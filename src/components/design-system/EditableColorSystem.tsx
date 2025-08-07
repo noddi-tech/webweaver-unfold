@@ -61,6 +61,7 @@ export const EditableColorSystem = () => {
   const [colors, setColors] = useState<ColorToken[]>(defaultColors);
   const [colorFormat, setColorFormat] = useState<'hsl' | 'hex' | 'rgb'>('hsl');
   const [autoContrast, setAutoContrast] = useState(true);
+  const [hexInputValues, setHexInputValues] = useState<Record<number, string>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -237,6 +238,32 @@ export const EditableColorSystem = () => {
     }
   };
 
+  const handleHexInputChange = (index: number, hexValue: string) => {
+    // Store the raw input value
+    setHexInputValues(prev => ({ ...prev, [index]: hexValue }));
+    
+    // Only update the color if it's a valid hex
+    if (isValidHex(hexValue)) {
+      updateColor(index, hexValue, 'hex');
+    }
+  };
+
+  const handleHexInputBlur = (index: number) => {
+    const hexValue = hexInputValues[index];
+    if (hexValue && !isValidHex(hexValue)) {
+      // Reset to current color value if invalid
+      setHexInputValues(prev => {
+        const newValues = { ...prev };
+        delete newValues[index];
+        return newValues;
+      });
+    }
+  };
+
+  const getHexInputValue = (index: number, color: ColorToken) => {
+    return hexInputValues[index] ?? formatColorValue(color.value, 'hex');
+  };
+
   return (
     <section>
       <div className="flex items-center justify-between mb-8">
@@ -384,8 +411,9 @@ export const EditableColorSystem = () => {
                 ) : colorFormat === 'hex' ? (
                   <Input
                     id={`color-${index}`}
-                    value={formatColorValue(color.value, colorFormat)}
-                    onChange={(e) => updateColor(index, e.target.value, 'hex')}
+                    value={getHexInputValue(index, color)}
+                    onChange={(e) => handleHexInputChange(index, e.target.value)}
+                    onBlur={() => handleHexInputBlur(index)}
                     className="font-mono text-xs"
                     placeholder="#000000"
                   />
