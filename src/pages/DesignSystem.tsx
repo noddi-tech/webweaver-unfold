@@ -10,7 +10,7 @@ import VideoManager from "@/components/design-system/VideoManager";
 
 const DesignSystem = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen text-foreground">
       <Header />
       
       <main className="container mx-auto px-6 py-12 pt-32">

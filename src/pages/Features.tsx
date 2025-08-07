@@ -3,7 +3,7 @@ import Features from "@/components/Features";
 
 const FeaturesPage = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen text-foreground">
       <Header />
       
       <main className="container mx-auto px-6 py-12 pt-32">

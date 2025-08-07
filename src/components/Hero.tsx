@@ -5,7 +5,7 @@ import dashboardPreview from "@/assets/dashboard-preview.jpg";
 
 const Hero = () => {
   return (
-    <section id="home" className="pt-32 pb-20 px-6 bg-background">
+    <section id="home" className="pt-32 pb-20 px-6">
       <div className="container mx-auto">
         <div className="max-w-4xl mx-auto text-center">
           {/* Hero Text */}

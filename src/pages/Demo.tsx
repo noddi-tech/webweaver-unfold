@@ -35,7 +35,7 @@ const Demo = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Header />
       <main className="pt-32 pb-20 px-6">
         <div className="container mx-auto max-w-6xl">
