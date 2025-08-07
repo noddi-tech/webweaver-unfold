@@ -23,11 +23,11 @@ const Metrics = () => {
   ];
 
   return (
-    <section className="py-20 px-6">
+    <section className="py-20 px-6 bg-background">
       <div className="container mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {metrics.map((metric, index) => (
-            <div key={index} className="text-center glass-card rounded-xl p-6">
+            <div key={index} className="text-center bg-card rounded-xl p-6 border border-border shadow-sm">
               <div className="text-4xl md:text-5xl font-bold gradient-text mb-2">
                 {metric.value}
               </div>

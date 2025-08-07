@@ -60,7 +60,7 @@ const Features = () => {
   ];
 
   return (
-    <section id="features" className="py-20 px-6">
+    <section id="features" className="py-20 px-6 bg-background">
       <div className="container mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -78,7 +78,7 @@ const Features = () => {
           {features.map((feature, index) => (
             <div 
               key={index} 
-              className="glass-card rounded-xl p-6 hover:scale-105 transition-transform duration-300"
+              className="bg-card rounded-xl p-6 hover:scale-105 transition-transform duration-300 border border-border shadow-sm"
             >
               <div className="text-primary mb-4">
                 {feature.icon}

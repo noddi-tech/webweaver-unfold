@@ -123,22 +123,23 @@ All colors MUST be HSL.
   }
 }
 
-/* Glass morphism utility classes */
+/* Design system utility classes */
 @layer utilities {
   .glass {
-    background: rgba(255, 255, 255, 0.1);
+    background: hsl(var(--card) / 0.1);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid hsl(var(--border) / 0.2);
   }
   
   .glass-card {
-    background: rgba(255, 255, 255, 0.8);
+    background: hsl(var(--card) / 0.8);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid hsl(var(--border) / 0.3);
+    color: hsl(var(--card-foreground));
   }
   
   .gradient-text {
-    background: linear-gradient(135deg, hsl(var(--noddi-primary)), hsl(var(--noddi-text)));
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--noddi-text)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

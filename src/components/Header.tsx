@@ -32,17 +32,17 @@ const Header = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" className="text-foreground hover:text-primary">
+            <Button variant="ghost" className="hover:bg-muted/50">
               Sign In
             </Button>
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button className="bg-primary hover:bg-primary/90">
               Get Started
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-foreground"
+            className="md:hidden p-2 text-foreground hover:text-primary transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -66,10 +66,10 @@ const Header = () => {
                 Contact
               </a>
               <div className="flex flex-col space-y-2 pt-4">
-                <Button variant="ghost" className="text-foreground hover:text-primary">
+                <Button variant="ghost" className="hover:bg-muted/50">
                   Sign In
                 </Button>
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Button className="bg-primary hover:bg-primary/90">
                   Get Started
                 </Button>
               </div>
