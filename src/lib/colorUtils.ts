@@ -67,6 +67,10 @@ export const hexToHsl = (hex: string): string => {
   return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 };
 
+export const isValidHex = (hex: string): boolean => {
+  return /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex);
+};
+
 export const hslToHex = (hsl: string): string => {
   const [h, s, l] = hsl.split(' ').map(v => parseInt(v));
   const hNorm = h / 360;

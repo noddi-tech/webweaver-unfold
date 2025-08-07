@@ -17,7 +17,8 @@ import {
   getOptimalTextColor, 
   hexToHsl, 
   hslToHex, 
-  getContrastLevel 
+  getContrastLevel,
+  isValidHex 
 } from "@/lib/colorUtils";
 
 interface ColorToken {
@@ -77,6 +78,10 @@ export const EditableColorSystem = () => {
       // Ensure hex value starts with #
       if (!value.startsWith('#')) {
         value = '#' + value;
+      }
+      // Only convert if it's a valid hex color
+      if (!isValidHex(value)) {
+        return; // Don't update if hex is invalid
       }
       value = hexToHsl(value);
     }
