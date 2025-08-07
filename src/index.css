@@ -16,19 +16,19 @@ All colors MUST be HSL.
     
     /* Design System Colors */
     --background: 266 42% 96%; /* Light purple from gradient end */
-    --foreground: 264 58% 28%; /* Dark purple text */
+    --foreground: 264 58% 15%; /* Much darker purple for better contrast */
 
     --card: 0 0% 100% / 0.8; /* Glass morphism white with transparency */
-    --card-foreground: 264 58% 28%;
+    --card-foreground: 264 58% 15%;
 
     --popover: 0 0% 100% / 0.95;
-    --popover-foreground: 264 58% 28%;
+    --popover-foreground: 264 58% 15%;
 
     --primary: 252 87% 58%; /* Noddi purple */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 321 59% 85%; /* Light pink from gradient */
-    --secondary-foreground: 264 58% 28%;
+    --secondary-foreground: 264 58% 15%;
 
     --muted: 266 42% 92%;
     --muted-foreground: 264 30% 50%;
@@ -44,7 +44,7 @@ All colors MUST be HSL.
     --ring: 252 87% 58%;
     
     /* Form specific improvements for better contrast */
-    --input-foreground: 264 58% 28%;
+    --input-foreground: 264 58% 15%;
 
     --radius: 1rem;
 
