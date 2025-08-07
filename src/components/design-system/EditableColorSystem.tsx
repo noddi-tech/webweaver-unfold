@@ -5,11 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Copy, RotateCcw, Save, Palette, AlertTriangle, CheckCircle2, Zap } from "lucide-react";
+import { Copy, RotateCcw, Save, Palette, AlertTriangle, CheckCircle2, Zap, Plus, Trash2, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   calculateContrastRatio, 
   getOptimalTextColor, 
@@ -26,6 +27,9 @@ interface ColorToken {
   isForeground?: boolean;
   backgroundPair?: string;
   description: string;
+  type?: 'color' | 'gradient';
+  gradientDirection?: string;
+  gradientStops?: string[];
 }
 
 const defaultColors: ColorToken[] = [
@@ -44,6 +48,11 @@ const defaultColors: ColorToken[] = [
   { name: "Border", cssVar: "--border", value: "264 20% 85%", className: "bg-border", description: "Color for borders and dividers throughout the interface" },
   { name: "Destructive", cssVar: "--destructive", value: "0 84% 60%", className: "bg-destructive", description: "Color for destructive actions like delete buttons and error states" },
   { name: "Destructive Foreground", cssVar: "--destructive-foreground", value: "0 0% 100%", className: "bg-destructive-foreground", isForeground: true, backgroundPair: "--destructive", description: "Text color that appears on destructive backgrounds" },
+  
+  // Gradients
+  { name: "Primary Gradient", cssVar: "--gradient-primary", value: "linear-gradient(135deg, hsl(252 87% 58%), hsl(321 59% 85%))", className: "bg-gradient-primary", type: "gradient", gradientDirection: "135deg", gradientStops: ["252 87% 58%", "321 59% 85%"], description: "Primary brand gradient from purple to pink" },
+  { name: "Background Gradient", cssVar: "--gradient-background", value: "linear-gradient(180deg, hsl(266 42% 96%), hsl(321 59% 85%))", className: "bg-gradient-background", type: "gradient", gradientDirection: "180deg", gradientStops: ["266 42% 96%", "321 59% 85%"], description: "Subtle background gradient" },
+  { name: "Hero Gradient", cssVar: "--gradient-hero", value: "linear-gradient(135deg, hsl(252 87% 58%), hsl(264 58% 28%))", className: "bg-gradient-hero", type: "gradient", gradientDirection: "135deg", gradientStops: ["252 87% 58%", "264 58% 28%"], description: "Bold hero section gradient" },
 ];
 
 export const EditableColorSystem = () => {
@@ -272,6 +281,7 @@ export const EditableColorSystem = () => {
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold text-foreground">{color.name}</h3>
                     {color.isForeground && <Palette className="w-3 h-3 text-muted-foreground" />}
+                    {color.type === 'gradient' && <Sparkles className="w-3 h-3 text-muted-foreground" />}
                   </div>
                   <code className="text-xs font-mono text-muted-foreground">
                     {color.cssVar}
@@ -312,31 +322,48 @@ export const EditableColorSystem = () => {
             <div className="space-y-3">
               <div 
                 className="w-full h-16 rounded-lg border border-border shadow-sm"
-                style={{ backgroundColor: `hsl(${color.value})` }}
+                style={{ 
+                  background: color.type === 'gradient' ? color.value : `hsl(${color.value})` 
+                }}
               />
               
               <div className="flex gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Palette className="w-3 h-3 mr-1" />
-                      Pick
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-3">
-                    <HexColorPicker
-                      color={hslToHex(color.value)}
-                      onChange={(hex) => updateColor(index, hex, 'hex')}
-                    />
-                  </PopoverContent>
-                </Popover>
+                {color.type !== 'gradient' ? (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <Palette className="w-3 h-3 mr-1" />
+                        Pick Color
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-3">
+                      <HexColorPicker
+                        color={hslToHex(color.value)}
+                        onChange={(hex) => updateColor(index, hex, 'hex')}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    Gradient Editor
+                  </Button>
+                )}
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor={`color-${index}`} className="text-xs text-muted-foreground">
-                  {colorFormat.toUpperCase()} Value
+                  {color.type === 'gradient' ? 'CSS Gradient' : `${colorFormat.toUpperCase()} Value`}
                 </Label>
-                {colorFormat === 'hsl' ? (
+                {color.type === 'gradient' ? (
+                  <Textarea
+                    id={`color-${index}`}
+                    value={color.value}
+                    onChange={(e) => updateColor(index, e.target.value, 'hsl')}
+                    className="font-mono text-xs min-h-[60px]"
+                    placeholder="linear-gradient(135deg, hsl(...), hsl(...))"
+                  />
+                ) : colorFormat === 'hsl' ? (
                   <Input
                     id={`color-${index}`}
                     value={color.value}
