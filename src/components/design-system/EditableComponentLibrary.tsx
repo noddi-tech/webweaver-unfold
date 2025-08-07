@@ -219,7 +219,7 @@ const componentLibrary: EditableComponent[] = [
     description: "Complete contact form with validation",
     category: "form",
     variants: [
-      { name: "Default", props: {}, code: '<form className="space-y-4"><div><Label>Name</Label><Input placeholder="Your name" /></div><div><Label>Email</Label><Input type="email" placeholder="your@email.com" /></div><div><Label>Message</Label><Textarea placeholder="Your message..." /></div><Button className="w-full">Send Message</Button></form>' },
+      { name: "Default", props: {}, code: '<form className="space-y-4"><div><Label className="text-foreground">Name</Label><Input placeholder="Your name" className="text-foreground" /></div><div><Label className="text-foreground">Email</Label><Input type="email" placeholder="your@email.com" className="text-foreground" /></div><div><Label className="text-foreground">Message</Label><Textarea placeholder="Your message..." className="text-foreground" /></div><Button className="w-full">Send Message</Button></form>' },
     ],
     customizable: ["layout", "styling"]
   },
@@ -228,7 +228,7 @@ const componentLibrary: EditableComponent[] = [
     description: "User authentication login form",
     category: "form",
     variants: [
-      { name: "Default", props: {}, code: '<form className="space-y-4 max-w-sm"><div><Label>Email</Label><Input type="email" placeholder="Enter email" /></div><div><Label>Password</Label><Input type="password" placeholder="Enter password" /></div><div className="flex items-center space-x-2"><Checkbox id="remember" /><Label htmlFor="remember">Remember me</Label></div><Button className="w-full">Sign In</Button></form>' },
+      { name: "Default", props: {}, code: '<form className="space-y-4 max-w-sm"><div><Label className="text-foreground">Email</Label><Input type="email" placeholder="Enter email" className="text-foreground" /></div><div><Label className="text-foreground">Password</Label><Input type="password" placeholder="Enter password" className="text-foreground" /></div><div className="flex items-center space-x-2"><Checkbox id="remember" /><Label htmlFor="remember" className="text-foreground">Remember me</Label></div><Button className="w-full">Sign In</Button></form>' },
     ],
     customizable: ["layout", "styling"]
   },
