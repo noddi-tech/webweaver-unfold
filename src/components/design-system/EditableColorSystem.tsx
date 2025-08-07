@@ -222,9 +222,9 @@ export const EditableColorSystem = () => {
     <section>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-4xl font-bold gradient-text mb-2">Color System</h2>
+          <h2 className="text-4xl font-bold gradient-text mb-2">Colors & Design Tokens</h2>
           <p className="text-muted-foreground text-lg">
-            Edit your semantic color tokens with auto-contrast and accessibility checks.
+            The single source of truth for all colors and design tokens used throughout the application.
           </p>
         </div>
         <div className="flex items-center gap-4">

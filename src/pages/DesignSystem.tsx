@@ -23,19 +23,14 @@ const DesignSystem = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="tokens" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-12">
-            <TabsTrigger value="tokens">Design Tokens</TabsTrigger>
-            <TabsTrigger value="colors">Colors</TabsTrigger>
+        <Tabs defaultValue="colors" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-12">
+            <TabsTrigger value="colors">Colors & Tokens</TabsTrigger>
             <TabsTrigger value="typography">Typography</TabsTrigger>
             <TabsTrigger value="spacing">Spacing</TabsTrigger>
             <TabsTrigger value="components">Components</TabsTrigger>
             <TabsTrigger value="icons">Icons</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="tokens" className="space-y-8">
-            <EditableDesignTokens />
-          </TabsContent>
 
           <TabsContent value="colors" className="space-y-8">
             <EditableColorSystem />
