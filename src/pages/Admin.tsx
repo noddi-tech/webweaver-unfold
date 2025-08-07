@@ -59,7 +59,6 @@ const Admin = () => {
       <main className="container mx-auto px-6 py-12 pt-32">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-4xl font-bold gradient-text">Admin</h1>
-          <Button variant="outline" onClick={signOut}>Sign out</Button>
         </div>
 
         <Tabs defaultValue="videos" className="w-full">
