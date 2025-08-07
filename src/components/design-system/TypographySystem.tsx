@@ -1,0 +1,135 @@
+import { Card } from "@/components/ui/card";
+
+export const TypographySystem = () => {
+  const headings = [
+    { tag: "h1", class: "text-6xl font-bold", sample: "Display Heading", description: "Hero titles, main page headers" },
+    { tag: "h2", class: "text-4xl font-bold", sample: "Section Heading", description: "Major section titles" },
+    { tag: "h3", class: "text-2xl font-semibold", sample: "Subsection Heading", description: "Subsection titles" },
+    { tag: "h4", class: "text-xl font-semibold", sample: "Component Heading", description: "Component or card titles" },
+    { tag: "h5", class: "text-lg font-medium", sample: "Small Heading", description: "Minor section headings" },
+    { tag: "h6", class: "text-base font-medium", sample: "Tiny Heading", description: "Labels and small titles" },
+  ];
+
+  const bodyText = [
+    { name: "Large Body", class: "text-xl", sample: "This is large body text for important content and introductions." },
+    { name: "Regular Body", class: "text-base", sample: "This is regular body text for most content, paragraphs, and descriptions." },
+    { name: "Small Body", class: "text-sm", sample: "This is small body text for captions, metadata, and secondary information." },
+    { name: "Extra Small", class: "text-xs", sample: "This is extra small text for fine print and minimal details." },
+  ];
+
+  const weights = [
+    { name: "Light", class: "font-light", weight: "300" },
+    { name: "Regular", class: "font-normal", weight: "400" },
+    { name: "Medium", class: "font-medium", weight: "500" },
+    { name: "Semibold", class: "font-semibold", weight: "600" },
+    { name: "Bold", class: "font-bold", weight: "700" },
+    { name: "Black", class: "font-black", weight: "900" },
+  ];
+
+  const specialStyles = [
+    { name: "Gradient Text", class: "gradient-text text-4xl font-bold", sample: "Gradient Heading" },
+    { name: "Muted Text", class: "text-muted-foreground", sample: "Secondary text content" },
+    { name: "Code Text", class: "font-mono text-sm bg-muted px-2 py-1 rounded", sample: "const variable = 'value'" },
+    { name: "Link Text", class: "text-primary hover:underline", sample: "Interactive link text" },
+  ];
+
+  return (
+    <section>
+      <h2 className="text-4xl font-bold gradient-text mb-8">Typography System</h2>
+      <p className="text-muted-foreground mb-12 text-lg">
+        Typography scale and styles using Inter font family with proper semantic hierarchy.
+      </p>
+
+      <div className="space-y-12">
+        {/* Headings */}
+        <div>
+          <h3 className="text-2xl font-semibold mb-6">Headings</h3>
+          <div className="grid gap-6">
+            {headings.map((heading) => (
+              <Card key={heading.tag} className="glass-card p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={heading.class}>{heading.sample}</div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Tag: </span>
+                    <code className="font-mono">&lt;{heading.tag}&gt;</code>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Classes: </span>
+                    <code className="font-mono">{heading.class}</code>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Usage: </span>
+                    <span>{heading.description}</span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Body Text */}
+        <div>
+          <h3 className="text-2xl font-semibold mb-6">Body Text</h3>
+          <div className="grid gap-6">
+            {bodyText.map((text) => (
+              <Card key={text.name} className="glass-card p-6">
+                <div className={`${text.class} mb-4`}>{text.sample}</div>
+                <div className="flex items-center gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Type: </span>
+                    <span className="font-medium">{text.name}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Class: </span>
+                    <code className="font-mono">{text.class}</code>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Font Weights */}
+        <div>
+          <h3 className="text-2xl font-semibold mb-6">Font Weights</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {weights.map((weight) => (
+              <Card key={weight.name} className="glass-card p-6 text-center">
+                <div className={`text-2xl ${weight.class} mb-2`}>Aa</div>
+                <div className="text-sm font-medium">{weight.name}</div>
+                <div className="text-xs text-muted-foreground">{weight.weight}</div>
+                <code className="text-xs bg-muted px-2 py-1 rounded mt-2 inline-block">
+                  {weight.class}
+                </code>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Special Styles */}
+        <div>
+          <h3 className="text-2xl font-semibold mb-6">Special Styles</h3>
+          <div className="grid gap-6">
+            {specialStyles.map((style) => (
+              <Card key={style.name} className="glass-card p-6">
+                <div className={`${style.class} mb-4`}>{style.sample}</div>
+                <div className="flex items-center gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Style: </span>
+                    <span className="font-medium">{style.name}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Classes: </span>
+                    <code className="font-mono">{style.class}</code>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
