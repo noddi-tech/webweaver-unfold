@@ -1,49 +1,74 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Trash2, Video } from "lucide-react";
+import { Upload, Trash2, Video, Save, RefreshCcw } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
+// DB type (kept simple to avoid coupling with generated types)
+type DbVideo = {
+  id: string;
+  title: string;
+  description: string | null;
+  section: string;
+  sort_order: number | null;
+  file_name: string;
+  file_url: string;
+};
+
 const VideoManager = () => {
-  const [videos, setVideos] = useState<Array<{ name: string; url: string; file?: File }>>([]);
+  const [localUploads, setLocalUploads] = useState<Array<{ name: string; url: string; file: File }>>([]);
   const [uploading, setUploading] = useState(false);
-  const [existingVideos, setExistingVideos] = useState<Array<{ name: string; url: string }>>([]);
+  const [dbVideos, setDbVideos] = useState<DbVideo[]>([]);
+  const [savingId, setSavingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchExistingVideos();
+    fetchDbVideos();
   }, []);
 
-  const fetchExistingVideos = async () => {
-    try {
-      const { data, error } = await supabase.storage
-        .from('demo-videos')
-        .list('', { limit: 10, sortBy: { column: 'created_at', order: 'desc' } });
+  const sections = useMemo(() => {
+    const unique = new Set<string>();
+    dbVideos.forEach(v => unique.add(v.section));
+    return Array.from(unique).sort();
+  }, [dbVideos]);
 
-      if (error) throw error;
+  const groupedBySection = useMemo(() => {
+    const groups: Record<string, DbVideo[]> = {};
+    dbVideos.forEach(v => {
+      const key = v.section || "General";
+      groups[key] = groups[key] || [];
+      groups[key].push(v);
+    });
+    Object.keys(groups).forEach(k => groups[k].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)));
+    return groups;
+  }, [dbVideos]);
 
-      const videoUrls = data?.map(file => ({
-        name: file.name,
-        url: supabase.storage.from('demo-videos').getPublicUrl(file.name).data.publicUrl
-      })) || [];
+  const fetchDbVideos = async () => {
+    const { data, error } = await supabase
+      .from("videos")
+      .select("*")
+      .order("section", { ascending: true })
+      .order("sort_order", { ascending: true });
 
-      setExistingVideos(videoUrls);
-    } catch (error) {
-      console.error('Error fetching videos:', error);
+    if (error) {
+      console.error("Error fetching videos table:", error);
+      toast({ title: "Failed to load videos", description: "Could not load video metadata", variant: "destructive" });
+      return;
     }
+    setDbVideos(data || []);
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    const videoFiles = files.filter(file => file.type.startsWith('video/'));
-    
+    const videoFiles = files.filter(file => file.type.startsWith("video/"));
+
     if (videoFiles.length === 0) {
-      toast({
-        title: "Invalid file type",
-        description: "Please select video files only.",
-        variant: "destructive",
-      });
+      toast({ title: "Invalid file type", description: "Please select video files only.", variant: "destructive" });
       return;
     }
 
@@ -53,73 +78,133 @@ const VideoManager = () => {
       file
     }));
 
-    setVideos(prev => [...prev, ...newVideos]);
+    setLocalUploads(prev => [...prev, ...newVideos]);
   };
 
   const uploadVideos = async () => {
-    if (videos.length === 0 || !videos.some(v => v.file)) return;
+    if (localUploads.length === 0) return;
 
     setUploading(true);
     try {
-      const uploadPromises = videos
-        .filter(video => video.file)
-        .map(async (video) => {
-          const fileExt = video.file!.name.split('.').pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-          
-          const { error } = await supabase.storage
-            .from('demo-videos')
-            .upload(fileName, video.file!);
+      const uploadedNames: string[] = [];
 
-          if (error) throw error;
+      for (const video of localUploads) {
+        const fileExt = video.file.name.split(".").pop();
+        const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
 
-          return fileName;
+        const { error: uploadErr } = await supabase.storage
+          .from("demo-videos")
+          .upload(uniqueName, video.file);
+        if (uploadErr) throw uploadErr;
+
+        const { data: publicUrlData } = supabase.storage
+          .from("demo-videos")
+          .getPublicUrl(uniqueName);
+
+        const defaultTitle = video.name.replace(/\.[^/.]+$/, "");
+        const insertRes = await supabase.from("videos").insert({
+          title: defaultTitle,
+          description: null,
+          section: "General",
+          file_name: uniqueName,
+          file_url: publicUrlData.publicUrl,
+          sort_order: 0
         });
+        if (insertRes.error) throw insertRes.error;
 
-      await Promise.all(uploadPromises);
-      
-      setVideos([]);
-      await fetchExistingVideos();
+        uploadedNames.push(uniqueName);
+      }
 
-      toast({
-        title: "Videos uploaded successfully",
-        description: "All videos have been uploaded to the demo gallery.",
-      });
+      setLocalUploads([]);
+      await fetchDbVideos();
+      toast({ title: "Videos uploaded", description: `${uploadedNames.length} video(s) added to gallery.` });
     } catch (error) {
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload videos. Please try again.",
-        variant: "destructive",
-      });
+      console.error(error);
+      toast({ title: "Upload failed", description: "Failed to upload videos. Please try again.", variant: "destructive" });
     } finally {
       setUploading(false);
     }
   };
 
-  const deleteVideo = async (fileName: string) => {
+  const deleteVideo = async (fileName: string, id: string) => {
     try {
-      const { error } = await supabase.storage
-        .from('demo-videos')
+      const { error: storageErr } = await supabase.storage
+        .from("demo-videos")
         .remove([fileName]);
+      if (storageErr) throw storageErr;
 
-      if (error) throw error;
+      const { error: dbErr } = await supabase.from("videos").delete().eq("id", id);
+      if (dbErr) throw dbErr;
 
-      await fetchExistingVideos();
-      toast({
-        title: "Video deleted",
-        description: "Video has been removed from the demo gallery.",
-      });
+      await fetchDbVideos();
+      toast({ title: "Video deleted", description: "Removed from storage and database." });
     } catch (error) {
-      toast({
-        title: "Delete failed",
-        description: "Failed to delete video. Please try again.",
-        variant: "destructive",
-      });
+      console.error(error);
+      toast({ title: "Delete failed", description: "Could not delete the video.", variant: "destructive" });
     }
   };
 
-  const removeLocalVideo = (index: number) => {
-    setVideos(prev => prev.filter((_, i) => i !== index));
+  const saveVideo = async (video: DbVideo) => {
+    setSavingId(video.id);
+    try {
+      const { error } = await supabase
+        .from("videos")
+        .update({
+          title: video.title,
+          description: video.description,
+          section: video.section,
+          sort_order: video.sort_order ?? 0,
+        })
+        .eq("id", video.id);
+      if (error) throw error;
+      toast({ title: "Saved", description: "Video details updated." });
+      await fetchDbVideos();
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Save failed", description: "Unable to update video.", variant: "destructive" });
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const syncStorage = async () => {
+    // Ensure all files in storage exist in DB
+    const { data: storageFiles, error } = await supabase.storage
+      .from("demo-videos")
+      .list("", { limit: 100, sortBy: { column: "name", order: "asc" } });
+    if (error) {
+      toast({ title: "Sync failed", description: "Cannot list storage files.", variant: "destructive" });
+      return;
+    }
+
+    const namesInDb = new Set(dbVideos.map(v => v.file_name));
+    const toInsert = (storageFiles || [])
+      .filter(f => !namesInDb.has(f.name))
+      .map(f => {
+        const { data: publicUrlData } = supabase.storage.from("demo-videos").getPublicUrl(f.name);
+        return {
+          title: f.name.replace(/\.[^/.]+$/, ""),
+          description: null,
+          section: "General",
+          file_name: f.name,
+          file_url: publicUrlData.publicUrl,
+          sort_order: 0,
+        } as Omit<DbVideo, "id">;
+      });
+
+    if (toInsert.length === 0) {
+      toast({ title: "Up to date", description: "All storage files are already tracked." });
+      return;
+    }
+
+    const { error: insertErr } = await supabase.from("videos").insert(toInsert as any);
+    if (insertErr) {
+      toast({ title: "Sync failed", description: insertErr.message, variant: "destructive" });
+      return;
+    }
+
+    await fetchDbVideos();
+    toast({ title: "Synced", description: `${toInsert.length} file(s) imported.` });
   };
 
   return (
@@ -127,9 +212,7 @@ const VideoManager = () => {
       <div className="text-center">
         <Video className="mx-auto h-12 w-12 text-primary mb-4" />
         <h2 className="text-3xl font-bold text-foreground mb-2">Demo Video Manager</h2>
-        <p className="text-muted-foreground">
-          Upload and manage demo videos that appear on the public demo page
-        </p>
+        <p className="text-muted-foreground">Upload and manage demo videos that appear on the public demo page</p>
       </div>
 
       {/* Upload Section */}
@@ -145,47 +228,29 @@ const VideoManager = () => {
                 </span>
               </Button>
             </label>
-            <input
-              id="video-upload"
-              type="file"
-              accept="video/*"
-              multiple
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-            {videos.length > 0 && (
-              <Button 
-                onClick={uploadVideos} 
-                disabled={uploading}
-                variant="outline"
-              >
+            <input id="video-upload" type="file" accept="video/*" multiple onChange={handleFileSelect} className="hidden" />
+            {localUploads.length > 0 && (
+              <Button onClick={uploadVideos} disabled={uploading} variant="outline">
                 {uploading ? "Uploading..." : "Upload to Gallery"}
               </Button>
             )}
+            <Button variant="ghost" onClick={syncStorage} title="Sync files from storage">
+              <RefreshCcw className="mr-2 h-4 w-4" /> Sync from Storage
+            </Button>
           </div>
-          <p className="text-sm text-muted-foreground mt-4">
-            Supported formats: MP4, WebM, MOV
-          </p>
+          <p className="text-sm text-muted-foreground mt-4">Supported formats: MP4, WebM, MOV</p>
         </div>
 
         {/* Preview New Videos */}
-        {videos.length > 0 && (
+        {localUploads.length > 0 && (
           <div className="mt-6">
             <h4 className="font-semibold mb-4 text-foreground">Ready to Upload:</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {videos.map((video, index) => (
+              {localUploads.map((video, index) => (
                 <div key={index} className="relative border border-border rounded-lg overflow-hidden">
-                  <video
-                    src={video.url}
-                    className="w-full h-32 object-cover"
-                    muted
-                  />
+                  <video src={video.url} className="w-full h-32 object-cover" muted />
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      onClick={() => removeLocalVideo(index)}
-                    >
+                    <Button size="icon" variant="destructive" onClick={() => setLocalUploads(prev => prev.filter((_, i) => i !== index))}>
                       <Trash2 size={16} />
                     </Button>
                   </div>
@@ -199,30 +264,82 @@ const VideoManager = () => {
         )}
       </Card>
 
-      {/* Existing Videos */}
+      {/* Existing Videos (with editing) */}
       <Card className="p-6 bg-card border-border">
-        <h3 className="text-xl font-semibold mb-4 text-foreground">Current Demo Videos</h3>
-        {existingVideos.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {existingVideos.map((video, index) => (
-              <div key={index} className="relative border border-border rounded-lg overflow-hidden">
-                <video
-                  src={video.url}
-                  controls
-                  className="w-full h-40 object-cover"
-                />
-                <div className="absolute top-2 right-2">
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    onClick={() => deleteVideo(video.name)}
-                  >
-                    <Trash2 size={16} />
-                  </Button>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-semibold text-foreground">Current Demo Videos</h3>
+        </div>
+        {dbVideos.length > 0 ? (
+          <div className="space-y-8">
+            {Object.entries(groupedBySection).map(([section, items]) => (
+              <div key={section}>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-lg font-semibold text-foreground">{section}</h4>
                 </div>
-                <div className="p-3">
-                  <p className="text-sm font-medium text-foreground truncate">Demo Video {index + 1}</p>
-                  <p className="text-xs text-muted-foreground">Live on demo page</p>
+                <Separator className="my-3" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {items.map((video) => (
+                    <div key={video.id} className="relative border border-border rounded-lg overflow-hidden">
+                      <video src={video.file_url} controls className="w-full h-40 object-cover" />
+                      <div className="absolute top-2 right-2 flex gap-2">
+                        <Button size="icon" variant="destructive" onClick={() => deleteVideo(video.file_name, video.id)}>
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
+                      <div className="p-3 space-y-3">
+                        <div className="grid gap-2">
+                          <Label htmlFor={`title-${video.id}`}>Heading</Label>
+                          <Input
+                            id={`title-${video.id}`}
+                            value={video.title}
+                            onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, title: e.target.value } : v))}
+                            placeholder="Enter video heading"
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor={`desc-${video.id}`}>Description</Label>
+                          <Textarea
+                            id={`desc-${video.id}`}
+                            value={video.description ?? ""}
+                            onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, description: e.target.value } : v))}
+                            placeholder="Add a short description"
+                          />
+                        </div>
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="col-span-2 grid gap-2">
+                            <Label htmlFor={`section-${video.id}`}>Section</Label>
+                            <Input
+                              id={`section-${video.id}`}
+                              list={`sections-datalist`}
+                              value={video.section}
+                              onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: e.target.value } : v))}
+                              placeholder="e.g. Capacity system, Worker app"
+                            />
+                            {/* A simple datalist for quick suggestions */}
+                            <datalist id="sections-datalist">
+                              {sections.map((s) => (
+                                <option key={s} value={s} />
+                              ))}
+                            </datalist>
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor={`order-${video.id}`}>Order</Label>
+                            <Input
+                              id={`order-${video.id}`}
+                              type="number"
+                              value={video.sort_order ?? 0}
+                              onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, sort_order: Number(e.target.value) } : v))}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button onClick={() => saveVideo(video)} disabled={savingId === video.id}>
+                            <Save className="mr-2 h-4 w-4" /> {savingId === video.id ? "Saving..." : "Save"}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
