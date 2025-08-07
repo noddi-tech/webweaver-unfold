@@ -14,6 +14,7 @@ const Demo = () => {
 
   const fetchVideos = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase.storage
         .from('demo-videos')
         .list('', { limit: 4, sortBy: { column: 'created_at', order: 'desc' } });
@@ -62,8 +63,9 @@ const Demo = () => {
                     <video
                       src={video.url}
                       controls
+                      preload="metadata"
                       className="w-full h-64 object-cover"
-                      poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3C/svg%3E"
+                      poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='16' fill='%23666'%3EDemo Video%3C/text%3E%3C/svg%3E"
                     >
                       Your browser does not support the video tag.
                     </video>
