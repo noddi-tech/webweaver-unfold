@@ -305,9 +305,92 @@ const componentLibrary: EditableComponent[] = [
     description: "Card with prominent image and overlay text",
     category: "content",
     variants: [
-      { name: "Default", props: {}, code: '<Card className="max-w-sm glass-card overflow-hidden"><div className="relative aspect-video bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center"><ImageIcon className="w-12 h-12 text-white/70" /><div className="absolute inset-0 bg-black/20"></div><div className="absolute bottom-4 left-4 text-white"><h3 className="font-semibold">Image Title</h3><p className="text-sm text-white/80">Image description</p></div></div><CardContent className="p-4"><Button variant="ghost" className="w-full">Learn More</Button></CardContent></Card>' },
+      { name: "Default", props: {}, code: '<Card className="max-w-sm glass-card overflow-hidden"><div className="relative aspect-video bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center"><ImageIcon className="w-12 h-12 text-white/70" /><div className="absolute inset-0 bg-black/20"></div><div className="absolute bottom-4 left-4 text-white"><h3 className="font-semibold">Image Title</h3><p className="text-sm text-white/80">Image description</p></div></div><CardContent className="p-4"><Button variant="ghost" className="w-full text-foreground hover:bg-secondary/20">Learn More</Button></CardContent></Card>' },
     ],
     customizable: ["image", "overlay", "content"]
+  },
+  {
+    name: "HeroSection",
+    description: "Hero sections with various layouts inspired by Webflow",
+    category: "layout",
+    variants: [
+      { 
+        name: "Image Left Text Right", 
+        props: {}, 
+        code: `<section className="min-h-screen flex items-center p-8">
+  <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
+    <div className="relative aspect-square bg-gradient-to-br from-primary/30 to-secondary/30 rounded-2xl flex items-center justify-center glass-card">
+      <ImageIcon className="w-24 h-24 text-white/70" />
+    </div>
+    <div className="space-y-6">
+      <h1 className="text-4xl lg:text-6xl font-bold text-foreground gradient-text">
+        Transform Your Digital Experience
+      </h1>
+      <p className="text-xl text-muted-foreground leading-relaxed">
+        Create stunning websites and applications with our cutting-edge design system and components.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+          Get Started
+        </Button>
+        <Button variant="outline" size="lg" className="border-border text-foreground hover:bg-secondary/20">
+          Learn More
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>` 
+      },
+      { 
+        name: "Centered Hero", 
+        props: {}, 
+        code: `<section className="min-h-screen flex items-center justify-center p-8">
+  <div className="text-center max-w-4xl mx-auto space-y-8">
+    <h1 className="text-5xl lg:text-7xl font-bold text-foreground gradient-text">
+      Build The Future
+    </h1>
+    <p className="text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto">
+      Revolutionary design system that empowers creators to build exceptional digital experiences.
+    </p>
+    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+        Start Building
+      </Button>
+      <Button variant="outline" size="lg" className="border-border text-foreground hover:bg-secondary/20">
+        View Demo
+      </Button>
+    </div>
+    <div className="mt-12 relative aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center glass-card">
+      <ImageIcon className="w-32 h-32 text-white/50" />
+    </div>
+  </div>
+</section>` 
+      },
+      { 
+        name: "Split Hero", 
+        props: {}, 
+        code: `<section className="min-h-screen grid lg:grid-cols-2">
+  <div className="flex items-center justify-center p-8 lg:p-12">
+    <div className="space-y-6 max-w-lg">
+      <h1 className="text-4xl lg:text-5xl font-bold text-foreground">
+        Design Without Limits
+      </h1>
+      <p className="text-lg text-muted-foreground">
+        Professional components and layouts that adapt to your vision. Create beautiful interfaces in minutes.
+      </p>
+      <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+        Get Started Free
+      </Button>
+    </div>
+  </div>
+  <div className="relative bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center">
+    <div className="absolute inset-0 bg-black/10"></div>
+    <ImageIcon className="w-40 h-40 text-white/60 relative z-10" />
+  </div>
+</section>` 
+      },
+    ],
+    customizable: ["layout", "text", "buttons", "background"]
   },
 ];
 
