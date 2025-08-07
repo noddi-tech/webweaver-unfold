@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,24 +11,21 @@ const Header = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="text-2xl font-bold gradient-text">
+          <Link to="/" className="text-2xl font-bold gradient-text hover:opacity-80 transition-opacity">
             Noddi Tech
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#home" className="text-foreground hover:text-primary transition-colors">
-              Home
-            </a>
-            <a href="#features" className="text-foreground hover:text-primary transition-colors">
+            <Link to="/features" className="text-foreground hover:text-primary transition-colors">
               Features
-            </a>
-            <a href="/demo" className="text-foreground hover:text-primary transition-colors">
+            </Link>
+            <Link to="/demo" className="text-foreground hover:text-primary transition-colors">
               Demo
-            </a>
-            <a href="#contact" className="text-foreground hover:text-primary transition-colors">
+            </Link>
+            <Link to="/contact" className="text-foreground hover:text-primary transition-colors">
               Contact
-            </a>
+            </Link>
           </nav>
 
           {/* CTA Buttons */}
@@ -53,18 +51,15 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-4">
             <nav className="flex flex-col space-y-4">
-              <a href="#home" className="text-foreground hover:text-primary transition-colors">
-                Home
-              </a>
-              <a href="#features" className="text-foreground hover:text-primary transition-colors">
+              <Link to="/features" className="text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Features
-              </a>
-              <a href="/demo" className="text-foreground hover:text-primary transition-colors">
+              </Link>
+              <Link to="/demo" className="text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Demo
-              </a>
-              <a href="#contact" className="text-foreground hover:text-primary transition-colors">
+              </Link>
+              <Link to="/contact" className="text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Contact
-              </a>
+              </Link>
               <div className="flex flex-col space-y-2 pt-4">
                 <Button variant="ghost" className="hover:bg-muted/50">
                   Sign In
