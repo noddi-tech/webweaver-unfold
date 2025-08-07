@@ -3,35 +3,52 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, RotateCcw, Save } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Copy, RotateCcw, Save, Palette, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  calculateContrastRatio, 
+  getOptimalTextColor, 
+  hexToHsl, 
+  hslToHex, 
+  getContrastLevel 
+} from "@/lib/colorUtils";
 
 interface ColorToken {
   name: string;
   cssVar: string;
   value: string;
   className: string;
+  isForeground?: boolean;
+  backgroundPair?: string;
 }
 
 const defaultColors: ColorToken[] = [
   { name: "Primary", cssVar: "--primary", value: "252 87% 58%", className: "bg-primary" },
-  { name: "Primary Foreground", cssVar: "--primary-foreground", value: "0 0% 100%", className: "bg-primary-foreground" },
+  { name: "Primary Foreground", cssVar: "--primary-foreground", value: "0 0% 100%", className: "bg-primary-foreground", isForeground: true, backgroundPair: "--primary" },
   { name: "Secondary", cssVar: "--secondary", value: "321 59% 85%", className: "bg-secondary" },
-  { name: "Secondary Foreground", cssVar: "--secondary-foreground", value: "264 58% 28%", className: "bg-secondary-foreground" },
+  { name: "Secondary Foreground", cssVar: "--secondary-foreground", value: "264 58% 28%", className: "bg-secondary-foreground", isForeground: true, backgroundPair: "--secondary" },
   { name: "Background", cssVar: "--background", value: "266 42% 96%", className: "bg-background" },
-  { name: "Foreground", cssVar: "--foreground", value: "264 58% 28%", className: "bg-foreground" },
+  { name: "Foreground", cssVar: "--foreground", value: "264 58% 28%", className: "bg-foreground", isForeground: true, backgroundPair: "--background" },
   { name: "Muted", cssVar: "--muted", value: "266 42% 92%", className: "bg-muted" },
-  { name: "Muted Foreground", cssVar: "--muted-foreground", value: "264 20% 50%", className: "bg-muted-foreground" },
+  { name: "Muted Foreground", cssVar: "--muted-foreground", value: "264 20% 50%", className: "bg-muted-foreground", isForeground: true, backgroundPair: "--muted" },
   { name: "Accent", cssVar: "--accent", value: "252 87% 58%", className: "bg-accent" },
-  { name: "Accent Foreground", cssVar: "--accent-foreground", value: "0 0% 100%", className: "bg-accent-foreground" },
+  { name: "Accent Foreground", cssVar: "--accent-foreground", value: "0 0% 100%", className: "bg-accent-foreground", isForeground: true, backgroundPair: "--accent" },
   { name: "Card", cssVar: "--card", value: "0 0% 100%", className: "bg-card" },
+  { name: "Card Foreground", cssVar: "--card-foreground", value: "264 58% 28%", className: "bg-card-foreground", isForeground: true, backgroundPair: "--card" },
   { name: "Border", cssVar: "--border", value: "264 20% 85%", className: "bg-border" },
+  { name: "Destructive", cssVar: "--destructive", value: "0 84% 60%", className: "bg-destructive" },
+  { name: "Destructive Foreground", cssVar: "--destructive-foreground", value: "0 0% 100%", className: "bg-destructive-foreground", isForeground: true, backgroundPair: "--destructive" },
 ];
 
 export const EditableColorSystem = () => {
   const [colors, setColors] = useState<ColorToken[]>(defaultColors);
+  const [colorFormat, setColorFormat] = useState<'hsl' | 'hex' | 'rgb'>('hsl');
+  const [autoContrast, setAutoContrast] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -41,14 +58,39 @@ export const EditableColorSystem = () => {
     }
   }, []);
 
-  const updateColor = (index: number, value: string) => {
+  const updateColor = (index: number, value: string, format: 'hsl' | 'hex' = 'hsl') => {
     const newColors = [...colors];
+    
+    // Convert to HSL if input is HEX
+    if (format === 'hex') {
+      value = hexToHsl(value);
+    }
+    
     newColors[index].value = value;
+    
+    // Auto-contrast: Update foreground colors automatically
+    if (autoContrast && !newColors[index].isForeground) {
+      const relatedForeground = newColors.find(color => 
+        color.backgroundPair === newColors[index].cssVar
+      );
+      if (relatedForeground) {
+        const optimalTextColor = getOptimalTextColor(value);
+        const foregroundIndex = newColors.findIndex(color => 
+          color.cssVar === relatedForeground.cssVar
+        );
+        if (foregroundIndex !== -1) {
+          newColors[foregroundIndex].value = optimalTextColor;
+        }
+      }
+    }
+    
     setColors(newColors);
     
     // Apply to CSS variables immediately
     const root = document.documentElement;
-    root.style.setProperty(newColors[index].cssVar, value);
+    newColors.forEach(color => {
+      root.style.setProperty(color.cssVar, color.value);
+    });
   };
 
   const saveColors = () => {
@@ -79,59 +121,31 @@ export const EditableColorSystem = () => {
     });
   };
 
-  const hexToHsl = (hex: string) => {
-    const r = parseInt(hex.slice(1, 3), 16) / 255;
-    const g = parseInt(hex.slice(3, 5), 16) / 255;
-    const b = parseInt(hex.slice(5, 7), 16) / 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h = 0, s = 0, l = (max + min) / 2;
-
-    if (max !== min) {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-      }
-      h /= 6;
-    }
-
-    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+  const getContrastInfo = (color: ColorToken) => {
+    if (!color.backgroundPair) return null;
+    
+    const backgroundColor = colors.find(c => c.cssVar === color.backgroundPair);
+    if (!backgroundColor) return null;
+    
+    const ratio = calculateContrastRatio(color.value, backgroundColor.value);
+    const level = getContrastLevel(ratio);
+    
+    return { ratio: ratio.toFixed(2), ...level };
   };
 
-  const hslToHex = (hsl: string) => {
-    const [h, s, l] = hsl.split(' ').map(v => parseInt(v));
-    const hNorm = h / 360;
-    const sNorm = s / 100;
-    const lNorm = l / 100;
-
-    const c = (1 - Math.abs(2 * lNorm - 1)) * sNorm;
-    const x = c * (1 - Math.abs(((hNorm * 6) % 2) - 1));
-    const m = lNorm - c / 2;
-
-    let r = 0, g = 0, b = 0;
-    if (0 <= hNorm && hNorm < 1/6) {
-      r = c; g = x; b = 0;
-    } else if (1/6 <= hNorm && hNorm < 2/6) {
-      r = x; g = c; b = 0;
-    } else if (2/6 <= hNorm && hNorm < 3/6) {
-      r = 0; g = c; b = x;
-    } else if (3/6 <= hNorm && hNorm < 4/6) {
-      r = 0; g = x; b = c;
-    } else if (4/6 <= hNorm && hNorm < 5/6) {
-      r = x; g = 0; b = c;
-    } else if (5/6 <= hNorm && hNorm < 1) {
-      r = c; g = 0; b = x;
+  const formatColorValue = (value: string, format: 'hsl' | 'hex' | 'rgb') => {
+    switch (format) {
+      case 'hex':
+        return hslToHex(value);
+      case 'rgb':
+        const hex = hslToHex(value);
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgb(${r}, ${g}, ${b})`;
+      default:
+        return `hsl(${value})`;
     }
-
-    r = Math.round((r + m) * 255);
-    g = Math.round((g + m) * 255);
-    b = Math.round((b + m) * 255);
-
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
   };
 
   return (
@@ -140,10 +154,28 @@ export const EditableColorSystem = () => {
         <div>
           <h2 className="text-4xl font-bold gradient-text mb-2">Color System</h2>
           <p className="text-muted-foreground text-lg">
-            Edit your semantic color tokens and see changes applied instantly.
+            Edit your semantic color tokens with auto-contrast and accessibility checks.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="auto-contrast" className="text-sm">Auto Contrast</Label>
+            <Switch 
+              id="auto-contrast"
+              checked={autoContrast} 
+              onCheckedChange={setAutoContrast}
+            />
+          </div>
+          <Select value={colorFormat} onValueChange={(value: 'hsl' | 'hex' | 'rgb') => setColorFormat(value)}>
+            <SelectTrigger className="w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="hsl">HSL</SelectItem>
+              <SelectItem value="hex">HEX</SelectItem>
+              <SelectItem value="rgb">RGB</SelectItem>
+            </SelectContent>
+          </Select>
           <Button variant="outline" onClick={resetColors}>
             <RotateCcw className="w-4 h-4 mr-2" />
             Reset
@@ -156,19 +188,38 @@ export const EditableColorSystem = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {colors.map((color, index) => (
-          <Card key={color.cssVar} className="glass-card p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="font-semibold text-foreground">{color.name}</h3>
-                <code className="text-xs font-mono text-muted-foreground">
-                  {color.cssVar}
-                </code>
+        {colors.map((color, index) => {
+          const contrastInfo = getContrastInfo(color);
+          
+          return (
+            <Card key={color.cssVar} className="glass-card p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-foreground">{color.name}</h3>
+                    {color.isForeground && <Palette className="w-3 h-3 text-muted-foreground" />}
+                  </div>
+                  <code className="text-xs font-mono text-muted-foreground">
+                    {color.cssVar}
+                  </code>
+                  {contrastInfo && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant={contrastInfo.badge}>
+                        {contrastInfo.level}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {contrastInfo.ratio}:1
+                      </span>
+                      {parseFloat(contrastInfo.ratio) < 4.5 && (
+                        <AlertTriangle className="w-3 h-3 text-destructive" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => copyColor(color)}>
+                  <Copy className="w-4 h-4" />
+                </Button>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => copyColor(color)}>
-                <Copy className="w-4 h-4" />
-              </Button>
-            </div>
             
             <div className="space-y-3">
               <div 
@@ -180,37 +231,54 @@ export const EditableColorSystem = () => {
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="flex-1">
-                      Pick Color
+                      <Palette className="w-3 h-3 mr-1" />
+                      Pick
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-3">
                     <HexColorPicker
                       color={hslToHex(color.value)}
-                      onChange={(hex) => updateColor(index, hexToHsl(hex))}
+                      onChange={(hex) => updateColor(index, hex, 'hex')}
                     />
                   </PopoverContent>
                 </Popover>
               </div>
               
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor={`color-${index}`} className="text-xs text-muted-foreground">
-                  HSL Value
+                  {colorFormat.toUpperCase()} Value
                 </Label>
-                <Input
-                  id={`color-${index}`}
-                  value={color.value}
-                  onChange={(e) => updateColor(index, e.target.value)}
-                  className="font-mono text-xs"
-                  placeholder="0 0% 0%"
-                />
+                {colorFormat === 'hsl' ? (
+                  <Input
+                    id={`color-${index}`}
+                    value={color.value}
+                    onChange={(e) => updateColor(index, e.target.value, 'hsl')}
+                    className="font-mono text-xs"
+                    placeholder="0 0% 0%"
+                  />
+                ) : (
+                  <Input
+                    id={`color-${index}`}
+                    value={formatColorValue(color.value, colorFormat)}
+                    onChange={(e) => {
+                      if (colorFormat === 'hex') {
+                        updateColor(index, e.target.value, 'hex');
+                      }
+                    }}
+                    className="font-mono text-xs"
+                    placeholder={colorFormat === 'hex' ? '#000000' : 'rgb(0, 0, 0)'}
+                    readOnly={colorFormat === 'rgb'}
+                  />
+                )}
               </div>
               
               <div className="text-xs text-muted-foreground">
                 <code>className: {color.className}</code>
               </div>
             </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
     </section>
   );

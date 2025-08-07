@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditableDesignTokens } from "@/components/design-system/EditableDesignTokens";
 import { EditableColorSystem } from "@/components/design-system/EditableColorSystem";
 import { EditableTypographySystem } from "@/components/design-system/EditableTypographySystem";
-import { ComponentLibrary } from "@/components/design-system/ComponentLibrary";
+import { EditableComponentLibrary } from "@/components/design-system/EditableComponentLibrary";
 import { EditableSpacingSystem } from "@/components/design-system/EditableSpacingSystem";
 import { IconLibrary } from "@/components/design-system/IconLibrary";
 
@@ -50,7 +50,7 @@ const DesignSystem = () => {
           </TabsContent>
 
           <TabsContent value="components" className="space-y-8">
-            <ComponentLibrary />
+            <EditableComponentLibrary />
           </TabsContent>
 
           <TabsContent value="icons" className="space-y-8">
