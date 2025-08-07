@@ -17,7 +17,7 @@ const DesignSystem = () => {
             Noddi Tech Design System
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            The single source of truth for all design tokens, components, and patterns. 
+            The single source of truth for all design tokens, components, and patterns.
             This living documentation ensures consistency across our entire platform.
           </p>
         </div>
