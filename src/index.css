@@ -40,7 +40,7 @@ All colors MUST be HSL.
     --destructive-foreground: 0 0% 100%;
 
     --border: 264 20% 85%;
-    --input: 0 0% 100% / 0.9;
+    --input: 0 0% 100%;
     --ring: 252 87% 58%;
     
     /* Form specific improvements for better contrast */
