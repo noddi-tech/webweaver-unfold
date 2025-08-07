@@ -23,8 +23,26 @@ import {
   CheckCircle2,
   Star,
   Heart,
-  Zap
+  Zap,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  ChevronDown
 } from "lucide-react";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 
 interface ComponentVariant {
@@ -123,6 +141,53 @@ const componentLibrary: EditableComponent[] = [
     ],
     customizable: ["variant", "className"]
   },
+  {
+    name: "Table",
+    description: "Data table component for displaying structured data",
+    category: "data",
+    variants: [
+      { name: "Basic", props: {}, code: '<Table><TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Status</TableHead><TableHead>Email</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>John Doe</TableCell><TableCell><Badge>Active</Badge></TableCell><TableCell>john@example.com</TableCell></TableRow></TableBody></Table>' },
+      { name: "With Caption", props: {}, code: '<Table><TableCaption>A list of recent users</TableCaption><TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>John Doe</TableCell><TableCell>Active</TableCell></TableRow></TableBody></Table>' },
+    ],
+    customizable: ["className"]
+  },
+  {
+    name: "Avatar",
+    description: "User avatar component with fallback support",
+    category: "data",
+    variants: [
+      { name: "Default", props: {}, code: '<Avatar><AvatarImage src="/placeholder.svg" /><AvatarFallback>JD</AvatarFallback></Avatar>' },
+      { name: "Large", props: { className: "h-16 w-16" }, code: '<Avatar className="h-16 w-16"><AvatarImage src="/placeholder.svg" /><AvatarFallback>JD</AvatarFallback></Avatar>' },
+    ],
+    customizable: ["className", "size"]
+  },
+  {
+    name: "DropdownMenu",
+    description: "Contextual menu component",
+    category: "navigation",
+    variants: [
+      { name: "Basic", props: {}, code: '<DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline">Open Menu</Button></DropdownMenuTrigger><DropdownMenuContent><DropdownMenuItem>Profile</DropdownMenuItem><DropdownMenuItem>Settings</DropdownMenuItem></DropdownMenuContent></DropdownMenu>' },
+    ],
+    customizable: ["align", "sideOffset"]
+  },
+  {
+    name: "NavigationMenu",
+    description: "Main navigation component",
+    category: "navigation",
+    variants: [
+      { name: "Basic", props: {}, code: '<NavigationMenu><NavigationMenuList><NavigationMenuItem><NavigationMenuTrigger>Getting started</NavigationMenuTrigger><NavigationMenuContent><p className="p-4">Navigation content</p></NavigationMenuContent></NavigationMenuItem></NavigationMenuList></NavigationMenu>' },
+    ],
+    customizable: ["orientation"]
+  },
+  {
+    name: "Accordion",
+    description: "Collapsible content sections",
+    category: "layout",
+    variants: [
+      { name: "Single", props: {}, code: '<Accordion type="single" collapsible><AccordionItem value="item-1"><AccordionTrigger>Is it accessible?</AccordionTrigger><AccordionContent>Yes. It adheres to the WAI-ARIA design pattern.</AccordionContent></AccordionItem></Accordion>' },
+    ],
+    customizable: ["type", "collapsible"]
+  },
 ];
 
 export const EditableComponentLibrary = () => {
@@ -206,6 +271,93 @@ export const EditableComponentLibrary = () => {
         ) : <Switch {...props} />;
       case "Alert":
         return <Alert {...props} className="w-full max-w-md" />;
+      case "Table":
+        return (
+          <div className="w-full max-w-md">
+            <Table>
+              <TableCaption>A list of recent users</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>John Doe</TableCell>
+                  <TableCell><Badge variant="outline">Active</Badge></TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Jane Smith</TableCell>
+                  <TableCell><Badge variant="secondary">Pending</Badge></TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        );
+      case "Avatar":
+        return (
+          <Avatar {...props}>
+            <AvatarImage src="/placeholder.svg" />
+            <AvatarFallback>JD</AvatarFallback>
+          </Avatar>
+        );
+      case "DropdownMenu":
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <User className="mr-2 h-4 w-4" />
+                Open Menu
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      case "NavigationMenu":
+        return (
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Getting started</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="p-4 w-48">
+                    <p className="text-sm">Navigation content here</p>
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        );
+      case "Accordion":
+        return (
+          <Accordion type="single" collapsible className="w-full max-w-md">
+            <AccordionItem value="item-1">
+              <AccordionTrigger>Is it accessible?</AccordionTrigger>
+              <AccordionContent>
+                Yes. It adheres to the WAI-ARIA design pattern.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+              <AccordionTrigger>Is it styled?</AccordionTrigger>
+              <AccordionContent>
+                Yes. It comes with default styles.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        );
       default:
         return <div className="p-4 border border-dashed border-muted-foreground rounded text-muted-foreground">Component Preview</div>;
     }
