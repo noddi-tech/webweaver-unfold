@@ -25,24 +25,25 @@ interface ColorToken {
   className: string;
   isForeground?: boolean;
   backgroundPair?: string;
+  description: string;
 }
 
 const defaultColors: ColorToken[] = [
-  { name: "Primary", cssVar: "--primary", value: "252 87% 58%", className: "bg-primary" },
-  { name: "Primary Foreground", cssVar: "--primary-foreground", value: "0 0% 100%", className: "bg-primary-foreground", isForeground: true, backgroundPair: "--primary" },
-  { name: "Secondary", cssVar: "--secondary", value: "321 59% 85%", className: "bg-secondary" },
-  { name: "Secondary Foreground", cssVar: "--secondary-foreground", value: "264 58% 28%", className: "bg-secondary-foreground", isForeground: true, backgroundPair: "--secondary" },
-  { name: "Background", cssVar: "--background", value: "266 42% 96%", className: "bg-background" },
-  { name: "Foreground", cssVar: "--foreground", value: "264 58% 28%", className: "bg-foreground", isForeground: true, backgroundPair: "--background" },
-  { name: "Muted", cssVar: "--muted", value: "266 42% 92%", className: "bg-muted" },
-  { name: "Muted Foreground", cssVar: "--muted-foreground", value: "264 20% 50%", className: "bg-muted-foreground", isForeground: true, backgroundPair: "--muted" },
-  { name: "Accent", cssVar: "--accent", value: "252 87% 58%", className: "bg-accent" },
-  { name: "Accent Foreground", cssVar: "--accent-foreground", value: "0 0% 100%", className: "bg-accent-foreground", isForeground: true, backgroundPair: "--accent" },
-  { name: "Card", cssVar: "--card", value: "0 0% 100%", className: "bg-card" },
-  { name: "Card Foreground", cssVar: "--card-foreground", value: "264 58% 28%", className: "bg-card-foreground", isForeground: true, backgroundPair: "--card" },
-  { name: "Border", cssVar: "--border", value: "264 20% 85%", className: "bg-border" },
-  { name: "Destructive", cssVar: "--destructive", value: "0 84% 60%", className: "bg-destructive" },
-  { name: "Destructive Foreground", cssVar: "--destructive-foreground", value: "0 0% 100%", className: "bg-destructive-foreground", isForeground: true, backgroundPair: "--destructive" },
+  { name: "Primary", cssVar: "--primary", value: "252 87% 58%", className: "bg-primary", description: "Main brand color used for primary actions and key UI elements" },
+  { name: "Primary Foreground", cssVar: "--primary-foreground", value: "0 0% 100%", className: "bg-primary-foreground", isForeground: true, backgroundPair: "--primary", description: "Text color that appears on primary backgrounds" },
+  { name: "Secondary", cssVar: "--secondary", value: "321 59% 85%", className: "bg-secondary", description: "Secondary brand color for less prominent elements and backgrounds" },
+  { name: "Secondary Foreground", cssVar: "--secondary-foreground", value: "264 58% 28%", className: "bg-secondary-foreground", isForeground: true, backgroundPair: "--secondary", description: "Text color that appears on secondary backgrounds" },
+  { name: "Background", cssVar: "--background", value: "266 42% 96%", className: "bg-background", description: "Main page background color" },
+  { name: "Foreground", cssVar: "--foreground", value: "264 58% 28%", className: "bg-foreground", isForeground: true, backgroundPair: "--background", description: "Primary text color for body content" },
+  { name: "Muted", cssVar: "--muted", value: "266 42% 92%", className: "bg-muted", description: "Subtle background color for less prominent areas" },
+  { name: "Muted Foreground", cssVar: "--muted-foreground", value: "264 20% 50%", className: "bg-muted-foreground", isForeground: true, backgroundPair: "--muted", description: "Text color for secondary or disabled content" },
+  { name: "Accent", cssVar: "--accent", value: "252 87% 58%", className: "bg-accent", description: "Accent color for highlights and interactive elements" },
+  { name: "Accent Foreground", cssVar: "--accent-foreground", value: "0 0% 100%", className: "bg-accent-foreground", isForeground: true, backgroundPair: "--accent", description: "Text color that appears on accent backgrounds" },
+  { name: "Card", cssVar: "--card", value: "0 0% 100%", className: "bg-card", description: "Background color for cards and elevated surfaces" },
+  { name: "Card Foreground", cssVar: "--card-foreground", value: "264 58% 28%", className: "bg-card-foreground", isForeground: true, backgroundPair: "--card", description: "Text color that appears on card backgrounds" },
+  { name: "Border", cssVar: "--border", value: "264 20% 85%", className: "bg-border", description: "Color for borders and dividers throughout the interface" },
+  { name: "Destructive", cssVar: "--destructive", value: "0 84% 60%", className: "bg-destructive", description: "Color for destructive actions like delete buttons and error states" },
+  { name: "Destructive Foreground", cssVar: "--destructive-foreground", value: "0 0% 100%", className: "bg-destructive-foreground", isForeground: true, backgroundPair: "--destructive", description: "Text color that appears on destructive backgrounds" },
 ];
 
 export const EditableColorSystem = () => {
@@ -275,6 +276,9 @@ export const EditableColorSystem = () => {
                   <code className="text-xs font-mono text-muted-foreground">
                     {color.cssVar}
                   </code>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    {color.description}
+                  </p>
                   {contrastInfo && (
                     <div className="flex items-center gap-2 mt-2">
                       <Badge variant={contrastInfo.badge}>
