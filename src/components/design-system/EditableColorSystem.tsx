@@ -340,18 +340,21 @@ export const EditableColorSystem = () => {
                     className="font-mono text-xs"
                     placeholder="0 0% 0%"
                   />
+                ) : colorFormat === 'hex' ? (
+                  <Input
+                    id={`color-${index}`}
+                    value={formatColorValue(color.value, colorFormat)}
+                    onChange={(e) => updateColor(index, e.target.value, 'hex')}
+                    className="font-mono text-xs"
+                    placeholder="#000000"
+                  />
                 ) : (
                   <Input
                     id={`color-${index}`}
                     value={formatColorValue(color.value, colorFormat)}
-                    onChange={(e) => {
-                      if (colorFormat === 'hex') {
-                        updateColor(index, e.target.value, 'hex');
-                      }
-                    }}
                     className="font-mono text-xs"
-                    placeholder={colorFormat === 'hex' ? '#000000' : 'rgb(0, 0, 0)'}
-                    readOnly={colorFormat === 'rgb'}
+                    placeholder="rgb(0, 0, 0)"
+                    readOnly
                   />
                 )}
               </div>
