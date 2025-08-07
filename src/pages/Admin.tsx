@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+
 import { Card } from "@/components/ui/card";
 import VideoManager from "@/components/design-system/VideoManager";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,7 @@ import { EditableTypographySystem } from "@/components/design-system/EditableTyp
 import { EditableComponentLibrary } from "@/components/design-system/EditableComponentLibrary";
 import { EditableSpacingSystem } from "@/components/design-system/EditableSpacingSystem";
 import { IconLibrary } from "@/components/design-system/IconLibrary";
-import VideoLibrary from "@/components/design-system/VideoManager";
+
 
 const Admin = () => {
   const { toast } = useToast();
@@ -61,38 +61,55 @@ const Admin = () => {
           <h1 className="text-4xl font-bold gradient-text">Admin</h1>
         </div>
 
-        <Tabs defaultValue="videos" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-12">
-            <TabsTrigger value="videos">Videos CMS</TabsTrigger>
-            <TabsTrigger value="colors">Colors & Tokens</TabsTrigger>
-            <TabsTrigger value="typography">Typography</TabsTrigger>
-            <TabsTrigger value="spacing">Spacing</TabsTrigger>
-            <TabsTrigger value="components">Components</TabsTrigger>
-            <TabsTrigger value="icons">Icons</TabsTrigger>
+        <Tabs defaultValue="cms" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-12">
+            <TabsTrigger value="cms">CMS</TabsTrigger>
+            <TabsTrigger value="design">Design System</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="videos" className="space-y-8">
-            <VideoManager />
+          {/* CMS Section with nested tabs */}
+          <TabsContent value="cms" className="space-y-8">
+            <Tabs defaultValue="videos" className="w-full">
+              <TabsList className="grid w-full grid-cols-1 mb-8">
+                <TabsTrigger value="videos">Videos CMS</TabsTrigger>
+              </TabsList>
+              <TabsContent value="videos" className="space-y-8">
+                <VideoManager />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
-          <TabsContent value="colors" className="space-y-8">
-            <EditableColorSystem />
-          </TabsContent>
+          {/* Design System Section with nested tabs */}
+          <TabsContent value="design" className="space-y-8">
+            <Tabs defaultValue="colors" className="w-full">
+              <TabsList className="grid w-full grid-cols-5 mb-8">
+                <TabsTrigger value="colors">Colors & Tokens</TabsTrigger>
+                <TabsTrigger value="typography">Typography</TabsTrigger>
+                <TabsTrigger value="spacing">Spacing</TabsTrigger>
+                <TabsTrigger value="components">Components</TabsTrigger>
+                <TabsTrigger value="icons">Icons</TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="typography" className="space-y-8">
-            <EditableTypographySystem />
-          </TabsContent>
+              <TabsContent value="colors" className="space-y-8">
+                <EditableColorSystem />
+              </TabsContent>
 
-          <TabsContent value="spacing" className="space-y-8">
-            <EditableSpacingSystem />
-          </TabsContent>
+              <TabsContent value="typography" className="space-y-8">
+                <EditableTypographySystem />
+              </TabsContent>
 
-          <TabsContent value="components" className="space-y-8">
-            <EditableComponentLibrary />
-          </TabsContent>
+              <TabsContent value="spacing" className="space-y-8">
+                <EditableSpacingSystem />
+              </TabsContent>
 
-          <TabsContent value="icons" className="space-y-8">
-            <IconLibrary />
+              <TabsContent value="components" className="space-y-8">
+                <EditableComponentLibrary />
+              </TabsContent>
+
+              <TabsContent value="icons" className="space-y-8">
+                <IconLibrary />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
 
