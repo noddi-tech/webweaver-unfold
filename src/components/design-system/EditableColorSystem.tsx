@@ -97,7 +97,8 @@ export const EditableColorSystem = () => {
     const newColors = [...colors];
     const color = newColors[colorIndex];
     
-    if (color.backgroundPair) {
+    // Only fix foreground colors that have a background pair
+    if (color.isForeground && color.backgroundPair) {
       const backgroundColor = newColors.find(c => c.cssVar === color.backgroundPair);
       if (backgroundColor) {
         const optimalTextColor = getOptimalTextColor(backgroundColor.value);
@@ -113,6 +114,12 @@ export const EditableColorSystem = () => {
           description: `${color.name} color automatically adjusted for better accessibility.`,
         });
       }
+    } else {
+      toast({
+        title: "Cannot fix contrast",
+        description: "This color is not a text color or doesn't have a background pair.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -276,7 +283,7 @@ export const EditableColorSystem = () => {
                       <span className="text-xs text-muted-foreground">
                         {contrastInfo.ratio}:1
                       </span>
-                      {parseFloat(contrastInfo.ratio) < 4.5 && (
+                      {parseFloat(contrastInfo.ratio) < 4.5 && color.isForeground && (
                         <div className="flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3 text-destructive" />
                           <Button 
