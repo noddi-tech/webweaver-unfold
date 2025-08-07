@@ -732,57 +732,58 @@ export const EditableComponentLibrary = () => {
       case "HeroSection":
         if (variant.name === "Image Left Text Right") {
           return (
-            <div className="grid lg:grid-cols-2 gap-8 items-center p-6 max-w-4xl border rounded-lg bg-gradient-to-r from-background/50 to-secondary/10">
-              <div className="relative aspect-square bg-gradient-to-br from-primary/30 to-secondary/30 rounded-xl flex items-center justify-center">
-                <ImageIcon className="w-16 h-16 text-white/70" />
+            <div className="grid grid-cols-2 gap-3 items-center p-3 border rounded-lg bg-gradient-to-r from-background to-secondary/10 min-h-[120px]">
+              <div className="w-full h-16 bg-gradient-to-br from-primary/40 to-secondary/40 rounded flex items-center justify-center">
+                <ImageIcon className="w-6 h-6 text-white/80" />
               </div>
-              <div className="space-y-4">
-                <h1 className="text-2xl font-bold text-foreground">
-                  Transform Digital Experience
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Create stunning websites with our design system.
-                </p>
-                <Button size="sm" className="bg-primary text-primary-foreground">Get Started</Button>
+              <div className="space-y-1">
+                <div className="h-3 bg-foreground/80 rounded w-3/4"></div>
+                <div className="h-2 bg-muted-foreground/60 rounded w-full"></div>
+                <div className="h-2 bg-muted-foreground/60 rounded w-2/3"></div>
+                <div className="h-6 bg-primary/80 rounded w-16 mt-2"></div>
               </div>
             </div>
           );
         } else if (variant.name === "Centered Hero") {
           return (
-            <div className="text-center space-y-4 p-6 max-w-2xl border rounded-lg bg-gradient-to-b from-background/50 to-primary/5">
-              <h1 className="text-3xl font-bold text-foreground gradient-text">
-                Build The Future
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Revolutionary design system for creators.
-              </p>
-              <div className="flex gap-2 justify-center">
-                <Button size="sm" className="bg-primary text-primary-foreground">Start Building</Button>
-                <Button variant="outline" size="sm">View Demo</Button>
+            <div className="text-center p-3 border rounded-lg bg-gradient-to-b from-background to-primary/5 min-h-[120px] flex flex-col justify-center">
+              <div className="space-y-1 mb-2">
+                <div className="h-4 bg-gradient-to-r from-primary to-secondary rounded w-2/3 mx-auto"></div>
+                <div className="h-2 bg-muted-foreground/60 rounded w-4/5 mx-auto"></div>
+                <div className="h-2 bg-muted-foreground/60 rounded w-3/5 mx-auto"></div>
               </div>
-              <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center mt-4">
-                <ImageIcon className="w-12 h-12 text-white/50" />
+              <div className="flex gap-1 justify-center mb-2">
+                <div className="h-6 bg-primary/80 rounded w-12"></div>
+                <div className="h-6 bg-border rounded w-12"></div>
+              </div>
+              <div className="h-8 bg-gradient-to-br from-primary/20 to-secondary/20 rounded"></div>
+            </div>
+          );
+        } else if (variant.name === "Split Hero") {
+          return (
+            <div className="grid grid-cols-2 border rounded-lg overflow-hidden min-h-[120px]">
+              <div className="p-3 bg-background flex flex-col justify-center">
+                <div className="space-y-1">
+                  <div className="h-3 bg-foreground/80 rounded w-4/5"></div>
+                  <div className="h-2 bg-muted-foreground/60 rounded w-full"></div>
+                  <div className="h-2 bg-muted-foreground/60 rounded w-3/4"></div>
+                  <div className="h-6 bg-primary/80 rounded w-12 mt-2"></div>
+                </div>
+              </div>
+              <div className="bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center">
+                <ImageIcon className="w-8 h-8 text-white/70" />
               </div>
             </div>
           );
         } else {
-          // Split Hero
+          // Default Hero
           return (
-            <div className="grid lg:grid-cols-2 max-w-4xl border rounded-lg overflow-hidden">
-              <div className="flex items-center p-6 bg-background/50">
-                <div className="space-y-3">
-                  <h1 className="text-2xl font-bold text-foreground">
-                    Design Without Limits
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    Professional components that adapt to your vision.
-                  </p>
-                  <Button size="sm" className="bg-primary text-primary-foreground">Get Started Free</Button>
-                </div>
+            <div className="p-3 border rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 min-h-[120px] flex flex-col justify-center items-center text-center">
+              <div className="space-y-1 mb-2">
+                <div className="h-4 bg-white/90 rounded w-24 mx-auto"></div>
+                <div className="h-2 bg-white/70 rounded w-32 mx-auto"></div>
               </div>
-              <div className="relative bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center min-h-[200px]">
-                <ImageIcon className="w-20 h-20 text-white/60" />
-              </div>
+              <div className="h-6 bg-white/80 rounded w-16"></div>
             </div>
           );
         }
