@@ -6,10 +6,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Trash2, Video, Save, RefreshCcw } from "lucide-react";
+import { Upload, Trash2, Video, Save, RefreshCcw, Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
-// DB type (kept simple to avoid coupling with generated types)
+// DB types (kept simple to avoid coupling with generated types)
 type DbVideo = {
   id: string;
   title: string;
@@ -18,6 +20,13 @@ type DbVideo = {
   sort_order: number | null;
   file_name: string;
   file_url: string;
+  thumbnail_shape?: string | null;
+};
+
+type DbSection = {
+  id: string;
+  name: string;
+  sort_order: number | null;
 };
 
 const VideoManager = () => {
@@ -25,17 +34,15 @@ const VideoManager = () => {
   const [uploading, setUploading] = useState(false);
   const [dbVideos, setDbVideos] = useState<DbVideo[]>([]);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [sections, setSections] = useState<DbSection[]>([]);
+  const [newSection, setNewSection] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
     fetchDbVideos();
+    fetchSections();
   }, []);
 
-  const sections = useMemo(() => {
-    const unique = new Set<string>();
-    dbVideos.forEach(v => unique.add(v.section));
-    return Array.from(unique).sort();
-  }, [dbVideos]);
 
   const groupedBySection = useMemo(() => {
     const groups: Record<string, DbVideo[]> = {};
@@ -61,6 +68,33 @@ const VideoManager = () => {
       return;
     }
     setDbVideos(data || []);
+  };
+
+  const fetchSections = async () => {
+    const { data, error } = await supabase
+      .from("video_sections")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true });
+    if (error) {
+      console.error("Error fetching sections:", error);
+      toast({ title: "Failed to load sections", description: "Could not load sections list", variant: "destructive" });
+      return;
+    }
+    setSections(data || []);
+  };
+
+  const addSection = async () => {
+    const name = newSection.trim();
+    if (!name) return;
+    const { error } = await supabase.from("video_sections").insert({ name });
+    if (error) {
+      toast({ title: "Add section failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    setNewSection("");
+    await fetchSections();
+    toast({ title: "Section added", description: `${name} created.` });
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,8 +142,9 @@ const VideoManager = () => {
           section: "General",
           file_name: uniqueName,
           file_url: publicUrlData.publicUrl,
-          sort_order: 0
-        });
+          sort_order: 0,
+          thumbnail_shape: "rectangle",
+        } as any);
         if (insertRes.error) throw insertRes.error;
 
         uploadedNames.push(uniqueName);
@@ -315,10 +350,9 @@ const VideoManager = () => {
                               onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: e.target.value } : v))}
                               placeholder="e.g. Capacity system, Worker app"
                             />
-                            {/* A simple datalist for quick suggestions */}
                             <datalist id="sections-datalist">
                               {sections.map((s) => (
-                                <option key={s} value={s} />
+                                <option key={s.id} value={s.name} />
                               ))}
                             </datalist>
                           </div>

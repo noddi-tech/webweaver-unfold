@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      video_sections: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       videos: {
         Row: {
           created_at: string
@@ -23,6 +47,7 @@ export type Database = {
           id: string
           section: string
           sort_order: number | null
+          thumbnail_shape: string
           title: string
           updated_at: string
         }
@@ -34,6 +59,7 @@ export type Database = {
           id?: string
           section: string
           sort_order?: number | null
+          thumbnail_shape?: string
           title: string
           updated_at?: string
         }
@@ -45,6 +71,7 @@ export type Database = {
           id?: string
           section?: string
           sort_order?: number | null
+          thumbnail_shape?: string
           title?: string
           updated_at?: string
         }
