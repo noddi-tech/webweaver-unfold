@@ -12,7 +12,7 @@ const DesignSystem = () => {
     <div className="min-h-screen">
       <Header />
       
-      <main className="container mx-auto px-6 py-12">
+      <main className="container mx-auto px-6 py-12 pt-32">
         <div className="text-center mb-16 pt-8">
           <h1 className="text-6xl font-bold gradient-text mb-6">
             Noddi Tech Design System
