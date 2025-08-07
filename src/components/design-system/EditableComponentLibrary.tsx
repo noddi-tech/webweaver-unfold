@@ -737,26 +737,25 @@ export const EditableComponentLibrary = () => {
                 <ImageIcon className="w-6 h-6 text-white/80" />
               </div>
               <div className="space-y-1">
-                <div className="h-3 bg-foreground/80 rounded w-3/4"></div>
+                <div className="h-4 bg-foreground/80 rounded w-3/4"></div>
                 <div className="h-2 bg-muted-foreground/60 rounded w-full"></div>
                 <div className="h-2 bg-muted-foreground/60 rounded w-2/3"></div>
-                <div className="h-6 bg-primary/80 rounded w-16 mt-2"></div>
+                <div className="h-5 bg-primary/80 rounded w-16 mt-2"></div>
               </div>
             </div>
           );
         } else if (variant.name === "Centered Hero") {
           return (
             <div className="text-center p-3 border rounded-lg bg-gradient-to-b from-background to-primary/5 min-h-[120px] flex flex-col justify-center">
-              <div className="space-y-1 mb-2">
-                <div className="h-4 bg-gradient-to-r from-primary to-secondary rounded w-2/3 mx-auto"></div>
+              <div className="space-y-1 mb-3">
+                <div className="h-5 bg-gradient-to-r from-primary to-secondary rounded w-2/3 mx-auto"></div>
                 <div className="h-2 bg-muted-foreground/60 rounded w-4/5 mx-auto"></div>
-                <div className="h-2 bg-muted-foreground/60 rounded w-3/5 mx-auto"></div>
               </div>
-              <div className="flex gap-1 justify-center mb-2">
-                <div className="h-6 bg-primary/80 rounded w-12"></div>
-                <div className="h-6 bg-border rounded w-12"></div>
+              <div className="flex gap-1 justify-center mb-3">
+                <div className="h-5 bg-primary/80 rounded w-14"></div>
+                <div className="h-5 bg-border rounded w-12"></div>
               </div>
-              <div className="h-8 bg-gradient-to-br from-primary/20 to-secondary/20 rounded"></div>
+              <div className="h-10 bg-gradient-to-br from-primary/20 to-secondary/20 rounded"></div>
             </div>
           );
         } else if (variant.name === "Split Hero") {
@@ -764,10 +763,10 @@ export const EditableComponentLibrary = () => {
             <div className="grid grid-cols-2 border rounded-lg overflow-hidden min-h-[120px]">
               <div className="p-3 bg-background flex flex-col justify-center">
                 <div className="space-y-1">
-                  <div className="h-3 bg-foreground/80 rounded w-4/5"></div>
+                  <div className="h-4 bg-foreground/80 rounded w-4/5"></div>
                   <div className="h-2 bg-muted-foreground/60 rounded w-full"></div>
                   <div className="h-2 bg-muted-foreground/60 rounded w-3/4"></div>
-                  <div className="h-6 bg-primary/80 rounded w-12 mt-2"></div>
+                  <div className="h-5 bg-primary/80 rounded w-12 mt-2"></div>
                 </div>
               </div>
               <div className="bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center">
@@ -775,15 +774,33 @@ export const EditableComponentLibrary = () => {
               </div>
             </div>
           );
-        } else {
-          // Default Hero
+        } else if (variant.name === "Hero Stack") {
           return (
-            <div className="p-3 border rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 min-h-[120px] flex flex-col justify-center items-center text-center">
-              <div className="space-y-1 mb-2">
-                <div className="h-4 bg-white/90 rounded w-24 mx-auto"></div>
-                <div className="h-2 bg-white/70 rounded w-32 mx-auto"></div>
+            <div className="p-3 border rounded-lg bg-gradient-to-b from-primary/10 to-background min-h-[120px] flex flex-col">
+              <div className="text-center mb-3">
+                <div className="h-4 bg-foreground/80 rounded w-3/4 mx-auto mb-1"></div>
+                <div className="h-2 bg-muted-foreground/60 rounded w-2/3 mx-auto"></div>
               </div>
-              <div className="h-6 bg-white/80 rounded w-16"></div>
+              <div className="flex-1 bg-gradient-to-br from-secondary/20 to-primary/20 rounded flex items-center justify-center">
+                <ImageIcon className="w-6 h-6 text-muted-foreground/70" />
+              </div>
+              <div className="text-center mt-2">
+                <div className="h-5 bg-primary/80 rounded w-16 mx-auto"></div>
+              </div>
+            </div>
+          );
+        } else {
+          // Default Hero - Full width banner style
+          return (
+            <div className="p-3 border rounded-lg bg-gradient-to-r from-primary/20 to-secondary/20 min-h-[120px] flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="h-4 bg-white/90 rounded w-20"></div>
+                <div className="h-2 bg-white/70 rounded w-24"></div>
+                <div className="h-5 bg-white/80 rounded w-12 mt-2"></div>
+              </div>
+              <div className="w-16 h-16 bg-white/20 rounded flex items-center justify-center">
+                <ImageIcon className="w-6 h-6 text-white/70" />
+              </div>
             </div>
           );
         }
@@ -857,8 +874,8 @@ export const EditableComponentLibrary = () => {
                 
                 <TabsContent value="preview" className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {component.variants.map((variant) => (
-                      <Card key={variant.name} className="p-6">
+                    {component.variants.map((variant, index) => (
+                      <Card key={`${component.name}-${variant.name}-${index}`} className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h4 className="font-medium">{variant.name}</h4>
                           <Button
@@ -878,8 +895,8 @@ export const EditableComponentLibrary = () => {
                 </TabsContent>
                 
                 <TabsContent value="code" className="space-y-4">
-                  {component.variants.map((variant) => (
-                    <Card key={variant.name} className="p-4">
+                  {component.variants.map((variant, index) => (
+                    <Card key={`${component.name}-code-${variant.name}-${index}`} className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-sm font-medium">{variant.name}</h4>
                         <Button
