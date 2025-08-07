@@ -263,15 +263,6 @@ const componentLibrary: EditableComponent[] = [
     ],
     customizable: ["columns", "gap", "alignment"]
   },
-  {
-    name: "HeroSection",
-    description: "Hero section with background and content",
-    category: "layout",
-    variants: [
-      { name: "Default", props: {}, code: '<div className="relative h-96 bg-gradient-to-r from-primary to-primary/80 rounded-lg flex items-center justify-center text-white"><div className="text-center"><h1 className="text-4xl font-bold mb-4">Hero Title</h1><p className="text-xl mb-6">Hero description text</p><Button variant="secondary">Get Started</Button></div></div>' },
-    ],
-    customizable: ["height", "background", "content"]
-  },
   // Enhanced Cards
   {
     name: "ProductCard",
@@ -645,17 +636,6 @@ export const EditableComponentLibrary = () => {
                 <div className="p-3 glass-card rounded text-center text-sm">Item 3</div>
               </div>
             )}
-          </div>
-        );
-      case "HeroSection":
-        return (
-          <div className="relative h-48 w-full max-w-md bg-gradient-to-r from-primary to-primary/80 rounded-lg flex items-center justify-center text-white overflow-hidden">
-            <div className="absolute inset-0 bg-black/10"></div>
-            <div className="text-center z-10">
-              <h1 className="text-2xl font-bold mb-2">Hero Title</h1>
-              <p className="text-sm mb-4 opacity-90">Hero description text</p>
-              <Button variant="secondary" size="sm">Get Started</Button>
-            </div>
           </div>
         );
       // Enhanced Cards
