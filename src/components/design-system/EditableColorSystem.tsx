@@ -11,6 +11,7 @@ import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { GradientEditor } from "./GradientEditor";
 import { 
   calculateContrastRatio, 
   getOptimalTextColor, 
@@ -73,6 +74,10 @@ export const EditableColorSystem = () => {
     
     // Convert to HSL if input is HEX
     if (format === 'hex') {
+      // Ensure hex value starts with #
+      if (!value.startsWith('#')) {
+        value = '#' + value;
+      }
       value = hexToHsl(value);
     }
     
@@ -344,10 +349,10 @@ export const EditableColorSystem = () => {
                     </PopoverContent>
                   </Popover>
                 ) : (
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    Gradient Editor
-                  </Button>
+                  <GradientEditor
+                    value={color.value}
+                    onChange={(newValue) => updateColor(index, newValue, 'hsl')}
+                  />
                 )}
               </div>
               
