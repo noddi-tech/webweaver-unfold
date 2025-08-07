@@ -1,9 +1,10 @@
 import Header from "@/components/Header";
-import { DesignTokens } from "@/components/design-system/DesignTokens";
-import { TypographySystem } from "@/components/design-system/TypographySystem";
-import { ColorSystem } from "@/components/design-system/ColorSystem";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EditableDesignTokens } from "@/components/design-system/EditableDesignTokens";
+import { EditableColorSystem } from "@/components/design-system/EditableColorSystem";
+import { EditableTypographySystem } from "@/components/design-system/EditableTypographySystem";
 import { ComponentLibrary } from "@/components/design-system/ComponentLibrary";
-import { SpacingSystem } from "@/components/design-system/SpacingSystem";
+import { EditableSpacingSystem } from "@/components/design-system/EditableSpacingSystem";
 import { IconLibrary } from "@/components/design-system/IconLibrary";
 
 const DesignSystem = () => {
@@ -22,14 +23,40 @@ const DesignSystem = () => {
           </p>
         </div>
 
-        <div className="space-y-24">
-          <DesignTokens />
-          <ColorSystem />
-          <TypographySystem />
-          <SpacingSystem />
-          <ComponentLibrary />
-          <IconLibrary />
-        </div>
+        <Tabs defaultValue="tokens" className="w-full">
+          <TabsList className="grid w-full grid-cols-6 mb-12">
+            <TabsTrigger value="tokens">Design Tokens</TabsTrigger>
+            <TabsTrigger value="colors">Colors</TabsTrigger>
+            <TabsTrigger value="typography">Typography</TabsTrigger>
+            <TabsTrigger value="spacing">Spacing</TabsTrigger>
+            <TabsTrigger value="components">Components</TabsTrigger>
+            <TabsTrigger value="icons">Icons</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="tokens" className="space-y-8">
+            <EditableDesignTokens />
+          </TabsContent>
+
+          <TabsContent value="colors" className="space-y-8">
+            <EditableColorSystem />
+          </TabsContent>
+
+          <TabsContent value="typography" className="space-y-8">
+            <EditableTypographySystem />
+          </TabsContent>
+
+          <TabsContent value="spacing" className="space-y-8">
+            <EditableSpacingSystem />
+          </TabsContent>
+
+          <TabsContent value="components" className="space-y-8">
+            <ComponentLibrary />
+          </TabsContent>
+
+          <TabsContent value="icons" className="space-y-8">
+            <IconLibrary />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
