@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Copy, RotateCcw, Save, Palette, AlertTriangle } from "lucide-react";
+import { Copy, RotateCcw, Save, Palette, AlertTriangle, CheckCircle2, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -68,7 +68,7 @@ export const EditableColorSystem = () => {
     
     newColors[index].value = value;
     
-    // Auto-contrast: Update foreground colors automatically
+    // Auto-contrast: Update foreground colors automatically when background changes
     if (autoContrast && !newColors[index].isForeground) {
       const relatedForeground = newColors.find(color => 
         color.backgroundPair === newColors[index].cssVar
@@ -91,6 +91,68 @@ export const EditableColorSystem = () => {
     newColors.forEach(color => {
       root.style.setProperty(color.cssVar, color.value);
     });
+  };
+
+  const fixContrast = (colorIndex: number) => {
+    const newColors = [...colors];
+    const color = newColors[colorIndex];
+    
+    if (color.backgroundPair) {
+      const backgroundColor = newColors.find(c => c.cssVar === color.backgroundPair);
+      if (backgroundColor) {
+        const optimalTextColor = getOptimalTextColor(backgroundColor.value);
+        newColors[colorIndex].value = optimalTextColor;
+        setColors(newColors);
+        
+        // Apply to CSS variables immediately
+        const root = document.documentElement;
+        root.style.setProperty(color.cssVar, optimalTextColor);
+        
+        toast({
+          title: "Contrast fixed",
+          description: `${color.name} color automatically adjusted for better accessibility.`,
+        });
+      }
+    }
+  };
+
+  const fixAllContrast = () => {
+    const newColors = [...colors];
+    let fixedCount = 0;
+
+    newColors.forEach((color, index) => {
+      if (color.isForeground && color.backgroundPair) {
+        const backgroundColor = newColors.find(c => c.cssVar === color.backgroundPair);
+        if (backgroundColor) {
+          const currentRatio = calculateContrastRatio(color.value, backgroundColor.value);
+          if (currentRatio < 4.5) {
+            const optimalTextColor = getOptimalTextColor(backgroundColor.value);
+            newColors[index].value = optimalTextColor;
+            fixedCount++;
+          }
+        }
+      }
+    });
+
+    if (fixedCount > 0) {
+      setColors(newColors);
+      
+      // Apply to CSS variables immediately
+      const root = document.documentElement;
+      newColors.forEach(color => {
+        root.style.setProperty(color.cssVar, color.value);
+      });
+      
+      toast({
+        title: "All contrast issues fixed",
+        description: `Fixed ${fixedCount} color${fixedCount > 1 ? 's' : ''} for better accessibility.`,
+      });
+    } else {
+      toast({
+        title: "No issues found",
+        description: "All colors already meet accessibility standards.",
+      });
+    }
   };
 
   const saveColors = () => {
@@ -158,6 +220,10 @@ export const EditableColorSystem = () => {
           </p>
         </div>
         <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={fixAllContrast}>
+            <CheckCircle2 className="w-4 h-4 mr-2" />
+            Fix All Contrast
+          </Button>
           <div className="flex items-center gap-2">
             <Label htmlFor="auto-contrast" className="text-sm">Auto Contrast</Label>
             <Switch 
@@ -211,7 +277,18 @@ export const EditableColorSystem = () => {
                         {contrastInfo.ratio}:1
                       </span>
                       {parseFloat(contrastInfo.ratio) < 4.5 && (
-                        <AlertTriangle className="w-3 h-3 text-destructive" />
+                        <div className="flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3 text-destructive" />
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => fixContrast(index)}
+                            className="text-xs h-6 px-2"
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Fix
+                          </Button>
+                        </div>
                       )}
                     </div>
                   )}
