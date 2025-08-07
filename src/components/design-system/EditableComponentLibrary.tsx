@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -29,8 +29,22 @@ import {
   Phone,
   MapPin,
   Calendar,
-  ChevronDown
+  ChevronDown,
+  Edit,
+  ShoppingCart,
+  Camera,
+  Globe,
+  Home,
+  MessageCircle,
+  TrendingUp,
+  Image as ImageIcon,
+  Grid
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -49,14 +63,25 @@ interface ComponentVariant {
   name: string;
   props: Record<string, any>;
   code: string;
+  editableProps?: EditableProps;
+}
+
+interface EditableProps {
+  size?: { width?: string; height?: string };
+  spacing?: { padding?: string; margin?: string };
+  colors?: { background?: string; text?: string; border?: string };
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  borderRadius?: string;
+  opacity?: number;
 }
 
 interface EditableComponent {
   name: string;
   description: string;
-  category: 'form' | 'navigation' | 'feedback' | 'layout' | 'data';
+  category: 'form' | 'navigation' | 'feedback' | 'layout' | 'data' | 'content';
   variants: ComponentVariant[];
   customizable: string[];
+  defaultEditableProps?: EditableProps;
 }
 
 const componentLibrary: EditableComponent[] = [
@@ -188,10 +213,108 @@ const componentLibrary: EditableComponent[] = [
     ],
     customizable: ["type", "collapsible"]
   },
+  // Complete Forms
+  {
+    name: "ContactForm",
+    description: "Complete contact form with validation",
+    category: "form",
+    variants: [
+      { name: "Default", props: {}, code: '<form className="space-y-4"><div><Label>Name</Label><Input placeholder="Your name" /></div><div><Label>Email</Label><Input type="email" placeholder="your@email.com" /></div><div><Label>Message</Label><Textarea placeholder="Your message..." /></div><Button className="w-full">Send Message</Button></form>' },
+    ],
+    customizable: ["layout", "styling"]
+  },
+  {
+    name: "LoginForm",
+    description: "User authentication login form",
+    category: "form",
+    variants: [
+      { name: "Default", props: {}, code: '<form className="space-y-4 max-w-sm"><div><Label>Email</Label><Input type="email" placeholder="Enter email" /></div><div><Label>Password</Label><Input type="password" placeholder="Enter password" /></div><div className="flex items-center space-x-2"><Checkbox id="remember" /><Label htmlFor="remember">Remember me</Label></div><Button className="w-full">Sign In</Button></form>' },
+    ],
+    customizable: ["layout", "styling"]
+  },
+  // Layout Components
+  {
+    name: "Container",
+    description: "Responsive container with max width",
+    category: "layout",
+    variants: [
+      { name: "Default", props: {}, code: '<div className="container mx-auto px-4"><h2>Container Content</h2><p>This content is centered with responsive padding.</p></div>' },
+      { name: "Full Width", props: {}, code: '<div className="w-full px-6"><h2>Full Width Content</h2><p>This content spans the full width with padding.</p></div>' },
+    ],
+    customizable: ["width", "padding", "alignment"]
+  },
+  {
+    name: "FlexLayout",
+    description: "Flexible layout container",
+    category: "layout",
+    variants: [
+      { name: "Row", props: {}, code: '<div className="flex space-x-4"><div className="flex-1 p-4 bg-muted rounded">Item 1</div><div className="flex-1 p-4 bg-muted rounded">Item 2</div></div>' },
+      { name: "Column", props: {}, code: '<div className="flex flex-col space-y-4"><div className="p-4 bg-muted rounded">Item 1</div><div className="p-4 bg-muted rounded">Item 2</div></div>' },
+    ],
+    customizable: ["direction", "spacing", "alignment"]
+  },
+  {
+    name: "GridLayout",
+    description: "CSS Grid layout container",
+    category: "layout",
+    variants: [
+      { name: "Two Column", props: {}, code: '<div className="grid grid-cols-2 gap-4"><div className="p-4 bg-muted rounded">Grid Item 1</div><div className="p-4 bg-muted rounded">Grid Item 2</div></div>' },
+      { name: "Three Column", props: {}, code: '<div className="grid grid-cols-3 gap-4"><div className="p-4 bg-muted rounded">Item 1</div><div className="p-4 bg-muted rounded">Item 2</div><div className="p-4 bg-muted rounded">Item 3</div></div>' },
+    ],
+    customizable: ["columns", "gap", "alignment"]
+  },
+  {
+    name: "HeroSection",
+    description: "Hero section with background and content",
+    category: "layout",
+    variants: [
+      { name: "Default", props: {}, code: '<div className="relative h-96 bg-gradient-to-r from-primary to-primary/80 rounded-lg flex items-center justify-center text-white"><div className="text-center"><h1 className="text-4xl font-bold mb-4">Hero Title</h1><p className="text-xl mb-6">Hero description text</p><Button variant="secondary">Get Started</Button></div></div>' },
+    ],
+    customizable: ["height", "background", "content"]
+  },
+  // Enhanced Cards
+  {
+    name: "ProductCard",
+    description: "Product showcase card with image and details",
+    category: "content",
+    variants: [
+      { name: "Default", props: {}, code: '<Card className="max-w-sm glass-card overflow-hidden"><div className="aspect-square bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center"><ShoppingCart className="w-12 h-12 text-muted-foreground" /></div><CardHeader><CardTitle>Product Name</CardTitle><CardDescription>$99.99</CardDescription></CardHeader><CardContent><p className="text-sm text-muted-foreground">Product description goes here.</p></CardContent><CardFooter><Button className="w-full">Add to Cart</Button></CardFooter></Card>' },
+    ],
+    customizable: ["image", "price", "description"]
+  },
+  {
+    name: "ProfileCard",
+    description: "User profile card with avatar and info",
+    category: "content",
+    variants: [
+      { name: "Default", props: {}, code: '<Card className="max-w-sm glass-card"><CardHeader className="text-center"><Avatar className="w-20 h-20 mx-auto mb-4"><AvatarImage src="/placeholder.svg" /><AvatarFallback>JD</AvatarFallback></Avatar><CardTitle>John Doe</CardTitle><CardDescription>Software Developer</CardDescription></CardHeader><CardContent className="text-center"><p className="text-sm text-muted-foreground mb-4">Building amazing web experiences</p><div className="flex justify-center space-x-2"><Badge variant="secondary">React</Badge><Badge variant="secondary">TypeScript</Badge></div></CardContent><CardFooter><Button className="w-full" variant="outline">Connect</Button></CardFooter></Card>' },
+    ],
+    customizable: ["avatar", "bio", "skills"]
+  },
+  {
+    name: "StatCard",
+    description: "Statistics display card",
+    category: "content",
+    variants: [
+      { name: "Default", props: {}, code: '<Card className="glass-card"><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">Total Revenue</CardTitle><TrendingUp className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">$45,231.89</div><p className="text-xs text-muted-foreground">+20.1% from last month</p></CardContent></Card>' },
+    ],
+    customizable: ["metric", "value", "trend"]
+  },
+  {
+    name: "ImageCard",
+    description: "Card with prominent image and overlay text",
+    category: "content",
+    variants: [
+      { name: "Default", props: {}, code: '<Card className="max-w-sm glass-card overflow-hidden"><div className="relative aspect-video bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center"><ImageIcon className="w-12 h-12 text-white/70" /><div className="absolute inset-0 bg-black/20"></div><div className="absolute bottom-4 left-4 text-white"><h3 className="font-semibold">Image Title</h3><p className="text-sm text-white/80">Image description</p></div></div><CardContent className="p-4"><Button variant="ghost" className="w-full">Learn More</Button></CardContent></Card>' },
+    ],
+    customizable: ["image", "overlay", "content"]
+  },
 ];
 
 export const EditableComponentLibrary = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedComponent, setSelectedComponent] = useState<{ component: EditableComponent; variant: ComponentVariant } | null>(null);
+  const [editableProps, setEditableProps] = useState<EditableProps>({});
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
@@ -202,6 +325,7 @@ export const EditableComponentLibrary = () => {
     { value: "feedback", label: "Feedback" },
     { value: "layout", label: "Layout" },
     { value: "data", label: "Data" },
+    { value: "content", label: "Content" },
   ];
 
   const filteredComponents = componentLibrary.filter(component => {
@@ -357,6 +481,170 @@ export const EditableComponentLibrary = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+        );
+      // Complete Forms
+      case "ContactForm":
+        return (
+          <form className="space-y-4 max-w-sm glass p-4 rounded-lg">
+            <div>
+              <Label className="text-white/90">Name</Label>
+              <Input placeholder="Your name" className="bg-white/10 border-white/20 text-white placeholder:text-white/60" />
+            </div>
+            <div>
+              <Label className="text-white/90">Email</Label>
+              <Input type="email" placeholder="your@email.com" className="bg-white/10 border-white/20 text-white placeholder:text-white/60" />
+            </div>
+            <div>
+              <Label className="text-white/90">Message</Label>
+              <Textarea placeholder="Your message..." className="bg-white/10 border-white/20 text-white placeholder:text-white/60" />
+            </div>
+            <Button className="w-full">Send Message</Button>
+          </form>
+        );
+      case "LoginForm":
+        return (
+          <form className="space-y-4 max-w-sm glass p-6 rounded-lg">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-semibold text-white">Welcome Back</h3>
+              <p className="text-white/70 text-sm">Sign in to your account</p>
+            </div>
+            <div>
+              <Label className="text-white/90">Email</Label>
+              <Input type="email" placeholder="Enter email" className="bg-white/10 border-white/20 text-white placeholder:text-white/60" />
+            </div>
+            <div>
+              <Label className="text-white/90">Password</Label>
+              <Input type="password" placeholder="Enter password" className="bg-white/10 border-white/20 text-white placeholder:text-white/60" />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="remember" className="border-white/30" />
+              <Label htmlFor="remember" className="text-white/80 text-sm">Remember me</Label>
+            </div>
+            <Button className="w-full">Sign In</Button>
+          </form>
+        );
+      // Layout Components
+      case "Container":
+        return (
+          <div className="glass-card p-6 max-w-md">
+            <h3 className="text-lg font-semibold mb-2">Container Content</h3>
+            <p className="text-muted-foreground">This content is centered with responsive padding and glass morphism effect.</p>
+          </div>
+        );
+      case "FlexLayout":
+        return (
+          <div className="max-w-md">
+            {variant.name === "Row" ? (
+              <div className="flex space-x-4">
+                <div className="flex-1 p-4 glass-card rounded">Item 1</div>
+                <div className="flex-1 p-4 glass-card rounded">Item 2</div>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-4">
+                <div className="p-4 glass-card rounded">Item 1</div>
+                <div className="p-4 glass-card rounded">Item 2</div>
+              </div>
+            )}
+          </div>
+        );
+      case "GridLayout":
+        return (
+          <div className="max-w-md">
+            {variant.name === "Two Column" ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 glass-card rounded text-center">Grid Item 1</div>
+                <div className="p-4 glass-card rounded text-center">Grid Item 2</div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-2">
+                <div className="p-3 glass-card rounded text-center text-sm">Item 1</div>
+                <div className="p-3 glass-card rounded text-center text-sm">Item 2</div>
+                <div className="p-3 glass-card rounded text-center text-sm">Item 3</div>
+              </div>
+            )}
+          </div>
+        );
+      case "HeroSection":
+        return (
+          <div className="relative h-48 w-full max-w-md bg-gradient-to-r from-primary to-primary/80 rounded-lg flex items-center justify-center text-white overflow-hidden">
+            <div className="absolute inset-0 bg-black/10"></div>
+            <div className="text-center z-10">
+              <h1 className="text-2xl font-bold mb-2">Hero Title</h1>
+              <p className="text-sm mb-4 opacity-90">Hero description text</p>
+              <Button variant="secondary" size="sm">Get Started</Button>
+            </div>
+          </div>
+        );
+      // Enhanced Cards
+      case "ProductCard":
+        return (
+          <Card className="max-w-48 glass-card overflow-hidden">
+            <div className="aspect-square bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+              <ShoppingCart className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <CardHeader className="p-4">
+              <CardTitle className="text-sm">Product Name</CardTitle>
+              <CardDescription className="text-xs">$99.99</CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <p className="text-xs text-muted-foreground">Great product description.</p>
+            </CardContent>
+            <CardFooter className="p-4 pt-0">
+              <Button size="sm" className="w-full">Add to Cart</Button>
+            </CardFooter>
+          </Card>
+        );
+      case "ProfileCard":
+        return (
+          <Card className="max-w-48 glass-card">
+            <CardHeader className="text-center p-4">
+              <Avatar className="w-12 h-12 mx-auto mb-2">
+                <AvatarImage src="/placeholder.svg" />
+                <AvatarFallback>JD</AvatarFallback>
+              </Avatar>
+              <CardTitle className="text-sm">John Doe</CardTitle>
+              <CardDescription className="text-xs">Developer</CardDescription>
+            </CardHeader>
+            <CardContent className="text-center p-4 pt-0">
+              <p className="text-xs text-muted-foreground mb-2">Building amazing experiences</p>
+              <div className="flex justify-center space-x-1">
+                <Badge variant="secondary" className="text-xs">React</Badge>
+                <Badge variant="secondary" className="text-xs">TS</Badge>
+              </div>
+            </CardContent>
+            <CardFooter className="p-4 pt-0">
+              <Button className="w-full" variant="outline" size="sm">Connect</Button>
+            </CardFooter>
+          </Card>
+        );
+      case "StatCard":
+        return (
+          <Card className="glass-card max-w-48">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-4">
+              <CardTitle className="text-xs font-medium">Total Revenue</CardTitle>
+              <TrendingUp className="h-3 w-3 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="text-lg font-bold">$45,231</div>
+              <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+            </CardContent>
+          </Card>
+        );
+      case "ImageCard":
+        return (
+          <Card className="max-w-48 glass-card overflow-hidden">
+            <div className="relative aspect-video bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center">
+              <ImageIcon className="w-8 h-8 text-white/70" />
+              <div className="absolute inset-0 bg-black/20"></div>
+              <div className="absolute bottom-2 left-2 text-white">
+                <h3 className="text-xs font-semibold">Image Title</h3>
+                <p className="text-xs text-white/80">Description</p>
+              </div>
+            </div>
+            <CardContent className="p-3">
+              <Button variant="ghost" size="sm" className="w-full text-xs">Learn More</Button>
+            </CardContent>
+          </Card>
         );
       default:
         return <div className="p-4 border border-dashed border-muted-foreground rounded text-muted-foreground">Component Preview</div>;
