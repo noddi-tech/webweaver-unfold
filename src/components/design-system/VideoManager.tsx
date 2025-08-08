@@ -299,6 +299,46 @@ const VideoManager = () => {
         )}
       </Card>
 
+      {/* Manage Sections */}
+      <Card className="p-6 bg-card border-border">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-semibold text-foreground">Sections</h3>
+          </div>
+          {sections.length > 0 ? (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Current sections</p>
+              <div className="flex flex-wrap gap-2">
+                {sections.map((s) => (
+                  <span key={s.id} className="px-2 py-1 rounded-md border border-border text-sm text-foreground">
+                    {s.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No sections yet. Add your first section below.</p>
+          )}
+
+          <Separator />
+
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
+            <div className="grid gap-2">
+              <Label htmlFor="new-section">Add new section</Label>
+              <Input
+                id="new-section"
+                value={newSection}
+                onChange={(e) => setNewSection(e.target.value)}
+                placeholder="e.g. Capacity system, Worker app"
+              />
+            </div>
+            <Button onClick={addSection} disabled={!newSection.trim()}>
+              <Plus className="mr-2 h-4 w-4" /> Add Section
+            </Button>
+          </div>
+        </div>
+      </Card>
+
       {/* Existing Videos (with editing) */}
       <Card className="p-6 bg-card border-border">
         <div className="flex items-center justify-between mb-4">
