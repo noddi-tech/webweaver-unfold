@@ -86,6 +86,8 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
       setActive(true);
       setMatches(getSuggestions(q));
       setSelectedIndex(0);
+      // keep focus on the target while the menu is open
+      el.focus({ preventScroll: true });
       const rect = el.getBoundingClientRect();
       setPosition({ top: rect.bottom + 6, left: rect.left + 8 });
     } else {
@@ -119,7 +121,11 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
     const onKeyUp = () => updateQueryFromCaret();
 
     const onKeyDown = (e: KeyboardEvent) => {
+      // Only intercept keys when the menu is open and the user isn't composing text
       if (!active) return;
+      const anyEvent = e as unknown as { isComposing?: boolean };
+      if (anyEvent.isComposing) return;
+
       if (e.key === "ArrowDown") {
         e.preventDefault();
         setSelectedIndex((i) => (i + 1) % Math.max(matches.length, 1));
@@ -134,6 +140,7 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
         e.preventDefault();
         reset();
       }
+      // Do not preventDefault for any other keys; let typing flow normally.
     };
 
     const onBlur = () => {

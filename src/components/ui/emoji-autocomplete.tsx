@@ -28,7 +28,7 @@ export const EmojiAutocomplete: React.FC<EmojiAutocompleteProps> = ({
   if (!active) return null;
   return (
     <div style={{ position: "fixed", zIndex: 60, ...style }} aria-live="polite" role="listbox">
-      <GlassPanel className="w-72 p-2" elevation="lg" maxHeight={256}>
+      <GlassPanel className="w-72 p-2 overflow-hidden" elevation="lg" maxHeight={256}>
         <div className="text-xs text-muted-foreground mb-1">Emoji suggestions</div>
         <div className="max-h-64 overflow-auto pr-1">
           {matches.length === 0 ? (
@@ -39,6 +39,8 @@ export const EmojiAutocomplete: React.FC<EmojiAutocompleteProps> = ({
                 <li key={`${m.emoji}-${idx}`} role="option" aria-selected={idx === selectedIndex}>
                   <button
                     type="button"
+                    tabIndex={-1}
+                    onMouseDown={(e) => e.preventDefault()}
                     className={cn(
                       "w-full flex items-center gap-2 px-2 py-1.5 text-left rounded-md",
                       idx === selectedIndex ? "bg-accent/50" : "hover:bg-accent/40",
