@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Smile } from "lucide-react";
 import emojiData from "unicode-emoji-json";
+import githubShortcodes from "emojibase-data/en/shortcodes/github.json";
 
 
 // Lightweight emoji picker without external deps
@@ -21,6 +22,22 @@ type EmojiInfo = {
 
 const ALL_EMOJIS: string[] = Object.keys(emojiData as Record<string, EmojiInfo>);
 
+// Build emoji to shortcode map from GitHub-style shortcodes
+const SHORTCODES_DATA = githubShortcodes as Record<string, string | string[]>;
+const fromCodepoint = (seq: string) =>
+  seq
+    .split("-")
+    .map((h) => String.fromCodePoint(parseInt(h, 16)))
+    .join("");
+
+const EMOJI_TO_SHORTCODES: Record<string, string[]> = Object.fromEntries(
+  Object.entries(SHORTCODES_DATA).map(([cp, sc]) => {
+    const emojiChar = fromCodepoint(cp);
+    const arr = Array.isArray(sc) ? sc : [sc];
+    return [emojiChar, arr.map((s) => `:${s}:`)];
+  })
+);
+
 
 
 interface EmojiPickerProps {
@@ -31,10 +48,21 @@ interface EmojiPickerProps {
 const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect, label = "Insert emoji" }) => {
 const [open, setOpen] = useState(false);
 const [query, setQuery] = useState("");
+const isShortcodeMode = useMemo(() => query.trim().startsWith(":"), [query]);
 
 const filtered = useMemo(() => {
-  const q = query.trim().toLowerCase();
+  const raw = query.trim();
+  const q = raw.toLowerCase();
   if (!q) return ALL_EMOJIS;
+
+  // If user is typing a shortcode like :blu
+  if (raw.startsWith(":")) {
+    const sub = raw.slice(1).toLowerCase();
+    return ALL_EMOJIS.filter((e) =>
+      (EMOJI_TO_SHORTCODES[e] || []).some((sc) => sc.toLowerCase().includes(sub))
+    );
+  }
+
   return ALL_EMOJIS.filter((e) => {
     if (e.includes(q)) return true; // allow searching by emoji char
     const info = (emojiData as Record<string, EmojiInfo>)[e] || {};
@@ -48,7 +76,9 @@ const filtered = useMemo(() => {
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
-    return haystack.includes(q);
+
+    const scodes = EMOJI_TO_SHORTCODES[e] || [];
+    return haystack.includes(q) || scodes.some((sc) => sc.toLowerCase().includes(q));
   });
 }, [query]);
 
@@ -74,11 +104,11 @@ const groups = useMemo(() => {
 <Input
   value={query}
   onChange={(e) => setQuery(e.target.value)}
-  placeholder="Search all emojis (name, tags, or paste 😄)"
+  placeholder="Search all emojis (type :blu for shortcodes or paste 😄)"
   aria-label="Search emojis"
   className="h-8 text-xs mb-2"
 />
-<div className="space-y-1">
+<div className="space-y-1 max-h-72 overflow-auto pr-1">
   {filtered.length === 0 ? (
     <div className="text-xs text-muted-foreground py-2" aria-live="polite">
       No matches
@@ -91,16 +121,27 @@ const groups = useMemo(() => {
             <button
               key={e}
               type="button"
-              className="h-7 w-7 rounded-md hover:bg-accent/60 transition flex items-center justify-center"
+              className={(isShortcodeMode ? "h-10 w-12 flex-col gap-1 " : "h-7 w-7 ") + "rounded-md hover:bg-accent/60 transition flex items-center justify-center"}
               onClick={() => {
                 onSelect(e);
                 setOpen(false);
               }}
-              title={((emojiData as Record<string, EmojiInfo>)[e]?.name ?? (emojiData as Record<string, EmojiInfo>)[e]?.annotation ?? "emoji")}
-            >
-              <span className="text-base leading-none" aria-hidden>
-                {e}
-              </span>
+              title={(EMOJI_TO_SHORTCODES[e]?.[0] ?? (emojiData as Record<string, EmojiInfo>)[e]?.name ?? (emojiData as Record<string, EmojiInfo>)[e]?.annotation ?? "emoji")}
+              >
+              {isShortcodeMode ? (
+                <>
+                  <span className="text-base leading-none" aria-hidden>
+                    {e}
+                  </span>
+                  <span className="text-[10px] leading-tight text-muted-foreground max-w-[2.5rem] truncate">
+                    {(EMOJI_TO_SHORTCODES[e]?.[0] ?? "")}
+                  </span>
+                </>
+              ) : (
+                <span className="text-base leading-none" aria-hidden>
+                  {e}
+                </span>
+              )}
             </button>
           ))}
         </div>
