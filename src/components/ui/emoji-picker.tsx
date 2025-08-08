@@ -3,91 +3,52 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Smile } from "lucide-react";
+import emojiData from "unicode-emoji-json";
+
 
 // Lightweight emoji picker without external deps
 // - Renders a small grid of commonly used emojis
 // - Calls onSelect with the chosen emoji
 // - Keeps UI minimal and fast
 
-const COMMON_EMOJIS = [
-  "😀","😁","😂","🤣","😊","😍","🤩","😉","😎","🤔",
-  "😇","🙌","👏","👍","🔥","✨","💡","🚀","🎯","✅",
-  "❌","❤️","💙","💚","⭐","🌟","⚙️","🧠","🛠️","🔧",
-  "📈","📊","📹","🎬","🗂️","📁","📦","🧰","🧪","🗺️",
-  "🏷️","📱","💻","🖥️","🌐","🔒","🔓","⏱️","🧭","🪄"
-];
+type EmojiInfo = {
+  name?: string;
+  annotation?: string;
+  tags?: string[];
+  keywords?: string[];
+  group?: string;
+};
+
+const ALL_EMOJIS: string[] = Object.keys(emojiData as Record<string, EmojiInfo>);
+
+
 
 interface EmojiPickerProps {
   onSelect: (emoji: string) => void;
   label?: string;
 }
 
-// Minimal keyword index for simple search
-const EMOJI_KEYWORDS: Record<string, string[]> = {
-  "😀": ["grinning", "smile", "happy"],
-  "😁": ["beaming", "grin", "smile"],
-  "😂": ["joy", "tears", "lol", "laugh"],
-  "🤣": ["rofl", "rolling", "laugh"],
-  "😊": ["blush", "smile", "warm"],
-  "😍": ["love", "heart eyes", "crush"],
-  "🤩": ["star-struck", "amazed", "excited"],
-  "😉": ["wink", "flirt", "hint"],
-  "😎": ["cool", "sunglasses", "chill"],
-  "🤔": ["thinking", "hmm", "question"],
-  "😇": ["angel", "innocent", "halo"],
-  "🙌": ["celebrate", "hooray", "raise hands"],
-  "👏": ["clap", "applause", "bravo"],
-  "👍": ["thumbs up", "approve", "like", "ok"],
-  "🔥": ["fire", "lit", "hot", "trending"],
-  "✨": ["sparkles", "shine", "magic"],
-  "💡": ["idea", "lightbulb", "tip"],
-  "🚀": ["rocket", "launch", "ship", "deploy"],
-  "🎯": ["target", "goal", "focus", "bullseye"],
-  "✅": ["check", "done", "complete", "tick"],
-  "❌": ["cross", "cancel", "delete", "remove"],
-  "❤️": ["heart", "love", "like", "favorite"],
-  "💙": ["blue heart", "trust", "loyal"],
-  "💚": ["green heart", "eco", "sustainability"],
-  "⭐": ["star", "favorite", "rate"],
-  "🌟": ["glow", "star", "featured", "highlight"],
-  "⚙️": ["gear", "settings", "config"],
-  "🧠": ["brain", "ai", "smart", "think"],
-  "🛠️": ["tools", "build", "fix", "maintenance"],
-  "🔧": ["wrench", "fix", "tool"],
-  "📈": ["chart", "growth", "up", "analytics"],
-  "📊": ["bar chart", "stats", "analytics", "report"],
-  "📹": ["video camera", "record", "film"],
-  "🎬": ["clapper", "movie", "action", "cut"],
-  "🗂️": ["folders", "organize", "index"],
-  "📁": ["folder", "files", "document"],
-  "📦": ["package", "box", "ship", "deliver"],
-  "🧰": ["toolbox", "tools", "kit"],
-  "🧪": ["lab", "experiment", "test"],
-  "🗺️": ["map", "location", "route"],
-  "🏷️": ["tag", "label", "badge"],
-  "📱": ["phone", "mobile", "app"],
-  "💻": ["laptop", "computer", "dev", "code"],
-  "🖥️": ["desktop", "monitor", "screen"],
-  "🌐": ["web", "internet", "globe", "www"],
-  "🔒": ["lock", "secure", "privacy"],
-  "🔓": ["unlock", "open", "access"],
-  "⏱️": ["timer", "stopwatch", "time", "duration"],
-  "🧭": ["compass", "navigation", "direction"],
-  "🪄": ["wand", "magic", "auto", "assist"],
-};
-
-
 const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect, label = "Insert emoji" }) => {
 const [open, setOpen] = useState(false);
 const [query, setQuery] = useState("");
 
 const filtered = useMemo(() => {
-  if (!query.trim()) return COMMON_EMOJIS;
   const q = query.trim().toLowerCase();
-  return COMMON_EMOJIS.filter((e) => {
+  if (!q) return ALL_EMOJIS;
+  return ALL_EMOJIS.filter((e) => {
     if (e.includes(q)) return true; // allow searching by emoji char
-    const keys = EMOJI_KEYWORDS[e] || [];
-    return keys.some((k) => k.toLowerCase().includes(q));
+    const info = (emojiData as Record<string, EmojiInfo>)[e] || {};
+    const haystack = [
+      info.name,
+      info.annotation,
+      ...(info.tags || []),
+      ...(info.keywords || []),
+      info.group,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(q);
   });
 }, [query]);
 
@@ -113,7 +74,7 @@ const groups = useMemo(() => {
 <Input
   value={query}
   onChange={(e) => setQuery(e.target.value)}
-  placeholder="Search (e.g., check, fire, tools)"
+  placeholder="Search all emojis (name, tags, or paste 😄)"
   aria-label="Search emojis"
   className="h-8 text-xs mb-2"
 />
@@ -135,7 +96,7 @@ const groups = useMemo(() => {
                 onSelect(e);
                 setOpen(false);
               }}
-              title={(EMOJI_KEYWORDS[e]?.[0] ?? "emoji")}
+              title={((emojiData as Record<string, EmojiInfo>)[e]?.name ?? (emojiData as Record<string, EmojiInfo>)[e]?.annotation ?? "emoji")}
             >
               <span className="text-base leading-none" aria-hidden>
                 {e}
