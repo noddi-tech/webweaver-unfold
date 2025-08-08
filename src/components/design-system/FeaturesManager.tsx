@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import IconPicker from "./IconPicker";
+import FeaturePreview from "./FeaturePreview";
 
 interface FeatureRow {
   id: string;
@@ -271,7 +272,7 @@ const FeaturesManager = () => {
           Uses your design tokens (bg-*, text-*, border-*) to style the Features section consistently.
         </p>
       </Card>
-
+ 
       <Card className="p-6 bg-card border-border">
         <h3 className="text-xl font-semibold mb-4">Add Feature</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -280,7 +281,7 @@ const FeaturesManager = () => {
             value={newFeature.title}
             onChange={(e) => setNewFeature((s) => ({ ...s, title: e.target.value }))}
           />
-<IconPicker
+          <IconPicker
             value={newFeature.icon_name}
             onChange={(v) => setNewFeature((s) => ({ ...s, icon_name: v }))}
             placeholder="Select an icon"
@@ -302,6 +303,16 @@ const FeaturesManager = () => {
             />
           </div>
         </div>
+        <div className="mt-4">
+          <h4 className="text-sm text-muted-foreground mb-2">Live Preview</h4>
+          {/* Preview card for the feature being created */}
+          <FeaturePreview
+            title={newFeature.title}
+            description={newFeature.description}
+            iconName={newFeature.icon_name}
+            settings={settings}
+          />
+        </div>
         <p className="text-xs text-muted-foreground mt-3">
           Tip: Icons are from lucide-react. Use names like Truck, Calendar, BarChart3, Wrench, Shield, Zap, Users, Clock, DollarSign, etc.
         </p>
@@ -317,19 +328,20 @@ const FeaturesManager = () => {
                 <TableHead className="w-[12rem]">Icon</TableHead>
                 <TableHead className="w-[8rem]">Sort</TableHead>
                 <TableHead>Description</TableHead>
+                <TableHead className="w-[20rem]">Preview</TableHead>
                 <TableHead className="w-[10rem] text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : features.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     No features yet.
                   </TableCell>
                 </TableRow>
@@ -356,6 +368,14 @@ const FeaturesManager = () => {
                       <Textarea
                         value={f.description ?? ""}
                         onChange={(e) => updateLocal(f.id, { description: e.target.value })}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FeaturePreview
+                        title={f.title}
+                        description={f.description}
+                        iconName={f.icon_name}
+                        settings={settings}
                       />
                     </TableCell>
                     <TableCell className="text-right space-x-2">
