@@ -10,6 +10,7 @@ import { Upload, Trash2, Video, Save, RefreshCcw, Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import EmojiPicker from "@/components/ui/emoji-picker";
 
 // DB types (kept simple to avoid coupling with generated types)
 type DbVideo = {
@@ -325,12 +326,16 @@ const VideoManager = () => {
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
             <div className="grid gap-2">
               <Label htmlFor="new-section">Add new section</Label>
-              <Input
-                id="new-section"
-                value={newSection}
-                onChange={(e) => setNewSection(e.target.value)}
-                placeholder="e.g. Capacity system, Worker app"
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  className="flex-1"
+                  id="new-section"
+                  value={newSection}
+                  onChange={(e) => setNewSection(e.target.value)}
+                  placeholder="e.g. Capacity system, Worker app"
+                />
+                <EmojiPicker onSelect={(e) => setNewSection((prev) => prev + e)} />
+              </div>
             </div>
             <Button onClick={addSection} disabled={!newSection.trim()}>
               <Plus className="mr-2 h-4 w-4" /> Add Section
@@ -364,12 +369,16 @@ const VideoManager = () => {
                       <div className="p-3 space-y-3">
                         <div className="grid gap-2">
                           <Label htmlFor={`title-${video.id}`}>Heading</Label>
-                          <Input
-                            id={`title-${video.id}`}
-                            value={video.title}
-                            onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, title: e.target.value } : v))}
-                            placeholder="Enter video heading"
-                          />
+                          <div className="flex items-center gap-2">
+                            <Input
+                              id={`title-${video.id}`}
+                              className="flex-1"
+                              value={video.title}
+                              onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, title: e.target.value } : v))}
+                              placeholder="Enter video heading"
+                            />
+                            <EmojiPicker onSelect={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, title: (v.title || "") + e } : v))} />
+                          </div>
                         </div>
                         <div className="grid gap-2">
                           <Label htmlFor={`desc-${video.id}`}>Description</Label>
@@ -383,13 +392,17 @@ const VideoManager = () => {
                         <div className="grid grid-cols-3 gap-3">
                           <div className="col-span-2 grid gap-2">
                             <Label htmlFor={`section-${video.id}`}>Section</Label>
-                            <Input
-                              id={`section-${video.id}`}
-                              list={`sections-datalist`}
-                              value={video.section}
-                              onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: e.target.value } : v))}
-                              placeholder="e.g. Capacity system, Worker app"
-                            />
+                            <div className="flex items-center gap-2">
+                              <Input
+                                id={`section-${video.id}`}
+                                className="flex-1"
+                                list={`sections-datalist`}
+                                value={video.section}
+                                onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: e.target.value } : v))}
+                                placeholder="e.g. Capacity system, Worker app"
+                              />
+                              <EmojiPicker onSelect={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: (v.section || "") + e } : v))} />
+                            </div>
                             <datalist id="sections-datalist">
                               {sections.map((s) => (
                                 <option key={s.id} value={s.name} />
