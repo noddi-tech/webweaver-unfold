@@ -328,20 +328,13 @@ const VideoManager = () => {
             <div className="grid gap-2">
               <Label htmlFor="new-section">Add new section</Label>
               <div className="flex items-center gap-2">
-              <WithEmojiAutocomplete
-                value={newSection}
-                setValue={setNewSection}
-                renderTarget={(ref) => (
                   <Input
-                    ref={ref as any}
                     className="w-full"
                     id="new-section"
                     value={newSection}
                     onChange={(e) => setNewSection(e.target.value)}
                     placeholder="e.g. Capacity system, Worker app"
                   />
-                )}
-              />
               </div>
             </div>
             <div className="flex gap-2 justify-end sm:justify-start">
