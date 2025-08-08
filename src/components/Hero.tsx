@@ -1,9 +1,31 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import dashboardPreview from "@/assets/dashboard-preview.jpg";
+import { useEffect, useState } from "react";
+import { icons } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Hero = () => {
+  const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      const { data } = await supabase
+        .from("usps")
+        .select("id,title,icon_name,href,bg_token,text_token,active,sort_order")
+        .eq("active", true)
+        .eq("location", "hero")
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      if (!mounted) return;
+      setUsps(data || []);
+    };
+    load();
+    return () => { mounted = false; };
+  }, []);
+
   return (
     <section id="home" className="pt-32 pb-20 px-6">
       <div className="container mx-auto">
@@ -14,11 +36,39 @@ const Hero = () => {
             <br />
             Automotive Operations
           </h1>
-          
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Noddi Tech empowers automotive maintenance providers with intelligent logistics 
-            technology to optimize operations, reduce costs, and deliver exceptional service.
-          </p>
+
+          {/* Hero USPs */}
+          {usps.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              {usps.map((u) => {
+                const IconCmp = (icons as any)[u.icon_name] || Sparkles;
+                return (
+                  <span key={u.id} className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border ${{
+                    background: "bg-background",
+                    card: "bg-card",
+                    primary: "bg-primary",
+                    secondary: "bg-secondary",
+                    accent: "bg-accent",
+                    "gradient-primary": "bg-gradient-primary",
+                    "gradient-background": "bg-gradient-background",
+                    "gradient-hero": "bg-gradient-hero",
+                  }[u.bg_token] || "bg-secondary"} ${
+                    {
+                      foreground: "text-foreground",
+                      "muted-foreground": "text-muted-foreground",
+                      primary: "text-primary",
+                      secondary: "text-secondary",
+                      accent: "text-accent",
+                    }[u.text_token] || "text-foreground"
+                  }`}>
+                    <IconCmp className="w-3.5 h-3.5" />
+                    <span className="text-xs font-medium whitespace-nowrap">{u.title}</span>
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">

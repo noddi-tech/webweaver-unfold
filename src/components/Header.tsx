@@ -3,10 +3,11 @@ import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-
+import GlobalUSPBar from "@/components/GlobalUSPBar";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
+  const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground" });
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -14,6 +15,28 @@ const Header = () => {
     });
     supabase.auth.getSession().then(({ data }) => setAuthenticated(!!data.session?.user));
     return () => listener.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      const { data } = await supabase
+        .from("brand_settings")
+        .select("logo_text,gradient_token,text_token")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (!mounted) return;
+      if (data) {
+        setBrand({
+          logo_text: data.logo_text || "",
+          gradient_token: data.gradient_token || "gradient-primary",
+          text_token: data.text_token || "foreground",
+        });
+      }
+    };
+    load();
+    return () => { mounted = false; };
   }, []);
 
   const signOut = async () => {
@@ -29,9 +52,10 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 glass">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="text-2xl font-bold gradient-text hover:opacity-80 transition-opacity">
-            Noddi Tech
+          <Link to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
+            <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent`}> 
+              {brand.logo_text || "Noddi Tech"}
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -104,6 +128,9 @@ const Header = () => {
             </nav>
           </div>
         )}
+
+        {/* Global USPs Bar */}
+        <GlobalUSPBar />
       </div>
     </header>
   );

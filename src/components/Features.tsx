@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
+import { Link } from "react-router-dom";
 // Fallback static features (used when DB has no rows)
 import { 
   Truck, Calendar, BarChart3, Wrench, Shield, Zap, Users, Clock, DollarSign
@@ -56,11 +56,11 @@ const borderClass: Record<string, string> = {
 const Features = () => {
   const [dbFeatures, setDbFeatures] = useState<DbFeature[] | null>(null);
   const [settings, setSettings] = useState<FeatureSettings | null>(null);
-
+  const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      const [{ data: feats }, { data: setts }] = await Promise.all([
+      const [{ data: feats }, { data: setts }, { data: uspList }] = await Promise.all([
         supabase
           .from("features")
           .select("id,title,description,icon_name,sort_order")
@@ -71,10 +71,18 @@ const Features = () => {
           .select("section_title,section_subtitle,background_token,card_bg_token,border_token,icon_token,title_token,description_token")
           .order("created_at", { ascending: true })
           .limit(1),
+        supabase
+          .from("usps")
+          .select("id,title,icon_name,href,bg_token,text_token,active,sort_order")
+          .eq("active", true)
+          .eq("location", "features")
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: true }),
       ]);
       if (!mounted) return;
       setDbFeatures(feats || []);
       setSettings((setts && setts[0]) || null);
+      setUsps(uspList || []);
     };
     load();
     return () => {
@@ -102,6 +110,28 @@ const Features = () => {
             {settings?.section_subtitle || "Our comprehensive platform transforms how automotive maintenance providers operate, delivering efficiency, visibility, and growth."}
           </p>
         </div>
+
+        {/* Feature-targeted USPs */}
+        {usps.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
+            {usps.map((u) => {
+              const IconCmp = icons[(u.icon_name as IconName)] || icons["Sparkles"];
+              const pill = (
+                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${borderClr} ${bgClass[u.bg_token] || "bg-secondary"} ${textClass[u.text_token] || "text-foreground"}`}>
+                  <IconCmp className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium whitespace-nowrap">{u.title}</span>
+                </div>
+              );
+              return u.href ? (
+                <Link key={u.id} to={u.href} className="shrink-0 hover:opacity-90 transition-opacity">
+                  {pill}
+                </Link>
+              ) : (
+                <span key={u.id} className="shrink-0">{pill}</span>
+              );
+            })}
+          </div>
+        )}
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
