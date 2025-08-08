@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import IconPicker from "@/components/design-system/IconPicker";
+import { icons as lucideIcons } from "lucide-react";
 
 interface UspRow {
   id?: string;
@@ -59,8 +60,7 @@ const USPForm: React.FC<{
   const [sortOrder, setSortOrder] = useState<number>(initial?.sort_order ?? 0);
 
   const IconPreview = useMemo(() => {
-    const { icons } = require("lucide-react");
-    const Cmp = icons[iconName];
+    const Cmp = (lucideIcons as Record<string, any>)[iconName];
     return Cmp ? <Cmp className="w-4 h-4" /> : null;
   }, [iconName]);
 
