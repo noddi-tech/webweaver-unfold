@@ -4,11 +4,13 @@ import { useEmojiAutocomplete } from "@/hooks/use-emoji-autocomplete";
 
 interface WithEmojiAutocompleteProps {
   renderTarget: (ref: React.RefObject<HTMLInputElement | HTMLTextAreaElement>) => React.ReactNode;
+  value: string;
+  setValue: (newValue: string) => void;
 }
 
-export const WithEmojiAutocomplete: React.FC<WithEmojiAutocompleteProps> = ({ renderTarget }) => {
+export const WithEmojiAutocomplete: React.FC<WithEmojiAutocompleteProps> = ({ renderTarget, value, setValue }) => {
   const targetRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
-  const { active, matches, selectedIndex, setSelectedIndex, pick, overlayStyle } = useEmojiAutocomplete(targetRef);
+  const { active, matches, selectedIndex, setSelectedIndex, pick, overlayStyle } = useEmojiAutocomplete(targetRef, value, setValue);
 
   return (
     <>

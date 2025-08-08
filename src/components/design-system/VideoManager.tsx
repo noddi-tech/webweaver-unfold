@@ -329,6 +329,8 @@ const VideoManager = () => {
               <Label htmlFor="new-section">Add new section</Label>
               <div className="flex items-center gap-2">
 <WithEmojiAutocomplete
+  value={newSection}
+  setValue={setNewSection}
   renderTarget={(ref) => (
     <Input
       ref={ref as any}
@@ -377,6 +379,8 @@ const VideoManager = () => {
                           <Label htmlFor={`title-${video.id}`}>Heading</Label>
                           <div className="flex items-center gap-2">
 <WithEmojiAutocomplete
+  value={video.title}
+  setValue={(val) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, title: val } : v))}
   renderTarget={(ref) => (
     <Input
       ref={ref as any}
@@ -394,6 +398,8 @@ const VideoManager = () => {
                         <div className="grid gap-2">
                           <Label htmlFor={`desc-${video.id}`}>Description</Label>
 <WithEmojiAutocomplete
+  value={video.description ?? ""}
+  setValue={(val) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, description: val } : v))}
   renderTarget={(ref) => (
     <Textarea
       ref={ref as any}
@@ -410,6 +416,8 @@ const VideoManager = () => {
                             <Label htmlFor={`section-${video.id}`}>Section</Label>
                             <div className="flex items-center gap-2">
 <WithEmojiAutocomplete
+  value={video.section}
+  setValue={(val) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: val } : v))}
   renderTarget={(ref) => (
     <Input
       ref={ref as any}

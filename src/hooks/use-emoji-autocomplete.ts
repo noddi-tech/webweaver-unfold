@@ -59,7 +59,7 @@ function getSuggestions(query: string, limit = 50): EmojiSuggestion[] {
 
 const TRIGGER_RE = /(^|\s):([a-z0-9_+\-]+)$/i;
 
-export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
+export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>, value: string, setValue: (newValue: string) => void) {
   const [active, setActive] = useState(false);
   const [query, setQuery] = useState("");
   const [matches, setMatches] = useState<EmojiSuggestion[]>([]);
@@ -78,7 +78,7 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
     const el = targetRef.current;
     if (!el) return;
     const caret = el.selectionStart ?? 0;
-    const before = el.value.slice(0, caret);
+    const before = value.slice(0, caret);
     const m = before.match(TRIGGER_RE);
     if (m) {
       const q = m[2] ?? "";
@@ -86,7 +86,6 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
       setActive(true);
       setMatches(getSuggestions(q));
       setSelectedIndex(0);
-      // keep focus on the target while the menu is open
       el.focus({ preventScroll: true });
       const rect = el.getBoundingClientRect();
       setPosition({ top: rect.bottom + 6, left: rect.left + 8 });
@@ -99,17 +98,21 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
     const el = targetRef.current;
     if (!el) return;
     const caret = el.selectionStart ?? 0;
-    const before = el.value.slice(0, caret);
-    const after = el.value.slice(el.selectionEnd ?? caret);
+    const before = value.slice(0, caret);
+    const after = value.slice(el.selectionEnd ?? caret);
     const m = before.match(TRIGGER_RE);
     if (!m) return;
     const start = (m.index ?? (before.length - (m[0]?.length ?? 0))) + (m[1]?.length ?? 0);
     const newBefore = before.slice(0, start) + s.emoji + " ";
     const nextVal = newBefore + after;
-    el.value = nextVal;
+    setValue(nextVal);
     const newPos = newBefore.length;
-    el.setSelectionRange(newPos, newPos);
-    el.dispatchEvent(new Event("input", { bubbles: true }));
+    setTimeout(() => {
+      if (el) {
+        el.setSelectionRange(newPos, newPos);
+        el.focus();
+      }
+    }, 0);
     reset();
   };
 
@@ -172,7 +175,7 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
       el.removeEventListener("blur", onBlur);
       if (closeTimer.current) window.clearTimeout(closeTimer.current);
     };
-  }, [active, matches, selectedIndex]);
+  }, [active, matches, selectedIndex, value]);
 
   const overlayStyle: React.CSSProperties = useMemo(
     () => ({ top: position.top, left: position.left }),
