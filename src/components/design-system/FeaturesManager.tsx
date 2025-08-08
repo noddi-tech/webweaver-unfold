@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 
 interface FeatureRow {
@@ -17,11 +18,29 @@ interface FeatureRow {
   updated_at?: string;
 }
 
+interface FeatureSettings {
+  id?: string;
+  section_title: string;
+  section_subtitle: string | null;
+  background_token: string;
+  card_bg_token: string;
+  border_token: string;
+  icon_token: string;
+  title_token: string;
+  description_token: string;
+}
+
 const emptyNew: Omit<FeatureRow, "id"> = {
   title: "",
   description: "",
   icon_name: "Sparkles",
   sort_order: 0,
+};
+
+const tokenOptions = {
+  bg: ["background", "card"],
+  text: ["foreground", "muted-foreground", "primary", "secondary", "accent"],
+  border: ["border"],
 };
 
 const FeaturesManager = () => {
@@ -33,18 +52,29 @@ const FeaturesManager = () => {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const [settings, setSettings] = useState<FeatureSettings | null>(null);
+  const [savingSettings, setSavingSettings] = useState(false);
+
   const fetchFeatures = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("features")
-      .select("id,title,description,icon_name,sort_order,created_at,updated_at")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true });
-    if (error) {
-      toast({ title: "Failed to load features", description: error.message, variant: "destructive" });
-    } else {
-      setFeatures(data || []);
-    }
+    const [{ data: feats, error: err1 }, { data: setts, error: err2 }] = await Promise.all([
+      supabase
+        .from("features")
+        .select("id,title,description,icon_name,sort_order,created_at,updated_at")
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("features_settings")
+        .select("id,section_title,section_subtitle,background_token,card_bg_token,border_token,icon_token,title_token,description_token")
+        .order("created_at", { ascending: true })
+        .limit(1),
+    ]);
+
+    if (err1) toast({ title: "Failed to load features", description: err1.message, variant: "destructive" });
+    if (err2) toast({ title: "Failed to load settings", description: err2.message, variant: "destructive" });
+
+    setFeatures(feats || []);
+    setSettings((setts && setts[0]) || null);
     setLoading(false);
   };
 
@@ -112,8 +142,135 @@ const FeaturesManager = () => {
     setFeatures((prev) => prev.map((f) => (f.id === id ? { ...f, ...patch } : f)));
   };
 
+  const saveSettings = async () => {
+    if (!settings) return;
+    setSavingSettings(true);
+    const payload = { ...settings } as any;
+    if (!payload.id) delete payload.id;
+    const { error } = await supabase.from("features_settings").upsert(payload, { onConflict: "id" });
+    setSavingSettings(false);
+    if (error) {
+      toast({ title: "Failed to save settings", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Design settings saved" });
+      fetchFeatures();
+    }
+  };
+
   return (
     <div className="space-y-8">
+      <Card className="p-6 bg-card border-border">
+        <h3 className="text-xl font-semibold mb-4">Design Settings</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label className="text-sm text-muted-foreground">Section Title</label>
+            <Input
+              value={settings?.section_title ?? ""}
+              onChange={(e) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), section_title: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground">Background</label>
+            <Select
+              value={settings?.background_token ?? "background"}
+              onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), background_token: v }))}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {tokenOptions.bg.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground">Card Background</label>
+            <Select
+              value={settings?.card_bg_token ?? "card"}
+              onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), card_bg_token: v }))}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {tokenOptions.bg.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground">Icon Color</label>
+            <Select
+              value={settings?.icon_token ?? "primary"}
+              onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), icon_token: v }))}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {tokenOptions.text.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground">Title Color</label>
+            <Select
+              value={settings?.title_token ?? "foreground"}
+              onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), title_token: v }))}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {tokenOptions.text.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground">Description Color</label>
+            <Select
+              value={settings?.description_token ?? "muted-foreground"}
+              onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), description_token: v }))}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {tokenOptions.text.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground">Border Color</label>
+            <Select
+              value={settings?.border_token ?? "border"}
+              onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), border_token: v }))}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {tokenOptions.border.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="md:col-span-3">
+            <label className="text-sm text-muted-foreground">Section Subtitle</label>
+            <Textarea
+              value={settings?.section_subtitle ?? ""}
+              onChange={(e) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), section_subtitle: e.target.value }))}
+            />
+          </div>
+          <div className="md:col-span-3 flex justify-end">
+            <Button onClick={saveSettings} disabled={savingSettings}>
+              {savingSettings ? "Saving..." : "Save Design Settings"}
+            </Button>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground mt-3">
+          Uses your design tokens (bg-*, text-*, border-*) to style the Features section consistently.
+        </p>
+      </Card>
+
       <Card className="p-6 bg-card border-border">
         <h3 className="text-xl font-semibold mb-4">Add Feature</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

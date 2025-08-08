@@ -44,6 +44,48 @@ export type Database = {
         }
         Relationships: []
       }
+      features_settings: {
+        Row: {
+          background_token: string
+          border_token: string
+          card_bg_token: string
+          created_at: string
+          description_token: string
+          icon_token: string
+          id: string
+          section_subtitle: string | null
+          section_title: string
+          title_token: string
+          updated_at: string
+        }
+        Insert: {
+          background_token?: string
+          border_token?: string
+          card_bg_token?: string
+          created_at?: string
+          description_token?: string
+          icon_token?: string
+          id?: string
+          section_subtitle?: string | null
+          section_title?: string
+          title_token?: string
+          updated_at?: string
+        }
+        Update: {
+          background_token?: string
+          border_token?: string
+          card_bg_token?: string
+          created_at?: string
+          description_token?: string
+          icon_token?: string
+          id?: string
+          section_subtitle?: string | null
+          section_title?: string
+          title_token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       video_sections: {
         Row: {
           created_at: string
