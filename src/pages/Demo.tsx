@@ -12,6 +12,7 @@ type DbVideo = {
   section: string;
   sort_order: number | null;
   file_url: string;
+  thumbnail_url: string | null;
 };
 
 const Demo = () => {
@@ -27,7 +28,7 @@ const Demo = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("videos")
-        .select("id,title,description,section,sort_order,file_url")
+        .select("id,title,description,section,sort_order,file_url,thumbnail_url")
         .order("section", { ascending: true })
         .order("sort_order", { ascending: true });
       if (error) throw error;
@@ -82,7 +83,7 @@ const Demo = () => {
                             controls
                             preload="metadata"
                             className="w-full h-64 object-cover"
-                            poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='16' fill='%23666'%3EDemo Video%3C/text%3E%3C/svg%3E"
+                            poster={video.thumbnail_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='16' fill='%23666'%3EDemo Video%3C/text%3E%3C/svg%3E"}
                           >
                             Your browser does not support the video tag.
                           </video>
