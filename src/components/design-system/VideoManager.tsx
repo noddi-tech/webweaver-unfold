@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import EmojiPicker from "@/components/ui/emoji-picker";
+import { WithEmojiAutocomplete } from "@/components/ui/with-emoji-autocomplete";
 
 // DB types (kept simple to avoid coupling with generated types)
 type DbVideo = {
@@ -327,14 +328,19 @@ const VideoManager = () => {
             <div className="grid gap-2">
               <Label htmlFor="new-section">Add new section</Label>
               <div className="flex items-center gap-2">
-                <Input
-                  className="flex-1"
-                  id="new-section"
-                  value={newSection}
-                  onChange={(e) => setNewSection(e.target.value)}
-                  placeholder="e.g. Capacity system, Worker app"
-                />
-                <EmojiPicker onSelect={(e) => setNewSection((prev) => prev + e)} />
+<WithEmojiAutocomplete
+  renderTarget={(ref) => (
+    <Input
+      ref={ref as any}
+      className="flex-1"
+      id="new-section"
+      value={newSection}
+      onChange={(e) => setNewSection(e.target.value)}
+      placeholder="e.g. Capacity system, Worker app"
+    />
+  )}
+/>
+<EmojiPicker onSelect={(e) => setNewSection((prev) => prev + e)} />
               </div>
             </div>
             <Button onClick={addSection} disabled={!newSection.trim()}>
@@ -370,38 +376,53 @@ const VideoManager = () => {
                         <div className="grid gap-2">
                           <Label htmlFor={`title-${video.id}`}>Heading</Label>
                           <div className="flex items-center gap-2">
-                            <Input
-                              id={`title-${video.id}`}
-                              className="flex-1"
-                              value={video.title}
-                              onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, title: e.target.value } : v))}
-                              placeholder="Enter video heading"
-                            />
-                            <EmojiPicker onSelect={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, title: (v.title || "") + e } : v))} />
+<WithEmojiAutocomplete
+  renderTarget={(ref) => (
+    <Input
+      ref={ref as any}
+      id={`title-${video.id}`}
+      className="flex-1"
+      value={video.title}
+      onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, title: e.target.value } : v))}
+      placeholder="Enter video heading"
+    />
+  )}
+/>
+<EmojiPicker onSelect={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, title: (v.title || "") + e } : v))} />
                           </div>
                         </div>
                         <div className="grid gap-2">
                           <Label htmlFor={`desc-${video.id}`}>Description</Label>
-                          <Textarea
-                            id={`desc-${video.id}`}
-                            value={video.description ?? ""}
-                            onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, description: e.target.value } : v))}
-                            placeholder="Add a short description"
-                          />
+<WithEmojiAutocomplete
+  renderTarget={(ref) => (
+    <Textarea
+      ref={ref as any}
+      id={`desc-${video.id}`}
+      value={video.description ?? ""}
+      onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, description: e.target.value } : v))}
+      placeholder="Add a short description"
+    />
+  )}
+/>
                         </div>
                         <div className="grid grid-cols-3 gap-3">
                           <div className="col-span-2 grid gap-2">
                             <Label htmlFor={`section-${video.id}`}>Section</Label>
                             <div className="flex items-center gap-2">
-                              <Input
-                                id={`section-${video.id}`}
-                                className="flex-1"
-                                list={`sections-datalist`}
-                                value={video.section}
-                                onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: e.target.value } : v))}
-                                placeholder="e.g. Capacity system, Worker app"
-                              />
-                              <EmojiPicker onSelect={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: (v.section || "") + e } : v))} />
+<WithEmojiAutocomplete
+  renderTarget={(ref) => (
+    <Input
+      ref={ref as any}
+      id={`section-${video.id}`}
+      className="flex-1"
+      list={`sections-datalist`}
+      value={video.section}
+      onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: e.target.value } : v))}
+      placeholder="e.g. Capacity system, Worker app"
+    />
+  )}
+/>
+<EmojiPicker onSelect={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: (v.section || "") + e } : v))} />
                             </div>
                             <datalist id="sections-datalist">
                               {sections.map((s) => (
