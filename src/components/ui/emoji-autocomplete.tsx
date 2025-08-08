@@ -27,8 +27,8 @@ export const EmojiAutocomplete: React.FC<EmojiAutocompleteProps> = ({
 }) => {
   if (!active) return null;
   return (
-    <div style={{ position: "fixed", zIndex: 60, ...style }} aria-live="polite" role="listbox">
-      <GlassPanel className="w-72 p-2 overflow-hidden" elevation="lg" maxHeight={256}>
+    <div style={{ position: "fixed", zIndex: 60, pointerEvents: "none", ...style }} aria-live="polite" role="listbox">
+      <GlassPanel className="w-72 p-2 overflow-hidden pointer-events-auto" elevation="lg" maxHeight={256}>
         <div className="text-xs text-muted-foreground mb-1">Emoji suggestions</div>
         <div className="max-h-64 overflow-auto pr-1">
           {matches.length === 0 ? (
