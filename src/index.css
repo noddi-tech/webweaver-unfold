@@ -144,4 +144,16 @@ All colors MUST be HSL.
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* Gradient background utility tokens used for wordmarks and chips */
+  .bg-gradient-primary {
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--noddi-text)));
+  }
+  .bg-gradient-background {
+    background-image: linear-gradient(135deg, hsl(var(--noddi-gradient-start)), hsl(var(--noddi-gradient-end)));
+  }
+  .bg-gradient-hero {
+    background-image: radial-gradient(80% 60% at 50% 0%, hsl(var(--primary) / 0.25), transparent 70%),
+                      linear-gradient(135deg, hsl(var(--noddi-gradient-start)), hsl(var(--noddi-gradient-end)));
+  }
 }
