@@ -23,6 +23,7 @@ type DbVideo = {
   file_name: string;
   file_url: string;
   thumbnail_shape?: string | null;
+  thumbnail_url?: string | null;
 };
 
 type DbSection = {
@@ -184,6 +185,52 @@ const VideoManager = () => {
     } catch (error) {
       console.error(error);
       toast({ title: "Delete failed", description: "Could not delete the video.", variant: "destructive" });
+    }
+  };
+
+  const handleThumbnailUpload = async (videoId: string, file: File) => {
+    try {
+      setSavingId(videoId);
+      const ext = file.name.split('.').pop();
+      const uniqueName = `thumb-${videoId}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('video-thumbnails')
+        .upload(uniqueName, file);
+      if (upErr) throw upErr;
+      const { data: publicUrlData } = supabase.storage
+        .from('video-thumbnails')
+        .getPublicUrl(uniqueName);
+      const url = publicUrlData.publicUrl;
+      const { error: dbErr } = await supabase
+        .from('videos')
+        .update({ thumbnail_url: url })
+        .eq('id', videoId);
+      if (dbErr) throw dbErr;
+      setDbVideos(prev => prev.map(v => v.id === videoId ? { ...v, thumbnail_url: url } : v));
+      toast({ title: 'Thumbnail updated' });
+    } catch (err: any) {
+      console.error(err);
+      toast({ title: 'Thumbnail upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const removeThumbnail = async (videoId: string) => {
+    try {
+      setSavingId(videoId);
+      const { error } = await supabase
+        .from('videos')
+        .update({ thumbnail_url: null })
+        .eq('id', videoId);
+      if (error) throw error;
+      setDbVideos(prev => prev.map(v => v.id === videoId ? { ...v, thumbnail_url: null } : v));
+      toast({ title: 'Thumbnail removed' });
+    } catch (err: any) {
+      console.error(err);
+      toast({ title: 'Failed to remove thumbnail', description: err.message, variant: 'destructive' });
+    } finally {
+      setSavingId(null);
     }
   };
 
@@ -369,13 +416,53 @@ const VideoManager = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {items.map((video) => (
                     <div key={video.id} className="relative border border-border rounded-lg overflow-hidden">
-                      <video src={video.file_url} controls className="w-full h-40 object-cover" />
+                      <video src={video.file_url} poster={video.thumbnail_url ?? undefined} controls className="w-full h-40 object-cover" />
                       <div className="absolute top-2 right-2 flex gap-2">
                         <Button size="icon" variant="destructive" onClick={() => deleteVideo(video.file_name, video.id)}>
                           <Trash2 size={16} />
                         </Button>
                       </div>
                       <div className="p-3 space-y-3">
+                        {/* Thumbnail controls */}
+                        <div className="grid gap-2">
+                          <Label>Thumbnail</Label>
+                          <div className="flex items-center gap-3">
+                            {video.thumbnail_url ? (
+                              <img
+                                src={video.thumbnail_url}
+                                alt={`${video.title} thumbnail`}
+                                className="h-14 w-24 rounded-md object-cover border border-border"
+                              />
+                            ) : (
+                              <div className="h-14 w-24 rounded-md border border-dashed border-border flex items-center justify-center text-xs text-muted-foreground">
+                                No thumbnail
+                              </div>
+                            )}
+                            <input
+                              id={`thumb-${video.id}`}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleThumbnailUpload(video.id, file);
+                              }}
+                            />
+                            <div className="flex gap-2">
+                              <label htmlFor={`thumb-${video.id}`}>
+                                <Button size="sm" type="button" variant="outline">
+                                  <Upload className="mr-2 h-4 w-4" /> Upload
+                                </Button>
+                              </label>
+                              {video.thumbnail_url && (
+                                <Button size="sm" type="button" variant="ghost" onClick={() => removeThumbnail(video.id)}>
+                                  Remove
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        {/* Heading */}
                         <div className="grid gap-2">
                           <Label htmlFor={`title-${video.id}`}>Heading</Label>
                           <div className="flex items-center gap-2">
