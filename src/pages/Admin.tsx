@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Card } from "@/components/ui/card";
 import VideoManager from "@/components/design-system/VideoManager";
+import FeaturesManager from "@/components/design-system/FeaturesManager";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { EditableColorSystem } from "@/components/design-system/EditableColorSystem";
@@ -70,11 +71,15 @@ const Admin = () => {
           {/* CMS Section with nested tabs */}
           <TabsContent value="cms" className="space-y-8">
             <Tabs defaultValue="videos" className="w-full">
-              <TabsList className="grid w-full grid-cols-1 mb-8">
+              <TabsList className="grid w-full grid-cols-2 mb-8">
                 <TabsTrigger value="videos">Videos CMS</TabsTrigger>
+                <TabsTrigger value="features">Features CMS</TabsTrigger>
               </TabsList>
               <TabsContent value="videos" className="space-y-8">
                 <VideoManager />
+              </TabsContent>
+              <TabsContent value="features" className="space-y-8">
+                <FeaturesManager />
               </TabsContent>
             </Tabs>
           </TabsContent>
