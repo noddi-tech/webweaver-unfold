@@ -6,12 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Trash2, Video, Save, RefreshCcw, Plus } from "lucide-react";
+import { Upload, Trash2, Video, Save, RefreshCcw, Plus, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import EmojiPicker from "@/components/ui/emoji-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 // DB types (kept simple to avoid coupling with generated types)
 type DbVideo = {
@@ -39,12 +40,13 @@ const VideoManager = () => {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [sections, setSections] = useState<DbSection[]>([]);
   const [newSection, setNewSection] = useState("");
-  const { toast } = useToast();
+const { toast } = useToast();
+const [pendingDelete, setPendingDelete] = useState<DbSection | null>(null);
 
-  useEffect(() => {
-    fetchDbVideos();
-    fetchSections();
-  }, []);
+useEffect(() => {
+  fetchDbVideos();
+  fetchSections();
+}, []);
 
 
   const groupedBySection = useMemo(() => {
@@ -58,11 +60,12 @@ const VideoManager = () => {
     return groups;
   }, [dbVideos]);
 
-  const sectionOptions = useMemo(() => {
-    const names = sections.map((s) => s.name);
-    if (!names.includes("General")) names.unshift("General");
-    return names;
-  }, [sections]);
+const sectionOptions = useMemo(() => {
+  const names = new Set<string>(sections.map((s) => s.name));
+  dbVideos.forEach((v) => names.add(v.section || "General"));
+  if (!names.has("General")) names.add("General");
+  return Array.from(names);
+}, [sections, dbVideos]);
 
   const fetchDbVideos = async () => {
     const { data, error } = await supabase
@@ -104,9 +107,25 @@ const VideoManager = () => {
     setNewSection("");
     await fetchSections();
     toast({ title: "Section added", description: `${name} created.` });
-  };
+};
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+const deleteSection = (section: DbSection) => {
+  setPendingDelete(section);
+};
+
+const confirmDeleteSection = async () => {
+  if (!pendingDelete) return;
+  const { error } = await supabase.from("video_sections").delete().eq("id", pendingDelete.id);
+  if (error) {
+    toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+  } else {
+    toast({ title: "Section deleted", description: `${pendingDelete.name} removed.` });
+    await fetchSections();
+  }
+  setPendingDelete(null);
+};
+
+const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     const videoFiles = files.filter(file => file.type.startsWith("video/"));
 
@@ -360,10 +379,18 @@ const VideoManager = () => {
             <div>
               <p className="text-sm text-muted-foreground mb-2">Current sections</p>
               <div className="flex flex-wrap gap-2">
-                {sections.map((s) => (
-                  <span key={s.id} className="px-2 py-1 rounded-md border border-border text-sm text-foreground">
-                    {s.name}
-                  </span>
+{sections.map((s) => (
+                  <div key={s.id} className="relative inline-block px-2 py-1 pr-5 rounded-md border border-border text-sm text-foreground">
+                    <span>{s.name}</span>
+                    <button
+                      type="button"
+                      aria-label={`Delete section ${s.name}`}
+                      onClick={() => setPendingDelete(s)}
+                      className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-background border border-border flex items-center justify-center hover:bg-destructive/10"
+                    >
+                      <X className="h-3 w-3 text-muted-foreground" />
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -405,8 +432,19 @@ const VideoManager = () => {
           <div className="space-y-8">
             {Object.entries(groupedBySection).map(([section, items]) => (
               <div key={section}>
-                <div className="flex items-center justify-between">
+<div className="flex items-center justify-between">
                   <h4 className="text-lg font-semibold text-foreground">{section}</h4>
+                  {sections.find((s) => s.name === section) ? (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={() => setPendingDelete(sections.find((s) => s.name === section)!)}
+                      title="Delete section"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  ) : null}
                 </div>
                 <Separator className="my-3" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -532,7 +570,22 @@ const VideoManager = () => {
             <p className="text-muted-foreground">No videos uploaded yet</p>
           </div>
         )}
-      </Card>
+</Card>
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the section "{pendingDelete?.name}". Videos won’t be deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteSection}>Yes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
