@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import EmojiPicker from "@/components/ui/emoji-picker";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // DB types (kept simple to avoid coupling with generated types)
 type DbVideo = {
@@ -400,22 +401,25 @@ const VideoManager = () => {
                         <div className="grid grid-cols-3 gap-3">
                           <div className="col-span-2 grid gap-2">
                             <Label htmlFor={`section-${video.id}`}>Section</Label>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                id={`section-${video.id}`}
-                                className="flex-1"
-                                list={`sections-datalist`}
-                                value={video.section}
-                                onChange={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: e.target.value } : v))}
-                                placeholder="e.g. Capacity system, Worker app"
-                              />
-                              <EmojiPicker onSelect={(e) => setDbVideos(prev => prev.map(v => v.id === video.id ? { ...v, section: (v.section || "") + e } : v))} />
-                            </div>
-                            <datalist id="sections-datalist">
-                              {sections.map((s) => (
-                                <option key={s.id} value={s.name} />
-                              ))}
-                            </datalist>
+                            <Select
+                              value={video.section}
+                              onValueChange={(val) =>
+                                setDbVideos((prev) =>
+                                  prev.map((v) => (v.id === video.id ? { ...v, section: val } : v))
+                                )
+                              }
+                            >
+                              <SelectTrigger className="flex-1" id={`section-${video.id}`}>
+                                <SelectValue placeholder="Select section" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {sectionOptions.map((name) => (
+                                  <SelectItem key={name} value={name}>
+                                    {name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div className="grid gap-2">
                             <Label htmlFor={`order-${video.id}`}>Order</Label>
