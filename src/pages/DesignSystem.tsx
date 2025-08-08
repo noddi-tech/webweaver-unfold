@@ -7,6 +7,9 @@ import { EditableComponentLibrary } from "@/components/design-system/EditableCom
 import { EditableSpacingSystem } from "@/components/design-system/EditableSpacingSystem";
 import { IconLibrary } from "@/components/design-system/IconLibrary";
 import VideoManager from "@/components/design-system/VideoManager";
+import LogoManager from "@/components/design-system/LogoManager";
+import USPCms from "@/components/design-system/USPCms";
+import PatternsShowcase from "@/components/design-system/PatternsShowcase";
 
 const DesignSystem = () => {
   return (
@@ -25,12 +28,15 @@ const DesignSystem = () => {
         </div>
 
         <Tabs defaultValue="colors" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-12">
+          <TabsList className="grid w-full grid-cols-9 mb-12">
             <TabsTrigger value="colors">Colors & Tokens</TabsTrigger>
             <TabsTrigger value="typography">Typography</TabsTrigger>
             <TabsTrigger value="spacing">Spacing</TabsTrigger>
             <TabsTrigger value="components">Components</TabsTrigger>
             <TabsTrigger value="icons">Icons</TabsTrigger>
+            <TabsTrigger value="logo">Logo</TabsTrigger>
+            <TabsTrigger value="usps">USPs</TabsTrigger>
+            <TabsTrigger value="patterns">Patterns</TabsTrigger>
             <TabsTrigger value="videos">Demo Videos</TabsTrigger>
           </TabsList>
 
@@ -52,6 +58,18 @@ const DesignSystem = () => {
 
           <TabsContent value="icons" className="space-y-8">
             <IconLibrary />
+          </TabsContent>
+
+          <TabsContent value="logo" className="space-y-8">
+            <LogoManager />
+          </TabsContent>
+
+          <TabsContent value="usps" className="space-y-8">
+            <USPCms />
+          </TabsContent>
+
+          <TabsContent value="patterns" className="space-y-8">
+            <PatternsShowcase />
           </TabsContent>
 
           <TabsContent value="videos" className="space-y-8">
