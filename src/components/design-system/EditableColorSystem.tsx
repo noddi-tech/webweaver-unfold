@@ -70,7 +70,11 @@ export const EditableColorSystem = () => {
   useEffect(() => {
     const saved = localStorage.getItem('noddi-color-system');
     if (saved) {
-      setColors(JSON.parse(saved));
+      const parsed: ColorToken[] = JSON.parse(saved);
+      setColors(parsed);
+      // Apply saved variables on load so the whole app updates immediately
+      const root = document.documentElement;
+      parsed.forEach((c) => root.style.setProperty(c.cssVar, c.value));
     }
   }, []);
 

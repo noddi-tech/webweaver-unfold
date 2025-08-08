@@ -30,7 +30,11 @@ export const EditableDesignTokens = () => {
   useEffect(() => {
     const saved = localStorage.getItem('noddi-design-tokens');
     if (saved) {
-      setTokens(JSON.parse(saved));
+      const parsed: DesignToken[] = JSON.parse(saved);
+      setTokens(parsed);
+      // Apply saved tokens on load so styles reflect immediately across the app
+      const root = document.documentElement;
+      parsed.forEach(t => root.style.setProperty(t.name, t.value));
     }
   }, []);
 
