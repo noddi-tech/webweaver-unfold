@@ -12,7 +12,8 @@ import { EditableTypographySystem } from "@/components/design-system/EditableTyp
 import { EditableComponentLibrary } from "@/components/design-system/EditableComponentLibrary";
 import { EditableSpacingSystem } from "@/components/design-system/EditableSpacingSystem";
 import { IconLibrary } from "@/components/design-system/IconLibrary";
-
+import USPCms from "@/components/design-system/USPCms";
+import LogoManager from "@/components/design-system/LogoManager";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -71,9 +72,10 @@ const Admin = () => {
           {/* CMS Section with nested tabs */}
           <TabsContent value="cms" className="space-y-8">
             <Tabs defaultValue="videos" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
                 <TabsTrigger value="videos">Videos CMS</TabsTrigger>
                 <TabsTrigger value="features">Features CMS</TabsTrigger>
+                <TabsTrigger value="usps">USPs CMS</TabsTrigger>
               </TabsList>
               <TabsContent value="videos" className="space-y-8">
                 <VideoManager />
@@ -81,18 +83,22 @@ const Admin = () => {
               <TabsContent value="features" className="space-y-8">
                 <FeaturesManager />
               </TabsContent>
+              <TabsContent value="usps" className="space-y-8">
+                <USPCms />
+              </TabsContent>
             </Tabs>
           </TabsContent>
 
           {/* Design System Section with nested tabs */}
           <TabsContent value="design" className="space-y-8">
             <Tabs defaultValue="colors" className="w-full">
-              <TabsList className="grid w-full grid-cols-5 mb-8">
+              <TabsList className="grid w-full grid-cols-6 mb-8">
                 <TabsTrigger value="colors">Colors & Tokens</TabsTrigger>
                 <TabsTrigger value="typography">Typography</TabsTrigger>
                 <TabsTrigger value="spacing">Spacing</TabsTrigger>
                 <TabsTrigger value="components">Components</TabsTrigger>
                 <TabsTrigger value="icons">Icons</TabsTrigger>
+                <TabsTrigger value="logo">Logo</TabsTrigger>
               </TabsList>
 
               <TabsContent value="colors" className="space-y-8">
@@ -113,6 +119,10 @@ const Admin = () => {
 
               <TabsContent value="icons" className="space-y-8">
                 <IconLibrary />
+              </TabsContent>
+
+              <TabsContent value="logo" className="space-y-8">
+                <LogoManager />
               </TabsContent>
             </Tabs>
           </TabsContent>
