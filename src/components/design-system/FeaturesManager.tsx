@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import IconPicker from "./IconPicker";
 
 interface FeatureRow {
   id: string;
@@ -279,10 +280,10 @@ const FeaturesManager = () => {
             value={newFeature.title}
             onChange={(e) => setNewFeature((s) => ({ ...s, title: e.target.value }))}
           />
-          <Input
-            placeholder="Icon name (e.g., Truck, Calendar, BarChart3)"
+<IconPicker
             value={newFeature.icon_name}
-            onChange={(e) => setNewFeature((s) => ({ ...s, icon_name: e.target.value }))}
+            onChange={(v) => setNewFeature((s) => ({ ...s, icon_name: v }))}
+            placeholder="Select an icon"
           />
           <Input
             type="number"
