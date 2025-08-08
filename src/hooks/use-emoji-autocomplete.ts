@@ -117,14 +117,21 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
     const el = targetRef.current;
     if (!el) return;
 
+    const composing = { current: false } as { current: boolean };
+
+    const onCompositionStart = () => {
+      composing.current = true;
+    };
+    const onCompositionEnd = () => {
+      composing.current = false;
+    };
+
     const onInput = () => updateQueryFromCaret();
     const onKeyUp = () => updateQueryFromCaret();
 
     const onKeyDown = (e: KeyboardEvent) => {
       // Only intercept keys when the menu is open and the user isn't composing text
-      if (!active) return;
-      const anyEvent = e as unknown as { isComposing?: boolean };
-      if (anyEvent.isComposing) return;
+      if (!active || composing.current) return;
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
@@ -148,12 +155,17 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
       closeTimer.current = window.setTimeout(() => reset(), 150);
     };
 
+    el.addEventListener("compositionstart", onCompositionStart);
+    el.addEventListener("compositionend", onCompositionEnd);
     el.addEventListener("input", onInput);
     el.addEventListener("keyup", onKeyUp);
-    el.addEventListener("keydown", onKeyDown);
+    // Attach keydown handler only while menu is active to be extra safe
+    if (active) el.addEventListener("keydown", onKeyDown);
     el.addEventListener("blur", onBlur);
 
     return () => {
+      el.removeEventListener("compositionstart", onCompositionStart);
+      el.removeEventListener("compositionend", onCompositionEnd);
       el.removeEventListener("input", onInput);
       el.removeEventListener("keyup", onKeyUp);
       el.removeEventListener("keydown", onKeyDown);
