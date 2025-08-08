@@ -57,7 +57,7 @@ function getSuggestions(query: string, limit = 50): EmojiSuggestion[] {
   return scored.slice(0, limit).map((r) => r.s);
 }
 
-const TRIGGER_RE = /(^|\s):([a-z0-9_+\-]*)$/i;
+const TRIGGER_RE = /(^|\s):([a-z0-9_+\-]+)$/i;
 
 export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
   const [active, setActive] = useState(false);
@@ -129,7 +129,7 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
     const onInput = () => updateQueryFromCaret();
     const onKeyUp = () => updateQueryFromCaret();
 
-    const onKeyDownWindow = (e: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       // Only intercept keys when the menu is open, the target has focus, and the user isn't composing text
       if (!active || composing.current || document.activeElement !== el) return;
 
@@ -159,8 +159,8 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
     el.addEventListener("compositionend", onCompositionEnd);
     el.addEventListener("input", onInput);
     el.addEventListener("keyup", onKeyUp);
-    // Attach keydown handler on window only while menu is active to avoid interfering with typing
-    if (active) window.addEventListener("keydown", onKeyDownWindow);
+    // Attach keydown handler on the element only while menu is active to avoid interfering with typing
+    if (active) el.addEventListener("keydown", onKeyDown);
     el.addEventListener("blur", onBlur);
 
     return () => {
@@ -168,7 +168,7 @@ export function useEmojiAutocomplete(targetRef: React.RefObject<TargetEl>) {
       el.removeEventListener("compositionend", onCompositionEnd);
       el.removeEventListener("input", onInput);
       el.removeEventListener("keyup", onKeyUp);
-      window.removeEventListener("keydown", onKeyDownWindow);
+      el.removeEventListener("keydown", onKeyDown);
       el.removeEventListener("blur", onBlur);
       if (closeTimer.current) window.clearTimeout(closeTimer.current);
     };
