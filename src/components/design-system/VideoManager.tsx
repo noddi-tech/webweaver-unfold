@@ -328,16 +328,19 @@ const VideoManager = () => {
             <div className="grid gap-2">
               <Label htmlFor="new-section">Add new section</Label>
               <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <Input
-                  className="flex-1"
-                  id="new-section"
-                  value={newSection}
-                  onChange={(e) => setNewSection(e.target.value)}
-                  placeholder="e.g. Capacity system, Worker app"
-                />
-                <EmojiPicker onSelect={(e) => setNewSection((prev) => prev + e)} />
-              </div>
+<WithEmojiAutocomplete
+  renderTarget={(ref) => (
+    <Input
+      ref={ref as any}
+      className="flex-1"
+      id="new-section"
+      value={newSection}
+      onChange={(e) => setNewSection(e.target.value)}
+      placeholder="e.g. Capacity system, Worker app"
+    />
+  )}
+/>
+<EmojiPicker onSelect={(e) => setNewSection((prev) => prev + e)} />
               </div>
             </div>
             <Button onClick={addSection} disabled={!newSection.trim()}>
