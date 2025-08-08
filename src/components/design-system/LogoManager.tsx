@@ -86,6 +86,8 @@ const LogoManager: React.FC = () => {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Saved", description: "Brand settings updated." });
+      // Broadcast update so the Header updates instantly
+      window.dispatchEvent(new CustomEvent('brand_settings_updated', { detail: payload }));
     }
   };
 

@@ -41,6 +41,38 @@ const Header = () => {
     return () => { mounted = false; };
   }, []);
 
+  // Listen for brand settings updates via Supabase realtime and local events
+  useEffect(() => {
+    // Custom event from Admin save
+    const onLocalUpdate = (e: any) => {
+      const d = e?.detail || {};
+      setBrand({
+        logo_text: d.logo_text || "",
+        gradient_token: d.gradient_token || "gradient-primary",
+        text_token: d.text_token || "foreground",
+      });
+    };
+    window.addEventListener('brand_settings_updated', onLocalUpdate);
+
+    // Supabase realtime fallback (works if replication is enabled)
+    const channel = supabase
+      .channel('brand_settings_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'brand_settings' }, (payload) => {
+        const d: any = (payload as any).new || {};
+        setBrand({
+          logo_text: d.logo_text || "",
+          gradient_token: d.gradient_token || "gradient-primary",
+          text_token: d.text_token || "foreground",
+        });
+      })
+      .subscribe();
+
+    return () => {
+      window.removeEventListener('brand_settings_updated', onLocalUpdate);
+      try { supabase.removeChannel(channel); } catch {}
+    };
+  }, []);
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut({ scope: "global" });
