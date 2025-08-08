@@ -310,15 +310,11 @@ const VideoManager = () => {
         <div className="text-center">
           <h3 className="text-xl font-semibold mb-4 text-foreground">Upload New Videos</h3>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <label htmlFor="video-upload" className="cursor-pointer">
-              <Button asChild>
-                <span>
-                  <Upload className="mr-2" size={20} />
-                  Select Videos
-                </span>
-              </Button>
-            </label>
             <input id="video-upload" type="file" accept="video/*" multiple onChange={handleFileSelect} className="hidden" />
+            <Button onClick={() => document.getElementById('video-upload')?.click()}>
+              <Upload className="mr-2" size={20} />
+              Select Videos
+            </Button>
             {localUploads.length > 0 && (
               <Button onClick={uploadVideos} disabled={uploading} variant="outline">
                 {uploading ? "Uploading..." : "Upload to Gallery"}
@@ -448,18 +444,19 @@ const VideoManager = () => {
                                 if (file) handleThumbnailUpload(video.id, file);
                               }}
                             />
-                            <div className="flex gap-2">
-                              <label htmlFor={`thumb-${video.id}`}>
-                                <Button size="sm" type="button" variant="outline">
-                                  <Upload className="mr-2 h-4 w-4" /> Upload
-                                </Button>
-                              </label>
+                              <Button
+                                size="sm"
+                                type="button"
+                                variant="outline"
+                                onClick={() => document.getElementById(`thumb-${video.id}`)?.click()}
+                              >
+                                <Upload className="mr-2 h-4 w-4" /> Upload
+                              </Button>
                               {video.thumbnail_url && (
                                 <Button size="sm" type="button" variant="ghost" onClick={() => removeThumbnail(video.id)}>
                                   Remove
                                 </Button>
                               )}
-                            </div>
                           </div>
                         </div>
                         {/* Heading */}
