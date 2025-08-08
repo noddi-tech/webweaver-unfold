@@ -114,11 +114,11 @@ All colors MUST be HSL.
     @apply text-foreground;
     background: linear-gradient(135deg, hsl(var(--noddi-gradient-start)), hsl(var(--noddi-gradient-end)));
     min-height: 100vh;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
     font-weight: 700;
   }
 }
