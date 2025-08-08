@@ -1,14 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import GlobalUSPBar from "@/components/GlobalUSPBar";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground" });
-
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+  const HeadingTag = (isHome ? "h1" : "h2") as keyof JSX.IntrinsicElements;
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setAuthenticated(!!session?.user);
@@ -52,11 +54,13 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 glass">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
-            <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent`}> 
-              {brand.logo_text || "Noddi Tech"}
-            </span>
-          </Link>
+          <HeadingTag className="m-0">
+            <Link to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
+              <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent`}>
+                {brand.logo_text || "Noddi Tech"}
+              </span>
+            </Link>
+          </HeadingTag>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
