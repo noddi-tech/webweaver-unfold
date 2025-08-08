@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_settings: {
+        Row: {
+          created_at: string
+          gradient_token: string
+          id: string
+          logo_text: string | null
+          logo_variant: string
+          text_token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          gradient_token?: string
+          id?: string
+          logo_text?: string | null
+          logo_variant?: string
+          text_token?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          gradient_token?: string
+          id?: string
+          logo_text?: string | null
+          logo_variant?: string
+          text_token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       features: {
         Row: {
           created_at: string
@@ -82,6 +112,48 @@ export type Database = {
           section_subtitle?: string | null
           section_title?: string
           title_token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      usps: {
+        Row: {
+          active: boolean
+          bg_token: string
+          created_at: string
+          href: string | null
+          icon_name: string
+          id: string
+          location: string
+          sort_order: number | null
+          text_token: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          bg_token?: string
+          created_at?: string
+          href?: string | null
+          icon_name?: string
+          id?: string
+          location?: string
+          sort_order?: number | null
+          text_token?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          bg_token?: string
+          created_at?: string
+          href?: string | null
+          icon_name?: string
+          id?: string
+          location?: string
+          sort_order?: number | null
+          text_token?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []
