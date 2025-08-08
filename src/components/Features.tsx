@@ -35,6 +35,9 @@ interface FeatureSettings {
 const bgClass: Record<string, string> = {
   background: "bg-background",
   card: "bg-card",
+  "gradient-primary": "bg-gradient-primary",
+  "gradient-background": "bg-gradient-background",
+  "gradient-hero": "bg-gradient-hero",
 };
 const textClass: Record<string, string> = {
   foreground: "text-foreground",
@@ -42,6 +45,9 @@ const textClass: Record<string, string> = {
   primary: "text-primary",
   secondary: "text-secondary",
   accent: "text-accent",
+  "gradient-primary": "bg-gradient-primary bg-clip-text text-transparent",
+  "gradient-background": "bg-gradient-background bg-clip-text text-transparent",
+  "gradient-hero": "bg-gradient-hero bg-clip-text text-transparent",
 };
 const borderClass: Record<string, string> = {
   border: "border-border",

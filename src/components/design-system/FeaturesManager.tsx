@@ -40,8 +40,18 @@ const emptyNew: Omit<FeatureRow, "id"> = {
 };
 
 const tokenOptions = {
-  bg: ["background", "card"],
-  text: ["foreground", "muted-foreground", "primary", "secondary", "accent"],
+  bg: ["background", "card", "gradient-primary", "gradient-background", "gradient-hero"],
+  textSolid: ["foreground", "muted-foreground", "primary", "secondary", "accent"],
+  textWithGradients: [
+    "foreground",
+    "muted-foreground",
+    "primary",
+    "secondary",
+    "accent",
+    "gradient-primary",
+    "gradient-background",
+    "gradient-hero",
+  ],
   border: ["border"],
 };
 
@@ -207,7 +217,7 @@ const FeaturesManager = () => {
             >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {tokenOptions.text.map((t) => (
+                {tokenOptions.textSolid.map((t) => (
                   <SelectItem key={t} value={t}>{t}</SelectItem>
                 ))}
               </SelectContent>
@@ -221,7 +231,7 @@ const FeaturesManager = () => {
             >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {tokenOptions.text.map((t) => (
+                {tokenOptions.textWithGradients.map((t) => (
                   <SelectItem key={t} value={t}>{t}</SelectItem>
                 ))}
               </SelectContent>
@@ -235,7 +245,7 @@ const FeaturesManager = () => {
             >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {tokenOptions.text.map((t) => (
+                {tokenOptions.textWithGradients.map((t) => (
                   <SelectItem key={t} value={t}>{t}</SelectItem>
                 ))}
               </SelectContent>
