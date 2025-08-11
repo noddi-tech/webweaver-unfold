@@ -11,6 +11,7 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import Team from "./pages/Team";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/features" element={<FeaturesPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/demo" element={<Demo />} />
+          <Route path="/team" element={<Team />} />
           
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />

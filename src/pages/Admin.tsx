@@ -15,6 +15,7 @@ import { IconLibrary } from "@/components/design-system/IconLibrary";
 import USPCms from "@/components/design-system/USPCms";
 import LogoManager from "@/components/design-system/LogoManager";
 import ImageManager from "@/components/design-system/ImageManager";
+import EmployeesManager from "@/components/design-system/EmployeesManager";
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
