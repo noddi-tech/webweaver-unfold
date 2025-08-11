@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import EmojiPicker from "@/components/ui/emoji-picker";
+import { Plus, X } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface Employee {
   id: string;
@@ -51,6 +54,7 @@ const EmployeesManager = () => {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<EmpSection | null>(null);
   const [newEmp, setNewEmp] = useState<Omit<Employee, "id">>({
     name: "",
     title: "",
@@ -129,15 +133,21 @@ const EmployeesManager = () => {
     fetchSections();
   };
 
-  const deleteSection = async (id: string) => {
-    if (!confirm("Delete this section?")) return;
-    const { error } = await (supabase as any).from("employees_sections").delete().eq("id", id);
+  const deleteSection = (id: string) => {
+    const s = sections.find((x) => x.id === id) || null;
+    if (s) setPendingDelete(s);
+  };
+
+  const confirmDeleteSection = async () => {
+    if (!pendingDelete) return;
+    const { error } = await (supabase as any).from("employees_sections").delete().eq("id", pendingDelete.id);
     if (error) {
       toast({ title: "Delete failed", description: error.message, variant: "destructive" });
-      return;
+    } else {
+      toast({ title: "Section deleted", description: `${pendingDelete.name} removed.` });
+      fetchSections();
     }
-    toast({ title: "Section deleted" });
-    fetchSections();
+    setPendingDelete(null);
   };
 
   const uploadImage = async (file: File) => {
@@ -229,9 +239,10 @@ const EmployeesManager = () => {
 
   const sectionOptions = useMemo(() => {
     const names = new Set<string>(sections.map((s) => s.name));
+    employees.forEach((e) => names.add(e.section || "General"));
     if (!names.has("General")) names.add("General");
     return Array.from(names);
-  }, [sections]);
+  }, [sections, employees]);
 
   return (
     <section className="space-y-8">
@@ -304,30 +315,75 @@ const EmployeesManager = () => {
       </Card>
 
       {/* Sections Management */}
-      <Card className="p-6 bg-card border-border space-y-4">
-        <h3 className="text-xl font-semibold">Sections</h3>
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-end">
-          <div className="grid gap-2">
-            <Label>New section name</Label>
-            <Input value={newSection} onChange={(e) => setNewSection(e.target.value)} placeholder="e.g. Tech, Admin" />
+      <Card className="p-6 bg-card border-border">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-semibold text-foreground">Sections</h3>
           </div>
-          <div className="flex justify-end md:justify-start">
-            <Button onClick={addSection} disabled={!newSection.trim()}>Add</Button>
-          </div>
-        </div>
-        <Separator />
-        <div className="flex flex-wrap gap-2">
-          {sections.map((s) => (
-            <div key={s.id} className="flex items-center gap-2 rounded-md border border-border px-3 py-1">
-              <span className="text-sm">{s.name}</span>
-              <Button size="sm" variant="outline" onClick={() => deleteSection(s.id)}>Delete</Button>
+
+          {sections.length > 0 ? (
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Current sections</p>
+              <div className="flex flex-wrap gap-2">
+                {sections.map((s) => (
+                  <div key={s.id} className="relative inline-block px-2 py-1 pr-5 rounded-md border border-border text-sm text-foreground">
+                    <span>{s.name}</span>
+                    <button
+                      type="button"
+                      aria-label={`Delete section ${s.name}`}
+                      onClick={() => setPendingDelete(s)}
+                      className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-background border border-border flex items-center justify-center hover:bg-destructive/10"
+                    >
+                      <X className="h-3 w-3 text-muted-foreground" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-          {sections.length === 0 && (
-            <p className="text-sm text-muted-foreground">No sections yet. Add your first one.</p>
+          ) : (
+            <p className="text-sm text-muted-foreground">No sections yet. Add your first section below.</p>
           )}
+
+          <Separator />
+
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-end">
+            <div className="grid gap-2">
+              <Label htmlFor="new-emp-section">Add new section</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  className="w-full"
+                  id="new-emp-section"
+                  value={newSection}
+                  onChange={(e) => setNewSection(e.target.value)}
+                  placeholder="e.g. Tech, Admin"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end sm:justify-start">
+              <EmojiPicker onSelect={(e) => setNewSection((prev) => prev + e)} />
+              <Button onClick={addSection} disabled={!newSection.trim()}>
+                <Plus className="mr-2 h-4 w-4" /> Add Section
+              </Button>
+            </div>
+          </div>
         </div>
       </Card>
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete section?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the section "{pendingDelete?.name}". Employees will keep their section text but it may no longer be listed here.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteSection}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       {/* Create Employee */}
       <Card className="p-6 bg-card border-border space-y-4">
