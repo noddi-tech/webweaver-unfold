@@ -33,7 +33,7 @@ interface FeatureSettings {
 }
 
 const bgClass: Record<string, string> = {
-  background: "bg-background",
+  background: "",
   card: "bg-card",
   "gradient-primary": "bg-gradient-primary",
   "gradient-background": "bg-gradient-background",
@@ -91,7 +91,7 @@ const Features = () => {
   }, []);
 
   const usingDb = dbFeatures && dbFeatures.length > 0;
-  const bg = settings ? (bgClass[settings.background_token] || "bg-background") : "bg-background";
+  const bg = settings ? (bgClass[settings.background_token] || "") : "";
   const cardBg = settings ? (bgClass[settings.card_bg_token] || "bg-card") : "bg-card";
   const iconClr = settings ? (textClass[settings.icon_token] || "text-primary") : "text-primary";
   const titleClr = settings ? (textClass[settings.title_token] || "text-foreground") : "text-foreground";
