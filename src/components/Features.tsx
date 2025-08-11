@@ -101,8 +101,8 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
 
   return (
     <section id="features" className="py-20 px-6">
-      <div className="container mx-auto">
-        <div className={useSectionBg ? bg : ""}>
+      <div className={`container mx-auto ${useSectionBg ? bg + " rounded-2xl p-6 md:p-10" : ""}`}>
+        <div>
           {/* Section Header */}
           <div className="text-center mb-16">
           <h2 className={`text-4xl md:text-5xl font-bold mb-6 gradient-text`}>
