@@ -94,21 +94,6 @@ const Hero = () => {
           )}
 
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link to="/contact">
-              <Button size="lg" className="text-lg px-8 py-4 w-full sm:w-auto">
-                Start Free Trial
-                <ArrowRight className="ml-2" size={20} />
-              </Button>
-            </Link>
-            <Link to="/demo">
-              <Button size="lg" variant="outline" className="text-lg px-8 py-4 w-full sm:w-auto">
-                <Play className="mr-2" size={20} />
-                Watch Demo
-              </Button>
-            </Link>
-          </div>
 
           {/* Dashboard Preview */}
           <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
@@ -117,6 +102,13 @@ const Hero = () => {
               alt={heroImage?.alt || "Noddi Tech Dashboard Preview"}
               className="w-full rounded-xl shadow-lg"
             />
+          </div>
+          <div className="mt-6 text-center">
+            <Link to="/demo">
+              <Button size="lg" className="px-8 py-4">
+                Book demo here
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
