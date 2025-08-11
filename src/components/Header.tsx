@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, icons } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +7,7 @@ import GlobalUSPBar from "@/components/GlobalUSPBar";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
-  const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground", logo_image_url: null as string | null, logo_variant: "text", logo_image_height: 32 });
+  const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground", logo_image_url: null as string | null, logo_variant: "text", logo_image_height: 32, logo_icon_name: null as string | null, logo_icon_position: "top-right", logo_icon_size: "default" });
   const location = useLocation();
   const isHome = location.pathname === "/";
   const HeadingTag = (isHome ? "h1" : "h2") as keyof JSX.IntrinsicElements;
@@ -24,7 +24,7 @@ const Header = () => {
     const load = async () => {
       const { data } = await supabase
         .from("brand_settings")
-        .select("logo_text,gradient_token,text_token,logo_image_url,logo_variant,logo_image_height")
+        .select("logo_text,gradient_token,text_token,logo_image_url,logo_variant,logo_image_height,logo_icon_name,logo_icon_position,logo_icon_size")
         .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle();
@@ -37,6 +37,9 @@ const Header = () => {
           logo_image_url: data.logo_image_url || null,
           logo_variant: data.logo_variant || "text",
           logo_image_height: typeof (data as any).logo_image_height === 'number' ? (data as any).logo_image_height : 32,
+          logo_icon_name: (data as any).logo_icon_name || null,
+          logo_icon_position: (data as any).logo_icon_position || "top-right",
+          logo_icon_size: (data as any).logo_icon_size || "default",
         });
       }
     };
@@ -56,6 +59,9 @@ const Header = () => {
         logo_image_url: d.logo_image_url || null,
         logo_variant: d.logo_variant || "text",
         logo_image_height: typeof d.logo_image_height === 'number' ? d.logo_image_height : 32,
+        logo_icon_name: d.logo_icon_name || null,
+        logo_icon_position: d.logo_icon_position || "top-right",
+        logo_icon_size: d.logo_icon_size || "default",
       });
     };
     window.addEventListener('brand_settings_updated', onLocalUpdate);
@@ -72,6 +78,9 @@ const Header = () => {
           logo_image_url: d.logo_image_url || null,
           logo_variant: d.logo_variant || "text",
           logo_image_height: typeof d.logo_image_height === 'number' ? d.logo_image_height : 32,
+          logo_icon_name: d.logo_icon_name || null,
+          logo_icon_position: d.logo_icon_position || "top-right",
+          logo_icon_size: d.logo_icon_size || "default",
         });
       })
       .subscribe();
@@ -100,8 +109,18 @@ const Header = () => {
               {brand.logo_variant === 'image' && brand.logo_image_url ? (
                 <img src={brand.logo_image_url} alt={brand.logo_text || "Brand logo"} className="w-auto" style={{ height: brand.logo_image_height || 32 }} />
               ) : (
-                <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent`}>
+                <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent relative inline-block pr-6`}>
                   {brand.logo_text || "Noddi Tech"}
+                  {(() => {
+                    if (!brand.logo_icon_name) return null;
+                    const Icon = (icons as Record<string, any>)[brand.logo_icon_name];
+                    if (!Icon) return null;
+                    const sizeMap: Record<string, number> = { small: 16, default: 24, medium: 28, large: 32, xl: 40 };
+                    const posMap: Record<string, string> = { 'top-right': 'top-0 -translate-y-1/2', 'middle-right': 'top-1/2 -translate-y-1/2', 'bottom-right': 'bottom-0 translate-y-1/2' };
+                    const px = sizeMap[brand.logo_icon_size as keyof typeof sizeMap] ?? 24;
+                    const posCls = posMap[brand.logo_icon_position as keyof typeof posMap] ?? 'top-0 -translate-y-1/2';
+                    return <Icon className={`absolute right-0 translate-x-1/4 ${posCls}`} style={{ width: px, height: px }} />;
+                  })()}
                 </span>
               )}
             </Link>

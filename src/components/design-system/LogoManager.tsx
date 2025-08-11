@@ -7,6 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
+import IconPicker from "@/components/design-system/IconPicker";
+import { icons } from "lucide-react";
 
 const gradientClass: Record<string, string> = {
   "gradient-primary": "bg-gradient-primary",
@@ -33,6 +36,9 @@ interface BrandSettingsRow {
   text_token: string;
   logo_image_url: string | null;
   logo_image_height: number;
+  logo_icon_name: string | null;
+  logo_icon_position: string;
+  logo_icon_size: string;
 }
 
 const LogoManager: React.FC = () => {
@@ -40,12 +46,16 @@ const LogoManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [row, setRow] = useState<BrandSettingsRow | null>(null);
 
-  const [logoText, setLogoText] = useState("");
-  const [variant, setVariant] = useState("text");
-  const [gradientToken, setGradientToken] = useState("gradient-primary");
-  const [textToken, setTextToken] = useState("foreground");
-  const [logoImageUrl, setLogoImageUrl] = useState<string | null>(null);
-  const [logoImageHeight, setLogoImageHeight] = useState(32);
+const [logoText, setLogoText] = useState("");
+const [variant, setVariant] = useState("text");
+const [gradientToken, setGradientToken] = useState("gradient-primary");
+const [textToken, setTextToken] = useState("foreground");
+const [logoImageUrl, setLogoImageUrl] = useState<string | null>(null);
+const [logoImageHeight, setLogoImageHeight] = useState(32);
+const [showIcon, setShowIcon] = useState(false);
+const [iconName, setIconName] = useState<string>("");
+const [iconPosition, setIconPosition] = useState("top-right");
+const [iconSize, setIconSize] = useState("default");
 
   useEffect(() => {
     const load = async () => {
@@ -60,13 +70,17 @@ const LogoManager: React.FC = () => {
         toast({ title: "Failed to load", description: error.message, variant: "destructive" });
       }
       if (data) {
-        setRow(data as any);
-        setLogoText(data.logo_text ?? "");
-        setVariant(data.logo_variant ?? "text");
-        setGradientToken(data.gradient_token ?? "gradient-primary");
-        setTextToken(data.text_token ?? "foreground");
-        setLogoImageUrl(data.logo_image_url ?? null);
-        setLogoImageHeight(typeof (data as any).logo_image_height === 'number' ? (data as any).logo_image_height : 32);
+setRow(data as any);
+setLogoText(data.logo_text ?? "");
+setVariant(data.logo_variant ?? "text");
+setGradientToken(data.gradient_token ?? "gradient-primary");
+setTextToken(data.text_token ?? "foreground");
+setLogoImageUrl(data.logo_image_url ?? null);
+setLogoImageHeight(typeof (data as any).logo_image_height === 'number' ? (data as any).logo_image_height : 32);
+setShowIcon(!!(data as any).logo_icon_name);
+setIconName((data as any).logo_icon_name ?? "");
+setIconPosition((data as any).logo_icon_position ?? "top-right");
+setIconSize((data as any).logo_icon_size ?? "default");
       }
       setLoading(false);
     };
@@ -74,14 +88,17 @@ const LogoManager: React.FC = () => {
   }, [toast]);
 
   const save = async () => {
-    const payload = {
-      logo_text: logoText,
-      logo_variant: variant,
-      gradient_token: gradientToken,
-      text_token: textToken,
-      logo_image_url: logoImageUrl,
-      logo_image_height: logoImageHeight,
-    };
+const payload = {
+  logo_text: logoText,
+  logo_variant: variant,
+  gradient_token: gradientToken,
+  text_token: textToken,
+  logo_image_url: logoImageUrl,
+  logo_image_height: logoImageHeight,
+  logo_icon_name: showIcon ? iconName : null,
+  logo_icon_position: iconPosition,
+  logo_icon_size: iconSize,
+};
     let error;
     if (row?.id) {
       ({ error } = await supabase.from("brand_settings").update(payload).eq("id", row.id));
@@ -100,12 +117,16 @@ const LogoManager: React.FC = () => {
   };
 
   const resetDefaults = () => {
-    setLogoText("");
-    setVariant("text");
-    setGradientToken("gradient-primary");
-    setTextToken("foreground");
-    setLogoImageUrl(null);
-    setLogoImageHeight(32);
+setLogoText("");
+setVariant("text");
+setGradientToken("gradient-primary");
+setTextToken("foreground");
+setLogoImageUrl(null);
+setLogoImageHeight(32);
+setShowIcon(false);
+setIconName("");
+setIconPosition("top-right");
+setIconSize("default");
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,8 +157,12 @@ const LogoManager: React.FC = () => {
     }
   };
 
-  const gradientPreviewCls = useMemo(() => gradientClass[gradientToken] ?? "", [gradientToken]);
-  const textPreviewCls = useMemo(() => textClass[textToken] ?? "text-foreground", [textToken]);
+const gradientPreviewCls = useMemo(() => gradientClass[gradientToken] ?? "", [gradientToken]);
+const textPreviewCls = useMemo(() => textClass[textToken] ?? "text-foreground", [textToken]);
+const posClsMap: Record<string, string> = { 'top-right': 'top-0 -translate-y-1/2', 'middle-right': 'top-1/2 -translate-y-1/2', 'bottom-right': 'bottom-0 translate-y-1/2' };
+const iconPosCls = useMemo(() => posClsMap[iconPosition] ?? 'top-0 -translate-y-1/2', [iconPosition]);
+const iconSizeMap: Record<string, number> = { small: 16, default: 24, medium: 28, large: 32, xl: 40 };
+const iconPx = useMemo(() => iconSizeMap[iconSize] ?? 24, [iconSize]);
 
   return (
     <section>
@@ -193,6 +218,51 @@ const LogoManager: React.FC = () => {
                 </Select>
               </div>
             </div>
+
+            {variant === 'text' && (
+              <div className="space-y-3">
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label>Accent icon</Label>
+                    <p className="text-xs text-muted-foreground">Optional icon placed after the wordmark.</p>
+                  </div>
+                  <Switch checked={showIcon} onCheckedChange={setShowIcon} />
+                </div>
+                {showIcon && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Icon</Label>
+                      <IconPicker value={iconName} onChange={setIconName} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Position</Label>
+                      <Select value={iconPosition} onValueChange={setIconPosition}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="top-right">Top right</SelectItem>
+                          <SelectItem value="middle-right">Middle right</SelectItem>
+                          <SelectItem value="bottom-right">Bottom right</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Size</Label>
+                      <Select value={iconSize} onValueChange={setIconSize}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="small">Small</SelectItem>
+                          <SelectItem value="default">Default</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="large">Large</SelectItem>
+                          <SelectItem value="xl">XL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="logo-image">Logo image (SVG/PNG/JPEG)</Label>
               <Input id="logo-image" type="file" accept=".svg,.png,.jpg,.jpeg" onChange={handleFileChange} />
@@ -227,9 +297,10 @@ const LogoManager: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <div className={`text-5xl font-extrabold tracking-tight ${gradientPreviewCls} bg-clip-text text-transparent`}>
-                    {logoText || "Your Brand"}
-                  </div>
+<div className={`relative inline-block pr-6 text-5xl font-extrabold tracking-tight ${gradientPreviewCls} bg-clip-text text-transparent`}>
+  {logoText || "Your Brand"}
+  {showIcon && iconName && (() => { const IconCmp = (icons as Record<string, any>)[iconName]; return IconCmp ? <IconCmp className={`absolute right-0 translate-x-1/4 ${iconPosCls}`} style={{ width: iconPx, height: iconPx }} /> : null; })()}
+</div>
                   <Separator />
                   <div className={`text-5xl font-extrabold tracking-tight ${textPreviewCls}`}>
                     {logoText || "Your Brand"}

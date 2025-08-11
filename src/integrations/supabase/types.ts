@@ -19,6 +19,9 @@ export type Database = {
           created_at: string
           gradient_token: string
           id: string
+          logo_icon_name: string | null
+          logo_icon_position: string
+          logo_icon_size: string
           logo_image_height: number
           logo_image_url: string | null
           logo_text: string | null
@@ -30,6 +33,9 @@ export type Database = {
           created_at?: string
           gradient_token?: string
           id?: string
+          logo_icon_name?: string | null
+          logo_icon_position?: string
+          logo_icon_size?: string
           logo_image_height?: number
           logo_image_url?: string | null
           logo_text?: string | null
@@ -41,6 +47,9 @@ export type Database = {
           created_at?: string
           gradient_token?: string
           id?: string
+          logo_icon_name?: string | null
+          logo_icon_position?: string
+          logo_icon_size?: string
           logo_image_height?: number
           logo_image_url?: string | null
           logo_text?: string | null
