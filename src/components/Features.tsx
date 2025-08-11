@@ -106,7 +106,7 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
           {/* Section Header */}
           <div className="text-center mb-16">
           <h2 className={`text-4xl md:text-5xl font-bold mb-6 gradient-text`}>
-            {settings?.section_title || "Platform Benefits"}
+            {settings?.section_title || "Platform Features"}
           </h2>
           <p className={`text-xl max-w-3xl mx-auto ${descClr}`}>
             {settings?.section_subtitle || "Our comprehensive platform transforms how automotive maintenance providers operate, delivering efficiency, visibility, and growth."}
