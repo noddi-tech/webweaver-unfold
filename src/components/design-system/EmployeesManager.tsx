@@ -89,6 +89,24 @@ const EmployeesManager = () => {
       console.error(error);
       return;
     }
+    // Ensure default "General" section exists
+    const hasGeneral = (data || []).some((s: EmpSection) => s.name === "General");
+    if (!hasGeneral) {
+      const { error: insertErr } = await (supabase as any)
+        .from("employees_sections")
+        .insert({ name: "General", sort_order: 0 } as any);
+      if (insertErr) {
+        console.error(insertErr);
+      } else {
+        const { data: refetched } = await (supabase as any)
+          .from("employees_sections")
+          .select("id,name,sort_order")
+          .order("sort_order", { ascending: true })
+          .order("name", { ascending: true });
+        setSections(refetched || []);
+        return;
+      }
+    }
     setSections(data || []);
   };
 
