@@ -109,7 +109,7 @@ const Header = () => {
               {brand.logo_variant === 'image' && brand.logo_image_url ? (
                 <img src={brand.logo_image_url} alt={brand.logo_text || "Brand logo"} className="w-auto" style={{ height: brand.logo_image_height || 32 }} />
               ) : (
-                <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent relative inline-block pr-6`}>
+                <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent relative inline-block`} style={{ paddingRight: brand.logo_icon_name ? (({ small: 16, default: 24, medium: 28, large: 32, xl: 40 } as Record<string, number>)[brand.logo_icon_size || "default"] + 4) : undefined }}>
                   {brand.logo_text || "Noddi Tech"}
                   {(() => {
                     if (!brand.logo_icon_name) return null;
@@ -119,7 +119,7 @@ const Header = () => {
                     const posMap: Record<string, string> = { 'top-right': 'top-0 -translate-y-1/2', 'middle-right': 'top-1/2 -translate-y-1/2', 'bottom-right': 'bottom-0 translate-y-1/2' };
                     const px = sizeMap[brand.logo_icon_size as keyof typeof sizeMap] ?? 24;
                     const posCls = posMap[brand.logo_icon_position as keyof typeof posMap] ?? 'top-0 -translate-y-1/2';
-                    return <Icon className={`absolute right-0 translate-x-1/4 ${posCls} ${({"foreground":"text-foreground","muted-foreground":"text-muted-foreground","primary":"text-primary","secondary":"text-secondary","accent":"text-accent"} as Record<string,string>)[brand.text_token] || "text-foreground"}`} style={{ width: px, height: px }} />;
+                    return <Icon className={`absolute right-0 ${posCls} ${({"foreground":"text-foreground","muted-foreground":"text-muted-foreground","primary":"text-primary","secondary":"text-secondary","accent":"text-accent"} as Record<string,string>)[brand.text_token] || "text-foreground"}`} style={{ width: px, height: px }} />;
                   })()}
                 </span>
               )}

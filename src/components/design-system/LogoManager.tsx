@@ -297,9 +297,9 @@ const iconPx = useMemo(() => iconSizeMap[iconSize] ?? 24, [iconSize]);
                 </div>
               ) : (
                 <>
-<div className={`relative inline-block pr-6 text-5xl font-extrabold tracking-tight ${gradientPreviewCls} bg-clip-text text-transparent`}>
+<div className={`relative inline-block text-5xl font-extrabold tracking-tight ${gradientPreviewCls} bg-clip-text text-transparent`} style={{ paddingRight: showIcon ? iconPx + 4 : undefined }}>
   {logoText || "Your Brand"}
-  {showIcon && iconName && (() => { const IconCmp = (icons as Record<string, any>)[iconName]; return IconCmp ? <IconCmp className={`absolute right-0 translate-x-1/4 ${iconPosCls} ${textPreviewCls}`} style={{ width: iconPx, height: iconPx }} /> : null; })()}
+  {showIcon && iconName && (() => { const IconCmp = (icons as Record<string, any>)[iconName]; return IconCmp ? <IconCmp className={`absolute right-0 ${iconPosCls} ${textPreviewCls}`} style={{ width: iconPx, height: iconPx }} /> : null; })()}
 </div>
                   <Separator />
                   <div className={`text-5xl font-extrabold tracking-tight ${textPreviewCls}`}>
