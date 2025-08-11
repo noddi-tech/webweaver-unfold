@@ -104,7 +104,7 @@ const Hero = () => {
             />
           </div>
           <div className="mt-6 text-center">
-            <Link to="/demo">
+            <Link to="/contact">
               <Button size="lg" className="px-8 py-4">
                 Book demo here
               </Button>
