@@ -100,10 +100,11 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
   const borderClr = settings ? (borderClass[settings.border_token] || "border-border") : "border-border";
 
   return (
-    <section id="features" className={`py-20 px-6 ${bg}`}>
+    <section id="features" className="py-20 px-6">
       <div className="container mx-auto">
-        {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className={useSectionBg ? bg : ""}>
+          {/* Section Header */}
+          <div className="text-center mb-16">
           <h2 className={`text-4xl md:text-5xl font-bold mb-6 gradient-text`}>
             {settings?.section_title || "Platform Benefits"}
           </h2>
@@ -156,6 +157,7 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
                   <p className={`${descClr}`}>{feature.description}</p>
                 </div>
               ))}
+        </div>
         </div>
       </div>
     </section>
