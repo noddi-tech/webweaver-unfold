@@ -108,7 +108,7 @@ const [newEmp, setNewEmp] = useState<Omit<Employee, "id">>({
   };
 
   const fetchSections = async () => {
-    const { data, error } = await (supabase as any)
+const { data, error } = await (supabase as any)
       .from("employees_sections")
       .select("id,name,sort_order")
       .order("sort_order", { ascending: true })
@@ -117,25 +117,14 @@ const [newEmp, setNewEmp] = useState<Omit<Employee, "id">>({
       console.error(error);
       return;
     }
-    // Ensure default "General" section exists
-    const hasGeneral = (data || []).some((s: EmpSection) => s.name === "General");
-    if (!hasGeneral) {
-      const { error: insertErr } = await (supabase as any)
-        .from("employees_sections")
-        .insert({ name: "General", sort_order: 0 } as any);
-      if (insertErr) {
-        console.error(insertErr);
-      } else {
-        const { data: refetched } = await (supabase as any)
-          .from("employees_sections")
-          .select("id,name,sort_order")
-          .order("sort_order", { ascending: true })
-          .order("name", { ascending: true });
-        setSections(refetched || []);
-        return;
-      }
-    }
     setSections(data || []);
+    const names = (data || []).map((s: EmpSection) => s.name);
+    setNewEmp((prev) => {
+      if (!prev.section || !names.includes(prev.section)) {
+        return { ...prev, section: names[0] || prev.section } as any;
+      }
+      return prev;
+    });
   };
 
   const fetchSettings = async () => {
@@ -181,10 +170,6 @@ const [newEmp, setNewEmp] = useState<Omit<Employee, "id">>({
 
 const deleteSection = (id: string) => {
   const s = sections.find((x) => x.id === id) || null;
-  if (s?.name === "General") {
-    toast({ title: "Cannot delete section", description: '"General" is required and cannot be removed.' });
-    return;
-  }
   if (s) setPendingDelete(s);
 };
 
@@ -287,12 +272,11 @@ fetchEmployees();
     }
   };
 
-  const sectionOptions = useMemo(() => {
-    const names = new Set<string>(sections.map((s) => s.name));
-    employees.forEach((e) => names.add(e.section || "General"));
-    if (!names.has("General")) names.add("General");
-    return Array.from(names);
-  }, [sections, employees]);
+const sectionOptions = useMemo(() => {
+  const names = new Set<string>(sections.map((s) => s.name));
+  employees.forEach((e) => names.add(e.section || "General"));
+  return Array.from(names);
+}, [sections, employees]);
 
   return (
     <section className="space-y-8">
@@ -378,16 +362,14 @@ fetchEmployees();
                 {sections.map((s) => (
 <div key={s.id} className="relative inline-block px-2 py-1 pr-5 rounded-md border border-border text-sm text-foreground">
   <span>{s.name}</span>
-  {s.name !== "General" && (
-    <button
-      type="button"
-      aria-label={`Delete section ${s.name}`}
-      onClick={() => deleteSection(s.id)}
-      className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-background border border-border flex items-center justify-center hover:bg-destructive/10"
-    >
-      <X className="h-3 w-3 text-muted-foreground" />
-    </button>
-  )}
+  <button
+    type="button"
+    aria-label={`Delete section ${s.name}`}
+    onClick={() => deleteSection(s.id)}
+    className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-background border border-border flex items-center justify-center hover:bg-destructive/10"
+  >
+    <X className="h-3 w-3 text-muted-foreground" />
+  </button>
 </div>
                 ))}
               </div>
