@@ -97,7 +97,7 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <HeadingTag className="m-0">
             <Link to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
-              {brand.logo_image_url ? (
+              {brand.logo_variant === 'image' && brand.logo_image_url ? (
                 <img src={brand.logo_image_url} alt={brand.logo_text || "Brand logo"} className="w-auto" style={{ height: brand.logo_image_height || 32 }} />
               ) : (
                 <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent`}>

@@ -127,6 +127,7 @@ const LogoManager: React.FC = () => {
       if (uploadError) throw uploadError;
       const { data: pub } = supabase.storage.from('brand-logos').getPublicUrl(path);
       setLogoImageUrl(pub.publicUrl);
+      setVariant('image');
       toast({ title: 'Logo uploaded', description: 'Remember to click Save to apply.' });
     } catch (err: any) {
       toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
@@ -163,6 +164,7 @@ const LogoManager: React.FC = () => {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="text">Text</SelectItem>
+                  <SelectItem value="image">Image</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -219,7 +221,7 @@ const LogoManager: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {logoImageUrl ? (
+              {variant === 'image' && logoImageUrl ? (
                 <div className="flex items-center">
                   <img src={logoImageUrl} alt="Brand logo image" className="w-auto" style={{ height: logoImageHeight }} loading="lazy" />
                 </div>
