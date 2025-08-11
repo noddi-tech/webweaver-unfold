@@ -235,7 +235,7 @@ const ImageManager = () => {
                   <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                 ))}
                 {/* Fallback common sections */}
-                {sections.length === 0 && ["hero","features","testimonials","footer"].map((s) => (
+                {sections.length === 0 && ["hero"].map((s) => (
                   <SelectItem key={s} value={s}>{s}</SelectItem>
                 ))}
               </SelectContent>
@@ -321,9 +321,9 @@ const ImageManager = () => {
                         {sections.map((s) => (
                           <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                         ))}
-                        {sections.length === 0 && ["hero","features","testimonials","footer"].map((s) => (
-                          <SelectItem key={s} value={s}>{s}</SelectItem>
-                        ))}
+                         {sections.length === 0 && ["hero"].map((s) => (
+                           <SelectItem key={s} value={s}>{s}</SelectItem>
+                         ))}
                       </SelectContent>
                     </Select>
                   </div>
