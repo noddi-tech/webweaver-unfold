@@ -7,7 +7,7 @@ import GlobalUSPBar from "@/components/GlobalUSPBar";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
-  const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground", logo_image_url: null as string | null, logo_variant: "text" });
+  const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground", logo_image_url: null as string | null, logo_variant: "text", logo_image_height: 32 });
   const location = useLocation();
   const isHome = location.pathname === "/";
   const HeadingTag = (isHome ? "h1" : "h2") as keyof JSX.IntrinsicElements;
@@ -24,7 +24,7 @@ const Header = () => {
     const load = async () => {
       const { data } = await supabase
         .from("brand_settings")
-        .select("logo_text,gradient_token,text_token,logo_image_url,logo_variant")
+        .select("logo_text,gradient_token,text_token,logo_image_url,logo_variant,logo_image_height")
         .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle();
@@ -36,6 +36,7 @@ const Header = () => {
           text_token: data.text_token || "foreground",
           logo_image_url: data.logo_image_url || null,
           logo_variant: data.logo_variant || "text",
+          logo_image_height: typeof (data as any).logo_image_height === 'number' ? (data as any).logo_image_height : 32,
         });
       }
     };
@@ -54,6 +55,7 @@ const Header = () => {
         text_token: d.text_token || "foreground",
         logo_image_url: d.logo_image_url || null,
         logo_variant: d.logo_variant || "text",
+        logo_image_height: typeof d.logo_image_height === 'number' ? d.logo_image_height : 32,
       });
     };
     window.addEventListener('brand_settings_updated', onLocalUpdate);
@@ -69,6 +71,7 @@ const Header = () => {
           text_token: d.text_token || "foreground",
           logo_image_url: d.logo_image_url || null,
           logo_variant: d.logo_variant || "text",
+          logo_image_height: typeof d.logo_image_height === 'number' ? d.logo_image_height : 32,
         });
       })
       .subscribe();
@@ -95,7 +98,7 @@ const Header = () => {
           <HeadingTag className="m-0">
             <Link to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
               {brand.logo_image_url ? (
-                <img src={brand.logo_image_url} alt={brand.logo_text || "Brand logo"} className="h-8 w-auto" />
+                <img src={brand.logo_image_url} alt={brand.logo_text || "Brand logo"} className="w-auto" style={{ height: brand.logo_image_height || 32 }} />
               ) : (
                 <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent`}>
                   {brand.logo_text || "Noddi Tech"}

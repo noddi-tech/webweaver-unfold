@@ -32,6 +32,7 @@ interface BrandSettingsRow {
   gradient_token: string;
   text_token: string;
   logo_image_url: string | null;
+  logo_image_height: number;
 }
 
 const LogoManager: React.FC = () => {
@@ -44,6 +45,7 @@ const LogoManager: React.FC = () => {
   const [gradientToken, setGradientToken] = useState("gradient-primary");
   const [textToken, setTextToken] = useState("foreground");
   const [logoImageUrl, setLogoImageUrl] = useState<string | null>(null);
+  const [logoImageHeight, setLogoImageHeight] = useState(32);
 
   useEffect(() => {
     const load = async () => {
@@ -64,6 +66,7 @@ const LogoManager: React.FC = () => {
         setGradientToken(data.gradient_token ?? "gradient-primary");
         setTextToken(data.text_token ?? "foreground");
         setLogoImageUrl(data.logo_image_url ?? null);
+        setLogoImageHeight(typeof (data as any).logo_image_height === 'number' ? (data as any).logo_image_height : 32);
       }
       setLoading(false);
     };
@@ -77,6 +80,7 @@ const LogoManager: React.FC = () => {
       gradient_token: gradientToken,
       text_token: textToken,
       logo_image_url: logoImageUrl,
+      logo_image_height: logoImageHeight,
     };
     let error;
     if (row?.id) {
@@ -101,6 +105,7 @@ const LogoManager: React.FC = () => {
     setGradientToken("gradient-primary");
     setTextToken("foreground");
     setLogoImageUrl(null);
+    setLogoImageHeight(32);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -193,6 +198,13 @@ const LogoManager: React.FC = () => {
                 <p className="text-xs text-muted-foreground break-all">{logoImageUrl}</p>
               )}
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="logo-height">Header logo height (px)</Label>
+                <Input id="logo-height" type="number" min={16} max={96} step={1} value={logoImageHeight} onChange={(e) => setLogoImageHeight(Number(e.target.value || 0))} />
+                <p className="text-xs text-muted-foreground">Controls the image logo size in the header.</p>
+              </div>
+            </div>
 
             <div className="flex gap-3 pt-2">
               <Button onClick={save} disabled={loading}>Save</Button>
@@ -209,7 +221,7 @@ const LogoManager: React.FC = () => {
             <div className="space-y-6">
               {logoImageUrl ? (
                 <div className="flex items-center">
-                  <img src={logoImageUrl} alt="Brand logo image" className="max-h-20 w-auto" loading="lazy" />
+                  <img src={logoImageUrl} alt="Brand logo image" className="w-auto" style={{ height: logoImageHeight }} loading="lazy" />
                 </div>
               ) : (
                 <>
