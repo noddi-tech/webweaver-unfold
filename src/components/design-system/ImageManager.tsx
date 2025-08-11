@@ -57,10 +57,10 @@ const ImageManager = () => {
     const iframe = previewRef.current;
     const doc = iframe?.contentDocument || iframe?.contentWindow?.document;
     if (!doc) return;
-    const id = sectionToAnchor(uploadSection);
+    const id = hasImages(uploadSection) ? sectionToAnchor(uploadSection) : null;
+    if (!id) return;
     const el = doc.getElementById(id);
     if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
     const prevOutline = (el as HTMLElement).style.outline;
     const prevOffset = (el as HTMLElement).style.outlineOffset as any;
     (el as HTMLElement).style.outline = "3px solid hsl(var(--primary))";
@@ -93,6 +93,8 @@ const ImageManager = () => {
     Object.values(map).forEach((arr) => arr.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)));
     return map;
   }, [images]);
+
+  const hasImages = (s: string) => (groupedBySection[s]?.length ?? 0) > 0;
 
   useEffect(() => {
     fetchSections();
@@ -257,12 +259,12 @@ const ImageManager = () => {
             <iframe
               ref={previewRef}
               key={iframeKey}
-              src={`/#${sectionToAnchor(uploadSection)}`}
+              src={hasImages(uploadSection) ? `/#${sectionToAnchor(uploadSection)}` : "/"}
               title="Section preview"
               className="w-full h-[420px] bg-background"
             />
           </div>
-          <p className="text-xs text-muted-foreground">We auto-scroll and highlight the "{uploadSection}" section on the homepage preview.</p>
+          <p className="text-xs text-muted-foreground">{hasImages(uploadSection) ? `We auto-scroll and highlight the "${uploadSection}" section on the homepage preview.` : `No images in "${uploadSection}" yet — preview anchors appear only for sections with images.`}</p>
         </div>
       </Card>
 
