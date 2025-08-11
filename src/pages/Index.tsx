@@ -11,7 +11,7 @@ const Index = () => {
       <main>
         <Hero />
         <Metrics />
-        <Features />
+        <Features useSectionBg={false} />
       </main>
       <Footer />
     </div>

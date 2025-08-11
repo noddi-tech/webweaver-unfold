@@ -53,7 +53,8 @@ const borderClass: Record<string, string> = {
   border: "border-border",
 };
 
-const Features = () => {
+interface FeaturesProps { useSectionBg?: boolean }
+const Features = ({ useSectionBg = true }: FeaturesProps) => {
   const [dbFeatures, setDbFeatures] = useState<DbFeature[] | null>(null);
   const [settings, setSettings] = useState<FeatureSettings | null>(null);
   const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
@@ -91,7 +92,7 @@ const Features = () => {
   }, []);
 
   const usingDb = dbFeatures && dbFeatures.length > 0;
-  const bg = settings ? (bgClass[settings.background_token] || "") : "";
+  const bg = settings && useSectionBg ? (bgClass[settings.background_token] || "") : "";
   const cardBg = settings ? (bgClass[settings.card_bg_token] || "bg-card") : "bg-card";
   const iconClr = settings ? (textClass[settings.icon_token] || "text-primary") : "text-primary";
   const titleClr = settings ? (textClass[settings.title_token] || "text-foreground") : "text-foreground";
