@@ -73,7 +73,7 @@ const Admin = () => {
           {/* CMS Section with nested tabs */}
           <TabsContent value="cms" className="space-y-8">
             <Tabs defaultValue="videos" className="w-full">
-              <TabsList className="grid w-full grid-cols-5 mb-8">
+              <TabsList className="flex w-full flex-wrap gap-2 h-auto mb-8 justify-center">
                 <TabsTrigger value="videos">Videos CMS</TabsTrigger>
                 <TabsTrigger value="images">Images CMS</TabsTrigger>
                 <TabsTrigger value="features">Features CMS</TabsTrigger>
