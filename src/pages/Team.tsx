@@ -81,7 +81,7 @@ const Team = () => {
               <div className="p-5 space-y-2">
                 <h2 className="text-xl font-semibold">{m.name}</h2>
                 <p className="text-sm text-muted-foreground">{m.title}</p>
-                <div className="flex flex-wrap gap-3 pt-3">
+                <div className="flex flex-wrap gap-5 pt-4">
                   {m.email && (
                     <a href={`mailto:${m.email}`} className="inline-flex items-center gap-2 text-primary hover:underline" aria-label={`Email ${m.name}`}>
                       <Mail className="h-4 w-4" />
