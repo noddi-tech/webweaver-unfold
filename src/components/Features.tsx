@@ -109,7 +109,7 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
             {settings?.section_title || "Platform Features"}
           </h2>
           <p className={`text-xl max-w-3xl mx-auto ${descClr}`}>
-            {settings?.section_subtitle || "Our comprehensive platform transforms how automotive maintenance providers operate, delivering efficiency, visibility, and growth."}
+            {settings?.section_subtitle || "A comprehensive collection of tools to enable your brand to stand out from the crowd, with cost-efficient mobile services."}
           </p>
         </div>
 
