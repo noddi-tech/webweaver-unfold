@@ -65,6 +65,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          image_object_position: string
           image_url: string | null
           linkedin_url: string | null
           name: string
@@ -79,6 +80,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          image_object_position?: string
           image_url?: string | null
           linkedin_url?: string | null
           name: string
@@ -93,6 +95,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          image_object_position?: string
           image_url?: string | null
           linkedin_url?: string | null
           name?: string
