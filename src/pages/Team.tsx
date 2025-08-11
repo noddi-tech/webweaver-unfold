@@ -137,7 +137,7 @@ const Team = () => {
   const linkCls = textClass[settings?.link_token || "primary"];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <Header />
       <main className="container mx-auto px-6 pt-32 pb-20">
         <header className="text-center max-w-2xl mx-auto mb-12">
@@ -149,7 +149,7 @@ const Team = () => {
 
         {orderedSectionNames.map((sec) => (
           <section key={sec} aria-label={`Team section ${sec}`} className="mb-10">
-            <h2 className="text-2xl font-semibold mb-4">{sec}</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">{sec}</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {(employeesBySection[sec] || []).map((m) => (
                 <article key={m.id} className={`rounded-xl border ${borderCls} ${cardBg} overflow-hidden`}>
