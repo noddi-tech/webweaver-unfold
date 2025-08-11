@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,48 @@ const ImageManager = () => {
   const [files, setFiles] = useState<FileList | null>(null);
   const [uploadSection, setUploadSection] = useState<string>("hero");
 
+  const previewRef = useRef<HTMLIFrameElement>(null);
+  const [iframeKey, setIframeKey] = useState(0);
+  const sectionToAnchor = (s: string) => {
+    const map: Record<string, string> = {
+      hero: "home",
+      features: "features",
+      testimonials: "testimonials",
+      footer: "footer",
+    };
+    return map[s] || s;
+  };
+
+  const scrollAndHighlight = () => {
+    const iframe = previewRef.current;
+    const doc = iframe?.contentDocument || iframe?.contentWindow?.document;
+    if (!doc) return;
+    const id = sectionToAnchor(uploadSection);
+    const el = doc.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    const prevOutline = (el as HTMLElement).style.outline;
+    const prevOffset = (el as HTMLElement).style.outlineOffset as any;
+    (el as HTMLElement).style.outline = "3px solid hsl(var(--primary))";
+    (el as HTMLElement).style.outlineOffset = "2px" as any;
+    setTimeout(() => {
+      (el as HTMLElement).style.outline = prevOutline;
+      (el as HTMLElement).style.outlineOffset = prevOffset;
+    }, 1500);
+  };
+
+  useEffect(() => {
+    const iframe = previewRef.current;
+    if (!iframe) return;
+    const onLoad = () => setTimeout(scrollAndHighlight, 300);
+    iframe.addEventListener("load", onLoad);
+    return () => iframe.removeEventListener("load", onLoad);
+  }, []);
+
+  useEffect(() => {
+    // Re-run highlight when section changes
+    setTimeout(scrollAndHighlight, 400);
+  }, [uploadSection]);
   const groupedBySection = useMemo(() => {
     const map: Record<string, DbImage[]> = {};
     for (const img of images) {
@@ -207,6 +249,20 @@ const ImageManager = () => {
             {uploading ? "Uploading..." : "Upload"}
           </Button>
           {files && <span className="text-sm text-muted-foreground self-center">{files.length} file(s) selected</span>}
+        </div>
+        <Separator className="my-4" />
+        <div className="space-y-2">
+          <Label>Preview location</Label>
+          <div className="rounded-lg border border-border overflow-hidden bg-background">
+            <iframe
+              ref={previewRef}
+              key={iframeKey}
+              src={`/#${sectionToAnchor(uploadSection)}`}
+              title="Section preview"
+              className="w-full h-[420px] bg-background"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">We auto-scroll and highlight the "{uploadSection}" section on the homepage preview.</p>
         </div>
       </Card>
 
