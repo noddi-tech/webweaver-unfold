@@ -207,8 +207,14 @@ export type Database = {
           icon_name: string
           id: string
           location: string
+          metric_align: string
           metric_description: string | null
+          metric_emphasis: string
+          metric_show_icon: boolean
+          metric_style: string
+          metric_suffix: string | null
           metric_value: string | null
+          metric_value_size: string
           sort_order: number | null
           text_token: string
           title: string
@@ -223,8 +229,14 @@ export type Database = {
           icon_name?: string
           id?: string
           location?: string
+          metric_align?: string
           metric_description?: string | null
+          metric_emphasis?: string
+          metric_show_icon?: boolean
+          metric_style?: string
+          metric_suffix?: string | null
           metric_value?: string | null
+          metric_value_size?: string
           sort_order?: number | null
           text_token?: string
           title: string
@@ -239,8 +251,14 @@ export type Database = {
           icon_name?: string
           id?: string
           location?: string
+          metric_align?: string
           metric_description?: string | null
+          metric_emphasis?: string
+          metric_show_icon?: boolean
+          metric_style?: string
+          metric_suffix?: string | null
           metric_value?: string | null
+          metric_value_size?: string
           sort_order?: number | null
           text_token?: string
           title?: string

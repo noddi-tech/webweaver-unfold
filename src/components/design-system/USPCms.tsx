@@ -25,6 +25,12 @@ interface UspRow {
   format?: string; // 'usp' | 'metric'
   metric_value?: string | null;
   metric_description?: string | null;
+  metric_style?: string | null; // 'card' | 'plain'
+  metric_align?: string | null; // 'left' | 'center'
+  metric_value_size?: string | null; // 'sm' | 'md' | 'lg' | 'xl'
+  metric_emphasis?: string | null; // 'normal' | 'gradient'
+  metric_suffix?: string | null;
+  metric_show_icon?: boolean | null;
 }
 
 const bgClass: Record<string, string> = {
@@ -64,7 +70,12 @@ const USPForm: React.FC<{
   const [format, setFormat] = useState<string>(initial?.format ?? "usp");
   const [metricValue, setMetricValue] = useState<string>(initial?.metric_value ?? "");
   const [metricDescription, setMetricDescription] = useState<string>(initial?.metric_description ?? "");
-
+  const [metricStyle, setMetricStyle] = useState<string>(initial?.metric_style ?? "card");
+  const [metricAlign, setMetricAlign] = useState<string>(initial?.metric_align ?? "center");
+  const [metricValueSize, setMetricValueSize] = useState<string>(initial?.metric_value_size ?? "xl");
+  const [metricEmphasis, setMetricEmphasis] = useState<string>(initial?.metric_emphasis ?? "gradient");
+  const [metricSuffix, setMetricSuffix] = useState<string>(initial?.metric_suffix ?? "");
+  const [metricShowIcon, setMetricShowIcon] = useState<boolean>(initial?.metric_show_icon ?? true);
   const IconPreview = useMemo(() => {
     const Cmp = (lucideIcons as Record<string, any>)[iconName];
     return Cmp ? <Cmp className="w-4 h-4" /> : null;
@@ -112,6 +123,56 @@ const USPForm: React.FC<{
           <div className="space-y-2">
             <Label>Metric description</Label>
             <Input value={metricDescription} onChange={(e) => setMetricDescription(e.target.value)} placeholder="Maintenance providers using our platform" />
+          </div>
+          <div className="space-y-2">
+            <Label>Style</Label>
+            <Select value={metricStyle} onValueChange={setMetricStyle}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="card">Card</SelectItem>
+                <SelectItem value="plain">Plain</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Align</Label>
+            <Select value={metricAlign} onValueChange={setMetricAlign}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="left">Left</SelectItem>
+                <SelectItem value="center">Center</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Value size</Label>
+            <Select value={metricValueSize} onValueChange={setMetricValueSize}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sm">Small</SelectItem>
+                <SelectItem value="md">Medium</SelectItem>
+                <SelectItem value="lg">Large</SelectItem>
+                <SelectItem value="xl">XL</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Emphasis</Label>
+            <Select value={metricEmphasis} onValueChange={setMetricEmphasis}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="normal">Normal</SelectItem>
+                <SelectItem value="gradient">Gradient</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Suffix</Label>
+            <Input value={metricSuffix} onChange={(e) => setMetricSuffix(e.target.value)} placeholder="% or +" />
+          </div>
+          <div className="flex items-center gap-2 pt-6">
+            <Switch checked={metricShowIcon} onCheckedChange={setMetricShowIcon} id="metric-show-icon" />
+            <Label htmlFor="metric-show-icon">Show icon</Label>
           </div>
         </div>
       )}
@@ -165,8 +226,12 @@ const USPForm: React.FC<{
 
       <div className="pt-2">
         {format === "metric" ? (
-          <div className={`text-center bg-card rounded-xl p-6 border border-border shadow-sm ${textClass[textToken]}`}>
-            <div className="text-4xl font-bold gradient-text mb-2">{metricValue || "123%"}</div>
+          <div className={`${metricStyle === 'card' ? `bg-card rounded-xl p-6 border border-border shadow-sm` : ''} ${metricAlign === 'left' ? 'text-left' : 'text-center'} ${textClass[textToken]}`}>
+            <div className={`${metricValueSize === 'sm' ? 'text-3xl' : metricValueSize === 'md' ? 'text-4xl' : metricValueSize === 'lg' ? 'text-5xl' : 'text-6xl'} font-bold ${metricEmphasis === 'gradient' ? 'gradient-text' : ''} mb-2 flex items-baseline ${metricAlign === 'left' ? 'justify-start' : 'justify-center'} gap-1`}>
+              {metricShowIcon && IconPreview}
+              <span>{metricValue || "123%"}</span>
+              {metricSuffix && <span className="text-lg text-muted-foreground">{metricSuffix}</span>}
+            </div>
             <div className="text-lg font-semibold">{title || "Metric Label"}</div>
             {metricDescription && (
               <div className="text-sm text-muted-foreground">{metricDescription}</div>
@@ -198,6 +263,12 @@ const USPForm: React.FC<{
               format,
               metric_value: metricValue || null,
               metric_description: metricDescription || null,
+              metric_style: metricStyle || null,
+              metric_align: metricAlign || null,
+              metric_value_size: metricValueSize || null,
+              metric_emphasis: metricEmphasis || null,
+              metric_suffix: metricSuffix || null,
+              metric_show_icon: metricShowIcon,
             })
           }
         >
