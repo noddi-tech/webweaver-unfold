@@ -179,10 +179,14 @@ const [newEmp, setNewEmp] = useState<Omit<Employee, "id">>({
     fetchSections();
   };
 
-  const deleteSection = (id: string) => {
-    const s = sections.find((x) => x.id === id) || null;
-    if (s) setPendingDelete(s);
-  };
+const deleteSection = (id: string) => {
+  const s = sections.find((x) => x.id === id) || null;
+  if (s?.name === "General") {
+    toast({ title: "Cannot delete section", description: '"General" is required and cannot be removed.' });
+    return;
+  }
+  if (s) setPendingDelete(s);
+};
 
   const confirmDeleteSection = async () => {
     if (!pendingDelete) return;
@@ -372,17 +376,19 @@ fetchEmployees();
               <p className="text-sm text-muted-foreground mb-2">Current sections</p>
               <div className="flex flex-wrap gap-2">
                 {sections.map((s) => (
-                  <div key={s.id} className="relative inline-block px-2 py-1 pr-5 rounded-md border border-border text-sm text-foreground">
-                    <span>{s.name}</span>
-                    <button
-                      type="button"
-                      aria-label={`Delete section ${s.name}`}
-                      onClick={() => setPendingDelete(s)}
-                      className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-background border border-border flex items-center justify-center hover:bg-destructive/10"
-                    >
-                      <X className="h-3 w-3 text-muted-foreground" />
-                    </button>
-                  </div>
+<div key={s.id} className="relative inline-block px-2 py-1 pr-5 rounded-md border border-border text-sm text-foreground">
+  <span>{s.name}</span>
+  {s.name !== "General" && (
+    <button
+      type="button"
+      aria-label={`Delete section ${s.name}`}
+      onClick={() => deleteSection(s.id)}
+      className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-background border border-border flex items-center justify-center hover:bg-destructive/10"
+    >
+      <X className="h-3 w-3 text-muted-foreground" />
+    </button>
+  )}
+</div>
                 ))}
               </div>
             </div>
