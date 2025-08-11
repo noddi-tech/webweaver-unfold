@@ -69,6 +69,7 @@ export type Database = {
           linkedin_url: string | null
           name: string
           phone: string | null
+          section: string
           sort_order: number | null
           title: string
           updated_at: string
@@ -82,6 +83,7 @@ export type Database = {
           linkedin_url?: string | null
           name: string
           phone?: string | null
+          section?: string
           sort_order?: number | null
           title: string
           updated_at?: string
@@ -95,8 +97,75 @@ export type Database = {
           linkedin_url?: string | null
           name?: string
           phone?: string | null
+          section?: string
           sort_order?: number | null
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      employees_sections: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      employees_settings: {
+        Row: {
+          background_token: string
+          border_token: string
+          card_bg_token: string
+          created_at: string
+          id: string
+          link_token: string
+          name_token: string
+          section_subtitle: string | null
+          section_title: string
+          title_token: string
+          updated_at: string
+        }
+        Insert: {
+          background_token?: string
+          border_token?: string
+          card_bg_token?: string
+          created_at?: string
+          id?: string
+          link_token?: string
+          name_token?: string
+          section_subtitle?: string | null
+          section_title?: string
+          title_token?: string
+          updated_at?: string
+        }
+        Update: {
+          background_token?: string
+          border_token?: string
+          card_bg_token?: string
+          created_at?: string
+          id?: string
+          link_token?: string
+          name_token?: string
+          section_subtitle?: string | null
+          section_title?: string
+          title_token?: string
           updated_at?: string
         }
         Relationships: []

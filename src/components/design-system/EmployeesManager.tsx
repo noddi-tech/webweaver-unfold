@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Employee {
   id: string;
@@ -17,11 +18,35 @@ interface Employee {
   image_url: string | null;
   sort_order: number | null;
   active: boolean;
+  section: string;
 }
+
+interface EmpSection { id: string; name: string; sort_order: number | null; }
+
+interface EmployeeSettings {
+  id?: string;
+  section_title: string;
+  section_subtitle: string | null;
+  background_token: string;
+  card_bg_token: string;
+  border_token: string;
+  name_token: string;
+  title_token: string;
+  link_token: string;
+}
+
+const bgOptions = ["background", "card", "primary", "secondary", "accent", "gradient-primary", "gradient-background", "gradient-hero"];
+const textOptions = ["foreground", "muted-foreground", "primary", "secondary", "accent"];
+const borderOptions = ["border"];
 
 const EmployeesManager = () => {
   const { toast } = useToast();
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [sections, setSections] = useState<EmpSection[]>([]);
+  const [newSection, setNewSection] = useState("");
+  const [settings, setSettings] = useState<EmployeeSettings | null>(null);
+  const [savingSettings, setSavingSettings] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -35,9 +60,10 @@ const EmployeesManager = () => {
     image_url: "",
     sort_order: 0,
     active: true,
+    section: "General",
   } as any);
 
-  const load = async () => {
+  const fetchEmployees = async () => {
     setLoading(true);
     const { data, error } = await (supabase as any)
       .from("employees")
@@ -49,9 +75,70 @@ const EmployeesManager = () => {
     setLoading(false);
   };
 
+  const fetchSections = async () => {
+    const { data, error } = await (supabase as any)
+      .from("employees_sections")
+      .select("id,name,sort_order")
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true });
+    if (error) {
+      console.error(error);
+      return;
+    }
+    setSections(data || []);
+  };
+
+  const fetchSettings = async () => {
+    const { data, error } = await (supabase as any)
+      .from("employees_settings")
+      .select("id,section_title,section_subtitle,background_token,card_bg_token,border_token,name_token,title_token,link_token")
+      .order("created_at", { ascending: true })
+      .limit(1);
+    if (error) {
+      console.error(error);
+      return;
+    }
+    setSettings((data && data[0]) || {
+      section_title: "Our Team",
+      section_subtitle: null,
+      background_token: "background",
+      card_bg_token: "card",
+      border_token: "border",
+      name_token: "foreground",
+      title_token: "muted-foreground",
+      link_token: "primary",
+    });
+  };
+
   useEffect(() => {
-    load();
+    fetchEmployees();
+    fetchSections();
+    fetchSettings();
   }, []);
+
+  const addSection = async () => {
+    const name = newSection.trim();
+    if (!name) return;
+    const { error } = await (supabase as any).from("employees_sections").insert({ name });
+    if (error) {
+      toast({ title: "Add section failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    setNewSection("");
+    toast({ title: "Section added" });
+    fetchSections();
+  };
+
+  const deleteSection = async (id: string) => {
+    if (!confirm("Delete this section?")) return;
+    const { error } = await (supabase as any).from("employees_sections").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Section deleted" });
+    fetchSections();
+  };
 
   const uploadImage = async (file: File) => {
     const ext = file.name.split(".").pop();
@@ -82,9 +169,9 @@ const EmployeesManager = () => {
       const { error } = await (supabase as any).from("employees").insert(payload);
       if (error) throw error;
       toast({ title: "Employee created" });
-      setNewEmp({ name: "", title: "", email: "", phone: "", linkedin_url: "", image_url: "", sort_order: 0, active: true } as any);
+      setNewEmp({ name: "", title: "", email: "", phone: "", linkedin_url: "", image_url: "", sort_order: 0, active: true, section: "General" } as any);
       setFile(null);
-      load();
+      fetchEmployees();
     } catch (e: any) {
       toast({ title: "Create failed", description: e.message, variant: "destructive" });
     } finally {
@@ -106,7 +193,7 @@ const EmployeesManager = () => {
       const { error } = await (supabase as any).from("employees").update(payload).eq("id", e.id);
       if (error) throw error;
       toast({ title: "Saved" });
-      load();
+      fetchEmployees();
     } catch (err: any) {
       toast({ title: "Save failed", description: err.message, variant: "destructive" });
     } finally {
@@ -125,13 +212,124 @@ const EmployeesManager = () => {
     }
   };
 
+  const saveSettings = async () => {
+    if (!settings) return;
+    setSavingSettings(true);
+    const payload: any = { ...settings };
+    if (!payload.id) delete payload.id;
+    const { error } = await (supabase as any).from("employees_settings").upsert(payload, { onConflict: "id" });
+    setSavingSettings(false);
+    if (error) {
+      toast({ title: "Failed to save settings", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Design settings saved" });
+      fetchSettings();
+    }
+  };
+
+  const sectionOptions = useMemo(() => {
+    const names = new Set<string>(sections.map((s) => s.name));
+    if (!names.has("General")) names.add("General");
+    return Array.from(names);
+  }, [sections]);
+
   return (
     <section className="space-y-8">
       <header className="space-y-2">
         <h2 className="text-3xl font-bold gradient-text">Employees CMS</h2>
-        <p className="text-muted-foreground">Manage your public team page members.</p>
+        <p className="text-muted-foreground">Manage your public team page members and styling.</p>
       </header>
 
+      {/* Design Settings */}
+      <Card className="p-6 bg-card border-border">
+        <h3 className="text-xl font-semibold mb-4">Design Settings</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <Label>Section Title</Label>
+            <Input value={settings?.section_title ?? ""} onChange={(e) => setSettings((s) => ({ ...(s || ({} as EmployeeSettings)), section_title: e.target.value }))} />
+          </div>
+          <div className="md:col-span-2">
+            <Label>Section Subtitle</Label>
+            <Input value={settings?.section_subtitle ?? ""} onChange={(e) => setSettings((s) => ({ ...(s || ({} as EmployeeSettings)), section_subtitle: e.target.value }))} />
+          </div>
+          <div>
+            <Label>Card Background</Label>
+            <Select value={settings?.card_bg_token ?? "card"} onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as EmployeeSettings)), card_bg_token: v }))}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {bgOptions.map((t) => (<SelectItem key={t} value={t}>{t}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Border</Label>
+            <Select value={settings?.border_token ?? "border"} onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as EmployeeSettings)), border_token: v }))}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {borderOptions.map((t) => (<SelectItem key={t} value={t}>{t}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Name Color</Label>
+            <Select value={settings?.name_token ?? "foreground"} onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as EmployeeSettings)), name_token: v }))}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {textOptions.map((t) => (<SelectItem key={t} value={t}>{t}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Title Color</Label>
+            <Select value={settings?.title_token ?? "muted-foreground"} onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as EmployeeSettings)), title_token: v }))}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {textOptions.map((t) => (<SelectItem key={t} value={t}>{t}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Link Color</Label>
+            <Select value={settings?.link_token ?? "primary"} onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as EmployeeSettings)), link_token: v }))}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {textOptions.map((t) => (<SelectItem key={t} value={t}>{t}</SelectItem>))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="flex justify-end mt-4">
+          <Button onClick={saveSettings} disabled={savingSettings}>{savingSettings ? "Saving..." : "Save Design Settings"}</Button>
+        </div>
+      </Card>
+
+      {/* Sections Management */}
+      <Card className="p-6 bg-card border-border space-y-4">
+        <h3 className="text-xl font-semibold">Sections</h3>
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-end">
+          <div className="grid gap-2">
+            <Label>New section name</Label>
+            <Input value={newSection} onChange={(e) => setNewSection(e.target.value)} placeholder="e.g. Tech, Admin" />
+          </div>
+          <div className="flex justify-end md:justify-start">
+            <Button onClick={addSection} disabled={!newSection.trim()}>Add</Button>
+          </div>
+        </div>
+        <Separator />
+        <div className="flex flex-wrap gap-2">
+          {sections.map((s) => (
+            <div key={s.id} className="flex items-center gap-2 rounded-md border border-border px-3 py-1">
+              <span className="text-sm">{s.name}</span>
+              <Button size="sm" variant="outline" onClick={() => deleteSection(s.id)}>Delete</Button>
+            </div>
+          ))}
+          {sections.length === 0 && (
+            <p className="text-sm text-muted-foreground">No sections yet. Add your first one.</p>
+          )}
+        </div>
+      </Card>
+
+      {/* Create Employee */}
       <Card className="p-6 bg-card border-border space-y-4">
         <h3 className="text-xl font-semibold">Add Employee</h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -142,6 +340,15 @@ const EmployeesManager = () => {
           <div className="grid gap-2">
             <Label>Title</Label>
             <Input value={newEmp.title} onChange={(e) => setNewEmp((s) => ({ ...s, title: e.target.value }))} />
+          </div>
+          <div className="grid gap-2">
+            <Label>Section</Label>
+            <Select value={newEmp.section} onValueChange={(v) => setNewEmp((s) => ({ ...s, section: v }))}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {sectionOptions.map((name) => (<SelectItem key={name} value={name}>{name}</SelectItem>))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid gap-2">
             <Label>Sort order</Label>
@@ -172,6 +379,7 @@ const EmployeesManager = () => {
         </div>
       </Card>
 
+      {/* Manage Employees */}
       <Card className="p-6 bg-card border-border space-y-4">
         <h3 className="text-xl font-semibold">Team Members ({employees.length})</h3>
         <Separator />
@@ -196,6 +404,19 @@ const EmployeesManager = () => {
                     <Input value={e.title} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, title: ev.target.value } : x))} />
                   </div>
                   <div className="grid gap-2">
+                    <Label>Section</Label>
+                    <Select value={e.section} onValueChange={(v) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, section: v } : x))}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {sectionOptions.map((name) => (<SelectItem key={name} value={name}>{name}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Sort order</Label>
+                    <Input type="number" value={e.sort_order ?? 0} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, sort_order: Number(ev.target.value) } : x))} />
+                  </div>
+                  <div className="grid gap-2">
                     <Label>Email</Label>
                     <Input value={e.email ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, email: ev.target.value } : x))} />
                   </div>
@@ -210,10 +431,6 @@ const EmployeesManager = () => {
                   <div className="grid gap-2">
                     <Label>Image URL</Label>
                     <Input value={e.image_url ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, image_url: ev.target.value } : x))} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Sort order</Label>
-                    <Input type="number" value={e.sort_order ?? 0} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, sort_order: Number(ev.target.value) } : x))} />
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
