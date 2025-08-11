@@ -28,14 +28,13 @@ export const EditableDesignTokens = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const saved = localStorage.getItem('noddi-design-tokens');
-    if (saved) {
-      const parsed: DesignToken[] = JSON.parse(saved);
-      setTokens(parsed);
-      // Apply saved tokens on load so styles reflect immediately across the app
-      const root = document.documentElement;
-      parsed.forEach(t => root.style.setProperty(t.name, t.value));
-    }
+    const root = document.documentElement;
+    const computed = getComputedStyle(root);
+    const initial = defaultTokens.map(t => ({
+      ...t,
+      value: (computed.getPropertyValue(t.name) || t.value).trim(),
+    }));
+    setTokens(initial);
   }, []);
 
   const updateToken = (index: number, value: string) => {
@@ -49,22 +48,28 @@ export const EditableDesignTokens = () => {
   };
 
   const saveTokens = () => {
-    localStorage.setItem('noddi-design-tokens', JSON.stringify(tokens));
     toast({
-      title: "Design tokens saved",
-      description: "Your changes have been saved locally.",
+      title: "Applied",
+      description: "Changes apply instantly via CSS variables (no storage).",
     });
   };
 
   const resetTokens = () => {
-    setTokens(defaultTokens);
+    const root = document.documentElement;
+    // Remove inline overrides to fall back to CSS defaults
     defaultTokens.forEach(token => {
-      document.documentElement.style.setProperty(token.name, token.value);
+      root.style.removeProperty(token.name);
     });
-    localStorage.removeItem('noddi-design-tokens');
+    // Re-read computed styles after reset
+    const computed = getComputedStyle(root);
+    const refreshed = defaultTokens.map(t => ({
+      ...t,
+      value: (computed.getPropertyValue(t.name) || t.value).trim(),
+    }));
+    setTokens(refreshed);
     toast({
       title: "Design tokens reset",
-      description: "All tokens have been reset to defaults.",
+      description: "Reverted to CSS defaults from index.css.",
     });
   };
 

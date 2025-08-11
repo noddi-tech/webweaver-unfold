@@ -68,14 +68,13 @@ export const EditableColorSystem = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const saved = localStorage.getItem('noddi-color-system');
-    if (saved) {
-      const parsed: ColorToken[] = JSON.parse(saved);
-      setColors(parsed);
-      // Apply saved variables on load so the whole app updates immediately
-      const root = document.documentElement;
-      parsed.forEach((c) => root.style.setProperty(c.cssVar, c.value));
-    }
+    const root = document.documentElement;
+    const computed = getComputedStyle(root);
+    const initial = defaultColors.map((c) => ({
+      ...c,
+      value: (computed.getPropertyValue(c.cssVar) || c.value).trim(),
+    }));
+    setColors(initial);
   }, []);
 
   const updateColor = (index: number, value: string, format: 'hsl' | 'hex' = 'hsl') => {
@@ -191,22 +190,28 @@ export const EditableColorSystem = () => {
   };
 
   const saveColors = () => {
-    localStorage.setItem('noddi-color-system', JSON.stringify(colors));
     toast({
-      title: "Color system saved",
-      description: "Your color changes have been saved locally.",
+      title: "Applied",
+      description: "Changes apply instantly via CSS variables (no storage).",
     });
   };
 
   const resetColors = () => {
-    setColors(defaultColors);
+    const root = document.documentElement;
+    // Remove inline overrides to fall back to CSS defaults
     defaultColors.forEach(color => {
-      document.documentElement.style.setProperty(color.cssVar, color.value);
+      root.style.removeProperty(color.cssVar);
     });
-    localStorage.removeItem('noddi-color-system');
+    // Re-read computed styles after reset
+    const computed = getComputedStyle(root);
+    const refreshed = defaultColors.map(c => ({
+      ...c,
+      value: (computed.getPropertyValue(c.cssVar) || c.value).trim(),
+    }));
+    setColors(refreshed);
     toast({
       title: "Colors reset",
-      description: "All colors have been reset to defaults.",
+      description: "Reverted to CSS defaults from index.css.",
     });
   };
 
