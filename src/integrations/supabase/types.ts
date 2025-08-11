@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           gradient_token: string
           id: string
+          logo_image_url: string | null
           logo_text: string | null
           logo_variant: string
           text_token: string
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           gradient_token?: string
           id?: string
+          logo_image_url?: string | null
           logo_text?: string | null
           logo_variant?: string
           text_token?: string
@@ -37,6 +39,7 @@ export type Database = {
           created_at?: string
           gradient_token?: string
           id?: string
+          logo_image_url?: string | null
           logo_text?: string | null
           logo_variant?: string
           text_token?: string

@@ -31,6 +31,7 @@ interface BrandSettingsRow {
   logo_variant: string;
   gradient_token: string;
   text_token: string;
+  logo_image_url: string | null;
 }
 
 const LogoManager: React.FC = () => {
@@ -42,6 +43,7 @@ const LogoManager: React.FC = () => {
   const [variant, setVariant] = useState("text");
   const [gradientToken, setGradientToken] = useState("gradient-primary");
   const [textToken, setTextToken] = useState("foreground");
+  const [logoImageUrl, setLogoImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -61,6 +63,7 @@ const LogoManager: React.FC = () => {
         setVariant(data.logo_variant ?? "text");
         setGradientToken(data.gradient_token ?? "gradient-primary");
         setTextToken(data.text_token ?? "foreground");
+        setLogoImageUrl(data.logo_image_url ?? null);
       }
       setLoading(false);
     };
@@ -73,6 +76,7 @@ const LogoManager: React.FC = () => {
       logo_variant: variant,
       gradient_token: gradientToken,
       text_token: textToken,
+      logo_image_url: logoImageUrl,
     };
     let error;
     if (row?.id) {
@@ -96,6 +100,34 @@ const LogoManager: React.FC = () => {
     setVariant("text");
     setGradientToken("gradient-primary");
     setTextToken("foreground");
+    setLogoImageUrl(null);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!['image/svg+xml','image/png','image/jpeg'].includes(file.type)) {
+      toast({ title: 'Invalid file type', description: 'Please upload SVG, PNG, or JPEG.', variant: 'destructive' });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const path = `${user?.id ?? 'public'}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage.from('brand-logos').upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type,
+      });
+      if (uploadError) throw uploadError;
+      const { data: pub } = supabase.storage.from('brand-logos').getPublicUrl(path);
+      setLogoImageUrl(pub.publicUrl);
+      toast({ title: 'Logo uploaded', description: 'Remember to click Save to apply.' });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const gradientPreviewCls = useMemo(() => gradientClass[gradientToken] ?? "", [gradientToken]);
@@ -117,6 +149,7 @@ const LogoManager: React.FC = () => {
             <div className="space-y-2">
               <Label htmlFor="logo-text">Logo text</Label>
               <Input id="logo-text" value={logoText} onChange={(e) => setLogoText(e.target.value)} placeholder="Noddi Tech" />
+              <p className="text-xs text-muted-foreground">Optional when using an uploaded logo image.</p>
             </div>
 
             <div className="space-y-2">
@@ -153,6 +186,13 @@ const LogoManager: React.FC = () => {
                 </Select>
               </div>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="logo-image">Logo image (SVG/PNG/JPEG)</Label>
+              <Input id="logo-image" type="file" accept=".svg,.png,.jpg,.jpeg" onChange={handleFileChange} />
+              {logoImageUrl && (
+                <p className="text-xs text-muted-foreground break-all">{logoImageUrl}</p>
+              )}
+            </div>
 
             <div className="flex gap-3 pt-2">
               <Button onClick={save} disabled={loading}>Save</Button>
@@ -167,13 +207,21 @@ const LogoManager: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              <div className={`text-5xl font-extrabold tracking-tight ${gradientPreviewCls} bg-clip-text text-transparent`}>
-                {logoText || "Your Brand"}
-              </div>
-              <Separator />
-              <div className={`text-5xl font-extrabold tracking-tight ${textPreviewCls}`}>
-                {logoText || "Your Brand"}
-              </div>
+              {logoImageUrl ? (
+                <div className="flex items-center">
+                  <img src={logoImageUrl} alt="Brand logo image" className="max-h-20 w-auto" loading="lazy" />
+                </div>
+              ) : (
+                <>
+                  <div className={`text-5xl font-extrabold tracking-tight ${gradientPreviewCls} bg-clip-text text-transparent`}>
+                    {logoText || "Your Brand"}
+                  </div>
+                  <Separator />
+                  <div className={`text-5xl font-extrabold tracking-tight ${textPreviewCls}`}>
+                    {logoText || "Your Brand"}
+                  </div>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
