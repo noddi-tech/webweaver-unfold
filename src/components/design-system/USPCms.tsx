@@ -22,6 +22,9 @@ interface UspRow {
   location: string;
   active: boolean;
   sort_order?: number | null;
+  format?: string; // 'usp' | 'metric'
+  metric_value?: string | null;
+  metric_description?: string | null;
 }
 
 const bgClass: Record<string, string> = {
@@ -44,7 +47,7 @@ const textClass: Record<string, string> = {
 
 const bgOptions = ["background", "card", "primary", "secondary", "accent", "gradient-primary", "gradient-background", "gradient-hero"];
 const textOptions = ["foreground", "muted-foreground", "primary", "secondary", "accent"];
-const locationOptions = ["hero", "features", "global"];
+const locationOptions = ["hero", "features", "global", "metrics"];
 
 const USPForm: React.FC<{
   initial?: Partial<UspRow>;
@@ -58,6 +61,9 @@ const USPForm: React.FC<{
   const [location, setLocation] = useState(initial?.location ?? "hero");
   const [active, setActive] = useState(initial?.active ?? true);
   const [sortOrder, setSortOrder] = useState<number>(initial?.sort_order ?? 0);
+  const [format, setFormat] = useState<string>(initial?.format ?? "usp");
+  const [metricValue, setMetricValue] = useState<string>(initial?.metric_value ?? "");
+  const [metricDescription, setMetricDescription] = useState<string>(initial?.metric_description ?? "");
 
   const IconPreview = useMemo(() => {
     const Cmp = (lucideIcons as Record<string, any>)[iconName];
@@ -80,10 +86,35 @@ const USPForm: React.FC<{
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label>Link (optional)</Label>
-        <Input value={href ?? ""} onChange={(e) => setHref(e.target.value)} placeholder="/learn-more" />
+      <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label>Format</Label>
+          <Select value={format} onValueChange={setFormat}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="usp">USP</SelectItem>
+              <SelectItem value="metric">Metric</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="col-span-2 space-y-2">
+          <Label>Link (optional)</Label>
+          <Input value={href ?? ""} onChange={(e) => setHref(e.target.value)} placeholder="/learn-more" />
+        </div>
       </div>
+
+      {format === "metric" && (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Metric value</Label>
+            <Input value={metricValue} onChange={(e) => setMetricValue(e.target.value)} placeholder="500+" />
+          </div>
+          <div className="space-y-2">
+            <Label>Metric description</Label>
+            <Input value={metricDescription} onChange={(e) => setMetricDescription(e.target.value)} placeholder="Maintenance providers using our platform" />
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
@@ -133,10 +164,20 @@ const USPForm: React.FC<{
       </div>
 
       <div className="pt-2">
-        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${bgClass[bgToken]} ${textClass[textToken]} border-border`}>
-          <span className="inline-flex">{IconPreview}</span>
-          <span className="text-sm font-medium">{title || "Preview USP"}</span>
-        </div>
+        {format === "metric" ? (
+          <div className={`text-center bg-card rounded-xl p-6 border border-border shadow-sm ${textClass[textToken]}`}>
+            <div className="text-4xl font-bold gradient-text mb-2">{metricValue || "123%"}</div>
+            <div className="text-lg font-semibold">{title || "Metric Label"}</div>
+            {metricDescription && (
+              <div className="text-sm text-muted-foreground">{metricDescription}</div>
+            )}
+          </div>
+        ) : (
+          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${bgClass[bgToken]} ${textClass[textToken]} border-border`}>
+            <span className="inline-flex">{IconPreview}</span>
+            <span className="text-sm font-medium">{title || "Preview USP"}</span>
+          </div>
+        )}
       </div>
 
       <Separator />
@@ -154,6 +195,9 @@ const USPForm: React.FC<{
               location,
               active,
               sort_order: sortOrder,
+              format,
+              metric_value: metricValue || null,
+              metric_description: metricDescription || null,
             })
           }
         >
@@ -194,9 +238,9 @@ const USPCms: React.FC = () => {
   const upsert = async (values: UspRow) => {
     let error;
     if (values.id) {
-      ({ error } = await supabase.from("usps").update(values).eq("id", values.id));
+      ({ error } = await supabase.from("usps").update(values as any).eq("id", values.id));
     } else {
-      ({ error } = await supabase.from("usps").insert(values));
+      ({ error } = await supabase.from("usps").insert(values as any));
     }
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
@@ -224,15 +268,15 @@ const USPCms: React.FC = () => {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold">USP CMS</h2>
-          <p className="text-muted-foreground">Manage short value props to promote across the site. Uses existing color tokens only.</p>
+          <p className="text-muted-foreground">Manage short value props and metrics. Use tokens and locations to target where they appear.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => { setEditing(null); }}>New USP</Button>
+            <Button onClick={() => { setEditing(null); }}>New Item</Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{editing ? "Edit USP" : "Create USP"}</DialogTitle>
+              <DialogTitle>{editing ? "Edit Item" : "Create Item"}</DialogTitle>
             </DialogHeader>
             <USPForm initial={editing || undefined} onSubmit={upsert} />
           </DialogContent>
@@ -241,7 +285,7 @@ const USPCms: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>All USPs</CardTitle>
+          <CardTitle>All Items</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -254,6 +298,8 @@ const USPCms: React.FC = () => {
                 <div key={u.id} className="flex items-center justify-between gap-4 p-3 rounded-lg border border-border">
                   <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${bgClass[u.bg_token]} ${textClass[u.text_token]}`}>
                     <span className="text-xs font-medium">{u.title}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-background text-foreground border border-border">{u.format || "usp"}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-background text-foreground border border-border">{u.location}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant="secondary" size="sm" onClick={() => { setEditing(u); setOpen(true); }}>Edit</Button>
@@ -264,7 +310,7 @@ const USPCms: React.FC = () => {
             </div>
           )}
         </CardContent>
-        <CardFooter className="text-xs text-muted-foreground">Tip: Use location to target where USPs appear (hero, features, global).</CardFooter>
+        <CardFooter className="text-xs text-muted-foreground">Tip: Use location to target where items appear (hero, features, global, metrics).</CardFooter>
       </Card>
     </section>
   );

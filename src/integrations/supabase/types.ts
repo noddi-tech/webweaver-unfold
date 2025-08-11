@@ -202,10 +202,13 @@ export type Database = {
           active: boolean
           bg_token: string
           created_at: string
+          format: string
           href: string | null
           icon_name: string
           id: string
           location: string
+          metric_description: string | null
+          metric_value: string | null
           sort_order: number | null
           text_token: string
           title: string
@@ -215,10 +218,13 @@ export type Database = {
           active?: boolean
           bg_token?: string
           created_at?: string
+          format?: string
           href?: string | null
           icon_name?: string
           id?: string
           location?: string
+          metric_description?: string | null
+          metric_value?: string | null
           sort_order?: number | null
           text_token?: string
           title: string
@@ -228,10 +234,13 @@ export type Database = {
           active?: boolean
           bg_token?: string
           created_at?: string
+          format?: string
           href?: string | null
           icon_name?: string
           id?: string
           location?: string
+          metric_description?: string | null
+          metric_value?: string | null
           sort_order?: number | null
           text_token?: string
           title?: string
