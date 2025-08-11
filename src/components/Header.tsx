@@ -7,7 +7,7 @@ import GlobalUSPBar from "@/components/GlobalUSPBar";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
-  const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground" });
+  const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground", logo_image_url: null as string | null, logo_variant: "text" });
   const location = useLocation();
   const isHome = location.pathname === "/";
   const HeadingTag = (isHome ? "h1" : "h2") as keyof JSX.IntrinsicElements;
@@ -24,7 +24,7 @@ const Header = () => {
     const load = async () => {
       const { data } = await supabase
         .from("brand_settings")
-        .select("logo_text,gradient_token,text_token")
+        .select("logo_text,gradient_token,text_token,logo_image_url,logo_variant")
         .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle();
@@ -34,6 +34,8 @@ const Header = () => {
           logo_text: data.logo_text || "",
           gradient_token: data.gradient_token || "gradient-primary",
           text_token: data.text_token || "foreground",
+          logo_image_url: data.logo_image_url || null,
+          logo_variant: data.logo_variant || "text",
         });
       }
     };
@@ -50,6 +52,8 @@ const Header = () => {
         logo_text: d.logo_text || "",
         gradient_token: d.gradient_token || "gradient-primary",
         text_token: d.text_token || "foreground",
+        logo_image_url: d.logo_image_url || null,
+        logo_variant: d.logo_variant || "text",
       });
     };
     window.addEventListener('brand_settings_updated', onLocalUpdate);
@@ -63,6 +67,8 @@ const Header = () => {
           logo_text: d.logo_text || "",
           gradient_token: d.gradient_token || "gradient-primary",
           text_token: d.text_token || "foreground",
+          logo_image_url: d.logo_image_url || null,
+          logo_variant: d.logo_variant || "text",
         });
       })
       .subscribe();
@@ -88,9 +94,13 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <HeadingTag className="m-0">
             <Link to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
-              <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent`}>
-                {brand.logo_text || "Noddi Tech"}
-              </span>
+              {brand.logo_image_url ? (
+                <img src={brand.logo_image_url} alt={brand.logo_text || "Brand logo"} className="h-8 w-auto" />
+              ) : (
+                <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent`}>
+                  {brand.logo_text || "Noddi Tech"}
+                </span>
+              )}
             </Link>
           </HeadingTag>
 
