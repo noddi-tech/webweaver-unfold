@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Hero = () => {
   const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
+  const [heroImage, setHeroImage] = useState<{ url: string; alt: string } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -23,6 +24,29 @@ const Hero = () => {
       setUsps(data || []);
     };
     load();
+    return () => { mounted = false; };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadHero = async () => {
+      const { data } = await supabase
+        .from("images")
+        .select("file_url,alt,active,section,sort_order,created_at")
+        .eq("active", true)
+        .eq("section", "hero")
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true })
+        .limit(1);
+      if (!mounted) return;
+      const img = data && data.length > 0 ? data[0] : null;
+      if (img) {
+        setHeroImage({ url: (img as any).file_url as string, alt: ((img as any).alt as string) || "Hero image" });
+      } else {
+        setHeroImage(null);
+      }
+    };
+    loadHero();
     return () => { mounted = false; };
   }, []);
 
@@ -89,8 +113,8 @@ const Hero = () => {
           {/* Dashboard Preview */}
           <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
             <img
-              src={dashboardPreview}
-              alt="Noddi Tech Dashboard Preview"
+              src={heroImage?.url || dashboardPreview}
+              alt={heroImage?.alt || "Noddi Tech Dashboard Preview"}
               className="w-full rounded-xl shadow-lg"
             />
           </div>

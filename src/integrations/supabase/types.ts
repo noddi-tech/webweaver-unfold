@@ -119,6 +119,72 @@ export type Database = {
         }
         Relationships: []
       }
+      image_sections: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      images: {
+        Row: {
+          active: boolean
+          alt: string | null
+          caption: string | null
+          created_at: string
+          file_name: string
+          file_url: string
+          id: string
+          section: string
+          sort_order: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          alt?: string | null
+          caption?: string | null
+          created_at?: string
+          file_name: string
+          file_url: string
+          id?: string
+          section: string
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          alt?: string | null
+          caption?: string | null
+          created_at?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          section?: string
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       usps: {
         Row: {
           active: boolean

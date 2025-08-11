@@ -14,7 +14,7 @@ import { EditableSpacingSystem } from "@/components/design-system/EditableSpacin
 import { IconLibrary } from "@/components/design-system/IconLibrary";
 import USPCms from "@/components/design-system/USPCms";
 import LogoManager from "@/components/design-system/LogoManager";
-
+import ImageManager from "@/components/design-system/ImageManager";
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -72,13 +72,17 @@ const Admin = () => {
           {/* CMS Section with nested tabs */}
           <TabsContent value="cms" className="space-y-8">
             <Tabs defaultValue="videos" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-8">
+              <TabsList className="grid w-full grid-cols-4 mb-8">
                 <TabsTrigger value="videos">Videos CMS</TabsTrigger>
+                <TabsTrigger value="images">Images CMS</TabsTrigger>
                 <TabsTrigger value="features">Features CMS</TabsTrigger>
                 <TabsTrigger value="usps">USPs CMS</TabsTrigger>
               </TabsList>
               <TabsContent value="videos" className="space-y-8">
                 <VideoManager />
+              </TabsContent>
+              <TabsContent value="images" className="space-y-8">
+                <ImageManager />
               </TabsContent>
               <TabsContent value="features" className="space-y-8">
                 <FeaturesManager />
