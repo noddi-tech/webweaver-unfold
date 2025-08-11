@@ -19,6 +19,7 @@ interface Employee {
   phone: string | null;
   linkedin_url: string | null;
   image_url: string | null;
+  image_object_position?: string | null;
   sort_order: number | null;
   active: boolean;
   section: string;
@@ -42,6 +43,32 @@ const bgOptions = ["background", "card", "primary", "secondary", "accent", "grad
 const textOptions = ["foreground", "muted-foreground", "primary", "secondary", "accent"];
 const borderOptions = ["border"];
 
+const imagePositionOptions = [
+  "center",
+  "top",
+  "bottom",
+  "left",
+  "right",
+  "left-top",
+  "left-bottom",
+  "right-top",
+  "right-bottom",
+] as const;
+
+const posClass = (p?: string | null) => {
+  switch (p) {
+    case "top": return "object-top";
+    case "bottom": return "object-bottom";
+    case "left": return "object-left";
+    case "right": return "object-right";
+    case "left-top": return "object-left-top";
+    case "left-bottom": return "object-left-bottom";
+    case "right-top": return "object-right-top";
+    case "right-bottom": return "object-right-bottom";
+    default: return "object-center";
+  }
+};
+
 const EmployeesManager = () => {
   const { toast } = useToast();
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -55,17 +82,18 @@ const EmployeesManager = () => {
   const [creating, setCreating] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [pendingDelete, setPendingDelete] = useState<EmpSection | null>(null);
-  const [newEmp, setNewEmp] = useState<Omit<Employee, "id">>({
-    name: "",
-    title: "",
-    email: "",
-    phone: "",
-    linkedin_url: "",
-    image_url: "",
-    sort_order: 0,
-    active: true,
-    section: "General",
-  } as any);
+const [newEmp, setNewEmp] = useState<Omit<Employee, "id">>({
+  name: "",
+  title: "",
+  email: "",
+  phone: "",
+  linkedin_url: "",
+  image_url: "",
+  image_object_position: "center",
+  sort_order: 0,
+  active: true,
+  section: "General",
+} as any);
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -196,10 +224,10 @@ const EmployeesManager = () => {
       };
       const { error } = await (supabase as any).from("employees").insert(payload);
       if (error) throw error;
-      toast({ title: "Employee created" });
-      setNewEmp({ name: "", title: "", email: "", phone: "", linkedin_url: "", image_url: "", sort_order: 0, active: true, section: "General" } as any);
-      setFile(null);
-      fetchEmployees();
+toast({ title: "Employee created" });
+setNewEmp({ name: "", title: "", email: "", phone: "", linkedin_url: "", image_url: "", image_object_position: "center", sort_order: 0, active: true, section: "General" } as any);
+setFile(null);
+fetchEmployees();
     } catch (e: any) {
       toast({ title: "Create failed", description: e.message, variant: "destructive" });
     } finally {
@@ -440,13 +468,24 @@ const EmployeesManager = () => {
             <Label>LinkedIn URL</Label>
             <Input value={newEmp.linkedin_url ?? ""} onChange={(e) => setNewEmp((s) => ({ ...s, linkedin_url: e.target.value }))} placeholder="https://linkedin.com/in/..." />
           </div>
-          <div className="grid gap-2 lg:col-span-3">
-            <Label>Image</Label>
-            <div className="flex gap-2">
-              <Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-              <Input placeholder="or paste image URL" value={newEmp.image_url ?? ""} onChange={(e) => setNewEmp((s) => ({ ...s, image_url: e.target.value }))} />
-            </div>
-          </div>
+<div className="grid gap-2 lg:col-span-3">
+  <Label>Image</Label>
+  <div className="flex gap-2">
+    <Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+    <Input placeholder="or paste image URL" value={newEmp.image_url ?? ""} onChange={(e) => setNewEmp((s) => ({ ...s, image_url: e.target.value }))} />
+  </div>
+</div>
+<div className="grid gap-2">
+  <Label>Image Position</Label>
+  <Select value={newEmp.image_object_position ?? "center"} onValueChange={(v) => setNewEmp((s) => ({ ...s, image_object_position: v }))}>
+    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+    <SelectContent>
+      {imagePositionOptions.map((p) => (
+        <SelectItem key={p} value={p}>{p.replace("-", " ")}</SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
         </div>
         <div className="flex justify-end">
           <Button onClick={create} disabled={creating}>{creating ? "Creating..." : "Create"}</Button>
@@ -466,7 +505,7 @@ const EmployeesManager = () => {
             {employees.map((e) => (
               <div key={e.id} className="grid gap-3 rounded-lg border border-border p-4 bg-background">
                 {e.image_url && (
-                  <img src={e.image_url} alt={`${e.name} – ${e.title}`} className="w-full h-40 object-cover rounded-md" loading="lazy" />
+                  <img src={e.image_url} alt={`${e.name} – ${e.title}`} className={`w-full h-56 object-cover ${posClass(e.image_object_position) } rounded-md`} loading="lazy" />
                 )}
                 <div className="grid gap-2 md:grid-cols-2">
                   <div className="grid gap-2">
@@ -502,10 +541,21 @@ const EmployeesManager = () => {
                     <Label>LinkedIn URL</Label>
                     <Input value={e.linkedin_url ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, linkedin_url: ev.target.value } : x))} />
                   </div>
-                  <div className="grid gap-2">
-                    <Label>Image URL</Label>
-                    <Input value={e.image_url ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, image_url: ev.target.value } : x))} />
-                  </div>
+<div className="grid gap-2">
+  <Label>Image URL</Label>
+  <Input value={e.image_url ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, image_url: ev.target.value } : x))} />
+</div>
+<div className="grid gap-2">
+  <Label>Image Position</Label>
+  <Select value={e.image_object_position ?? "center"} onValueChange={(v) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, image_object_position: v } : x))}>
+    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+    <SelectContent>
+      {imagePositionOptions.map((p) => (
+        <SelectItem key={p} value={p}>{p.replace("-", " ")}</SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button size="sm" variant="secondary" onClick={() => save(e)} disabled={savingId === e.id}>{savingId === e.id ? "Saving..." : "Save"}</Button>

@@ -12,6 +12,7 @@ interface Employee {
   phone: string | null;
   linkedin_url: string | null;
   image_url: string | null;
+  image_object_position?: string | null;
   sort_order: number | null;
   active: boolean;
   section: string;
@@ -67,6 +68,20 @@ const textClass: Record<string, string> = {
 };
 const borderClass: Record<string, string> = {
   border: "border-border",
+};
+
+const posClass = (p?: string | null) => {
+  switch (p) {
+    case "top": return "object-top";
+    case "bottom": return "object-bottom";
+    case "left": return "object-left";
+    case "right": return "object-right";
+    case "left-top": return "object-left-top";
+    case "left-bottom": return "object-left-bottom";
+    case "right-top": return "object-right-top";
+    case "right-bottom": return "object-right-bottom";
+    default: return "object-center";
+  }
 };
 
 const Team = () => {
@@ -153,14 +168,14 @@ const Team = () => {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {(employeesBySection[sec] || []).map((m) => (
                 <article key={m.id} className={`rounded-xl border ${borderCls} ${cardBg} overflow-hidden`}>
-                  {m.image_url && (
-                    <img
-                      src={m.image_url}
-                      alt={`${m.name} – ${m.title}`}
-                      className="w-full h-56 object-cover"
-                      loading="lazy"
-                    />
-                  )}
+{m.image_url && (
+  <img
+    src={m.image_url}
+    alt={`${m.name} – ${m.title}`}
+    className={`w-full h-80 md:h-[24rem] object-cover ${posClass(m.image_object_position)}`}
+    loading="lazy"
+  />
+)}
                   <div className="p-5 space-y-2">
                     <h3 className={`text-xl font-semibold ${nameCls}`}>{m.name}</h3>
                     <p className={`text-sm ${titleCls}`}>{m.title}</p>
