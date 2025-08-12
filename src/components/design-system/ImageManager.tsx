@@ -317,6 +317,19 @@ const ImageManager = () => {
                     <Textarea value={img.caption ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption: e.target.value } : i))} />
                   </div>
                   <div className="grid gap-2">
+                    <Label>Link URL</Label>
+                    <Input
+                      type="url"
+                      placeholder="https://example.com"
+                      value={img.link_url ?? ""}
+                      onChange={(e) =>
+                        setImages((prev) =>
+                          prev.map((i) => (i.id === img.id ? { ...i, link_url: e.target.value } : i))
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="grid gap-2">
                     <Label>Section</Label>
                     <Select value={img.section} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, section: v } : i))}>
                       <SelectTrigger className="w-full">
