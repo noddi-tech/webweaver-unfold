@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { icons as lucideIcons } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface MetricItem {
   value: string;
@@ -64,7 +65,45 @@ const Metrics = () => {
     <section className="py-20 px-6" aria-labelledby="metrics-heading">
       <div className="container mx-auto">
         <h2 id="metrics-heading" className="sr-only">Key platform metrics</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {/* Mobile: swipeable carousel */}
+        <div className="md:hidden">
+          <Carousel>
+            <CarouselContent>
+              {displayMetrics.map((m, index) => {
+                const alignClass = m.align === 'left' ? 'text-left' : 'text-center';
+                const valueCls = `${sizeClass[m.valueSize || 'xl'] || 'text-6xl'} font-bold ${m.emphasis === 'gradient' ? 'gradient-text' : ''} mb-2 flex items-baseline ${m.align === 'left' ? 'justify-start' : 'justify-center'} gap-1`;
+                const containerBase = m.style === 'plain' ? '' : 'bg-card rounded-xl p-6 border border-border shadow-sm';
+                const IconCmp = m.iconName ? (lucideIcons as Record<string, any>)[m.iconName] : null;
+                return (
+                  <CarouselItem key={index} className="basis-full p-1">
+                    <div className={`${alignClass} ${containerBase} animate-fade-in`}>
+                      {m.showIcon && IconCmp ? <IconCmp className="w-6 h-6 text-primary mb-2" /> : null}
+                      <div className={valueCls}>
+                        <span>{m.value}</span>
+                        {m.suffix ? <span className="text-lg text-muted-foreground">{m.suffix}</span> : null}
+                      </div>
+                      <div className="text-lg font-semibold text-foreground mb-1">
+                        {m.label}
+                      </div>
+                      {m.description ? (
+                        <div className="text-sm text-muted-foreground">
+                          {m.description}
+                        </div>
+                      ) : null}
+                    </div>
+                  </CarouselItem>
+                );
+              })}
+            </CarouselContent>
+            <div className="flex items-center justify-end gap-2 pr-2 mt-2">
+              <CarouselPrevious />
+              <CarouselNext />
+            </div>
+          </Carousel>
+        </div>
+
+        {/* Desktop: 4-column grid */}
+        <div className="hidden md:grid md:grid-cols-4 gap-8">
           {displayMetrics.map((m, index) => {
             const alignClass = m.align === 'left' ? 'text-left' : 'text-center';
             const valueCls = `${sizeClass[m.valueSize || 'xl'] || 'text-6xl'} font-bold ${m.emphasis === 'gradient' ? 'gradient-text' : ''} mb-2 flex items-baseline ${m.align === 'left' ? 'justify-start' : 'justify-center'} gap-1`;
@@ -89,6 +128,7 @@ const Metrics = () => {
             );
           })}
         </div>
+
       </div>
     </section>
   );
