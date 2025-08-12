@@ -37,6 +37,7 @@ interface DbImage {
   section: string;
   file_name: string;
   file_url: string;
+  link_url: string | null;
   sort_order: number | null;
   active: boolean;
   created_at: string;
@@ -147,7 +148,7 @@ const Team = () => {
     const fetchExperienceLogos = async () => {
       const { data, error } = await (supabase as any)
         .from("images")
-        .select("id,title,alt,caption,section,file_name,file_url,sort_order,active,created_at,updated_at")
+        .select("id,title,alt,caption,section,file_name,file_url,link_url,sort_order,active,created_at,updated_at")
         .eq("active", true)
         .eq("section", "experience-logos")
         .order("sort_order", { ascending: true })
@@ -184,23 +185,36 @@ const Team = () => {
     <div className="min-h-screen text-foreground">
       <Header />
       <main className="container mx-auto px-6 pt-32 pb-20">
-        <header className="text-center max-w-2xl mx-auto mb-12">
+        <header className="text-center max-w-3xl mx-auto mb-12">
           <h1 className="text-4xl md:text-5xl font-bold gradient-text">{settings?.section_title || "Meet the Team"}</h1>
           {settings?.section_subtitle && (
             <p className="text-muted-foreground mt-3">{settings.section_subtitle}</p>
           )}
           {experienceLogos.length > 0 && (
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-6" aria-label="Experience logos">
-              {experienceLogos.map((img) => (
-                <img
-                  key={img.id}
-                  src={img.file_url}
-                  alt={img.alt ?? img.title}
-                  className="h-10 md:h-12 object-contain opacity-80 hover:opacity-100 transition-opacity"
-                  loading="lazy"
-                />
-              ))}
-            </div>
+            <Card className="mt-6 bg-card border-border">
+              <div className="flex flex-wrap items-center justify-center gap-6 p-4" aria-label="Experience logos">
+                {experienceLogos.map((img) => {
+                  const Img = (
+                    <div className="flex h-12 w-28 md:h-14 md:w-32 items-center justify-center opacity-80 hover:opacity-100 transition-opacity">
+                      <img
+                        key={img.id}
+                        src={img.file_url}
+                        alt={img.alt ?? img.title}
+                        className="max-h-full max-w-full object-contain"
+                        loading="lazy"
+                      />
+                    </div>
+                  );
+                  return img.link_url ? (
+                    <a key={img.id} href={img.link_url} target="_blank" rel="noopener noreferrer" aria-label={`${img.title} website`}>
+                      {Img}
+                    </a>
+                  ) : (
+                    <div key={img.id}>{Img}</div>
+                  );
+                })}
+              </div>
+            </Card>
           )}
         </header>
 

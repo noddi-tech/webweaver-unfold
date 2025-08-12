@@ -18,6 +18,7 @@ interface DbImage {
   section: string;
   file_name: string;
   file_url: string;
+  link_url: string | null;
   sort_order: number | null;
   active: boolean;
   created_at: string;
