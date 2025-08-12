@@ -192,10 +192,10 @@ const Team = () => {
           )}
           {experienceLogos.length > 0 && (
             <Card className="mt-6 bg-card border-border">
-              <div className="flex flex-wrap items-center justify-center gap-6 p-4" aria-label="Experience logos">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 p-4 place-items-center" aria-label="Experience logos">
                 {experienceLogos.map((img) => {
                   const Img = (
-                      <div className="flex h-16 w-40 md:h-16 md:w-48 items-center justify-center opacity-80 hover:opacity-100 transition-opacity">
+                      <div className="flex h-16 md:h-16 w-full items-center justify-center opacity-80 hover:opacity-100 transition-opacity">
                         <img
                           key={img.id}
                           src={img.file_url}
