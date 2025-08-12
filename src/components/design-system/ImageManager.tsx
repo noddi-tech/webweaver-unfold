@@ -112,14 +112,18 @@ const ImageManager = () => {
   };
 
   const fetchImages = async () => {
-    const { data, error } = await supabase.from("images").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
+    const { data, error } = await supabase
+      .from("images")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
     if (error) {
       toast({ title: "Failed to fetch images", description: error.message, variant: "destructive" });
       return;
     }
-    setImages(data || []);
+    const rows = (data ?? []).map((r: any) => ({ link_url: r.link_url ?? null, ...r })) as DbImage[];
+    setImages(rows);
   };
-
   const addSection = async () => {
     const name = newSection.trim();
     if (!name) return;
