@@ -29,6 +29,20 @@ interface EmployeeSettings {
   link_token: string;
 }
 
+interface DbImage {
+  id: string;
+  title: string;
+  alt: string | null;
+  caption: string | null;
+  section: string;
+  file_name: string;
+  file_url: string;
+  sort_order: number | null;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 const ensureMeta = (name: string, content: string) => {
   let tag = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
   if (!tag) {
@@ -88,6 +102,7 @@ const Team = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [settings, setSettings] = useState<EmployeeSettings | null>(null);
   const [sections, setSections] = useState<Array<{ id: string; name: string; sort_order: number | null }>>([]);
+  const [experienceLogos, setExperienceLogos] = useState<DbImage[]>([]);
 
   useEffect(() => {
     document.title = "Our Team – Noddi Tech";
@@ -124,8 +139,22 @@ const Team = () => {
       ]);
       setSettings((setts && setts[0]) || null);
       setSections(secs || []);
+  };
+  loadMeta();
+  }, []);
+
+  useEffect(() => {
+    const fetchExperienceLogos = async () => {
+      const { data, error } = await (supabase as any)
+        .from("images")
+        .select("id,title,alt,caption,section,file_name,file_url,sort_order,active,created_at,updated_at")
+        .eq("active", true)
+        .eq("section", "experience-logos")
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      if (!error) setExperienceLogos(data || []);
     };
-    loadMeta();
+    fetchExperienceLogos();
   }, []);
 
   const orderedSectionNames = useMemo(() => {
@@ -159,6 +188,19 @@ const Team = () => {
           <h1 className="text-4xl md:text-5xl font-bold gradient-text">{settings?.section_title || "Meet the Team"}</h1>
           {settings?.section_subtitle && (
             <p className="text-muted-foreground mt-3">{settings.section_subtitle}</p>
+          )}
+          {experienceLogos.length > 0 && (
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-6" aria-label="Experience logos">
+              {experienceLogos.map((img) => (
+                <img
+                  key={img.id}
+                  src={img.file_url}
+                  alt={img.alt ?? img.title}
+                  className="h-10 md:h-12 object-contain opacity-80 hover:opacity-100 transition-opacity"
+                  loading="lazy"
+                />
+              ))}
+            </div>
           )}
         </header>
 
