@@ -195,15 +195,15 @@ const Team = () => {
               <div className="flex flex-wrap items-center justify-center gap-6 p-4" aria-label="Experience logos">
                 {experienceLogos.map((img) => {
                   const Img = (
-                    <div className="flex h-12 w-28 md:h-14 md:w-32 items-center justify-center opacity-80 hover:opacity-100 transition-opacity">
-                      <img
-                        key={img.id}
-                        src={img.file_url}
-                        alt={img.alt ?? img.title}
-                        className="max-h-full max-w-full object-contain"
-                        loading="lazy"
-                      />
-                    </div>
+                      <div className="flex h-16 w-40 md:h-16 md:w-48 items-center justify-center opacity-80 hover:opacity-100 transition-opacity">
+                        <img
+                          key={img.id}
+                          src={img.file_url}
+                          alt={img.alt ?? img.title}
+                          className="h-10 md:h-12 w-auto object-contain"
+                          loading="lazy"
+                        />
+                      </div>
                   );
                   return img.link_url ? (
                     <a key={img.id} href={img.link_url} target="_blank" rel="noopener noreferrer" aria-label={`${img.title} website`}>
