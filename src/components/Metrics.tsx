@@ -102,8 +102,8 @@ const Metrics = () => {
           </Carousel>
         </div>
 
-        {/* Desktop: 4-column grid */}
-        <div className="hidden md:grid md:grid-cols-4 gap-8">
+        {/* Desktop: responsive auto-fit grid */}
+        <div className="hidden md:grid gap-8 md:grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] justify-items-stretch">
           {displayMetrics.map((m, index) => {
             const alignClass = m.align === 'left' ? 'text-left' : 'text-center';
             const valueCls = `${sizeClass[m.valueSize || 'xl'] || 'text-6xl'} font-bold ${m.emphasis === 'gradient' ? 'gradient-text' : ''} mb-2 flex items-baseline ${m.align === 'left' ? 'justify-start' : 'justify-center'} gap-1`;
