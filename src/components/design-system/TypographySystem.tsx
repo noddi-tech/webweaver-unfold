@@ -1,37 +1,8 @@
 import { Card } from "@/components/ui/card";
+import { TYPOGRAPHY_SCALE } from "@/lib/typography";
 
 export const TypographySystem = () => {
-  const headings = [
-    { tag: "h1", class: "text-6xl font-bold", sample: "Display Heading", description: "Hero titles, main page headers" },
-    { tag: "h2", class: "text-4xl font-bold", sample: "Section Heading", description: "Major section titles" },
-    { tag: "h3", class: "text-2xl font-semibold", sample: "Subsection Heading", description: "Subsection titles" },
-    { tag: "h4", class: "text-xl font-semibold", sample: "Component Heading", description: "Component or card titles" },
-    { tag: "h5", class: "text-lg font-medium", sample: "Small Heading", description: "Minor section headings" },
-    { tag: "h6", class: "text-base font-medium", sample: "Tiny Heading", description: "Labels and small titles" },
-  ];
-
-  const bodyText = [
-    { name: "Large Body", class: "text-xl", sample: "This is large body text for important content and introductions." },
-    { name: "Regular Body", class: "text-base", sample: "This is regular body text for most content, paragraphs, and descriptions." },
-    { name: "Small Body", class: "text-sm", sample: "This is small body text for captions, metadata, and secondary information." },
-    { name: "Extra Small", class: "text-xs", sample: "This is extra small text for fine print and minimal details." },
-  ];
-
-  const weights = [
-    { name: "Light", class: "font-light", weight: "300" },
-    { name: "Regular", class: "font-normal", weight: "400" },
-    { name: "Medium", class: "font-medium", weight: "500" },
-    { name: "Semibold", class: "font-semibold", weight: "600" },
-    { name: "Bold", class: "font-bold", weight: "700" },
-    { name: "Black", class: "font-black", weight: "900" },
-  ];
-
-  const specialStyles = [
-    { name: "Gradient Text", class: "gradient-text text-4xl font-bold", sample: "Gradient Heading" },
-    { name: "Muted Text", class: "text-muted-foreground", sample: "Secondary text content" },
-    { name: "Code Text", class: "font-mono text-sm bg-muted px-2 py-1 rounded", sample: "const variable = 'value'" },
-    { name: "Link Text", class: "text-primary hover:underline", sample: "Interactive link text" },
-  ];
+  const { headings, bodyText, weights, specialStyles } = TYPOGRAPHY_SCALE;
 
   return (
     <section>

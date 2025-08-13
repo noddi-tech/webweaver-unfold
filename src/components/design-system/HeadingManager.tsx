@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Type, Plus, Trash2, Save } from "lucide-react";
+import { getTypographyClassWithSpecialStyles } from "@/lib/typography";
 
 interface Heading {
   id: string;
@@ -318,32 +319,32 @@ const HeadingManager = () => {
                        <TableCell>
                          <div className="min-w-[200px] max-w-[250px]">
                            {heading.element_type === 'h1' && (
-                             <h1 className="text-6xl font-bold gradient-text truncate">
+                             <h1 className={`${getTypographyClassWithSpecialStyles('h1')} truncate`}>
                                {heading.content || 'Preview text'}
                              </h1>
                            )}
                            {heading.element_type === 'h2' && (
-                             <h2 className="text-4xl font-bold text-foreground truncate">
+                             <h2 className={`${getTypographyClassWithSpecialStyles('h2')} truncate`}>
                                {heading.content || 'Preview text'}
                              </h2>
                            )}
                            {heading.element_type === 'h3' && (
-                             <h3 className="text-2xl font-semibold text-foreground truncate">
+                             <h3 className={`${getTypographyClassWithSpecialStyles('h3')} truncate`}>
                                {heading.content || 'Preview text'}
                              </h3>
                            )}
                            {heading.element_type === 'h4' && (
-                             <h4 className="text-xl font-semibold text-foreground truncate">
+                             <h4 className={`${getTypographyClassWithSpecialStyles('h4')} truncate`}>
                                {heading.content || 'Preview text'}
                              </h4>
                            )}
                            {heading.element_type === 'subtitle' && (
-                             <p className="text-xl text-muted-foreground truncate">
+                             <p className={`${getTypographyClassWithSpecialStyles('subtitle')} truncate`}>
                                {heading.content || 'Preview text'}
                              </p>
                            )}
                            {heading.element_type === 'description' && (
-                             <p className="text-base text-muted-foreground truncate">
+                             <p className={`${getTypographyClassWithSpecialStyles('description')} truncate`}>
                                {heading.content || 'Preview text'}
                              </p>
                            )}
