@@ -188,9 +188,13 @@ const Team = () => {
       <Header />
       <main className="container mx-auto px-6 pt-32 pb-20">
         <header className="text-center max-w-3xl mx-auto mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold gradient-text">{settings?.section_title || "Meet the Team"}</h1>
-          {settings?.section_subtitle && (
-            <p className="text-muted-foreground mt-3">{settings.section_subtitle}</p>
+          <h1 className="text-4xl md:text-5xl font-bold gradient-text">
+            {getHeading('h1', settings?.section_title || "Meet the Team")}
+          </h1>
+          {(getHeading('subtitle') || settings?.section_subtitle) && (
+            <p className="text-muted-foreground mt-3">
+              {getHeading('subtitle', settings?.section_subtitle)}
+            </p>
           )}
           {experienceLogos.length > 0 && (
             <Card className="mt-6 bg-card border-border">
