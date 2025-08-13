@@ -327,12 +327,12 @@ const SectionsManager = () => {
             </div>
             <div>
               <Label htmlFor="position">Position After</Label>
-              <Select value={newSection.position_after} onValueChange={(value) => setNewSection({ ...newSection, position_after: value })}>
+              <Select value={newSection.position_after} onValueChange={(value) => setNewSection({ ...newSection, position_after: value === "first" ? "" : value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select position" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">First section</SelectItem>
+                  <SelectItem value="first">First section</SelectItem>
                   {sectionsByPage[newSection.page_location]?.map(section => (
                     <SelectItem key={section.id} value={section.name}>
                       After {section.display_name}
