@@ -60,6 +60,11 @@ const Hero = () => {
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 gradient-text leading-tight break-words hyphens-auto text-balance">
             {getHeading('h1', 'Streamline Your Automotive Operations')}
           </h1>
+          
+          {/* Subheading */}
+          <h5 className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+            {getHeading('h5', '')}
+          </h5>
 
           {/* Hero USPs */}
           {usps.length > 0 && (
