@@ -100,9 +100,10 @@ const SectionsManager = () => {
 
       const content: Record<string, SectionContent> = {};
       
-      // Initialize content for each section ID specifically
+      // Initialize content for each section
       sectionsData?.forEach(section => {
         const sectionName = section.name;
+        const pageLocation = section.page_location;
         
         content[section.id] = {
           features: [],
@@ -113,64 +114,64 @@ const SectionsManager = () => {
           headings: []
         };
 
-        // Map content based on section names and what actually belongs to each section
-        switch (sectionName) {
-          case 'hero':
-            // Hero section has USPs, headings, and images
-            content[section.id].usps = usps.data?.filter(u => u.location === 'hero') || [];
-            content[section.id].headings = headings.data?.filter(h => 
-              h.page_location === section.page_location && h.section === 'hero') || [];
-            content[section.id].images = images.data?.filter(i => i.section === 'hero') || [];
-            break;
-            
-          case 'features':
-            content[section.id].features = features.data?.filter(f => !f.section_id) || [];
-            content[section.id].usps = usps.data?.filter(u => u.location === 'features') || [];
-            content[section.id].headings = headings.data?.filter(h => 
-              h.page_location === section.page_location && h.section === 'features') || [];
-            break;
-            
-          case 'metrics':
-            content[section.id].usps = usps.data?.filter(u => u.format === 'metric') || [];
-            content[section.id].headings = headings.data?.filter(h => 
-              h.page_location === section.page_location && h.section === 'metrics') || [];
-            break;
-            
-          case 'team':
-            // Team section has employee sections and headings
+        // Always check for headings that match the section and page
+        content[section.id].headings = headings.data?.filter(h => 
+          h.page_location === pageLocation && h.section === sectionName
+        ) || [];
+
+        // Check for content that directly references this section ID
+        content[section.id].features = features.data?.filter(f => f.section_id === section.id) || [];
+        content[section.id].usps = usps.data?.filter(u => u.section_id === section.id) || [];
+        content[section.id].images = images.data?.filter(i => i.section_id === section.id) || [];
+
+        // Also check for content that matches by section name
+        const featuresByName = features.data?.filter(f => !f.section_id && sectionName === 'features') || [];
+        const uspsByName = usps.data?.filter(u => u.location === sectionName) || [];
+        const imagesByName = images.data?.filter(i => i.section === sectionName) || [];
+        const videosByName = videos.data?.filter(v => v.section === sectionName) || [];
+
+        // Merge content avoiding duplicates
+        content[section.id].features = [...content[section.id].features, ...featuresByName];
+        content[section.id].usps = [...content[section.id].usps, ...uspsByName];
+        content[section.id].images = [...content[section.id].images, ...imagesByName];
+        content[section.id].videos = [...content[section.id].videos, ...videosByName];
+
+        // Special handling for specific sections
+        if (sectionName === 'team') {
+          // Show all employee sections for team page
+          if (pageLocation === 'team') {
             content[section.id].employees = employeeSections.data || [];
-            content[section.id].headings = headings.data?.filter(h => 
-              h.page_location === section.page_location && h.section === 'team') || [];
-            break;
-            
-          case 'contact':
-            content[section.id].usps = usps.data?.filter(u => u.location === 'contact') || [];
-            content[section.id].headings = headings.data?.filter(h => 
-              h.page_location === section.page_location && h.section === 'contact') || [];
-            break;
-            
-          default:
-            // For other sections, show relevant content based on page location and section name
-            content[section.id].headings = headings.data?.filter(h => 
-              h.page_location === section.page_location && h.section === sectionName) || [];
-            
-            if (section.page_location === 'demo') {
-              content[section.id].videos = videoSections.data || [];
-              content[section.id].images = imageSections.data || [];
-            }
-            
-            // Check for section-specific content
-            content[section.id].features = features.data?.filter(f => f.section_id === section.id) || [];
-            content[section.id].images = [
-              ...content[section.id].images,
-              ...images.data?.filter(i => i.section === sectionName || i.section_id === section.id) || []
-            ];
-            content[section.id].usps = [
-              ...content[section.id].usps,
-              ...usps.data?.filter(u => u.section_id === section.id) || []
-            ];
-            break;
+          }
         }
+
+        // For demo page, show video and image sections
+        if (pageLocation === 'demo') {
+          content[section.id].videos = [...content[section.id].videos, ...videoSections.data || []];
+          content[section.id].images = [...content[section.id].images, ...imageSections.data || []];
+        }
+
+        // Handle metrics format USPs
+        if (sectionName === 'metrics') {
+          const metricUsps = usps.data?.filter(u => u.format === 'metric') || [];
+          content[section.id].usps = [...content[section.id].usps, ...metricUsps];
+        }
+
+        // Remove duplicates by ID
+        content[section.id].features = content[section.id].features.filter((item, index, arr) => 
+          arr.findIndex(t => t.id === item.id) === index
+        );
+        content[section.id].usps = content[section.id].usps.filter((item, index, arr) => 
+          arr.findIndex(t => t.id === item.id) === index
+        );
+        content[section.id].images = content[section.id].images.filter((item, index, arr) => 
+          arr.findIndex(t => t.id === item.id) === index
+        );
+        content[section.id].videos = content[section.id].videos.filter((item, index, arr) => 
+          arr.findIndex(t => t.id === item.id) === index
+        );
+        content[section.id].employees = content[section.id].employees.filter((item, index, arr) => 
+          arr.findIndex(t => t.id === item.id) === index
+        );
       });
 
       setSectionContent(content);
