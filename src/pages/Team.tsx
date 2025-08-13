@@ -192,12 +192,15 @@ const Team = () => {
           {(() => {
             const h1Heading = headings.find(h => h.element_type === 'h1');
             const h1Option = TYPOGRAPHY_SCALE.headings.find(h => h.tag === 'h1');
+            const colorClass = h1Heading?.color_token === 'gradient-text' 
+              ? 'gradient-text' 
+              : `text-${h1Heading?.color_token || 'foreground'}`;
             return h1Heading ? (
-              <h1 className={h1Option?.class || 'text-6xl font-bold gradient-text'}>
+              <h1 className={`${h1Option?.class || 'text-6xl font-bold'} ${colorClass}`}>
                 {h1Heading.content}
               </h1>
             ) : (
-              <h1 className={h1Option?.class || 'text-6xl font-bold gradient-text'}>
+              <h1 className={`${h1Option?.class || 'text-6xl font-bold'} gradient-text`}>
                 {settings?.section_title || "Meet the Team"}
               </h1>
             );
@@ -211,22 +214,31 @@ const Team = () => {
             
             if (h4Heading) {
               const h4Option = TYPOGRAPHY_SCALE.headings.find(h => h.tag === 'h4');
+              const colorClass = h4Heading.color_token === 'gradient-text' 
+                ? 'gradient-text' 
+                : `text-${h4Heading.color_token || 'foreground'}`;
               return (
-                <h4 className={`${h4Option?.class || 'text-xl font-semibold'} mt-3`}>
+                <h4 className={`${h4Option?.class || 'text-xl font-semibold'} ${colorClass} mt-3`}>
                   {h4Heading.content}
                 </h4>
               );
             } else if (h3Heading) {
               const h3Option = TYPOGRAPHY_SCALE.headings.find(h => h.tag === 'h3');
+              const colorClass = h3Heading.color_token === 'gradient-text' 
+                ? 'gradient-text' 
+                : `text-${h3Heading.color_token || 'foreground'}`;
               return (
-                <h3 className={`${h3Option?.class || 'text-2xl font-semibold'} mt-3`}>
+                <h3 className={`${h3Option?.class || 'text-2xl font-semibold'} ${colorClass} mt-3`}>
                   {h3Heading.content}
                 </h3>
               );
             } else if (subtitleHeading) {
               const subtitleOption = TYPOGRAPHY_SCALE.bodyText.find(b => b.name === 'Large Body');
+              const colorClass = subtitleHeading.color_token === 'gradient-text' 
+                ? 'gradient-text' 
+                : `text-${subtitleHeading.color_token || 'muted-foreground'}`;
               return (
-                <p className={`${subtitleOption?.class || 'text-xl'} text-muted-foreground mt-3`}>
+                <p className={`${subtitleOption?.class || 'text-xl'} ${colorClass} mt-3`}>
                   {subtitleHeading.content}
                 </p>
               );

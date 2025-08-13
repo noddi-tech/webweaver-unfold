@@ -444,6 +444,7 @@ export type Database = {
       headings: {
         Row: {
           active: boolean
+          color_token: string | null
           content: string
           created_at: string
           element_type: string
@@ -455,6 +456,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          color_token?: string | null
           content: string
           created_at?: string
           element_type: string
@@ -466,6 +468,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          color_token?: string | null
           content?: string
           created_at?: string
           element_type?: string

@@ -9,6 +9,7 @@ interface Heading {
   content: string;
   active: boolean;
   sort_order: number | null;
+  color_token?: string;
 }
 
 export const useHeadings = (pageLocation?: string, section?: string) => {

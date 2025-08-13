@@ -20,6 +20,7 @@ interface Heading {
   content: string;
   active: boolean;
   sort_order: number | null;
+  color_token?: string;
 }
 
 const pageOptions = [
@@ -60,6 +61,17 @@ const elementTypeOptions = [
   }))
 ];
 
+// Color token options from design system
+const colorTokenOptions = [
+  { value: 'foreground', label: 'Foreground (Default)', description: 'Primary text color' },
+  { value: 'muted-foreground', label: 'Muted Foreground', description: 'Secondary text color' },
+  { value: 'primary', label: 'Primary', description: 'Brand primary color' },
+  { value: 'secondary', label: 'Secondary', description: 'Secondary brand color' },
+  { value: 'accent', label: 'Accent', description: 'Accent color' },
+  { value: 'destructive', label: 'Destructive', description: 'Error/warning color' },
+  { value: 'gradient-text', label: 'Gradient Text', description: 'Brand gradient effect' },
+];
+
 const HeadingManager = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -74,6 +86,7 @@ const HeadingManager = () => {
     content: '',
     active: true,
     sort_order: 0,
+    color_token: 'foreground',
   });
 
   useEffect(() => {
@@ -115,6 +128,7 @@ const HeadingManager = () => {
           content: heading.content,
           active: heading.active,
           sort_order: heading.sort_order,
+          color_token: heading.color_token,
         })
         .eq('id', heading.id);
 
@@ -153,6 +167,7 @@ const HeadingManager = () => {
         content: '',
         active: true,
         sort_order: headings.length,
+        color_token: 'foreground',
       });
       toast({
         title: "Heading created",
@@ -261,6 +276,7 @@ const HeadingManager = () => {
             <TableHead>Section</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Content</TableHead>
+            <TableHead>Color</TableHead>
             <TableHead>Preview</TableHead>
             <TableHead>Active</TableHead>
             <TableHead>Order</TableHead>
@@ -328,29 +344,49 @@ const HeadingManager = () => {
                           className="min-w-[200px]"
                           rows={2}
                         />
-                      </TableCell>
+                       </TableCell>
+                       <TableCell>
+                         <Select
+                           value={heading.color_token || 'foreground'}
+                           onValueChange={(value) => updateHeading(heading.id, 'color_token', value)}
+                         >
+                           <SelectTrigger className="w-32">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent>
+                             {colorTokenOptions.map(option => (
+                               <SelectItem key={option.value} value={option.value}>
+                                 {option.label}
+                               </SelectItem>
+                             ))}
+                           </SelectContent>
+                         </Select>
+                       </TableCell>
                        <TableCell>
                          <div className="min-w-[200px] max-w-[250px]">
-                           {(() => {
-                             const elementOption = elementTypeOptions.find(opt => opt.value === heading.element_type);
-                             const className = elementOption?.class || 'text-base';
-                             const isHeading = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(heading.element_type);
-                             
-                             if (isHeading) {
-                               const HeadingTag = heading.element_type as keyof JSX.IntrinsicElements;
-                               return (
-                                 <HeadingTag className={`${className} truncate`}>
-                                   {heading.content || 'Preview text'}
-                                 </HeadingTag>
-                               );
-                             } else {
-                               return (
-                                 <p className={`${className} truncate`}>
-                                   {heading.content || 'Preview text'}
-                                 </p>
-                               );
-                             }
-                           })()}
+                            {(() => {
+                              const elementOption = elementTypeOptions.find(opt => opt.value === heading.element_type);
+                              const className = elementOption?.class || 'text-base';
+                              const colorClass = heading.color_token === 'gradient-text' 
+                                ? 'gradient-text' 
+                                : `text-${heading.color_token || 'foreground'}`;
+                              const isHeading = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(heading.element_type);
+                              
+                              if (isHeading) {
+                                const HeadingTag = heading.element_type as keyof JSX.IntrinsicElements;
+                                return (
+                                  <HeadingTag className={`${className} ${colorClass} truncate`}>
+                                    {heading.content || 'Preview text'}
+                                  </HeadingTag>
+                                );
+                              } else {
+                                return (
+                                  <p className={`${className} ${colorClass} truncate`}>
+                                    {heading.content || 'Preview text'}
+                                  </p>
+                                );
+                              }
+                            })()}
                           </div>
                        </TableCell>
                        <TableCell>
@@ -388,13 +424,13 @@ const HeadingManager = () => {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {filteredHeadings.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center text-muted-foreground">
-                        No headings found for the selected page.
-                      </TableCell>
-                    </TableRow>
-                  )}
+                   {filteredHeadings.length === 0 && (
+                     <TableRow>
+                       <TableCell colSpan={9} className="text-center text-muted-foreground">
+                         No headings found for the selected page.
+                       </TableCell>
+                     </TableRow>
+                   )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -408,7 +444,7 @@ const HeadingManager = () => {
               <CardDescription>Add a new heading or subheading</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <label className="text-sm font-medium text-foreground">Page Location</label>
                   <Select
@@ -463,6 +499,24 @@ const HeadingManager = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">Color</label>
+                  <Select
+                    value={newHeading.color_token}
+                    onValueChange={(value) => setNewHeading({ ...newHeading, color_token: value })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {colorTokenOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-foreground">Content</label>
@@ -497,29 +551,32 @@ const HeadingManager = () => {
                  <div>
                    <label className="text-sm font-medium text-foreground">Typography Preview</label>
                    <div className="mt-2 p-4 border rounded-lg bg-muted/50">
-                     {(() => {
-                       const elementOption = elementTypeOptions.find(opt => opt.value === newHeading.element_type);
-                       const className = elementOption?.class || 'text-base';
-                       const isHeading = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(newHeading.element_type);
-                       
-                       if (isHeading) {
-                         const HeadingTag = newHeading.element_type as keyof JSX.IntrinsicElements;
-                         return (
-                           <HeadingTag className={className}>
-                             {newHeading.content}
-                           </HeadingTag>
-                         );
-                       } else {
-                         return (
-                           <p className={className}>
-                             {newHeading.content}
-                           </p>
-                         );
-                       }
-                     })()}
-                     <p className="text-xs text-muted-foreground mt-2">
-                       Applied class: {elementTypeOptions.find(opt => opt.value === newHeading.element_type)?.class || 'text-base'}
-                     </p>
+                      {(() => {
+                        const elementOption = elementTypeOptions.find(opt => opt.value === newHeading.element_type);
+                        const className = elementOption?.class || 'text-base';
+                        const colorClass = newHeading.color_token === 'gradient-text' 
+                          ? 'gradient-text' 
+                          : `text-${newHeading.color_token}`;
+                        const isHeading = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(newHeading.element_type);
+                        
+                        if (isHeading) {
+                          const HeadingTag = newHeading.element_type as keyof JSX.IntrinsicElements;
+                          return (
+                            <HeadingTag className={`${className} ${colorClass}`}>
+                              {newHeading.content}
+                            </HeadingTag>
+                          );
+                        } else {
+                          return (
+                            <p className={`${className} ${colorClass}`}>
+                              {newHeading.content}
+                            </p>
+                          );
+                        }
+                      })()}
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Applied class: {elementTypeOptions.find(opt => opt.value === newHeading.element_type)?.class || 'text-base'} {newHeading.color_token === 'gradient-text' ? 'gradient-text' : `text-${newHeading.color_token}`}
+                      </p>
                    </div>
                  </div>
                )}
