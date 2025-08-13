@@ -47,12 +47,15 @@ const DynamicSection = ({ section }: DynamicSectionProps) => {
     const mapping: Record<string, string> = {
       background: 'bg-background',
       card: 'bg-card',
+      muted: 'bg-muted',
       primary: 'bg-primary',
       secondary: 'bg-secondary',
       accent: 'bg-accent',
       'gradient-primary': 'bg-gradient-primary',
       'gradient-background': 'bg-gradient-background',
       'gradient-hero': 'bg-gradient-hero',
+      'gradient-subtle': 'bg-gradient-subtle',
+      transparent: 'bg-transparent',
     };
     return mapping[token || 'background'] || 'bg-background';
   };

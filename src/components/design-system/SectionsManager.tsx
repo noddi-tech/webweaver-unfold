@@ -41,11 +41,23 @@ interface SectionContent {
 }
 
 const DESIGN_TOKENS = {
-  background: ['background', 'card', 'muted', 'primary', 'secondary', 'accent'],
-  text: ['foreground', 'muted-foreground', 'primary', 'secondary', 'accent-foreground'],
-  padding: ['none', 'sm', 'md', 'lg', 'xl', 'section'],
+  background: [
+    'background', 
+    'card', 
+    'muted', 
+    'primary', 
+    'secondary', 
+    'accent',
+    'gradient-primary',
+    'gradient-background', 
+    'gradient-hero',
+    'gradient-subtle',
+    'transparent'
+  ],
+  text: ['foreground', 'muted-foreground', 'primary', 'secondary', 'accent-foreground', 'primary-foreground'],
+  padding: ['none', 'sm', 'md', 'lg', 'xl', 'section', 'large', 'small'],
   margin: ['none', 'sm', 'md', 'lg', 'xl'],
-  maxWidth: ['container', 'sm', 'md', 'lg', 'xl', 'full']
+  maxWidth: ['container', 'sm', 'md', 'lg', 'xl', 'full', 'narrow', 'wide']
 };
 
 const PAGE_LOCATIONS = [
@@ -435,7 +447,12 @@ const SectionsManager = () => {
         'muted': 'bg-muted',
         'primary': 'bg-primary',
         'secondary': 'bg-secondary',
-        'accent': 'bg-accent'
+        'accent': 'bg-accent',
+        'gradient-primary': 'bg-gradient-primary',
+        'gradient-background': 'bg-gradient-background',
+        'gradient-hero': 'bg-gradient-hero',
+        'gradient-subtle': 'bg-gradient-subtle',
+        'transparent': 'bg-transparent'
       };
       return bgMap[token] || 'bg-background';
     };
