@@ -5,8 +5,10 @@ import dashboardPreview from "@/assets/dashboard-preview.jpg";
 import { useEffect, useState } from "react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useHeadings } from "@/hooks/useHeadings";
 
 const Hero = () => {
+  const { getHeading } = useHeadings('index', 'hero');
   const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
   const [heroImage, setHeroImage] = useState<{ url: string; alt: string } | null>(null);
 
@@ -56,9 +58,7 @@ const Hero = () => {
         <div className="max-w-4xl mx-auto text-center overflow-hidden">
           {/* Hero Text */}
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 gradient-text leading-tight break-words hyphens-auto text-balance">
-            Streamline Your
-            <br />
-            Automotive Operations
+            {getHeading('h1', 'Streamline Your Automotive Operations')}
           </h1>
 
           {/* Hero USPs */}

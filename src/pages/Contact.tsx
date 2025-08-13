@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useHeadings } from "@/hooks/useHeadings";
 import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
@@ -48,6 +49,9 @@ const Contact = () => {
   const [settings, setSettings] = useState<ContactSettings | null>(null);
   const [contactItems, setContactItems] = useState<ContactItem[]>([]);
   const [hours, setHours] = useState<BusinessHour[]>([]);
+  
+  // Use headings CMS for page headings
+  const { getHeading } = useHeadings('contact', 'hero');
 
   useEffect(() => {
     const load = async () => {
@@ -126,10 +130,10 @@ const Contact = () => {
       <main className="container mx-auto px-6 py-12 pt-32">
         <div className="text-center mb-16">
           <h1 className="text-6xl font-bold gradient-text mb-6">
-            Contact Us
+            {getHeading('h1', 'Contact Us')}
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Get in touch with our team. We're here to help you succeed.
+            {getHeading('subtitle', 'Get in touch with our team. We\'re here to help you succeed.')}
           </p>
         </div>
 

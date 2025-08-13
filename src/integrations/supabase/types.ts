@@ -350,6 +350,42 @@ export type Database = {
         }
         Relationships: []
       }
+      headings: {
+        Row: {
+          active: boolean
+          content: string
+          created_at: string
+          element_type: string
+          id: string
+          page_location: string
+          section: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          content: string
+          created_at?: string
+          element_type: string
+          id?: string
+          page_location: string
+          section: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          content?: string
+          created_at?: string
+          element_type?: string
+          id?: string
+          page_location?: string
+          section?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       image_sections: {
         Row: {
           created_at: string

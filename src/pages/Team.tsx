@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import Header from "@/components/Header";
+import { useHeadings } from "@/hooks/useHeadings";
 import { Card } from "@/components/ui/card";
 import { Mail, Phone, Linkedin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -100,6 +101,7 @@ const posClass = (p?: string | null) => {
 };
 
 const Team = () => {
+  const { getHeading } = useHeadings('team', 'hero');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [settings, setSettings] = useState<EmployeeSettings | null>(null);
   const [sections, setSections] = useState<Array<{ id: string; name: string; sort_order: number | null }>>([]);

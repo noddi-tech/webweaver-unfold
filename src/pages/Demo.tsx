@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useHeadings } from "@/hooks/useHeadings";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { Play } from "lucide-react";
@@ -16,6 +17,7 @@ type DbVideo = {
 };
 
 const Demo = () => {
+  const { getHeading } = useHeadings('demo', 'hero');
   const [videos, setVideos] = useState<DbVideo[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,10 +58,11 @@ const Demo = () => {
       <main className="pt-32 pb-20 px-6">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 gradient-text">Product Demo</h1>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 gradient-text">
+              {getHeading('h1', 'Demo')}
+            </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Watch our product in action. See how Noddi Tech's automotive logistics 
-              platform streamlines operations and delivers exceptional results.
+              {getHeading('subtitle', 'Experience our platform in action')}
             </p>
           </div>
 
