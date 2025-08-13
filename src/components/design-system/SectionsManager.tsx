@@ -10,7 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowUp, ArrowDown, Eye, Plus, Trash2 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ArrowUp, ArrowDown, Eye, Plus, Trash2, ChevronDown, ChevronRight, Image, Video, Users, Sparkles, Star } from "lucide-react";
 
 interface Section {
   id: string;
@@ -28,6 +29,14 @@ interface Section {
   sort_order: number;
   created_at: string;
   updated_at: string;
+}
+
+interface SectionContent {
+  features: any[];
+  images: any[];
+  videos: any[];
+  usps: any[];
+  employees: any[];
 }
 
 const DESIGN_TOKENS = {
@@ -253,14 +262,48 @@ const SectionsManager = () => {
   };
 
   const getSectionPreview = (section: Section) => {
-    const bgClass = `bg-${section.background_token}`;
-    const textClass = `text-${section.text_token}`;
-    const paddingClass = section.padding_token !== 'none' ? `p-${section.padding_token}` : '';
-    const marginClass = section.margin_token !== 'none' ? `m-${section.margin_token}` : '';
-    const maxWidthClass = section.max_width_token !== 'full' ? `max-w-${section.max_width_token}` : '';
+    // Map design tokens to actual Tailwind classes
+    const getBackgroundClass = (token: string) => {
+      const bgMap: Record<string, string> = {
+        'background': 'bg-background',
+        'card': 'bg-card',
+        'muted': 'bg-muted',
+        'primary': 'bg-primary',
+        'secondary': 'bg-secondary',
+        'accent': 'bg-accent'
+      };
+      return bgMap[token] || 'bg-background';
+    };
+
+    const getTextClass = (token: string) => {
+      const textMap: Record<string, string> = {
+        'foreground': 'text-foreground',
+        'muted-foreground': 'text-muted-foreground',
+        'primary': 'text-primary',
+        'secondary': 'text-secondary',
+        'accent-foreground': 'text-accent-foreground'
+      };
+      return textMap[token] || 'text-foreground';
+    };
+
+    const getPaddingClass = (token: string) => {
+      const paddingMap: Record<string, string> = {
+        'none': '',
+        'sm': 'p-2',
+        'md': 'p-4',
+        'lg': 'p-6',
+        'xl': 'p-8',
+        'section': 'p-6'
+      };
+      return paddingMap[token] || '';
+    };
+
+    const bgClass = getBackgroundClass(section.background_token);
+    const textClass = getTextClass(section.text_token);
+    const paddingClass = getPaddingClass(section.padding_token);
 
     return (
-      <div className={`${bgClass} ${textClass} ${paddingClass} ${marginClass} ${maxWidthClass} rounded border min-h-[40px] flex items-center justify-center text-sm`}>
+      <div className={`${bgClass} ${textClass} ${paddingClass} rounded border min-h-[40px] flex items-center justify-center text-sm`}>
         {section.display_name}
       </div>
     );
@@ -327,7 +370,7 @@ const SectionsManager = () => {
             </div>
             <div>
               <Label htmlFor="position">Position After</Label>
-              <Select value={newSection.position_after} onValueChange={(value) => setNewSection({ ...newSection, position_after: value === "first" ? "" : value })}>
+              <Select value={newSection.position_after || "first"} onValueChange={(value) => setNewSection({ ...newSection, position_after: value === "first" ? "" : value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select position" />
                 </SelectTrigger>
