@@ -91,7 +91,7 @@ const SectionsManager = () => {
 
       console.log('Sections data:', sectionsData);
 
-      const [employeeSections, videoSections, imageSections, features, usps, employees, videos, images, headings] = await Promise.all([
+      const [employeeSections, videoSections, imageSections, features, usps, employees, videos, images, headings, headerSettings, footerSettings] = await Promise.all([
         supabase.from('employees_sections').select('*').order('sort_order'),
         supabase.from('video_sections').select('*').order('sort_order'),
         supabase.from('image_sections').select('*').order('sort_order'),
@@ -100,7 +100,9 @@ const SectionsManager = () => {
         supabase.from('employees').select('*').order('sort_order'),
         supabase.from('videos').select('*').order('sort_order'),
         supabase.from('images').select('*').order('sort_order'),
-        supabase.from('headings').select('*').order('sort_order')
+        supabase.from('headings').select('*').order('sort_order'),
+        supabase.from('header_settings').select('*').limit(1).maybeSingle(),
+        supabase.from('footer_settings').select('*').limit(1).maybeSingle()
       ]);
 
       console.log('All content data:', {
@@ -191,6 +193,24 @@ const SectionsManager = () => {
         if (sectionName === 'metrics') {
           const metricUsps = usps.data?.filter(u => u.format === 'metric') || [];
           content[section.id].usps = [...content[section.id].usps, ...metricUsps];
+        }
+
+        // Special handling for global header/footer sections
+        if (pageLocation === 'global') {
+          if (sectionName === 'header' && headerSettings.data) {
+            // Add header settings as content indicator
+            const navLinks = Array.isArray(headerSettings.data.navigation_links) ? headerSettings.data.navigation_links : [];
+            content[section.id].headings = [
+              { id: 'header-nav', content: `Navigation: ${navLinks.length} links`, element_type: 'navigation' },
+              { id: 'header-auth', content: `Auth buttons: ${headerSettings.data.show_auth_buttons ? 'enabled' : 'disabled'}`, element_type: 'auth' }
+            ];
+          }
+          if (sectionName === 'footer' && footerSettings.data) {
+            // Add footer settings as content indicator
+            content[section.id].headings = [
+              { id: 'footer-content', content: `Footer sections configured`, element_type: 'footer' }
+            ];
+          }
         }
 
         // Remove duplicates by ID
