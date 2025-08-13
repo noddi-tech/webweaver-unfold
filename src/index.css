@@ -72,48 +72,50 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Use the same brand colors as light mode */
+    --background: 266 42% 96%; /* Same as light mode */
+    --foreground: 0 0% 5%; /* Same as light mode */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100% / 0.8; /* Same glass morphism */
+    --card-foreground: 0 0% 5%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100% / 0.95;
+    --popover-foreground: 0 0% 5%;
 
-    --primary: 252 87% 58%; /* Keep the brand purple for primary */
-    --primary-foreground: 210 40% 98%;
+    --primary: 252 87% 58%; /* Noddi purple */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 321 59% 85%; /* Light pink from gradient */
+    --secondary-foreground: 0 0% 5%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 266 42% 92%;
+    --muted-foreground: 264 28% 38%;
 
-    --accent: 252 87% 58%; /* Keep brand purple for accent */
-    --accent-foreground: 210 40% 98%;
+    --accent: 252 87% 58%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --input-foreground: 210 40% 98%;
-    --ring: 252 87% 58%; /* Keep brand purple for ring */
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 252 87% 58%; /* Keep brand purple */
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 252 87% 58%; /* Keep brand purple */
+    --border: 264 20% 85%;
+    --input: 0 0% 100%;
+    --input-foreground: 0 0% 5%;
+    --ring: 252 87% 58%;
     
-    /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(240 100% 20%));
-    --gradient-background: linear-gradient(135deg, hsl(222.2 84% 4.9%), hsl(240 10% 8%));
-    --gradient-hero: radial-gradient(80% 60% at 50% 0%, hsl(var(--primary) / 0.15), transparent 70%),
-                     linear-gradient(135deg, hsl(222.2 84% 4.9%), hsl(240 10% 8%));
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Same gradients as light mode */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--noddi-text)));
+    --gradient-background: linear-gradient(135deg, hsl(var(--noddi-gradient-start)), hsl(var(--noddi-gradient-end)));
+    --gradient-hero: radial-gradient(80% 60% at 50% 0%, hsl(var(--primary) / 0.25), transparent 70%),
+                     linear-gradient(135deg, hsl(var(--noddi-gradient-start)), hsl(var(--noddi-gradient-end)));
   }
 }
 
