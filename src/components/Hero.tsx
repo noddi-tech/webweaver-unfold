@@ -55,7 +55,7 @@ const Hero = () => {
   return (
     <section id="home" className="pt-32 pb-20 px-6">
       <div className="container mx-auto">
-        <div className="max-w-4xl mx-auto text-center overflow-hidden">
+        <div className="max-w-4xl mx-auto text-center">
           {/* Hero Text */}
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 gradient-text leading-tight break-words hyphens-auto text-balance">
             {getHeading('h1', 'Streamline Your Automotive Operations')}
