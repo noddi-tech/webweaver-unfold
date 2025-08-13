@@ -171,11 +171,12 @@ const SectionsManager = () => {
           content[section.id].employees = employeeSections.data || [];
         }
 
-        // Special handling for demo page - add video and image sections
-        if (pageLocation === 'demo') {
+        // Special handling for demo page - only show video sections on video-showcase section
+        if (pageLocation === 'demo' && sectionName === 'video-showcase') {
           content[section.id].videos = [...content[section.id].videos, ...videoSections.data || []];
-          content[section.id].images = [...content[section.id].images, ...imageSections.data || []];
         }
+        
+        // Don't add image sections globally to demo page
 
         // Special handling for metrics - get metric format USPs
         if (sectionName === 'metrics') {
