@@ -4,6 +4,7 @@ import { useHeadings } from "@/hooks/useHeadings";
 import { Card } from "@/components/ui/card";
 import { Mail, Phone, Linkedin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { TYPOGRAPHY_SCALE } from "@/lib/typography";
 
 interface Employee {
   id: string;
@@ -101,7 +102,7 @@ const posClass = (p?: string | null) => {
 };
 
 const Team = () => {
-  const { getHeading } = useHeadings('team', 'hero');
+  const { headings, getHeading } = useHeadings('team', 'hero');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [settings, setSettings] = useState<EmployeeSettings | null>(null);
   const [sections, setSections] = useState<Array<{ id: string; name: string; sort_order: number | null }>>([]);
@@ -188,14 +189,56 @@ const Team = () => {
       <Header />
       <main className="container mx-auto px-6 pt-32 pb-20">
         <header className="text-center max-w-3xl mx-auto mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold gradient-text">
-            {getHeading('h1', settings?.section_title || "Meet the Team")}
-          </h1>
-          {(getHeading('subtitle') || settings?.section_subtitle) && (
-            <p className="text-muted-foreground mt-3">
-              {getHeading('subtitle', settings?.section_subtitle)}
-            </p>
-          )}
+          {(() => {
+            const h1Heading = headings.find(h => h.element_type === 'h1');
+            const h1Option = TYPOGRAPHY_SCALE.headings.find(h => h.tag === 'h1');
+            return h1Heading ? (
+              <h1 className={h1Option?.class || 'text-6xl font-bold gradient-text'}>
+                {h1Heading.content}
+              </h1>
+            ) : (
+              <h1 className={h1Option?.class || 'text-6xl font-bold gradient-text'}>
+                {settings?.section_title || "Meet the Team"}
+              </h1>
+            );
+          })()}
+          
+          {(() => {
+            // Check for h3, h4, or subtitle headings
+            const h3Heading = headings.find(h => h.element_type === 'h3');
+            const h4Heading = headings.find(h => h.element_type === 'h4');
+            const subtitleHeading = headings.find(h => h.element_type === 'subtitle');
+            
+            if (h4Heading) {
+              const h4Option = TYPOGRAPHY_SCALE.headings.find(h => h.tag === 'h4');
+              return (
+                <h4 className={`${h4Option?.class || 'text-xl font-semibold'} mt-3`}>
+                  {h4Heading.content}
+                </h4>
+              );
+            } else if (h3Heading) {
+              const h3Option = TYPOGRAPHY_SCALE.headings.find(h => h.tag === 'h3');
+              return (
+                <h3 className={`${h3Option?.class || 'text-2xl font-semibold'} mt-3`}>
+                  {h3Heading.content}
+                </h3>
+              );
+            } else if (subtitleHeading) {
+              const subtitleOption = TYPOGRAPHY_SCALE.bodyText.find(b => b.name === 'Large Body');
+              return (
+                <p className={`${subtitleOption?.class || 'text-xl'} text-muted-foreground mt-3`}>
+                  {subtitleHeading.content}
+                </p>
+              );
+            } else if (settings?.section_subtitle) {
+              return (
+                <p className="text-muted-foreground mt-3">
+                  {settings.section_subtitle}
+                </p>
+              );
+            }
+            return null;
+          })()}
           {experienceLogos.length > 0 && (
             <Card className="mt-6 bg-card border-border">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 p-4 place-items-center" aria-label="Experience logos">
