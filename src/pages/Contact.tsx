@@ -8,6 +8,7 @@ import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useHeadings } from "@/hooks/useHeadings";
 import { supabase } from "@/integrations/supabase/client";
+import { getTypographyClass } from "@/lib/typography";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -51,7 +52,7 @@ const Contact = () => {
   const [hours, setHours] = useState<BusinessHour[]>([]);
   
   // Use headings CMS for page headings
-  const { getHeading } = useHeadings('contact', 'hero');
+  const { getHeading, headings } = useHeadings('contact', 'hero');
 
   useEffect(() => {
     const load = async () => {
@@ -129,12 +130,28 @@ const Contact = () => {
       
       <main className="container mx-auto px-6 py-12 pt-32">
         <div className="text-center mb-16">
-          <h1 className="text-6xl font-bold gradient-text mb-6">
-            {getHeading('h1', 'Contact Us')}
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {getHeading('subtitle', 'Get in touch with our team. We\'re here to help you succeed.')}
-          </p>
+          {(() => {
+            const h1Heading = headings.find(h => h.element_type === 'h1');
+            const h1Class = h1Heading?.color_token ? 
+              `${getTypographyClass('h1')} mb-6 text-${h1Heading.color_token}` : 
+              'text-6xl font-bold gradient-text mb-6';
+            
+            const subtitleHeading = headings.find(h => h.element_type === 'subtitle');
+            const subtitleClass = subtitleHeading?.color_token ? 
+              `${getTypographyClass('subtitle')} max-w-3xl mx-auto text-${subtitleHeading.color_token}` : 
+              'text-xl text-muted-foreground max-w-3xl mx-auto';
+            
+            return (
+              <>
+                <h1 className={h1Class}>
+                  {getHeading('h1', 'Contact Us')}
+                </h1>
+                <p className={subtitleClass}>
+                  {getHeading('subtitle', 'Get in touch with our team. We\'re here to help you succeed.')}
+                </p>
+              </>
+            );
+          })()}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">

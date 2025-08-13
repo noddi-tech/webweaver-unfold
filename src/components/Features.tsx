@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { useHeadings } from "@/hooks/useHeadings";
+import { getTypographyClass } from "@/lib/typography";
 // Fallback static features (used when DB has no rows)
 import { 
   Truck, Calendar, BarChart3, Wrench, Shield, Zap, Users, Clock, DollarSign
@@ -55,6 +57,7 @@ const borderClass: Record<string, string> = {
 
 interface FeaturesProps { useSectionBg?: boolean }
 const Features = ({ useSectionBg = true }: FeaturesProps) => {
+  const { getHeading, headings } = useHeadings('homepage', 'features');
   const [dbFeatures, setDbFeatures] = useState<DbFeature[] | null>(null);
   const [settings, setSettings] = useState<FeatureSettings | null>(null);
   const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
@@ -105,13 +108,29 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
         <div>
           {/* Section Header */}
           <div className="text-center mb-16">
-          <h2 className={`text-4xl md:text-5xl font-bold mb-6 gradient-text`}>
-            {settings?.section_title || "Platform Features"}
-          </h2>
-          <p className={`text-xl max-w-3xl mx-auto ${descClr}`}>
-            {settings?.section_subtitle || "A comprehensive suite of tools built to give your business a unique and cost-optimized edge with mobile services."}
-          </p>
-        </div>
+            {(() => {
+              const h2Heading = headings.find(h => h.element_type === 'h2');
+              const h2Class = h2Heading?.color_token ? 
+                `${getTypographyClass('h2')} mb-6 text-${h2Heading.color_token}` : 
+                'text-4xl md:text-5xl font-bold mb-6 gradient-text';
+              
+              const subtitleHeading = headings.find(h => h.element_type === 'subtitle');
+              const subtitleClass = subtitleHeading?.color_token ? 
+                `${getTypographyClass('subtitle')} max-w-3xl mx-auto text-${subtitleHeading.color_token}` : 
+                `text-xl max-w-3xl mx-auto ${descClr}`;
+              
+              return (
+                <>
+                  <h2 className={h2Class}>
+                    {getHeading('h2', settings?.section_title || "Platform Features")}
+                  </h2>
+                  <p className={subtitleClass}>
+                    {getHeading('subtitle', settings?.section_subtitle || "A comprehensive suite of tools built to give your business a unique and cost-optimized edge with mobile services.")}
+                  </p>
+                </>
+              );
+            })()}
+          </div>
 
         {/* Feature-targeted USPs */}
         {usps.length > 0 && (
