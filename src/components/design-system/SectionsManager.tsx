@@ -100,7 +100,6 @@ const SectionsManager = () => {
       
       // Initialize content for each section ID specifically
       sectionsData?.forEach(section => {
-        const pageLocation = section.page_location;
         const sectionName = section.name;
         
         content[section.id] = {
@@ -111,40 +110,38 @@ const SectionsManager = () => {
           employees: []
         };
 
-        // Map content based on section names and types
-        if (sectionName === 'hero') {
-          content[section.id].usps = usps.data?.filter(u => u.location === 'hero') || [];
-        } else if (sectionName === 'features') {
-          content[section.id].features = features.data?.filter(f => !f.section_id) || [];
-          content[section.id].usps = usps.data?.filter(u => u.location === 'features') || [];
-        } else if (sectionName === 'metrics') {
-          content[section.id].usps = usps.data?.filter(u => u.format === 'metric') || [];
-        } else if (sectionName === 'team') {
-          content[section.id].employees = employeeSections.data || [];
-          // Add actual employees data
-          content[section.id].employees = [
-            ...(employeeSections.data || []),
-            ...((employees.data || []).reduce((acc: any[], emp: any) => {
-              const sectionName = emp.section || 'General';
-              if (!acc.some(item => item.name === sectionName && item.type === 'employee_data')) {
-                acc.push({ id: emp.section_id || emp.id, name: sectionName, type: 'employee_data' });
-              }
-              return acc;
-            }, []))
-          ];
-        } else if (sectionName === 'contact') {
-          // Contact sections can show contact-related USPs
-          content[section.id].usps = usps.data?.filter(u => u.location === 'contact') || [];
-        }
-
-        // Add video sections for pages that have videos
-        if (pageLocation === 'homepage' || pageLocation === 'demo') {
-          content[section.id].videos = videoSections.data || [];
-        }
-
-        // Add image sections for pages that have images
-        if (pageLocation === 'homepage' || pageLocation === 'demo') {
-          content[section.id].images = imageSections.data || [];
+        // Map content based on section names and what actually belongs to each section
+        switch (sectionName) {
+          case 'hero':
+            // Hero section only has USPs (not videos)
+            content[section.id].usps = usps.data?.filter(u => u.location === 'hero') || [];
+            break;
+            
+          case 'features':
+            content[section.id].features = features.data?.filter(f => !f.section_id) || [];
+            content[section.id].usps = usps.data?.filter(u => u.location === 'features') || [];
+            break;
+            
+          case 'metrics':
+            content[section.id].usps = usps.data?.filter(u => u.format === 'metric') || [];
+            break;
+            
+          case 'team':
+            // Only show employee sections (not individual employees to avoid duplication)
+            content[section.id].employees = employeeSections.data || [];
+            break;
+            
+          case 'contact':
+            content[section.id].usps = usps.data?.filter(u => u.location === 'contact') || [];
+            break;
+            
+          default:
+            // For other sections, only show relevant content based on page location
+            if (section.page_location === 'demo') {
+              content[section.id].videos = videoSections.data || [];
+              content[section.id].images = imageSections.data || [];
+            }
+            break;
         }
       });
 
@@ -643,7 +640,7 @@ const SectionsManager = () => {
                                       <div className="space-y-1">
                                         {sectionContent[section.id].employees.map((emp: any) => (
                                           <Badge key={emp.id} variant="outline" className="text-xs">
-                                            {emp.name} {emp.type === 'employee_data' ? '👤' : '📁'}
+                                            {emp.name} 📁
                                           </Badge>
                                         ))}
                                       </div>
