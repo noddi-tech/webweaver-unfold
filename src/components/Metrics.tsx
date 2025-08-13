@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { icons as lucideIcons } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { useHeadings } from "@/hooks/useHeadings";
+import { getTypographyClass } from "@/lib/typography";
 
 interface MetricItem {
   value: string;
@@ -25,6 +27,7 @@ const sizeClass: Record<string, string> = {
 
 const Metrics = () => {
   const [metrics, setMetrics] = useState<MetricItem[]>([]);
+  const { getHeading } = useHeadings('homepage', 'metrics');
 
   useEffect(() => {
     const loadMetrics = async () => {
@@ -64,7 +67,16 @@ const Metrics = () => {
   return (
     <section className="py-20 px-6" aria-labelledby="metrics-heading">
       <div className="container mx-auto">
-        <h2 id="metrics-heading" className="sr-only">Key platform metrics</h2>
+        {getHeading('h2') && (
+          <h2 id="metrics-heading" className={`${getTypographyClass('h2')} text-center mb-12 text-foreground`}>
+            {getHeading('h2')}
+          </h2>
+        )}
+        {getHeading('subtitle') && (
+          <p className={`${getTypographyClass('subtitle')} text-center mb-16 text-muted-foreground max-w-2xl mx-auto`}>
+            {getHeading('subtitle')}
+          </p>
+        )}
         {/* Mobile: swipeable carousel */}
         <div className="md:hidden">
           <Carousel>
