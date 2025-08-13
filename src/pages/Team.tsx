@@ -152,7 +152,7 @@ const Team = () => {
         .from("images")
         .select("id,title,alt,caption,section,file_name,file_url,link_url,sort_order,active,created_at,updated_at")
         .eq("active", true)
-        .eq("section", "experience-logos")
+        .eq("section", "experience")
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
       if (!error) setExperienceLogos(data || []);
