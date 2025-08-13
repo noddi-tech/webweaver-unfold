@@ -59,6 +59,8 @@ const SectionsManager = () => {
   const { toast } = useToast();
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sectionContent, setSectionContent] = useState<Record<string, SectionContent>>({});
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [newSection, setNewSection] = useState({
     name: '',
     display_name: '',
@@ -73,7 +75,37 @@ const SectionsManager = () => {
 
   useEffect(() => {
     fetchSections();
+    fetchSectionContent();
   }, []);
+
+  const fetchSectionContent = async () => {
+    try {
+      const [employeeSections, videoSections, imageSections, features, usps] = await Promise.all([
+        supabase.from('employees_sections').select('*').order('sort_order'),
+        supabase.from('video_sections').select('*').order('sort_order'),
+        supabase.from('image_sections').select('*').order('sort_order'),
+        supabase.from('features').select('*').order('sort_order'),
+        supabase.from('usps').select('*').order('sort_order')
+      ]);
+
+      const content: Record<string, SectionContent> = {};
+      
+      // Group by page location
+      ['homepage', 'features', 'team', 'contact', 'demo'].forEach(page => {
+        content[page] = {
+          features: features.data?.filter(f => !f.section_id) || [],
+          images: imageSections.data || [],
+          videos: videoSections.data || [],
+          usps: usps.data?.filter(u => u.location === page || (page === 'homepage' && u.location === 'hero')) || [],
+          employees: employeeSections.data || []
+        };
+      });
+
+      setSectionContent(content);
+    } catch (error) {
+      console.error('Error fetching section content:', error);
+    }
+  };
 
   const fetchSections = async () => {
     try {
@@ -472,68 +504,180 @@ const SectionsManager = () => {
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {pageSections.map((section, index) => (
-                    <TableRow key={section.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => moveSectionOrder(section.id, 'up')}
-                            disabled={index === 0}
-                          >
-                            <ArrowUp className="h-4 w-4" />
-                          </Button>
-                          <span>{index + 1}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => moveSectionOrder(section.id, 'down')}
-                            disabled={index === pageSections.length - 1}
-                          >
-                            <ArrowDown className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <code className="text-sm bg-muted px-1 rounded">{section.name}</code>
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          value={section.display_name}
-                          onChange={(e) => updateSection(section.id, { display_name: e.target.value })}
-                          className="min-w-[150px]"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1 text-xs">
-                          <div>BG: <code>{section.background_token}</code></div>
-                          <div>Text: <code>{section.text_token}</code></div>
-                          <div>Padding: <code>{section.padding_token}</code></div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="min-w-[200px]">
-                        {getSectionPreview(section)}
-                      </TableCell>
-                      <TableCell>
-                        <Switch
-                          checked={section.active}
-                          onCheckedChange={(checked) => updateSection(section.id, { active: checked })}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteSection(section.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                 <TableBody>
+                   {pageSections.map((section, index) => (
+                     <>
+                       <TableRow key={section.id}>
+                         <TableCell>
+                           <div className="flex items-center gap-1">
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => moveSectionOrder(section.id, 'up')}
+                               disabled={index === 0}
+                             >
+                               <ArrowUp className="h-4 w-4" />
+                             </Button>
+                             <span>{index + 1}</span>
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => moveSectionOrder(section.id, 'down')}
+                               disabled={index === pageSections.length - 1}
+                             >
+                               <ArrowDown className="h-4 w-4" />
+                             </Button>
+                           </div>
+                         </TableCell>
+                         <TableCell>
+                           <div className="flex items-center gap-2">
+                             <code className="text-sm bg-muted px-1 rounded">{section.name}</code>
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => setExpandedSections(prev => ({ 
+                                 ...prev, 
+                                 [section.id]: !prev[section.id] 
+                               }))}
+                             >
+                               {expandedSections[section.id] ? 
+                                 <ChevronDown className="h-4 w-4" /> : 
+                                 <ChevronRight className="h-4 w-4" />
+                               }
+                             </Button>
+                           </div>
+                         </TableCell>
+                         <TableCell>
+                           <Input
+                             value={section.display_name}
+                             onChange={(e) => updateSection(section.id, { display_name: e.target.value })}
+                             className="min-w-[150px]"
+                           />
+                         </TableCell>
+                         <TableCell>
+                           <div className="space-y-1 text-xs">
+                             <div>BG: <code>{section.background_token}</code></div>
+                             <div>Text: <code>{section.text_token}</code></div>
+                             <div>Padding: <code>{section.padding_token}</code></div>
+                           </div>
+                         </TableCell>
+                         <TableCell className="min-w-[200px]">
+                           {getSectionPreview(section)}
+                         </TableCell>
+                         <TableCell>
+                           <Switch
+                             checked={section.active}
+                             onCheckedChange={(checked) => updateSection(section.id, { active: checked })}
+                           />
+                         </TableCell>
+                         <TableCell>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => deleteSection(section.id)}
+                           >
+                             <Trash2 className="h-4 w-4" />
+                           </Button>
+                         </TableCell>
+                       </TableRow>
+                       
+                       {expandedSections[section.id] && (
+                         <TableRow>
+                           <TableCell colSpan={7} className="p-0">
+                             <div className="p-4 bg-muted/30 border-l-4 border-primary">
+                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                 {/* Employee Sections */}
+                                 {pageLocation === 'team' && sectionContent[pageLocation]?.employees?.length > 0 && (
+                                   <div className="space-y-2">
+                                     <div className="flex items-center gap-2 text-sm font-medium">
+                                       <Users className="h-4 w-4" />
+                                       Employee Sections ({sectionContent[pageLocation].employees.length})
+                                     </div>
+                                     <div className="space-y-1">
+                                       {sectionContent[pageLocation].employees.map((emp: any) => (
+                                         <Badge key={emp.id} variant="outline" className="text-xs">
+                                           {emp.name}
+                                         </Badge>
+                                       ))}
+                                     </div>
+                                   </div>
+                                 )}
+                                 
+                                 {/* Video Sections */}
+                                 {sectionContent[pageLocation]?.videos?.length > 0 && (
+                                   <div className="space-y-2">
+                                     <div className="flex items-center gap-2 text-sm font-medium">
+                                       <Video className="h-4 w-4" />
+                                       Video Sections ({sectionContent[pageLocation].videos.length})
+                                     </div>
+                                     <div className="space-y-1">
+                                       {sectionContent[pageLocation].videos.map((vid: any) => (
+                                         <Badge key={vid.id} variant="outline" className="text-xs">
+                                           {vid.name}
+                                         </Badge>
+                                       ))}
+                                     </div>
+                                   </div>
+                                 )}
+                                 
+                                 {/* Image Sections */}
+                                 {sectionContent[pageLocation]?.images?.length > 0 && (
+                                   <div className="space-y-2">
+                                     <div className="flex items-center gap-2 text-sm font-medium">
+                                       <Image className="h-4 w-4" />
+                                       Image Sections ({sectionContent[pageLocation].images.length})
+                                     </div>
+                                     <div className="space-y-1">
+                                       {sectionContent[pageLocation].images.map((img: any) => (
+                                         <Badge key={img.id} variant="outline" className="text-xs">
+                                           {img.name}
+                                         </Badge>
+                                       ))}
+                                     </div>
+                                   </div>
+                                 )}
+                                 
+                                 {/* USPs */}
+                                 {sectionContent[pageLocation]?.usps?.length > 0 && (
+                                   <div className="space-y-2">
+                                     <div className="flex items-center gap-2 text-sm font-medium">
+                                       <Star className="h-4 w-4" />
+                                       USPs ({sectionContent[pageLocation].usps.length})
+                                     </div>
+                                     <div className="space-y-1">
+                                       {sectionContent[pageLocation].usps.map((usp: any) => (
+                                         <Badge key={usp.id} variant="outline" className="text-xs">
+                                           {usp.title}
+                                         </Badge>
+                                       ))}
+                                     </div>
+                                   </div>
+                                 )}
+                                 
+                                 {/* Features */}
+                                 {sectionContent[pageLocation]?.features?.length > 0 && (
+                                   <div className="space-y-2">
+                                     <div className="flex items-center gap-2 text-sm font-medium">
+                                       <Sparkles className="h-4 w-4" />
+                                       Features ({sectionContent[pageLocation].features.length})
+                                     </div>
+                                     <div className="space-y-1">
+                                       {sectionContent[pageLocation].features.map((feat: any) => (
+                                         <Badge key={feat.id} variant="outline" className="text-xs">
+                                           {feat.title}
+                                         </Badge>
+                                       ))}
+                                     </div>
+                                   </div>
+                                 )}
+                               </div>
+                             </div>
+                           </TableCell>
+                         </TableRow>
+                       )}
+                     </>
+                   ))}
+                 </TableBody>
               </Table>
             </CardContent>
           </Card>
