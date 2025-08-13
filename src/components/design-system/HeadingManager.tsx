@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Type, Plus, Trash2, Save } from "lucide-react";
-import { getTypographyClassWithSpecialStyles } from "@/lib/typography";
+import { TYPOGRAPHY_SCALE } from "@/lib/typography";
 
 interface Heading {
   id: string;
@@ -38,13 +38,26 @@ const sectionOptions = [
   { value: 'nav', label: 'Navigation' },
 ];
 
+// Generate element type options from typography scale
 const elementTypeOptions = [
-  { value: 'h1', label: 'Main Heading (H1)' },
-  { value: 'h2', label: 'Section Heading (H2)' },
-  { value: 'h3', label: 'Subsection Heading (H3)' },
-  { value: 'h4', label: 'Minor Heading (H4)' },
-  { value: 'subtitle', label: 'Subtitle' },
-  { value: 'description', label: 'Description' },
+  ...TYPOGRAPHY_SCALE.headings.map(heading => ({
+    value: heading.tag,
+    label: `${heading.sample} (${heading.tag.toUpperCase()})`,
+    class: heading.class,
+    description: heading.description
+  })),
+  ...TYPOGRAPHY_SCALE.bodyText.map(body => ({
+    value: body.name.toLowerCase().replace(' ', '_'),
+    label: body.name,
+    class: body.class,
+    description: `Body text: ${body.sample.substring(0, 30)}...`
+  })),
+  ...TYPOGRAPHY_SCALE.specialStyles.map(special => ({
+    value: special.name.toLowerCase().replace(' ', '_'),
+    label: special.name,
+    class: special.class,
+    description: `Special: ${special.sample}`
+  }))
 ];
 
 const HeadingManager = () => {
@@ -318,36 +331,26 @@ const HeadingManager = () => {
                       </TableCell>
                        <TableCell>
                          <div className="min-w-[200px] max-w-[250px]">
-                           {heading.element_type === 'h1' && (
-                             <h1 className={`${getTypographyClassWithSpecialStyles('h1')} truncate`}>
-                               {heading.content || 'Preview text'}
-                             </h1>
-                           )}
-                           {heading.element_type === 'h2' && (
-                             <h2 className={`${getTypographyClassWithSpecialStyles('h2')} truncate`}>
-                               {heading.content || 'Preview text'}
-                             </h2>
-                           )}
-                           {heading.element_type === 'h3' && (
-                             <h3 className={`${getTypographyClassWithSpecialStyles('h3')} truncate`}>
-                               {heading.content || 'Preview text'}
-                             </h3>
-                           )}
-                           {heading.element_type === 'h4' && (
-                             <h4 className={`${getTypographyClassWithSpecialStyles('h4')} truncate`}>
-                               {heading.content || 'Preview text'}
-                             </h4>
-                           )}
-                           {heading.element_type === 'subtitle' && (
-                             <p className={`${getTypographyClassWithSpecialStyles('subtitle')} truncate`}>
-                               {heading.content || 'Preview text'}
-                             </p>
-                           )}
-                           {heading.element_type === 'description' && (
-                             <p className={`${getTypographyClassWithSpecialStyles('description')} truncate`}>
-                               {heading.content || 'Preview text'}
-                             </p>
-                           )}
+                           {(() => {
+                             const elementOption = elementTypeOptions.find(opt => opt.value === heading.element_type);
+                             const className = elementOption?.class || 'text-base';
+                             const isHeading = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(heading.element_type);
+                             
+                             if (isHeading) {
+                               const HeadingTag = heading.element_type as keyof JSX.IntrinsicElements;
+                               return (
+                                 <HeadingTag className={`${className} truncate`}>
+                                   {heading.content || 'Preview text'}
+                                 </HeadingTag>
+                               );
+                             } else {
+                               return (
+                                 <p className={`${className} truncate`}>
+                                   {heading.content || 'Preview text'}
+                                 </p>
+                               );
+                             }
+                           })()}
                           </div>
                        </TableCell>
                        <TableCell>
@@ -472,23 +475,54 @@ const HeadingManager = () => {
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-foreground">Sort Order</label>
-                  <Input
-                    type="number"
-                    value={newHeading.sort_order}
-                    onChange={(e) => setNewHeading({ ...newHeading, sort_order: parseInt(e.target.value) })}
-                    className="mt-1"
-                  />
-                </div>
-                <div className="flex items-center space-x-2 mt-6">
-                  <Switch
-                    checked={newHeading.active}
-                    onCheckedChange={(checked) => setNewHeading({ ...newHeading, active: checked })}
-                  />
-                  <label className="text-sm font-medium text-foreground">Active</label>
-                </div>
-              </div>
+                 <div>
+                   <label className="text-sm font-medium text-foreground">Sort Order</label>
+                   <Input
+                     type="number"
+                     value={newHeading.sort_order}
+                     onChange={(e) => setNewHeading({ ...newHeading, sort_order: parseInt(e.target.value) })}
+                     className="mt-1"
+                   />
+                 </div>
+                 <div className="flex items-center space-x-2 mt-6">
+                   <Switch
+                     checked={newHeading.active}
+                     onCheckedChange={(checked) => setNewHeading({ ...newHeading, active: checked })}
+                   />
+                   <label className="text-sm font-medium text-foreground">Active</label>
+                 </div>
+               </div>
+               
+               {newHeading.content && (
+                 <div>
+                   <label className="text-sm font-medium text-foreground">Typography Preview</label>
+                   <div className="mt-2 p-4 border rounded-lg bg-muted/50">
+                     {(() => {
+                       const elementOption = elementTypeOptions.find(opt => opt.value === newHeading.element_type);
+                       const className = elementOption?.class || 'text-base';
+                       const isHeading = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(newHeading.element_type);
+                       
+                       if (isHeading) {
+                         const HeadingTag = newHeading.element_type as keyof JSX.IntrinsicElements;
+                         return (
+                           <HeadingTag className={className}>
+                             {newHeading.content}
+                           </HeadingTag>
+                         );
+                       } else {
+                         return (
+                           <p className={className}>
+                             {newHeading.content}
+                           </p>
+                         );
+                       }
+                     })()}
+                     <p className="text-xs text-muted-foreground mt-2">
+                       Applied class: {elementTypeOptions.find(opt => opt.value === newHeading.element_type)?.class || 'text-base'}
+                     </p>
+                   </div>
+                 </div>
+               )}
               <Button onClick={createHeading} disabled={creatingNew || !newHeading.content}>
                 <Plus className="mr-2 h-4 w-4" />
                 {creatingNew ? "Creating..." : "Create Heading"}
