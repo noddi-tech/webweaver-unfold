@@ -28,7 +28,10 @@ interface DbImage {
 interface DbSection {
   id: string;
   name: string;
+  display_name: string;
+  page_location: string;
   sort_order: number | null;
+  active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -37,10 +40,9 @@ const ImageManager = () => {
   const { toast } = useToast();
   const [sections, setSections] = useState<DbSection[]>([]);
   const [images, setImages] = useState<DbImage[]>([]);
-  const [newSection, setNewSection] = useState("");
   const [uploading, setUploading] = useState(false);
   const [files, setFiles] = useState<FileList | null>(null);
-  const [uploadSection, setUploadSection] = useState<string>("hero");
+  const [uploadSection, setUploadSection] = useState<string>("");
 
   const previewRef = useRef<HTMLIFrameElement>(null);
   const [iframeKey, setIframeKey] = useState(0);
@@ -103,12 +105,16 @@ const ImageManager = () => {
   }, []);
 
   const fetchSections = async () => {
-    const { data, error } = await supabase.from("image_sections").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
+    const { data, error } = await supabase.from("sections").select("*").eq("active", true).order("sort_order", { ascending: true }).order("created_at", { ascending: true });
     if (error) {
       toast({ title: "Failed to fetch sections", description: error.message, variant: "destructive" });
       return;
     }
     setSections(data || []);
+    // Set first section as default if none selected
+    if (!uploadSection && data && data.length > 0) {
+      setUploadSection(data[0].name);
+    }
   };
 
   const fetchImages = async () => {
@@ -123,29 +129,6 @@ const ImageManager = () => {
     }
     const rows = (data ?? []).map((r: any) => ({ link_url: r.link_url ?? null, ...r })) as DbImage[];
     setImages(rows);
-  };
-  const addSection = async () => {
-    const name = newSection.trim();
-    if (!name) return;
-    const { error } = await supabase.from("image_sections").insert({ name });
-    if (error) {
-      toast({ title: "Add section failed", description: error.message, variant: "destructive" });
-      return;
-    }
-    setNewSection("");
-    toast({ title: "Section added" });
-    fetchSections();
-  };
-
-  const deleteSection = async (id: string) => {
-    if (!confirm("Delete this section? (Images will not be deleted but keep their section text)")) return;
-    const { error } = await supabase.from("image_sections").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Delete section failed", description: error.message, variant: "destructive" });
-      return;
-    }
-    toast({ title: "Section deleted" });
-    fetchSections();
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,7 +220,7 @@ const ImageManager = () => {
               </SelectTrigger>
               <SelectContent>
                 {sections.map((s) => (
-                  <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                  <SelectItem key={s.id} value={s.name}>{s.display_name} ({s.name})</SelectItem>
                 ))}
                 {/* Fallback common sections */}
                 {sections.length === 0 && ["hero"].map((s) => (
@@ -274,21 +257,18 @@ const ImageManager = () => {
       </Card>
 
       <Card className="p-6 bg-card border-border space-y-4">
-        <h3 className="text-xl font-semibold">Sections</h3>
-        <div className="flex gap-3">
-          <Input placeholder="New section name" value={newSection} onChange={(e) => setNewSection(e.target.value)} />
-          <Button onClick={addSection}>Add</Button>
-        </div>
+        <h3 className="text-xl font-semibold">Available Sections</h3>
+        <p className="text-sm text-muted-foreground">Sections are managed in the Sections CMS. Only active sections are shown here.</p>
         <Separator className="my-2" />
         <div className="flex flex-wrap gap-2">
           {sections.map((s) => (
             <div key={s.id} className="flex items-center gap-2 rounded-md border border-border px-3 py-1">
-              <span className="text-sm">{s.name}</span>
-              <Button variant="outline" size="sm" onClick={() => deleteSection(s.id)}>Delete</Button>
+              <span className="text-sm font-medium">{s.display_name}</span>
+              <span className="text-xs text-muted-foreground">({s.name})</span>
             </div>
           ))}
           {sections.length === 0 && (
-            <p className="text-sm text-muted-foreground">No sections yet. Add some above.</p>
+            <p className="text-sm text-muted-foreground">No active sections available. Manage sections in the Sections CMS.</p>
           )}
         </div>
       </Card>
@@ -297,73 +277,77 @@ const ImageManager = () => {
         {Object.keys(groupedBySection).length === 0 && (
           <p className="text-muted-foreground">No images uploaded yet.</p>
         )}
-        {Object.entries(groupedBySection).map(([section, imgs]) => (
-          <Card key={section} className="p-6 bg-card border-border space-y-4">
-            <h3 className="text-lg font-semibold">Section: {section}</h3>
-            <div className="grid gap-6 md:grid-cols-2">
-              {imgs.map((img) => (
-                <div key={img.id} className="grid gap-3 rounded-lg border border-border p-4">
-                  <img src={img.file_url} alt={img.alt ?? img.title} className="w-full h-40 object-cover rounded-md" loading="lazy" />
-                  <div className="grid gap-2">
-                    <Label>Title</Label>
-                    <Input value={img.title} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title: e.target.value } : i))} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Alt text</Label>
-                    <Input value={img.alt ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, alt: e.target.value } : i))} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Caption</Label>
-                    <Textarea value={img.caption ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption: e.target.value } : i))} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Link URL</Label>
-                    <Input
-                      type="url"
-                      placeholder="https://example.com"
-                      value={img.link_url ?? ""}
-                      onChange={(e) =>
-                        setImages((prev) =>
-                          prev.map((i) => (i.id === img.id ? { ...i, link_url: e.target.value } : i))
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Section</Label>
-                    <Select value={img.section} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, section: v } : i))}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sections.map((s) => (
-                          <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                        ))}
-                         {sections.length === 0 && ["hero"].map((s) => (
-                           <SelectItem key={s} value={s}>{s}</SelectItem>
-                         ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Sort order</Label>
-                    <Input type="number" value={img.sort_order ?? 0} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, sort_order: Number(e.target.value) } : i))} />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Switch checked={img.active} onCheckedChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, active: v } : i))} />
-                      <span className="text-sm text-muted-foreground">Active</span>
+        {Object.entries(groupedBySection).map(([section, imgs]) => {
+          const sectionInfo = sections.find(s => s.name === section);
+          const sectionTitle = sectionInfo ? `${sectionInfo.display_name} (${section})` : section;
+          return (
+            <Card key={section} className="p-6 bg-card border-border space-y-4">
+              <h3 className="text-lg font-semibold">Section: {sectionTitle}</h3>
+              <div className="grid gap-6 md:grid-cols-2">
+                {imgs.map((img) => (
+                  <div key={img.id} className="grid gap-3 rounded-lg border border-border p-4">
+                    <img src={img.file_url} alt={img.alt ?? img.title} className="w-full h-40 object-cover rounded-md" loading="lazy" />
+                    <div className="grid gap-2">
+                      <Label>Title</Label>
+                      <Input value={img.title} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title: e.target.value } : i))} />
                     </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={() => saveImage(img)}>Save</Button>
-                      <Button variant="outline" size="sm" onClick={() => deleteImage(img)}>Delete</Button>
+                    <div className="grid gap-2">
+                      <Label>Alt text</Label>
+                      <Input value={img.alt ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, alt: e.target.value } : i))} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Caption</Label>
+                      <Textarea value={img.caption ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption: e.target.value } : i))} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Link URL</Label>
+                      <Input
+                        type="url"
+                        placeholder="https://example.com"
+                        value={img.link_url ?? ""}
+                        onChange={(e) =>
+                          setImages((prev) =>
+                            prev.map((i) => (i.id === img.id ? { ...i, link_url: e.target.value } : i))
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Section</Label>
+                      <Select value={img.section} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, section: v } : i))}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {sections.map((s) => (
+                            <SelectItem key={s.id} value={s.name}>{s.display_name} ({s.name})</SelectItem>
+                          ))}
+                           {sections.length === 0 && ["hero"].map((s) => (
+                             <SelectItem key={s} value={s}>{s}</SelectItem>
+                           ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Sort order</Label>
+                      <Input type="number" value={img.sort_order ?? 0} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, sort_order: Number(e.target.value) } : i))} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Switch checked={img.active} onCheckedChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, active: v } : i))} />
+                        <span className="text-sm text-muted-foreground">Active</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => saveImage(img)}>Save</Button>
+                        <Button variant="outline" size="sm" onClick={() => deleteImage(img)}>Delete</Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        ))}
+                ))}
+              </div>
+            </Card>
+          );
+        })}
       </div>
     </section>
   );
