@@ -372,6 +372,75 @@ export type Database = {
         }
         Relationships: []
       }
+      footer_settings: {
+        Row: {
+          company_description: string | null
+          company_name: string
+          contact_info: Json
+          copyright_text: string | null
+          created_at: string
+          id: string
+          legal_links: Json
+          quick_links: Json
+          updated_at: string
+        }
+        Insert: {
+          company_description?: string | null
+          company_name?: string
+          contact_info?: Json
+          copyright_text?: string | null
+          created_at?: string
+          id?: string
+          legal_links?: Json
+          quick_links?: Json
+          updated_at?: string
+        }
+        Update: {
+          company_description?: string | null
+          company_name?: string
+          contact_info?: Json
+          copyright_text?: string | null
+          created_at?: string
+          id?: string
+          legal_links?: Json
+          quick_links?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      header_settings: {
+        Row: {
+          created_at: string
+          get_started_text: string
+          id: string
+          navigation_links: Json
+          show_auth_buttons: boolean
+          show_global_usp_bar: boolean
+          sign_in_text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          get_started_text?: string
+          id?: string
+          navigation_links?: Json
+          show_auth_buttons?: boolean
+          show_global_usp_bar?: boolean
+          sign_in_text?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          get_started_text?: string
+          id?: string
+          navigation_links?: Json
+          show_auth_buttons?: boolean
+          show_global_usp_bar?: boolean
+          sign_in_text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       headings: {
         Row: {
           active: boolean

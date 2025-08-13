@@ -49,6 +49,7 @@ const DESIGN_TOKENS = {
 };
 
 const PAGE_LOCATIONS = [
+  { value: 'global', label: 'Global (Header/Footer)' },
   { value: 'homepage', label: 'Homepage' },
   { value: 'features', label: 'Features Page' },
   { value: 'team', label: 'Team Page' },
