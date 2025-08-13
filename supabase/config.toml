@@ -1,1 +1,4 @@
 project_id = "ouhfgazomdmirdazvjys"
+
+[functions.send-contact-to-slack]
+verify_jwt = false

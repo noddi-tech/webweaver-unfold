@@ -59,6 +59,105 @@ export type Database = {
         }
         Relationships: []
       }
+      business_hours: {
+        Row: {
+          close_time: string | null
+          closed: boolean
+          created_at: string
+          day_name: string
+          id: string
+          open_time: string | null
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          close_time?: string | null
+          closed?: boolean
+          created_at?: string
+          day_name: string
+          id?: string
+          open_time?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          close_time?: string | null
+          closed?: boolean
+          created_at?: string
+          day_name?: string
+          id?: string
+          open_time?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contact_items: {
+        Row: {
+          active: boolean
+          created_at: string
+          icon_name: string
+          id: string
+          link_url: string | null
+          sort_order: number | null
+          title: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          icon_name?: string
+          id?: string
+          link_url?: string | null
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          icon_name?: string
+          id?: string
+          link_url?: string | null
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      contact_settings: {
+        Row: {
+          business_hours_title: string
+          created_at: string
+          form_description: string | null
+          form_title: string
+          get_in_touch_title: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          business_hours_title?: string
+          created_at?: string
+          form_description?: string | null
+          form_title?: string
+          get_in_touch_title?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          business_hours_title?: string
+          created_at?: string
+          form_description?: string | null
+          form_title?: string
+          get_in_touch_title?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           active: boolean

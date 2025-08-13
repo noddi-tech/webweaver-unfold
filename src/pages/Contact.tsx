@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,48 @@ const Contact = () => {
     subject: '',
     message: ''
   });
+
+  type ContactSettings = {
+    form_title: string | null;
+    form_description: string | null;
+    get_in_touch_title: string;
+    business_hours_title: string;
+  };
+
+  type ContactItem = {
+    id: string;
+    title: string;
+    value: string;
+    icon_name: string;
+    link_url: string | null;
+  };
+
+  type BusinessHour = {
+    id: string;
+    day_name: string;
+    open_time: string | null;
+    close_time: string | null;
+    closed: boolean;
+    sort_order: number | null;
+  };
+
+  const [settings, setSettings] = useState<ContactSettings | null>(null);
+  const [contactItems, setContactItems] = useState<ContactItem[]>([]);
+  const [hours, setHours] = useState<BusinessHour[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      const [settingsRes, itemsRes, hoursRes] = await Promise.all([
+        supabase.from('contact_settings').select('*').maybeSingle(),
+        supabase.from('contact_items').select('*').eq('active', true).order('sort_order', { ascending: true }),
+        supabase.from('business_hours').select('*').order('sort_order', { ascending: true }),
+      ]);
+      if (settingsRes.data) setSettings(settingsRes.data as any);
+      if (itemsRes.data) setContactItems(itemsRes.data as any);
+      if (hoursRes.data) setHours(hoursRes.data as any);
+    };
+    load();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -93,10 +135,8 @@ const Contact = () => {
           {/* Contact Form */}
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-2xl text-foreground">Send us a message</CardTitle>
-              <CardDescription>
-                Fill out the form below and we'll get back to you as soon as possible.
-              </CardDescription>
+              <CardTitle className="text-2xl text-foreground">{settings?.form_title ?? "Send us a message"}</CardTitle>
+              <CardDescription>{settings?.form_description ?? "Fill out the form below and we'll get back to you as soon as possible."}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <form onSubmit={handleSubmit}>
@@ -168,65 +208,56 @@ const Contact = () => {
           <div className="space-y-8">
             <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-2xl text-foreground">Get in touch</CardTitle>
+                <CardTitle className="text-2xl text-foreground">{settings?.get_in_touch_title ?? "Get in touch"}</CardTitle>
                 <CardDescription>
                   Reach out to us through any of these channels.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-lg">
-                    <Mail className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Email</h3>
-                    <p className="text-muted-foreground">hello@nodditech.com</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-lg">
-                    <Phone className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Phone</h3>
-                    <p className="text-muted-foreground">+1 (555) 123-4567</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  <div className="bg-primary/10 p-3 rounded-lg">
-                    <MapPin className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">Office</h3>
-                    <p className="text-muted-foreground">
-                      123 Innovation Drive<br />
-                      Tech City, TC 12345
-                    </p>
-                  </div>
-                </div>
+                {contactItems.length > 0 ? (
+                  contactItems.map((item) => (
+                    <div key={item.id} className="flex items-center space-x-4">
+                      <div className="bg-primary/10 p-3 rounded-lg">
+                        {item.icon_name === 'Phone' ? (
+                          <Phone className="h-6 w-6 text-primary" />
+                        ) : item.icon_name === 'MapPin' ? (
+                          <MapPin className="h-6 w-6 text-primary" />
+                        ) : (
+                          <Mail className="h-6 w-6 text-primary" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">{item.title}</h3>
+                        {item.link_url ? (
+                          <a href={item.link_url} className="text-muted-foreground underline underline-offset-4">{item.value}</a>
+                        ) : (
+                          <p className="text-muted-foreground">{item.value}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground">No contact items configured yet.</p>
+                )}
               </CardContent>
             </Card>
 
             <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-xl text-foreground">Business Hours</CardTitle>
+                <CardTitle className="text-xl text-foreground">{settings?.business_hours_title ?? "Business Hours"}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Monday - Friday</span>
-                    <span className="text-foreground">9:00 AM - 6:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Saturday</span>
-                    <span className="text-foreground">10:00 AM - 4:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Sunday</span>
-                    <span className="text-foreground">Closed</span>
-                  </div>
+                  {hours.length > 0 ? (
+                    hours.map((h) => (
+                      <div key={h.id} className="flex justify-between">
+                        <span className="text-muted-foreground">{h.day_name}</span>
+                        <span className="text-foreground">{h.closed ? 'Closed' : `${h.open_time ?? ''}${h.open_time && h.close_time ? ' - ' : ''}${h.close_time ?? ''}`}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground">No business hours configured yet.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
