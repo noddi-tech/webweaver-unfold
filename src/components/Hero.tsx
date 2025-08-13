@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useHeadings } from "@/hooks/useHeadings";
 
 const Hero = () => {
-  const { getHeading } = useHeadings('homepage', 'hero');
+  const { getHeading } = useHeadings('index', 'hero');
   const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
   const [heroImage, setHeroImage] = useState<{ url: string; alt: string } | null>(null);
 
