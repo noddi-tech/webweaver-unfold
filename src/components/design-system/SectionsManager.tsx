@@ -80,25 +80,72 @@ const SectionsManager = () => {
 
   const fetchSectionContent = async () => {
     try {
-      const [employeeSections, videoSections, imageSections, features, usps] = await Promise.all([
+      // Fetch all the sections first to get their IDs
+      const { data: sectionsData } = await supabase
+        .from('sections')
+        .select('*');
+
+      const [employeeSections, videoSections, imageSections, features, usps, employees, videos, images] = await Promise.all([
         supabase.from('employees_sections').select('*').order('sort_order'),
         supabase.from('video_sections').select('*').order('sort_order'),
         supabase.from('image_sections').select('*').order('sort_order'),
         supabase.from('features').select('*').order('sort_order'),
-        supabase.from('usps').select('*').order('sort_order')
+        supabase.from('usps').select('*').order('sort_order'),
+        supabase.from('employees').select('*').order('sort_order'),
+        supabase.from('videos').select('*').order('sort_order'),
+        supabase.from('images').select('*').order('sort_order')
       ]);
 
       const content: Record<string, SectionContent> = {};
       
-      // Group by page location
-      ['homepage', 'features', 'team', 'contact', 'demo'].forEach(page => {
-        content[page] = {
-          features: features.data?.filter(f => !f.section_id) || [],
-          images: imageSections.data || [],
-          videos: videoSections.data || [],
-          usps: usps.data?.filter(u => u.location === page || (page === 'homepage' && u.location === 'hero')) || [],
-          employees: employeeSections.data || []
+      // Initialize content for each section ID specifically
+      sectionsData?.forEach(section => {
+        const pageLocation = section.page_location;
+        const sectionName = section.name;
+        
+        content[section.id] = {
+          features: [],
+          images: [],
+          videos: [],
+          usps: [],
+          employees: []
         };
+
+        // Map content based on section names and types
+        if (sectionName === 'hero') {
+          content[section.id].usps = usps.data?.filter(u => u.location === 'hero') || [];
+        } else if (sectionName === 'features') {
+          content[section.id].features = features.data?.filter(f => !f.section_id) || [];
+          content[section.id].usps = usps.data?.filter(u => u.location === 'features') || [];
+        } else if (sectionName === 'metrics') {
+          content[section.id].usps = usps.data?.filter(u => u.format === 'metric') || [];
+        } else if (sectionName === 'team') {
+          content[section.id].employees = employeeSections.data || [];
+          // Add actual employees data
+          content[section.id].employees = [
+            ...(employeeSections.data || []),
+            ...((employees.data || []).reduce((acc: any[], emp: any) => {
+              const sectionName = emp.section || 'General';
+              if (!acc.some(item => item.name === sectionName && item.type === 'employee_data')) {
+                acc.push({ id: emp.section_id || emp.id, name: sectionName, type: 'employee_data' });
+              }
+              return acc;
+            }, []))
+          ];
+        } else if (sectionName === 'contact') {
+          // Contact sections can show contact-related USPs
+          content[section.id].usps = usps.data?.filter(u => u.location === 'contact') || [];
+        }
+
+        // Add video sections for pages that have videos
+        if (pageLocation === 'homepage' || pageLocation === 'demo') {
+          content[section.id].videos = videoSections.data || [];
+        }
+
+        // Add image sections for pages that have images
+        if (pageLocation === 'homepage' || pageLocation === 'demo') {
+          content[section.id].images = imageSections.data || [];
+        }
       });
 
       setSectionContent(content);
@@ -581,100 +628,112 @@ const SectionsManager = () => {
                          </TableCell>
                        </TableRow>
                        
-                       {expandedSections[section.id] && (
-                         <TableRow>
-                           <TableCell colSpan={7} className="p-0">
-                             <div className="p-4 bg-muted/30 border-l-4 border-primary">
-                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                 {/* Employee Sections */}
-                                 {pageLocation === 'team' && sectionContent[pageLocation]?.employees?.length > 0 && (
-                                   <div className="space-y-2">
-                                     <div className="flex items-center gap-2 text-sm font-medium">
-                                       <Users className="h-4 w-4" />
-                                       Employee Sections ({sectionContent[pageLocation].employees.length})
-                                     </div>
-                                     <div className="space-y-1">
-                                       {sectionContent[pageLocation].employees.map((emp: any) => (
-                                         <Badge key={emp.id} variant="outline" className="text-xs">
-                                           {emp.name}
-                                         </Badge>
-                                       ))}
-                                     </div>
-                                   </div>
-                                 )}
-                                 
-                                 {/* Video Sections */}
-                                 {sectionContent[pageLocation]?.videos?.length > 0 && (
-                                   <div className="space-y-2">
-                                     <div className="flex items-center gap-2 text-sm font-medium">
-                                       <Video className="h-4 w-4" />
-                                       Video Sections ({sectionContent[pageLocation].videos.length})
-                                     </div>
-                                     <div className="space-y-1">
-                                       {sectionContent[pageLocation].videos.map((vid: any) => (
-                                         <Badge key={vid.id} variant="outline" className="text-xs">
-                                           {vid.name}
-                                         </Badge>
-                                       ))}
-                                     </div>
-                                   </div>
-                                 )}
-                                 
-                                 {/* Image Sections */}
-                                 {sectionContent[pageLocation]?.images?.length > 0 && (
-                                   <div className="space-y-2">
-                                     <div className="flex items-center gap-2 text-sm font-medium">
-                                       <Image className="h-4 w-4" />
-                                       Image Sections ({sectionContent[pageLocation].images.length})
-                                     </div>
-                                     <div className="space-y-1">
-                                       {sectionContent[pageLocation].images.map((img: any) => (
-                                         <Badge key={img.id} variant="outline" className="text-xs">
-                                           {img.name}
-                                         </Badge>
-                                       ))}
-                                     </div>
-                                   </div>
-                                 )}
-                                 
-                                 {/* USPs */}
-                                 {sectionContent[pageLocation]?.usps?.length > 0 && (
-                                   <div className="space-y-2">
-                                     <div className="flex items-center gap-2 text-sm font-medium">
-                                       <Star className="h-4 w-4" />
-                                       USPs ({sectionContent[pageLocation].usps.length})
-                                     </div>
-                                     <div className="space-y-1">
-                                       {sectionContent[pageLocation].usps.map((usp: any) => (
-                                         <Badge key={usp.id} variant="outline" className="text-xs">
-                                           {usp.title}
-                                         </Badge>
-                                       ))}
-                                     </div>
-                                   </div>
-                                 )}
-                                 
-                                 {/* Features */}
-                                 {sectionContent[pageLocation]?.features?.length > 0 && (
-                                   <div className="space-y-2">
-                                     <div className="flex items-center gap-2 text-sm font-medium">
-                                       <Sparkles className="h-4 w-4" />
-                                       Features ({sectionContent[pageLocation].features.length})
-                                     </div>
-                                     <div className="space-y-1">
-                                       {sectionContent[pageLocation].features.map((feat: any) => (
-                                         <Badge key={feat.id} variant="outline" className="text-xs">
-                                           {feat.title}
-                                         </Badge>
-                                       ))}
-                                     </div>
-                                   </div>
-                                 )}
-                               </div>
-                             </div>
-                           </TableCell>
-                         </TableRow>
-                       )}
+                        {expandedSections[section.id] && (
+                          <TableRow>
+                            <TableCell colSpan={7} className="p-0">
+                              <div className="p-4 bg-muted/30 border-l-4 border-primary">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                  {/* Employee Sections */}
+                                  {sectionContent[section.id]?.employees?.length > 0 && (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 text-sm font-medium">
+                                        <Users className="h-4 w-4" />
+                                        Employee Sections ({sectionContent[section.id].employees.length})
+                                      </div>
+                                      <div className="space-y-1">
+                                        {sectionContent[section.id].employees.map((emp: any) => (
+                                          <Badge key={emp.id} variant="outline" className="text-xs">
+                                            {emp.name} {emp.type === 'employee_data' ? '👤' : '📁'}
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Video Sections */}
+                                  {sectionContent[section.id]?.videos?.length > 0 && (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 text-sm font-medium">
+                                        <Video className="h-4 w-4" />
+                                        Video Sections ({sectionContent[section.id].videos.length})
+                                      </div>
+                                      <div className="space-y-1">
+                                        {sectionContent[section.id].videos.map((vid: any) => (
+                                          <Badge key={vid.id} variant="outline" className="text-xs">
+                                            {vid.name} 🎥
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Image Sections */}
+                                  {sectionContent[section.id]?.images?.length > 0 && (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 text-sm font-medium">
+                                        <Image className="h-4 w-4" />
+                                        Image Sections ({sectionContent[section.id].images.length})
+                                      </div>
+                                      <div className="space-y-1">
+                                        {sectionContent[section.id].images.map((img: any) => (
+                                          <Badge key={img.id} variant="outline" className="text-xs">
+                                            {img.name} 🖼️
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {/* USPs */}
+                                  {sectionContent[section.id]?.usps?.length > 0 && (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 text-sm font-medium">
+                                        <Star className="h-4 w-4" />
+                                        USPs ({sectionContent[section.id].usps.length})
+                                      </div>
+                                      <div className="space-y-1">
+                                        {sectionContent[section.id].usps.map((usp: any) => (
+                                          <Badge key={usp.id} variant="outline" className="text-xs">
+                                            {usp.title}
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Features */}
+                                  {sectionContent[section.id]?.features?.length > 0 && (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 text-sm font-medium">
+                                        <Sparkles className="h-4 w-4" />
+                                        Features ({sectionContent[section.id].features.length})
+                                      </div>
+                                      <div className="space-y-1">
+                                        {sectionContent[section.id].features.map((feat: any) => (
+                                          <Badge key={feat.id} variant="outline" className="text-xs">
+                                            {feat.title}
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Show message if no content */}
+                                  {(!sectionContent[section.id] || 
+                                    (sectionContent[section.id].employees.length === 0 && 
+                                     sectionContent[section.id].videos.length === 0 && 
+                                     sectionContent[section.id].images.length === 0 && 
+                                     sectionContent[section.id].usps.length === 0 && 
+                                     sectionContent[section.id].features.length === 0)) && (
+                                    <div className="col-span-full text-center text-muted-foreground text-sm py-4">
+                                      No CMS content linked to this section yet
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
                      </>
                    ))}
                  </TableBody>
