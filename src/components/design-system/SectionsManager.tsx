@@ -127,16 +127,23 @@ const SectionsManager = () => {
         };
 
         // Get all headings for this section and page
-        const sectionHeadings = headings.data?.filter(h => 
-          h.page_location === pageLocation && h.section === sectionName
-        ) || [];
+        const sectionHeadings = headings.data?.filter(h => {
+          // Handle page_location mismatch: "homepage" section vs "index" in headings
+          const pageMatch = (pageLocation === 'homepage' && h.page_location === 'index') ||
+                          h.page_location === pageLocation;
+          return pageMatch && h.section === sectionName;
+        }) || [];
         content[section.id].headings = sectionHeadings;
         console.log(`Found ${sectionHeadings.length} headings for ${sectionName}:`, sectionHeadings);
 
         // Get all images for this section (by section name or section_id)
-        const sectionImages = images.data?.filter(i => 
-          i.section === sectionName || i.section_id === section.id
-        ) || [];
+        const sectionImages = images.data?.filter(i => {
+          // Handle section name variations like "hero-homepage" for "hero"
+          const sectionMatch = i.section === sectionName || 
+                              i.section === `${sectionName}-${pageLocation}` ||
+                              i.section_id === section.id;
+          return sectionMatch;
+        }) || [];
         content[section.id].images = sectionImages;
         console.log(`Found ${sectionImages.length} images for ${sectionName}:`, sectionImages);
 
