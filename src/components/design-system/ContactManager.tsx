@@ -17,6 +17,8 @@ interface ContactSettings {
   form_description: string | null;
   get_in_touch_title: string;
   business_hours_title: string;
+  show_contact_methods_tab: boolean;
+  show_business_hours_tab: boolean;
 }
 
 interface ContactItem {
@@ -43,6 +45,8 @@ const defaultSettings: Omit<ContactSettings, "id"> = {
   form_description: "Fill out the form below and we'll get back to you as soon as possible.",
   get_in_touch_title: "Get in touch",
   business_hours_title: "Business Hours",
+  show_contact_methods_tab: true,
+  show_business_hours_tab: true,
 };
 
 const defaultDays = [
@@ -97,7 +101,10 @@ const ContactManager = () => {
       ]);
 
       if (settingsRes.data) {
-        setSettings(settingsRes.data as ContactSettings);
+        const settingsData = settingsRes.data as ContactSettings;
+        setSettings(settingsData);
+        setShowContactTab(settingsData.show_contact_methods_tab);
+        setShowBusinessHoursTab(settingsData.show_business_hours_tab);
       }
 
       if (itemsRes.data) {
@@ -302,6 +309,31 @@ const ContactManager = () => {
     ));
   };
 
+  const updateTabVisibility = async (field: 'show_contact_methods_tab' | 'show_business_hours_tab', value: boolean) => {
+    try {
+      const updatedSettings = { ...settings, [field]: value };
+      setSettings(updatedSettings);
+      
+      const { error } = await supabase
+        .from('contact_settings')
+        .upsert(updatedSettings);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Tab visibility updated",
+        description: "Changes have been saved successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating tab visibility:', error);
+      toast({
+        title: "Error updating tab visibility",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center py-8">
@@ -329,14 +361,20 @@ const ContactManager = () => {
             <label className="text-sm font-medium text-foreground">Show Contact Methods Tab</label>
             <Switch
               checked={showContactTab}
-              onCheckedChange={setShowContactTab}
+              onCheckedChange={(checked) => {
+                setShowContactTab(checked);
+                updateTabVisibility('show_contact_methods_tab', checked);
+              }}
             />
           </div>
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-foreground">Show Business Hours Tab</label>
             <Switch
               checked={showBusinessHoursTab}
-              onCheckedChange={setShowBusinessHoursTab}
+              onCheckedChange={(checked) => {
+                setShowBusinessHoursTab(checked);
+                updateTabVisibility('show_business_hours_tab', checked);
+              }}
             />
           </div>
         </CardContent>

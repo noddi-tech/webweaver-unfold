@@ -136,6 +136,8 @@ export type Database = {
           form_title: string
           get_in_touch_title: string
           id: string
+          show_business_hours_tab: boolean
+          show_contact_methods_tab: boolean
           updated_at: string
         }
         Insert: {
@@ -145,6 +147,8 @@ export type Database = {
           form_title?: string
           get_in_touch_title?: string
           id?: string
+          show_business_hours_tab?: boolean
+          show_contact_methods_tab?: boolean
           updated_at?: string
         }
         Update: {
@@ -154,6 +158,8 @@ export type Database = {
           form_title?: string
           get_in_touch_title?: string
           id?: string
+          show_business_hours_tab?: boolean
+          show_contact_methods_tab?: boolean
           updated_at?: string
         }
         Relationships: []
