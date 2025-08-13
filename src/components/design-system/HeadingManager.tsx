@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import EmojiPicker from "@/components/ui/emoji-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -337,14 +338,17 @@ const HeadingManager = () => {
                           </SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell>
-                        <Textarea
-                          value={heading.content}
-                          onChange={(e) => updateHeading(heading.id, 'content', e.target.value)}
-                          className="min-w-[200px]"
-                          rows={2}
-                        />
-                       </TableCell>
+                       <TableCell>
+                         <div className="flex gap-2 min-w-[200px]">
+                           <Textarea
+                             value={heading.content}
+                             onChange={(e) => updateHeading(heading.id, 'content', e.target.value)}
+                             className="flex-1"
+                             rows={2}
+                           />
+                           <EmojiPicker onSelect={(emoji) => updateHeading(heading.id, 'content', heading.content + emoji)} />
+                         </div>
+                        </TableCell>
                        <TableCell>
                          <Select
                            value={heading.color_token || 'foreground'}
@@ -520,13 +524,16 @@ const HeadingManager = () => {
               </div>
               <div>
                 <label className="text-sm font-medium text-foreground">Content</label>
-                <Textarea
-                  value={newHeading.content}
-                  onChange={(e) => setNewHeading({ ...newHeading, content: e.target.value })}
-                  placeholder="Enter the heading text..."
-                  className="mt-1"
-                  rows={3}
-                />
+                <div className="flex gap-2 mt-1">
+                  <Textarea
+                    value={newHeading.content}
+                    onChange={(e) => setNewHeading({ ...newHeading, content: e.target.value })}
+                    placeholder="Enter the heading text..."
+                    className="flex-1"
+                    rows={3}
+                  />
+                  <EmojiPicker onSelect={(emoji) => setNewHeading({ ...newHeading, content: newHeading.content + emoji })} />
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div>
