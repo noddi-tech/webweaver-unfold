@@ -37,6 +37,7 @@ interface SectionContent {
   videos: any[];
   usps: any[];
   employees: any[];
+  headings: any[];
 }
 
 const DESIGN_TOKENS = {
@@ -85,7 +86,7 @@ const SectionsManager = () => {
         .from('sections')
         .select('*');
 
-      const [employeeSections, videoSections, imageSections, features, usps, employees, videos, images] = await Promise.all([
+      const [employeeSections, videoSections, imageSections, features, usps, employees, videos, images, headings] = await Promise.all([
         supabase.from('employees_sections').select('*').order('sort_order'),
         supabase.from('video_sections').select('*').order('sort_order'),
         supabase.from('image_sections').select('*').order('sort_order'),
@@ -93,7 +94,8 @@ const SectionsManager = () => {
         supabase.from('usps').select('*').order('sort_order'),
         supabase.from('employees').select('*').order('sort_order'),
         supabase.from('videos').select('*').order('sort_order'),
-        supabase.from('images').select('*').order('sort_order')
+        supabase.from('images').select('*').order('sort_order'),
+        supabase.from('headings').select('*').order('sort_order')
       ]);
 
       const content: Record<string, SectionContent> = {};
@@ -107,40 +109,66 @@ const SectionsManager = () => {
           images: [],
           videos: [],
           usps: [],
-          employees: []
+          employees: [],
+          headings: []
         };
 
         // Map content based on section names and what actually belongs to each section
         switch (sectionName) {
           case 'hero':
-            // Hero section only has USPs (not videos)
+            // Hero section has USPs, headings, and images
             content[section.id].usps = usps.data?.filter(u => u.location === 'hero') || [];
+            content[section.id].headings = headings.data?.filter(h => 
+              h.page_location === section.page_location && h.section === 'hero') || [];
+            content[section.id].images = images.data?.filter(i => i.section === 'hero') || [];
             break;
             
           case 'features':
             content[section.id].features = features.data?.filter(f => !f.section_id) || [];
             content[section.id].usps = usps.data?.filter(u => u.location === 'features') || [];
+            content[section.id].headings = headings.data?.filter(h => 
+              h.page_location === section.page_location && h.section === 'features') || [];
             break;
             
           case 'metrics':
             content[section.id].usps = usps.data?.filter(u => u.format === 'metric') || [];
+            content[section.id].headings = headings.data?.filter(h => 
+              h.page_location === section.page_location && h.section === 'metrics') || [];
             break;
             
           case 'team':
-            // Only show employee sections (not individual employees to avoid duplication)
+            // Team section has employee sections and headings
             content[section.id].employees = employeeSections.data || [];
+            content[section.id].headings = headings.data?.filter(h => 
+              h.page_location === section.page_location && h.section === 'team') || [];
             break;
             
           case 'contact':
             content[section.id].usps = usps.data?.filter(u => u.location === 'contact') || [];
+            content[section.id].headings = headings.data?.filter(h => 
+              h.page_location === section.page_location && h.section === 'contact') || [];
             break;
             
           default:
-            // For other sections, only show relevant content based on page location
+            // For other sections, show relevant content based on page location and section name
+            content[section.id].headings = headings.data?.filter(h => 
+              h.page_location === section.page_location && h.section === sectionName) || [];
+            
             if (section.page_location === 'demo') {
               content[section.id].videos = videoSections.data || [];
               content[section.id].images = imageSections.data || [];
             }
+            
+            // Check for section-specific content
+            content[section.id].features = features.data?.filter(f => f.section_id === section.id) || [];
+            content[section.id].images = [
+              ...content[section.id].images,
+              ...images.data?.filter(i => i.section === sectionName || i.section_id === section.id) || []
+            ];
+            content[section.id].usps = [
+              ...content[section.id].usps,
+              ...usps.data?.filter(u => u.section_id === section.id) || []
+            ];
             break;
         }
       });
@@ -630,6 +658,23 @@ const SectionsManager = () => {
                             <TableCell colSpan={7} className="p-0">
                               <div className="p-4 bg-muted/30 border-l-4 border-primary">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                  {/* Headings */}
+                                  {sectionContent[section.id]?.headings?.length > 0 && (
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 text-sm font-medium">
+                                        <span className="h-4 w-4 text-center">📝</span>
+                                        Headings ({sectionContent[section.id].headings.length})
+                                      </div>
+                                      <div className="space-y-1">
+                                        {sectionContent[section.id].headings.map((heading: any) => (
+                                          <Badge key={heading.id} variant="outline" className="text-xs">
+                                            {heading.element_type}: {heading.content?.substring(0, 30)}...
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
                                   {/* Employee Sections */}
                                   {sectionContent[section.id]?.employees?.length > 0 && (
                                     <div className="space-y-2">
@@ -669,12 +714,12 @@ const SectionsManager = () => {
                                     <div className="space-y-2">
                                       <div className="flex items-center gap-2 text-sm font-medium">
                                         <Image className="h-4 w-4" />
-                                        Image Sections ({sectionContent[section.id].images.length})
+                                        Images ({sectionContent[section.id].images.length})
                                       </div>
                                       <div className="space-y-1">
                                         {sectionContent[section.id].images.map((img: any) => (
                                           <Badge key={img.id} variant="outline" className="text-xs">
-                                            {img.name} 🖼️
+                                            {img.title || img.file_name} 🖼️
                                           </Badge>
                                         ))}
                                       </div>
@@ -721,7 +766,8 @@ const SectionsManager = () => {
                                      sectionContent[section.id].videos.length === 0 && 
                                      sectionContent[section.id].images.length === 0 && 
                                      sectionContent[section.id].usps.length === 0 && 
-                                     sectionContent[section.id].features.length === 0)) && (
+                                     sectionContent[section.id].features.length === 0 &&
+                                     sectionContent[section.id].headings.length === 0)) && (
                                     <div className="col-span-full text-center text-muted-foreground text-sm py-4">
                                       No CMS content linked to this section yet
                                     </div>
