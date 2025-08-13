@@ -149,6 +149,8 @@ All colors MUST be HSL.
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    line-height: 1.1;
+    padding: 0.1em 0;
   }
 
   /* Gradient background utility tokens used for wordmarks and chips */
