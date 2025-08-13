@@ -81,10 +81,14 @@ const SectionsManager = () => {
 
   const fetchSectionContent = async () => {
     try {
+      console.log('Fetching section content...');
+      
       // Fetch all the sections first to get their IDs
       const { data: sectionsData } = await supabase
         .from('sections')
         .select('*');
+
+      console.log('Sections data:', sectionsData);
 
       const [employeeSections, videoSections, imageSections, features, usps, employees, videos, images, headings] = await Promise.all([
         supabase.from('employees_sections').select('*').order('sort_order'),
@@ -98,12 +102,20 @@ const SectionsManager = () => {
         supabase.from('headings').select('*').order('sort_order')
       ]);
 
+      console.log('All content data:', {
+        images: images.data,
+        headings: headings.data,
+        usps: usps.data
+      });
+
       const content: Record<string, SectionContent> = {};
       
       // Initialize content for each section
       sectionsData?.forEach(section => {
         const sectionName = section.name;
         const pageLocation = section.page_location;
+        
+        console.log(`Processing section: ${sectionName} on page: ${pageLocation}`);
         
         content[section.id] = {
           features: [],
@@ -114,43 +126,51 @@ const SectionsManager = () => {
           headings: []
         };
 
-        // Always check for headings that match the section and page
-        content[section.id].headings = headings.data?.filter(h => 
+        // Get all headings for this section and page
+        const sectionHeadings = headings.data?.filter(h => 
           h.page_location === pageLocation && h.section === sectionName
         ) || [];
+        content[section.id].headings = sectionHeadings;
+        console.log(`Found ${sectionHeadings.length} headings for ${sectionName}:`, sectionHeadings);
 
-        // Check for content that directly references this section ID
-        content[section.id].features = features.data?.filter(f => f.section_id === section.id) || [];
-        content[section.id].usps = usps.data?.filter(u => u.section_id === section.id) || [];
-        content[section.id].images = images.data?.filter(i => i.section_id === section.id) || [];
+        // Get all images for this section (by section name or section_id)
+        const sectionImages = images.data?.filter(i => 
+          i.section === sectionName || i.section_id === section.id
+        ) || [];
+        content[section.id].images = sectionImages;
+        console.log(`Found ${sectionImages.length} images for ${sectionName}:`, sectionImages);
 
-        // Also check for content that matches by section name
-        const featuresByName = features.data?.filter(f => !f.section_id && sectionName === 'features') || [];
-        const uspsByName = usps.data?.filter(u => u.location === sectionName) || [];
-        const imagesByName = images.data?.filter(i => i.section === sectionName) || [];
-        const videosByName = videos.data?.filter(v => v.section === sectionName) || [];
+        // Get all USPs for this section (by location or section_id)
+        const sectionUsps = usps.data?.filter(u => 
+          u.location === sectionName || u.section_id === section.id
+        ) || [];
+        content[section.id].usps = sectionUsps;
+        console.log(`Found ${sectionUsps.length} USPs for ${sectionName}:`, sectionUsps);
 
-        // Merge content avoiding duplicates
-        content[section.id].features = [...content[section.id].features, ...featuresByName];
-        content[section.id].usps = [...content[section.id].usps, ...uspsByName];
-        content[section.id].images = [...content[section.id].images, ...imagesByName];
-        content[section.id].videos = [...content[section.id].videos, ...videosByName];
+        // Get all features for this section
+        const sectionFeatures = features.data?.filter(f => 
+          f.section_id === section.id || (sectionName === 'features' && !f.section_id)
+        ) || [];
+        content[section.id].features = sectionFeatures;
 
-        // Special handling for specific sections
-        if (sectionName === 'team') {
-          // Show all employee sections for team page
-          if (pageLocation === 'team') {
-            content[section.id].employees = employeeSections.data || [];
-          }
+        // Get all videos for this section
+        const sectionVideos = videos.data?.filter(v => 
+          v.section === sectionName
+        ) || [];
+        content[section.id].videos = sectionVideos;
+
+        // Special handling for team sections - get employee sections
+        if (sectionName === 'team' && pageLocation === 'team') {
+          content[section.id].employees = employeeSections.data || [];
         }
 
-        // For demo page, show video and image sections
+        // Special handling for demo page - add video and image sections
         if (pageLocation === 'demo') {
           content[section.id].videos = [...content[section.id].videos, ...videoSections.data || []];
           content[section.id].images = [...content[section.id].images, ...imageSections.data || []];
         }
 
-        // Handle metrics format USPs
+        // Special handling for metrics - get metric format USPs
         if (sectionName === 'metrics') {
           const metricUsps = usps.data?.filter(u => u.format === 'metric') || [];
           content[section.id].usps = [...content[section.id].usps, ...metricUsps];
@@ -172,8 +192,11 @@ const SectionsManager = () => {
         content[section.id].employees = content[section.id].employees.filter((item, index, arr) => 
           arr.findIndex(t => t.id === item.id) === index
         );
+
+        console.log(`Final content for ${sectionName}:`, content[section.id]);
       });
 
+      console.log('Final section content:', content);
       setSectionContent(content);
     } catch (error) {
       console.error('Error fetching section content:', error);
