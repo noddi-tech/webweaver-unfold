@@ -34,7 +34,7 @@ const Hero = () => {
         .from("images")
         .select("file_url,alt,active,section,sort_order,created_at")
         .eq("active", true)
-        .eq("section", "hero")
+        .in("section", ["hero", "hero-homepage", "hero-background"]) // Support legacy and new section names
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true })
         .limit(1);
