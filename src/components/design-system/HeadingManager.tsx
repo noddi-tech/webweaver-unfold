@@ -243,13 +243,14 @@ const HeadingManager = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Page</TableHead>
-                    <TableHead>Section</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Content</TableHead>
-                    <TableHead>Active</TableHead>
-                    <TableHead>Order</TableHead>
-                    <TableHead>Actions</TableHead>
+            <TableHead>Page</TableHead>
+            <TableHead>Section</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Content</TableHead>
+            <TableHead>Preview</TableHead>
+            <TableHead>Active</TableHead>
+            <TableHead>Order</TableHead>
+            <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -315,6 +316,40 @@ const HeadingManager = () => {
                         />
                       </TableCell>
                       <TableCell>
+                        <div className="min-w-[200px] max-w-[250px]">
+                          {heading.element_type === 'h1' && (
+                            <h1 className="text-lg font-bold gradient-text truncate">
+                              {heading.content || 'Preview text'}
+                            </h1>
+                          )}
+                          {heading.element_type === 'h2' && (
+                            <h2 className="text-base font-semibold text-foreground truncate">
+                              {heading.content || 'Preview text'}
+                            </h2>
+                          )}
+                          {heading.element_type === 'h3' && (
+                            <h3 className="text-sm font-medium text-foreground truncate">
+                              {heading.content || 'Preview text'}
+                            </h3>
+                          )}
+                          {heading.element_type === 'h4' && (
+                            <h4 className="text-xs font-medium text-foreground truncate">
+                              {heading.content || 'Preview text'}
+                            </h4>
+                          )}
+                          {heading.element_type === 'subtitle' && (
+                            <p className="text-sm text-muted-foreground truncate">
+                              {heading.content || 'Preview text'}
+                            </p>
+                          )}
+                          {heading.element_type === 'description' && (
+                            <p className="text-xs text-muted-foreground truncate">
+                              {heading.content || 'Preview text'}
+                            </p>
+                          )}
+                         </div>
+                       </TableCell>
+                       <TableCell>
                         <Switch
                           checked={heading.active}
                           onCheckedChange={(checked) => updateHeading(heading.id, 'active', checked)}
@@ -351,7 +386,7 @@ const HeadingManager = () => {
                   ))}
                   {filteredHeadings.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      <TableCell colSpan={8} className="text-center text-muted-foreground">
                         No headings found for the selected page.
                       </TableCell>
                     </TableRow>
