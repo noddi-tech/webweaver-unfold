@@ -79,6 +79,10 @@ const ContactManager = () => {
     sort_order: 0,
     active: true,
   });
+  
+  // Tab visibility toggles
+  const [showContactTab, setShowContactTab] = useState(true);
+  const [showBusinessHoursTab, setShowBusinessHoursTab] = useState(true);
 
   useEffect(() => {
     loadData();
@@ -314,11 +318,39 @@ const ContactManager = () => {
         <p className="text-muted-foreground">Manage contact form settings, contact methods, and business hours</p>
       </div>
 
+      {/* Tab visibility controls */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="text-foreground">Tab Visibility</CardTitle>
+          <CardDescription>Toggle which tabs are visible in the Contact CMS</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-foreground">Show Contact Methods Tab</label>
+            <Switch
+              checked={showContactTab}
+              onCheckedChange={setShowContactTab}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-foreground">Show Business Hours Tab</label>
+            <Switch
+              checked={showBusinessHoursTab}
+              onCheckedChange={setShowBusinessHoursTab}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="settings" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className={`grid w-full ${
+          showContactTab && showBusinessHoursTab ? 'grid-cols-3' : 
+          showContactTab || showBusinessHoursTab ? 'grid-cols-2' : 
+          'grid-cols-1'
+        }`}>
           <TabsTrigger value="settings">Form Settings</TabsTrigger>
-          <TabsTrigger value="contact">Contact Methods</TabsTrigger>
-          <TabsTrigger value="hours">Business Hours</TabsTrigger>
+          {showContactTab && <TabsTrigger value="contact">Contact Methods</TabsTrigger>}
+          {showBusinessHoursTab && <TabsTrigger value="hours">Business Hours</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="settings" className="space-y-6">
@@ -371,7 +403,7 @@ const ContactManager = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="contact" className="space-y-6">
+        {showContactTab && <TabsContent value="contact" className="space-y-6">
           <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Add New Contact Method</CardTitle>
@@ -529,9 +561,9 @@ const ContactManager = () => {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent>}
 
-        <TabsContent value="hours" className="space-y-6">
+        {showBusinessHoursTab && <TabsContent value="hours" className="space-y-6">
           <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Business Hours</CardTitle>
@@ -597,7 +629,7 @@ const ContactManager = () => {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent>}
       </Tabs>
     </div>
   );
