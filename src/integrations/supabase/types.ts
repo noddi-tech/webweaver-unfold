@@ -176,6 +176,7 @@ export type Database = {
           name: string
           phone: string | null
           section: string
+          section_id: string | null
           sort_order: number | null
           title: string
           updated_at: string
@@ -191,6 +192,7 @@ export type Database = {
           name: string
           phone?: string | null
           section?: string
+          section_id?: string | null
           sort_order?: number | null
           title: string
           updated_at?: string
@@ -206,11 +208,20 @@ export type Database = {
           name?: string
           phone?: string | null
           section?: string
+          section_id?: string | null
           sort_order?: number | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "employees_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employees_sections: {
         Row: {
@@ -284,6 +295,7 @@ export type Database = {
           description: string | null
           icon_name: string
           id: string
+          section_id: string | null
           sort_order: number | null
           title: string
           updated_at: string
@@ -293,6 +305,7 @@ export type Database = {
           description?: string | null
           icon_name?: string
           id?: string
+          section_id?: string | null
           sort_order?: number | null
           title: string
           updated_at?: string
@@ -302,11 +315,20 @@ export type Database = {
           description?: string | null
           icon_name?: string
           id?: string
+          section_id?: string | null
           sort_order?: number | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "features_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       features_settings: {
         Row: {
@@ -421,6 +443,7 @@ export type Database = {
           id: string
           link_url: string | null
           section: string
+          section_id: string | null
           sort_order: number | null
           title: string
           updated_at: string
@@ -435,6 +458,7 @@ export type Database = {
           id?: string
           link_url?: string | null
           section: string
+          section_id?: string | null
           sort_order?: number | null
           title: string
           updated_at?: string
@@ -449,8 +473,71 @@ export type Database = {
           id?: string
           link_url?: string | null
           section?: string
+          section_id?: string | null
           sort_order?: number | null
           title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "images_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sections: {
+        Row: {
+          active: boolean
+          background_token: string
+          created_at: string
+          display_name: string
+          id: string
+          margin_token: string
+          max_width_token: string
+          name: string
+          padding_token: string
+          page_location: string
+          position_after: string | null
+          position_before: string | null
+          sort_order: number | null
+          text_token: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          background_token?: string
+          created_at?: string
+          display_name: string
+          id?: string
+          margin_token?: string
+          max_width_token?: string
+          name: string
+          padding_token?: string
+          page_location?: string
+          position_after?: string | null
+          position_before?: string | null
+          sort_order?: number | null
+          text_token?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          background_token?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          margin_token?: string
+          max_width_token?: string
+          name?: string
+          padding_token?: string
+          page_location?: string
+          position_after?: string | null
+          position_before?: string | null
+          sort_order?: number | null
+          text_token?: string
           updated_at?: string
         }
         Relationships: []
@@ -473,6 +560,7 @@ export type Database = {
           metric_suffix: string | null
           metric_value: string | null
           metric_value_size: string
+          section_id: string | null
           sort_order: number | null
           text_token: string
           title: string
@@ -495,6 +583,7 @@ export type Database = {
           metric_suffix?: string | null
           metric_value?: string | null
           metric_value_size?: string
+          section_id?: string | null
           sort_order?: number | null
           text_token?: string
           title: string
@@ -517,12 +606,21 @@ export type Database = {
           metric_suffix?: string | null
           metric_value?: string | null
           metric_value_size?: string
+          section_id?: string | null
           sort_order?: number | null
           text_token?: string
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "usps_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       video_sections: {
         Row: {

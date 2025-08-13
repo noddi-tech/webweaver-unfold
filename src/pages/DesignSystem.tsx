@@ -10,6 +10,7 @@ import VideoManager from "@/components/design-system/VideoManager";
 import LogoManager from "@/components/design-system/LogoManager";
 import USPCms from "@/components/design-system/USPCms";
 import PatternsShowcase from "@/components/design-system/PatternsShowcase";
+import SectionsManager from "@/components/design-system/SectionsManager";
 
 const DesignSystem = () => {
   return (
@@ -28,13 +29,14 @@ const DesignSystem = () => {
         </div>
 
         <Tabs defaultValue="colors" className="w-full">
-          <TabsList className="grid w-full grid-cols-9 mb-12">
+          <TabsList className="grid w-full grid-cols-10 mb-12">
             <TabsTrigger value="colors">Colors & Tokens</TabsTrigger>
             <TabsTrigger value="typography">Typography</TabsTrigger>
             <TabsTrigger value="spacing">Spacing</TabsTrigger>
             <TabsTrigger value="components">Components</TabsTrigger>
             <TabsTrigger value="icons">Icons</TabsTrigger>
             <TabsTrigger value="logo">Logo</TabsTrigger>
+            <TabsTrigger value="sections">Sections</TabsTrigger>
             <TabsTrigger value="usps">USPs</TabsTrigger>
             <TabsTrigger value="patterns">Patterns</TabsTrigger>
             <TabsTrigger value="videos">Demo Videos</TabsTrigger>
@@ -62,6 +64,10 @@ const DesignSystem = () => {
 
           <TabsContent value="logo" className="space-y-8">
             <LogoManager />
+          </TabsContent>
+
+          <TabsContent value="sections" className="space-y-8">
+            <SectionsManager />
           </TabsContent>
 
           <TabsContent value="usps" className="space-y-8">

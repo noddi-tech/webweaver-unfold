@@ -18,6 +18,7 @@ import ImageManager from "@/components/design-system/ImageManager";
 import EmployeesManager from "@/components/design-system/EmployeesManager";
 import HeadingManager from "@/components/design-system/HeadingManager";
 import ContactManager from "@/components/design-system/ContactManager";
+import SectionsManager from "@/components/design-system/SectionsManager";
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -76,14 +77,18 @@ const Admin = () => {
           <TabsContent value="cms" className="space-y-8">
             <Tabs defaultValue="videos" className="w-full">
               <TabsList className="flex w-full flex-wrap gap-2 h-auto mb-8 justify-center">
+                <TabsTrigger value="sections">Sections CMS</TabsTrigger>
                 <TabsTrigger value="videos">Videos CMS</TabsTrigger>
                 <TabsTrigger value="images">Images CMS</TabsTrigger>
                 <TabsTrigger value="features">Features CMS</TabsTrigger>
                 <TabsTrigger value="usps">USPs CMS</TabsTrigger>
                 <TabsTrigger value="employees">Employees CMS</TabsTrigger>
-          <TabsTrigger value="headings">Heading CMS</TabsTrigger>
-          <TabsTrigger value="contact">Contact CMS</TabsTrigger>
+                <TabsTrigger value="headings">Heading CMS</TabsTrigger>
+                <TabsTrigger value="contact">Contact CMS</TabsTrigger>
               </TabsList>
+              <TabsContent value="sections" className="space-y-8">
+                <SectionsManager />
+              </TabsContent>
               <TabsContent value="videos" className="space-y-8">
                 <VideoManager />
               </TabsContent>
