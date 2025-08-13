@@ -148,19 +148,27 @@ const SectionsManager = () => {
         console.log(`Found ${sectionImages.length} images for ${sectionName}:`, sectionImages);
 
         // Get all USPs for this section (by location or section_id)
-        const sectionUsps = usps.data?.filter(u => 
-          u.location === sectionName || u.section_id === section.id
-        ) || [];
+        // Don't show USPs on demo page sections unless specifically mapped
+        let sectionUsps = [];
+        if (pageLocation !== 'demo') {
+          sectionUsps = usps.data?.filter(u => 
+            u.location === sectionName || u.section_id === section.id
+          ) || [];
+        }
         content[section.id].usps = sectionUsps;
         console.log(`Found ${sectionUsps.length} USPs for ${sectionName}:`, sectionUsps);
 
         // Get all features for this section
-        const sectionFeatures = features.data?.filter(f => 
-          f.section_id === section.id || (sectionName === 'features' && !f.section_id)
-        ) || [];
+        // Don't show features on demo page sections unless specifically mapped
+        let sectionFeatures = [];
+        if (pageLocation !== 'demo') {
+          sectionFeatures = features.data?.filter(f => 
+            f.section_id === section.id || (sectionName === 'features' && !f.section_id)
+          ) || [];
+        }
         content[section.id].features = sectionFeatures;
 
-        // Get all videos for this section
+        // Get all videos for this section - only for demo video-showcase section
         const sectionVideos = videos.data?.filter(v => 
           v.section === sectionName
         ) || [];
