@@ -315,39 +315,39 @@ const HeadingManager = () => {
                           rows={2}
                         />
                       </TableCell>
-                      <TableCell>
-                        <div className="min-w-[200px] max-w-[250px]">
-                          {heading.element_type === 'h1' && (
-                            <h1 className="text-lg font-bold gradient-text truncate">
-                              {heading.content || 'Preview text'}
-                            </h1>
-                          )}
-                          {heading.element_type === 'h2' && (
-                            <h2 className="text-base font-semibold text-foreground truncate">
-                              {heading.content || 'Preview text'}
-                            </h2>
-                          )}
-                          {heading.element_type === 'h3' && (
-                            <h3 className="text-sm font-medium text-foreground truncate">
-                              {heading.content || 'Preview text'}
-                            </h3>
-                          )}
-                          {heading.element_type === 'h4' && (
-                            <h4 className="text-xs font-medium text-foreground truncate">
-                              {heading.content || 'Preview text'}
-                            </h4>
-                          )}
-                          {heading.element_type === 'subtitle' && (
-                            <p className="text-sm text-muted-foreground truncate">
-                              {heading.content || 'Preview text'}
-                            </p>
-                          )}
-                          {heading.element_type === 'description' && (
-                            <p className="text-xs text-muted-foreground truncate">
-                              {heading.content || 'Preview text'}
-                            </p>
-                          )}
-                         </div>
+                       <TableCell>
+                         <div className="min-w-[200px] max-w-[250px]">
+                           {heading.element_type === 'h1' && (
+                             <h1 className="text-6xl font-bold gradient-text truncate">
+                               {heading.content || 'Preview text'}
+                             </h1>
+                           )}
+                           {heading.element_type === 'h2' && (
+                             <h2 className="text-4xl font-bold text-foreground truncate">
+                               {heading.content || 'Preview text'}
+                             </h2>
+                           )}
+                           {heading.element_type === 'h3' && (
+                             <h3 className="text-2xl font-semibold text-foreground truncate">
+                               {heading.content || 'Preview text'}
+                             </h3>
+                           )}
+                           {heading.element_type === 'h4' && (
+                             <h4 className="text-xl font-semibold text-foreground truncate">
+                               {heading.content || 'Preview text'}
+                             </h4>
+                           )}
+                           {heading.element_type === 'subtitle' && (
+                             <p className="text-xl text-muted-foreground truncate">
+                               {heading.content || 'Preview text'}
+                             </p>
+                           )}
+                           {heading.element_type === 'description' && (
+                             <p className="text-base text-muted-foreground truncate">
+                               {heading.content || 'Preview text'}
+                             </p>
+                           )}
+                          </div>
                        </TableCell>
                        <TableCell>
                         <Switch
