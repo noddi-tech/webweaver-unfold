@@ -278,6 +278,7 @@ export type Database = {
           file_name: string
           file_url: string
           id: string
+          link_url: string | null
           section: string
           sort_order: number | null
           title: string
@@ -291,6 +292,7 @@ export type Database = {
           file_name: string
           file_url: string
           id?: string
+          link_url?: string | null
           section: string
           sort_order?: number | null
           title: string
@@ -304,6 +306,7 @@ export type Database = {
           file_name?: string
           file_url?: string
           id?: string
+          link_url?: string | null
           section?: string
           sort_order?: number | null
           title?: string
