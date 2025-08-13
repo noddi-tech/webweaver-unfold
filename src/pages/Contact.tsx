@@ -24,6 +24,8 @@ const Contact = () => {
     form_description: string | null;
     get_in_touch_title: string;
     business_hours_title: string;
+    show_contact_methods_tab: boolean;
+    show_business_hours_tab: boolean;
   };
 
   type ContactItem = {
@@ -206,61 +208,65 @@ const Contact = () => {
 
           {/* Contact Information */}
           <div className="space-y-8">
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-2xl text-foreground">{settings?.get_in_touch_title ?? "Get in touch"}</CardTitle>
-                <CardDescription>
-                  Reach out to us through any of these channels.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {contactItems.length > 0 ? (
-                  contactItems.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-4">
-                      <div className="bg-primary/10 p-3 rounded-lg">
-                        {item.icon_name === 'Phone' ? (
-                          <Phone className="h-6 w-6 text-primary" />
-                        ) : item.icon_name === 'MapPin' ? (
-                          <MapPin className="h-6 w-6 text-primary" />
-                        ) : (
-                          <Mail className="h-6 w-6 text-primary" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">{item.title}</h3>
-                        {item.link_url ? (
-                          <a href={item.link_url} className="text-muted-foreground underline underline-offset-4">{item.value}</a>
-                        ) : (
-                          <p className="text-muted-foreground">{item.value}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground">No contact items configured yet.</p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-xl text-foreground">{settings?.business_hours_title ?? "Business Hours"}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  {hours.length > 0 ? (
-                    hours.map((h) => (
-                      <div key={h.id} className="flex justify-between">
-                        <span className="text-muted-foreground">{h.day_name}</span>
-                        <span className="text-foreground">{h.closed ? 'Closed' : `${h.open_time ?? ''}${h.open_time && h.close_time ? ' - ' : ''}${h.close_time ?? ''}`}</span>
+            {settings?.show_contact_methods_tab !== false && (
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-foreground">{settings?.get_in_touch_title ?? "Get in touch"}</CardTitle>
+                  <CardDescription>
+                    Reach out to us through any of these channels.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {contactItems.length > 0 ? (
+                    contactItems.map((item) => (
+                      <div key={item.id} className="flex items-center space-x-4">
+                        <div className="bg-primary/10 p-3 rounded-lg">
+                          {item.icon_name === 'Phone' ? (
+                            <Phone className="h-6 w-6 text-primary" />
+                          ) : item.icon_name === 'MapPin' ? (
+                            <MapPin className="h-6 w-6 text-primary" />
+                          ) : (
+                            <Mail className="h-6 w-6 text-primary" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">{item.title}</h3>
+                          {item.link_url ? (
+                            <a href={item.link_url} className="text-muted-foreground underline underline-offset-4">{item.value}</a>
+                          ) : (
+                            <p className="text-muted-foreground">{item.value}</p>
+                          )}
+                        </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-muted-foreground">No business hours configured yet.</p>
+                    <p className="text-muted-foreground">No contact items configured yet.</p>
                   )}
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
+
+            {settings?.show_business_hours_tab !== false && (
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-xl text-foreground">{settings?.business_hours_title ?? "Business Hours"}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm">
+                    {hours.length > 0 ? (
+                      hours.map((h) => (
+                        <div key={h.id} className="flex justify-between">
+                          <span className="text-muted-foreground">{h.day_name}</span>
+                          <span className="text-foreground">{h.closed ? 'Closed' : `${h.open_time ?? ''}${h.open_time && h.close_time ? ' - ' : ''}${h.close_time ?? ''}`}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-muted-foreground">No business hours configured yet.</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </main>
