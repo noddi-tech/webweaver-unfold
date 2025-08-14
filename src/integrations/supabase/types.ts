@@ -560,6 +560,7 @@ export type Database = {
           active: boolean
           alt: string | null
           caption: string | null
+          caption_color_token: string | null
           caption_position: string
           created_at: string
           file_name: string
@@ -570,12 +571,14 @@ export type Database = {
           section_id: string | null
           sort_order: number | null
           title: string
+          title_color_token: string | null
           updated_at: string
         }
         Insert: {
           active?: boolean
           alt?: string | null
           caption?: string | null
+          caption_color_token?: string | null
           caption_position?: string
           created_at?: string
           file_name: string
@@ -586,12 +589,14 @@ export type Database = {
           section_id?: string | null
           sort_order?: number | null
           title: string
+          title_color_token?: string | null
           updated_at?: string
         }
         Update: {
           active?: boolean
           alt?: string | null
           caption?: string | null
+          caption_color_token?: string | null
           caption_position?: string
           created_at?: string
           file_name?: string
@@ -602,6 +607,7 @@ export type Database = {
           section_id?: string | null
           sort_order?: number | null
           title?: string
+          title_color_token?: string | null
           updated_at?: string
         }
         Relationships: [

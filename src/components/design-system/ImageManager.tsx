@@ -18,6 +18,8 @@ interface DbImage {
   alt: string | null;
   caption: string | null;
   caption_position?: string;
+  title_color_token?: string;
+  caption_color_token?: string;
   section: string;
   file_name: string;
   file_url: string;
@@ -383,6 +385,38 @@ const ImageManager = () => {
                         <SelectContent>
                           <SelectItem value="above">Above image (below heading)</SelectItem>
                           <SelectItem value="below">Below image</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Title Color</Label>
+                      <Select value={img.title_color_token || 'foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title_color_token: v } : i))}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="foreground">Default Text</SelectItem>
+                          <SelectItem value="primary">Primary</SelectItem>
+                          <SelectItem value="secondary">Secondary</SelectItem>
+                          <SelectItem value="muted-foreground">Muted</SelectItem>
+                          <SelectItem value="accent">Accent</SelectItem>
+                          <SelectItem value="gradient-text">Gradient</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Caption Color</Label>
+                      <Select value={img.caption_color_token || 'muted-foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_color_token: v } : i))}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="foreground">Default Text</SelectItem>
+                          <SelectItem value="primary">Primary</SelectItem>
+                          <SelectItem value="secondary">Secondary</SelectItem>
+                          <SelectItem value="muted-foreground">Muted</SelectItem>
+                          <SelectItem value="accent">Accent</SelectItem>
+                          <SelectItem value="gradient-text">Gradient</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

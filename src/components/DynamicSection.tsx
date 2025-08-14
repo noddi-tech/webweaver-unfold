@@ -224,10 +224,10 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
         {images.map((image) => (
           <div key={image.id} className="mb-8">
             {image.title && (
-              <h3 className="text-xl font-semibold mb-3">{image.title}</h3>
+              <h3 className={`text-xl font-semibold mb-3 text-${image.title_color_token || 'foreground'}`}>{image.title}</h3>
             )}
             {image.caption && image.caption_position === 'above' && (
-              <p className="text-base text-muted-foreground mb-4 leading-relaxed">{image.caption}</p>
+              <p className={`text-base mb-4 leading-relaxed text-${image.caption_color_token || 'muted-foreground'}`}>{image.caption}</p>
             )}
             <img
               src={image.file_url}
@@ -235,7 +235,7 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
               className="w-full h-auto rounded-lg"
             />
             {image.caption && (!image.caption_position || image.caption_position === 'below') && (
-              <p className="text-base text-muted-foreground mt-3 leading-relaxed">{image.caption}</p>
+              <p className={`text-base mt-3 leading-relaxed text-${image.caption_color_token || 'muted-foreground'}`}>{image.caption}</p>
             )}
           </div>
         ))}
