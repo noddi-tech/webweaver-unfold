@@ -223,13 +223,16 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
         {/* Render images */}
         {images.map((image) => (
           <div key={image.id} className="mb-8">
+            {image.title && (
+              <h3 className="text-xl font-semibold mb-4">{image.title}</h3>
+            )}
             <img
               src={image.file_url}
               alt={image.alt || image.title}
               className="w-full h-auto rounded-lg"
             />
             {image.caption && (
-              <p className="text-sm text-muted-foreground mt-2">{image.caption}</p>
+              <p className="text-base text-muted-foreground mt-3 leading-relaxed">{image.caption}</p>
             )}
           </div>
         ))}
