@@ -17,6 +17,7 @@ interface DbImage {
   title: string;
   alt: string | null;
   caption: string | null;
+  caption_position?: string;
   section: string;
   file_name: string;
   file_url: string;
@@ -372,6 +373,18 @@ const ImageManager = () => {
                     <div className="grid gap-2">
                       <Label>Caption</Label>
                       <Textarea value={img.caption ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption: e.target.value } : i))} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Caption Position</Label>
+                      <Select value={img.caption_position || 'below'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_position: v } : i))}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="above">Above image (below heading)</SelectItem>
+                          <SelectItem value="below">Below image</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="grid gap-2">
                       <Label>Link URL</Label>

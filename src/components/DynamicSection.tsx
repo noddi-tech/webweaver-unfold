@@ -226,7 +226,7 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
             {image.title && (
               <h3 className="text-xl font-semibold mb-3">{image.title}</h3>
             )}
-            {image.caption && (
+            {image.caption && image.caption_position === 'above' && (
               <p className="text-base text-muted-foreground mb-4 leading-relaxed">{image.caption}</p>
             )}
             <img
@@ -234,6 +234,9 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
               alt={image.alt || image.title}
               className="w-full h-auto rounded-lg"
             />
+            {image.caption && (!image.caption_position || image.caption_position === 'below') && (
+              <p className="text-base text-muted-foreground mt-3 leading-relaxed">{image.caption}</p>
+            )}
           </div>
         ))}
 

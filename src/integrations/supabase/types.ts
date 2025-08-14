@@ -560,6 +560,7 @@ export type Database = {
           active: boolean
           alt: string | null
           caption: string | null
+          caption_position: string
           created_at: string
           file_name: string
           file_url: string
@@ -575,6 +576,7 @@ export type Database = {
           active?: boolean
           alt?: string | null
           caption?: string | null
+          caption_position?: string
           created_at?: string
           file_name: string
           file_url: string
@@ -590,6 +592,7 @@ export type Database = {
           active?: boolean
           alt?: string | null
           caption?: string | null
+          caption_position?: string
           created_at?: string
           file_name?: string
           file_url?: string
