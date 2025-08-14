@@ -43,13 +43,13 @@ const designTokenOptions = {
 const layoutTypes = ['standard', 'wide', 'full-width', 'sidebar'];
 
 export const PagesManager = () => {
-  // Fixed: Removed isEditing variable - using modal states instead
-  console.log("PagesManager component rendering - v2");
   const [pages, setPages] = useState<Page[]>([]);
   const [selectedPage, setSelectedPage] = useState<Page | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [activeFilter, setActiveFilter] = useState<string>('all');
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -210,6 +210,18 @@ export const PagesManager = () => {
   const generateSlugFromName = (name: string) => {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   };
+
+  const filteredPages = pages.filter(page => {
+    // Filter by status (published/draft)
+    if (statusFilter === 'published' && !page.published) return false;
+    if (statusFilter === 'draft' && page.published) return false;
+    
+    // Filter by active/inactive
+    if (activeFilter === 'active' && !page.active) return false;
+    if (activeFilter === 'inactive' && page.active) return false;
+    
+    return true;
+  });
 
   const PageFormContent = () => (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -507,8 +519,47 @@ export const PagesManager = () => {
         </Dialog>
       </div>
 
+      {/* Filter Controls */}
+      <div className="flex items-center gap-4 p-4 bg-card rounded-lg border">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="status-filter" className="text-sm font-medium">
+            Status:
+          </Label>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Label htmlFor="active-filter" className="text-sm font-medium">
+            State:
+          </Label>
+          <Select value={activeFilter} onValueChange={setActiveFilter}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
+          Showing {filteredPages.length} of {pages.length} pages
+        </div>
+      </div>
+
       <div className="grid gap-4">
-        {pages.map((page) => (
+        {filteredPages.map((page) => (
           <Card key={page.id}>
             <CardHeader>
               <div className="flex items-center justify-between">
