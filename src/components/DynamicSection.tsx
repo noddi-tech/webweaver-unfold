@@ -83,6 +83,19 @@ const DynamicSection = ({ section, pageDefaults }: DynamicSectionProps) => {
     return mapping[token || 'section'] || 'py-section';
   };
 
+  const getMarginClass = (token?: string) => {
+    const mapping: Record<string, string> = {
+      none: 'my-0',
+      xs: 'my-2',
+      sm: 'my-4',
+      md: 'my-8',
+      lg: 'my-12',
+      xl: 'my-16',
+      section: 'my-section',
+    };
+    return mapping[token || 'none'] || 'my-0';
+  };
+
   const getMaxWidthClass = (token?: string) => {
     const mapping: Record<string, string> = {
       none: 'max-w-none',
@@ -153,12 +166,19 @@ const DynamicSection = ({ section, pageDefaults }: DynamicSectionProps) => {
       pageDefaults?.default_padding_token
     );
 
+    const marginToken = getEffectiveToken(
+      section.margin_token_override,
+      section.margin_token || 'none',
+      pageDefaults?.default_margin_token
+    );
+
     const backgroundClass = backgroundToken === 'transparent' ? '' : getBackgroundClass(backgroundToken);
     const textClass = textToken === 'inherit' ? '' : getTextClass(textToken);
     const paddingClass = getPaddingClass(paddingToken);
+    const marginClass = getMarginClass(marginToken);
 
     return (
-      <div className={`${backgroundClass} ${textClass} ${paddingClass}`.trim()}>
+      <div className={`${backgroundClass} ${textClass} ${paddingClass} ${marginClass}`.trim()}>
         <SectionComponent />
       </div>
     );
