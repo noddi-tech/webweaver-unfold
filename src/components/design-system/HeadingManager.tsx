@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Type, Plus, Trash2, Save } from "lucide-react";
 import { TYPOGRAPHY_SCALE } from "@/lib/typography";
+import { getColorTokenOptions, getColorClass } from "@/lib/colorUtils";
 
 interface Heading {
   id: string;
@@ -62,16 +63,8 @@ const elementTypeOptions = [
   }))
 ];
 
-// Color token options from design system
-const colorTokenOptions = [
-  { value: 'foreground', label: 'Foreground (Default)', description: 'Primary text color' },
-  { value: 'muted-foreground', label: 'Muted Foreground', description: 'Secondary text color' },
-  { value: 'primary', label: 'Primary', description: 'Brand primary color' },
-  { value: 'secondary', label: 'Secondary', description: 'Secondary brand color' },
-  { value: 'accent', label: 'Accent', description: 'Accent color' },
-  { value: 'destructive', label: 'Destructive', description: 'Error/warning color' },
-  { value: 'gradient-text', label: 'Gradient Text', description: 'Brand gradient effect' },
-];
+// Use the unified color token options
+const colorTokenOptions = getColorTokenOptions();
 
 const HeadingManager = () => {
   const { toast } = useToast();
@@ -388,9 +381,7 @@ const HeadingManager = () => {
                             {(() => {
                               const elementOption = elementTypeOptions.find(opt => opt.value === heading.element_type);
                               const className = elementOption?.class || 'text-base';
-                              const colorClass = heading.color_token === 'gradient-text' 
-                                ? 'gradient-text' 
-                                : `text-${heading.color_token || 'foreground'}`;
+                               const colorClass = getColorClass(heading.color_token, 'foreground');
                               const isHeading = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(heading.element_type);
                               
                               if (isHeading) {
@@ -578,9 +569,7 @@ const HeadingManager = () => {
                       {(() => {
                         const elementOption = elementTypeOptions.find(opt => opt.value === newHeading.element_type);
                         const className = elementOption?.class || 'text-base';
-                        const colorClass = newHeading.color_token === 'gradient-text' 
-                          ? 'gradient-text' 
-                          : `text-${newHeading.color_token}`;
+                         const colorClass = getColorClass(newHeading.color_token, 'foreground');
                         const isHeading = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(newHeading.element_type);
                         
                         if (isHeading) {
@@ -599,7 +588,7 @@ const HeadingManager = () => {
                         }
                       })()}
                       <p className="text-xs text-muted-foreground mt-2">
-                        Applied class: {elementTypeOptions.find(opt => opt.value === newHeading.element_type)?.class || 'text-base'} {newHeading.color_token === 'gradient-text' ? 'gradient-text' : `text-${newHeading.color_token}`}
+                        Applied class: {elementTypeOptions.find(opt => opt.value === newHeading.element_type)?.class || 'text-base'} {getColorClass(newHeading.color_token, 'foreground')}
                       </p>
                    </div>
                  </div>

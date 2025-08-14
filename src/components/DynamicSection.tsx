@@ -4,19 +4,7 @@ import Features from './Features';
 import Metrics from './Metrics';
 import { supabase } from '@/integrations/supabase/client';
 import { getTypographyClass } from '@/lib/typography';
-
-// Helper function to map color tokens to CSS classes for images
-const getImageColorClass = (colorToken: string): string => {
-  const colorMap: Record<string, string> = {
-    'foreground': 'text-foreground',
-    'primary': 'text-primary',
-    'secondary': 'text-secondary',
-    'muted-foreground': 'text-muted-foreground',
-    'accent': 'text-accent',
-    'gradient-text': 'bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent'
-  };
-  return colorMap[colorToken] || 'text-foreground';
-};
+import { getColorClass } from '@/lib/colorUtils';
 
 interface Section {
   id: string;
@@ -225,7 +213,7 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
         {/* Render headings */}
         {headings.map((heading) => {
           const HeadingTag = heading.element_type as keyof JSX.IntrinsicElements;
-          const colorClass = getImageColorClass(heading.color_token || 'foreground');
+          const colorClass = getColorClass(heading.color_token, 'foreground');
           const typographyClass = getTypographyClass(heading.element_type);
           return (
             <HeadingTag
@@ -241,12 +229,12 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
         {images.map((image) => (
           <div key={image.id} className="mb-8">
             {image.title && (
-              <h3 className={`text-xl font-semibold mb-3 ${getImageColorClass(image.title_color_token || 'foreground')}`}>
+              <h3 className={`text-xl font-semibold mb-3 ${getColorClass(image.title_color_token, 'foreground')}`}>
                 {image.title}
               </h3>
             )}
             {image.caption && image.caption_position === 'above' && (
-              <p className={`text-base mb-4 leading-relaxed ${getImageColorClass(image.caption_color_token || 'muted-foreground')}`}>
+              <p className={`text-base mb-4 leading-relaxed ${getColorClass(image.caption_color_token, 'muted-foreground')}`}>
                 {image.caption}
               </p>
             )}
@@ -256,7 +244,7 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
               className="w-full h-auto rounded-lg"
             />
             {image.caption && (!image.caption_position || image.caption_position === 'below') && (
-              <p className={`text-base mt-3 leading-relaxed ${getImageColorClass(image.caption_color_token || 'muted-foreground')}`}>
+              <p className={`text-base mt-3 leading-relaxed ${getColorClass(image.caption_color_token, 'muted-foreground')}`}>
                 {image.caption}
               </p>
             )}

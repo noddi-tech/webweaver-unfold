@@ -232,7 +232,14 @@ export const EditableColorSystem = () => {
     const ratio = calculateContrastRatio(color.value, backgroundColor.value);
     const level = getContrastLevel(ratio);
     
-    return { ratio: ratio.toFixed(2), ...level };
+    // Determine badge variant based on contrast level
+    let badge: "default" | "secondary" | "destructive" | "outline" = "default";
+    if (level === 'AAA') badge = "default";
+    else if (level === 'AA') badge = "secondary";
+    else if (level === 'AA Large') badge = "outline";
+    else badge = "destructive";
+    
+    return { ratio: ratio.toFixed(2), level, badge };
   };
 
   const formatColorValue = (value: string, format: 'hsl' | 'hex' | 'rgb') => {
