@@ -128,17 +128,20 @@ const DynamicSection = ({ section, pageDefaults }: DynamicSectionProps) => {
     return <GenericSection section={section} pageDefaults={pageDefaults} />;
   }
 
-  // For known components, render them directly but apply page-level styling
+  // For known components, render them with conditional background override
   if (['hero', 'features', 'metrics'].includes(section.name)) {
-    const backgroundToken = getEffectiveToken(
+    // Only apply background if section explicitly overrides or doesn't inherit from page
+    const shouldApplyBackground = !section.inherit_page_defaults || section.background_token_override;
+    
+    const backgroundToken = shouldApplyBackground ? getEffectiveToken(
       section.background_token_override,
-      section.background_token || 'background',
-      pageDefaults?.default_background_token
-    );
+      section.background_token || 'transparent',
+      undefined // Don't use page default since it's on body
+    ) : 'transparent';
     
     const textToken = getEffectiveToken(
       section.text_token_override,
-      section.text_token || 'foreground',
+      section.text_token || 'inherit',
       pageDefaults?.default_text_token
     );
 
@@ -148,12 +151,12 @@ const DynamicSection = ({ section, pageDefaults }: DynamicSectionProps) => {
       pageDefaults?.default_padding_token
     );
 
-    const backgroundClass = getBackgroundClass(backgroundToken);
-    const textClass = getTextClass(textToken);
+    const backgroundClass = backgroundToken === 'transparent' ? '' : getBackgroundClass(backgroundToken);
+    const textClass = textToken === 'inherit' ? '' : getTextClass(textToken);
     const paddingClass = getPaddingClass(paddingToken);
 
     return (
-      <div className={`${backgroundClass} ${textClass} ${paddingClass}`}>
+      <div className={`${backgroundClass} ${textClass} ${paddingClass}`.trim()}>
         <SectionComponent />
       </div>
     );
@@ -255,7 +258,7 @@ const GenericSection = ({ section, pageDefaults }: {
   pageDefaults?: DynamicSectionProps['pageDefaults'];
 }) => {
   return (
-    <section className="py-section px-6 bg-muted/50">
+    <section className="py-section px-6 bg-muted/10">
       <div className="container mx-auto text-center">
         <h2 className="text-2xl font-bold mb-4">
           Section: {section.display_name}

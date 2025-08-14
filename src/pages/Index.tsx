@@ -77,6 +77,9 @@ const Index = () => {
             }
           }
 
+          // Apply page background to body element
+          document.body.className = `bg-${page.default_background_token} text-${page.default_text_token}`;
+
           // Fetch sections for this page
           const { data: sectionsData, error: sectionsError } = await supabase
             .from('sections')
@@ -107,9 +110,16 @@ const Index = () => {
     fetchPageAndSections();
   }, []);
 
+  // Cleanup body classes when component unmounts
+  useEffect(() => {
+    return () => {
+      document.body.className = '';
+    };
+  }, []);
+
   if (loading) {
     return (
-      <div className="min-h-screen text-foreground">
+      <div className="min-h-screen">
         <Header />
         <main className="flex items-center justify-center py-20">
           <div className="text-center">
@@ -122,14 +132,8 @@ const Index = () => {
     );
   }
 
-  // Apply page-level background styling
-  const pageStyle = pageData ? {
-    backgroundColor: `hsl(var(--${pageData.default_background_token}))`,
-    color: `hsl(var(--${pageData.default_text_token}))`
-  } : {};
-
   return (
-    <div className="min-h-screen text-foreground" style={pageStyle}>
+    <div className="min-h-screen">
       <Header />
       <main>
         {sections.map((section) => (
