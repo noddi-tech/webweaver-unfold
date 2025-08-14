@@ -10,7 +10,7 @@ import { getTypographyClass } from "@/lib/typography";
 import { getColorClass } from "@/lib/colorUtils";
 
 const Hero = () => {
-  const { getContent, textContent } = useTextContent('index', 'hero');
+  const { getContent, textContent, loading } = useTextContent('index', 'hero');
   const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
   const [heroImage, setHeroImage] = useState<{ url: string; alt: string } | null>(null);
 
@@ -69,14 +69,18 @@ const Hero = () => {
       <div className="container mx-auto">
         <div className="max-w-4xl mx-auto text-center">
           {/* Hero Text */}
-          <h1 className={`${getContentStyles('h1')} mb-6 leading-tight break-words hyphens-auto text-balance`}>
-            {getContent('h1', '')}
-          </h1>
+          {!loading && getContent('h1') && (
+            <h1 className={`${getContentStyles('h1')} mb-6 leading-tight break-words hyphens-auto text-balance`}>
+              {getContent('h1')}
+            </h1>
+          )}
           
           {/* Subheading */}
-          <h5 className={`${getContentStyles('h5')} mb-8 max-w-3xl mx-auto leading-relaxed`}>
-            {getContent('h5', '')}
-          </h5>
+          {!loading && getContent('h5') && (
+            <h5 className={`${getContentStyles('h5')} mb-8 max-w-3xl mx-auto leading-relaxed`}>
+              {getContent('h5')}
+            </h5>
+          )}
 
           {/* Hero USPs */}
           {usps.length > 0 && (
@@ -120,13 +124,15 @@ const Hero = () => {
               className="w-full rounded-xl shadow-lg"
             />
           </div>
-          <div className="mt-6 text-center">
-            <Link to="/contact">
-              <Button size="lg" className="px-8 py-4">
-                {getContent('cta', '')}
-              </Button>
-            </Link>
-          </div>
+          {!loading && getContent('cta') && (
+            <div className="mt-6 text-center">
+              <Link to="/contact">
+                <Button size="lg" className="px-8 py-4">
+                  {getContent('cta')}
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </section>

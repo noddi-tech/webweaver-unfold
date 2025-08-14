@@ -8,6 +8,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground", logo_image_url: null as string | null, logo_variant: "text", logo_image_height: 32, logo_icon_name: null as string | null, logo_icon_position: "top-right", logo_icon_size: "default" });
+  const [headerSettings, setHeaderSettings] = useState<any>(null);
   const location = useLocation();
   const isHome = location.pathname === "/";
   const HeadingTag = (isHome ? "h1" : "h2") as keyof JSX.IntrinsicElements;
@@ -22,26 +23,38 @@ const Header = () => {
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      const { data } = await supabase
-        .from("brand_settings")
-        .select("logo_text,gradient_token,text_token,logo_image_url,logo_variant,logo_image_height,logo_icon_name,logo_icon_position,logo_icon_size")
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
+      const [brandData, headerData] = await Promise.all([
+        supabase
+          .from("brand_settings")
+          .select("logo_text,gradient_token,text_token,logo_image_url,logo_variant,logo_image_height,logo_icon_name,logo_icon_position,logo_icon_size")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from("header_settings")
+          .select("*")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle()
+      ]);
+      
       if (!mounted) return;
-      if (data) {
+      
+      if (brandData.data) {
         setBrand({
-          logo_text: data.logo_text || "",
-          gradient_token: data.gradient_token || "gradient-primary",
-          text_token: data.text_token || "foreground",
-          logo_image_url: data.logo_image_url || null,
-          logo_variant: data.logo_variant || "text",
-          logo_image_height: typeof (data as any).logo_image_height === 'number' ? (data as any).logo_image_height : 32,
-          logo_icon_name: (data as any).logo_icon_name || null,
-          logo_icon_position: (data as any).logo_icon_position || "top-right",
-          logo_icon_size: (data as any).logo_icon_size || "default",
+          logo_text: brandData.data.logo_text || "",
+          gradient_token: brandData.data.gradient_token || "gradient-primary",
+          text_token: brandData.data.text_token || "foreground",
+          logo_image_url: brandData.data.logo_image_url || null,
+          logo_variant: brandData.data.logo_variant || "text",
+          logo_image_height: typeof (brandData.data as any).logo_image_height === 'number' ? (brandData.data as any).logo_image_height : 32,
+          logo_icon_name: (brandData.data as any).logo_icon_name || null,
+          logo_icon_position: (brandData.data as any).logo_icon_position || "top-right",
+          logo_icon_size: (brandData.data as any).logo_icon_size || "default",
         });
       }
+      
+      setHeaderSettings(headerData.data);
     };
     load();
     return () => { mounted = false; };
@@ -100,6 +113,8 @@ const Header = () => {
     }
   };
 
+  if (!brand.logo_text && !brand.logo_image_url) return null;
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">
       <div className="container mx-auto px-6 py-4">
@@ -110,7 +125,7 @@ const Header = () => {
                 <img src={brand.logo_image_url} alt={brand.logo_text || "Brand logo"} className="w-auto" style={{ height: brand.logo_image_height || 32 }} />
               ) : (
                 <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent relative inline-block`} style={{ paddingRight: brand.logo_icon_name ? (({ small: 16, default: 24, medium: 28, large: 32, xl: 40 } as Record<string, number>)[brand.logo_icon_size || "default"] + 4) : undefined }}>
-                  {brand.logo_text || "Noddi Tech"}
+                  {brand.logo_text}
                   {(() => {
                     if (!brand.logo_icon_name) return null;
                     const Icon = (icons as Record<string, any>)[brand.logo_icon_name];
@@ -127,20 +142,19 @@ const Header = () => {
           </HeadingTag>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/features" className="text-foreground hover:text-primary transition-colors">
-              Features
-            </Link>
-            <Link to="/demo" className="text-foreground hover:text-primary transition-colors">
-              Demo
-            </Link>
-            <Link to="/team" className="text-foreground hover:text-primary transition-colors">
-              Team
-            </Link>
-            <Link to="/contact" className="text-foreground hover:text-primary transition-colors">
-              Contact
-            </Link>
-          </nav>
+          {headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
+            <nav className="hidden md:flex items-center space-x-8">
+              {headerSettings.navigation_links.map((link: any, index: number) => (
+                <Link 
+                  key={index} 
+                  to={link.href} 
+                  className="text-foreground hover:text-primary transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          )}
 
           {/* CTA Buttons - Hidden for clean public interface */}
           <div className="hidden md:flex items-center space-x-4">
@@ -159,21 +173,19 @@ const Header = () => {
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && (
+        {isMenuOpen && headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
           <div className="md:hidden mt-4 pb-4">
             <nav className="flex flex-col space-y-4">
-              <Link to="/features" className="text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
-                Features
-              </Link>
-              <Link to="/demo" className="text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
-                Demo
-              </Link>
-              <Link to="/team" className="text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
-                Team
-              </Link>
-              <Link to="/contact" className="text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
-                Contact
-              </Link>
+              {headerSettings.navigation_links.map((link: any, index: number) => (
+                <Link 
+                  key={index} 
+                  to={link.href} 
+                  className="text-foreground hover:text-primary transition-colors" 
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
               <div className="flex flex-col space-y-2 pt-4">
                 {authenticated && (
                   <Button variant="outline" onClick={() => { setIsMenuOpen(false); signOut(); }}>
@@ -186,7 +198,7 @@ const Header = () => {
         )}
 
         {/* Global USPs Bar */}
-        <GlobalUSPBar />
+        {headerSettings?.show_global_usp_bar && <GlobalUSPBar />}
       </div>
     </header>
   );

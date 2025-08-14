@@ -5,30 +5,6 @@ import { Link } from "react-router-dom";
 import { useHeadings } from "@/hooks/useHeadings";
 import { getTypographyClass } from "@/lib/typography";
 import { getColorClass } from "@/lib/colorUtils";
-// Fallback static features (used when DB has no rows)
-import {
-  Truck,
-  Calendar,
-  BarChart3,
-  Wrench,
-  Shield,
-  Zap,
-  Users,
-  Clock,
-  DollarSign,
-} from "lucide-react";
-
-const defaultFeatures = [
-  { icon: <Truck className="w-8 h-8" />, title: "Fleet Management", description: "Track and manage your entire fleet with real-time visibility and automated scheduling." },
-  { icon: <Calendar className="w-8 h-8" />, title: "Smart Scheduling", description: "AI-powered scheduling that optimizes maintenance windows and reduces downtime." },
-  { icon: <BarChart3 className="w-8 h-8" />, title: "Analytics Dashboard", description: "Comprehensive insights into operations, costs, and performance metrics." },
-  { icon: <Wrench className="w-8 h-8" />, title: "Parts Inventory", description: "Automated parts ordering and inventory management with supplier integration." },
-  { icon: <Shield className="w-8 h-8" />, title: "Compliance Tracking", description: "Stay compliant with industry regulations and safety standards automatically." },
-  { icon: <Zap className="w-8 h-8" />, title: "Workflow Automation", description: "Streamline repetitive tasks and approvals with customizable automation." },
-  { icon: <Users className="w-8 h-8" />, title: "Team Collaboration", description: "Connect technicians, managers, and suppliers in one unified platform." },
-  { icon: <Clock className="w-8 h-8" />, title: "Real-time Updates", description: "Live status updates and notifications keep everyone informed instantly." },
-  { icon: <DollarSign className="w-8 h-8" />, title: "Cost Optimization", description: "Identify cost-saving opportunities and optimize maintenance budgets." },
-];
 
 type IconName = keyof typeof icons;
 interface DbFeature { id: string; title: string; description: string | null; icon_name: string; sort_order: number | null; }
@@ -103,7 +79,7 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
     };
   }, []);
 
-  const usingDb = dbFeatures && dbFeatures.length > 0;
+  const showFeatures = dbFeatures && dbFeatures.length > 0;
   const bg = settings && useSectionBg ? (bgClass[settings.background_token] || "") : "";
   const cardBg = settings ? (bgClass[settings.card_bg_token] || "bg-card") : "bg-card";
   const iconClr = settings ? (textClass[settings.icon_token] || "text-primary") : "text-primary";
@@ -164,28 +140,22 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
         )}
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {usingDb
-            ? dbFeatures!.map((f) => {
-                const Icon = icons[(f.icon_name as IconName)] || icons["Sparkles"];
-                return (
-                  <div key={f.id} className={`${cardBg} rounded-xl p-6 hover:scale-105 transition-transform duration-300 border ${borderClr} shadow-sm`}>
-                    <div className={`${iconClr} mb-4`}>
-                      <Icon className="w-8 h-8" />
-                    </div>
-                    <h3 className={`text-xl font-semibold mb-3 ${titleClr}`}>{f.title}</h3>
-                    <p className={`${descClr}`}>{f.description}</p>
+        {showFeatures && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {dbFeatures!.map((f) => {
+              const Icon = icons[(f.icon_name as IconName)] || icons["Sparkles"];
+              return (
+                <div key={f.id} className={`${cardBg} rounded-xl p-6 hover:scale-105 transition-transform duration-300 border ${borderClr} shadow-sm`}>
+                  <div className={`${iconClr} mb-4`}>
+                    <Icon className="w-8 h-8" />
                   </div>
-                );
-              })
-            : defaultFeatures.map((feature, index) => (
-                <div key={index} className={`${cardBg} rounded-xl p-6 hover:scale-105 transition-transform duration-300 border ${borderClr} shadow-sm`}>
-                  <div className={`${iconClr} mb-4`}>{feature.icon}</div>
-                  <h3 className={`text-xl font-semibold mb-3 ${titleClr}`}>{feature.title}</h3>
-                  <p className={`${descClr}`}>{feature.description}</p>
+                  <h3 className={`text-xl font-semibold mb-3 ${titleClr}`}>{f.title}</h3>
+                  <p className={`${descClr}`}>{f.description}</p>
                 </div>
-              ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
         </div>
       </div>
     </section>

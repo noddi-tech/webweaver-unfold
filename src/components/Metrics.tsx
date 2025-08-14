@@ -57,12 +57,7 @@ const Metrics = () => {
     loadMetrics();
   }, []);
 
-  const displayMetrics: MetricItem[] = metrics.length > 0 ? metrics : [
-    { value: "500+", label: "Active Providers", description: "Maintenance providers using our platform", iconName: "Users", style: "card", align: "center", valueSize: "xl", emphasis: "gradient", suffix: "+", showIcon: true },
-    { value: "98%", label: "Uptime", description: "Reliable platform performance", iconName: "Activity", style: "card", align: "center", valueSize: "xl", emphasis: "gradient", suffix: "%", showIcon: true },
-    { value: "45%", label: "Cost Reduction", description: "Average operational savings", iconName: "TrendingDown", style: "card", align: "center", valueSize: "xl", emphasis: "gradient", suffix: "%", showIcon: true },
-    { value: "24/7", label: "Support", description: "Always here when you need us", iconName: "Clock", style: "card", align: "center", valueSize: "xl", emphasis: "gradient", suffix: "", showIcon: true },
-  ];
+  const showMetrics = metrics.length > 0;
 
   return (
     <section className="py-20 px-6" aria-labelledby="metrics-heading">
@@ -77,11 +72,13 @@ const Metrics = () => {
             {getHeading('subtitle')}
           </p>
         )}
-        {/* Mobile: swipeable carousel */}
-        <div className="md:hidden">
-          <Carousel>
-            <CarouselContent>
-              {displayMetrics.map((m, index) => {
+        {showMetrics && (
+          <>
+            {/* Mobile: swipeable carousel */}
+            <div className="md:hidden">
+              <Carousel>
+                <CarouselContent>
+                  {metrics.map((m, index) => {
                 const alignClass = m.align === 'left' ? 'text-left' : 'text-center';
                 const valueCls = `${sizeClass[m.valueSize || 'xl'] || 'text-6xl'} font-bold ${m.emphasis === 'gradient' ? 'gradient-text' : ''} mb-2 flex items-baseline ${m.align === 'left' ? 'justify-start' : 'justify-center'} gap-1`;
                 const containerBase = m.style === 'plain' ? '' : 'bg-card rounded-xl p-6 border border-border shadow-sm';
@@ -114,9 +111,9 @@ const Metrics = () => {
           </Carousel>
         </div>
 
-        {/* Desktop: responsive auto-fit grid with fallback */}
-        <div className="hidden md:grid gap-8 md:grid-cols-3 xl:grid-cols-4 md:[grid-template-columns:repeat(auto-fit,minmax(16rem,1fr))] justify-items-stretch">
-          {displayMetrics.map((m, index) => {
+            {/* Desktop: responsive auto-fit grid */}
+            <div className="hidden md:grid gap-8 md:grid-cols-3 xl:grid-cols-4 md:[grid-template-columns:repeat(auto-fit,minmax(16rem,1fr))] justify-items-stretch">
+              {metrics.map((m, index) => {
             const alignClass = m.align === 'left' ? 'text-left' : 'text-center';
             const valueCls = `${sizeClass[m.valueSize || 'xl'] || 'text-6xl'} font-bold ${m.emphasis === 'gradient' ? 'gradient-text' : ''} mb-2 flex items-baseline ${m.align === 'left' ? 'justify-start' : 'justify-center'} gap-1`;
             const containerBase = m.style === 'plain' ? '' : 'bg-card rounded-xl p-6 border border-border shadow-sm';
@@ -138,9 +135,10 @@ const Metrics = () => {
                 ) : null}
               </div>
             );
-          })}
-        </div>
-
+              })}
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
