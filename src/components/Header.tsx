@@ -144,13 +144,13 @@ const Header = () => {
           {/* Desktop Navigation */}
           {headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
             <nav className="hidden md:flex items-center space-x-8">
-              {headerSettings.navigation_links.map((link: any, index: number) => (
+              {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => (
                 <Link 
                   key={index} 
-                  to={link.href} 
+                  to={link.url} 
                   className="text-foreground hover:text-primary transition-colors"
                 >
-                  {link.label}
+                  {link.title}
                 </Link>
               ))}
             </nav>
@@ -176,14 +176,14 @@ const Header = () => {
         {isMenuOpen && headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
           <div className="md:hidden mt-4 pb-4">
             <nav className="flex flex-col space-y-4">
-              {headerSettings.navigation_links.map((link: any, index: number) => (
+              {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => (
                 <Link 
                   key={index} 
-                  to={link.href} 
+                  to={link.url} 
                   className="text-foreground hover:text-primary transition-colors" 
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {link.label}
+                  {link.title}
                 </Link>
               ))}
               <div className="flex flex-col space-y-2 pt-4">
