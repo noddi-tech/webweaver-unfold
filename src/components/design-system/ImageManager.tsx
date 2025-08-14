@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Trash2 } from "lucide-react";
 
 interface DbImage {
   id: string;
@@ -43,6 +45,8 @@ const ImageManager = () => {
   const [uploading, setUploading] = useState(false);
   const [files, setFiles] = useState<FileList | null>(null);
   const [uploadSection, setUploadSection] = useState<string>("");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState<DbImage | null>(null);
 
   const previewRef = useRef<HTMLIFrameElement>(null);
   const [iframeKey, setIframeKey] = useState(0);
@@ -187,19 +191,31 @@ const ImageManager = () => {
     return url.substring(idx + "/site-images/".length);
   };
 
-  const deleteImage = async (img: DbImage) => {
-    if (!confirm("Delete this image?")) return;
-    const storagePath = extractStoragePath(img.file_url);
+  const openDeleteModal = (img: DbImage) => {
+    setImageToDelete(img);
+    setDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setImageToDelete(null);
+  };
+
+  const confirmDeleteImage = async () => {
+    if (!imageToDelete) return;
+    
+    const storagePath = extractStoragePath(imageToDelete.file_url);
     if (storagePath) {
       await supabase.storage.from("site-images").remove([storagePath]);
     }
-    const { error } = await supabase.from("images").delete().eq("id", img.id);
+    const { error } = await supabase.from("images").delete().eq("id", imageToDelete.id);
     if (error) {
       toast({ title: "Delete failed", description: error.message, variant: "destructive" });
       return;
     }
     toast({ title: "Image deleted" });
     fetchImages();
+    closeDeleteModal();
   };
 
   return (
@@ -339,7 +355,10 @@ const ImageManager = () => {
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" onClick={() => saveImage(img)}>Save</Button>
-                        <Button variant="outline" size="sm" onClick={() => deleteImage(img)}>Delete</Button>
+                        <Button variant="destructive" size="sm" onClick={() => openDeleteModal(img)}>
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -349,6 +368,33 @@ const ImageManager = () => {
           );
         })}
       </div>
+
+      {/* Delete confirmation modal */}
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Image</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this image? This action cannot be undone.
+              {imageToDelete && (
+                <div className="mt-3 p-3 rounded-lg bg-muted">
+                  <p className="font-medium text-sm">{imageToDelete.title}</p>
+                  <p className="text-xs text-muted-foreground">{imageToDelete.file_name}</p>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeDeleteModal}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteImage}>
+              <Trash2 className="h-4 w-4 mr-1" />
+              Delete Image
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
