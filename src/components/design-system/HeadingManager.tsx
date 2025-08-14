@@ -77,12 +77,13 @@ const HeadingManager = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [headings, setHeadings] = useState<Heading[]>([]);
+  const [sections, setSections] = useState<{name: string, display_name: string}[]>([]);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
   const [selectedPage, setSelectedPage] = useState<string>('all');
   const [newHeading, setNewHeading] = useState({
     page_location: 'index',
-    section: 'hero',
+    section: '',
     element_type: 'h1',
     content: '',
     active: true,
@@ -92,7 +93,23 @@ const HeadingManager = () => {
 
   useEffect(() => {
     loadHeadings();
+    loadSections();
   }, []);
+
+  const loadSections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sections')
+        .select('name, display_name')
+        .eq('active', true)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setSections(data || []);
+    } catch (error) {
+      console.error('Error loading sections:', error);
+    }
+  };
 
   const loadHeadings = async () => {
     try {
@@ -163,7 +180,7 @@ const HeadingManager = () => {
       setHeadings([...headings, data]);
       setNewHeading({
         page_location: 'index',
-        section: 'hero',
+        section: '',
         element_type: 'h1',
         content: '',
         active: true,
@@ -313,9 +330,9 @@ const HeadingManager = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {sectionOptions.map(option => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
+                            {sections.map(section => (
+                              <SelectItem key={section.name} value={section.name}>
+                                {section.display_name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -477,9 +494,9 @@ const HeadingManager = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {sectionOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                      {sections.map(section => (
+                        <SelectItem key={section.name} value={section.name}>
+                          {section.display_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
