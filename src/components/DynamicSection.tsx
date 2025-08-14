@@ -73,11 +73,11 @@ const DynamicSection = ({ section, pageDefaults }: DynamicSectionProps) => {
   const getPaddingClass = (token?: string) => {
     const mapping: Record<string, string> = {
       none: 'py-0',
-      xs: 'py-2',
-      sm: 'py-4',
-      md: 'py-8',
-      lg: 'py-12',
-      xl: 'py-16',
+      xs: 'py-xs',
+      sm: 'py-sm',
+      md: 'py-md',
+      lg: 'py-lg',
+      xl: 'py-xl',
       section: 'py-section',
     };
     return mapping[token || 'section'] || 'py-section';
@@ -86,11 +86,11 @@ const DynamicSection = ({ section, pageDefaults }: DynamicSectionProps) => {
   const getMarginClass = (token?: string) => {
     const mapping: Record<string, string> = {
       none: 'my-0',
-      xs: 'my-2',
-      sm: 'my-4',
-      md: 'my-8',
-      lg: 'my-12',
-      xl: 'my-16',
+      xs: 'my-xs',
+      sm: 'my-sm',
+      md: 'my-md',
+      lg: 'my-lg',
+      xl: 'my-xl',
       section: 'my-section',
     };
     return mapping[token || 'none'] || 'my-0';

@@ -116,6 +116,14 @@ All colors MUST be HSL.
     --input-foreground: 0 0% 5%;
     --ring: 252 87% 58%;
     
+    /* Same spacing tokens as light mode */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 2rem;
+    --spacing-lg: 3rem;
+    --spacing-xl: 4rem;
+    --spacing-section: 5rem;
+    
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
