@@ -704,13 +704,90 @@ const SectionsManager = () => {
                              className="min-w-[150px]"
                            />
                          </TableCell>
-                         <TableCell>
-                           <div className="space-y-1 text-xs">
-                             <div>BG: <code>{section.background_token}</code></div>
-                             <div>Text: <code>{section.text_token}</code></div>
-                             <div>Padding: <code>{section.padding_token}</code></div>
-                           </div>
-                         </TableCell>
+                          <TableCell>
+                            <div className="space-y-2">
+                              <div className="space-y-1">
+                                <Label className="text-xs">Background</Label>
+                                <Select 
+                                  value={section.background_token} 
+                                  onValueChange={(value) => updateSection(section.id, { background_token: value })}
+                                >
+                                  <SelectTrigger className="h-8 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {DESIGN_TOKENS.background.map(token => (
+                                      <SelectItem key={token} value={token}>{token}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Text</Label>
+                                <Select 
+                                  value={section.text_token} 
+                                  onValueChange={(value) => updateSection(section.id, { text_token: value })}
+                                >
+                                  <SelectTrigger className="h-8 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {DESIGN_TOKENS.text.map(token => (
+                                      <SelectItem key={token} value={token}>{token}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Padding</Label>
+                                <Select 
+                                  value={section.padding_token} 
+                                  onValueChange={(value) => updateSection(section.id, { padding_token: value })}
+                                >
+                                  <SelectTrigger className="h-8 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {DESIGN_TOKENS.padding.map(token => (
+                                      <SelectItem key={token} value={token}>{token}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Margin</Label>
+                                <Select 
+                                  value={section.margin_token} 
+                                  onValueChange={(value) => updateSection(section.id, { margin_token: value })}
+                                >
+                                  <SelectTrigger className="h-8 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {DESIGN_TOKENS.margin.map(token => (
+                                      <SelectItem key={token} value={token}>{token}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Max Width</Label>
+                                <Select 
+                                  value={section.max_width_token} 
+                                  onValueChange={(value) => updateSection(section.id, { max_width_token: value })}
+                                >
+                                  <SelectTrigger className="h-8 text-xs">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {DESIGN_TOKENS.maxWidth.map(token => (
+                                      <SelectItem key={token} value={token}>{token}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </TableCell>
                          <TableCell className="min-w-[200px]">
                            {getSectionPreview(section)}
                          </TableCell>
