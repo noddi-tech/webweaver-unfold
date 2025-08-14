@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
+import Hero from './Hero';
+import Features from './Features';
+import Metrics from './Metrics';
 import { supabase } from '@/integrations/supabase/client';
-import Hero from '@/components/Hero';
-import Features from '@/components/Features';
-import Metrics from '@/components/Metrics';
 
 interface Section {
   id: string;
@@ -11,38 +11,33 @@ interface Section {
   page_location: string;
   active: boolean;
   sort_order: number;
+  page_id?: string;
+  inherit_page_defaults: boolean;
   background_token?: string;
   text_token?: string;
   padding_token?: string;
   margin_token?: string;
   max_width_token?: string;
+  background_token_override?: string;
+  text_token_override?: string;
+  padding_token_override?: string;
+  margin_token_override?: string;
+  max_width_token_override?: string;
 }
 
-interface DynamicSectionProps {
+interface DynamicSectionProps { 
   section: Section;
+  pageDefaults?: {
+    default_background_token: string;
+    default_text_token: string;
+    default_padding_token: string;
+    default_margin_token: string;
+    default_max_width_token: string;
+  };
 }
 
-const DynamicSection = ({ section }: DynamicSectionProps) => {
-  // Map section names to components
-  const sectionComponents: Record<string, React.ComponentType> = {
-    hero: Hero,
-    features: Features,
-    metrics: Metrics,
-    'customer-journey': () => <CustomerJourneySection section={section} />,
-  };
-
-  const SectionComponent = sectionComponents[section.name];
-  
-  if (!SectionComponent) {
-    return <GenericSection section={section} />;
-  }
-
-  // For known components, render them directly
-  if (['hero', 'features', 'metrics'].includes(section.name)) {
-    return <SectionComponent />;
-  }
-
-  // For custom sections, wrap in styling
+const DynamicSection = ({ section, pageDefaults }: DynamicSectionProps) => {
+  // Helper functions to apply Tailwind CSS classes based on tokens
   const getBackgroundClass = (token?: string) => {
     const mapping: Record<string, string> = {
       background: 'bg-background',
@@ -67,52 +62,114 @@ const DynamicSection = ({ section }: DynamicSectionProps) => {
       primary: 'text-primary',
       secondary: 'text-secondary',
       accent: 'text-accent',
+      'gradient-text': 'gradient-text',
+      destructive: 'text-destructive',
     };
     return mapping[token || 'foreground'] || 'text-foreground';
   };
 
   const getPaddingClass = (token?: string) => {
     const mapping: Record<string, string> = {
-      section: 'py-20 px-6',
-      large: 'py-32 px-8',
-      small: 'py-12 px-4',
-      none: '',
+      none: 'py-0',
+      xs: 'py-2',
+      sm: 'py-4',
+      md: 'py-8',
+      lg: 'py-12',
+      xl: 'py-16',
+      section: 'py-section',
     };
-    return mapping[token || 'section'] || 'py-20 px-6';
+    return mapping[token || 'section'] || 'py-section';
   };
 
   const getMaxWidthClass = (token?: string) => {
     const mapping: Record<string, string> = {
-      container: 'container mx-auto',
-      full: 'w-full',
-      narrow: 'max-w-4xl mx-auto',
-      wide: 'max-w-7xl mx-auto',
+      none: 'max-w-none',
+      sm: 'max-w-sm',
+      md: 'max-w-md',
+      lg: 'max-w-lg',
+      xl: 'max-w-xl',
+      container: 'max-w-container',
+      full: 'max-w-full',
     };
-    return mapping[token || 'container'] || 'container mx-auto';
+    return mapping[token || 'container'] || 'max-w-container';
   };
 
-  return (
-    <section 
-      className={`
-        ${getBackgroundClass(section.background_token)}
-        ${getTextClass(section.text_token)}
-        ${getPaddingClass(section.padding_token)}
-      `}
-    >
-      <div className={getMaxWidthClass(section.max_width_token)}>
+  // Use inheritance logic: section overrides take precedence over page defaults
+  const getEffectiveToken = (
+    sectionOverride: string | undefined, 
+    sectionDefault: string, 
+    pageDefault: string | undefined
+  ) => {
+    // If section has override, use it
+    if (sectionOverride) {
+      return sectionOverride;
+    }
+    
+    // If section inherits from page and page has default, use page default
+    if (section.inherit_page_defaults && pageDefault) {
+      return pageDefault;
+    }
+    
+    // Otherwise use section default
+    return sectionDefault;
+  };
+
+  // Map section names to components
+  const sectionComponents: Record<string, React.ComponentType> = {
+    hero: Hero,
+    features: Features,
+    metrics: Metrics,
+    'customer-journey': () => <CustomerJourneySection section={section} />,
+  };
+
+  const SectionComponent = sectionComponents[section.name];
+  
+  if (!SectionComponent) {
+    return <GenericSection section={section} pageDefaults={pageDefaults} />;
+  }
+
+  // For known components, render them directly but apply page-level styling
+  if (['hero', 'features', 'metrics'].includes(section.name)) {
+    const backgroundToken = getEffectiveToken(
+      section.background_token_override,
+      section.background_token || 'background',
+      pageDefaults?.default_background_token
+    );
+    
+    const textToken = getEffectiveToken(
+      section.text_token_override,
+      section.text_token || 'foreground',
+      pageDefaults?.default_text_token
+    );
+
+    const paddingToken = getEffectiveToken(
+      section.padding_token_override,
+      section.padding_token || 'section',
+      pageDefaults?.default_padding_token
+    );
+
+    const backgroundClass = getBackgroundClass(backgroundToken);
+    const textClass = getTextClass(textToken);
+    const paddingClass = getPaddingClass(paddingToken);
+
+    return (
+      <div className={`${backgroundClass} ${textClass} ${paddingClass}`}>
         <SectionComponent />
       </div>
-    </section>
-  );
+    );
+  }
+
+  return <SectionComponent />;
 };
 
+// Customer Journey Section Component
 const CustomerJourneySection = ({ section }: { section: Section }) => {
   const [headings, setHeadings] = useState<any[]>([]);
   const [features, setFeatures] = useState<any[]>([]);
   const [images, setImages] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchContent = async () => {
+    const fetchSectionContent = async () => {
       // Fetch headings for this section
       const { data: headingsData } = await supabase
         .from('headings')
@@ -141,58 +198,79 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
       setImages(imagesData || []);
     };
 
-    fetchContent();
-  }, [section.name, section.id]);
-
-  const getHeading = (elementType: string, fallback: string = '') => {
-    const heading = headings.find(h => h.element_type === elementType);
-    return heading?.content || fallback;
-  };
+    fetchSectionContent();
+  }, [section.id, section.name]);
 
   return (
-    <div className="text-center">
-      <h2 className="text-3xl md:text-4xl font-bold mb-6">
-        {getHeading('h2', section.display_name)}
-      </h2>
-      
-      {getHeading('h5') && (
-        <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
-          {getHeading('h5')}
-        </p>
-      )}
+    <section className="py-section px-6">
+      <div className="container mx-auto">
+        {/* Render headings */}
+        {headings.map((heading) => {
+          const HeadingTag = heading.element_type as keyof JSX.IntrinsicElements;
+          return (
+            <HeadingTag
+              key={heading.id}
+              className={`${heading.color_token ? `text-${heading.color_token}` : 'text-foreground'} mb-4`}
+            >
+              {heading.content}
+            </HeadingTag>
+          );
+        })}
 
-      {images.length > 0 && (
-        <div className="mb-8">
-          <img
-            src={images[0].file_url}
-            alt={images[0].alt || section.display_name}
-            className="w-full max-w-4xl mx-auto rounded-xl shadow-lg"
-          />
-        </div>
-      )}
+        {/* Render images */}
+        {images.map((image) => (
+          <div key={image.id} className="mb-8">
+            <img
+              src={image.file_url}
+              alt={image.alt || image.title}
+              className="w-full h-auto rounded-lg"
+            />
+            {image.caption && (
+              <p className="text-sm text-muted-foreground mt-2">{image.caption}</p>
+            )}
+          </div>
+        ))}
 
-      {features.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-          {features.map((feature) => (
-            <div key={feature.id} className="p-6 bg-card rounded-lg border border-border">
-              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-              <p className="text-muted-foreground">{feature.description}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+        {/* Render features */}
+        {features.length > 0 && (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature) => (
+              <div key={feature.id} className="p-6 bg-card rounded-lg border">
+                <h3 className="font-semibold mb-2">{feature.title}</h3>
+                {feature.description && (
+                  <p className="text-muted-foreground">{feature.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 };
 
-const GenericSection = ({ section }: { section: Section }) => {
+// Generic Section Component for unmatched sections
+const GenericSection = ({ section, pageDefaults }: { 
+  section: Section; 
+  pageDefaults?: DynamicSectionProps['pageDefaults'];
+}) => {
   return (
-    <div className="text-center py-12">
-      <h2 className="text-2xl font-bold mb-4">{section.display_name}</h2>
-      <p className="text-muted-foreground">
-        Section "{section.name}" is configured but needs a custom component.
-      </p>
-    </div>
+    <section className="py-section px-6 bg-muted/50">
+      <div className="container mx-auto text-center">
+        <h2 className="text-2xl font-bold mb-4">
+          Section: {section.display_name}
+        </h2>
+        <p className="text-muted-foreground">
+          This section ({section.name}) needs a custom component to be implemented.
+        </p>
+        {pageDefaults && (
+          <div className="mt-4 text-sm text-muted-foreground">
+            <p>Page defaults: {pageDefaults.default_background_token} background</p>
+            <p>Inherits from page: {section.inherit_page_defaults ? 'Yes' : 'No'}</p>
+          </div>
+        )}
+      </div>
+    </section>
   );
 };
 
