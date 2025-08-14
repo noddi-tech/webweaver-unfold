@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import Team from "./pages/Team";
+import LlmsTxt from "./pages/LlmsTxt";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           
           <Route path="/cms-login" element={<Auth />} />
           <Route path="/cms" element={<Admin />} />
+          <Route path="/llms.txt" element={<LlmsTxt />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
