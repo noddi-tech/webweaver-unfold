@@ -43,6 +43,8 @@ const designTokenOptions = {
 const layoutTypes = ['standard', 'wide', 'full-width', 'sidebar'];
 
 export const PagesManager = () => {
+  // Fixed: Removed isEditing variable - using modal states instead
+  console.log("PagesManager component rendering - v2");
   const [pages, setPages] = useState<Page[]>([]);
   const [selectedPage, setSelectedPage] = useState<Page | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
