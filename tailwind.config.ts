@@ -18,6 +18,17 @@ export default {
 			}
 		},
 		extend: {
+			spacing: {
+				'xs': 'var(--spacing-xs)',
+				'sm': 'var(--spacing-sm)',
+				'md': 'var(--spacing-md)',
+				'lg': 'var(--spacing-lg)',
+				'xl': 'var(--spacing-xl)',
+				'section': 'var(--spacing-section)',
+			},
+			maxWidth: {
+				'container': '1200px',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: {
