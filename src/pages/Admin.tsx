@@ -22,6 +22,7 @@ import SectionsManager from "@/components/design-system/SectionsManager";
 import HeaderManager from "@/components/design-system/HeaderManager";
 import FooterManager from "@/components/design-system/FooterManager";
 import { PagesManager } from "@/components/design-system/PagesManager";
+import FileManager from "@/components/design-system/FileManager";
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -91,6 +92,7 @@ const Admin = () => {
                 <TabsTrigger value="employees">Employees CMS</TabsTrigger>
                 <TabsTrigger value="headings">Text Content CMS</TabsTrigger>
                 <TabsTrigger value="contact">Contact CMS</TabsTrigger>
+                <TabsTrigger value="files">Files CMS</TabsTrigger>
               </TabsList>
               <TabsContent value="pages" className="space-y-8">
                 <PagesManager />
@@ -122,11 +124,14 @@ const Admin = () => {
                <TabsContent value="headings" className="space-y-8">
                  <TextContentManager />
                </TabsContent>
-              <TabsContent value="contact" className="space-y-8">
-                <ContactManager />
-              </TabsContent>
-            </Tabs>
-          </TabsContent>
+               <TabsContent value="contact" className="space-y-8">
+                 <ContactManager />
+               </TabsContent>
+               <TabsContent value="files" className="space-y-8">
+                 <FileManager />
+               </TabsContent>
+             </Tabs>
+           </TabsContent>
 
           {/* Design System Section with nested tabs */}
           <TabsContent value="design" className="space-y-8">

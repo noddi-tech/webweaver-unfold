@@ -733,6 +733,36 @@ export type Database = {
           },
         ]
       }
+      static_files: {
+        Row: {
+          content: string
+          created_at: string
+          description: string | null
+          file_path: string
+          id: string
+          mime_type: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          description?: string | null
+          file_path: string
+          id?: string
+          mime_type?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          id?: string
+          mime_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       text_content: {
         Row: {
           active: boolean
