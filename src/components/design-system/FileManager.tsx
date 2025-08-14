@@ -67,16 +67,24 @@ const FileManager = () => {
     
     setLoading(true);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("static_files")
         .update({
           content: selectedFile.content,
           description: selectedFile.description,
-          mime_type: selectedFile.mime_type
+          mime_type: selectedFile.mime_type,
+          updated_at: new Date().toISOString()
         })
-        .eq("id", selectedFile.id);
+        .eq("id", selectedFile.id)
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Update the selected file with the returned data
+      if (data) {
+        setSelectedFile(data);
+      }
 
       // Broadcast event for real-time updates
       window.dispatchEvent(new Event("staticFileUpdated"));
@@ -86,8 +94,10 @@ const FileManager = () => {
         description: `${selectedFile.file_path} has been updated`
       });
       
-      fetchFiles();
+      // Refresh the files list to show updated timestamp
+      await fetchFiles();
     } catch (error: any) {
+      console.error("Save error:", error);
       toast({
         title: "Error saving file",
         description: error.message,
