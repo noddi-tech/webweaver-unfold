@@ -25,9 +25,9 @@ const Auth = () => {
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        window.location.href = "/admin";
+        window.location.href = "/cms";
       } else {
-        const redirectUrl = `${window.location.origin}/admin`;
+        const redirectUrl = `${window.location.origin}/cms`;
         const { error } = await supabase.auth.signUp({
           email,
           password,

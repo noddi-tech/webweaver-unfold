@@ -94,7 +94,7 @@ const Header = () => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut({ scope: "global" });
-      window.location.href = "/auth";
+      window.location.href = "/cms-login";
     } catch (e) {
       console.error("Sign out failed", e);
     }
@@ -142,19 +142,10 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons - Hidden for clean public interface */}
           <div className="hidden md:flex items-center space-x-4">
-            {authenticated ? (
+            {authenticated && (
               <Button variant="outline" onClick={signOut}>Sign out</Button>
-            ) : (
-              <>
-                <Button asChild variant="ghost" className="hover:bg-muted/50">
-                  <Link to="/auth">Sign In</Link>
-                </Button>
-                <Button asChild className="bg-primary hover:bg-primary/90">
-                  <Link to="/auth">Get Started</Link>
-                </Button>
-              </>
             )}
           </div>
 
@@ -184,19 +175,10 @@ const Header = () => {
                 Contact
               </Link>
               <div className="flex flex-col space-y-2 pt-4">
-                {authenticated ? (
+                {authenticated && (
                   <Button variant="outline" onClick={() => { setIsMenuOpen(false); signOut(); }}>
                     Sign out
                   </Button>
-                ) : (
-                  <>
-                    <Button asChild variant="ghost" className="hover:bg-muted/50 w-full">
-                      <Link to="/auth" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
-                    </Button>
-                    <Button asChild className="bg-primary hover:bg-primary/90 w-full">
-                      <Link to="/auth" onClick={() => setIsMenuOpen(false)}>Get Started</Link>
-                    </Button>
-                  </>
                 )}
               </div>
             </nav>

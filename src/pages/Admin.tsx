@@ -38,7 +38,7 @@ const Admin = () => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut({ scope: "global" });
-      window.location.href = "/auth";
+      window.location.href = "/cms-login";
     } catch (err: any) {
       toast({ title: "Sign out failed", description: err.message, variant: "destructive" });
     }
