@@ -3,6 +3,7 @@ import Hero from './Hero';
 import Features from './Features';
 import Metrics from './Metrics';
 import { supabase } from '@/integrations/supabase/client';
+import { getTypographyClass } from '@/lib/typography';
 
 // Helper function to map color tokens to CSS classes for images
 const getImageColorClass = (colorToken: string): string => {
@@ -225,10 +226,11 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
         {headings.map((heading) => {
           const HeadingTag = heading.element_type as keyof JSX.IntrinsicElements;
           const colorClass = getImageColorClass(heading.color_token || 'foreground');
+          const typographyClass = getTypographyClass(heading.element_type);
           return (
             <HeadingTag
               key={heading.id}
-              className={`${colorClass} mb-4 text-center`}
+              className={`${typographyClass} ${colorClass} mb-4 text-center`}
             >
               {heading.content}
             </HeadingTag>
