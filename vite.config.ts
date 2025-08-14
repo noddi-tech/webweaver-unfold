@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
       '/llms.txt': {
         target: 'https://ouhfgazomdmirdazvjys.supabase.co/functions/v1/static-file/llms.txt',
         changeOrigin: true,
-        rewrite: () => ''
+        rewrite: (path) => path.replace('/llms.txt', '/llms.txt')
       }
     }
   },

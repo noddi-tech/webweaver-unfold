@@ -14,7 +14,9 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url)
-    const filePath = url.pathname.replace('/functions/v1/static-file/', '')
+    // Extract just the filename from the URL path
+    const pathParts = url.pathname.split('/')
+    const filePath = pathParts[pathParts.length - 1] // Get last part (filename)
     
     if (!filePath) {
       return new Response('File path required', { 
