@@ -12,6 +12,19 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Trash2 } from "lucide-react";
 
+// Helper function to map color tokens to CSS classes
+const getColorClass = (colorToken: string): string => {
+  const colorMap: Record<string, string> = {
+    'foreground': 'text-foreground',
+    'primary': 'text-primary',
+    'secondary': 'text-secondary',
+    'muted-foreground': 'text-muted-foreground',
+    'accent': 'text-accent',
+    'gradient-text': 'bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent'
+  };
+  return colorMap[colorToken] || 'text-foreground';
+};
+
 interface DbImage {
   id: string;
   title: string;
@@ -346,13 +359,27 @@ const ImageManager = () => {
                 <div className="grid gap-6 md:grid-cols-2">
                 {imgs.map((img) => (
                   <div key={img.id} className="grid gap-3 rounded-lg border border-border p-4">
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-lg">{img.title}</h4>
-                      <img src={img.file_url} alt={img.alt ?? img.title} className="w-full h-40 object-cover rounded-md" loading="lazy" />
-                      {img.caption && (
-                        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{img.caption}</p>
+                    <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
+                      <div className="text-xs font-medium text-muted-foreground mb-2">Preview:</div>
+                      {img.title && (
+                        <h4 className={`font-semibold text-lg ${getColorClass(img.title_color_token || 'foreground')}`}>
+                          {img.title}
+                        </h4>
                       )}
-                      
+                      {img.caption && img.caption_position === 'above' && (
+                        <p className={`text-sm leading-relaxed ${getColorClass(img.caption_color_token || 'muted-foreground')}`}>
+                          {img.caption}
+                        </p>
+                      )}
+                      <img src={img.file_url} alt={img.alt ?? img.title} className="w-full h-40 object-cover rounded-md" loading="lazy" />
+                      {img.caption && (!img.caption_position || img.caption_position === 'below') && (
+                        <p className={`text-sm mt-2 leading-relaxed ${getColorClass(img.caption_color_token || 'muted-foreground')}`}>
+                          {img.caption}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-3">
                       {/* Replace Image */}
                       <div className="space-y-2 pt-2 border-t border-border">
                         <Label className="text-xs font-medium">Replace Image</Label>
@@ -363,107 +390,108 @@ const ImageManager = () => {
                           className="text-xs"
                         />
                       </div>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Title</Label>
-                      <Input value={img.title} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title: e.target.value } : i))} />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Alt text</Label>
-                      <Input value={img.alt ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, alt: e.target.value } : i))} />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Caption</Label>
-                      <Textarea value={img.caption ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption: e.target.value } : i))} />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Caption Position</Label>
-                      <Select value={img.caption_position || 'below'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_position: v } : i))}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="above">Above image (below heading)</SelectItem>
-                          <SelectItem value="below">Below image</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Title Color</Label>
-                      <Select value={img.title_color_token || 'foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title_color_token: v } : i))}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="foreground">Default Text</SelectItem>
-                          <SelectItem value="primary">Primary</SelectItem>
-                          <SelectItem value="secondary">Secondary</SelectItem>
-                          <SelectItem value="muted-foreground">Muted</SelectItem>
-                          <SelectItem value="accent">Accent</SelectItem>
-                          <SelectItem value="gradient-text">Gradient</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Caption Color</Label>
-                      <Select value={img.caption_color_token || 'muted-foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_color_token: v } : i))}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="foreground">Default Text</SelectItem>
-                          <SelectItem value="primary">Primary</SelectItem>
-                          <SelectItem value="secondary">Secondary</SelectItem>
-                          <SelectItem value="muted-foreground">Muted</SelectItem>
-                          <SelectItem value="accent">Accent</SelectItem>
-                          <SelectItem value="gradient-text">Gradient</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Link URL</Label>
-                      <Input
-                        type="url"
-                        placeholder="https://example.com"
-                        value={img.link_url ?? ""}
-                        onChange={(e) =>
-                          setImages((prev) =>
-                            prev.map((i) => (i.id === img.id ? { ...i, link_url: e.target.value } : i))
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Section</Label>
-                      <Select value={img.section} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, section: v } : i))}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {sections.map((s) => (
-                            <SelectItem key={s.id} value={s.name}>{s.display_name} ({s.name})</SelectItem>
-                          ))}
-                           {sections.length === 0 && ["hero"].map((s) => (
-                             <SelectItem key={s} value={s}>{s}</SelectItem>
-                           ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Sort order</Label>
-                      <Input type="number" value={img.sort_order ?? 0} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, sort_order: Number(e.target.value) } : i))} />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Switch checked={img.active} onCheckedChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, active: v } : i))} />
-                        <span className="text-sm text-muted-foreground">Active</span>
+                      
+                      <div className="grid gap-2">
+                        <Label>Title</Label>
+                        <Input value={img.title} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title: e.target.value } : i))} />
                       </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => saveImage(img)}>Save</Button>
-                        <Button variant="destructive" size="sm" onClick={() => openDeleteModal(img)}>
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
-                        </Button>
+                      <div className="grid gap-2">
+                        <Label>Alt text</Label>
+                        <Input value={img.alt ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, alt: e.target.value } : i))} />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Caption</Label>
+                        <Textarea value={img.caption ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption: e.target.value } : i))} />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Caption Position</Label>
+                        <Select value={img.caption_position || 'below'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_position: v } : i))}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="above">Above image (below heading)</SelectItem>
+                            <SelectItem value="below">Below image</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Title Color</Label>
+                        <Select value={img.title_color_token || 'foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title_color_token: v } : i))}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="foreground">Default Text</SelectItem>
+                            <SelectItem value="primary">Primary</SelectItem>
+                            <SelectItem value="secondary">Secondary</SelectItem>
+                            <SelectItem value="muted-foreground">Muted</SelectItem>
+                            <SelectItem value="accent">Accent</SelectItem>
+                            <SelectItem value="gradient-text">Gradient</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Caption Color</Label>
+                        <Select value={img.caption_color_token || 'muted-foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_color_token: v } : i))}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="foreground">Default Text</SelectItem>
+                            <SelectItem value="primary">Primary</SelectItem>
+                            <SelectItem value="secondary">Secondary</SelectItem>
+                            <SelectItem value="muted-foreground">Muted</SelectItem>
+                            <SelectItem value="accent">Accent</SelectItem>
+                            <SelectItem value="gradient-text">Gradient</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Link URL</Label>
+                        <Input
+                          type="url"
+                          placeholder="https://example.com"
+                          value={img.link_url ?? ""}
+                          onChange={(e) =>
+                            setImages((prev) =>
+                              prev.map((i) => (i.id === img.id ? { ...i, link_url: e.target.value } : i))
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Section</Label>
+                        <Select value={img.section} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, section: v } : i))}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {sections.map((s) => (
+                              <SelectItem key={s.id} value={s.name}>{s.display_name} ({s.name})</SelectItem>
+                            ))}
+                             {sections.length === 0 && ["hero"].map((s) => (
+                               <SelectItem key={s} value={s}>{s}</SelectItem>
+                             ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Sort order</Label>
+                        <Input type="number" value={img.sort_order ?? 0} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, sort_order: Number(e.target.value) } : i))} />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Switch checked={img.active} onCheckedChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, active: v } : i))} />
+                          <span className="text-sm text-muted-foreground">Active</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => saveImage(img)}>Save</Button>
+                          <Button variant="destructive" size="sm" onClick={() => openDeleteModal(img)}>
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
