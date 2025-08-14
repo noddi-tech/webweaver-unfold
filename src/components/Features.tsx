@@ -4,9 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { useHeadings } from "@/hooks/useHeadings";
 import { getTypographyClass } from "@/lib/typography";
+import { getColorClass } from "@/lib/colorUtils";
 // Fallback static features (used when DB has no rows)
-import { 
-  Truck, Calendar, BarChart3, Wrench, Shield, Zap, Users, Clock, DollarSign
+import {
+  Truck,
+  Calendar,
+  BarChart3,
+  Wrench,
+  Shield,
+  Zap,
+  Users,
+  Clock,
+  DollarSign,
 } from "lucide-react";
 
 const defaultFeatures = [
@@ -111,21 +120,21 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
             {(() => {
               const h2Heading = headings.find(h => h.element_type === 'h2');
               const h2Class = h2Heading?.color_token ? 
-                `${getTypographyClass('h2')} mb-6 text-${h2Heading.color_token}` : 
+                `${getTypographyClass('h2')} mb-6 ${getColorClass(h2Heading.color_token)}` : 
                 'text-4xl md:text-5xl font-bold mb-6 gradient-text';
               
               const subtitleHeading = headings.find(h => h.element_type === 'subtitle');
               const subtitleClass = subtitleHeading?.color_token ? 
-                `${getTypographyClass('subtitle')} max-w-3xl mx-auto text-${subtitleHeading.color_token}` : 
+                `${getTypographyClass('subtitle')} max-w-3xl mx-auto ${getColorClass(subtitleHeading.color_token)}` : 
                 `text-xl max-w-3xl mx-auto ${descClr}`;
               
               return (
                 <>
                   <h2 className={h2Class}>
-                    {getHeading('h2', settings?.section_title || "Platform Features")}
+                    {getHeading('h2', settings?.section_title || '')}
                   </h2>
                   <p className={subtitleClass}>
-                    {getHeading('subtitle', settings?.section_subtitle || "A comprehensive suite of tools built to give your business a unique and cost-optimized edge with mobile services.")}
+                    {getHeading('subtitle', settings?.section_subtitle || '')}
                   </p>
                 </>
               );

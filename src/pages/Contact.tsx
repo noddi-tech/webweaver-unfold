@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useHeadings } from "@/hooks/useHeadings";
 import { supabase } from "@/integrations/supabase/client";
 import { getTypographyClass } from "@/lib/typography";
+import { getColorClass } from "@/lib/colorUtils";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -133,21 +134,21 @@ const Contact = () => {
           {(() => {
             const h1Heading = headings.find(h => h.element_type === 'h1');
             const h1Class = h1Heading?.color_token ? 
-              `${getTypographyClass('h1')} mb-6 text-${h1Heading.color_token}` : 
+              `${getTypographyClass('h1')} mb-6 ${getColorClass(h1Heading.color_token)}` : 
               'text-6xl font-bold gradient-text mb-6';
             
             const subtitleHeading = headings.find(h => h.element_type === 'subtitle');
             const subtitleClass = subtitleHeading?.color_token ? 
-              `${getTypographyClass('subtitle')} max-w-3xl mx-auto text-${subtitleHeading.color_token}` : 
+              `${getTypographyClass('subtitle')} max-w-3xl mx-auto ${getColorClass(subtitleHeading.color_token)}` : 
               'text-xl text-muted-foreground max-w-3xl mx-auto';
             
             return (
               <>
                 <h1 className={h1Class}>
-                  {getHeading('h1', 'Contact Us')}
+                  {getHeading('h1', '')}
                 </h1>
                 <p className={subtitleClass}>
-                  {getHeading('subtitle', 'Get in touch with our team. We\'re here to help you succeed.')}
+                  {getHeading('subtitle', '')}
                 </p>
               </>
             );

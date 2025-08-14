@@ -75,7 +75,7 @@ const Hero = () => {
         <div className="max-w-4xl mx-auto text-center">
           {/* Hero Text */}
           <h1 className={`text-4xl sm:text-5xl md:text-7xl font-bold mb-6 ${getHeadingColorClass('h1')} leading-tight break-words hyphens-auto text-balance`}>
-            {getHeading('h1', 'Streamline Your Automotive Operations')}
+            {getHeading('h1', '')}
           </h1>
           
           {/* Subheading */}
@@ -128,7 +128,7 @@ const Hero = () => {
           <div className="mt-6 text-center">
             <Link to="/contact">
               <Button size="lg" className="px-8 py-4">
-                Book demo here
+                {getHeading('cta', 'Contact Us')}
               </Button>
             </Link>
           </div>

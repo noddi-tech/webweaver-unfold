@@ -6,6 +6,7 @@ import { Play } from "lucide-react";
 import Header from "@/components/Header";
 import { Separator } from "@/components/ui/separator";
 import { getTypographyClass } from "@/lib/typography";
+import { getColorClass } from "@/lib/colorUtils";
 
 type DbVideo = {
   id: string;
@@ -62,21 +63,21 @@ const Demo = () => {
             {(() => {
               const h1Heading = headings.find(h => h.element_type === 'h1');
               const h1Class = h1Heading?.color_token ? 
-                `text-4xl md:${getTypographyClass('h1')} mb-6 text-${h1Heading.color_token}` : 
+                `text-4xl md:${getTypographyClass('h1')} mb-6 ${getColorClass(h1Heading.color_token)}` : 
                 'text-4xl md:text-6xl font-bold mb-6 gradient-text';
               
               const subtitleHeading = headings.find(h => h.element_type === 'subtitle');
               const subtitleClass = subtitleHeading?.color_token ? 
-                `${getTypographyClass('subtitle')} max-w-3xl mx-auto text-${subtitleHeading.color_token}` : 
+                `${getTypographyClass('subtitle')} max-w-3xl mx-auto ${getColorClass(subtitleHeading.color_token)}` : 
                 'text-xl text-muted-foreground max-w-3xl mx-auto';
               
               return (
                 <>
                   <h1 className={h1Class}>
-                    {getHeading('h1', 'Demo')}
+                    {getHeading('h1', '')}
                   </h1>
                   <p className={subtitleClass}>
-                    {getHeading('subtitle', 'Experience our platform in action')}
+                    {getHeading('subtitle', '')}
                   </p>
                 </>
               );
