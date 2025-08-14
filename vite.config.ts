@@ -10,9 +10,20 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       '/llms.txt': {
-        target: 'https://ouhfgazomdmirdazvjys.supabase.co/functions/v1/static-file/llms.txt',
+        target: 'https://ouhfgazomdmirdazvjys.supabase.co/functions/v1/static-file',
         changeOrigin: true,
-        rewrite: (path) => path.replace('/llms.txt', '/llms.txt')
+        rewrite: (path) => path.replace('/llms.txt', '/llms.txt'),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending Request to the Target:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+          });
+        }
       }
     }
   },

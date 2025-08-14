@@ -1,62 +1,30 @@
-# Noddi
+# Noddi Tech
 
-> Noddi is a comprehensive business website and CMS platform built with React, TypeScript, and Supabase. It provides a complete content management system for businesses to manage their online presence.
+> **Noddi Tech** is a globally scalable SaaS platform that transforms car maintenance by combining advanced logistics technology with exceptional end-user experience. We empower service providers to deliver mobile-first, on-demand car services anywhere in the world — with less than a day to go live.  
 
-## Key Features
+## Key Capabilities
 
-- **Dynamic Content Management**: Full CMS for managing pages, sections, and content
-- **Design System**: Comprehensive design tokens and component library
-- **Team Management**: Employee profiles and team organization
-- **Contact Management**: Contact forms with Slack integration
-- **SEO Optimized**: Built-in SEO best practices and meta management
-- **Responsive Design**: Mobile-first responsive design system
-- **Authentication**: Secure admin authentication system
+- **Automated Workforce Management** – Real-time capacity tracking, scheduling, and resource allocation with minimal admin.  
+- **AI-Optimized Route Planning** – Maximizes efficiency, reduces costs, and increases service speed.  
+- **Seamless Digital Experience** – Mobile-first booking, transparent pricing, and inspection data in customers' pockets — proven 90+ NPS.  
+- **Inspection-Driven Upselling** – Converts routine inspections into targeted, high-value sales opportunities across our partner network.  
+- **Instant Geographic Deployment** – Onboard partners in any market in less than 1 day, with full SEO and brand setup.  
+
+## Commercial Model
+
+- **Per-Booking Fee + Revenue Share** – Partners pay a fixed fee per booking plus a percentage of transaction value.  
+- **High-Margin SaaS** – Contribution margin ~96–99% on software revenue.  
+- **Scalable Across Verticals** – Proven in tire services, expandable to other maintenance categories.  
+
+## Proven Traction
+
+- **18,000+ Appointments** completed through Noddi-powered operations.  
+- **4 SaaS Partners** live across different markets.  
+- **€600K Run-Rate** from services.  
+- **Addressable Market > €65B** annually, with convenience segment CAGR ~50% through 2031.  
 
 ## Technology Stack
 
-- **Frontend**: React 18, TypeScript, Tailwind CSS, Vite
-- **Backend**: Supabase (PostgreSQL, Authentication, Storage)
-- **UI Components**: Radix UI, shadcn/ui
-- **Routing**: React Router
-- **State Management**: React Query
-- **Build Tool**: Vite
-- **Deployment**: Lovable platform
-
-## Main Pages
-
-- `/`: Homepage with hero, features, metrics, and CTA sections
-- `/team`: Team member profiles and contact information  
-- `/contact`: Contact form with Slack integration
-- `/features`: Detailed feature showcase
-- `/demo`: Product demonstration
-- `/cms-login`: Admin authentication portal
-- `/admin`: Content management system interface
-
-## CMS Features
-
-The admin panel provides comprehensive content management including:
-- Page settings and metadata
-- Section content and styling
-- Team member management
-- Brand settings and logo configuration
-- Design token customization
-- Typography and spacing controls
-- Contact and employee management
-
-## API Integration
-
-- Supabase Edge Functions for contact form processing
-- Slack webhook integration for contact notifications
-- Real-time content updates
-- Secure file upload and storage
-
-## Content Structure
-
-All content is dynamically loaded from Supabase database including:
-- Page metadata and SEO settings
-- Section content with rich text support
-- Team member profiles and contact details
-- Brand assets and design tokens
-- Navigation links and site structure
-
-This platform enables businesses to maintain a professional web presence with full control over content, design, and functionality through an intuitive admin interface.
+- **Core Platform** – Proprietary logistics engine for automated matching of supply and demand.  
+- **Partner Tools** – Admin dashboard, worker app, inspection-data modules, and AI-driven analytics.  
+- **Customer Experience** – Mobile-first booking flow, service history, and inspection insights.
