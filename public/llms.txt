@@ -1,0 +1,62 @@
+# Noddi
+
+> Noddi is a comprehensive business website and CMS platform built with React, TypeScript, and Supabase. It provides a complete content management system for businesses to manage their online presence.
+
+## Key Features
+
+- **Dynamic Content Management**: Full CMS for managing pages, sections, and content
+- **Design System**: Comprehensive design tokens and component library
+- **Team Management**: Employee profiles and team organization
+- **Contact Management**: Contact forms with Slack integration
+- **SEO Optimized**: Built-in SEO best practices and meta management
+- **Responsive Design**: Mobile-first responsive design system
+- **Authentication**: Secure admin authentication system
+
+## Technology Stack
+
+- **Frontend**: React 18, TypeScript, Tailwind CSS, Vite
+- **Backend**: Supabase (PostgreSQL, Authentication, Storage)
+- **UI Components**: Radix UI, shadcn/ui
+- **Routing**: React Router
+- **State Management**: React Query
+- **Build Tool**: Vite
+- **Deployment**: Lovable platform
+
+## Main Pages
+
+- `/`: Homepage with hero, features, metrics, and CTA sections
+- `/team`: Team member profiles and contact information  
+- `/contact`: Contact form with Slack integration
+- `/features`: Detailed feature showcase
+- `/demo`: Product demonstration
+- `/cms-login`: Admin authentication portal
+- `/admin`: Content management system interface
+
+## CMS Features
+
+The admin panel provides comprehensive content management including:
+- Page settings and metadata
+- Section content and styling
+- Team member management
+- Brand settings and logo configuration
+- Design token customization
+- Typography and spacing controls
+- Contact and employee management
+
+## API Integration
+
+- Supabase Edge Functions for contact form processing
+- Slack webhook integration for contact notifications
+- Real-time content updates
+- Secure file upload and storage
+
+## Content Structure
+
+All content is dynamically loaded from Supabase database including:
+- Page metadata and SEO settings
+- Section content with rich text support
+- Team member profiles and contact details
+- Brand assets and design tokens
+- Navigation links and site structure
+
+This platform enables businesses to maintain a professional web presence with full control over content, design, and functionality through an intuitive admin interface.
