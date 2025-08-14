@@ -8,9 +8,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { useHeadings } from "@/hooks/useHeadings";
 
 const Hero = () => {
-  const { getHeading } = useHeadings('homepage', 'hero');
+  const { getHeading, headings } = useHeadings('index', 'hero');
   const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
   const [heroImage, setHeroImage] = useState<{ url: string; alt: string } | null>(null);
+
+  // Helper function to get color class from heading
+  const getHeadingColorClass = (elementType: string) => {
+    const heading = headings.find(h => h.element_type === elementType);
+    const colorToken = heading?.color_token || 'foreground';
+    
+    const colorMap: Record<string, string> = {
+      'foreground': 'text-foreground',
+      'primary': 'text-primary',
+      'secondary': 'text-secondary',
+      'muted-foreground': 'text-muted-foreground',
+      'accent': 'text-accent',
+      'gradient-text': 'gradient-text'
+    };
+    
+    return colorMap[colorToken] || 'text-foreground';
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -57,12 +74,12 @@ const Hero = () => {
       <div className="container mx-auto">
         <div className="max-w-4xl mx-auto text-center">
           {/* Hero Text */}
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 gradient-text leading-tight break-words hyphens-auto text-balance">
+          <h1 className={`text-4xl sm:text-5xl md:text-7xl font-bold mb-6 ${getHeadingColorClass('h1')} leading-tight break-words hyphens-auto text-balance`}>
             {getHeading('h1', 'Streamline Your Automotive Operations')}
           </h1>
           
           {/* Subheading */}
-          <h5 className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+          <h5 className={`text-lg sm:text-xl ${getHeadingColorClass('h5')} mb-8 max-w-3xl mx-auto leading-relaxed`}>
             {getHeading('h5', '')}
           </h5>
 

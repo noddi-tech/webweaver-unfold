@@ -186,12 +186,13 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
 
   useEffect(() => {
     const fetchSectionContent = async () => {
-      // Fetch headings for this section
+      // Fetch headings for this section - try both index and page_location
       const { data: headingsData } = await supabase
         .from('headings')
         .select('*')
         .eq('active', true)
         .eq('section', section.name)
+        .in('page_location', ['index', section.page_location])
         .order('sort_order', { ascending: true });
 
       // Fetch features for this section
@@ -223,10 +224,11 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
         {/* Render headings */}
         {headings.map((heading) => {
           const HeadingTag = heading.element_type as keyof JSX.IntrinsicElements;
+          const colorClass = getImageColorClass(heading.color_token || 'foreground');
           return (
             <HeadingTag
               key={heading.id}
-              className={`${heading.color_token ? `text-${heading.color_token}` : 'text-foreground'} mb-4`}
+              className={`${colorClass} mb-4 text-center`}
             >
               {heading.content}
             </HeadingTag>
