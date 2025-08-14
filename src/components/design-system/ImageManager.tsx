@@ -299,10 +299,16 @@ const ImageManager = () => {
           return (
             <Card key={section} className="p-6 bg-card border-border space-y-4">
               <h3 className="text-lg font-semibold">Section: {sectionTitle}</h3>
-              <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 md:grid-cols-2">
                 {imgs.map((img) => (
                   <div key={img.id} className="grid gap-3 rounded-lg border border-border p-4">
-                    <img src={img.file_url} alt={img.alt ?? img.title} className="w-full h-40 object-cover rounded-md" loading="lazy" />
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-lg">{img.title}</h4>
+                      <img src={img.file_url} alt={img.alt ?? img.title} className="w-full h-40 object-cover rounded-md" loading="lazy" />
+                      {img.caption && (
+                        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{img.caption}</p>
+                      )}
+                    </div>
                     <div className="grid gap-2">
                       <Label>Title</Label>
                       <Input value={img.title} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title: e.target.value } : i))} />
