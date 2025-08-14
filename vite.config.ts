@@ -8,6 +8,13 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/llms.txt': {
+        target: 'https://ouhfgazomdmirdazvjys.supabase.co/functions/v1/static-file/llms.txt',
+        changeOrigin: true,
+        rewrite: () => ''
+      }
+    }
   },
   plugins: [
     react(),
