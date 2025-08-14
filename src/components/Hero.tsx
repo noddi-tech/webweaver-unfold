@@ -5,19 +5,19 @@ import dashboardPreview from "@/assets/dashboard-preview.jpg";
 import { useEffect, useState } from "react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useHeadings } from "@/hooks/useHeadings";
+import { useTextContent } from "@/hooks/useTextContent";
 import { getTypographyClass } from "@/lib/typography";
 import { getColorClass } from "@/lib/colorUtils";
 
 const Hero = () => {
-  const { getHeading, headings } = useHeadings('index', 'hero');
+  const { getContent, textContent } = useTextContent('index', 'hero');
   const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
   const [heroImage, setHeroImage] = useState<{ url: string; alt: string } | null>(null);
 
-  // Helper function to get CMS-driven styles for headings
-  const getHeadingStyles = (elementType: string) => {
-    const heading = headings.find(h => h.element_type === elementType);
-    const colorToken = heading?.color_token || 'foreground';
+  // Helper function to get CMS-driven styles for text content
+  const getContentStyles = (elementType: string) => {
+    const content = textContent.find(tc => tc.element_type === elementType);
+    const colorToken = content?.color_token || 'foreground';
     const typographyClass = getTypographyClass(elementType);
     const colorClass = getColorClass(colorToken, 'foreground');
     
@@ -69,13 +69,13 @@ const Hero = () => {
       <div className="container mx-auto">
         <div className="max-w-4xl mx-auto text-center">
           {/* Hero Text */}
-          <h1 className={`${getHeadingStyles('h1')} mb-6 leading-tight break-words hyphens-auto text-balance`}>
-            {getHeading('h1', '')}
+          <h1 className={`${getContentStyles('h1')} mb-6 leading-tight break-words hyphens-auto text-balance`}>
+            {getContent('h1', '')}
           </h1>
           
           {/* Subheading */}
-          <h5 className={`${getHeadingStyles('h5')} mb-8 max-w-3xl mx-auto leading-relaxed`}>
-            {getHeading('h5', '')}
+          <h5 className={`${getContentStyles('h5')} mb-8 max-w-3xl mx-auto leading-relaxed`}>
+            {getContent('h5', '')}
           </h5>
 
           {/* Hero USPs */}
@@ -123,7 +123,7 @@ const Hero = () => {
           <div className="mt-6 text-center">
             <Link to="/contact">
               <Button size="lg" className="px-8 py-4">
-                {getHeading('cta', '')}
+                {getContent('cta', '')}
               </Button>
             </Link>
           </div>

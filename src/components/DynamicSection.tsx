@@ -177,7 +177,7 @@ const CustomerJourneySection = ({ section }: { section: Section }) => {
     const fetchSectionContent = async () => {
       // Fetch headings for this section - try both index and page_location
       const { data: headingsData } = await supabase
-        .from('headings')
+        .from('text_content')
         .select('*')
         .eq('active', true)
         .eq('section', section.name)

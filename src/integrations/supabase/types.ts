@@ -492,45 +492,6 @@ export type Database = {
         }
         Relationships: []
       }
-      headings: {
-        Row: {
-          active: boolean
-          color_token: string | null
-          content: string
-          created_at: string
-          element_type: string
-          id: string
-          page_location: string
-          section: string
-          sort_order: number | null
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          color_token?: string | null
-          content: string
-          created_at?: string
-          element_type: string
-          id?: string
-          page_location: string
-          section: string
-          sort_order?: number | null
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          color_token?: string | null
-          content?: string
-          created_at?: string
-          element_type?: string
-          id?: string
-          page_location?: string
-          section?: string
-          sort_order?: number | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       image_sections: {
         Row: {
           created_at: string
@@ -771,6 +732,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      text_content: {
+        Row: {
+          active: boolean
+          color_token: string | null
+          content: string
+          content_type: string | null
+          created_at: string
+          element_type: string
+          id: string
+          page_location: string
+          section: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          color_token?: string | null
+          content: string
+          content_type?: string | null
+          created_at?: string
+          element_type: string
+          id?: string
+          page_location: string
+          section: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          color_token?: string | null
+          content?: string
+          content_type?: string | null
+          created_at?: string
+          element_type?: string
+          id?: string
+          page_location?: string
+          section?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       usps: {
         Row: {

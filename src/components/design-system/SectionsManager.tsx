@@ -112,7 +112,7 @@ const SectionsManager = () => {
         supabase.from('employees').select('*').order('sort_order'),
         supabase.from('videos').select('*').order('sort_order'),
         supabase.from('images').select('*').order('sort_order'),
-        supabase.from('headings').select('*').order('sort_order'),
+        supabase.from('text_content').select('*').order('sort_order'),
         supabase.from('header_settings').select('*').limit(1).maybeSingle(),
         supabase.from('footer_settings').select('*').limit(1).maybeSingle()
       ]);

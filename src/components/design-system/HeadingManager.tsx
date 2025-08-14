@@ -107,7 +107,7 @@ const HeadingManager = () => {
   const loadHeadings = async () => {
     try {
       const { data, error } = await supabase
-        .from('headings')
+        .from('text_content')
         .select('*')
         .order('page_location', { ascending: true })
         .order('section', { ascending: true })
@@ -131,7 +131,7 @@ const HeadingManager = () => {
     setSavingId(heading.id);
     try {
       const { error } = await supabase
-        .from('headings')
+        .from('text_content')
         .update({
           page_location: heading.page_location,
           section: heading.section,
@@ -164,7 +164,7 @@ const HeadingManager = () => {
     setCreatingNew(true);
     try {
       const { data, error } = await supabase
-        .from('headings')
+        .from('text_content')
         .insert(newHeading)
         .select()
         .single();
@@ -199,7 +199,7 @@ const HeadingManager = () => {
   const deleteHeading = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('headings')
+        .from('text_content')
         .delete()
         .eq('id', id);
 

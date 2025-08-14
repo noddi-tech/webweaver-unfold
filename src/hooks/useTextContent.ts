@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-interface Heading {
+interface TextContent {
   id: string;
   page_location: string;
   section: string;
@@ -10,15 +10,16 @@ interface Heading {
   active: boolean;
   sort_order: number | null;
   color_token?: string;
+  content_type: string;
 }
 
-export const useHeadings = (pageLocation?: string, section?: string) => {
-  const [headings, setHeadings] = useState<Heading[]>([]);
+export const useTextContent = (pageLocation?: string, section?: string) => {
+  const [textContent, setTextContent] = useState<TextContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchHeadings = async () => {
+    const fetchTextContent = async () => {
       try {
         let query = supabase
           .from('text_content')
@@ -38,32 +39,36 @@ export const useHeadings = (pageLocation?: string, section?: string) => {
         const { data, error } = await query;
 
         if (error) throw error;
-        setHeadings(data || []);
+        setTextContent(data || []);
       } catch (err) {
-        console.error('Error fetching headings:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch headings');
+        console.error('Error fetching text content:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch text content');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHeadings();
+    fetchTextContent();
   }, [pageLocation, section]);
 
-  const getHeading = (elementType: string, fallback: string = '') => {
-    const heading = headings.find(h => h.element_type === elementType);
-    return heading?.content || fallback;
+  const getContent = (elementType: string, fallback: string = '') => {
+    const item = textContent.find(tc => tc.element_type === elementType);
+    return item?.content || fallback;
   };
 
-  const getHeadingsBySection = (sectionName: string) => {
-    return headings.filter(h => h.section === sectionName);
+  const getContentBySection = (sectionName: string) => {
+    return textContent.filter(tc => tc.section === sectionName);
   };
 
   return {
-    headings,
+    textContent,
     loading,
     error,
-    getHeading,
-    getHeadingsBySection,
+    getContent,
+    getContentBySection,
+    // Keep backward compatibility with old naming
+    headings: textContent,
+    getHeading: getContent,
+    getHeadingsBySection: getContentBySection,
   };
 };
