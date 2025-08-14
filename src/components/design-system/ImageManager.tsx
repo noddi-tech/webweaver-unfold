@@ -218,6 +218,47 @@ const ImageManager = () => {
     closeDeleteModal();
   };
 
+  const replaceImage = async (imageId: string, file: File | null) => {
+    if (!file) return;
+    
+    setUploading(true);
+    try {
+      const img = images.find(i => i.id === imageId);
+      if (!img) throw new Error("Image not found");
+      
+      // Delete old image from storage
+      const oldStoragePath = extractStoragePath(img.file_url);
+      if (oldStoragePath) {
+        await supabase.storage.from("site-images").remove([oldStoragePath]);
+      }
+      
+      // Upload new image
+      const ext = file.name.split(".").pop();
+      const path = `${img.section}/${Date.now()}-${file.name}`;
+      const { error: upErr } = await supabase.storage.from("site-images").upload(path, file, { cacheControl: "3600", upsert: false });
+      if (upErr) throw upErr;
+      
+      const { data: pub } = supabase.storage.from("site-images").getPublicUrl(path);
+      
+      // Update database with new file info
+      const { error: dbErr } = await supabase
+        .from("images")
+        .update({
+          file_name: file.name,
+          file_url: pub.publicUrl,
+        })
+        .eq("id", imageId);
+      if (dbErr) throw dbErr;
+      
+      toast({ title: "Image replaced successfully" });
+      fetchImages();
+    } catch (e: any) {
+      toast({ title: "Replace failed", description: e.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <section className="space-y-8">
       <header className="space-y-2">
@@ -308,6 +349,17 @@ const ImageManager = () => {
                       {img.caption && (
                         <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{img.caption}</p>
                       )}
+                      
+                      {/* Replace Image */}
+                      <div className="space-y-2 pt-2 border-t border-border">
+                        <Label className="text-xs font-medium">Replace Image</Label>
+                        <Input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={(e) => replaceImage(img.id, e.target.files?.[0] || null)}
+                          className="text-xs"
+                        />
+                      </div>
                     </div>
                     <div className="grid gap-2">
                       <Label>Title</Label>
