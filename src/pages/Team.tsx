@@ -7,6 +7,54 @@ import { supabase } from "@/integrations/supabase/client";
 import { TYPOGRAPHY_SCALE } from "@/lib/typography";
 import { getColorClass } from "@/lib/colorUtils";
 
+interface Page {
+  id: string;
+  name: string;
+  slug: string;
+  title: string;
+  meta_description?: string;
+  default_background_token: string;
+  default_text_token: string;
+  default_padding_token: string;
+  default_margin_token: string;
+  default_max_width_token: string;
+  layout_type: string;
+  container_width: string;
+  active: boolean;
+  published: boolean;
+}
+
+// Helper functions to apply Tailwind CSS classes based on tokens
+const getBackgroundClass = (token?: string) => {
+  const mapping: Record<string, string> = {
+    background: 'bg-background',
+    card: 'bg-card',
+    muted: 'bg-muted',
+    primary: 'bg-primary',
+    secondary: 'bg-secondary',
+    accent: 'bg-accent',
+    'gradient-primary': 'bg-gradient-primary',
+    'gradient-background': 'bg-gradient-background',
+    'gradient-hero': 'bg-gradient-hero',
+    'gradient-subtle': 'bg-gradient-subtle',
+    transparent: 'bg-transparent',
+  };
+  return mapping[token || 'background'] || 'bg-background';
+};
+
+const getTextClass = (token?: string) => {
+  const mapping: Record<string, string> = {
+    foreground: 'text-foreground',
+    'muted-foreground': 'text-muted-foreground',
+    primary: 'text-primary',
+    secondary: 'text-secondary',
+    accent: 'text-accent',
+    'gradient-text': 'gradient-text',
+    destructive: 'text-destructive',
+  };
+  return mapping[token || 'foreground'] || 'text-foreground';
+};
+
 interface Employee {
   id: string;
   name: string;
@@ -108,11 +156,55 @@ const Team = () => {
   const [settings, setSettings] = useState<EmployeeSettings | null>(null);
   const [sections, setSections] = useState<Array<{ id: string; name: string; sort_order: number | null }>>([]);
   const [experienceLogos, setExperienceLogos] = useState<DbImage[]>([]);
+  const [pageData, setPageData] = useState<Page | null>(null);
 
   useEffect(() => {
-    document.title = "Our Team – Noddi Tech";
-    ensureMeta("description", "Meet the Noddi Tech team: names, roles, and contact details.");
+    const loadPage = async () => {
+      // Load page data for Team page
+      const { data: page, error: pageError } = await supabase
+        .from('pages')
+        .select('*')
+        .eq('slug', 'team')
+        .eq('active', true)
+        .maybeSingle();
+
+      if (page) {
+        setPageData(page);
+        
+        // Update document head with page data
+        document.title = page.title;
+        if (page.meta_description) {
+          ensureMeta("description", page.meta_description);
+        } else {
+          ensureMeta("description", "Meet the Noddi Tech team: names, roles, and contact details.");
+        }
+
+        // Apply page background using proper background class mapping
+        const backgroundClass = getBackgroundClass(page.default_background_token);
+        const textClass = getTextClass(page.default_text_token);
+        
+        // Remove existing background classes and apply new ones
+        document.body.className = document.body.className
+          .replace(/bg-\S+/g, '')
+          .replace(/text-\S+/g, '')
+          .trim();
+        document.body.classList.add(...backgroundClass.split(' '), ...textClass.split(' '));
+      } else {
+        // Fallback if no page data
+        document.title = "Our Team – Noddi Tech";
+        ensureMeta("description", "Meet the Noddi Tech team: names, roles, and contact details.");
+      }
+    };
+
+    loadPage();
     setCanonical("/team");
+  }, []);
+
+  // Cleanup body classes when component unmounts
+  useEffect(() => {
+    return () => {
+      document.body.className = '';
+    };
   }, []);
 
   useEffect(() => {
