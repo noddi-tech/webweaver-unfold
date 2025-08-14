@@ -17,10 +17,10 @@ export const COLOR_TOKEN_MAP: Record<string, string> = {
   'success': 'text-success',
   'info': 'text-info',
   
-  // Special gradient styles
-  'gradient-text': 'bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent',
-  'gradient-primary': 'bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent',
-  'gradient-secondary': 'bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent',
+  // Special gradient styles - use the CSS classes defined in index.css
+  'gradient-text': 'gradient-text',
+  'gradient-primary': 'gradient-text',
+  'gradient-secondary': 'gradient-text',
   
   // Background colors (for completeness)
   'background': 'bg-background',
