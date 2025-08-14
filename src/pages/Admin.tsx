@@ -21,6 +21,7 @@ import ContactManager from "@/components/design-system/ContactManager";
 import SectionsManager from "@/components/design-system/SectionsManager";
 import HeaderManager from "@/components/design-system/HeaderManager";
 import FooterManager from "@/components/design-system/FooterManager";
+import { PagesManager } from "@/components/design-system/PagesManager";
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -77,8 +78,9 @@ const Admin = () => {
 
           {/* CMS Section with nested tabs */}
           <TabsContent value="cms" className="space-y-8">
-            <Tabs defaultValue="videos" className="w-full">
+            <Tabs defaultValue="pages" className="w-full">
                <TabsList className="flex w-full flex-wrap gap-2 h-auto mb-8 justify-center">
+                <TabsTrigger value="pages">Pages CMS</TabsTrigger>
                 <TabsTrigger value="sections">Sections CMS</TabsTrigger>
                 <TabsTrigger value="header">Header CMS</TabsTrigger>
                 <TabsTrigger value="footer">Footer CMS</TabsTrigger>
@@ -90,6 +92,9 @@ const Admin = () => {
                 <TabsTrigger value="headings">Heading CMS</TabsTrigger>
                 <TabsTrigger value="contact">Contact CMS</TabsTrigger>
               </TabsList>
+              <TabsContent value="pages" className="space-y-8">
+                <PagesManager />
+              </TabsContent>
               <TabsContent value="sections" className="space-y-8">
                 <SectionsManager />
               </TabsContent>

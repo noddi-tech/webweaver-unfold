@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -163,6 +163,57 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      content_hierarchies: {
+        Row: {
+          active: boolean
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          page_id: string
+          section_id: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          page_id: string
+          section_id: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          page_id?: string
+          section_id?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_hierarchies_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_hierarchies_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employees: {
         Row: {
@@ -560,59 +611,157 @@ export type Database = {
           },
         ]
       }
+      pages: {
+        Row: {
+          active: boolean
+          brand_id: string | null
+          container_width: string
+          created_at: string
+          default_background_token: string
+          default_margin_token: string
+          default_max_width_token: string
+          default_padding_token: string
+          default_text_token: string
+          footer_id: string | null
+          header_id: string | null
+          id: string
+          layout_type: string
+          meta_description: string | null
+          meta_keywords: string | null
+          name: string
+          published: boolean
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          brand_id?: string | null
+          container_width?: string
+          created_at?: string
+          default_background_token?: string
+          default_margin_token?: string
+          default_max_width_token?: string
+          default_padding_token?: string
+          default_text_token?: string
+          footer_id?: string | null
+          header_id?: string | null
+          id?: string
+          layout_type?: string
+          meta_description?: string | null
+          meta_keywords?: string | null
+          name: string
+          published?: boolean
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          brand_id?: string | null
+          container_width?: string
+          created_at?: string
+          default_background_token?: string
+          default_margin_token?: string
+          default_max_width_token?: string
+          default_padding_token?: string
+          default_text_token?: string
+          footer_id?: string | null
+          header_id?: string | null
+          id?: string
+          layout_type?: string
+          meta_description?: string | null
+          meta_keywords?: string | null
+          name?: string
+          published?: boolean
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sections: {
         Row: {
           active: boolean
           background_token: string
+          background_token_override: string | null
           created_at: string
           display_name: string
           id: string
+          inherit_page_defaults: boolean
           margin_token: string
+          margin_token_override: string | null
           max_width_token: string
+          max_width_token_override: string | null
           name: string
           padding_token: string
+          padding_token_override: string | null
+          page_id: string | null
           page_location: string
           position_after: string | null
           position_before: string | null
           sort_order: number | null
           text_token: string
+          text_token_override: string | null
           updated_at: string
         }
         Insert: {
           active?: boolean
           background_token?: string
+          background_token_override?: string | null
           created_at?: string
           display_name: string
           id?: string
+          inherit_page_defaults?: boolean
           margin_token?: string
+          margin_token_override?: string | null
           max_width_token?: string
+          max_width_token_override?: string | null
           name: string
           padding_token?: string
+          padding_token_override?: string | null
+          page_id?: string | null
           page_location?: string
           position_after?: string | null
           position_before?: string | null
           sort_order?: number | null
           text_token?: string
+          text_token_override?: string | null
           updated_at?: string
         }
         Update: {
           active?: boolean
           background_token?: string
+          background_token_override?: string | null
           created_at?: string
           display_name?: string
           id?: string
+          inherit_page_defaults?: boolean
           margin_token?: string
+          margin_token_override?: string | null
           max_width_token?: string
+          max_width_token_override?: string | null
           name?: string
           padding_token?: string
+          padding_token_override?: string | null
+          page_id?: string | null
           page_location?: string
           position_after?: string | null
           position_before?: string | null
           sort_order?: number | null
           text_token?: string
+          text_token_override?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "sections_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       usps: {
         Row: {
