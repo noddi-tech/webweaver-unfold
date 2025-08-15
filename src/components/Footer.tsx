@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import * as Icons from "lucide-react";
 
 const Footer = () => {
   const [footerSettings, setFooterSettings] = useState<any>(null);
@@ -38,18 +39,22 @@ const Footer = () => {
             )}
             {footerSettings.contact_info && footerSettings.contact_info.length > 0 && (
               <div className="space-y-2">
-                {footerSettings.contact_info.map((contact: any, index: number) => (
-                  <div key={index} className="flex items-center text-muted-foreground">
-                    <span className="w-4 h-4 mr-2">{contact.icon}</span>
-                    {contact.link ? (
-                      <a href={contact.link} className="hover:text-primary transition-colors">
-                        {contact.value}
-                      </a>
-                    ) : (
-                      contact.value
-                    )}
-                  </div>
-                ))}
+                {footerSettings.contact_info.map((contact: any, index: number) => {
+                  const IconComponent = contact.icon && (Icons as any)[contact.icon] ? (Icons as any)[contact.icon] : Icons.Mail;
+                  return (
+                    <div key={index} className="flex items-center text-muted-foreground">
+                      <IconComponent className="w-4 h-4 mr-2 shrink-0" />
+                      <span className="mr-2 text-sm font-medium">{contact.title}:</span>
+                      {contact.link ? (
+                        <a href={contact.link} className="hover:text-primary transition-colors">
+                          {contact.value}
+                        </a>
+                      ) : (
+                        contact.value
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
