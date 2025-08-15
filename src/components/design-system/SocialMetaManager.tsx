@@ -40,7 +40,7 @@ const SocialMetaManager = () => {
 
   const fetchSocialMetaSettings = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('site_settings')
         .select('*')
         .eq('setting_key', 'social_meta')
@@ -76,7 +76,7 @@ const SocialMetaManager = () => {
 
   const saveSocialMetaSettings = async (settings: SocialMetaSettings) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('site_settings')
         .upsert({
           setting_key: 'social_meta',

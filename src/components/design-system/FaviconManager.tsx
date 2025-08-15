@@ -30,7 +30,7 @@ const FaviconManager = () => {
 
   const fetchFaviconSettings = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('site_settings')
         .select('*')
         .eq('setting_key', 'favicon')
@@ -58,7 +58,7 @@ const FaviconManager = () => {
 
   const saveFaviconSettings = async (settings: FaviconSettings) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('site_settings')
         .upsert({
           setting_key: 'favicon',
