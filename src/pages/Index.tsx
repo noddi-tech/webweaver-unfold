@@ -5,6 +5,16 @@ import DynamicSection from "@/components/DynamicSection";
 import { supabase } from '@/integrations/supabase/client';
 import { getColorClass } from '@/lib/colorUtils';
 
+interface SocialMetaSettings {
+  og_title: string;
+  og_description: string;
+  og_image_url: string;
+  og_url: string;
+  twitter_card: 'summary' | 'summary_large_image';
+  twitter_site: string;
+  twitter_image_url: string;
+}
+
 interface Section {
   id: string;
   name: string;
@@ -79,6 +89,49 @@ const Index = () => {
   const [pageData, setPageData] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Helper function to update meta tags
+  const updateMetaTag = (property: string, content: string, isOpenGraph = false) => {
+    const attribute = isOpenGraph ? 'property' : 'name';
+    let meta = document.querySelector(`meta[${attribute}="${property}"]`);
+    
+    if (meta) {
+      meta.setAttribute('content', content);
+    } else {
+      meta = document.createElement('meta');
+      meta.setAttribute(attribute, property);
+      meta.setAttribute('content', content);
+      document.head.appendChild(meta);
+    }
+  };
+
+  // Function to fetch and apply social meta settings
+  const fetchAndApplySocialMeta = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('*')
+        .eq('setting_key', 'social_meta')
+        .single();
+
+      if (data && data.setting_value) {
+        const settings: SocialMetaSettings = JSON.parse(String(data.setting_value));
+        
+        // Update Open Graph tags
+        if (settings.og_title) updateMetaTag('og:title', settings.og_title, true);
+        if (settings.og_description) updateMetaTag('og:description', settings.og_description, true);
+        if (settings.og_image_url) updateMetaTag('og:image', settings.og_image_url, true);
+        if (settings.og_url) updateMetaTag('og:url', settings.og_url, true);
+        
+        // Update Twitter tags
+        if (settings.twitter_card) updateMetaTag('twitter:card', settings.twitter_card);
+        if (settings.twitter_site) updateMetaTag('twitter:site', settings.twitter_site);
+        if (settings.twitter_image_url) updateMetaTag('twitter:image', settings.twitter_image_url);
+      }
+    } catch (error) {
+      console.error('Error fetching social meta settings:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchPageAndSections = async () => {
       try {
@@ -148,6 +201,7 @@ const Index = () => {
     };
 
     fetchPageAndSections();
+    fetchAndApplySocialMeta();
   }, []);
 
   // Cleanup body classes when component unmounts
