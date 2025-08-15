@@ -23,6 +23,8 @@ import HeaderManager from "@/components/design-system/HeaderManager";
 import FooterManager from "@/components/design-system/FooterManager";
 import { PagesManager } from "@/components/design-system/PagesManager";
 import FileManager from "@/components/design-system/FileManager";
+import FaviconManager from "@/components/design-system/FaviconManager";
+import SocialMetaManager from "@/components/design-system/SocialMetaManager";
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -85,6 +87,8 @@ const Admin = () => {
                 <TabsTrigger value="sections">Sections CMS</TabsTrigger>
                 <TabsTrigger value="header">Header CMS</TabsTrigger>
                 <TabsTrigger value="footer">Footer CMS</TabsTrigger>
+                <TabsTrigger value="favicon">Favicon</TabsTrigger>
+                <TabsTrigger value="social">Social Meta</TabsTrigger>
                 <TabsTrigger value="videos">Videos CMS</TabsTrigger>
                 <TabsTrigger value="images">Images CMS</TabsTrigger>
                 <TabsTrigger value="features">Features CMS</TabsTrigger>
@@ -105,6 +109,12 @@ const Admin = () => {
               </TabsContent>
               <TabsContent value="footer" className="space-y-8">
                 <FooterManager />
+              </TabsContent>
+              <TabsContent value="favicon" className="space-y-8">
+                <FaviconManager />
+              </TabsContent>
+              <TabsContent value="social" className="space-y-8">
+                <SocialMetaManager />
               </TabsContent>
               <TabsContent value="videos" className="space-y-8">
                 <VideoManager />
