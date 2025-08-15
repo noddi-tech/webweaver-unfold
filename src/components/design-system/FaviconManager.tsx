@@ -64,6 +64,8 @@ const FaviconManager = () => {
           setting_key: 'favicon',
           setting_value: JSON.stringify(settings),
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'setting_key'
         });
 
       if (error) throw error;
