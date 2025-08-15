@@ -66,8 +66,8 @@ const Footer = () => {
               <ul className="space-y-2">
                 {footerSettings.quick_links.map((link: any, index: number) => (
                   <li key={index}>
-                    <a href={link.href} className="text-muted-foreground hover:text-primary transition-colors">
-                      {link.label}
+                    <a href={link.url} className="text-muted-foreground hover:text-primary transition-colors">
+                      {link.title}
                     </a>
                   </li>
                 ))}
@@ -82,8 +82,8 @@ const Footer = () => {
               <ul className="space-y-2">
                 {footerSettings.legal_links.map((link: any, index: number) => (
                   <li key={index}>
-                    <a href={link.href} className="text-muted-foreground hover:text-primary transition-colors">
-                      {link.label}
+                    <a href={link.url} className="text-muted-foreground hover:text-primary transition-colors">
+                      {link.title}
                     </a>
                   </li>
                 ))}
