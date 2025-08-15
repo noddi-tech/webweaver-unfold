@@ -326,7 +326,13 @@ const SocialMetaManager = () => {
           </Button>
           <Button 
             variant="outline" 
-            onClick={() => updateDocumentMetaTags(metaSettings)}
+            onClick={() => {
+              updateDocumentMetaTags(metaSettings);
+              toast({
+                title: "Meta tags updated",
+                description: "The page's meta tags have been updated for preview. Check the browser's developer tools to see the changes.",
+              });
+            }}
           >
             Preview Meta Tags
           </Button>
