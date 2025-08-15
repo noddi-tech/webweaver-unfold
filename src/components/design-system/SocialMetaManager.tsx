@@ -44,7 +44,7 @@ const SocialMetaManager = () => {
         .from('site_settings')
         .select('*')
         .eq('setting_key', 'social_meta')
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         throw error;
