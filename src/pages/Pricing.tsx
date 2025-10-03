@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Calculator, Zap, TrendingDown, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PricingFeatureCards } from "@/components/pricing/PricingFeatureCards";
-import { StaticPricingExamples } from "@/components/pricing/StaticPricingExamples";
 import { RateReductionChart } from "@/components/pricing/RateReductionChart";
 import { PricingCalculatorModal } from "@/components/pricing/PricingCalculatorModal";
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
@@ -122,7 +121,7 @@ const Pricing = () => {
 
         {/* Feature Cards */}
         <section className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <PricingFeatureCards currency={currency} />
+          <PricingFeatureCards currency={currency} contractType={contractType} />
         </section>
 
         {/* Advanced Calculator CTA */}
@@ -139,11 +138,6 @@ const Pricing = () => {
               Open Advanced Calculator
             </Button>
           </Card>
-        </section>
-
-        {/* Static Examples */}
-        <section className="animate-fade-in" style={{ animationDelay: '300ms' }}>
-          <StaticPricingExamples currency={currency} contractType={contractType} />
         </section>
 
         {/* Rate Reduction Chart */}
