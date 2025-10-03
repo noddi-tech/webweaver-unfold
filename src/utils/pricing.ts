@@ -5,8 +5,8 @@
  * generates revenue tiers on the fly based on a base take‑rate, a step
  * reduction (cooldown), an initial revenue span and a range multiplier. The
  * resulting ranges are then used to compute usage costs for garage, mobile
- * and shop services. Optional contract discounts and SaaS licence
- * percentages are also applied.
+ * and shop services. The take‑rates include all costs—there is no separate
+ * SaaS licence fee. Optional contract discounts are applied to the usage fees.
  *
  * **INPUT ASSUMPTION:** All revenue inputs are expected to be **annual revenue in EUR**.
  */
@@ -28,11 +28,6 @@ const MOBILE_COOLDOWN = 0.15;  // 15% reduction per tier
 
 const SHOP_BASE_RATE = 0.05;  // 5% on the first revenue tier
 const SHOP_COOLDOWN = 0.15;   // 15% reduction per tier
-
-// SaaS licence rates per service (annual rates applied to annual revenue)
-const GARAGE_LICENSE_RATE = 0.01; // 1% licence fee
-const MOBILE_LICENSE_RATE = 0.10; // 10% licence fee
-const SHOP_LICENSE_RATE = 0.00;   // no licence fee defined for shop yet
 
 /**
  * Representation of a revenue range with an associated take‑rate.
@@ -102,7 +97,6 @@ function calculateUsageCost(revenue: number, ranges: RevenueRange[]): number {
 
 export interface PricingResult {
   usage: { garage: number; shop: number; mobile: number };
-  licence: { garage: number; shop: number; mobile: number };
   total: number;
   effectiveRate: number;
   discount: number;
@@ -113,19 +107,19 @@ export interface PricingResult {
  * 
  * **IMPORTANT:** All revenue inputs should be **annual revenue in EUR**.
  * 
- * This function calculates usage fees and licence fees for garage, shop and mobile
- * services, optionally applying a contract discount across all components. The
- * `contractType` option specifies whether no contract (`'none'`), a monthly
- * contract (`'monthly'`) or a yearly contract (`'yearly'`) discount should be
- * applied. Monthly contracts receive a 15% discount and yearly contracts
- * receive a 25% discount.
+ * This function calculates usage fees for garage, shop and mobile services.
+ * The take‑rates already include all costs—there is no separate licence fee.
+ * Optionally, a contract discount is applied to the usage fees. The `contractType`
+ * option specifies whether no contract (`'none'`), a monthly contract (`'monthly'`)
+ * or a yearly contract (`'yearly'`) discount should be applied. Monthly contracts
+ * receive a 15% discount and yearly contracts receive a 25% discount.
  *
  * @param revenues An object containing annual revenue for each service (in EUR)
  * @param options  Additional options:
  *                 - includeMobile: whether to include the mobile service in the calculation.
  *                 - contractType: 'none', 'monthly' or 'yearly' to apply no discount,
  *                   a 15% discount or a 25% discount, respectively.
- * @returns Pricing breakdown with usage, licence, total costs, effective rate, and discount amount
+ * @returns Pricing breakdown with usage, total costs, effective rate, and discount amount
  */
 export function calculatePricing(
   revenues: { garage: number; shop: number; mobile: number },
@@ -144,31 +138,22 @@ export function calculatePricing(
   const shopRanges = generateRanges(SHOP_BASE_RATE, SHOP_COOLDOWN);
   const mobileRanges = generateRanges(MOBILE_BASE_RATE, MOBILE_COOLDOWN);
 
-  // Compute usage costs per service (annual)
+  // Compute usage costs per service (annual) with discount applied
   const garageUsage = calculateUsageCost(revenues.garage, garageRanges) * discountFactor;
   const shopUsage = calculateUsageCost(revenues.shop, shopRanges) * discountFactor;
   const mobileUsage = includeMobile
     ? calculateUsageCost(revenues.mobile, mobileRanges) * discountFactor
     : 0;
 
-  // Compute licence fees per service (annual)
-  const garageLicence = revenues.garage * GARAGE_LICENSE_RATE * discountFactor;
-  const shopLicence = revenues.shop * SHOP_LICENSE_RATE * discountFactor;
-  const mobileLicence = includeMobile
-    ? revenues.mobile * MOBILE_LICENSE_RATE * discountFactor
-    : 0;
-
   const totalUsage = garageUsage + shopUsage + mobileUsage;
-  const totalLicence = garageLicence + shopLicence + mobileLicence;
-  const total = totalUsage + totalLicence;
+  const total = totalUsage; // No separate licence component
   
   // Calculate effective rate (total cost as % of total revenue)
   const totalRevenue = revenues.garage + revenues.shop + (includeMobile ? revenues.mobile : 0);
   const effectiveRate = totalRevenue > 0 ? (total / totalRevenue) * 100 : 0;
   
-  // Calculate discount amount saved
-  const totalWithoutDiscount = (garageUsage + shopUsage + mobileUsage) / discountFactor + 
-                                (garageLicence + shopLicence + mobileLicence) / discountFactor;
+  // Calculate discount amount saved (usage only, no licence)
+  const totalWithoutDiscount = (garageUsage + shopUsage + mobileUsage) / discountFactor;
   const discountAmount = totalWithoutDiscount - total;
 
   return {
@@ -176,11 +161,6 @@ export function calculatePricing(
       garage: garageUsage,
       shop: shopUsage,
       mobile: mobileUsage,
-    },
-    licence: {
-      garage: garageLicence,
-      shop: shopLicence,
-      mobile: mobileLicence,
     },
     total,
     effectiveRate,

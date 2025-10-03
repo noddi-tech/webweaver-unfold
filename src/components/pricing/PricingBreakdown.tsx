@@ -20,13 +20,12 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
   const [examplesOpen, setExamplesOpen] = useState(false);
   
   const services = [
-    { name: 'Garage', usage: result.usage.garage, licence: result.licence.garage, show: true },
-    { name: 'Shop', usage: result.usage.shop, licence: result.licence.shop, show: true },
-    { name: 'Mobile', usage: result.usage.mobile, licence: result.licence.mobile, show: includeMobile },
+    { name: 'Garage', usage: result.usage.garage, show: true },
+    { name: 'Shop', usage: result.usage.shop, show: true },
+    { name: 'Mobile', usage: result.usage.mobile, show: includeMobile },
   ];
 
   const totalUsage = result.usage.garage + result.usage.shop + result.usage.mobile;
-  const totalLicence = result.licence.garage + result.licence.shop + result.licence.mobile;
 
   // Calculate total revenue and detect tier
   const totalRevenue = Object.values(result.usage).reduce((sum, val) => {
@@ -65,7 +64,7 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
         {/* Usage Costs */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-foreground">Usage Costs</h4>
+            <h4 className="text-sm font-medium text-foreground">Annual Usage Cost</h4>
             <span className="text-sm font-semibold text-primary">
               {formatCurrency(totalUsage, currency)}
             </span>
@@ -78,24 +77,9 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
               </div>
             ))}
           </div>
-        </div>
-
-        {/* License Fees */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-foreground">License Fees</h4>
-            <span className="text-sm font-semibold text-secondary-foreground">
-              {formatCurrency(totalLicence, currency)}
-            </span>
-          </div>
-          <div className="space-y-2 pl-4 border-l-2 border-secondary/40">
-            {services.filter(s => s.show).map((service) => (
-              <div key={service.name} className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{service.name}</span>
-                <span className="font-medium text-foreground">{formatCurrency(service.licence, currency)}</span>
-              </div>
-            ))}
-          </div>
+          <p className="text-xs text-muted-foreground pl-4 pt-2">
+            Revenue-based pricing with no separate SaaS licence fee
+          </p>
         </div>
 
         <Separator />

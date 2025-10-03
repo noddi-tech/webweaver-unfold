@@ -82,7 +82,7 @@ const Pricing = () => {
             Pay as you grow
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8">
-            Revenue-based pricing that scales with your success. Only pay for what you use.
+            Revenue-based pricing that scales with your success. No separate SaaS licence fee—just simple usage costs.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             {[
@@ -164,8 +164,9 @@ const Pricing = () => {
                 </Card>
               </div>
               <p className="text-center text-sm text-muted-foreground mt-8">
-                Our revenue-based model ensures you always pay a fair rate. As your business grows, 
-                your effective rate automatically decreases—no negotiations needed.
+                Our revenue-based model ensures you always pay a fair rate. The usage fee includes everything—no 
+                separate licence charges. As your business grows, your effective rate automatically decreases 
+                continuously across 10 tiers—no negotiations needed.
               </p>
             </div>
 
