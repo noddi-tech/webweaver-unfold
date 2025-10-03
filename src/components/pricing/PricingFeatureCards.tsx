@@ -120,7 +120,7 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
       
       {/* Single CTA below all cards */}
       <div className="text-center mt-8 md:mt-12">
-        <Button size="lg" className="w-full sm:w-auto" asChild>
+        <Button size="lg" className="w-full sm:w-auto text-lg md:text-xl px-8 md:px-12 py-6 md:py-8" asChild>
           <a 
             href="https://calendly.com/joachim-noddi/30min"
             target="_blank"
