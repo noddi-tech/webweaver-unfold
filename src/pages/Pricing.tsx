@@ -4,59 +4,71 @@ import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
+
+interface PricingPlan {
+  id: string;
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  popular: boolean;
+  cta_text: string;
+  cta_url?: string;
+}
 
 const Pricing = () => {
+  const [plans, setPlans] = useState<PricingPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     document.title = "Pricing | Your Plans";
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Choose the perfect plan for your needs');
     }
+
+    fetchPlans();
   }, []);
 
-  const plans = [
-    {
-      name: "Starter",
-      price: "$29",
-      period: "/month",
-      description: "Perfect for individuals getting started",
-      features: [
-        "Up to 10 projects",
-        "Basic analytics",
-        "Email support",
-        "1GB storage",
-      ]
-    },
-    {
-      name: "Professional",
-      price: "$79",
-      period: "/month",
-      description: "Best for growing businesses",
-      features: [
-        "Unlimited projects",
-        "Advanced analytics",
-        "Priority support",
-        "10GB storage",
-        "Custom integrations",
-        "API access",
-      ],
-      popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      period: "",
-      description: "For large organizations",
-      features: [
-        "Everything in Professional",
-        "Dedicated account manager",
-        "Custom contract",
-        "Unlimited storage",
-        "SLA guarantee",
-        "Advanced security",
-      ]
+  const fetchPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("pricing_plans")
+        .select("*")
+        .eq("active", true)
+        .order("sort_order", { ascending: true });
+
+      if (error) throw error;
+      setPlans((data || []).map(plan => ({
+        ...plan,
+        features: Array.isArray(plan.features) 
+          ? plan.features.filter((f): f is string => typeof f === 'string')
+          : []
+      })));
+    } catch (error) {
+      console.error("Error fetching pricing plans:", error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-6 pt-32 pb-20">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading pricing plans...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -101,12 +113,23 @@ const Pricing = () => {
                 ))}
               </ul>
 
-              <Button 
-                className="w-full" 
-                variant={plan.popular ? "default" : "outline"}
-              >
-                Get Started
-              </Button>
+              {plan.cta_url ? (
+                <Link to={plan.cta_url} className="block">
+                  <Button 
+                    className="w-full" 
+                    variant={plan.popular ? "default" : "outline"}
+                  >
+                    {plan.cta_text}
+                  </Button>
+                </Link>
+              ) : (
+                <Button 
+                  className="w-full" 
+                  variant={plan.popular ? "default" : "outline"}
+                >
+                  {plan.cta_text}
+                </Button>
+              )}
             </Card>
           ))}
         </div>

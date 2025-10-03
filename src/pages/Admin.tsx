@@ -25,6 +25,7 @@ import { PagesManager } from "@/components/design-system/PagesManager";
 import FileManager from "@/components/design-system/FileManager";
 import FaviconManager from "@/components/design-system/FaviconManager";
 import SocialMetaManager from "@/components/design-system/SocialMetaManager";
+import PricingManager from "@/components/design-system/PricingManager";
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -89,6 +90,7 @@ const Admin = () => {
                 <TabsTrigger value="footer">Footer CMS</TabsTrigger>
                 <TabsTrigger value="favicon">Favicon</TabsTrigger>
                 <TabsTrigger value="social">Social Meta</TabsTrigger>
+                <TabsTrigger value="pricing">Pricing CMS</TabsTrigger>
                 <TabsTrigger value="videos">Videos CMS</TabsTrigger>
                 <TabsTrigger value="images">Images CMS</TabsTrigger>
                 <TabsTrigger value="features">Features CMS</TabsTrigger>
@@ -115,6 +117,9 @@ const Admin = () => {
               </TabsContent>
               <TabsContent value="social" className="space-y-8">
                 <SocialMetaManager />
+              </TabsContent>
+              <TabsContent value="pricing" className="space-y-8">
+                <PricingManager />
               </TabsContent>
               <TabsContent value="videos" className="space-y-8">
                 <VideoManager />
