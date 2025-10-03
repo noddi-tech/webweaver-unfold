@@ -59,60 +59,62 @@ const Pricing = () => {
           </div>
 
           {/* Currency and Contract Toggles */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
-            <div className="flex items-center gap-4">
-              <Label className="text-sm text-muted-foreground whitespace-nowrap">View pricing in:</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 w-full max-w-3xl mx-auto">
+            <div className="flex flex-col gap-2 w-full">
+              <Label className="text-sm text-muted-foreground">View pricing in:</Label>
               <ToggleGroup
                 type="single"
                 value={currency}
                 onValueChange={(value) => value && setCurrency(value)}
-                className="bg-muted/50 rounded-lg p-1"
+                className="bg-muted/50 rounded-lg p-1 w-full"
               >
                 <ToggleGroupItem
                   value="EUR"
                   aria-label="Euro"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-3"
                 >
                   EUR (€)
                 </ToggleGroupItem>
                 <ToggleGroupItem
                   value="NOK"
                   aria-label="Norwegian Krone"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-3"
                 >
                   NOK (kr)
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
-            <div className="flex items-center gap-4">
-              <Label className="text-sm text-muted-foreground whitespace-nowrap">Contract type:</Label>
+            <div className="flex flex-col gap-2 w-full">
+              <Label className="text-sm text-muted-foreground">Contract type:</Label>
               <ToggleGroup
                 type="single"
                 value={contractType}
                 onValueChange={(value) => value && setContractType(value as 'none' | 'monthly' | 'yearly')}
-                className="bg-muted/50 rounded-lg p-1"
+                className="bg-muted/50 rounded-lg p-1 w-full"
               >
                 <ToggleGroupItem
                   value="none"
                   aria-label="No Contract"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2"
                 >
                   None
                 </ToggleGroupItem>
                 <ToggleGroupItem
                   value="monthly"
-                  aria-label="Monthly Contract"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                  aria-label="Monthly Contract (Save 15%)"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2"
                 >
-                  Monthly <span className="text-xs ml-1 opacity-75">(Save 15%)</span>
+                  Monthly <span className="hidden sm:inline text-xs ml-1 opacity-75">(Save 15%)</span>
+                  <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-15%</span>
                 </ToggleGroupItem>
                 <ToggleGroupItem
                   value="yearly"
-                  aria-label="Yearly Contract"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                  aria-label="Yearly Contract (Save 25%)"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2"
                 >
-                  Yearly <span className="text-xs ml-1 opacity-75">(Save 25%)</span>
+                  Yearly <span className="hidden sm:inline text-xs ml-1 opacity-75">(Save 25%)</span>
+                  <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-25%</span>
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
