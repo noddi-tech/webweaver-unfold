@@ -3,6 +3,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 export function PricingFAQ() {
   const faqs = [
     {
+      question: "Is there a free tier?",
+      answer: "No. Billing starts from your first euro of revenue. Tier 1 (€0–€100,000) is billed at our base take-rates: 4% for garage services, 5% for shop services, and 10% for mobile services. As you grow beyond tier 1, your effective rate decreases continuously across 10 revenue tiers."
+    },
+    {
       question: "Why revenue-based pricing?",
       answer: "Revenue-based pricing ensures you pay in proportion to the value you get. As your business grows and generates more revenue, your costs scale with you—but your effective rate decreases. This model aligns our success with yours."
     },

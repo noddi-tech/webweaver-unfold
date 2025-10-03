@@ -43,7 +43,7 @@ const Pricing = () => {
             Pay as you grow
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground">
-            Transparent revenue-based pricing with no separate licence fees. See exactly what you'll pay.
+            Transparent revenue-based pricing with no separate licence fees or free tiers. Pay from your first euro, with rates that decrease as you grow.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             {[

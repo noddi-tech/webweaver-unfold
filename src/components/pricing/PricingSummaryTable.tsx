@@ -26,6 +26,7 @@ export function PricingSummaryTable({ currency }: PricingSummaryTableProps) {
                 <div className="font-semibold text-foreground">Emerging</div>
               </td>
               <td className="py-4 px-4 text-sm text-muted-foreground">
+                {symbol}0 – {symbol}{currency === 'NOK' ? '1M' : '100k'} (Tier 1, billable)<br />
                 Up to {symbol}{currency === 'NOK' ? '20M' : '2M'}
               </td>
               <td className="py-4 px-4 text-sm text-muted-foreground">

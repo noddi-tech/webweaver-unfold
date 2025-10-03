@@ -39,17 +39,22 @@ interface RevenueRange {
 }
 
 /**
- * Generate an array of revenue ranges for a particular service. Each range
- * covers a span of revenue and has its own take‑rate. The base rate is
- * reduced on each subsequent tier by the given cooldown factor. The final
+ * Generate an array of revenue ranges for a particular service.
+ * 
+ * **IMPORTANT: Tier 1 is billable. There is no free tier.**
+ * - Tier 1: €0 - €100,000 charged at base rate (e.g., 4% for garage)
+ * - Tier 2+: Spans increase by 2.5× with cooldown applied per tier
+ * 
+ * Each range covers a span of revenue and has its own take‑rate. The base rate
+ * is reduced on each subsequent tier by the given cooldown factor. The final
  * range has an end of Infinity, meaning any revenue beyond the previous
  * tiers will be charged at the last rate.
  *
- * @param baseRate      Starting take‑rate for the first revenue tier (e.g. 0.04)
- * @param cooldown      Fractional reduction applied per tier (e.g. 0.2 yields 20% reduction)
- * @param initialSpan   Size of the first tier (in revenue units)
- * @param multiplier    Multiplier to increase the span of each subsequent tier
- * @param numRanges     Number of tiers to generate (defaults to 10)
+ * @param baseRate      Starting take‑rate for tier 1 (e.g., 0.04 = 4%)
+ * @param cooldown      Fractional reduction per tier (e.g., 0.2 = 20% reduction)
+ * @param initialSpan   Size of tier 1 in revenue units (default: 100,000 EUR)
+ * @param multiplier    Multiplier for subsequent tier spans (default: 2.5)
+ * @param numRanges     Number of tiers to generate (default: 10)
  */
 function generateRanges(
   baseRate: number,
@@ -64,6 +69,8 @@ function generateRanges(
   let start = 0;
   for (let i = 0; i < numRanges; i++) {
     const end = i === numRanges - 1 ? Infinity : start + span;
+    // Tier 1 (i=0) starts at 0 and is fully billable at baseRate.
+    // No free tier exists.
     ranges.push({ start, end, rate });
     // prepare for next tier
     start = end;

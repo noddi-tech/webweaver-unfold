@@ -3,7 +3,7 @@ import { TrendingDown } from "lucide-react";
 
 export function RateReductionChart() {
   const dataPoints = [
-    { tier: "Tier 1", rate: 4.0, label: "Start" },
+    { tier: "Tier 1", rate: 4.0, label: "€0-100k (billable)" },
     { tier: "Tier 4", rate: 2.5, label: "€2.5M" },
     { tier: "Tier 7", rate: 1.8, label: "€40M" },
     { tier: "Tier 10", rate: 1.2, label: "€2B+" }
