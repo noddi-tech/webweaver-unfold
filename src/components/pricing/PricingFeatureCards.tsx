@@ -126,7 +126,7 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
             target="_blank"
             rel="noopener noreferrer"
           >
-            Book Demo
+            Book a demo
           </a>
         </Button>
       </div>
