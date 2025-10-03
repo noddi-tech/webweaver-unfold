@@ -4,11 +4,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { RevenueInput } from "./RevenueInput";
 import { PricingBreakdown } from "./PricingBreakdown";
 import { calculatePricing } from "@/utils/pricing";
 import { getCurrencyConfig, DEFAULT_CURRENCY } from "@/config/pricing";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Settings } from "lucide-react";
 
 const PRESETS = {
   small: { garage: 750_000, shop: 200_000, mobile: 50_000 },
@@ -52,7 +53,7 @@ export function PricingCalculator() {
   return (
     <div className="grid lg:grid-cols-2 gap-8">
       {/* Controls */}
-      <Card className="glass-card p-6 space-y-6 h-fit">
+      <Card className="glass-card p-6 space-y-6 h-fit animate-fade-in">
         <div>
           <h3 className="text-xl font-bold text-foreground mb-2">Calculate Your Price</h3>
           <p className="text-sm text-muted-foreground">
@@ -130,7 +131,72 @@ export function PricingCalculator() {
           </p>
         </div>
 
-        <div className="space-y-6">
+        {/* Revenue Inputs - Mobile Accordion */}
+        <div className="block lg:hidden">
+          <Accordion type="single" collapsible defaultValue="revenue-inputs">
+            <AccordionItem value="revenue-inputs" className="border-none">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <Settings className="w-4 h-4" />
+                  <span className="font-medium">Revenue Inputs</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-4">
+                {/* Garage Revenue */}
+                <RevenueInput
+                  label={`Garage Annual Revenue (${currencyConfig.symbol})`}
+                  value={garageRevenue}
+                  onChange={setGarageRevenue}
+                  max={currencyConfig.maxRevenue}
+                  currency={currency}
+                  tooltip="Enter your total annual revenue from garage services (repairs, maintenance, etc.)"
+                />
+
+                {/* Shop Revenue */}
+                <RevenueInput
+                  label={`Shop Annual Revenue (${currencyConfig.symbol})`}
+                  value={shopRevenue}
+                  onChange={setShopRevenue}
+                  max={currencyConfig.maxRevenue}
+                  currency={currency}
+                  tooltip="Enter your total annual revenue from shop/retail services (parts sales, accessories, etc.)"
+                />
+
+                {/* Mobile Service Toggle */}
+                <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border">
+                  <div className="space-y-1">
+                    <Label htmlFor="mobile-toggle-mobile" className="text-sm font-medium text-foreground">
+                      Offer Mobile Service?
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Enable if you provide mobile/on-site services
+                    </p>
+                  </div>
+                  <Switch
+                    id="mobile-toggle-mobile"
+                    checked={includeMobile}
+                    onCheckedChange={setIncludeMobile}
+                  />
+                </div>
+
+                {/* Mobile Revenue (conditional) */}
+                {includeMobile && (
+                  <RevenueInput
+                    label={`Mobile Annual Revenue (${currencyConfig.symbol})`}
+                    value={mobileRevenue}
+                    onChange={setMobileRevenue}
+                    max={currencyConfig.maxRevenue}
+                    currency={currency}
+                    tooltip="Enter your total annual revenue from mobile/on-site services"
+                  />
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
+        {/* Revenue Inputs - Desktop */}
+        <div className="hidden lg:block space-y-6">
           {/* Garage Revenue */}
           <RevenueInput
             label={`Garage Annual Revenue (${currencyConfig.symbol})`}
@@ -152,7 +218,7 @@ export function PricingCalculator() {
           />
 
           {/* Mobile Service Toggle */}
-          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border transition-all duration-200">
             <div className="space-y-1">
               <Label htmlFor="mobile-toggle" className="text-sm font-medium text-foreground">
                 Offer Mobile Service?
@@ -170,60 +236,62 @@ export function PricingCalculator() {
 
           {/* Mobile Revenue (conditional) */}
           {includeMobile && (
-            <RevenueInput
-              label={`Mobile Annual Revenue (${currencyConfig.symbol})`}
-              value={mobileRevenue}
-              onChange={setMobileRevenue}
-              max={currencyConfig.maxRevenue}
-              currency={currency}
-              tooltip="Enter your total annual revenue from mobile/on-site services"
-            />
+            <div className="animate-fade-in">
+              <RevenueInput
+                label={`Mobile Annual Revenue (${currencyConfig.symbol})`}
+                value={mobileRevenue}
+                onChange={setMobileRevenue}
+                max={currencyConfig.maxRevenue}
+                currency={currency}
+                tooltip="Enter your total annual revenue from mobile/on-site services"
+              />
+            </div>
           )}
+        </div>
 
-          {/* Contract Type Selector */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium text-foreground">Contract Type</Label>
-            <p className="text-xs text-muted-foreground">
-              All rates decrease continuously across 10 revenue tiers—no sudden jumps.
-            </p>
-            <ToggleGroup
-              type="single"
-              value={contractType}
-              onValueChange={(value) => value && setContractType(value as typeof contractType)}
-              className="grid grid-cols-3 gap-2"
+        {/* Contract Type Selector */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-foreground">Contract Type</Label>
+          <p className="text-xs text-muted-foreground">
+            All rates decrease continuously across 10 revenue tiers—no sudden jumps.
+          </p>
+          <ToggleGroup
+            type="single"
+            value={contractType}
+            onValueChange={(value) => value && setContractType(value as typeof contractType)}
+            className="grid grid-cols-3 gap-2"
+          >
+            <ToggleGroupItem
+              value="none"
+              aria-label="No contract"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
-              <ToggleGroupItem
-                value="none"
-                aria-label="No contract"
-                className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-              >
-                <div className="text-center">
-                  <div className="text-sm font-medium">No Contract</div>
-                  <div className="text-xs opacity-80">Standard</div>
-                </div>
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="monthly"
-                aria-label="Monthly contract"
-                className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-              >
-                <div className="text-center">
-                  <div className="text-sm font-medium">Monthly</div>
-                  <div className="text-xs opacity-80">Save 15%</div>
-                </div>
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="yearly"
-                aria-label="Yearly contract"
-                className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground relative"
-              >
-                <div className="text-center">
-                  <div className="text-sm font-medium">Yearly</div>
-                  <div className="text-xs opacity-80">Save 25%</div>
-                </div>
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
+              <div className="text-center">
+                <div className="text-sm font-medium">No Contract</div>
+                <div className="text-xs opacity-80">Standard</div>
+              </div>
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="monthly"
+              aria-label="Monthly contract"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              <div className="text-center">
+                <div className="text-sm font-medium">Monthly</div>
+                <div className="text-xs opacity-80">Save 15%</div>
+              </div>
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="yearly"
+              aria-label="Yearly contract"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground relative"
+            >
+              <div className="text-center">
+                <div className="text-sm font-medium">Yearly</div>
+                <div className="text-xs opacity-80">Save 25%</div>
+              </div>
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
       </Card>
 

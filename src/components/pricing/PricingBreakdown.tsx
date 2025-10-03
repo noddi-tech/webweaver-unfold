@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { formatCurrency, formatPercentage } from "@/utils/formatCurrency";
 import { PricingResult } from "@/utils/pricing";
-import { detectCurrentTier, getTierLabel, EXAMPLE_RATES } from "@/utils/pricingHelpers";
+import { detectCurrentTier, getTierLabel, getTierColor, EXAMPLE_RATES } from "@/utils/pricingHelpers";
 import { Sparkles, ChevronDown, Info } from "lucide-react";
 
 interface PricingBreakdownProps {
@@ -43,20 +43,22 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
   const tierLabel = getTierLabel(currentTier);
 
   return (
-    <Card className="glass-card p-6 space-y-6">
+    <Card className="glass-card p-6 space-y-6 animate-fade-in">
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">Annual Cost Breakdown</h3>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Annual Cost Breakdown</h3>
+            <p className="text-sm text-muted-foreground">
+              Revenue-based pricing that scales with your business
+            </p>
+          </div>
           {contractType !== 'none' && result.discount > 0 && (
-            <Badge className="bg-gradient-primary text-primary-foreground">
+            <Badge className="bg-gradient-primary text-primary-foreground w-fit animate-scale-in">
               <Sparkles className="w-3 h-3 mr-1" />
               Save {formatCurrency(result.discount, currency)}
             </Badge>
           )}
         </div>
-        <p className="text-sm text-muted-foreground">
-          Revenue-based pricing that scales with your business
-        </p>
       </div>
 
       <div className="space-y-4">
@@ -100,25 +102,31 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
 
         {/* Total */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+            <div className="space-y-2">
               <h4 className="text-lg font-bold text-foreground">Total Annual Cost</h4>
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs">
-                  Tier {currentTier} - {tierLabel}
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className={`text-xs font-semibold ${getTierColor(currentTier)} transition-all duration-300`}>
+                  Tier {currentTier}
                 </Badge>
+                <span className="text-xs text-muted-foreground">
+                  {tierLabel}
+                </span>
               </div>
             </div>
-            <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <span className="text-3xl lg:text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent transition-all duration-300">
               {formatCurrency(result.total, currency)}
             </span>
           </div>
-          <div className="text-sm text-muted-foreground">
-            ≈ {formatCurrency(result.total / 12, currency)}/month
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Effective rate</span>
-            <span className="font-semibold text-foreground">{formatPercentage(result.effectiveRate / 100)}</span>
+          <div className="grid sm:grid-cols-2 gap-3 pt-2">
+            <div className="flex items-center justify-between sm:justify-start sm:gap-2 text-sm p-3 rounded-lg bg-muted/30">
+              <span className="text-muted-foreground">Monthly avg:</span>
+              <span className="font-semibold text-foreground">{formatCurrency(result.total / 12, currency)}</span>
+            </div>
+            <div className="flex items-center justify-between sm:justify-start sm:gap-2 text-sm p-3 rounded-lg bg-muted/30">
+              <span className="text-muted-foreground">Effective rate:</span>
+              <span className="font-semibold text-foreground">{formatPercentage(result.effectiveRate / 100)}</span>
+            </div>
           </div>
         </div>
       </div>

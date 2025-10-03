@@ -25,7 +25,7 @@ export function RevenueInput({ label, value, onChange, max, currency, tooltip }:
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 transition-all duration-200">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Label htmlFor={label} className="text-sm font-medium text-foreground">

@@ -46,6 +46,15 @@ export function getTierLabel(tier: number): string {
 }
 
 /**
+ * Get color class for a tier badge.
+ */
+export function getTierColor(tier: number): string {
+  if (tier <= 4) return 'bg-green-600 text-white border-green-700';
+  if (tier <= 7) return 'bg-amber-500 text-white border-amber-600';
+  return 'bg-gradient-primary text-primary-foreground border-primary';
+}
+
+/**
  * Example effective rates calculated for reference scenarios.
  */
 export const EXAMPLE_RATES = {
