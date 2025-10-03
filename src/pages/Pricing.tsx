@@ -12,8 +12,41 @@ import { PricingFAQ } from "@/components/pricing/PricingFAQ";
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { DEFAULT_CURRENCY } from "@/config/pricing";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Page {
+  id: string;
+  name: string;
+  slug: string;
+  title: string;
+  meta_description?: string;
+  default_background_token: string;
+  default_text_token: string;
+}
+
+const getBackgroundClass = (token?: string) => {
+  const map: Record<string, string> = {
+    background: 'bg-background',
+    secondary: 'bg-secondary',
+    muted: 'bg-muted',
+    accent: 'bg-accent',
+    card: 'bg-card',
+  };
+  return map[token || 'background'] || 'bg-background';
+};
+
+const getTextClass = (token?: string) => {
+  const map: Record<string, string> = {
+    foreground: 'text-foreground',
+    'muted-foreground': 'text-muted-foreground',
+    primary: 'text-primary',
+    secondary: 'text-secondary',
+  };
+  return map[token || 'foreground'] || 'text-foreground';
+};
 
 const Pricing = () => {
+  const [pageData, setPageData] = useState<Page | null>(null);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [currency, setCurrency] = useState(() => {
     const saved = localStorage.getItem('noddi-pricing-currency');
@@ -22,11 +55,44 @@ const Pricing = () => {
   const [contractType, setContractType] = useState<'none' | 'monthly' | 'yearly'>('none');
 
   useEffect(() => {
-    document.title = "Transparent Revenue-Based Pricing | Noddi";
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Pay as you grow with clear, tier-based pricing. No hidden fees, no separate licence charges. See exactly what you\'ll pay.');
-    }
+    const loadPage = async () => {
+      const { data: page } = await supabase
+        .from('pages')
+        .select('*')
+        .eq('slug', 'pricing')
+        .eq('active', true)
+        .maybeSingle();
+
+      if (page) {
+        setPageData(page);
+        document.title = page.title;
+        
+        if (page.meta_description) {
+          const metaDescription = document.querySelector('meta[name="description"]');
+          if (metaDescription) {
+            metaDescription.setAttribute('content', page.meta_description);
+          }
+        }
+
+        // Apply page background to body
+        const backgroundClass = getBackgroundClass(page.default_background_token);
+        const textClass = getTextClass(page.default_text_token);
+        
+        document.body.className = document.body.className
+          .replace(/bg-\S+/g, '')
+          .replace(/text-\S+/g, '')
+          .trim();
+        document.body.classList.add(...backgroundClass.split(' '), ...textClass.split(' '));
+      }
+    };
+
+    loadPage();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      document.body.className = '';
+    };
   }, []);
 
   useEffect(() => {
@@ -34,7 +100,7 @@ const Pricing = () => {
   }, [currency]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Header />
       <main className="container mx-auto px-6 pt-32 pb-20 space-y-20">
         {/* Hero Section */}
@@ -43,7 +109,7 @@ const Pricing = () => {
             Pay as you grow
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground">
-            Transparent revenue-based pricing with no separate licence fees or free tiers. Pay from your first euro, with rates that decrease as you grow.
+            Transparent revenue-based pricing with no separate licence fees or free tiers.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             {[
