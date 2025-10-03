@@ -1,0 +1,189 @@
+/**
+ * Pricing calculation utilities for Noddi's revenue‑based pricing model.
+ *
+ * This module encapsulates the logic defined in the shared pricing sheet. It
+ * generates revenue tiers on the fly based on a base take‑rate, a step
+ * reduction (cooldown), an initial revenue span and a range multiplier. The
+ * resulting ranges are then used to compute usage costs for garage, mobile
+ * and shop services. Optional contract discounts and SaaS licence
+ * percentages are also applied.
+ *
+ * **INPUT ASSUMPTION:** All revenue inputs are expected to be **annual revenue in EUR**.
+ */
+
+// Constants derived from the pricing spreadsheet
+const INITIAL_SPAN = 100_000; // revenue span for the first tier (EUR)
+const RANGE_MULTIPLIER = 2.5; // each subsequent tier is 2.5× larger
+
+// Contract discounts: monthly subscribers get 15% off, yearly subscribers get 25% off.
+const CONTRACT_DISCOUNT_MONTHLY = 0.15;
+const CONTRACT_DISCOUNT_YEARLY = 0.25;
+
+// Service‑specific base rates and cooldowns
+const GARAGE_BASE_RATE = 0.04; // 4% on the first revenue tier
+const GARAGE_COOLDOWN = 0.20;  // 20% reduction per tier
+
+const MOBILE_BASE_RATE = 0.10; // 10% on the first revenue tier
+const MOBILE_COOLDOWN = 0.15;  // 15% reduction per tier
+
+const SHOP_BASE_RATE = 0.05;  // 5% on the first revenue tier
+const SHOP_COOLDOWN = 0.15;   // 15% reduction per tier
+
+// SaaS licence rates per service (annual rates applied to annual revenue)
+const GARAGE_LICENSE_RATE = 0.01; // 1% licence fee
+const MOBILE_LICENSE_RATE = 0.10; // 10% licence fee
+const SHOP_LICENSE_RATE = 0.00;   // no licence fee defined for shop yet
+
+/**
+ * Representation of a revenue range with an associated take‑rate.
+ */
+interface RevenueRange {
+  start: number;
+  end: number;   // Infinity for the last range
+  rate: number;  // percentage as a decimal (e.g. 0.032 for 3.2%)
+}
+
+/**
+ * Generate an array of revenue ranges for a particular service. Each range
+ * covers a span of revenue and has its own take‑rate. The base rate is
+ * reduced on each subsequent tier by the given cooldown factor. The final
+ * range has an end of Infinity, meaning any revenue beyond the previous
+ * tiers will be charged at the last rate.
+ *
+ * @param baseRate      Starting take‑rate for the first revenue tier (e.g. 0.04)
+ * @param cooldown      Fractional reduction applied per tier (e.g. 0.2 yields 20% reduction)
+ * @param initialSpan   Size of the first tier (in revenue units)
+ * @param multiplier    Multiplier to increase the span of each subsequent tier
+ * @param numRanges     Number of tiers to generate (defaults to 10)
+ */
+function generateRanges(
+  baseRate: number,
+  cooldown: number,
+  initialSpan: number = INITIAL_SPAN,
+  multiplier: number = RANGE_MULTIPLIER,
+  numRanges = 10,
+): RevenueRange[] {
+  const ranges: RevenueRange[] = [];
+  let span = initialSpan;
+  let rate = baseRate;
+  let start = 0;
+  for (let i = 0; i < numRanges; i++) {
+    const end = i === numRanges - 1 ? Infinity : start + span;
+    ranges.push({ start, end, rate });
+    // prepare for next tier
+    start = end;
+    span *= multiplier;
+    rate = parseFloat((rate * (1 - cooldown)).toFixed(10));
+  }
+  return ranges;
+}
+
+/**
+ * Calculate the usage cost for a given revenue and set of ranges. The cost
+ * represents the sum of each tier's charge: revenue within a tier multiplied
+ * by the tier's take‑rate.
+ *
+ * @param revenue  Total annual revenue for this service (in EUR)
+ * @param ranges   Precomputed revenue ranges for this service
+ */
+function calculateUsageCost(revenue: number, ranges: RevenueRange[]): number {
+  let remaining = revenue;
+  let cost = 0;
+  for (const range of ranges) {
+    if (remaining <= 0) break;
+    const span = range.end === Infinity
+      ? remaining
+      : Math.min(range.end - range.start, remaining);
+    cost += span * range.rate;
+    remaining -= span;
+  }
+  return cost;
+}
+
+export interface PricingResult {
+  usage: { garage: number; shop: number; mobile: number };
+  licence: { garage: number; shop: number; mobile: number };
+  total: number;
+  effectiveRate: number;
+  discount: number;
+}
+
+/**
+ * Compute the pricing breakdown for the provided annual revenues.
+ * 
+ * **IMPORTANT:** All revenue inputs should be **annual revenue in EUR**.
+ * 
+ * This function calculates usage fees and licence fees for garage, shop and mobile
+ * services, optionally applying a contract discount across all components. The
+ * `contractType` option specifies whether no contract (`'none'`), a monthly
+ * contract (`'monthly'`) or a yearly contract (`'yearly'`) discount should be
+ * applied. Monthly contracts receive a 15% discount and yearly contracts
+ * receive a 25% discount.
+ *
+ * @param revenues An object containing annual revenue for each service (in EUR)
+ * @param options  Additional options:
+ *                 - includeMobile: whether to include the mobile service in the calculation.
+ *                 - contractType: 'none', 'monthly' or 'yearly' to apply no discount,
+ *                   a 15% discount or a 25% discount, respectively.
+ * @returns Pricing breakdown with usage, licence, total costs, effective rate, and discount amount
+ */
+export function calculatePricing(
+  revenues: { garage: number; shop: number; mobile: number },
+  options: { includeMobile?: boolean; contractType?: 'none' | 'monthly' | 'yearly' } = {},
+): PricingResult {
+  const { includeMobile = true, contractType = 'none' } = options;
+  
+  // Determine the discount factor based on the contract type.
+  let discount = 0;
+  if (contractType === 'monthly') discount = CONTRACT_DISCOUNT_MONTHLY;
+  else if (contractType === 'yearly') discount = CONTRACT_DISCOUNT_YEARLY;
+  const discountFactor = 1 - discount;
+
+  // Generate ranges per service
+  const garageRanges = generateRanges(GARAGE_BASE_RATE, GARAGE_COOLDOWN);
+  const shopRanges = generateRanges(SHOP_BASE_RATE, SHOP_COOLDOWN);
+  const mobileRanges = generateRanges(MOBILE_BASE_RATE, MOBILE_COOLDOWN);
+
+  // Compute usage costs per service (annual)
+  const garageUsage = calculateUsageCost(revenues.garage, garageRanges) * discountFactor;
+  const shopUsage = calculateUsageCost(revenues.shop, shopRanges) * discountFactor;
+  const mobileUsage = includeMobile
+    ? calculateUsageCost(revenues.mobile, mobileRanges) * discountFactor
+    : 0;
+
+  // Compute licence fees per service (annual)
+  const garageLicence = revenues.garage * GARAGE_LICENSE_RATE * discountFactor;
+  const shopLicence = revenues.shop * SHOP_LICENSE_RATE * discountFactor;
+  const mobileLicence = includeMobile
+    ? revenues.mobile * MOBILE_LICENSE_RATE * discountFactor
+    : 0;
+
+  const totalUsage = garageUsage + shopUsage + mobileUsage;
+  const totalLicence = garageLicence + shopLicence + mobileLicence;
+  const total = totalUsage + totalLicence;
+  
+  // Calculate effective rate (total cost as % of total revenue)
+  const totalRevenue = revenues.garage + revenues.shop + (includeMobile ? revenues.mobile : 0);
+  const effectiveRate = totalRevenue > 0 ? (total / totalRevenue) * 100 : 0;
+  
+  // Calculate discount amount saved
+  const totalWithoutDiscount = (garageUsage + shopUsage + mobileUsage) / discountFactor + 
+                                (garageLicence + shopLicence + mobileLicence) / discountFactor;
+  const discountAmount = totalWithoutDiscount - total;
+
+  return {
+    usage: {
+      garage: garageUsage,
+      shop: shopUsage,
+      mobile: mobileUsage,
+    },
+    licence: {
+      garage: garageLicence,
+      shop: shopLicence,
+      mobile: mobileLicence,
+    },
+    total,
+    effectiveRate,
+    discount: discountAmount,
+  };
+}
