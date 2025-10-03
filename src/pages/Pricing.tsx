@@ -185,12 +185,15 @@ const Pricing = () => {
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Join leading businesses that have reduced costs while improving customer satisfaction
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-lg px-8">
-                Book a Demo
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8" asChild>
-                <Link to="/contact">Contact Sales</Link>
+            <div className="flex justify-center">
+              <Button size="lg" className="text-lg px-8" asChild>
+                <a 
+                  href="https://calendly.com/joachim-noddi/30min"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Book a Demo
+                </a>
               </Button>
             </div>
           </Card>
