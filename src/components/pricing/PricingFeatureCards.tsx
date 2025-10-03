@@ -23,12 +23,6 @@ export function PricingFeatureCards({ currency }: PricingFeatureCardsProps) {
         "Shop: 5% take-rate",
         "Mobile: 10% take-rate"
       ],
-      benefits: [
-        "High NPS scores",
-        "AI-powered scheduling",
-        "No seat fees",
-        "World-class UX"
-      ],
       cta: "Talk to Sales"
     },
     {
@@ -40,12 +34,6 @@ export function PricingFeatureCards({ currency }: PricingFeatureCardsProps) {
         "Continuous pricing reduction",
         "No sudden jumps"
       ],
-      benefits: [
-        "All Small/Basic features",
-        "Reduced effective rates",
-        "Scale automatically",
-        "Dedicated support"
-      ],
       cta: "Book a Demo"
     },
     {
@@ -56,12 +44,6 @@ export function PricingFeatureCards({ currency }: PricingFeatureCardsProps) {
         "Lowest rates, down to ~1%",
         "Maximum value",
         "Custom contracts available"
-      ],
-      benefits: [
-        "All Large features",
-        "Lowest effective rates",
-        "Priority support",
-        "Custom integrations"
       ],
       cta: "Contact Sales"
     }
@@ -93,19 +75,7 @@ export function PricingFeatureCards({ currency }: PricingFeatureCardsProps) {
             </ul>
           </div>
 
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-foreground">Key Benefits</h4>
-            <ul className="space-y-2">
-              {card.benefits.map((benefit) => (
-                <li key={benefit} className="flex items-start text-sm">
-                  <Check className="w-4 h-4 text-primary mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{benefit}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <Button 
+          <Button
             className="w-full"
             variant="outline"
             asChild

@@ -4,9 +4,10 @@ import { calculatePricing } from "@/utils/pricing";
 
 interface StaticPricingExamplesProps {
   currency: string;
+  contractType: 'none' | 'monthly' | 'yearly';
 }
 
-export function StaticPricingExamples({ currency }: StaticPricingExamplesProps) {
+export function StaticPricingExamples({ currency, contractType }: StaticPricingExamplesProps) {
   const examples = [
     {
       description: "Small Business",
@@ -35,7 +36,12 @@ export function StaticPricingExamples({ currency }: StaticPricingExamplesProps) 
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground mb-2">Example Pricing Scenarios</h2>
         <p className="text-sm text-muted-foreground">
-          See what businesses like yours typically pay (with yearly contract)
+          {contractType === 'none' 
+            ? 'See what businesses like yours typically pay (base pricing)'
+            : contractType === 'monthly'
+            ? 'See what businesses like yours typically pay (with monthly contract - Save 15%)'
+            : 'See what businesses like yours typically pay (with yearly contract - Save 25%)'
+          }
         </p>
       </div>
 
@@ -43,8 +49,17 @@ export function StaticPricingExamples({ currency }: StaticPricingExamplesProps) 
         {examples.map((example) => {
           const result = calculatePricing(
             example.revenues,
-            { includeMobile: example.revenues.mobile > 0, contractType: 'yearly' }
+            { includeMobile: example.revenues.mobile > 0, contractType }
           );
+
+          // Calculate base price (without discount) for comparison
+          const baseResult = calculatePricing(
+            example.revenues,
+            { includeMobile: example.revenues.mobile > 0, contractType: 'none' }
+          );
+
+          const hasDiscount = contractType !== 'none';
+          const savings = hasDiscount ? baseResult.total - result.total : 0;
 
           return (
             <Card key={example.description} className="p-5 hover:shadow-md transition-all duration-200">
@@ -75,9 +90,26 @@ export function StaticPricingExamples({ currency }: StaticPricingExamplesProps) 
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-border flex justify-between items-center">
-                  <span className="text-sm font-semibold text-foreground">Annual Cost:</span>
-                  <span className="text-lg font-bold text-primary">{formatCurrency(result.total, currency)}</span>
+                <div className="pt-3 border-t border-border space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-foreground">Annual Cost:</span>
+                    <div className="text-right">
+                      {hasDiscount && (
+                        <div className="text-sm text-muted-foreground line-through">
+                          {formatCurrency(baseResult.total, currency)}
+                        </div>
+                      )}
+                      <div className="text-lg font-bold text-primary">
+                        {formatCurrency(result.total, currency)}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {hasDiscount && (
+                    <div className="bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium px-2 py-1 rounded">
+                      💰 Save {formatCurrency(savings, currency)} with {contractType} contract
+                    </div>
+                  )}
                 </div>
 
                 <div className="text-xs text-muted-foreground">

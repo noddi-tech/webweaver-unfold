@@ -21,6 +21,7 @@ const Pricing = () => {
     const saved = localStorage.getItem('noddi-pricing-currency');
     return saved || DEFAULT_CURRENCY;
   });
+  const [contractType, setContractType] = useState<'none' | 'monthly' | 'yearly'>('none');
 
   useEffect(() => {
     document.title = "Transparent Revenue-Based Pricing | Noddi";
@@ -50,7 +51,7 @@ const Pricing = () => {
             {[
               { icon: Zap, text: 'No upfront costs' },
               { icon: TrendingDown, text: 'Rates decrease as you grow' },
-              { icon: Shield, text: 'Cancel anytime' },
+              { icon: Shield, text: 'No setup fees' },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-muted-foreground">
                 <item.icon className="w-5 h-5 text-primary" />
@@ -59,30 +60,64 @@ const Pricing = () => {
             ))}
           </div>
 
-          {/* Currency Toggle */}
-          <div className="flex items-center justify-center gap-4 pt-4">
-            <Label className="text-sm text-muted-foreground">View pricing in:</Label>
-            <ToggleGroup
-              type="single"
-              value={currency}
-              onValueChange={(value) => value && setCurrency(value)}
-              className="bg-muted/50 rounded-lg p-1"
-            >
-              <ToggleGroupItem
-                value="EUR"
-                aria-label="Euro"
-                className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+          {/* Currency and Contract Toggles */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
+            <div className="flex items-center gap-4">
+              <Label className="text-sm text-muted-foreground whitespace-nowrap">View pricing in:</Label>
+              <ToggleGroup
+                type="single"
+                value={currency}
+                onValueChange={(value) => value && setCurrency(value)}
+                className="bg-muted/50 rounded-lg p-1"
               >
-                EUR (€)
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="NOK"
-                aria-label="Norwegian Krone"
-                className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                <ToggleGroupItem
+                  value="EUR"
+                  aria-label="Euro"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                >
+                  EUR (€)
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="NOK"
+                  aria-label="Norwegian Krone"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                >
+                  NOK (kr)
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Label className="text-sm text-muted-foreground whitespace-nowrap">Contract type:</Label>
+              <ToggleGroup
+                type="single"
+                value={contractType}
+                onValueChange={(value) => value && setContractType(value as 'none' | 'monthly' | 'yearly')}
+                className="bg-muted/50 rounded-lg p-1"
               >
-                NOK (kr)
-              </ToggleGroupItem>
-            </ToggleGroup>
+                <ToggleGroupItem
+                  value="none"
+                  aria-label="No Contract"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                >
+                  None
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="monthly"
+                  aria-label="Monthly Contract"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                >
+                  Monthly <span className="text-xs ml-1 opacity-75">(Save 15%)</span>
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="yearly"
+                  aria-label="Yearly Contract"
+                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                >
+                  Yearly <span className="text-xs ml-1 opacity-75">(Save 25%)</span>
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
           </div>
         </div>
 
@@ -96,18 +131,8 @@ const Pricing = () => {
           <PricingFeatureCards currency={currency} />
         </section>
 
-        {/* Static Examples */}
-        <section className="animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <StaticPricingExamples currency={currency} />
-        </section>
-
-        {/* Rate Reduction Chart */}
-        <section className="animate-fade-in" style={{ animationDelay: '300ms' }}>
-          <RateReductionChart />
-        </section>
-
         {/* Advanced Calculator CTA */}
-        <section className="text-center animate-fade-in" style={{ animationDelay: '400ms' }}>
+        <section className="text-center animate-fade-in" style={{ animationDelay: '200ms' }}>
           <Card className="glass-card p-8 max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-foreground mb-4">
               Need a Precise Estimate?
@@ -120,6 +145,16 @@ const Pricing = () => {
               Open Advanced Calculator
             </Button>
           </Card>
+        </section>
+
+        {/* Static Examples */}
+        <section className="animate-fade-in" style={{ animationDelay: '300ms' }}>
+          <StaticPricingExamples currency={currency} contractType={contractType} />
+        </section>
+
+        {/* Rate Reduction Chart */}
+        <section className="animate-fade-in" style={{ animationDelay: '400ms' }}>
+          <RateReductionChart />
         </section>
 
         {/* Value Proposition */}
@@ -153,40 +188,8 @@ const Pricing = () => {
           <PricingFAQ />
         </section>
 
-        {/* How It Works */}
-        <section className="max-w-4xl mx-auto animate-fade-in" style={{ animationDelay: '700ms' }}>
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">
-            How Our Pricing Works
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="glass-card p-6">
-              <div className="text-primary text-2xl font-bold mb-2">Small/Basic</div>
-              <p className="text-muted-foreground text-sm">
-                Lower volume businesses get higher support with competitive rates
-              </p>
-            </Card>
-            <Card className="glass-card p-6">
-              <div className="text-primary text-2xl font-bold mb-2">Large</div>
-              <p className="text-muted-foreground text-sm">
-                Growing businesses benefit from reduced rates as revenue scales
-              </p>
-            </Card>
-            <Card className="glass-card p-6">
-              <div className="text-primary text-2xl font-bold mb-2">Enterprise</div>
-              <p className="text-muted-foreground text-sm">
-                High-volume businesses get the lowest rates with maximum value
-              </p>
-            </Card>
-          </div>
-          <p className="text-center text-sm text-muted-foreground mt-8">
-            Our revenue-based model ensures you always pay a fair rate. The usage fee includes everything—no 
-            separate licence charges. As your business grows, your effective rate automatically decreases 
-            continuously across 10 tiers—no negotiations needed.
-          </p>
-        </section>
-
         {/* Final CTA */}
-        <section className="animate-fade-in" style={{ animationDelay: '800ms' }}>
+        <section className="animate-fade-in" style={{ animationDelay: '700ms' }}>
           <Card className="glass-card p-12 text-center bg-gradient-primary/5 border-primary/20 max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold mb-4 text-foreground">
               Ready to transform your customer experience?
