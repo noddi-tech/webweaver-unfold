@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calculator, Zap, TrendingDown, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
-import { PricingSummaryTable } from "@/components/pricing/PricingSummaryTable";
 import { PricingFeatureCards } from "@/components/pricing/PricingFeatureCards";
 import { StaticPricingExamples } from "@/components/pricing/StaticPricingExamples";
 import { RateReductionChart } from "@/components/pricing/RateReductionChart";
@@ -120,11 +119,6 @@ const Pricing = () => {
             </div>
           </div>
         </div>
-
-        {/* Summary Table */}
-        <section className="animate-fade-in">
-          <PricingSummaryTable currency={currency} />
-        </section>
 
         {/* Feature Cards */}
         <section className="animate-fade-in" style={{ animationDelay: '100ms' }}>
