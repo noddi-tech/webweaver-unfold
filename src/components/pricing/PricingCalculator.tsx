@@ -1,18 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Button } from "@/components/ui/button";
 import { RevenueInput } from "./RevenueInput";
 import { PricingBreakdown } from "./PricingBreakdown";
 import { calculatePricing } from "@/utils/pricing";
-import { getCurrencyConfig } from "@/config/pricing";
+import { getCurrencyConfig, DEFAULT_CURRENCY } from "@/config/pricing";
+import { Sparkles } from "lucide-react";
 
-interface PricingCalculatorProps {
-  currency?: string;
-}
+const PRESETS = {
+  small: { garage: 750_000, shop: 200_000, mobile: 50_000 },
+  large: { garage: 6_000_000, shop: 3_000_000, mobile: 1_000_000 },
+  enterprise: { garage: 50_000_000, shop: 20_000_000, mobile: 10_000_000 },
+};
 
-export function PricingCalculator({ currency = 'EUR' }: PricingCalculatorProps) {
+export function PricingCalculator() {
+  // Load currency from localStorage or use default
+  const [currency, setCurrency] = useState(() => {
+    const saved = localStorage.getItem('noddi-pricing-currency');
+    return saved || DEFAULT_CURRENCY;
+  });
+
   const currencyConfig = getCurrencyConfig(currency);
   
   const [garageRevenue, setGarageRevenue] = useState(5_000_000);
@@ -20,6 +30,19 @@ export function PricingCalculator({ currency = 'EUR' }: PricingCalculatorProps) 
   const [mobileRevenue, setMobileRevenue] = useState(1_000_000);
   const [includeMobile, setIncludeMobile] = useState(true);
   const [contractType, setContractType] = useState<'none' | 'monthly' | 'yearly'>('yearly');
+
+  // Persist currency selection
+  useEffect(() => {
+    localStorage.setItem('noddi-pricing-currency', currency);
+  }, [currency]);
+
+  // Apply preset values
+  const applyPreset = (preset: keyof typeof PRESETS) => {
+    const values = PRESETS[preset];
+    setGarageRevenue(values.garage);
+    setShopRevenue(values.shop);
+    setMobileRevenue(includeMobile ? values.mobile : 0);
+  };
 
   const result = calculatePricing(
     { garage: garageRevenue, shop: shopRevenue, mobile: mobileRevenue },
@@ -34,6 +57,76 @@ export function PricingCalculator({ currency = 'EUR' }: PricingCalculatorProps) 
           <h3 className="text-xl font-bold text-foreground mb-2">Calculate Your Price</h3>
           <p className="text-sm text-muted-foreground">
             Enter your annual revenue per service to see your pricing
+          </p>
+        </div>
+
+        {/* Currency Selector */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-foreground">Currency</Label>
+          <ToggleGroup
+            type="single"
+            value={currency}
+            onValueChange={(value) => value && setCurrency(value)}
+            className="grid grid-cols-2 gap-2"
+          >
+            <ToggleGroupItem
+              value="EUR"
+              aria-label="Euro"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              <div className="text-center">
+                <div className="text-sm font-medium">EUR (€)</div>
+                <div className="text-xs opacity-80">Euro</div>
+              </div>
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="NOK"
+              aria-label="Norwegian Krone"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              <div className="text-center">
+                <div className="text-sm font-medium">NOK (kr)</div>
+                <div className="text-xs opacity-80">Norsk</div>
+              </div>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+
+        {/* Preset Scenarios */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-foreground">Quick Presets</Label>
+          <div className="grid grid-cols-3 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => applyPreset('small')}
+              className="flex flex-col h-auto py-3"
+            >
+              <span className="text-xs font-semibold">Small</span>
+              <span className="text-xs text-muted-foreground">≤ {currencyConfig.symbol}2M</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => applyPreset('large')}
+              className="flex flex-col h-auto py-3"
+            >
+              <span className="text-xs font-semibold">Large</span>
+              <span className="text-xs text-muted-foreground">{currencyConfig.symbol}2-40M</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => applyPreset('enterprise')}
+              className="flex flex-col h-auto py-3 relative"
+            >
+              <Sparkles className="w-3 h-3 absolute top-1 right-1 text-primary" />
+              <span className="text-xs font-semibold">Enterprise</span>
+              <span className="text-xs text-muted-foreground">{currencyConfig.symbol}40M+</span>
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground italic">
+            * Revenue bands are approximate. Pricing decreases continuously as revenue grows.
           </p>
         </div>
 
@@ -90,6 +183,9 @@ export function PricingCalculator({ currency = 'EUR' }: PricingCalculatorProps) 
           {/* Contract Type Selector */}
           <div className="space-y-3">
             <Label className="text-sm font-medium text-foreground">Contract Type</Label>
+            <p className="text-xs text-muted-foreground">
+              All rates decrease continuously across 10 revenue tiers—no sudden jumps.
+            </p>
             <ToggleGroup
               type="single"
               value={contractType}

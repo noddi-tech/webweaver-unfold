@@ -136,7 +136,7 @@ const Pricing = () => {
 
           <TabsContent value="calculator" className="space-y-12">
             {/* Pricing Calculator */}
-            <PricingCalculator currency="EUR" />
+            <PricingCalculator />
 
             {/* How It Works */}
             <div className="max-w-4xl mx-auto">
