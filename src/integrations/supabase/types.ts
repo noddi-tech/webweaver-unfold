@@ -977,7 +977,56 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      employees_public: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          id: string | null
+          image_object_position: string | null
+          image_url: string | null
+          name: string | null
+          section: string | null
+          section_id: string | null
+          sort_order: number | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string | null
+          image_object_position?: string | null
+          image_url?: string | null
+          name?: string | null
+          section?: string | null
+          section_id?: string | null
+          sort_order?: number | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string | null
+          image_object_position?: string | null
+          image_url?: string | null
+          name?: string | null
+          section?: string | null
+          section_id?: string | null
+          sort_order?: number | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never

@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import Header from "@/components/Header";
 import { useHeadings } from "@/hooks/useHeadings";
 import { Card } from "@/components/ui/card";
-import { Mail, Phone, Linkedin } from "lucide-react";
+
 import { supabase } from "@/integrations/supabase/client";
 import { TYPOGRAPHY_SCALE } from "@/lib/typography";
 import { getColorClass } from "@/lib/colorUtils";
@@ -59,9 +59,6 @@ interface Employee {
   id: string;
   name: string;
   title: string;
-  email: string | null;
-  phone: string | null;
-  linkedin_url: string | null;
   image_url: string | null;
   image_object_position?: string | null;
   sort_order: number | null;
@@ -210,9 +207,8 @@ const Team = () => {
   useEffect(() => {
     const load = async () => {
       const { data } = await (supabase as any)
-        .from("employees")
+        .from("employees_public")
         .select("*")
-        .eq("active", true)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
       setEmployees(data || []);
@@ -389,26 +385,6 @@ const Team = () => {
                   <div className="p-5 space-y-2">
                     <h3 className={`text-xl font-semibold ${nameCls}`}>{m.name}</h3>
                     <p className={`text-sm ${titleCls}`}>{m.title}</p>
-                    <div className="flex flex-wrap gap-5 pt-4">
-                      {m.email && (
-                        <a href={`mailto:${m.email}`} className={`inline-flex items-center gap-2 ${linkCls} hover:underline`} aria-label={`Email ${m.name}`}>
-                          <Mail className="h-4 w-4" />
-                          <span className="text-sm">Email</span>
-                        </a>
-                      )}
-                      {m.phone && (
-                        <a href={`tel:${m.phone}`} className={`inline-flex items-center gap-2 ${linkCls} hover:underline`} aria-label={`Call ${m.name}`}>
-                          <Phone className="h-4 w-4" />
-                          <span className="text-sm">Call</span>
-                        </a>
-                      )}
-                      {m.linkedin_url && (
-                        <a href={m.linkedin_url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-2 ${linkCls} hover:underline`} aria-label={`${m.name} on LinkedIn`}>
-                          <Linkedin className="h-4 w-4" />
-                          <span className="text-sm">LinkedIn</span>
-                        </a>
-                      )}
-                    </div>
                   </div>
                 </article>
               ))}
