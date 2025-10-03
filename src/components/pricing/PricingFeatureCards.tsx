@@ -108,8 +108,8 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
               </div>
               
               {hasDiscount && savings > 0 && (
-                <div className="bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 text-xs font-semibold px-3 py-1 rounded-md inline-block">
-                  Save {formatCurrency(savings, currency)}
+                <div className="bg-green-600 text-white border-green-700 text-xs font-semibold px-3 py-1 rounded-md inline-block">
+                  💰 Save {formatCurrency(savings, currency)}
                 </div>
               )}
               
