@@ -57,7 +57,7 @@ All colors MUST be HSL.
     --spacing-section: 5rem;
     
     /* Tier-based colors for pricing calculator */
-    --tier-low: 142 76% 36%; /* Green for lower tiers (Small/Basic) */
+    --tier-low: 142 76% 36%; /* Green for lower tiers (Emerging) */
     --tier-mid: 45 93% 47%; /* Amber for mid tiers (Large) */
     --tier-high: 252 87% 58%; /* Purple for high tiers (Enterprise) */
     

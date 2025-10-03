@@ -1,7 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
 import { getCurrencyConfig } from "@/config/pricing";
 import { calculatePricing } from "@/utils/pricing";
 import { formatCurrency, formatCompactCurrency } from "@/utils/formatCurrency";
@@ -17,7 +16,7 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
 
   const scenarios = [
     {
-      tier: "Small/Basic",
+      tier: "Emerging",
       range: `Up to ${symbol}${currency === 'NOK' ? '20M' : '2M'}`,
       color: "bg-green-600 text-white border-green-700",
       revenues: {
@@ -25,7 +24,7 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
         shop: currency === 'NOK' ? 2_000_000 : 200_000,
         mobile: currency === 'NOK' ? 500_000 : 50_000
       },
-      cta: "Talk to Sales"
+      cta: "Book Demo"
     },
     {
       tier: "Large",
@@ -36,7 +35,7 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
         shop: currency === 'NOK' ? 30_000_000 : 3_000_000,
         mobile: currency === 'NOK' ? 10_000_000 : 1_000_000
       },
-      cta: "Book a Demo"
+      cta: "Book Demo"
     },
     {
       tier: "Enterprise",
@@ -47,7 +46,7 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
         shop: currency === 'NOK' ? 800_000_000 : 80_000_000,
         mobile: currency === 'NOK' ? 240_000_000 : 24_000_000
       },
-      cta: "Contact Sales"
+      cta: "Book Demo"
     }
   ];
 
@@ -120,7 +119,13 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
               variant="outline"
               asChild
             >
-              <Link to="/contact">{scenario.cta}</Link>
+              <a 
+                href="https://calendly.com/joachim-noddi/30min"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {scenario.cta}
+              </a>
             </Button>
           </Card>
         );

@@ -40,7 +40,7 @@ export function detectCurrentTier(totalRevenue: number): number {
  * Get a descriptive label for a tier.
  */
 export function getTierLabel(tier: number): string {
-  if (tier <= 4) return 'Small/Basic';
+  if (tier <= 4) return 'Emerging';
   if (tier <= 7) return 'Large';
   return 'Enterprise';
 }
