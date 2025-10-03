@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Demo from "./pages/Demo";
 import FeaturesPage from "./pages/Features";
 import Contact from "./pages/Contact";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
@@ -25,6 +26,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/pricing" element={<Pricing />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/demo" element={<Demo />} />
           <Route path="/team" element={<Team />} />
