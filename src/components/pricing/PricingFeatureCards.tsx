@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Sparkles } from "lucide-react";
+import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getCurrencyConfig } from "@/config/pricing";
 
@@ -29,8 +29,7 @@ export function PricingFeatureCards({ currency }: PricingFeatureCardsProps) {
         "No seat fees",
         "World-class UX"
       ],
-      cta: "Talk to Sales",
-      isPopular: false
+      cta: "Talk to Sales"
     },
     {
       tier: "Large",
@@ -47,8 +46,7 @@ export function PricingFeatureCards({ currency }: PricingFeatureCardsProps) {
         "Scale automatically",
         "Dedicated support"
       ],
-      cta: "Book a Demo",
-      isPopular: true
+      cta: "Book a Demo"
     },
     {
       tier: "Enterprise",
@@ -65,8 +63,7 @@ export function PricingFeatureCards({ currency }: PricingFeatureCardsProps) {
         "Priority support",
         "Custom integrations"
       ],
-      cta: "Contact Sales",
-      isPopular: false
+      cta: "Contact Sales"
     }
   ];
 
@@ -75,18 +72,8 @@ export function PricingFeatureCards({ currency }: PricingFeatureCardsProps) {
       {cards.map((card) => (
         <Card 
           key={card.tier}
-          className={`p-6 space-y-6 relative transition-all duration-200 hover:shadow-lg hover-scale ${
-            card.isPopular ? 'border-primary shadow-lg' : ''
-          }`}
+          className="p-6 space-y-6 relative transition-all duration-200 hover:shadow-lg hover-scale"
         >
-          {card.isPopular && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge className="bg-gradient-primary text-primary-foreground shadow-lg">
-                <Sparkles className="w-3 h-3 mr-1" />
-                Most Popular
-              </Badge>
-            </div>
-          )}
 
           <div className="space-y-3">
             <Badge className={`${card.color} text-xs font-semibold px-3 py-1`}>
@@ -120,7 +107,7 @@ export function PricingFeatureCards({ currency }: PricingFeatureCardsProps) {
 
           <Button 
             className="w-full"
-            variant={card.isPopular ? "default" : "outline"}
+            variant="outline"
             asChild
           >
             <Link to="/contact">{card.cta}</Link>
