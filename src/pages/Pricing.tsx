@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, Zap, TrendingDown, Shield } from "lucide-react";
+import { Calculator, Zap, TrendingDown, Shield, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PricingFeatureCards } from "@/components/pricing/PricingFeatureCards";
 import { RateReductionChart } from "@/components/pricing/RateReductionChart";
@@ -47,9 +47,9 @@ const Pricing = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             {[
-              { icon: Zap, text: 'No upfront costs' },
+              { icon: Sparkles, text: 'World class UX' },
               { icon: TrendingDown, text: 'Rates decrease as you grow' },
-              { icon: Shield, text: 'No setup fees' },
+              { icon: Zap, text: 'Save costs with efficient operations' },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-muted-foreground">
                 <item.icon className="w-5 h-5 text-primary" />
