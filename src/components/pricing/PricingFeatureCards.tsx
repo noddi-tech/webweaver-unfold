@@ -67,21 +67,25 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
         const hasDiscount = contractType !== 'none';
         const savings = baseResult.total - discountedResult.total;
 
+        const borderColor = scenario.tier === 'Emerging' ? 'border-l-green-500' : 
+                           scenario.tier === 'Large' ? 'border-l-amber-500' : 'border-l-primary';
+        
         return (
           <Card 
             key={scenario.tier}
-            className="p-4 md:p-6 space-y-4 md:space-y-6 relative transition-all duration-200 hover:shadow-lg hover-scale"
+            className={`p-4 md:p-6 space-y-4 md:space-y-6 relative transition-all duration-200 hover:shadow-lg border-l-4 ${borderColor}`}
           >
-            <div className="space-y-2 md:space-y-3">
-              <h3 className={`text-2xl md:text-3xl lg:text-4xl font-bold ${scenario.color} px-4 py-2 rounded-lg inline-block`}>
-                {scenario.tier}
+            {/* Revenue Range as Heading */}
+            <div className="space-y-1">
+              <h3 className="text-xl md:text-2xl font-bold text-foreground">
+                {scenario.range}
               </h3>
-              <div className="text-sm md:text-base text-muted-foreground">{scenario.range}</div>
+              <div className="text-xs md:text-sm text-muted-foreground">{scenario.tier}</div>
             </div>
 
             {/* Example Scenario Breakdown */}
             <div className="space-y-2">
-              <h4 className="text-sm md:text-base font-semibold text-foreground">Example Scenario:</h4>
+              <h4 className="text-sm md:text-base font-semibold text-foreground">Example scenario:</h4>
               <ul className="text-xs md:text-sm text-muted-foreground space-y-1">
                 <li>• Garage: {formatCompactCurrency(scenario.revenues.garage, currency)}</li>
                 <li>• Shop: {formatCompactCurrency(scenario.revenues.shop, currency)}</li>
@@ -91,7 +95,7 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
 
             {/* Annual Cost with Discount Display */}
             <div className="space-y-2">
-              <h4 className="text-sm md:text-base font-semibold text-foreground">Annual Cost:</h4>
+              <h4 className="text-sm md:text-base font-semibold text-foreground">Annual cost:</h4>
               
               {hasDiscount && (
                 <div className="text-sm text-muted-foreground line-through">
@@ -104,8 +108,8 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
               </div>
               
               {hasDiscount && savings > 0 && (
-                <div className="bg-green-600 text-white border-green-700 text-xs font-semibold px-3 py-1 rounded-md inline-block">
-                  💰 Save {formatCurrency(savings, currency)}
+                <div className="bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 text-xs font-semibold px-3 py-1 rounded-md inline-block">
+                  Save {formatCurrency(savings, currency)}
                 </div>
               )}
               
