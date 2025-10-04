@@ -11,6 +11,7 @@ import { PricingCalculatorModal } from "@/components/pricing/PricingCalculatorMo
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DEFAULT_CURRENCY } from "@/config/pricing";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -114,10 +115,10 @@ const Pricing = () => {
       <main className="container mx-auto px-6 pt-32 pb-20 space-y-20">
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto space-y-8">
-          <h1 className="text-4xl md:text-6xl font-bold gradient-text">
+          <h1 className="text-4xl md:text-6xl font-bold text-white">
             Pay as you grow
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground">
+          <p className="text-xl md:text-2xl text-white/90">
             Transparent revenue-based pricing with no separate licence fees.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
@@ -126,75 +127,68 @@ const Pricing = () => {
               { icon: TrendingDown, text: 'Rates decrease as you grow' },
               { icon: Zap, text: 'Save costs with efficient operations' },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 text-muted-foreground">
-                <item.icon className="w-5 h-5 text-primary" />
+              <div key={i} className="flex items-center gap-2 text-white/80">
+                <item.icon className="w-5 h-5 text-white" />
                 <span>{item.text}</span>
               </div>
             ))}
           </div>
 
-          {/* Currency and Contract Toggles */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 w-full max-w-3xl mx-auto">
-            <div className="flex flex-col gap-2 w-full">
-              <Label className="text-sm text-muted-foreground">View pricing in:</Label>
-              <ToggleGroup
-                type="single"
-                value={currency}
-                onValueChange={(value) => value && setCurrency(value)}
-                className="liquid-glass-tab rounded-lg p-1 w-full"
-              >
-                <ToggleGroupItem
-                  value="EUR"
-                  aria-label="Euro"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-3"
-                >
-                  EUR (€)
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="NOK"
-                  aria-label="Norwegian Krone"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-3"
-                >
-                  NOK (kr)
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
-
-            <div className="flex flex-col gap-2 w-full">
-              <Label className="text-sm text-muted-foreground">Contract type:</Label>
-              <ToggleGroup
-                type="single"
-                value={contractType}
-                onValueChange={(value) => value && setContractType(value as 'none' | 'monthly' | 'yearly')}
-                className="liquid-glass-tab rounded-lg p-1 w-full"
-              >
-                <ToggleGroupItem
-                  value="none"
-                  aria-label="No Contract"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2"
-                >
-                  None
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="monthly"
-                  aria-label="Monthly Contract (Save 15%)"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2 flex items-center justify-center whitespace-nowrap"
-                >
-                  Monthly <span className="hidden sm:inline text-xs ml-1 opacity-75 whitespace-nowrap">(Save 15%)</span>
-                  <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-15%</span>
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="yearly"
-                  aria-label="Yearly Contract (Save 25%)"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2 flex items-center justify-center whitespace-nowrap"
-                >
-                  Yearly <span className="hidden sm:inline text-xs ml-1 opacity-75 whitespace-nowrap">(Save 25%)</span>
-                  <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-25%</span>
-                </ToggleGroupItem>
-              </ToggleGroup>
+          {/* Currency Selector */}
+          <div className="flex justify-center pt-4">
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm text-white/70">View pricing in:</Label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger className="w-[180px] liquid-glass border-white/20 text-white">
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent className="bg-background/95 backdrop-blur-md border-border z-50">
+                  <SelectItem value="EUR">🇪🇺 EUR (€)</SelectItem>
+                  <SelectItem value="NOK">🇳🇴 NOK (kr)</SelectItem>
+                  <SelectItem value="USD">🇺🇸 USD ($)</SelectItem>
+                  <SelectItem value="GBP">🇬🇧 GBP (£)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
+
+        {/* Contract Type Selector - Centered Above Cards */}
+        <section className="max-w-md mx-auto">
+          <div className="flex flex-col gap-3">
+            <Label className="text-sm text-foreground text-center">Contract type:</Label>
+            <ToggleGroup
+              type="single"
+              value={contractType}
+              onValueChange={(value) => value && setContractType(value as 'none' | 'monthly' | 'yearly')}
+              className="liquid-glass-tab rounded-lg p-1 w-full"
+            >
+              <ToggleGroupItem
+                value="none"
+                aria-label="No Contract"
+                className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2"
+              >
+                None
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="monthly"
+                aria-label="Monthly Contract (Save 15%)"
+                className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2 flex items-center justify-center whitespace-nowrap"
+              >
+                Monthly <span className="hidden sm:inline text-xs ml-1 opacity-75 whitespace-nowrap">(Save 15%)</span>
+                <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-15%</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="yearly"
+                aria-label="Yearly Contract (Save 25%)"
+                className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2 flex items-center justify-center whitespace-nowrap"
+              >
+                Yearly <span className="hidden sm:inline text-xs ml-1 opacity-75 whitespace-nowrap">(Save 25%)</span>
+                <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-25%</span>
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </section>
 
         {/* Feature Cards */}
         <section className="animate-fade-in" style={{ animationDelay: '100ms' }}>

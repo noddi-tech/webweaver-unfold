@@ -73,7 +73,7 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
         return (
           <Card 
             key={scenario.tier}
-            className={`p-4 md:p-6 space-y-4 md:space-y-6 relative transition-all duration-200 hover:shadow-lg border-l-4 ${borderColor}`}
+            className={`liquid-glass p-4 md:p-6 space-y-4 md:space-y-6 relative transition-all duration-200 hover:shadow-lg border-l-4 ${borderColor}`}
           >
             {/* Revenue Range as Heading */}
             <div className="space-y-1">
