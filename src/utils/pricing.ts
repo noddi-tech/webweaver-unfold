@@ -107,6 +107,9 @@ export interface PricingResult {
   total: number;
   effectiveRate: number;
   discount: number;
+  garageCost: number;
+  shopCost: number;
+  mobileCost: number;
 }
 
 /**
@@ -172,5 +175,8 @@ export function calculatePricing(
     total,
     effectiveRate,
     discount: discountAmount,
+    garageCost: garageUsage,
+    shopCost: shopUsage,
+    mobileCost: mobileUsage,
   };
 }
