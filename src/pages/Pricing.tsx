@@ -125,10 +125,10 @@ const Pricing = () => {
       <main className="container mx-auto px-6 pt-32 pb-20 space-y-20">
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto space-y-8">
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground">
+          <h1 className="text-4xl md:text-6xl font-bold gradient-text">
             Pay as you grow
           </h1>
-          <p className="text-xl md:text-2xl text-foreground">
+          <p className="text-xl md:text-2xl text-primary">
             Transparent revenue-based pricing with no separate licence fees.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
@@ -137,8 +137,8 @@ const Pricing = () => {
               { icon: TrendingDown, text: 'Rates decrease as you grow' },
               { icon: Zap, text: 'Save costs with efficient operations' },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 text-foreground">
-                <item.icon className="w-5 h-5 text-foreground" />
+              <div key={i} className="flex items-center gap-2 text-primary">
+                <item.icon className="w-5 h-5 text-primary" />
                 <span>{item.text}</span>
               </div>
             ))}
