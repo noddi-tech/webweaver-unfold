@@ -168,13 +168,13 @@ All colors MUST be HSL.
 @layer utilities {
   .glass {
     background: hsl(var(--card) / 0.1);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--border) / 0.2);
   }
   
   .glass-card {
     background: hsl(var(--card) / 0.8);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--border) / 0.3);
     color: hsl(var(--card-foreground));
   }
@@ -202,13 +202,17 @@ All colors MUST be HSL.
       inset 0 1px 0 0 hsl(0 0% 100% / 0.4);
     position: relative;
     overflow: hidden;
+    will-change: transform;
+    contain: layout style;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Fallback for browsers without backdrop-filter support */
   @supports not (backdrop-filter: blur(1px)) {
     .liquid-glass {
-      background: hsl(0 0% 100% / 0.95);
+      background: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      box-shadow: 0 8px 32px 0 hsl(0 0% 0% / 0.15);
     }
   }
 
@@ -221,7 +225,7 @@ All colors MUST be HSL.
 
   /* Enhanced hover state */
   .liquid-glass:hover {
-    transform: scale(1.01);
+    transform: translateY(-2px) scale(1.01);
     box-shadow: 
       0 12px 40px 0 hsl(0 0% 0% / 0.12),
       inset 0 1px 0 0 hsl(0 0% 100% / 0.5);
@@ -238,7 +242,7 @@ All colors MUST be HSL.
     color: hsl(var(--foreground));
     font-weight: 600;
     font-size: 16px;
-    text-shadow: 0 1px 2px hsl(0 0% 0% / 0.1);
+    text-shadow: 0 2px 4px hsl(0 0% 0% / 0.25), 0 1px 2px hsl(0 0% 0% / 0.15);
   }
 
   /* Large text for glass backgrounds - WCAG AA 3:1 */
@@ -288,7 +292,7 @@ All colors MUST be HSL.
       hsl(var(--background) / 0.6),
       hsl(var(--muted) / 0.4)
     );
-    backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(12px) saturate(160%);
     border: 1px solid hsl(var(--border) / 0.3);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -309,7 +313,7 @@ All colors MUST be HSL.
       hsl(var(--background) / 0.95),
       hsl(var(--card) / 0.85)
     );
-    backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(12px) saturate(180%);
     border: 1px solid hsl(var(--primary) / 0.4);
     box-shadow: 
       0 4px 20px rgba(124, 58, 237, 0.2),
