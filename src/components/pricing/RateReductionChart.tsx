@@ -1,13 +1,33 @@
 import { Card } from "@/components/ui/card";
 import { TrendingDown } from "lucide-react";
+import { getCurrencyConfig } from "@/config/pricing";
+import { convertFromEUR } from "@/utils/currencyConversion";
+import { formatCompactCurrency } from "@/utils/formatCurrency";
 
-export function RateReductionChart() {
-  const dataPoints = [
-    { tier: "Tier 1", rate: 4.0, label: "€0-100k (billable)" },
-    { tier: "Tier 4", rate: 2.5, label: "€2.5M" },
-    { tier: "Tier 7", rate: 1.8, label: "€40M" },
-    { tier: "Tier 10", rate: 1.2, label: "€2B+" }
+interface RateReductionChartProps {
+  currency: string;
+}
+
+export function RateReductionChart({ currency }: RateReductionChartProps) {
+  const config = getCurrencyConfig(currency);
+  
+  // Base values in EUR
+  const BASE_VALUES_EUR = [
+    { tier: "Tier 1", rate: 4.0, amount: 100_000 },
+    { tier: "Tier 4", rate: 2.5, amount: 2_500_000 },
+    { tier: "Tier 7", rate: 1.8, amount: 40_000_000 },
+    { tier: "Tier 10", rate: 1.2, amount: 2_000_000_000 }
   ];
+
+  const dataPoints = BASE_VALUES_EUR.map((base, index) => ({
+    tier: base.tier,
+    rate: base.rate,
+    label: index === 0 
+      ? `${config.symbol}0-${formatCompactCurrency(convertFromEUR(base.amount, currency), currency).replace(config.symbol, '')} (billable)`
+      : index === 3
+      ? `${formatCompactCurrency(convertFromEUR(base.amount, currency), currency)}+`
+      : formatCompactCurrency(convertFromEUR(base.amount, currency), currency)
+  }));
 
   const maxRate = 4.5;
 

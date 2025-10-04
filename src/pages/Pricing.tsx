@@ -154,9 +154,13 @@ const Pricing = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-background/95 backdrop-blur-md border-border z-50">
                   <SelectItem value="EUR">🇪🇺 EUR (€)</SelectItem>
-                  <SelectItem value="NOK">🇳🇴 NOK (kr)</SelectItem>
                   <SelectItem value="USD">🇺🇸 USD ($)</SelectItem>
                   <SelectItem value="GBP">🇬🇧 GBP (£)</SelectItem>
+                  <SelectItem value="SEK">🇸🇪 SEK (kr)</SelectItem>
+                  <SelectItem value="DKK">🇩🇰 DKK (kr)</SelectItem>
+                  <SelectItem value="NOK">🇳🇴 NOK (kr)</SelectItem>
+                  <SelectItem value="CHF">🇨🇭 CHF (Fr)</SelectItem>
+                  <SelectItem value="PLN">🇵🇱 PLN (zł)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -227,7 +231,7 @@ const Pricing = () => {
 
         {/* Rate Reduction Chart */}
         <section className="animate-fade-in" style={{ animationDelay: '400ms' }}>
-          <RateReductionChart />
+          <RateReductionChart currency={currency} />
         </section>
 
         {/* Value Proposition */}

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getCurrencyConfig } from "@/config/pricing";
 import { calculatePricing } from "@/utils/pricing";
 import { formatCurrency, formatCompactCurrency } from "@/utils/formatCurrency";
+import { convertFromEUR } from "@/utils/currencyConversion";
 
 interface TextContent {
   id: string;
@@ -32,41 +33,65 @@ export function PricingFeatureCards({ currency, contractType, textContent }: Pri
     return item?.content || fallback;
   };
 
-  const scenarios = [
+  // Base scenarios defined in EUR (source of truth)
+  const BASE_SCENARIOS_EUR = [
     {
       tier: "Emerging",
-      range: `Up to ${symbol}${currency === 'NOK' ? '20M' : '2M'}`,
-      color: "bg-green-600 text-white border-green-700",
+      maxRange: 2_000_000, // €2M
       revenues: {
-        garage: currency === 'NOK' ? 7_500_000 : 750_000,
-        shop: currency === 'NOK' ? 2_000_000 : 200_000,
-        mobile: currency === 'NOK' ? 500_000 : 50_000
-      },
-      cta: "Book Demo"
+        garage: 750_000,
+        shop: 200_000,
+        mobile: 50_000
+      }
     },
     {
       tier: "Large",
-      range: `${symbol}${currency === 'NOK' ? '20M – 400M' : '2M – 40M'}`,
-      color: "bg-amber-500 text-white border-amber-600",
+      minRange: 2_000_000, // €2M
+      maxRange: 40_000_000, // €40M
       revenues: {
-        garage: currency === 'NOK' ? 60_000_000 : 6_000_000,
-        shop: currency === 'NOK' ? 30_000_000 : 3_000_000,
-        mobile: currency === 'NOK' ? 10_000_000 : 1_000_000
-      },
-      cta: "Book Demo"
+        garage: 6_000_000,
+        shop: 3_000_000,
+        mobile: 1_000_000
+      }
     },
     {
       tier: "Enterprise",
-      range: `${symbol}${currency === 'NOK' ? '400M+' : '40M+'}`,
-      color: "bg-gradient-primary text-primary-foreground border-primary",
+      minRange: 40_000_000, // €40M+
       revenues: {
-        garage: currency === 'NOK' ? 900_000_000 : 90_000_000,
-        shop: currency === 'NOK' ? 800_000_000 : 80_000_000,
-        mobile: currency === 'NOK' ? 240_000_000 : 24_000_000
-      },
-      cta: "Book Demo"
+        garage: 90_000_000,
+        shop: 80_000_000,
+        mobile: 24_000_000
+      }
     }
   ];
+
+  // Convert EUR base values to selected currency
+  const scenarios = BASE_SCENARIOS_EUR.map((base) => {
+    const convertedRevenues = {
+      garage: convertFromEUR(base.revenues.garage, currency),
+      shop: convertFromEUR(base.revenues.shop, currency),
+      mobile: convertFromEUR(base.revenues.mobile, currency)
+    };
+
+    let range = '';
+    if (base.tier === 'Emerging') {
+      range = `Up to ${formatCompactCurrency(convertFromEUR(base.maxRange, currency), currency)}`;
+    } else if (base.tier === 'Large') {
+      range = `${formatCompactCurrency(convertFromEUR(base.minRange, currency), currency)} – ${formatCompactCurrency(convertFromEUR(base.maxRange, currency), currency)}`;
+    } else {
+      range = `${formatCompactCurrency(convertFromEUR(base.minRange, currency), currency)}+`;
+    }
+
+    return {
+      tier: base.tier,
+      range,
+      color: base.tier === "Emerging" ? "bg-green-600 text-white border-green-700" :
+             base.tier === "Large" ? "bg-amber-500 text-white border-amber-600" :
+             "bg-gradient-primary text-primary-foreground border-primary",
+      revenues: convertedRevenues,
+      cta: "Book Demo"
+    };
+  });
 
   return (
     <>

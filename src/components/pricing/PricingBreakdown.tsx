@@ -6,8 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { formatCurrency, formatPercentage } from "@/utils/formatCurrency";
 import { PricingResult } from "@/utils/pricing";
-import { detectCurrentTier, getTierLabel, getTierColor, EXAMPLE_RATES } from "@/utils/pricingHelpers";
+import { detectCurrentTier, getTierLabel, getTierColor } from "@/utils/pricingHelpers";
 import { Sparkles, ChevronDown, Info } from "lucide-react";
+import { convertFromEUR } from "@/utils/currencyConversion";
+
+// Base example rates in EUR (source of truth)
+const EXAMPLE_RATES_EUR = {
+  small: { revenue: 1_000_000, rate: 4.89 },
+  large: { revenue: 10_000_000, rate: 2.87 },
+  enterprise: { revenue: 80_000_000, rate: 1.42 },
+};
 
 interface PricingBreakdownProps {
   result: PricingResult;
@@ -145,24 +153,24 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
           <div className="space-y-2">
             <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
               <div>
-                <div className="text-sm font-medium text-foreground">Small ({formatCurrency(EXAMPLE_RATES.small.revenue, currency)})</div>
+                <div className="text-sm font-medium text-foreground">Small ({formatCurrency(convertFromEUR(EXAMPLE_RATES_EUR.small.revenue, currency), currency)})</div>
                 <div className="text-xs text-muted-foreground">Tiers 1-4</div>
               </div>
-              <div className="text-sm font-bold text-primary">~{EXAMPLE_RATES.small.rate}%</div>
+              <div className="text-sm font-bold text-primary">~{EXAMPLE_RATES_EUR.small.rate}%</div>
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
               <div>
-                <div className="text-sm font-medium text-foreground">Large ({formatCurrency(EXAMPLE_RATES.large.revenue, currency)})</div>
+                <div className="text-sm font-medium text-foreground">Large ({formatCurrency(convertFromEUR(EXAMPLE_RATES_EUR.large.revenue, currency), currency)})</div>
                 <div className="text-xs text-muted-foreground">Tiers 5-7</div>
               </div>
-              <div className="text-sm font-bold text-primary">~{EXAMPLE_RATES.large.rate}%</div>
+              <div className="text-sm font-bold text-primary">~{EXAMPLE_RATES_EUR.large.rate}%</div>
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
               <div>
-                <div className="text-sm font-medium text-foreground">Enterprise ({formatCurrency(EXAMPLE_RATES.enterprise.revenue, currency)})</div>
+                <div className="text-sm font-medium text-foreground">Enterprise ({formatCurrency(convertFromEUR(EXAMPLE_RATES_EUR.enterprise.revenue, currency), currency)})</div>
                 <div className="text-xs text-muted-foreground">Tiers 8-10</div>
               </div>
-              <div className="text-sm font-bold text-primary">~{EXAMPLE_RATES.enterprise.rate}%</div>
+              <div className="text-sm font-bold text-primary">~{EXAMPLE_RATES_EUR.enterprise.rate}%</div>
             </div>
           </div>
           <p className="text-xs text-muted-foreground italic">

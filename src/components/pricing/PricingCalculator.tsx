@@ -10,11 +10,13 @@ import { PricingBreakdown } from "./PricingBreakdown";
 import { calculatePricing } from "@/utils/pricing";
 import { getCurrencyConfig, DEFAULT_CURRENCY } from "@/config/pricing";
 import { Sparkles, Settings } from "lucide-react";
+import { convertFromEUR, convertToEUR } from "@/utils/currencyConversion";
 
-const PRESETS = {
-  small: { garage: 750_000, shop: 200_000, mobile: 50_000 },
-  large: { garage: 6_000_000, shop: 3_000_000, mobile: 1_000_000 },
-  enterprise: { garage: 50_000_000, shop: 20_000_000, mobile: 10_000_000 },
+// Base presets in EUR (source of truth)
+const BASE_PRESETS_EUR = {
+  small: { garage: 1_000_000, shop: 500_000, mobile: 200_000 },
+  large: { garage: 20_000_000, shop: 15_000_000, mobile: 5_000_000 },
+  enterprise: { garage: 150_000_000, shop: 100_000_000, mobile: 50_000_000 },
 };
 
 export function PricingCalculator() {
@@ -37,16 +39,21 @@ export function PricingCalculator() {
     localStorage.setItem('noddi-pricing-currency', currency);
   }, [currency]);
 
-  // Apply preset values
-  const applyPreset = (preset: keyof typeof PRESETS) => {
-    const values = PRESETS[preset];
-    setGarageRevenue(values.garage);
-    setShopRevenue(values.shop);
-    setMobileRevenue(includeMobile ? values.mobile : 0);
+  // Apply preset values (convert from EUR to selected currency)
+  const applyPreset = (preset: keyof typeof BASE_PRESETS_EUR) => {
+    const valuesEUR = BASE_PRESETS_EUR[preset];
+    setGarageRevenue(convertFromEUR(valuesEUR.garage, currency));
+    setShopRevenue(convertFromEUR(valuesEUR.shop, currency));
+    setMobileRevenue(includeMobile ? convertFromEUR(valuesEUR.mobile, currency) : 0);
   };
 
+  // Convert user inputs to EUR for calculation
   const result = calculatePricing(
-    { garage: garageRevenue, shop: shopRevenue, mobile: mobileRevenue },
+    { 
+      garage: convertToEUR(garageRevenue, currency), 
+      shop: convertToEUR(shopRevenue, currency), 
+      mobile: convertToEUR(mobileRevenue, currency) 
+    },
     { includeMobile, contractType }
   );
 
@@ -68,27 +75,31 @@ export function PricingCalculator() {
             type="single"
             value={currency}
             onValueChange={(value) => value && setCurrency(value)}
-            className="grid grid-cols-2 gap-2"
+            className="grid grid-cols-4 gap-2"
           >
-            <ToggleGroupItem
-              value="EUR"
-              aria-label="Euro"
-              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              <div className="text-center">
-                <div className="text-sm font-medium">EUR (€)</div>
-                <div className="text-xs opacity-80">Euro</div>
-              </div>
+            <ToggleGroupItem value="EUR" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+              EUR (€)
             </ToggleGroupItem>
-            <ToggleGroupItem
-              value="NOK"
-              aria-label="Norwegian Krone"
-              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              <div className="text-center">
-                <div className="text-sm font-medium">NOK (kr)</div>
-                <div className="text-xs opacity-80">Norsk</div>
-              </div>
+            <ToggleGroupItem value="USD" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+              USD ($)
+            </ToggleGroupItem>
+            <ToggleGroupItem value="GBP" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+              GBP (£)
+            </ToggleGroupItem>
+            <ToggleGroupItem value="SEK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+              SEK (kr)
+            </ToggleGroupItem>
+            <ToggleGroupItem value="DKK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+              DKK (kr)
+            </ToggleGroupItem>
+            <ToggleGroupItem value="NOK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+              NOK (kr)
+            </ToggleGroupItem>
+            <ToggleGroupItem value="CHF" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+              CHF (Fr)
+            </ToggleGroupItem>
+            <ToggleGroupItem value="PLN" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+              PLN (zł)
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
