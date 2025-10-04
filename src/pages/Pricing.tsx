@@ -14,6 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DEFAULT_CURRENCY } from "@/config/pricing";
 import { supabase } from "@/integrations/supabase/client";
+import { useTextContent } from "@/hooks/useTextContent";
 
 interface Page {
   id: string;
@@ -63,6 +64,15 @@ const Pricing = () => {
     return saved || DEFAULT_CURRENCY;
   });
   const [contractType, setContractType] = useState<'none' | 'monthly' | 'yearly'>('none');
+  
+  // Fetch CMS content for pricing page
+  const { textContent, loading: contentLoading } = useTextContent('pricing');
+  
+  // Helper to get CMS content with validation
+  const getCMSContent = (elementType: string, fallback: string = ''): string => {
+    const item = textContent.find(tc => tc.element_type === elementType);
+    return item?.content || fallback;
+  };
 
   useEffect(() => {
     const loadPage = async () => {
@@ -192,7 +202,11 @@ const Pricing = () => {
 
         {/* Feature Cards */}
         <section className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <PricingFeatureCards currency={currency} contractType={contractType} />
+          <PricingFeatureCards 
+            currency={currency} 
+            contractType={contractType}
+            textContent={textContent}
+          />
         </section>
 
         {/* Advanced Calculator CTA */}

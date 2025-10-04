@@ -4,14 +4,33 @@ import { getCurrencyConfig } from "@/config/pricing";
 import { calculatePricing } from "@/utils/pricing";
 import { formatCurrency, formatCompactCurrency } from "@/utils/formatCurrency";
 
+interface TextContent {
+  id: string;
+  page_location: string;
+  section: string;
+  element_type: string;
+  content: string;
+  active: boolean;
+  sort_order: number | null;
+  color_token?: string;
+  content_type: string;
+}
+
 interface PricingFeatureCardsProps {
   currency: string;
   contractType: 'none' | 'monthly' | 'yearly';
+  textContent: TextContent[];
 }
 
-export function PricingFeatureCards({ currency, contractType }: PricingFeatureCardsProps) {
+export function PricingFeatureCards({ currency, contractType, textContent }: PricingFeatureCardsProps) {
   const config = getCurrencyConfig(currency);
   const symbol = config.symbol;
+  
+  // Helper to get CMS content
+  const getCMSContent = (elementType: string, fallback: string = ''): string => {
+    const item = textContent.find(tc => tc.element_type === elementType);
+    return item?.content || fallback;
+  };
 
   const scenarios = [
     {
@@ -85,36 +104,40 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
 
             {/* Example Scenario Breakdown */}
             <div className="space-y-2">
-              <h4 className="text-sm md:text-base font-semibold text-foreground">Example scenario:</h4>
-              <ul className="text-xs md:text-sm text-muted-foreground space-y-1">
-                <li>• Garage: {formatCompactCurrency(scenario.revenues.garage, currency)}</li>
-                <li>• Shop: {formatCompactCurrency(scenario.revenues.shop, currency)}</li>
-                <li>• Mobile: {formatCompactCurrency(scenario.revenues.mobile, currency)}</li>
+              <h4 className="text-sm md:text-base font-semibold glass-text-high-contrast">
+                {getCMSContent('pricing_cards_h4_example', 'Example scenario:')}
+              </h4>
+              <ul className="text-xs md:text-sm glass-text-high-contrast space-y-1">
+                <li>• {getCMSContent('pricing_cards_label_garage', 'Garage:')} {formatCompactCurrency(scenario.revenues.garage, currency)}</li>
+                <li>• {getCMSContent('pricing_cards_label_shop', 'Shop:')} {formatCompactCurrency(scenario.revenues.shop, currency)}</li>
+                <li>• {getCMSContent('pricing_cards_label_mobile', 'Mobile:')} {formatCompactCurrency(scenario.revenues.mobile, currency)}</li>
               </ul>
             </div>
 
             {/* Annual Cost with Discount Display */}
             <div className="space-y-2">
-              <h4 className="text-sm md:text-base font-semibold text-foreground">Annual cost:</h4>
+              <h4 className="text-sm md:text-base font-semibold glass-text-high-contrast">
+                {getCMSContent('pricing_cards_label_annual', 'Annual cost:')}
+              </h4>
               
               {hasDiscount && (
-                <div className="text-sm text-muted-foreground line-through">
+                <div className="text-sm glass-text-high-contrast line-through">
                   {formatCurrency(baseResult.total, currency)}
                 </div>
               )}
               
-              <div className="text-lg md:text-xl lg:text-2xl font-bold text-foreground">
+              <div className="text-lg md:text-xl lg:text-2xl font-bold glass-text-large">
                 {formatCurrency(discountedResult.total, currency)}
               </div>
               
               {hasDiscount && savings > 0 && (
                 <div className="bg-green-600 text-white border-green-700 text-xs font-semibold px-3 py-1 rounded-md inline-block">
-                  💰 Save {formatCurrency(savings, currency)}
+                  💰 {getCMSContent('pricing_cards_save_prefix', 'Save')} {formatCurrency(savings, currency)}
                 </div>
               )}
               
-              <div className="text-xs md:text-sm text-muted-foreground">
-                Effective rate: ~{discountedResult.effectiveRate.toFixed(2)}%
+              <div className="text-xs md:text-sm glass-text-high-contrast font-semibold">
+                {getCMSContent('pricing_cards_label_rate', 'Effective rate:')} ~{discountedResult.effectiveRate.toFixed(2)}%
               </div>
             </div>
           </Card>
@@ -124,13 +147,13 @@ export function PricingFeatureCards({ currency, contractType }: PricingFeatureCa
       
       {/* Single CTA below all cards */}
       <div className="text-center mt-8 md:mt-12">
-        <Button size="lg" className="text-lg px-8" asChild>
+        <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
           <a 
             href="https://calendly.com/joachim-noddi/30min"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Book a demo
+            {getCMSContent('cta_button_demo', 'Book a demo')}
           </a>
         </Button>
       </div>
