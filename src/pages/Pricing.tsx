@@ -25,24 +25,33 @@ interface Page {
 }
 
 const getBackgroundClass = (token?: string) => {
-  const map: Record<string, string> = {
+  const mapping: Record<string, string> = {
     background: 'bg-background',
-    secondary: 'bg-secondary',
-    muted: 'bg-muted',
-    accent: 'bg-accent',
     card: 'bg-card',
+    muted: 'bg-muted',
+    primary: 'bg-primary',
+    secondary: 'bg-secondary',
+    accent: 'bg-accent',
+    'gradient-primary': 'bg-gradient-primary',
+    'gradient-background': 'bg-gradient-background',
+    'gradient-hero': 'bg-gradient-hero',
+    'gradient-subtle': 'bg-gradient-subtle',
+    transparent: 'bg-transparent',
   };
-  return map[token || 'background'] || 'bg-background';
+  return mapping[token || 'background'] || 'bg-background';
 };
 
 const getTextClass = (token?: string) => {
-  const map: Record<string, string> = {
+  const mapping: Record<string, string> = {
     foreground: 'text-foreground',
     'muted-foreground': 'text-muted-foreground',
     primary: 'text-primary',
     secondary: 'text-secondary',
+    accent: 'text-accent',
+    'gradient-text': 'gradient-text',
+    destructive: 'text-destructive',
   };
-  return map[token || 'foreground'] || 'text-foreground';
+  return mapping[token || 'foreground'] || 'text-foreground';
 };
 
 const Pricing = () => {
@@ -132,7 +141,7 @@ const Pricing = () => {
                 type="single"
                 value={currency}
                 onValueChange={(value) => value && setCurrency(value)}
-                className="bg-muted/50 rounded-lg p-1 w-full"
+                className="liquid-glass-tab rounded-lg p-1 w-full"
               >
                 <ToggleGroupItem
                   value="EUR"
@@ -157,7 +166,7 @@ const Pricing = () => {
                 type="single"
                 value={contractType}
                 onValueChange={(value) => value && setContractType(value as 'none' | 'monthly' | 'yearly')}
-                className="bg-muted/50 rounded-lg p-1 w-full"
+                className="liquid-glass-tab rounded-lg p-1 w-full"
               >
                 <ToggleGroupItem
                   value="none"
@@ -194,7 +203,7 @@ const Pricing = () => {
 
         {/* Advanced Calculator CTA */}
         <section className="text-center animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <Card className="glass-card p-8 max-w-2xl mx-auto">
+          <Card className="liquid-glass p-8 max-w-2xl mx-auto">
             <h2 className="text-2xl font-bold text-foreground mb-4">
               Need a Precise Estimate?
             </h2>
@@ -215,7 +224,7 @@ const Pricing = () => {
 
         {/* Value Proposition */}
         <section className="animate-fade-in" style={{ animationDelay: '500ms' }}>
-          <Card className="glass-card p-8 max-w-4xl mx-auto">
+          <Card className="liquid-glass p-8 max-w-4xl mx-auto">
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
@@ -246,7 +255,7 @@ const Pricing = () => {
 
         {/* Final CTA */}
         <section className="animate-fade-in" style={{ animationDelay: '700ms' }}>
-          <Card className="glass-card p-12 text-center bg-gradient-primary/5 border-primary/20 max-w-4xl mx-auto">
+          <Card className="liquid-glass p-12 text-center bg-gradient-primary/5 border-primary/20 max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold mb-4 text-foreground">
               Ready to transform your customer experience?
             </h2>

@@ -188,6 +188,72 @@ All colors MUST be HSL.
     padding: 0.1em 0;
   }
 
+  .liquid-glass {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--card) / 0.7),
+      hsl(var(--card) / 0.5)
+    );
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid hsl(var(--border) / 0.4);
+    box-shadow: 
+      0 8px 32px 0 rgba(124, 58, 237, 0.1),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    transform: rotate(45deg);
+    pointer-events: none;
+  }
+
+  .liquid-glass-tab {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--background) / 0.6),
+      hsl(var(--muted) / 0.4)
+    );
+    backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid hsl(var(--border) / 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .liquid-glass-tab:hover {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--background) / 0.8),
+      hsl(var(--muted) / 0.6)
+    );
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.15);
+  }
+
+  .liquid-glass-tab-active {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--background) / 0.95),
+      hsl(var(--card) / 0.85)
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid hsl(var(--primary) / 0.4);
+    box-shadow: 
+      0 4px 20px rgba(124, 58, 237, 0.2),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+  }
+
   /* Gradient background utility tokens used for wordmarks and chips */
   .bg-gradient-primary {
     background-image: var(--gradient-primary);
