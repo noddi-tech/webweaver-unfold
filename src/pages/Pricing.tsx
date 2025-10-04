@@ -125,10 +125,10 @@ const Pricing = () => {
       <main className="container mx-auto px-6 pt-32 pb-20 space-y-20">
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto space-y-8">
-          <h1 className="text-4xl md:text-6xl font-bold text-white">
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground">
             Pay as you grow
           </h1>
-          <p className="text-xl md:text-2xl text-white/90">
+          <p className="text-xl md:text-2xl text-foreground">
             Transparent revenue-based pricing with no separate licence fees.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
@@ -137,8 +137,8 @@ const Pricing = () => {
               { icon: TrendingDown, text: 'Rates decrease as you grow' },
               { icon: Zap, text: 'Save costs with efficient operations' },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 text-white/80">
-                <item.icon className="w-5 h-5 text-white" />
+              <div key={i} className="flex items-center gap-2 text-foreground">
+                <item.icon className="w-5 h-5 text-foreground" />
                 <span>{item.text}</span>
               </div>
             ))}
@@ -147,9 +147,9 @@ const Pricing = () => {
           {/* Currency Selector */}
           <div className="flex justify-center pt-4">
             <div className="flex flex-col gap-2">
-              <Label className="text-sm text-white/70">View pricing in:</Label>
+              <Label className="text-sm text-muted-foreground">View pricing in:</Label>
               <Select value={currency} onValueChange={setCurrency}>
-                <SelectTrigger className="w-[180px] liquid-glass border-white/20 text-white">
+                <SelectTrigger className="w-[180px] liquid-glass border-white/20 text-foreground">
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent className="bg-background/95 backdrop-blur-md border-border z-50">
