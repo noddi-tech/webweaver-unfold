@@ -22,15 +22,35 @@ interface PricingBreakdownProps {
   currency: string;
   contractType: 'none' | 'monthly' | 'yearly';
   includeMobile: boolean;
+  revenues: {
+    garage: number;
+    shop: number;
+    mobile: number;
+  };
 }
 
-export function PricingBreakdown({ result, currency, contractType, includeMobile }: PricingBreakdownProps) {
+export function PricingBreakdown({ result, currency, contractType, includeMobile, revenues }: PricingBreakdownProps) {
   const [examplesOpen, setExamplesOpen] = useState(false);
   
   const services = [
-    { name: 'Garage', usage: result.usage.garage, show: true },
-    { name: 'Shop', usage: result.usage.shop, show: true },
-    { name: 'Mobile', usage: result.usage.mobile, show: includeMobile },
+    { 
+      name: 'Garage', 
+      usage: result.usage.garage, 
+      rate: revenues.garage > 0 ? (result.usage.garage / revenues.garage) * 100 : 0,
+      show: true 
+    },
+    { 
+      name: 'Shop', 
+      usage: result.usage.shop, 
+      rate: revenues.shop > 0 ? (result.usage.shop / revenues.shop) * 100 : 0,
+      show: true 
+    },
+    { 
+      name: 'Mobile', 
+      usage: result.usage.mobile, 
+      rate: revenues.mobile > 0 ? (result.usage.mobile / revenues.mobile) * 100 : 0,
+      show: includeMobile 
+    },
   ];
 
   const totalUsage = result.usage.garage + result.usage.shop + result.usage.mobile;
@@ -80,7 +100,9 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
           <div className="space-y-2 pl-4 border-l-2 border-primary/20">
             {services.filter(s => s.show).map((service) => (
               <div key={service.name} className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{service.name}</span>
+                <span className="text-muted-foreground">
+                  {service.name} <span className="text-xs opacity-70">({formatPercentage(service.rate / 100)})</span>
+                </span>
                 <span className="font-medium text-foreground">{formatCurrency(service.usage, currency)}</span>
               </div>
             ))}

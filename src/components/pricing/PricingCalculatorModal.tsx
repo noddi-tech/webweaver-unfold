@@ -313,12 +313,17 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
 
           {/* Results */}
           <div>
-            <PricingBreakdown
-              result={result}
-              currency={currency}
-              contractType={contractType}
-              includeMobile={includeMobile}
-            />
+              <PricingBreakdown
+                result={result}
+                currency={currency}
+                contractType={contractType}
+                includeMobile={includeMobile}
+                revenues={{
+                  garage: garageRevenue,
+                  shop: shopRevenue,
+                  mobile: mobileRevenue,
+                }}
+              />
           </div>
         </div>
       </DialogContent>
