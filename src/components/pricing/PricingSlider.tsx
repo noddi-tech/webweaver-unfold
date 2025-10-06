@@ -109,7 +109,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
         {/* Revenue Display */}
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2 glass-text-high-contrast">
-            {getCMSContent('label', 'Total annual revenue:')}
+            {getCMSContent('label', 'Revenue')}
           </h3>
           <div className="text-3xl md:text-4xl font-bold gradient-text">
             {formatCompactCurrency(revenue, currency)}
@@ -135,7 +135,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
 
         {/* Contract Type Selector */}
         <div className="space-y-3">
-          <Label className="text-sm text-foreground">{getCMSContent('label_contract', 'Revenue')}</Label>
+          <Label className="text-sm text-foreground">{getCMSContent('label_contract', 'Lock-in-period')}</Label>
           <ToggleGroup
             type="single"
             value={contractType}
