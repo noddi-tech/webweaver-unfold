@@ -35,10 +35,10 @@ const journeySteps = [
 
 export default function CustomerJourney() {
   return (
-    <section className="py-section">
-      <div className="container max-w-container">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+    <section className="py-20 md:py-28">
+      <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
             Customer Journey
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">

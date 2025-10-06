@@ -67,11 +67,11 @@ const features = [
 
 export default function ProductFeatures() {
   return (
-    <section className="py-section bg-muted/30">
-      <div className="container max-w-container">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
-            Product Features
+    <section className="py-20 md:py-28 bg-muted/30">
+      <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+            Product Capabilities
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Everything you need to run your automotive service business

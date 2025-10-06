@@ -8,9 +8,9 @@ const Hero = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
-    <section className="py-section-lg bg-gradient-hero">
+    <section className="pt-32 pb-20 md:pb-28 bg-gradient-hero">
       <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left Column - Text Content */}
           <div className="space-y-8">
             <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-foreground">
@@ -22,8 +22,8 @@ const Hero = () => {
             </p>
 
             {/* Metrics Badges */}
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-card border border-border shadow-lg hover-scale">
+            <div className="flex flex-wrap gap-6">
+              <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-card/80 backdrop-blur-sm border border-border shadow-lg hover-scale">
                 <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
                   <Award className="w-6 h-6 text-primary-foreground" />
                 </div>
@@ -32,7 +32,7 @@ const Hero = () => {
                   <div className="text-xs text-muted-foreground">Industry leading</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-card border border-border shadow-lg hover-scale">
+              <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-card/80 backdrop-blur-sm border border-border shadow-lg hover-scale">
                 <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-primary-foreground" />
                 </div>

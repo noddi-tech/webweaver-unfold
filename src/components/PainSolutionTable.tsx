@@ -42,10 +42,10 @@ const painPoints = [
 
 export default function PainSolutionTable() {
   return (
-    <section className="py-section">
-      <div className="container max-w-container">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+    <section className="py-20 md:py-28">
+      <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
             Why We Built This
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -68,16 +68,16 @@ export default function PainSolutionTable() {
                 const Icon = point.icon;
                 return (
                   <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors">
-                    <td className="p-4">
+                    <td className="p-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center flex-shrink-0">
-                          <Icon className="w-5 h-5 text-destructive" />
+                        <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-5 h-5 text-red-600" />
                         </div>
                         <span className="font-medium text-foreground">{point.problem}</span>
                       </div>
                     </td>
-                    <td className="p-4 text-muted-foreground">{point.disconnected}</td>
-                    <td className="p-4">
+                    <td className="p-6 text-muted-foreground">{point.disconnected}</td>
+                    <td className="p-6">
                       <div className="flex items-start gap-2">
                         <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                         <span className="text-foreground">{point.ourApproach}</span>
@@ -97,8 +97,8 @@ export default function PainSolutionTable() {
             return (
               <Card key={index} className="p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-5 h-5 text-destructive" />
+                  <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-5 h-5 text-red-600" />
                   </div>
                   <h3 className="font-semibold text-foreground">{point.problem}</h3>
                 </div>
