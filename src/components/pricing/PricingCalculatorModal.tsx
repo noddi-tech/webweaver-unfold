@@ -51,8 +51,8 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
     setMobileRevenue(includeMobile ? convertFromEUR(valuesEUR.mobile, currency) : 0);
   };
 
-  // Convert user inputs to EUR for calculation
-  const result = calculatePricing(
+  // Convert user inputs to EUR for calculation (pricing.ts is source of truth)
+  const resultEUR = calculatePricing(
     { 
       garage: convertToEUR(garageRevenue, currency), 
       shop: convertToEUR(shopRevenue, currency), 
@@ -60,6 +60,22 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
     },
     { includeMobile, contractType }
   );
+
+  // Convert all cost fields to target currency for display
+  const result = {
+    ...resultEUR,
+    total: convertFromEUR(resultEUR.total, currency),
+    usage: {
+      garage: convertFromEUR(resultEUR.usage.garage, currency),
+      shop: convertFromEUR(resultEUR.usage.shop, currency),
+      mobile: convertFromEUR(resultEUR.usage.mobile, currency),
+    },
+    garageCost: convertFromEUR(resultEUR.garageCost, currency),
+    shopCost: convertFromEUR(resultEUR.shopCost, currency),
+    mobileCost: convertFromEUR(resultEUR.mobileCost, currency),
+    discount: convertFromEUR(resultEUR.discount, currency),
+    // effectiveRate stays the same (it's a percentage)
+  };
 
   // Determine step size based on revenue scale
   const getStepSize = (revenue: number) => {
