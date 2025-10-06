@@ -31,6 +31,7 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
     const saved = localStorage.getItem('noddi-pricing-currency');
     return saved || DEFAULT_CURRENCY;
   });
+  const [previousCurrency, setPreviousCurrency] = useState(currency);
 
   const currencyConfig = getCurrencyConfig(currency);
   
@@ -41,8 +42,21 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
   const [contractType, setContractType] = useState<'none' | 'monthly' | 'yearly'>('yearly');
 
   useEffect(() => {
+    if (currency !== previousCurrency) {
+      // Auto-convert revenue values when currency changes
+      const garageEUR = convertToEUR(garageRevenue, previousCurrency);
+      const shopEUR = convertToEUR(shopRevenue, previousCurrency);
+      const mobileEUR = convertToEUR(mobileRevenue, previousCurrency);
+      
+      setGarageRevenue(Math.round(convertFromEUR(garageEUR, currency)));
+      setShopRevenue(Math.round(convertFromEUR(shopEUR, currency)));
+      setMobileRevenue(Math.round(convertFromEUR(mobileEUR, currency)));
+      
+      setPreviousCurrency(currency);
+    }
     localStorage.setItem('noddi-pricing-currency', currency);
-  }, [currency]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currency, previousCurrency]);
 
   const applyPreset = (preset: keyof typeof BASE_PRESETS_EUR) => {
     const valuesEUR = BASE_PRESETS_EUR[preset];
