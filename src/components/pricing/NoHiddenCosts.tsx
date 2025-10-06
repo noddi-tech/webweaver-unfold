@@ -67,6 +67,19 @@ export const NoHiddenCosts = ({ textContent, onOpenCalculator }: NoHiddenCostsPr
         ))}
       </div>
 
+      {/* Book a Demo CTA */}
+      <div className="text-center mb-12">
+        <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
+          <a 
+            href="https://calendly.com/joachim-noddi/30min"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {getContent('button_book_demo', 'Book a Demo')}
+          </a>
+        </Button>
+      </div>
+
       {/* Calculator CTA Section */}
       <div className="text-center pt-8 border-t border-border/50">
         <h2 className="text-2xl font-bold text-foreground mb-4">

@@ -174,19 +174,6 @@ const Pricing = () => {
           <NoHiddenCosts textContent={textContent} onOpenCalculator={() => setIsCalculatorOpen(true)} />
         </section>
 
-        {/* Book a Demo CTA - After No Hidden Costs */}
-        <section className="text-center animate-fade-in" style={{ animationDelay: '190ms' }}>
-          <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
-            <a 
-              href="https://calendly.com/joachim-noddi/30min"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {getCMSContent('button_book_demo', 'Book a Demo')}
-            </a>
-          </Button>
-        </section>
-
         {/* Contract Type Selector - Now integrated in PricingSlider */}
         {/* <section className="max-w-md mx-auto">
           <div className="flex flex-col gap-3">
