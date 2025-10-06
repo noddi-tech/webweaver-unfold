@@ -126,14 +126,14 @@ const Pricing = () => {
       <Header />
       <main className="container mx-auto px-6 pt-32 pb-20 space-y-20">
         {/* Hero Section */}
-        <div className="text-center max-w-4xl mx-auto space-y-8">
+        <div className="text-left md:text-center max-w-4xl md:mx-auto space-y-8">
           <h1 className="text-4xl md:text-6xl font-bold gradient-text">
             {getCMSContent('h1', 'Pay as you grow')}
           </h1>
           <p className="text-xl md:text-2xl text-primary">
             {getCMSContent('p', 'Transparent revenue-based pricing that scales with your business')}
           </p>
-          <div className="flex flex-wrap justify-center gap-6 text-sm">
+          <div className="flex flex-wrap justify-start md:justify-center gap-6 text-sm">
             {[
               { icon: Sparkles, text: getCMSContent('usp_1', 'World class UX') },
               { icon: TrendingDown, text: getCMSContent('usp_2', 'Rates decrease as you grow') },
@@ -147,7 +147,7 @@ const Pricing = () => {
           </div>
 
           {/* Clarifier Message */}
-          <div className="max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <div className="max-w-2xl md:mx-auto animate-fade-in" style={{ animationDelay: '100ms' }}>
             <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex items-start gap-3">
               <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <p className="text-sm text-foreground">
@@ -157,7 +157,7 @@ const Pricing = () => {
           </div>
 
           {/* Currency Selector */}
-          <div className="flex justify-center pt-4">
+          <div className="flex justify-start md:justify-center pt-4">
             <div className="flex flex-col gap-2">
               <Label className="text-sm text-muted-foreground">{getCMSContent('label_currency', 'View pricing in:')}</Label>
               <Select value={currency} onValueChange={setCurrency}>
