@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { PricingFeatureCards } from "@/components/pricing/PricingFeatureCards";
 import { PricingSlider } from "@/components/pricing/PricingSlider";
 import { RateReductionChart } from "@/components/pricing/RateReductionChart";
+import { NoHiddenCosts } from "@/components/pricing/NoHiddenCosts";
 import { PricingCalculatorModal } from "@/components/pricing/PricingCalculatorModal";
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
 import { Label } from "@/components/ui/label";
@@ -186,6 +187,11 @@ const Pricing = () => {
             onOpenCalculator={() => setIsCalculatorOpen(true)}
             textContent={textContent}
           />
+        </section>
+
+        {/* No Hidden Costs Banner */}
+        <section className="animate-fade-in" style={{ animationDelay: '175ms' }}>
+          <NoHiddenCosts textContent={textContent} />
         </section>
 
         {/* Contract Type Selector - Centered Above Cards */}
