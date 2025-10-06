@@ -18,10 +18,10 @@ All colors MUST be HSL.
     --background: 266 42% 96%; /* Light purple from gradient end */
     --foreground: 0 0% 5%; /* Very dark for maximum contrast */
 
-    --card: 0 0% 100% / 0.8; /* Glass morphism white with transparency */
+    --card: 0 0% 100% / 0.9; /* Glass morphism white with transparency */
     --card-foreground: 0 0% 5%;
 
-    --popover: 0 0% 100% / 0.95;
+    --popover: 0 0% 100%;
     --popover-foreground: 0 0% 5%;
 
     --primary: 252 87% 58%; /* Noddi purple */
@@ -95,10 +95,10 @@ All colors MUST be HSL.
     --background: 266 42% 96%; /* Same as light mode */
     --foreground: 0 0% 5%; /* Same as light mode */
 
-    --card: 0 0% 100% / 0.8; /* Same glass morphism */
+    --card: 0 0% 100% / 0.9; /* Same glass morphism */
     --card-foreground: 0 0% 5%;
 
-    --popover: 0 0% 100% / 0.95;
+    --popover: 0 0% 100%;
     --popover-foreground: 0 0% 5%;
 
     --primary: 252 87% 58%; /* Noddi purple */
@@ -156,6 +156,9 @@ All colors MUST be HSL.
     background: var(--gradient-background);
     min-height: 100vh;
     font-family: 'Inter', system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4, h5, h6 {

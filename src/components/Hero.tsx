@@ -13,6 +13,7 @@ const Hero = () => {
   const { getContent, textContent, loading } = useTextContent('index', 'hero');
   const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
   const [heroImage, setHeroImage] = useState<{ url: string; alt: string } | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Helper function to get CMS-driven styles for text content
   const getContentStyles = (elementType: string) => {
@@ -117,11 +118,15 @@ const Hero = () => {
 
 
           {/* Dashboard Preview */}
-          <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
+          <div className="bg-card rounded-2xl p-6 shadow-lg border border-border relative">
+            {!imageLoaded && (
+              <div className="w-full aspect-video rounded-xl bg-muted animate-pulse" />
+            )}
             <img
               src={heroImage?.url || dashboardPreview}
               alt={heroImage?.alt || "Noddi Tech Dashboard Preview"}
-              className="w-full rounded-xl shadow-lg"
+              className={`w-full rounded-xl shadow-lg transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute inset-6'}`}
+              onLoad={() => setImageLoaded(true)}
             />
           </div>
           {!loading && getContent('cta') && (
