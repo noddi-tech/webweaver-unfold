@@ -1,14 +1,27 @@
 /**
- * Pricing calculation utilities for Noddi's revenue‑based pricing model.
- *
- * This module encapsulates the logic defined in the shared pricing sheet. It
- * generates revenue tiers on the fly based on a base take‑rate, a step
- * reduction (cooldown), an initial revenue span and a range multiplier. The
- * resulting ranges are then used to compute usage costs for garage, mobile
- * and shop services. The take‑rates include all costs—there is no separate
- * SaaS licence fee. Optional contract discounts are applied to the usage fees.
- *
+ * Pricing model for Noddi's revenue-based take-rate system.
+ * 
+ * ══════════════════════════════════════════════════════════════════════════════
+ * SINGLE-TIER FLAT RATE SYSTEM
+ * ══════════════════════════════════════════════════════════════════════════════
+ * 
+ * How it works:
+ * 1. Total combined revenue (Garage + Shop + Mobile) determines ONE tier (1-10)
+ * 2. Each service is charged at its FLAT RATE for that tier
+ * 3. Rates decrease as you move up tiers using a cooldown formula:
+ *    Rate(tier) = baseRate × (1 - cooldown)^(tier-1)
+ * 
+ * Important: NOT a progressive/marginal tax system - the entire revenue for 
+ * each service is charged at the tier's flat rate.
+ * 
+ * Service Rates:
+ * - Garage: 4.00% base, 20% cooldown → [4.00%, 3.20%, 2.56%, 2.05%, 1.64%, 1.31%, 1.05%, 0.84%, 0.67%, 0.54%]
+ * - Shop: 5.00% base, 15% cooldown → [5.00%, 4.25%, 3.61%, 3.07%, 2.61%, 2.22%, 1.89%, 1.60%, 1.36%, 1.16%]
+ * - Mobile: 10.00% base, 15% cooldown → [10.00%, 8.50%, 7.23%, 6.14%, 5.22%, 4.44%, 3.77%, 3.21%, 2.73%, 2.32%]
+ * 
  * **INPUT ASSUMPTION:** All revenue inputs are expected to be **annual revenue in EUR**.
+ * 
+ * See pricingHelpers.ts for tier boundaries and example scenarios.
  */
 
 // Constants derived from the pricing spreadsheet
@@ -31,6 +44,9 @@ export const SHOP_COOLDOWN = 0.15;   // 15% reduction per tier
 
 /**
  * Representation of a revenue range with an associated take‑rate.
+ * 
+ * Note: This interface is kept for backward compatibility but the 
+ * generateRanges function below is no longer used in the current pricing model.
  */
 interface RevenueRange {
   start: number;
@@ -39,17 +55,13 @@ interface RevenueRange {
 }
 
 /**
- * Generate an array of revenue ranges for a particular service.
+ * DEPRECATED: This function is not used in the current flat-rate tier system.
  * 
- * **IMPORTANT: Tier 1 is billable. There is no free tier.**
- * - Tier 1: €0 - €100,000 charged at base rate (e.g., 4% for garage)
- * - Tier 2+: Spans increase by 2.5× with cooldown applied per tier
+ * Previously generated progressive revenue ranges with decreasing rates,
+ * but the current model uses a simpler tier detection with flat rates per tier.
  * 
- * Each range covers a span of revenue and has its own take‑rate. The base rate
- * is reduced on each subsequent tier by the given cooldown factor. The final
- * range has an end of Infinity, meaning any revenue beyond the previous
- * tiers will be charged at the last rate.
- *
+ * Kept for reference only - see detectCurrentTier() and getRateForTier() instead.
+ * 
  * @param baseRate      Starting take‑rate for tier 1 (e.g., 0.04 = 4%)
  * @param cooldown      Fractional reduction per tier (e.g., 0.2 = 20% reduction)
  * @param initialSpan   Size of tier 1 in revenue units (default: 100,000 EUR)
@@ -69,10 +81,7 @@ function generateRanges(
   let start = 0;
   for (let i = 0; i < numRanges; i++) {
     const end = i === numRanges - 1 ? Infinity : start + span;
-    // Tier 1 (i=0) starts at 0 and is fully billable at baseRate.
-    // No free tier exists.
     ranges.push({ start, end, rate });
-    // prepare for next tier
     start = end;
     span *= multiplier;
     rate = parseFloat((rate * (1 - cooldown)).toFixed(10));
@@ -82,7 +91,22 @@ function generateRanges(
 
 /**
  * Detect which tier a given total revenue falls into (1-10).
- * Tiers are defined by cumulative revenue boundaries.
+ * Uses the same logic as the tier boundaries to compute on-the-fly.
+ * 
+ * Note: This function is also exported from pricingHelpers.ts for convenience
+ * in UI components. Both implementations use identical logic.
+ * 
+ * Tier boundaries (approximate):
+ * - Tier 1: €0 - €100k
+ * - Tier 2: €100k - €350k
+ * - Tier 3: €350k - €1.225M
+ * - Tier 4: €1.225M - €4.289M
+ * - Tier 5: €4.289M - €15.01M
+ * - Tier 6: €15.01M - €52.54M
+ * - Tier 7: €52.54M - €183.9M
+ * - Tier 8: €183.9M - €643.6M
+ * - Tier 9: €643.6M - €2.253B
+ * - Tier 10: €2.253B+
  */
 function detectCurrentTier(totalRevenue: number): number {
   let span = INITIAL_SPAN;
