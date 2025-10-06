@@ -115,6 +115,7 @@ export interface PricingResult {
   garageCost: number;
   shopCost: number;
   mobileCost: number;
+  tier: number;
 }
 
 /**
@@ -186,5 +187,6 @@ export function calculatePricing(
     garageCost: garageUsage,
     shopCost: shopUsage,
     mobileCost: mobileUsage,
+    tier,
   };
 }

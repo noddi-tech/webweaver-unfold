@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { formatCurrency, formatPercentage } from "@/utils/formatCurrency";
 import { PricingResult } from "@/utils/pricing";
-import { detectCurrentTier, getTierLabel, getTierColor } from "@/utils/pricingHelpers";
+import { getTierLabel, getTierColor } from "@/utils/pricingHelpers";
 import { Sparkles } from "lucide-react";
 
 interface PricingBreakdownProps {
@@ -38,18 +38,8 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
 
   const totalUsage = result.usage.garage + result.usage.shop + result.usage.mobile;
 
-  // Calculate total revenue and detect tier
-  const totalRevenue = Object.values(result.usage).reduce((sum, val) => {
-    // Reverse-engineer approximate revenue from usage (this is a simplification)
-    return sum + val;
-  }, 0);
-  
-  // Use a better approximation: total cost / effective rate
-  const calculatedRevenue = result.effectiveRate > 0 
-    ? (result.total / (result.effectiveRate / 100)) 
-    : 0;
-  
-  const currentTier = detectCurrentTier(calculatedRevenue);
+  // Use tier directly from pricing calculation
+  const currentTier = result.tier;
   const tierLabel = getTierLabel(currentTier);
 
   return (
