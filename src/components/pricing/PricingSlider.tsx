@@ -8,7 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { formatCompactCurrency, formatCurrency } from '@/utils/formatCurrency';
 import { convertFromEUR } from '@/utils/currencyConversion';
 import { calculatePricing } from '@/utils/pricing';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Info } from 'lucide-react';
 
 interface PricingSliderProps {
   currency: string;
@@ -175,6 +175,14 @@ export function PricingSlider({ currency, contractType, onContractTypeChange, on
             {getCMSContent('link_text', 'Calculate your full breakdown »')} 
             <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
           </Button>
+        </div>
+
+        {/* Clarifier Message */}
+        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex items-start gap-3">
+          <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+          <p className="text-sm text-foreground">
+            {getCMSContent('clarifier', 'Your cost is a small percentage of your processed revenue — this calculator shows what that means for your business.')}
+          </p>
         </div>
       </div>
     </Card>
