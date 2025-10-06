@@ -287,7 +287,7 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium text-foreground">Total Annual Revenue</Label>
                 <span className="text-lg font-semibold text-primary">
-                  {currencyConfig.symbol}{(garageRevenue + shopRevenue + mobileRevenue).toLocaleString()}
+                  {currencyConfig.symbol}{(garageRevenue + shopRevenue + (includeMobile ? mobileRevenue : 0)).toLocaleString()}
                 </span>
               </div>
             </Card>
