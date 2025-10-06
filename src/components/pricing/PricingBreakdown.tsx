@@ -1,54 +1,37 @@
-import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Label } from "@/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { formatCurrency, formatPercentage } from "@/utils/formatCurrency";
 import { PricingResult } from "@/utils/pricing";
 import { detectCurrentTier, getTierLabel, getTierColor } from "@/utils/pricingHelpers";
-import { Sparkles, ChevronDown, Info } from "lucide-react";
-import { convertFromEUR } from "@/utils/currencyConversion";
-
-// Base example rates in EUR (source of truth)
-const EXAMPLE_RATES_EUR = {
-  small: { revenue: 1_000_000, rate: 4.89 },
-  large: { revenue: 10_000_000, rate: 2.87 },
-  enterprise: { revenue: 80_000_000, rate: 1.42 },
-};
+import { Sparkles } from "lucide-react";
 
 interface PricingBreakdownProps {
   result: PricingResult;
   currency: string;
   contractType: 'none' | 'monthly' | 'yearly';
+  onContractTypeChange: (value: 'none' | 'monthly' | 'yearly') => void;
   includeMobile: boolean;
-  revenues: {
-    garage: number;
-    shop: number;
-    mobile: number;
-  };
 }
 
-export function PricingBreakdown({ result, currency, contractType, includeMobile, revenues }: PricingBreakdownProps) {
-  const [examplesOpen, setExamplesOpen] = useState(false);
+export function PricingBreakdown({ result, currency, contractType, onContractTypeChange, includeMobile }: PricingBreakdownProps) {
   
   const services = [
     { 
       name: 'Garage', 
       usage: result.usage.garage, 
-      rate: revenues.garage > 0 ? (result.usage.garage / revenues.garage) * 100 : 0,
       show: true 
     },
     { 
       name: 'Shop', 
       usage: result.usage.shop, 
-      rate: revenues.shop > 0 ? (result.usage.shop / revenues.shop) * 100 : 0,
       show: true 
     },
     { 
       name: 'Mobile', 
       usage: result.usage.mobile, 
-      rate: revenues.mobile > 0 ? (result.usage.mobile / revenues.mobile) * 100 : 0,
       show: includeMobile 
     },
   ];
@@ -101,7 +84,7 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
             {services.filter(s => s.show).map((service) => (
               <div key={service.name} className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
-                  {service.name} <span className="text-xs opacity-70">({formatPercentage(service.rate / 100)})</span>
+                  {service.name}
                 </span>
                 <span className="font-medium text-foreground">{formatCurrency(service.usage, currency)}</span>
               </div>
@@ -110,18 +93,6 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
           <p className="text-xs text-muted-foreground pl-4 pt-2">
             Revenue-based pricing with no separate SaaS licence fee
           </p>
-        </div>
-
-        <Separator />
-
-        {/* Total Revenue */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-foreground">Total Revenue</h4>
-            <span className="text-sm font-semibold text-primary">
-              {formatCurrency(revenues.garage + revenues.shop + revenues.mobile, currency)}
-            </span>
-          </div>
         </div>
 
         <Separator />
@@ -155,6 +126,50 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
             </div>
           </div>
         </div>
+
+        <Separator />
+
+        {/* Contract Type Selector */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-foreground">Contract Type</Label>
+          <ToggleGroup
+            type="single"
+            value={contractType}
+            onValueChange={(value) => value && onContractTypeChange(value as typeof contractType)}
+            className="grid grid-cols-3 gap-2"
+          >
+            <ToggleGroupItem
+              value="none"
+              aria-label="No contract"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              <div className="text-center">
+                <div className="text-sm font-medium">No Contract</div>
+                <div className="text-xs opacity-80">Standard</div>
+              </div>
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="monthly"
+              aria-label="Monthly contract"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              <div className="text-center">
+                <div className="text-sm font-medium">Monthly</div>
+                <div className="text-xs opacity-80">Save 15%</div>
+              </div>
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="yearly"
+              aria-label="Yearly contract"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              <div className="text-center">
+                <div className="text-sm font-medium">Yearly</div>
+                <div className="text-xs opacity-80">Save 25%</div>
+              </div>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </div>
 
       {contractType !== 'none' && result.discount > 0 && (
@@ -164,54 +179,6 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
           </p>
         </div>
       )}
-
-      {/* Example Rates Section */}
-      <Collapsible open={examplesOpen} onOpenChange={setExamplesOpen}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full flex items-center justify-between"
-          >
-            <span className="flex items-center gap-2 text-sm font-medium">
-              <Info className="w-4 h-4" />
-              See Example Rates
-            </span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${examplesOpen ? 'rotate-180' : ''}`} />
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-3 pt-4">
-          <p className="text-xs text-muted-foreground">
-            Example effective rates at different revenue levels:
-          </p>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-              <div>
-                <div className="text-sm font-medium text-foreground">Small ({formatCurrency(convertFromEUR(EXAMPLE_RATES_EUR.small.revenue, currency), currency)})</div>
-                <div className="text-xs text-muted-foreground">Tiers 1-4</div>
-              </div>
-              <div className="text-sm font-bold text-primary">~{EXAMPLE_RATES_EUR.small.rate}%</div>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-              <div>
-                <div className="text-sm font-medium text-foreground">Large ({formatCurrency(convertFromEUR(EXAMPLE_RATES_EUR.large.revenue, currency), currency)})</div>
-                <div className="text-xs text-muted-foreground">Tiers 5-7</div>
-              </div>
-              <div className="text-sm font-bold text-primary">~{EXAMPLE_RATES_EUR.large.rate}%</div>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-              <div>
-                <div className="text-sm font-medium text-foreground">Enterprise ({formatCurrency(convertFromEUR(EXAMPLE_RATES_EUR.enterprise.revenue, currency), currency)})</div>
-                <div className="text-xs text-muted-foreground">Tiers 8-10</div>
-              </div>
-              <div className="text-sm font-bold text-primary">~{EXAMPLE_RATES_EUR.enterprise.rate}%</div>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground italic">
-            Rates shown are effective rates (total cost ÷ total revenue) and decrease continuously.
-          </p>
-        </CollapsibleContent>
-      </Collapsible>
     </Card>
   );
 }

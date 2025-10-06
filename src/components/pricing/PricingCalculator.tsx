@@ -328,12 +328,8 @@ export function PricingCalculator() {
           result={result}
           currency={currency}
           contractType={contractType}
+          onContractTypeChange={setContractType}
           includeMobile={includeMobile}
-          revenues={{
-            garage: garageRevenue,
-            shop: shopRevenue,
-            mobile: mobileRevenue,
-          }}
         />
       </div>
     </div>

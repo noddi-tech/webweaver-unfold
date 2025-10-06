@@ -282,47 +282,15 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
               )}
             </div>
 
-            {/* Contract Type Selector */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-foreground">Contract Type</Label>
-              <ToggleGroup
-                type="single"
-                value={contractType}
-                onValueChange={(value) => value && setContractType(value as typeof contractType)}
-                className="grid grid-cols-3 gap-2"
-              >
-                <ToggleGroupItem
-                  value="none"
-                  aria-label="No contract"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                >
-                  <div className="text-center">
-                    <div className="text-sm font-medium">No Contract</div>
-                    <div className="text-xs opacity-80">Standard</div>
-                  </div>
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="monthly"
-                  aria-label="Monthly contract"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                >
-                  <div className="text-center">
-                    <div className="text-sm font-medium">Monthly</div>
-                    <div className="text-xs opacity-80">Save 15%</div>
-                  </div>
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="yearly"
-                  aria-label="Yearly contract"
-                  className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                >
-                  <div className="text-center">
-                    <div className="text-sm font-medium">Yearly</div>
-                    <div className="text-xs opacity-80">Save 25%</div>
-                  </div>
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
+            {/* Total Revenue Display */}
+            <Card className="p-4 bg-muted/30 border-border">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-foreground">Total Annual Revenue</Label>
+                <span className="text-lg font-semibold text-primary">
+                  {currencyConfig.symbol}{(garageRevenue + shopRevenue + mobileRevenue).toLocaleString()}
+                </span>
+              </div>
+            </Card>
           </div>
 
           {/* Results */}
@@ -331,12 +299,8 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
                 result={result}
                 currency={currency}
                 contractType={contractType}
+                onContractTypeChange={setContractType}
                 includeMobile={includeMobile}
-                revenues={{
-                  garage: garageRevenue,
-                  shop: shopRevenue,
-                  mobile: mobileRevenue,
-                }}
               />
           </div>
         </div>
