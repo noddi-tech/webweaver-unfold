@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCompactCurrency, formatCurrency } from '@/utils/formatCurrency';
 import { convertFromEUR } from '@/utils/currencyConversion';
 import { calculatePricing } from '@/utils/pricing';
 import { ArrowRight, Info } from 'lucide-react';
+import { CurrencyFlag } from './CurrencyFlag';
 
 interface PricingSliderProps {
   currency: string;
@@ -85,25 +85,71 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
     <Card className="liquid-glass p-6 md:p-8 max-w-4xl mx-auto">
       <div className="space-y-6">
         {/* Currency Selector */}
-        <div className="flex justify-center">
-          <div className="flex flex-col gap-2">
-            <Label className="text-sm text-muted-foreground text-center">{getCMSContent('label_currency', 'View pricing in:')}</Label>
-            <Select value={currency} onValueChange={onCurrencyChange}>
-              <SelectTrigger className="w-[180px] bg-background/95 border-border text-foreground">
-                <SelectValue placeholder="Select currency" />
-              </SelectTrigger>
-              <SelectContent className="bg-background/95 backdrop-blur-md border-border z-50">
-                <SelectItem value="EUR">🇪🇺 EUR (€)</SelectItem>
-                <SelectItem value="USD">🇺🇸 USD ($)</SelectItem>
-                <SelectItem value="GBP">🇬🇧 GBP (£)</SelectItem>
-                <SelectItem value="SEK">🇸🇪 SEK (kr)</SelectItem>
-                <SelectItem value="DKK">🇩🇰 DKK (kr)</SelectItem>
-                <SelectItem value="NOK">🇳🇴 NOK (kr)</SelectItem>
-                <SelectItem value="CHF">🇨🇭 CHF (Fr)</SelectItem>
-                <SelectItem value="PLN">🇵🇱 PLN (zł)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="space-y-3">
+          <Label className="text-sm text-muted-foreground text-center block">{getCMSContent('label_currency', 'View pricing in:')}</Label>
+          <ToggleGroup
+            type="single"
+            value={currency}
+            onValueChange={(value) => value && onCurrencyChange(value)}
+            className="grid grid-cols-4 gap-2"
+          >
+            <ToggleGroupItem 
+              value="EUR" 
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5"
+            >
+              <CurrencyFlag currency="EUR" className="w-4 h-3" />
+              EUR (€)
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="USD" 
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5"
+            >
+              <CurrencyFlag currency="USD" className="w-4 h-3" />
+              USD ($)
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="GBP" 
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5"
+            >
+              <CurrencyFlag currency="GBP" className="w-4 h-3" />
+              GBP (£)
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="SEK" 
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5"
+            >
+              <CurrencyFlag currency="SEK" className="w-4 h-3" />
+              SEK (kr)
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="DKK" 
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5"
+            >
+              <CurrencyFlag currency="DKK" className="w-4 h-3" />
+              DKK (kr)
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="NOK" 
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5"
+            >
+              <CurrencyFlag currency="NOK" className="w-4 h-3" />
+              NOK (kr)
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="CHF" 
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5"
+            >
+              <CurrencyFlag currency="CHF" className="w-4 h-3" />
+              CHF (Fr)
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="PLN" 
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5"
+            >
+              <CurrencyFlag currency="PLN" className="w-4 h-3" />
+              PLN (zł)
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
 
         {/* Revenue Display */}

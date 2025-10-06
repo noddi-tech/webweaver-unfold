@@ -13,6 +13,7 @@ import { Sparkles } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
 import { convertFromEUR, convertToEUR } from "@/utils/currencyConversion";
+import { CurrencyFlag } from "./CurrencyFlag";
 
 interface PricingCalculatorModalProps {
   open: boolean;
@@ -120,28 +121,36 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
                 onValueChange={(value) => value && setCurrency(value)}
                 className="grid grid-cols-4 gap-2"
               >
-                <ToggleGroupItem value="EUR" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+                <ToggleGroupItem value="EUR" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
+                  <CurrencyFlag currency="EUR" className="w-4 h-3" />
                   EUR (€)
                 </ToggleGroupItem>
-                <ToggleGroupItem value="USD" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+                <ToggleGroupItem value="USD" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
+                  <CurrencyFlag currency="USD" className="w-4 h-3" />
                   USD ($)
                 </ToggleGroupItem>
-                <ToggleGroupItem value="GBP" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+                <ToggleGroupItem value="GBP" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
+                  <CurrencyFlag currency="GBP" className="w-4 h-3" />
                   GBP (£)
                 </ToggleGroupItem>
-                <ToggleGroupItem value="SEK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+                <ToggleGroupItem value="SEK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
+                  <CurrencyFlag currency="SEK" className="w-4 h-3" />
                   SEK (kr)
                 </ToggleGroupItem>
-                <ToggleGroupItem value="DKK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+                <ToggleGroupItem value="DKK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
+                  <CurrencyFlag currency="DKK" className="w-4 h-3" />
                   DKK (kr)
                 </ToggleGroupItem>
-                <ToggleGroupItem value="NOK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+                <ToggleGroupItem value="NOK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
+                  <CurrencyFlag currency="NOK" className="w-4 h-3" />
                   NOK (kr)
                 </ToggleGroupItem>
-                <ToggleGroupItem value="CHF" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+                <ToggleGroupItem value="CHF" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
+                  <CurrencyFlag currency="CHF" className="w-4 h-3" />
                   CHF (Fr)
                 </ToggleGroupItem>
-                <ToggleGroupItem value="PLN" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs">
+                <ToggleGroupItem value="PLN" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
+                  <CurrencyFlag currency="PLN" className="w-4 h-3" />
                   PLN (zł)
                 </ToggleGroupItem>
               </ToggleGroup>
