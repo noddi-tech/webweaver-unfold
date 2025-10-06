@@ -81,25 +81,30 @@ function generateRanges(
 }
 
 /**
- * Calculate the usage cost for a given revenue and set of ranges. The cost
- * represents the sum of each tier's charge: revenue within a tier multiplied
- * by the tier's take‑rate.
- *
- * @param revenue  Total annual revenue for this service (in EUR)
- * @param ranges   Precomputed revenue ranges for this service
+ * Detect which tier a given total revenue falls into (1-10).
+ * Tiers are defined by cumulative revenue boundaries.
  */
-function calculateUsageCost(revenue: number, ranges: RevenueRange[]): number {
-  let remaining = revenue;
-  let cost = 0;
-  for (const range of ranges) {
-    if (remaining <= 0) break;
-    const span = range.end === Infinity
-      ? remaining
-      : Math.min(range.end - range.start, remaining);
-    cost += span * range.rate;
-    remaining -= span;
+function detectCurrentTier(totalRevenue: number): number {
+  let span = INITIAL_SPAN;
+  let boundary = 0;
+  
+  for (let tier = 1; tier <= 10; tier++) {
+    boundary += span;
+    if (totalRevenue < boundary || tier === 10) {
+      return tier;
+    }
+    span *= RANGE_MULTIPLIER;
   }
-  return cost;
+  
+  return 10;
+}
+
+/**
+ * Calculate the flat rate for a service at a given tier.
+ * Rate = baseRate * (1 - cooldown)^(tier - 1)
+ */
+function getRateForTier(baseRate: number, cooldown: number, tier: number): number {
+  return baseRate * Math.pow(1 - cooldown, tier - 1);
 }
 
 export interface PricingResult {
@@ -143,23 +148,26 @@ export function calculatePricing(
   else if (contractType === 'yearly') discount = CONTRACT_DISCOUNT_YEARLY;
   const discountFactor = 1 - discount;
 
-  // Generate ranges per service
-  const garageRanges = generateRanges(GARAGE_BASE_RATE, GARAGE_COOLDOWN);
-  const shopRanges = generateRanges(SHOP_BASE_RATE, SHOP_COOLDOWN);
-  const mobileRanges = generateRanges(MOBILE_BASE_RATE, MOBILE_COOLDOWN);
-
-  // Compute usage costs per service (annual) with discount applied
-  const garageUsage = calculateUsageCost(revenues.garage, garageRanges) * discountFactor;
-  const shopUsage = calculateUsageCost(revenues.shop, shopRanges) * discountFactor;
-  const mobileUsage = includeMobile
-    ? calculateUsageCost(revenues.mobile, mobileRanges) * discountFactor
-    : 0;
+  // Calculate total revenue to determine the tier
+  const totalRevenue = revenues.garage + revenues.shop + (includeMobile ? revenues.mobile : 0);
+  
+  // Determine the single tier based on total revenue
+  const tier = detectCurrentTier(totalRevenue);
+  
+  // Get the flat rate for each service at this tier
+  const garageRate = getRateForTier(GARAGE_BASE_RATE, GARAGE_COOLDOWN, tier);
+  const shopRate = getRateForTier(SHOP_BASE_RATE, SHOP_COOLDOWN, tier);
+  const mobileRate = getRateForTier(MOBILE_BASE_RATE, MOBILE_COOLDOWN, tier);
+  
+  // Calculate usage costs by applying the flat rate to each service's revenue
+  const garageUsage = revenues.garage * garageRate * discountFactor;
+  const shopUsage = revenues.shop * shopRate * discountFactor;
+  const mobileUsage = includeMobile ? revenues.mobile * mobileRate * discountFactor : 0;
 
   const totalUsage = garageUsage + shopUsage + mobileUsage;
   const total = totalUsage; // No separate licence component
   
   // Calculate effective rate (total cost as % of total revenue)
-  const totalRevenue = revenues.garage + revenues.shop + (includeMobile ? revenues.mobile : 0);
   const effectiveRate = totalRevenue > 0 ? (total / totalRevenue) * 100 : 0;
   
   // Calculate discount amount saved (usage only, no licence)
