@@ -169,19 +169,6 @@ const Pricing = () => {
           />
         </section>
 
-        {/* Book a Demo CTA - After Slider */}
-        <section className="text-center animate-fade-in" style={{ animationDelay: '162ms' }}>
-          <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
-            <a 
-              href="https://calendly.com/joachim-noddi/30min"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {getCMSContent('button_book_demo', 'Book a Demo')}
-            </a>
-          </Button>
-        </section>
-
         {/* No Hidden Costs Banner */}
         <section className="animate-fade-in" style={{ animationDelay: '175ms' }}>
           <NoHiddenCosts textContent={textContent} onOpenCalculator={() => setIsCalculatorOpen(true)} />
@@ -236,6 +223,19 @@ const Pricing = () => {
         {/* Rate Reduction Chart */}
         <section className="animate-fade-in" style={{ animationDelay: '200ms' }}>
           <RateReductionChart currency={currency} />
+        </section>
+
+        {/* Book a Demo CTA - After Chart */}
+        <section className="text-center animate-fade-in" style={{ animationDelay: '250ms' }}>
+          <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
+            <a 
+              href="https://calendly.com/joachim-noddi/30min"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {getCMSContent('button_book_demo', 'Book a Demo')}
+            </a>
+          </Button>
         </section>
 
         {/* Value Proposition */}
