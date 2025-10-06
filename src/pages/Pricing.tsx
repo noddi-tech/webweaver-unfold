@@ -263,7 +263,7 @@ const Pricing = () => {
         </section>
 
         {/* Value Proposition */}
-        <section className="animate-fade-in" style={{ animationDelay: '500ms' }}>
+        <section className="hidden animate-fade-in" style={{ animationDelay: '500ms' }}>
           <Card className="liquid-glass p-8 max-w-4xl mx-auto">
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
