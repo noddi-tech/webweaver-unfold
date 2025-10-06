@@ -144,6 +144,19 @@ const Pricing = () => {
           </div>
         </div>
 
+        {/* Book a Demo CTA - After Hero */}
+        <section className="text-center animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
+            <a 
+              href="https://calendly.com/joachim-noddi/30min"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {getCMSContent('button_book_demo', 'Book a Demo')}
+            </a>
+          </Button>
+        </section>
+
         {/* Interactive Revenue Slider */}
         <section className="animate-fade-in" style={{ animationDelay: '150ms' }}>
           <PricingSlider 
@@ -154,6 +167,19 @@ const Pricing = () => {
             onOpenCalculator={() => setIsCalculatorOpen(true)}
             textContent={textContent}
           />
+        </section>
+
+        {/* Book a Demo CTA - After Slider */}
+        <section className="text-center animate-fade-in" style={{ animationDelay: '162ms' }}>
+          <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
+            <a 
+              href="https://calendly.com/joachim-noddi/30min"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {getCMSContent('button_book_demo', 'Book a Demo')}
+            </a>
+          </Button>
         </section>
 
         {/* No Hidden Costs Banner */}
@@ -241,6 +267,19 @@ const Pricing = () => {
         {/* FAQ Section */}
         <section className="animate-fade-in" style={{ animationDelay: '600ms' }}>
           <PricingFAQ />
+        </section>
+
+        {/* Book a Demo CTA - After FAQ */}
+        <section className="text-center animate-fade-in" style={{ animationDelay: '650ms' }}>
+          <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
+            <a 
+              href="https://calendly.com/joachim-noddi/30min"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {getCMSContent('button_book_demo', 'Book a Demo')}
+            </a>
+          </Button>
         </section>
 
         {/* Final CTA */}
