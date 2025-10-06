@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import DynamicSection from "@/components/DynamicSection";
+import Hero from "@/components/Hero";
+import PainSolutionTable from "@/components/PainSolutionTable";
+import ProductFeatures from "@/components/ProductFeatures";
+import CustomerJourney from "@/components/CustomerJourney";
+import TrustProof from "@/components/TrustProof";
+import FinalCTA from "@/components/FinalCTA";
 import { supabase } from '@/integrations/supabase/client';
-import { getColorClass } from '@/lib/colorUtils';
 
 interface SocialMetaSettings {
   og_title: string;
@@ -13,27 +17,6 @@ interface SocialMetaSettings {
   twitter_card: 'summary' | 'summary_large_image';
   twitter_site: string;
   twitter_image_url: string;
-}
-
-interface Section {
-  id: string;
-  name: string;
-  display_name: string;
-  page_location: string;
-  active: boolean;
-  sort_order: number;
-  page_id?: string;
-  inherit_page_defaults: boolean;
-  background_token?: string;
-  text_token?: string;
-  padding_token?: string;
-  margin_token?: string;
-  max_width_token?: string;
-  background_token_override?: string;
-  text_token_override?: string;
-  padding_token_override?: string;
-  margin_token_override?: string;
-  max_width_token_override?: string;
 }
 
 interface Page {
@@ -85,7 +68,6 @@ const getTextClass = (token?: string) => {
 };
 
 const Index = () => {
-  const [sections, setSections] = useState<Section[]>([]);
   const [pageData, setPageData] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -133,7 +115,7 @@ const Index = () => {
   };
 
   useEffect(() => {
-    const fetchPageAndSections = async () => {
+    const fetchPageData = async () => {
       try {
         // Fetch page data for homepage
         const { data: page, error: pageError } = await supabase
@@ -149,7 +131,7 @@ const Index = () => {
           setPageData(page);
           
           // Update document head with page data
-          document.title = page.title;
+          document.title = page.title || "Noddi Tech - Unified Booking & ERP for Auto Services";
           if (page.meta_description) {
             const metaDescription = document.querySelector('meta[name="description"]');
             if (metaDescription) {
@@ -172,35 +154,15 @@ const Index = () => {
             .replace(/text-\S+/g, '')
             .trim();
           document.body.classList.add(...backgroundClass.split(' '), ...textClass.split(' '));
-
-          // Fetch sections for this page
-          const { data: sectionsData, error: sectionsError } = await supabase
-            .from('sections')
-            .select('*')
-            .eq('active', true)
-            .eq('page_id', page.id)
-            .order('sort_order', { ascending: true });
-
-          if (sectionsError) throw sectionsError;
-          setSections(sectionsData || []);
         }
       } catch (error) {
         console.error('Error fetching page data:', error);
-        // Fallback to old method if page doesn't exist
-        const { data } = await supabase
-          .from('sections')
-          .select('*')
-          .eq('active', true)
-          .in('page_location', ['index', 'homepage'])
-          .order('sort_order', { ascending: true });
-        
-        setSections(data || []);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPageAndSections();
+    fetchPageData();
     fetchAndApplySocialMeta();
   }, []);
 
@@ -230,19 +192,12 @@ const Index = () => {
     <div className="min-h-screen">
       <Header />
       <main>
-        {sections.map((section) => (
-          <DynamicSection 
-            key={section.id} 
-            section={section} 
-            pageDefaults={pageData ? {
-              default_background_token: pageData.default_background_token,
-              default_text_token: pageData.default_text_token,
-              default_padding_token: pageData.default_padding_token,
-              default_margin_token: pageData.default_margin_token,
-              default_max_width_token: pageData.default_max_width_token
-            } : undefined}
-          />
-        ))}
+        <Hero />
+        <PainSolutionTable />
+        <ProductFeatures />
+        <CustomerJourney />
+        <TrustProof />
+        <FinalCTA />
       </main>
       <Footer />
     </div>

@@ -1,143 +1,74 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play, Sparkles } from "lucide-react";
+import { ArrowRight, Award, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import dashboardPreview from "@/assets/dashboard-preview.jpg";
-import { useEffect, useState } from "react";
-import { icons } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useTextContent } from "@/hooks/useTextContent";
-import { getTypographyClass } from "@/lib/typography";
-import { getColorClass } from "@/lib/colorUtils";
+import { useState } from "react";
 
 const Hero = () => {
-  const { getContent, textContent, loading } = useTextContent('index', 'hero');
-  const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
-  const [heroImage, setHeroImage] = useState<{ url: string; alt: string } | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Helper function to get CMS-driven styles for text content
-  const getContentStyles = (elementType: string) => {
-    const content = textContent.find(tc => tc.element_type === elementType);
-    const colorToken = content?.color_token || 'foreground';
-    const typographyClass = getTypographyClass(elementType);
-    const colorClass = getColorClass(colorToken, 'foreground');
-    
-    return `${typographyClass} ${colorClass}`;
-  };
-
-  useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      const { data } = await supabase
-        .from("usps")
-        .select("id,title,icon_name,href,bg_token,text_token,active,sort_order")
-        .eq("active", true)
-        .eq("location", "hero")
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: true });
-      if (!mounted) return;
-      setUsps(data || []);
-    };
-    load();
-    return () => { mounted = false; };
-  }, []);
-
-  useEffect(() => {
-    let mounted = true;
-    const loadHero = async () => {
-      const { data } = await supabase
-        .from("images")
-        .select("file_url,alt,active,section,sort_order,created_at")
-        .eq("active", true)
-        .in("section", ["hero", "hero-homepage", "hero-background"]) // Support legacy and new section names
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: true })
-        .limit(1);
-      if (!mounted) return;
-      const img = data && data.length > 0 ? data[0] : null;
-      if (img) {
-        setHeroImage({ url: (img as any).file_url as string, alt: ((img as any).alt as string) || "Hero image" });
-      } else {
-        setHeroImage(null);
-      }
-    };
-    loadHero();
-    return () => { mounted = false; };
-  }, []);
-
   return (
-    <section id="home" className="pt-32 pb-20 px-6">
-      <div className="container mx-auto">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Hero Text */}
-          {!loading && getContent('h1') && (
-            <h1 className={`${getContentStyles('h1')} mb-6 leading-tight break-words hyphens-auto text-balance`}>
-              {getContent('h1')}
+    <section className="py-section-lg bg-gradient-hero">
+      <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left Column - Text Content */}
+          <div className="space-y-8">
+            <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-foreground">
+              Where your customers book & your business runs — all in one system
             </h1>
-          )}
-          
-          {/* Subheading */}
-          {!loading && getContent('h5') && (
-            <h5 className={`${getContentStyles('h5')} mb-8 max-w-3xl mx-auto leading-relaxed`}>
-              {getContent('h5')}
-            </h5>
-          )}
 
-          {/* Hero USPs */}
-          {usps.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-2 mb-6">
-              {usps.map((u) => {
-                const IconCmp = (icons as any)[u.icon_name] || Sparkles;
-                return (
-                  <span key={u.id} className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border ${{
-                    background: "bg-background",
-                    card: "bg-card",
-                    primary: "bg-primary",
-                    secondary: "bg-secondary",
-                    accent: "bg-accent",
-                    "gradient-primary": "bg-gradient-primary",
-                    "gradient-background": "bg-gradient-background",
-                    "gradient-hero": "bg-gradient-hero",
-                  }[u.bg_token] || "bg-secondary"} ${
-                    {
-                      foreground: "text-foreground",
-                      "muted-foreground": "text-muted-foreground",
-                      primary: "text-primary",
-                      secondary: "text-secondary",
-                      accent: "text-accent",
-                    }[u.text_token] || "text-foreground"
-                  }`}>
-                    <IconCmp className="w-3.5 h-3.5" />
-                    <span className="text-xs font-medium whitespace-nowrap">{u.title}</span>
-                  </span>
-                );
-              })}
+            <p className="text-xl md:text-2xl text-muted-foreground">
+              From booking flow to back-office automation — built for auto repair & tire services
+            </p>
+
+            {/* Metrics Badges */}
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-card border border-border shadow-lg hover-scale">
+                <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
+                  <Award className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">88+ NPS</div>
+                  <div className="text-xs text-muted-foreground">Industry leading</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-card border border-border shadow-lg hover-scale">
+                <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">40%</div>
+                  <div className="text-xs text-muted-foreground">Conversion uplift</div>
+                </div>
+              </div>
             </div>
-          )}
 
-
-
-          {/* Dashboard Preview */}
-          <div className="bg-card rounded-2xl p-6 shadow-lg border border-border relative">
-            {!imageLoaded && (
-              <div className="w-full aspect-video rounded-xl bg-muted animate-pulse" />
-            )}
-            <img
-              src={heroImage?.url || dashboardPreview}
-              alt={heroImage?.alt || "Noddi Tech Dashboard Preview"}
-              className={`w-full rounded-xl shadow-lg transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute inset-6'}`}
-              onLoad={() => setImageLoaded(true)}
-            />
-          </div>
-          {!loading && getContent('cta') && (
-            <div className="mt-6 text-center">
+            {/* CTA Button */}
+            <div>
               <Link to="/contact">
-                <Button size="lg" className="px-8 py-4">
-                  {getContent('cta')}
+                <Button size="lg" className="text-lg px-8 py-4 group shadow-lg">
+                  Get a Demo
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
             </div>
-          )}
+          </div>
+
+          {/* Right Column - Dashboard Preview */}
+          <div className="relative">
+            <div className="absolute -inset-4 bg-gradient-primary opacity-20 blur-3xl rounded-full" />
+            <div className="relative bg-card rounded-2xl p-6 shadow-2xl border border-border">
+              {!imageLoaded && (
+                <div className="w-full aspect-video rounded-xl bg-muted animate-pulse" />
+              )}
+              <img
+                src={dashboardPreview}
+                alt="Noddi Tech Dashboard - Unified booking and ERP system"
+                className={`w-full rounded-xl shadow-lg transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute inset-6'}`}
+                onLoad={() => setImageLoaded(true)}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>
