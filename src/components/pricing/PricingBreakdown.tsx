@@ -80,7 +80,7 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
             </p>
           </div>
           {contractType !== 'none' && result.discount > 0 && (
-            <Badge className="bg-gradient-primary text-primary-foreground w-fit animate-scale-in">
+            <Badge className="bg-[hsl(var(--tier-low))] text-white w-fit animate-scale-in">
               <Sparkles className="w-3 h-3 mr-1" />
               Save {formatCurrency(result.discount, currency)}
             </Badge>
@@ -110,6 +110,18 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
           <p className="text-xs text-muted-foreground pl-4 pt-2">
             Revenue-based pricing with no separate SaaS licence fee
           </p>
+        </div>
+
+        <Separator />
+
+        {/* Total Revenue */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-foreground">Total Revenue</h4>
+            <span className="text-sm font-semibold text-primary">
+              {formatCurrency(revenues.garage + revenues.shop + revenues.mobile, currency)}
+            </span>
+          </div>
         </div>
 
         <Separator />
@@ -146,7 +158,7 @@ export function PricingBreakdown({ result, currency, contractType, includeMobile
       </div>
 
       {contractType !== 'none' && result.discount > 0 && (
-        <div className="bg-gradient-primary/10 rounded-lg p-4 border border-primary/20">
+        <div className="bg-[hsl(var(--tier-low))]/10 rounded-lg p-4 border border-[hsl(var(--tier-low))]/20">
           <p className="text-sm font-medium text-foreground">
             💰 You're saving {formatCurrency(result.discount, currency)} per year with your {contractType} contract!
           </p>
