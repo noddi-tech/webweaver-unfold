@@ -151,6 +151,11 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    @apply bg-gradient-hero;
+    min-height: 100vh;
+  }
+
   body {
     @apply text-foreground;
     min-height: 100vh;
