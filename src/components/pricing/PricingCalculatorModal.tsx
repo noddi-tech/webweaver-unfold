@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { NumericStepperInput } from "./NumericStepperInput";
 import { PricingBreakdown } from "./PricingBreakdown";
@@ -14,6 +15,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Info } from "lucide-react";
 import { convertFromEUR, convertToEUR } from "@/utils/currencyConversion";
 import { CurrencyFlag } from "./CurrencyFlag";
+
+const getCurrencySymbol = (currency: string) => {
+  const symbols: Record<string, string> = {
+    EUR: '€', USD: '$', GBP: '£', SEK: 'kr',
+    DKK: 'kr', NOK: 'kr', CHF: 'Fr', PLN: 'zł'
+  };
+  return symbols[currency] || currency;
+};
 
 interface PricingCalculatorModalProps {
   open: boolean;
@@ -115,45 +124,66 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
             {/* Currency Selector */}
             <div className="space-y-3">
               <Label className="text-sm font-medium text-foreground">Currency</Label>
-              <ToggleGroup
-                type="single"
-                value={currency}
-                onValueChange={(value) => value && setCurrency(value)}
-                className="grid grid-cols-4 gap-2"
-              >
-                <ToggleGroupItem value="EUR" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
-                  <CurrencyFlag currency="EUR" className="w-4 h-3" />
-                  EUR (€)
-                </ToggleGroupItem>
-                <ToggleGroupItem value="USD" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
-                  <CurrencyFlag currency="USD" className="w-4 h-3" />
-                  USD ($)
-                </ToggleGroupItem>
-                <ToggleGroupItem value="GBP" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
-                  <CurrencyFlag currency="GBP" className="w-4 h-3" />
-                  GBP (£)
-                </ToggleGroupItem>
-                <ToggleGroupItem value="SEK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
-                  <CurrencyFlag currency="SEK" className="w-4 h-3" />
-                  SEK (kr)
-                </ToggleGroupItem>
-                <ToggleGroupItem value="DKK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
-                  <CurrencyFlag currency="DKK" className="w-4 h-3" />
-                  DKK (kr)
-                </ToggleGroupItem>
-                <ToggleGroupItem value="NOK" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
-                  <CurrencyFlag currency="NOK" className="w-4 h-3" />
-                  NOK (kr)
-                </ToggleGroupItem>
-                <ToggleGroupItem value="CHF" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
-                  <CurrencyFlag currency="CHF" className="w-4 h-3" />
-                  CHF (Fr)
-                </ToggleGroupItem>
-                <ToggleGroupItem value="PLN" className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground text-xs flex items-center gap-1.5">
-                  <CurrencyFlag currency="PLN" className="w-4 h-3" />
-                  PLN (zł)
-                </ToggleGroupItem>
-              </ToggleGroup>
+              <Select value={currency} onValueChange={(value) => value && setCurrency(value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue>
+                    <div className="flex items-center gap-2">
+                      <CurrencyFlag currency={currency} className="w-4 h-3" />
+                      <span>{currency} ({getCurrencySymbol(currency)})</span>
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="EUR">
+                    <div className="flex items-center gap-2">
+                      <CurrencyFlag currency="EUR" className="w-4 h-3" />
+                      <span>EUR (€)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="USD">
+                    <div className="flex items-center gap-2">
+                      <CurrencyFlag currency="USD" className="w-4 h-3" />
+                      <span>USD ($)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="GBP">
+                    <div className="flex items-center gap-2">
+                      <CurrencyFlag currency="GBP" className="w-4 h-3" />
+                      <span>GBP (£)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="SEK">
+                    <div className="flex items-center gap-2">
+                      <CurrencyFlag currency="SEK" className="w-4 h-3" />
+                      <span>SEK (kr)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="DKK">
+                    <div className="flex items-center gap-2">
+                      <CurrencyFlag currency="DKK" className="w-4 h-3" />
+                      <span>DKK (kr)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="NOK">
+                    <div className="flex items-center gap-2">
+                      <CurrencyFlag currency="NOK" className="w-4 h-3" />
+                      <span>NOK (kr)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="CHF">
+                    <div className="flex items-center gap-2">
+                      <CurrencyFlag currency="CHF" className="w-4 h-3" />
+                      <span>CHF (Fr)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="PLN">
+                    <div className="flex items-center gap-2">
+                      <CurrencyFlag currency="PLN" className="w-4 h-3" />
+                      <span>PLN (zł)</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Preset Scenarios */}
