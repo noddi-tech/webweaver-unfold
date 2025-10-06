@@ -153,7 +153,6 @@ All colors MUST be HSL.
 
   body {
     @apply text-foreground;
-    background: var(--gradient-background);
     min-height: 100vh;
     font-family: 'Inter', system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
     -webkit-font-smoothing: antialiased;
