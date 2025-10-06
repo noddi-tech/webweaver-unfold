@@ -14,7 +14,7 @@
  * Rate Calculation:
  * - Each service has a base rate (Tier 1) and dual cooldown structure
  * - Tiers 1-5: 15% cooldown per tier
- * - Tiers 6-10: 10% cooldown per tier
+ * - Tiers 6-10: 10% cooldown per tier (Garage/Shop), 5% cooldown per tier (Mobile)
  * - Garage: 4.00% base
  * - Shop: 5.00% base
  * - Mobile: 10.00% base
@@ -24,10 +24,10 @@
  * ══════════════════════════════════════════════════════════════════════════════
  * 
  * Example 1: €15M total revenue = Tier 6
- * - €5M Garage revenue × 1.31% = €65,536
- * - €5M Shop revenue × 2.22% = €110,926
- * - €5M Mobile revenue × 4.44% = €221,853
- * - Total annual cost: €398,315 (2.66% effective rate)
+ * - €5M Garage revenue × 1.88% = €94,000
+ * - €5M Shop revenue × 2.35% = €117,500
+ * - €5M Mobile revenue × 4.96% = €248,000
+ * - Total annual cost: €459,500 (3.06% effective rate)
  * 
  * Example 2: €100k total revenue = Tier 1
  * - €50k Garage revenue × 4.00% = €2,000
@@ -35,10 +35,10 @@
  * - Total annual cost: €4,500 (4.50% effective rate)
  * 
  * Example 3: €80M total revenue = Tier 8
- * - €40M Garage revenue × 0.84% = €335,544
- * - €30M Shop revenue × 1.60% = €481,498
- * - €10M Mobile revenue × 3.21% = €320,999
- * - Total annual cost: €1,138,041 (1.42% effective rate)
+ * - €40M Garage revenue × 1.52% = €608,000
+ * - €30M Shop revenue × 1.90% = €570,000
+ * - €10M Mobile revenue × 4.47% = €447,000
+ * - Total annual cost: €1,625,000 (2.03% effective rate)
  */
 
 const INITIAL_SPAN = 100_000;
@@ -46,7 +46,9 @@ const RANGE_MULTIPLIER = 2.5;
 
 /**
  * Complete rate table for all tiers and services.
- * Dual cooldown structure: 15% for tiers 1-5, 10% for tiers 6-10.
+ * Dual cooldown structure:
+ * - Tiers 1-5: 15% for all services
+ * - Tiers 6-10: 10% for Garage/Shop, 5% for Mobile
  * 
  * Garage: 4.00% base
  * Shop: 5.00% base
@@ -55,7 +57,7 @@ const RANGE_MULTIPLIER = 2.5;
 export const TIER_RATES = {
   garage: [4.00, 3.40, 2.89, 2.46, 2.09, 1.88, 1.69, 1.52, 1.37, 1.23],
   shop: [5.00, 4.25, 3.61, 3.07, 2.61, 2.35, 2.11, 1.90, 1.71, 1.54],
-  mobile: [10.00, 8.50, 7.23, 6.14, 5.22, 4.70, 4.23, 3.81, 3.43, 3.08]
+  mobile: [10.00, 8.50, 7.23, 6.14, 5.22, 4.96, 4.71, 4.47, 4.25, 4.04]
 };
 
 /**

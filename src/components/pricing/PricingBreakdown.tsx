@@ -25,7 +25,7 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
   // Calculate the percentage rates for each service at the current tier
   const garageRate = getRateForTier(GARAGE_BASE_RATE, currentTier);
   const shopRate = getRateForTier(SHOP_BASE_RATE, currentTier);
-  const mobileRate = getRateForTier(MOBILE_BASE_RATE, currentTier);
+  const mobileRate = getRateForTier(MOBILE_BASE_RATE, currentTier, 'mobile');
 
   const services = [
     { 

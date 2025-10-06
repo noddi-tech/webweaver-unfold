@@ -17,7 +17,7 @@
  * Service Rates:
  * - Garage: 4.00% base, 15% cooldown (T1-T5), 10% cooldown (T6-T10) → [4.00%, 3.40%, 2.89%, 2.46%, 2.09%, 1.88%, 1.69%, 1.52%, 1.37%, 1.23%]
  * - Shop: 5.00% base, 15% cooldown (T1-T5), 10% cooldown (T6-T10) → [5.00%, 4.25%, 3.61%, 3.07%, 2.61%, 2.35%, 2.11%, 1.90%, 1.71%, 1.54%]
- * - Mobile: 10.00% base, 15% cooldown (T1-T5), 10% cooldown (T6-T10) → [10.00%, 8.50%, 7.23%, 6.14%, 5.22%, 4.70%, 4.23%, 3.81%, 3.43%, 3.08%]
+ * - Mobile: 10.00% base, 15% cooldown (T1-T5), 5% cooldown (T6-T10) → [10.00%, 8.50%, 7.23%, 6.14%, 5.22%, 4.96%, 4.71%, 4.47%, 4.25%, 4.04%]
  * 
  * **INPUT ASSUMPTION:** All revenue inputs are expected to be **annual revenue in EUR**.
  * 
@@ -121,18 +121,22 @@ function detectCurrentTier(totalRevenue: number): number {
 /**
  * Calculate the flat rate for a service at a given tier.
  * Uses dual cooldown structure:
- * - Tiers 1-5: 15% cooldown
- * - Tiers 6-10: 10% cooldown
+ * - Tiers 1-5: 15% cooldown (all services)
+ * - Tiers 6-10: 10% cooldown (Garage/Shop), 5% cooldown (Mobile)
+ * 
+ * @param baseRate Starting rate for tier 1
+ * @param tier Current tier (1-10)
+ * @param service Optional service identifier ('mobile' for special mobile cooldown)
  */
-export function getRateForTier(baseRate: number, tier: number): number {
+export function getRateForTier(baseRate: number, tier: number, service?: 'mobile'): number {
   if (tier <= 5) {
-    // Tiers 1-5: 15% cooldown
+    // Tiers 1-5: 15% cooldown for all services
     return baseRate * Math.pow(1 - 0.15, tier - 1);
   } else {
-    // Tiers 6-10: 10% cooldown
-    // First calculate tier 5 rate, then apply 10% cooldown for remaining tiers
+    // Tiers 6-10: Different cooldowns per service
     const tier5Rate = baseRate * Math.pow(1 - 0.15, 4);
-    return tier5Rate * Math.pow(1 - 0.10, tier - 5);
+    const cooldown = service === 'mobile' ? 0.05 : 0.10;
+    return tier5Rate * Math.pow(1 - cooldown, tier - 5);
   }
 }
 
@@ -187,7 +191,7 @@ export function calculatePricing(
   // Get the flat rate for each service at this tier
   const garageRate = getRateForTier(GARAGE_BASE_RATE, tier);
   const shopRate = getRateForTier(SHOP_BASE_RATE, tier);
-  const mobileRate = getRateForTier(MOBILE_BASE_RATE, tier);
+  const mobileRate = getRateForTier(MOBILE_BASE_RATE, tier, 'mobile');
   
   // Calculate usage costs by applying the flat rate to each service's revenue
   const garageUsage = revenues.garage * garageRate * discountFactor;
