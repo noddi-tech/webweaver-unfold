@@ -19,15 +19,15 @@ const RANGE_MULTIPLIER = 2.5; // each subsequent tier is 2.5× larger
 const CONTRACT_DISCOUNT_MONTHLY = 0.15;
 const CONTRACT_DISCOUNT_YEARLY = 0.25;
 
-// Service‑specific base rates and cooldowns
-const GARAGE_BASE_RATE = 0.04; // 4% on the first revenue tier
-const GARAGE_COOLDOWN = 0.20;  // 20% reduction per tier
+// Service‑specific base rates and cooldowns (exported for display purposes)
+export const GARAGE_BASE_RATE = 0.04; // 4% on the first revenue tier
+export const GARAGE_COOLDOWN = 0.20;  // 20% reduction per tier
 
-const MOBILE_BASE_RATE = 0.10; // 10% on the first revenue tier
-const MOBILE_COOLDOWN = 0.15;  // 15% reduction per tier
+export const MOBILE_BASE_RATE = 0.10; // 10% on the first revenue tier
+export const MOBILE_COOLDOWN = 0.15;  // 15% reduction per tier
 
-const SHOP_BASE_RATE = 0.05;  // 5% on the first revenue tier
-const SHOP_COOLDOWN = 0.15;   // 15% reduction per tier
+export const SHOP_BASE_RATE = 0.05;  // 5% on the first revenue tier
+export const SHOP_COOLDOWN = 0.15;   // 15% reduction per tier
 
 /**
  * Representation of a revenue range with an associated take‑rate.
@@ -103,7 +103,7 @@ function detectCurrentTier(totalRevenue: number): number {
  * Calculate the flat rate for a service at a given tier.
  * Rate = baseRate * (1 - cooldown)^(tier - 1)
  */
-function getRateForTier(baseRate: number, cooldown: number, tier: number): number {
+export function getRateForTier(baseRate: number, cooldown: number, tier: number): number {
   return baseRate * Math.pow(1 - cooldown, tier - 1);
 }
 

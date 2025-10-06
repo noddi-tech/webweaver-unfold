@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { formatCurrency, formatPercentage } from "@/utils/formatCurrency";
-import { PricingResult } from "@/utils/pricing";
+import { PricingResult, getRateForTier, GARAGE_BASE_RATE, GARAGE_COOLDOWN, SHOP_BASE_RATE, SHOP_COOLDOWN, MOBILE_BASE_RATE, MOBILE_COOLDOWN } from "@/utils/pricing";
 import { getTierLabel, getTierColor } from "@/utils/pricingHelpers";
 import { Sparkles } from "lucide-react";
 
@@ -18,29 +18,37 @@ interface PricingBreakdownProps {
 
 export function PricingBreakdown({ result, currency, contractType, onContractTypeChange, includeMobile }: PricingBreakdownProps) {
   
+  // Use tier directly from pricing calculation
+  const currentTier = result.tier;
+  const tierLabel = getTierLabel(currentTier);
+
+  // Calculate the percentage rates for each service at the current tier
+  const garageRate = getRateForTier(GARAGE_BASE_RATE, GARAGE_COOLDOWN, currentTier);
+  const shopRate = getRateForTier(SHOP_BASE_RATE, SHOP_COOLDOWN, currentTier);
+  const mobileRate = getRateForTier(MOBILE_BASE_RATE, MOBILE_COOLDOWN, currentTier);
+
   const services = [
     { 
       name: 'Garage', 
       usage: result.usage.garage, 
+      rate: garageRate,
       show: true 
     },
     { 
       name: 'Shop', 
       usage: result.usage.shop, 
+      rate: shopRate,
       show: true 
     },
     { 
       name: 'Mobile', 
-      usage: result.usage.mobile, 
+      usage: result.usage.mobile,
+      rate: mobileRate,
       show: includeMobile 
     },
   ];
 
   const totalUsage = result.usage.garage + result.usage.shop + result.usage.mobile;
-
-  // Use tier directly from pricing calculation
-  const currentTier = result.tier;
-  const tierLabel = getTierLabel(currentTier);
 
   return (
     <Card className="glass-card p-6 space-y-6 animate-fade-in">
@@ -74,7 +82,10 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
             {services.filter(s => s.show).map((service) => (
               <div key={service.name} className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
-                  {service.name}
+                  <span className="font-medium">{service.name}</span>
+                  <span className="text-xs ml-1.5 opacity-70">
+                    ({formatPercentage(service.rate)})
+                  </span>
                 </span>
                 <span className="font-medium text-foreground">{formatCurrency(service.usage, currency)}</span>
               </div>
