@@ -11,9 +11,6 @@ import { RateReductionChart } from "@/components/pricing/RateReductionChart";
 import { NoHiddenCosts } from "@/components/pricing/NoHiddenCosts";
 import { PricingCalculatorModal } from "@/components/pricing/PricingCalculatorModal";
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
-import { Label } from "@/components/ui/label";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DEFAULT_CURRENCY } from "@/config/pricing";
 import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
@@ -143,29 +140,7 @@ const Pricing = () => {
                 <item.icon className="w-5 h-5 text-primary" />
                 <span>{item.text}</span>
               </div>
-            ))}
-          </div>
-
-          {/* Currency Selector */}
-          <div className="flex justify-start md:justify-center pt-4">
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm text-muted-foreground">{getCMSContent('label_currency', 'View pricing in:')}</Label>
-              <Select value={currency} onValueChange={setCurrency}>
-                <SelectTrigger className="w-[180px] bg-background/95 border-border text-foreground">
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent className="bg-background/95 backdrop-blur-md border-border z-50">
-                  <SelectItem value="EUR">🇪🇺 EUR (€)</SelectItem>
-                  <SelectItem value="USD">🇺🇸 USD ($)</SelectItem>
-                  <SelectItem value="GBP">🇬🇧 GBP (£)</SelectItem>
-                  <SelectItem value="SEK">🇸🇪 SEK (kr)</SelectItem>
-                  <SelectItem value="DKK">🇩🇰 DKK (kr)</SelectItem>
-                  <SelectItem value="NOK">🇳🇴 NOK (kr)</SelectItem>
-                  <SelectItem value="CHF">🇨🇭 CHF (Fr)</SelectItem>
-                  <SelectItem value="PLN">🇵🇱 PLN (zł)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          ))}
           </div>
         </div>
 
@@ -173,6 +148,7 @@ const Pricing = () => {
         <section className="animate-fade-in" style={{ animationDelay: '150ms' }}>
           <PricingSlider 
             currency={currency}
+            onCurrencyChange={setCurrency}
             contractType={contractType}
             onContractTypeChange={setContractType}
             onOpenCalculator={() => setIsCalculatorOpen(true)}

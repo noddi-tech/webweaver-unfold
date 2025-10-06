@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCompactCurrency, formatCurrency } from '@/utils/formatCurrency';
 import { convertFromEUR } from '@/utils/currencyConversion';
 import { calculatePricing } from '@/utils/pricing';
@@ -12,6 +13,7 @@ import { ArrowRight, Info } from 'lucide-react';
 
 interface PricingSliderProps {
   currency: string;
+  onCurrencyChange: (currency: string) => void;
   contractType: 'none' | 'monthly' | 'yearly';
   onContractTypeChange: (type: 'none' | 'monthly' | 'yearly') => void;
   onOpenCalculator: () => void;
@@ -36,7 +38,7 @@ const PRESETS_EUR = [
   200_000_000  // €200M - Enterprise
 ];
 
-export function PricingSlider({ currency, contractType, onContractTypeChange, onOpenCalculator, textContent }: PricingSliderProps) {
+export function PricingSlider({ currency, onCurrencyChange, contractType, onContractTypeChange, onOpenCalculator, textContent }: PricingSliderProps) {
   // Default to index 2 (€2M preset)
   const [sliderValue, setSliderValue] = useState(2);
   
@@ -82,6 +84,28 @@ export function PricingSlider({ currency, contractType, onContractTypeChange, on
   return (
     <Card className="liquid-glass p-6 md:p-8 max-w-4xl mx-auto">
       <div className="space-y-6">
+        {/* Currency Selector */}
+        <div className="flex justify-center">
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm text-muted-foreground text-center">{getCMSContent('label_currency', 'View pricing in:')}</Label>
+            <Select value={currency} onValueChange={onCurrencyChange}>
+              <SelectTrigger className="w-[180px] bg-background/95 border-border text-foreground">
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent className="bg-background/95 backdrop-blur-md border-border z-50">
+                <SelectItem value="EUR">🇪🇺 EUR (€)</SelectItem>
+                <SelectItem value="USD">🇺🇸 USD ($)</SelectItem>
+                <SelectItem value="GBP">🇬🇧 GBP (£)</SelectItem>
+                <SelectItem value="SEK">🇸🇪 SEK (kr)</SelectItem>
+                <SelectItem value="DKK">🇩🇰 DKK (kr)</SelectItem>
+                <SelectItem value="NOK">🇳🇴 NOK (kr)</SelectItem>
+                <SelectItem value="CHF">🇨🇭 CHF (Fr)</SelectItem>
+                <SelectItem value="PLN">🇵🇱 PLN (zł)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         {/* Revenue Display */}
         <div className="text-center">
           <h3 className="text-lg font-semibold text-foreground mb-2 glass-text-high-contrast">
