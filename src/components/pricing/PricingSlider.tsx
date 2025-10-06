@@ -149,7 +149,7 @@ export function PricingSlider({ currency, contractType, onContractTypeChange, on
           <div className="text-sm text-muted-foreground mb-1 glass-text-high-contrast">
             {getCMSContent('preview_label', 'Estimated annual cost:')}
           </div>
-          <div className="flex items-center justify-center gap-2 flex-wrap">
+          <div className="grid gap-2 justify-items-center">
             <div className="text-2xl md:text-3xl font-bold text-foreground glass-text-large">
               {formatCurrency(result.total, currency)}
             </div>
