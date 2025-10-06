@@ -294,7 +294,7 @@ const Pricing = () => {
         </section>
 
         {/* Final CTA */}
-        <section className="animate-fade-in" style={{ animationDelay: '700ms' }}>
+        <section className="hidden animate-fade-in" style={{ animationDelay: '700ms' }}>
           <Card className="liquid-glass p-12 text-center bg-gradient-primary/5 border-primary/20 max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold mb-4 text-foreground">
               {getCMSContent('h2', 'Ready to transform your support experience?')}
