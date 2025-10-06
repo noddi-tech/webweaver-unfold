@@ -182,7 +182,7 @@ const Pricing = () => {
 
         {/* No Hidden Costs Banner */}
         <section className="animate-fade-in" style={{ animationDelay: '175ms' }}>
-          <NoHiddenCosts textContent={textContent} />
+          <NoHiddenCosts textContent={textContent} onOpenCalculator={() => setIsCalculatorOpen(true)} />
         </section>
 
         {/* Contract Type Selector - Now integrated in PricingSlider */}
@@ -231,24 +231,8 @@ const Pricing = () => {
           />
         </section> */}
 
-        {/* Advanced Calculator CTA */}
-        <section className="text-center animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <Card className="liquid-glass p-8 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-foreground mb-4">
-              {getCMSContent('h2', 'Need a Precise Estimate?')}
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              {getCMSContent('p', 'Enter your revenue and service mix to see your cost.')}
-            </p>
-            <Button size="lg" onClick={() => setIsCalculatorOpen(true)} className="accessible-focus">
-              <Calculator className="w-5 h-5 mr-2" />
-              {getCMSContent('button', 'Open Advanced Calculator')}
-            </Button>
-          </Card>
-        </section>
-
         {/* Rate Reduction Chart */}
-        <section className="animate-fade-in" style={{ animationDelay: '400ms' }}>
+        <section className="animate-fade-in" style={{ animationDelay: '200ms' }}>
           <RateReductionChart currency={currency} />
         </section>
 
