@@ -29,12 +29,6 @@ interface PricingCalculatorModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Base presets in EUR (source of truth)
-const BASE_PRESETS_EUR = {
-  small: { garage: 1_000_000, shop: 500_000, mobile: 200_000 },
-  large: { garage: 20_000_000, shop: 15_000_000, mobile: 5_000_000 },
-  enterprise: { garage: 150_000_000, shop: 100_000_000, mobile: 50_000_000 },
-};
 
 export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculatorModalProps) {
   const [currency, setCurrency] = useState(() => {
@@ -68,12 +62,6 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currency, previousCurrency]);
 
-  const applyPreset = (preset: keyof typeof BASE_PRESETS_EUR) => {
-    const valuesEUR = BASE_PRESETS_EUR[preset];
-    setGarageRevenue(convertFromEUR(valuesEUR.garage, currency));
-    setShopRevenue(convertFromEUR(valuesEUR.shop, currency));
-    setMobileRevenue(includeMobile ? convertFromEUR(valuesEUR.mobile, currency) : 0);
-  };
 
   // Convert user inputs to EUR for calculation (pricing.ts is source of truth)
   const resultEUR = calculatePricing(
@@ -105,7 +93,8 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
   const getStepSize = (revenue: number) => {
     if (revenue < 1_000_000) return 50_000;
     if (revenue < 10_000_000) return 500_000;
-    return 5_000_000;
+    if (revenue < 50_000_000) return 5_000_000;
+    return 10_000_000;
   };
 
   return (
@@ -184,41 +173,6 @@ export function PricingCalculatorModal({ open, onOpenChange }: PricingCalculator
                   </SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-
-            {/* Preset Scenarios */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-foreground">Quick Presets</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => applyPreset('small')}
-                  className="flex flex-col h-auto py-3"
-                >
-                  <span className="text-xs font-semibold">Small</span>
-                  <span className="text-xs text-muted-foreground">≤ {currencyConfig.symbol}2M</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => applyPreset('large')}
-                  className="flex flex-col h-auto py-3"
-                >
-                  <span className="text-xs font-semibold">Large</span>
-                  <span className="text-xs text-muted-foreground">{currencyConfig.symbol}2-40M</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => applyPreset('enterprise')}
-                  className="flex flex-col h-auto py-3 relative"
-                >
-                  <Sparkles className="w-3 h-3 absolute top-1 right-1 text-primary" />
-                  <span className="text-xs font-semibold">Enterprise</span>
-                  <span className="text-xs text-muted-foreground">{currencyConfig.symbol}40M+</span>
-                </Button>
-              </div>
             </div>
 
             {/* Revenue Inputs */}
