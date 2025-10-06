@@ -135,7 +135,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
 
         {/* Contract Type Selector */}
         <div className="space-y-3">
-          <Label className="text-sm text-foreground">{getCMSContent('label_contract', 'Contract type:')}</Label>
+          <Label className="text-sm text-foreground">{getCMSContent('label_contract', 'Revenue')}</Label>
           <ToggleGroup
             type="single"
             value={contractType}
