@@ -12,11 +12,11 @@ export function PricingFAQ() {
     },
     {
       question: "How are rates calculated?",
-      answer: "Rates are calculated using a tiered system across 10 revenue ranges. Each tier has a specific take-rate that applies to revenue within that range. As you move into higher tiers, your take-rate decreases by approximately 20% per tier, resulting in continuously decreasing effective rates."
+      answer: "Rates are calculated using a single-tier flat-rate system across 10 revenue ranges. Your total combined annual revenue determines your tier, and each service (garage, shop, mobile) is then charged at a flat rate for that entire tier. As you move into higher tiers, your rates decrease using a dual cooldown structure: 15% reduction per tier for tiers 1-5, then 10% reduction for garage/shop and 5% reduction for mobile services in tiers 6-10."
     },
     {
       question: "Do you offer discounts?",
-      answer: "Yes! We offer two types of contract discounts: 15% off with a monthly contract, and 25% off with a yearly contract. These discounts apply to your entire usage cost, providing significant savings."
+      answer: "Yes! We offer two types of contract discounts: 10% off with a monthly contract, and 20% off with a yearly contract. These discounts apply to your entire usage cost, providing significant savings."
     },
     {
       question: "Is there a minimum commitment?",
