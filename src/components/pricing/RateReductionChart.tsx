@@ -32,7 +32,7 @@ export function RateReductionChart({ currency }: RateReductionChartProps) {
   const maxRate = 4.5;
 
   return (
-    <Card className="p-6 max-w-3xl mx-auto">
+    <Card className="p-6 max-w-4xl mx-auto">
       <div className="space-y-6">
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">

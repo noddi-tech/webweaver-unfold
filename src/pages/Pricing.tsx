@@ -243,7 +243,7 @@ const Pricing = () => {
 
         {/* Advanced Calculator CTA */}
         <section className="text-center animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <Card className="liquid-glass p-8 max-w-2xl mx-auto">
+          <Card className="liquid-glass p-8 max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-foreground mb-4">
               {getCMSContent('h2', 'Need a Precise Estimate?')}
             </h2>

@@ -35,7 +35,7 @@ export const NoHiddenCosts = ({ textContent }: NoHiddenCostsProps) => {
   ];
 
   return (
-    <Card className="liquid-glass p-8 max-w-5xl mx-auto border-2 border-primary/20 relative overflow-hidden">
+    <Card className="liquid-glass p-8 max-w-4xl mx-auto border-2 border-primary/20 relative overflow-hidden">
       {/* Gradient border effect */}
       <div className="absolute inset-0 bg-gradient-primary opacity-5 pointer-events-none" />
       
