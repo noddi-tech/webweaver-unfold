@@ -12,11 +12,12 @@
  *   at the tier's flat rate
  * 
  * Rate Calculation:
- * - Each service has a base rate (Tier 1) and a cooldown percentage
- * - Rate for tier N = baseRate × (1 - cooldown)^(N-1)
- * - Garage: 4.00% base, 20% cooldown per tier
- * - Shop: 5.00% base, 15% cooldown per tier
- * - Mobile: 10.00% base, 15% cooldown per tier
+ * - Each service has a base rate (Tier 1) and dual cooldown structure
+ * - Tiers 1-5: 15% cooldown per tier
+ * - Tiers 6-10: 10% cooldown per tier
+ * - Garage: 4.00% base
+ * - Shop: 5.00% base
+ * - Mobile: 10.00% base
  * 
  * ══════════════════════════════════════════════════════════════════════════════
  * EXAMPLE SCENARIOS
@@ -45,16 +46,16 @@ const RANGE_MULTIPLIER = 2.5;
 
 /**
  * Complete rate table for all tiers and services.
- * Each service has a base rate that decreases by a cooldown % per tier.
+ * Dual cooldown structure: 15% for tiers 1-5, 10% for tiers 6-10.
  * 
- * Garage: 4.00% base, 20% cooldown per tier
- * Shop: 5.00% base, 15% cooldown per tier  
- * Mobile: 10.00% base, 15% cooldown per tier
+ * Garage: 4.00% base
+ * Shop: 5.00% base
+ * Mobile: 10.00% base
  */
 export const TIER_RATES = {
-  garage: [4.00, 3.20, 2.56, 2.05, 1.64, 1.31, 1.05, 0.84, 0.67, 0.54],
-  shop: [5.00, 4.25, 3.61, 3.07, 2.61, 2.22, 1.89, 1.60, 1.36, 1.16],
-  mobile: [10.00, 8.50, 7.23, 6.14, 5.22, 4.44, 3.77, 3.21, 2.73, 2.32]
+  garage: [4.00, 3.40, 2.89, 2.46, 2.09, 1.88, 1.69, 1.52, 1.37, 1.23],
+  shop: [5.00, 4.25, 3.61, 3.07, 2.61, 2.35, 2.11, 1.90, 1.71, 1.54],
+  mobile: [10.00, 8.50, 7.23, 6.14, 5.22, 4.70, 4.23, 3.81, 3.43, 3.08]
 };
 
 /**

@@ -15,9 +15,9 @@
  * each service is charged at the tier's flat rate.
  * 
  * Service Rates:
- * - Garage: 4.00% base, 20% cooldown → [4.00%, 3.20%, 2.56%, 2.05%, 1.64%, 1.31%, 1.05%, 0.84%, 0.67%, 0.54%]
- * - Shop: 5.00% base, 15% cooldown → [5.00%, 4.25%, 3.61%, 3.07%, 2.61%, 2.22%, 1.89%, 1.60%, 1.36%, 1.16%]
- * - Mobile: 10.00% base, 15% cooldown → [10.00%, 8.50%, 7.23%, 6.14%, 5.22%, 4.44%, 3.77%, 3.21%, 2.73%, 2.32%]
+ * - Garage: 4.00% base, 15% cooldown (T1-T5), 10% cooldown (T6-T10) → [4.00%, 3.40%, 2.89%, 2.46%, 2.09%, 1.88%, 1.69%, 1.52%, 1.37%, 1.23%]
+ * - Shop: 5.00% base, 15% cooldown (T1-T5), 10% cooldown (T6-T10) → [5.00%, 4.25%, 3.61%, 3.07%, 2.61%, 2.35%, 2.11%, 1.90%, 1.71%, 1.54%]
+ * - Mobile: 10.00% base, 15% cooldown (T1-T5), 10% cooldown (T6-T10) → [10.00%, 8.50%, 7.23%, 6.14%, 5.22%, 4.70%, 4.23%, 3.81%, 3.43%, 3.08%]
  * 
  * **INPUT ASSUMPTION:** All revenue inputs are expected to be **annual revenue in EUR**.
  * 
@@ -28,19 +28,14 @@
 const INITIAL_SPAN = 100_000; // revenue span for the first tier (EUR)
 const RANGE_MULTIPLIER = 2.5; // each subsequent tier is 2.5× larger
 
-// Contract discounts: monthly subscribers get 15% off, yearly subscribers get 25% off.
-const CONTRACT_DISCOUNT_MONTHLY = 0.15;
-const CONTRACT_DISCOUNT_YEARLY = 0.25;
+// Contract discounts: monthly subscribers get 10% off, yearly subscribers get 20% off.
+const CONTRACT_DISCOUNT_MONTHLY = 0.10;
+const CONTRACT_DISCOUNT_YEARLY = 0.20;
 
-// Service‑specific base rates and cooldowns (exported for display purposes)
+// Service‑specific base rates (exported for display purposes)
 export const GARAGE_BASE_RATE = 0.04; // 4% on the first revenue tier
-export const GARAGE_COOLDOWN = 0.20;  // 20% reduction per tier
-
 export const MOBILE_BASE_RATE = 0.10; // 10% on the first revenue tier
-export const MOBILE_COOLDOWN = 0.15;  // 15% reduction per tier
-
 export const SHOP_BASE_RATE = 0.05;  // 5% on the first revenue tier
-export const SHOP_COOLDOWN = 0.15;   // 15% reduction per tier
 
 /**
  * Representation of a revenue range with an associated take‑rate.
@@ -125,10 +120,20 @@ function detectCurrentTier(totalRevenue: number): number {
 
 /**
  * Calculate the flat rate for a service at a given tier.
- * Rate = baseRate * (1 - cooldown)^(tier - 1)
+ * Uses dual cooldown structure:
+ * - Tiers 1-5: 15% cooldown
+ * - Tiers 6-10: 10% cooldown
  */
-export function getRateForTier(baseRate: number, cooldown: number, tier: number): number {
-  return baseRate * Math.pow(1 - cooldown, tier - 1);
+export function getRateForTier(baseRate: number, tier: number): number {
+  if (tier <= 5) {
+    // Tiers 1-5: 15% cooldown
+    return baseRate * Math.pow(1 - 0.15, tier - 1);
+  } else {
+    // Tiers 6-10: 10% cooldown
+    // First calculate tier 5 rate, then apply 10% cooldown for remaining tiers
+    const tier5Rate = baseRate * Math.pow(1 - 0.15, 4);
+    return tier5Rate * Math.pow(1 - 0.10, tier - 5);
+  }
 }
 
 export interface PricingResult {
@@ -152,13 +157,13 @@ export interface PricingResult {
  * Optionally, a contract discount is applied to the usage fees. The `contractType`
  * option specifies whether no contract (`'none'`), a monthly contract (`'monthly'`)
  * or a yearly contract (`'yearly'`) discount should be applied. Monthly contracts
- * receive a 15% discount and yearly contracts receive a 25% discount.
+ * receive a 10% discount and yearly contracts receive a 20% discount.
  *
  * @param revenues An object containing annual revenue for each service (in EUR)
  * @param options  Additional options:
  *                 - includeMobile: whether to include the mobile service in the calculation.
  *                 - contractType: 'none', 'monthly' or 'yearly' to apply no discount,
- *                   a 15% discount or a 25% discount, respectively.
+ *                   a 10% discount or a 20% discount, respectively.
  * @returns Pricing breakdown with usage, total costs, effective rate, and discount amount
  */
 export function calculatePricing(
@@ -180,9 +185,9 @@ export function calculatePricing(
   const tier = detectCurrentTier(totalRevenue);
   
   // Get the flat rate for each service at this tier
-  const garageRate = getRateForTier(GARAGE_BASE_RATE, GARAGE_COOLDOWN, tier);
-  const shopRate = getRateForTier(SHOP_BASE_RATE, SHOP_COOLDOWN, tier);
-  const mobileRate = getRateForTier(MOBILE_BASE_RATE, MOBILE_COOLDOWN, tier);
+  const garageRate = getRateForTier(GARAGE_BASE_RATE, tier);
+  const shopRate = getRateForTier(SHOP_BASE_RATE, tier);
+  const mobileRate = getRateForTier(MOBILE_BASE_RATE, tier);
   
   // Calculate usage costs by applying the flat rate to each service's revenue
   const garageUsage = revenues.garage * garageRate * discountFactor;

@@ -127,19 +127,19 @@ export function PricingSlider({ currency, contractType, onContractTypeChange, on
             </ToggleGroupItem>
             <ToggleGroupItem
               value="monthly"
-              aria-label="Monthly Contract (Save 15%)"
+              aria-label="Monthly Contract (Save 10%)"
               className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2 flex items-center justify-center whitespace-nowrap"
             >
-              Monthly <span className="hidden sm:inline text-xs ml-1 opacity-75 whitespace-nowrap">(Save 15%)</span>
-              <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-15%</span>
+              Monthly <span className="hidden sm:inline text-xs ml-1 opacity-75 whitespace-nowrap">(Save 10%)</span>
+              <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-10%</span>
             </ToggleGroupItem>
             <ToggleGroupItem
               value="yearly"
-              aria-label="Yearly Contract (Save 25%)"
+              aria-label="Yearly Contract (Save 20%)"
               className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2 flex items-center justify-center whitespace-nowrap"
             >
-              Yearly <span className="hidden sm:inline text-xs ml-1 opacity-75 whitespace-nowrap">(Save 25%)</span>
-              <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-25%</span>
+              Yearly <span className="hidden sm:inline text-xs ml-1 opacity-75 whitespace-nowrap">(Save 20%)</span>
+              <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-20%</span>
             </ToggleGroupItem>
           </ToggleGroup>
         </div>

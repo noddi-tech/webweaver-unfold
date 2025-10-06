@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { formatCurrency, formatPercentage } from "@/utils/formatCurrency";
-import { PricingResult, getRateForTier, GARAGE_BASE_RATE, GARAGE_COOLDOWN, SHOP_BASE_RATE, SHOP_COOLDOWN, MOBILE_BASE_RATE, MOBILE_COOLDOWN } from "@/utils/pricing";
+import { PricingResult, getRateForTier, GARAGE_BASE_RATE, SHOP_BASE_RATE, MOBILE_BASE_RATE } from "@/utils/pricing";
 import { getTierLabel, getTierColor } from "@/utils/pricingHelpers";
 import { Sparkles } from "lucide-react";
 
@@ -23,9 +23,9 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
   const tierLabel = getTierLabel(currentTier);
 
   // Calculate the percentage rates for each service at the current tier
-  const garageRate = getRateForTier(GARAGE_BASE_RATE, GARAGE_COOLDOWN, currentTier);
-  const shopRate = getRateForTier(SHOP_BASE_RATE, SHOP_COOLDOWN, currentTier);
-  const mobileRate = getRateForTier(MOBILE_BASE_RATE, MOBILE_COOLDOWN, currentTier);
+  const garageRate = getRateForTier(GARAGE_BASE_RATE, currentTier);
+  const shopRate = getRateForTier(SHOP_BASE_RATE, currentTier);
+  const mobileRate = getRateForTier(MOBILE_BASE_RATE, currentTier);
 
   const services = [
     { 
@@ -156,7 +156,7 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
             >
               <div className="text-center">
                 <div className="text-sm font-medium">Monthly</div>
-                <div className="text-xs opacity-80">Save 15%</div>
+                <div className="text-xs opacity-80">Save 10%</div>
               </div>
             </ToggleGroupItem>
             <ToggleGroupItem
@@ -166,7 +166,7 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
             >
               <div className="text-center">
                 <div className="text-sm font-medium">Yearly</div>
-                <div className="text-xs opacity-80">Save 25%</div>
+                <div className="text-xs opacity-80">Save 20%</div>
               </div>
             </ToggleGroupItem>
           </ToggleGroup>
