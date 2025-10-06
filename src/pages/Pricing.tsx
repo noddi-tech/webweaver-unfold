@@ -184,6 +184,7 @@ const Pricing = () => {
           <PricingSlider 
             currency={currency}
             contractType={contractType}
+            onContractTypeChange={setContractType}
             onOpenCalculator={() => setIsCalculatorOpen(true)}
             textContent={textContent}
           />
@@ -194,8 +195,8 @@ const Pricing = () => {
           <NoHiddenCosts textContent={textContent} />
         </section>
 
-        {/* Contract Type Selector - Centered Above Cards */}
-        <section className="max-w-md mx-auto">
+        {/* Contract Type Selector - Now integrated in PricingSlider */}
+        {/* <section className="max-w-md mx-auto">
           <div className="flex flex-col gap-3">
             <Label className="text-sm text-foreground text-center">{getCMSContent('label', 'Contract type:')}</Label>
             <ToggleGroup
@@ -229,16 +230,16 @@ const Pricing = () => {
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
-        </section>
+        </section> */}
 
-        {/* Feature Cards */}
-        <section className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+        {/* Feature Cards - Hidden for now */}
+        {/* <section className="animate-fade-in" style={{ animationDelay: '100ms' }}>
           <PricingFeatureCards 
             currency={currency} 
             contractType={contractType}
             textContent={textContent}
           />
-        </section>
+        </section> */}
 
         {/* Advanced Calculator CTA */}
         <section className="text-center animate-fade-in" style={{ animationDelay: '200ms' }}>

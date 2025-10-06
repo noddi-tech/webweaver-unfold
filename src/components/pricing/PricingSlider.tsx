@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { formatCompactCurrency, formatCurrency } from '@/utils/formatCurrency';
 import { convertFromEUR } from '@/utils/currencyConversion';
 import { calculatePricing } from '@/utils/pricing';
@@ -10,6 +13,7 @@ import { ArrowRight } from 'lucide-react';
 interface PricingSliderProps {
   currency: string;
   contractType: 'none' | 'monthly' | 'yearly';
+  onContractTypeChange: (type: 'none' | 'monthly' | 'yearly') => void;
   onOpenCalculator: () => void;
   textContent: any[];
 }
@@ -17,15 +21,22 @@ interface PricingSliderProps {
 // Logarithmic presets in EUR (source of truth)
 // These are the ONLY values the slider can snap to
 const PRESETS_EUR = [
-  100_000,    // €100k - Very small
-  500_000,    // €500k - Small
-  2_000_000,  // €2M - Medium
-  10_000_000, // €10M - Large
-  40_000_000, // €40M - Very Large
-  200_000_000 // €200M - Enterprise
+  100_000,     // €100k - Very small
+  500_000,     // €500k - Small
+  2_000_000,   // €2M - Small-Medium
+  5_000_000,   // €5M - Medium
+  7_000_000,   // €7M - Medium
+  10_000_000,  // €10M - Medium-Large
+  15_000_000,  // €15M - Large
+  20_000_000,  // €20M - Large
+  40_000_000,  // €40M - Very Large
+  60_000_000,  // €60M - Very Large
+  80_000_000,  // €80M - Very Large
+  100_000_000, // €100M - Enterprise
+  200_000_000  // €200M - Enterprise
 ];
 
-export function PricingSlider({ currency, contractType, onOpenCalculator, textContent }: PricingSliderProps) {
+export function PricingSlider({ currency, contractType, onContractTypeChange, onOpenCalculator, textContent }: PricingSliderProps) {
   // Default to index 2 (€2M preset)
   const [sliderValue, setSliderValue] = useState(2);
   
@@ -60,6 +71,14 @@ export function PricingSlider({ currency, contractType, onOpenCalculator, textCo
     mobileCost: convertFromEUR(resultEUR.mobileCost, currency),
   };
 
+  // Calculate savings (cost without contract vs with contract)
+  const resultWithoutContract = calculatePricing(estimatedRevenues, { 
+    includeMobile: true, 
+    contractType: 'none' 
+  });
+  const savingsEUR = resultWithoutContract.total - resultEUR.total;
+  const savings = convertFromEUR(savingsEUR, currency);
+
   return (
     <Card className="liquid-glass p-6 md:p-8 max-w-3xl mx-auto">
       <div className="space-y-6">
@@ -90,13 +109,55 @@ export function PricingSlider({ currency, contractType, onOpenCalculator, textCo
           </div>
         </div>
 
+        {/* Contract Type Selector */}
+        <div className="space-y-3">
+          <Label className="text-sm text-foreground">{getCMSContent('label_contract', 'Contract type:')}</Label>
+          <ToggleGroup
+            type="single"
+            value={contractType}
+            onValueChange={(value) => value && onContractTypeChange(value as 'none' | 'monthly' | 'yearly')}
+            className="liquid-glass-tab rounded-lg p-1 w-full"
+          >
+            <ToggleGroupItem
+              value="none"
+              aria-label="No Contract"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2"
+            >
+              None
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="monthly"
+              aria-label="Monthly Contract (Save 15%)"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2 flex items-center justify-center whitespace-nowrap"
+            >
+              Monthly <span className="hidden sm:inline text-xs ml-1 opacity-75 whitespace-nowrap">(Save 15%)</span>
+              <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-15%</span>
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="yearly"
+              aria-label="Yearly Contract (Save 25%)"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground flex-1 text-xs sm:text-sm px-2 flex items-center justify-center whitespace-nowrap"
+            >
+              Yearly <span className="hidden sm:inline text-xs ml-1 opacity-75 whitespace-nowrap">(Save 25%)</span>
+              <span className="sm:hidden text-[10px] ml-0.5 opacity-75">-25%</span>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+
         {/* Cost Preview */}
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center">
           <div className="text-sm text-muted-foreground mb-1 glass-text-high-contrast">
             {getCMSContent('preview_label', 'Estimated annual cost:')}
           </div>
-          <div className="text-2xl md:text-3xl font-bold text-foreground glass-text-large">
-            {formatCurrency(result.total, currency)}
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <div className="text-2xl md:text-3xl font-bold text-foreground glass-text-large">
+              {formatCurrency(result.total, currency)}
+            </div>
+            {contractType !== 'none' && savings > 0 && (
+              <Badge className="bg-green-600/90 text-white hover:bg-green-600 border-green-500/20 text-sm">
+                ↓ Save {formatCurrency(savings, currency)}
+              </Badge>
+            )}
           </div>
           <div className="text-sm text-muted-foreground mt-1">
             ≈ {result.effectiveRate.toFixed(2)}% effective rate
