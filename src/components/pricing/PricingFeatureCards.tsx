@@ -91,7 +91,8 @@ export function PricingFeatureCards({ currency, contractType, textContent }: Pri
       color: base.tier === "Emerging" ? "bg-green-600 text-white border-green-700" :
              base.tier === "Large" ? "bg-amber-500 text-white border-amber-600" :
              "bg-gradient-primary text-primary-foreground border-primary",
-      revenues: convertedRevenues,
+      revenues: convertedRevenues, // For DISPLAY
+      revenuesEUR: base.revenues,   // For CALCULATION
       cta: "Book Demo"
     };
   });
@@ -100,16 +101,33 @@ export function PricingFeatureCards({ currency, contractType, textContent }: Pri
     <>
       <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {scenarios.map((scenario, index) => {
-        // Calculate both base and discounted pricing
-        const baseResult = calculatePricing(scenario.revenues, { 
+        // Calculate using EUR revenues (correct input for calculatePricing)
+        const baseResultEUR = calculatePricing(scenario.revenuesEUR, { 
           includeMobile: true, 
           contractType: 'none' 
         });
 
-        const discountedResult = calculatePricing(scenario.revenues, { 
+        const discountedResultEUR = calculatePricing(scenario.revenuesEUR, { 
           includeMobile: true, 
           contractType 
         });
+
+        // Convert results to target currency for display
+        const baseResult = {
+          ...baseResultEUR,
+          total: convertFromEUR(baseResultEUR.total, currency),
+          garageCost: convertFromEUR(baseResultEUR.garageCost, currency),
+          shopCost: convertFromEUR(baseResultEUR.shopCost, currency),
+          mobileCost: convertFromEUR(baseResultEUR.mobileCost, currency),
+        };
+
+        const discountedResult = {
+          ...discountedResultEUR,
+          total: convertFromEUR(discountedResultEUR.total, currency),
+          garageCost: convertFromEUR(discountedResultEUR.garageCost, currency),
+          shopCost: convertFromEUR(discountedResultEUR.shopCost, currency),
+          mobileCost: convertFromEUR(discountedResultEUR.mobileCost, currency),
+        };
 
         const hasDiscount = contractType !== 'none';
         const savings = baseResult.total - discountedResult.total;
@@ -117,15 +135,15 @@ export function PricingFeatureCards({ currency, contractType, textContent }: Pri
         // State for collapsible breakdown (default collapsed for better UX)
         const [showDetails, setShowDetails] = useState(false);
 
-        // Calculate per-category rates
+        // Calculate per-category rates using converted display values
         const garageRate = scenario.revenues.garage > 0 
-          ? (discountedResult.garageCost / convertFromEUR(scenario.revenues.garage, currency)) * 100 
+          ? (discountedResult.garageCost / scenario.revenues.garage) * 100 
           : 0;
         const shopRate = scenario.revenues.shop > 0 
-          ? (discountedResult.shopCost / convertFromEUR(scenario.revenues.shop, currency)) * 100 
+          ? (discountedResult.shopCost / scenario.revenues.shop) * 100 
           : 0;
         const mobileRate = scenario.revenues.mobile > 0 
-          ? (discountedResult.mobileCost / convertFromEUR(scenario.revenues.mobile, currency)) * 100 
+          ? (discountedResult.mobileCost / scenario.revenues.mobile) * 100 
           : 0;
 
         const borderColor = scenario.tier === 'Emerging' ? 'border-l-green-500' : 

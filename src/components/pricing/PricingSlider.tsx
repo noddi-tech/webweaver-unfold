@@ -45,10 +45,20 @@ export function PricingSlider({ currency, contractType, onOpenCalculator, textCo
     mobile: revenueEUR * 0.1
   };
 
-  const result = calculatePricing(estimatedRevenues, { 
+  // Calculate in EUR
+  const resultEUR = calculatePricing(estimatedRevenues, { 
     includeMobile: true, 
     contractType 
   });
+
+  // Convert all costs to target currency for display
+  const result = {
+    ...resultEUR,
+    total: convertFromEUR(resultEUR.total, currency),
+    garageCost: convertFromEUR(resultEUR.garageCost, currency),
+    shopCost: convertFromEUR(resultEUR.shopCost, currency),
+    mobileCost: convertFromEUR(resultEUR.mobileCost, currency),
+  };
 
   return (
     <Card className="liquid-glass p-6 md:p-8 max-w-3xl mx-auto">

@@ -242,7 +242,6 @@ All colors MUST be HSL.
     color: hsl(var(--foreground));
     font-weight: 600;
     font-size: 16px;
-    text-shadow: 0 2px 4px hsl(0 0% 0% / 0.25), 0 1px 2px hsl(0 0% 0% / 0.15);
   }
 
   /* Large text for glass backgrounds - WCAG AA 3:1 */
@@ -250,7 +249,6 @@ All colors MUST be HSL.
     color: hsl(var(--foreground));
     font-weight: 600;
     font-size: 18px;
-    text-shadow: 0 1px 2px hsl(0 0% 0% / 0.1);
   }
 
   /* Hero text with strong shadow for gradient backgrounds */
