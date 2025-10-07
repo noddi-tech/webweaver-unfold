@@ -1,3 +1,4 @@
+import React from "react";
 import { Calendar, Zap, Smartphone, RefreshCw, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
@@ -45,18 +46,18 @@ export default function HowItWorks() {
         </div>
 
         {/* Desktop: Horizontal Flow */}
-        <div className="hidden lg:flex items-start justify-between gap-4 mb-12">
+        <div className="hidden lg:grid lg:grid-cols-4 gap-4 mb-12 items-stretch">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <div 
-                key={index} 
-                className={`flex items-start gap-4 flex-1 transition-all duration-500 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
-                <Card className="flex-1 hover-scale h-full">
+              <React.Fragment key={index}>
+                <div 
+                  className={`transition-all duration-500 ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                  style={{ transitionDelay: `${index * 100}ms` }}
+                >
+                <Card className="hover-scale h-full">
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
                       <Icon className="w-7 h-7 text-primary-foreground" />
@@ -67,12 +68,13 @@ export default function HowItWorks() {
                     <p className="text-xs text-muted-foreground">{step.details}</p>
                   </CardContent>
                 </Card>
+                </div>
                 {index < steps.length - 1 && (
-                  <div className="flex items-center justify-center pt-12">
+                  <div className="flex items-center justify-center self-center">
                     <ArrowRight className="w-6 h-6 text-primary" />
                   </div>
                 )}
-              </div>
+              </React.Fragment>
             );
           })}
         </div>
