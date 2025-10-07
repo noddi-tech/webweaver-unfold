@@ -338,4 +338,22 @@ All colors MUST be HSL.
   .bg-gradient-subtle {
     background-image: var(--gradient-subtle);
   }
+
+  /* Hover scale animation */
+  .hover-scale {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hover-scale {
+      transition: none;
+    }
+    .hover-scale:hover {
+      transform: none;
+    }
+  }
 }

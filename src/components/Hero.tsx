@@ -3,13 +3,15 @@ import { ArrowRight, Award, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import dashboardPreview from "@/assets/dashboard-preview.jpg";
 import { useState } from "react";
+import { Counter } from "@/components/ui/counter";
 
 const Hero = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
-    <section className="pt-32 pb-20 md:pb-28 bg-gradient-hero">
-      <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <section className="pt-32 pb-20 md:pb-28 bg-gradient-hero relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 animate-gradient bg-[length:200%_200%]" />
+      <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left Column - Text Content */}
           <div className="space-y-8">
@@ -28,7 +30,9 @@ const Hero = () => {
                   <Award className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">NPS ~90</div>
+                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                    NPS <Counter end={90} prefix="~" />
+                  </div>
                   <div className="text-xs text-muted-foreground">Industry leading</div>
                 </div>
               </div>
@@ -37,7 +41,9 @@ const Hero = () => {
                   <TrendingUp className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">20,000+</div>
+                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                    <Counter end={20000} suffix="+" />
+                  </div>
                   <div className="text-xs text-muted-foreground">Bookings completed</div>
                 </div>
               </div>

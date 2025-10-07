@@ -1,5 +1,6 @@
 import { Calendar, Zap, Smartphone, RefreshCw, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const steps = [
   {
@@ -29,8 +30,10 @@ const steps = [
 ];
 
 export default function HowItWorks() {
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
+
   return (
-    <section className="py-20 md:py-28 bg-muted/30">
+    <section ref={ref as any} className="py-20 md:py-28 bg-muted/30">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
@@ -46,7 +49,13 @@ export default function HowItWorks() {
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <div key={index} className="flex items-start gap-4 flex-1">
+              <div 
+                key={index} 
+                className={`flex items-start gap-4 flex-1 transition-all duration-500 ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: `${index * 100}ms` }}
+              >
                 <Card className="flex-1 hover-scale">
                   <CardContent className="p-6">
                     <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
@@ -73,7 +82,13 @@ export default function HowItWorks() {
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <div key={index} className="relative">
+              <div 
+                key={index} 
+                className={`relative transition-all duration-500 ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: `${index * 100}ms` }}
+              >
                 <Card className="hover-scale">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
@@ -103,10 +118,10 @@ export default function HowItWorks() {
         <div className="text-center">
           <div className="inline-block px-8 py-4 bg-primary/10 border-2 border-primary/20 rounded-xl">
             <p className="text-base md:text-lg font-semibold text-primary mb-1">
-              All data shared instantly between customer, technician, and back office.
+              It's not automation. It's orchestration.
             </p>
             <p className="text-sm text-primary/80 font-medium">
-              One platform. One source of truth.
+              One platform. Every function. Zero friction.
             </p>
           </div>
         </div>
