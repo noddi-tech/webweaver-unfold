@@ -46,13 +46,13 @@ export default function HowItWorks() {
         </div>
 
         {/* Desktop: Horizontal Flow */}
-        <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 mb-12 items-center">
+        <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 mb-12 items-stretch">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
               <React.Fragment key={index}>
                 <div 
-                  className={`transition-all duration-500 ${
+                  className={`h-full transition-all duration-500 ${
                     isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                   style={{ transitionDelay: `${index * 100}ms` }}
