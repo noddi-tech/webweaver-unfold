@@ -58,7 +58,7 @@ export default function HowItWorks() {
                   style={{ transitionDelay: `${index * 100}ms` }}
                 >
                 <Card className="hover-scale h-full">
-                  <CardContent className="p-6 flex flex-col">
+                  <CardContent className="p-6 h-full flex flex-col">
                     <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
                       <Icon className="w-7 h-7 text-primary-foreground" />
                     </div>
