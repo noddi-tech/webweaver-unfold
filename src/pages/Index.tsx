@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
-import PainSolutionTable from "@/components/PainSolutionTable";
+import WhyItMatters from "@/components/WhyItMatters";
+import HowItWorks from "@/components/HowItWorks";
 import ProductFeatures from "@/components/ProductFeatures";
-import CustomerJourney from "@/components/CustomerJourney";
 import TrustProof from "@/components/TrustProof";
+import CustomerJourney from "@/components/CustomerJourney";
+import RapidOnboarding from "@/components/RapidOnboarding";
+import TeamHighlight from "@/components/TeamHighlight";
 import FinalCTA from "@/components/FinalCTA";
 import { supabase } from '@/integrations/supabase/client';
 
@@ -193,10 +196,13 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        <PainSolutionTable />
+        <WhyItMatters />
+        <HowItWorks />
         <ProductFeatures />
-        <CustomerJourney />
         <TrustProof />
+        <CustomerJourney />
+        <RapidOnboarding />
+        <TeamHighlight />
         <FinalCTA />
       </main>
       <Footer />

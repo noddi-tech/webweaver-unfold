@@ -10,22 +10,22 @@ export default function FinalCTA() {
           <div className="absolute inset-0 bg-gradient-primary opacity-10" />
           <div className="relative z-10">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-              Ready to unify your front-end + back-end?
+              Let's build your digital workshop
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-              See how Noddi Tech can transform your automotive service business with seamless booking and ERP integration
+              Schedule a personalized demo or see how your specific use case can be automated with Noddi
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button size="lg" className="text-lg px-8 py-6 group" asChild>
                 <Link to="/contact">
                   <Calendar className="w-5 h-5 mr-2" />
-                  Book a live demo
+                  Book a Demo
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6" asChild>
+              <Button size="lg" variant="secondary" className="text-lg px-8 py-6" asChild>
                 <Link to="/features">
-                  Explore features
+                  See Technical Overview
                 </Link>
               </Button>
             </div>

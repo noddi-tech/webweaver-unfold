@@ -1,15 +1,15 @@
-import { Calendar, Package, RefreshCw, TrendingUp, Zap, BarChart3, ArrowRight } from "lucide-react";
+import { Calendar, Package, RefreshCw, TrendingUp, Zap, BarChart3, GitBranch, Building2, ArrowRight, ScanLine } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 const features = [
   {
     icon: Calendar,
-    title: "Booking & Scheduling",
+    title: "Modern Booking Experience",
     bullets: [
-      "Multi-channel booking",
-      "Real-time availability",
-      "Garage + mobile support"
+      "One-minute funnel: address → car → services → timeslot → confirm",
+      "Available on mobile and desktop",
+      "Multi-channel booking support"
     ],
     link: "#booking"
   },
@@ -17,9 +17,9 @@ const features = [
     icon: Package,
     title: "Tire Sales & Inventory Integration",
     bullets: [
-      "Automated tire tracking",
-      "Integrated quoting",
-      "Real-time inventory sync"
+      "Automated tire tracking with storage logistics",
+      "Laser scanner sensor data integration",
+      "Auto-generated quotes based on inventory & margins"
     ],
     link: "#tire-sales"
   },
@@ -27,8 +27,8 @@ const features = [
     icon: RefreshCw,
     title: "Auto Recall & Re-engagement",
     bullets: [
-      "Smart cohort filtering",
-      "Data-driven campaigns",
+      "Cohort-based recall campaigns",
+      "Triggered by capacity and utilization data",
       "77.9% acceptance rate"
     ],
     link: "#auto-recall"
@@ -37,9 +37,9 @@ const features = [
     icon: TrendingUp,
     title: "Capacity / Lane Optimization",
     bullets: [
-      "Resource optimization",
-      "Utilization tracking",
-      "Route planning"
+      "Admins set service areas and worker competencies",
+      "Dynamically allocates resources to maximize utilization",
+      "Avoid overbooking with smart route planning"
     ],
     link: "#capacity"
   },
@@ -47,9 +47,9 @@ const features = [
     icon: Zap,
     title: "Real-time Sync & Data Flow",
     bullets: [
-      "No sync delays",
-      "Single source of truth",
-      "Seamless integration"
+      "No sync delays or API issues",
+      "Single source of truth across frontend & backend",
+      "Seamless integration from booking to lane"
     ],
     link: "#sync"
   },
@@ -58,10 +58,30 @@ const features = [
     title: "Reporting & Analytics",
     bullets: [
       "Comprehensive dashboards",
-      "Performance metrics",
-      "Business intelligence"
+      "Performance metrics and KPIs",
+      "Business intelligence for decision-making"
     ],
     link: "#analytics"
+  },
+  {
+    icon: GitBranch,
+    title: "Workflow Automation",
+    bullets: [
+      "Backend event-condition-action engine",
+      "Automates service completion, storage & inventory",
+      "Recall triggers without manual intervention"
+    ],
+    link: "#workflow"
+  },
+  {
+    icon: Building2,
+    title: "B2B Portal & Fleet Management",
+    bullets: [
+      "Tailored portals for fleet customers",
+      "Manage multiple vehicles and bookings",
+      "API support for third-party fleet systems"
+    ],
+    link: "#fleet"
   }
 ];
 

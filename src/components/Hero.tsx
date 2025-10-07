@@ -18,7 +18,7 @@ const Hero = () => {
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground">
-              From booking flow to back-office automation — built for auto repair & tire services
+              From booking flow to back-office automation — built for automotive service providers: from tire hotels to repair networks
             </p>
 
             {/* Metrics Badges */}
@@ -28,7 +28,7 @@ const Hero = () => {
                   <Award className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">88+ NPS</div>
+                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">NPS ~90</div>
                   <div className="text-xs text-muted-foreground">Industry leading</div>
                 </div>
               </div>
@@ -37,8 +37,8 @@ const Hero = () => {
                   <TrendingUp className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">40%</div>
-                  <div className="text-xs text-muted-foreground">Conversion uplift</div>
+                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">20,000+</div>
+                  <div className="text-xs text-muted-foreground">Bookings completed</div>
                 </div>
               </div>
             </div>
