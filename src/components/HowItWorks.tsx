@@ -56,8 +56,8 @@ export default function HowItWorks() {
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <Card className="flex-1 hover-scale">
-                  <CardContent className="p-6">
+                <Card className="flex-1 hover-scale h-full">
+                  <CardContent className="p-6 h-full flex flex-col">
                     <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
                       <Icon className="w-7 h-7 text-primary-foreground" />
                     </div>
@@ -89,8 +89,8 @@ export default function HowItWorks() {
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <Card className="hover-scale">
-                  <CardContent className="p-6">
+                <Card className="hover-scale h-full">
+                  <CardContent className="p-6 h-full flex flex-col">
                     <div className="flex items-start gap-4">
                       <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center flex-shrink-0 shadow-lg">
                         <Icon className="w-7 h-7 text-primary-foreground" />
