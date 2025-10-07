@@ -91,20 +91,6 @@ export default function CustomerJourney() {
           })}
         </div>
 
-        {/* Booking Funnel Visual */}
-        <div className="mt-16">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-foreground mb-2">40% Conversion Rate</h3>
-            <p className="text-muted-foreground">Industry-leading booking funnel performance</p>
-          </div>
-          <div className="bg-card border border-border rounded-xl p-8 max-w-4xl mx-auto">
-            <img 
-              src="/src/assets/booking-funnel.png" 
-              alt="6-step booking funnel showing 40% conversion rate" 
-              className="w-full rounded-lg"
-            />
-          </div>
-        </div>
       </div>
     </section>
   );
