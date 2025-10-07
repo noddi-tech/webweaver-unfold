@@ -46,7 +46,7 @@ export default function HowItWorks() {
         </div>
 
         {/* Desktop: Horizontal Flow */}
-        <div className="hidden lg:grid lg:grid-cols-4 gap-4 mb-12 items-stretch">
+        <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 mb-12 items-center">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -58,7 +58,7 @@ export default function HowItWorks() {
                   style={{ transitionDelay: `${index * 100}ms` }}
                 >
                 <Card className="hover-scale h-full">
-                  <CardContent className="p-6 h-full flex flex-col">
+                  <CardContent className="p-6 flex flex-col">
                     <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
                       <Icon className="w-7 h-7 text-primary-foreground" />
                     </div>
@@ -70,7 +70,7 @@ export default function HowItWorks() {
                 </Card>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className="flex items-center justify-center self-center">
+                  <div className="flex items-center justify-center">
                     <ArrowRight className="w-6 h-6 text-primary" />
                   </div>
                 )}
