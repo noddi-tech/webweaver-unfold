@@ -140,13 +140,13 @@ All colors MUST be HSL.
 
     --radius: 1rem;
     
-    /* Spacing tokens */
-    --spacing-xs: 0.5rem;
-    --spacing-sm: 1rem;
-    --spacing-md: 2rem;
-    --spacing-lg: 3rem;
-    --spacing-xl: 4rem;
-    --spacing-section: 5rem;
+    /* Spacing tokens (all multiples of 4px) */
+    --spacing-xs: 0.5rem;   /* 8px */
+    --spacing-sm: 1rem;     /* 16px */
+    --spacing-md: 2rem;     /* 32px */
+    --spacing-lg: 3rem;     /* 48px */
+    --spacing-xl: 4rem;     /* 64px */
+    --spacing-section: 7.5rem;  /* 120px - increased from 80px */
     
     /* Tier-based colors for pricing calculator */
     --tier-low: var(--color-success-500); /* Green for lower tiers (Emerging) */
