@@ -274,17 +274,86 @@ All colors MUST be HSL.
 
 /* Design system utility classes */
 @layer utilities {
-  .glass {
-    background: hsl(var(--card) / 0.1);
-    backdrop-filter: blur(12px);
-    border: 1px solid hsl(var(--border) / 0.2);
+  /* ========================================
+     GLASS SYSTEM WITH ACCESSIBILITY SAFEGUARDS
+     ======================================== */
+
+  /* Tier 1: Solid (for critical UI - navigation, buttons) */
+  .glass-solid {
+    background: hsl(var(--card-background) / 1.0);  /* 100% opacity */
+    border: 1px solid hsl(var(--card-border));
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
-  
+
+  /* Tier 2: Standard glass card (95% opacity for WCAG compliance) */
   .glass-card {
-    background: hsl(var(--card) / 0.8);
+    background: hsl(var(--card-background) / 0.95);  /* Up from 0.8 */
+    backdrop-filter: blur(16px);  /* Up from 12px */
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(var(--card-border));
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Add text shadow for legibility on glass */
+  .glass-card h1,
+  .glass-card h2,
+  .glass-card h3,
+  .glass-card .glass-text {
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
+  }
+
+  /* Tier 3: Prominent glass (for modals, popovers) */
+  .glass-prominent {
+    background: hsl(var(--card-background) / 0.98);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid hsl(var(--card-border) / 0.8);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Tier 4: Accent glass (decorative, with 10% tint overlay) */
+  .glass-accent {
+    position: relative;
+    background: hsl(var(--interactive-primary) / 0.08);
     backdrop-filter: blur(12px);
-    border: 1px solid hsl(var(--border) / 0.3);
-    color: hsl(var(--card-foreground));
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--interactive-primary) / 0.2);
+  }
+
+  /* Fallback overlay for text legibility on glass-accent */
+  .glass-accent::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: hsl(var(--bg-surface) / 0.05);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* Legacy glass utility (deprecated - use glass-card instead) */
+  .glass {
+    background: hsl(var(--card-background) / 0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--card-border) / 0.2);
+  }
+
+  /* Disable glass effects for users who prefer reduced transparency */
+  @media (prefers-reduced-transparency: reduce) {
+    .glass-card,
+    .glass-prominent,
+    .glass-accent {
+      background: hsl(var(--card-background) / 1.0) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+  }
+
+  /* Reduce blur for users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .glass-card,
+    .glass-prominent {
+      backdrop-filter: blur(4px) !important;  /* Minimal blur */
+    }
   }
   
   .gradient-text {
@@ -456,5 +525,40 @@ All colors MUST be HSL.
     .hover-scale:hover {
       transform: none;
     }
+  }
+
+  /* ========================================
+     SEMANTIC BACKGROUND SYSTEM
+     ======================================== */
+
+  .bg-surface {
+    background-color: hsl(var(--bg-surface));
+  }
+
+  .bg-alternate {
+    background-color: hsl(var(--bg-alternate));
+  }
+
+  .bg-inset {
+    background-color: hsl(var(--bg-inset));
+  }
+
+  .bg-elevated {
+    background-color: hsl(var(--card-background));
+    border: 1px solid hsl(var(--card-border));
+  }
+
+  /* Hero section with gradient overlay */
+  .bg-hero {
+    position: relative;
+    background: var(--gradient-hero);
+  }
+
+  .bg-hero-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: hsl(var(--bg-surface) / 0.1);  /* 10% overlay for text legibility */
+    pointer-events: none;
   }
 }

@@ -9,8 +9,8 @@ const Hero = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
-    <section className="pt-32 pb-20 md:pb-28 bg-gradient-hero relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 animate-gradient bg-[length:200%_200%]" />
+    <section className="bg-hero pt-32 pb-20 md:pb-28 relative overflow-hidden">
+      <div className="bg-hero-overlay" />
       <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left Column - Text Content */}
