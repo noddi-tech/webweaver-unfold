@@ -9,15 +9,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
-        ghost: "hover:bg-accent hover:text-accent-foreground motion-safe:hover:scale-[1.02]",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "bg-[hsl(var(--interactive-primary))] text-white hover:bg-[hsl(var(--interactive-primary-hover))] shadow-md hover:shadow-lg motion-safe:hover:scale-[1.02] motion-safe:hover:-translate-y-0.5 transition-all",
+        secondary: "bg-[hsl(var(--interactive-secondary))] border-2 border-[hsl(var(--color-raspberry-60))] text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--interactive-secondary-hover))] shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
+        outline: "border-2 border-[hsl(var(--interactive-primary))] text-[hsl(var(--interactive-primary))] bg-transparent hover:bg-[hsl(var(--color-darkpurple-30))] shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
+        ghost: "text-[hsl(var(--interactive-primary))] hover:bg-[hsl(var(--color-bone-20))] motion-safe:hover:scale-[1.02]",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
+        link: "text-[hsl(var(--interactive-primary))] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2 min-h-[44px]",

@@ -3,23 +3,48 @@ import { Card } from "@/components/ui/card";
 export const DesignTokens = () => {
   const tokens = [
     {
-      category: "Brand Colors",
+      category: "Darkpurple Scale (Primary Text & Actions)",
       tokens: [
-        { name: "--noddi-primary", value: "252 87% 58%", color: "hsl(252, 87%, 58%)", description: "Primary brand purple" },
-        { name: "--noddi-text", value: "264 58% 28%", color: "hsl(264, 58%, 28%)", description: "Dark purple text" },
-        { name: "--noddi-gradient-start", value: "321 59% 85%", color: "hsl(321, 59%, 85%)", description: "Pink gradient start" },
-        { name: "--noddi-gradient-end", value: "266 42% 96%", color: "hsl(266, 42%, 96%)", description: "Light purple gradient end" },
+        { name: "--color-darkpurple-30", value: "264 45% 95%", color: "hsl(264, 45%, 95%)", description: "Lightest darkpurple" },
+        { name: "--color-darkpurple-50", value: "264 50% 75%", color: "hsl(264, 50%, 75%)", description: "Mid darkpurple" },
+        { name: "--color-darkpurple-70", value: "264 55% 45%", color: "hsl(264, 55%, 45%)", description: "Primary CTA" },
+        { name: "--color-darkpurple-90", value: "264 58% 20%", color: "hsl(264, 58%, 20%)", description: "Primary text" },
       ]
     },
     {
-      category: "System Colors",
+      category: "Purple Scale (Brand Accent)",
       tokens: [
-        { name: "--background", value: "266 42% 96%", color: "hsl(266, 42%, 96%)", description: "Main background" },
-        { name: "--foreground", value: "264 58% 28%", color: "hsl(264, 58%, 28%)", description: "Main text color" },
-        { name: "--primary", value: "252 87% 58%", color: "hsl(252, 87%, 58%)", description: "Primary action color" },
-        { name: "--secondary", value: "321 59% 85%", color: "hsl(321, 59%, 85%)", description: "Secondary action color" },
-        { name: "--muted", value: "266 42% 92%", color: "hsl(266, 42%, 92%)", description: "Muted backgrounds" },
-        { name: "--accent", value: "252 87% 58%", color: "hsl(252, 87%, 58%)", description: "Accent highlights" },
+        { name: "--color-purple-40", value: "252 85% 85%", color: "hsl(252, 85%, 85%)", description: "Light purple" },
+        { name: "--color-purple-70", value: "252 87% 58%", color: "hsl(252, 87%, 58%)", description: "Brand purple" },
+        { name: "--color-purple-90", value: "252 85% 38%", color: "hsl(252, 85%, 38%)", description: "Dark purple" },
+      ]
+    },
+    {
+      category: "Raspberry Scale (Secondary Actions)",
+      tokens: [
+        { name: "--color-raspberry-30", value: "321 55% 92%", color: "hsl(321, 55%, 92%)", description: "Lightest raspberry" },
+        { name: "--color-raspberry-40", value: "321 57% 85%", color: "hsl(321, 57%, 85%)", description: "Secondary CTA" },
+        { name: "--color-raspberry-60", value: "321 59% 65%", color: "hsl(321, 59%, 65%)", description: "Raspberry accent" },
+      ]
+    },
+    {
+      category: "Bone Neutrals (Backgrounds & Muted)",
+      tokens: [
+        { name: "--color-bone-10", value: "35 20% 98%", color: "hsl(35, 20%, 98%)", description: "Lightest bone (bg)" },
+        { name: "--color-bone-30", value: "35 16% 88%", color: "hsl(35, 16%, 88%)", description: "Border/divider" },
+        { name: "--color-bone-50", value: "35 12% 62%", color: "hsl(35, 12%, 62%)", description: "Muted text" },
+        { name: "--color-bone-90", value: "35 14% 12%", color: "hsl(35, 14%, 12%)", description: "Darkest bone" },
+      ]
+    },
+    {
+      category: "Semantic Tokens",
+      tokens: [
+        { name: "--text-primary", value: "var(--color-darkpurple-90)", color: "hsl(264, 58%, 20%)", description: "Primary text" },
+        { name: "--text-secondary", value: "var(--color-darkpurple-70)", color: "hsl(264, 55%, 45%)", description: "Secondary text" },
+        { name: "--text-muted", value: "var(--color-bone-50)", color: "hsl(35, 12%, 62%)", description: "Muted text" },
+        { name: "--interactive-primary", value: "var(--color-darkpurple-70)", color: "hsl(264, 55%, 45%)", description: "Primary CTA" },
+        { name: "--interactive-secondary", value: "var(--color-raspberry-40)", color: "hsl(321, 57%, 85%)", description: "Secondary CTA" },
+        { name: "--focus-ring", value: "var(--color-purple-70)", color: "hsl(252, 87%, 58%)", description: "Focus outline" },
       ]
     },
     {

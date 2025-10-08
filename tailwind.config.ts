@@ -47,6 +47,51 @@ export default {
 			'container': '1440px',
 		},
 			colors: {
+				// B2B Color Scales
+				darkpurple: {
+					30: 'hsl(var(--color-darkpurple-30))',
+					40: 'hsl(var(--color-darkpurple-40))',
+					50: 'hsl(var(--color-darkpurple-50))',
+					60: 'hsl(var(--color-darkpurple-60))',
+					70: 'hsl(var(--color-darkpurple-70))',
+					80: 'hsl(var(--color-darkpurple-80))',
+					90: 'hsl(var(--color-darkpurple-90))',
+					100: 'hsl(var(--color-darkpurple-100))',
+				},
+				purple: {
+					30: 'hsl(var(--color-purple-30))',
+					40: 'hsl(var(--color-purple-40))',
+					50: 'hsl(var(--color-purple-50))',
+					60: 'hsl(var(--color-purple-60))',
+					70: 'hsl(var(--color-purple-70))',
+					80: 'hsl(var(--color-purple-80))',
+					90: 'hsl(var(--color-purple-90))',
+				},
+				raspberry: {
+					30: 'hsl(var(--color-raspberry-30))',
+					40: 'hsl(var(--color-raspberry-40))',
+					50: 'hsl(var(--color-raspberry-50))',
+					60: 'hsl(var(--color-raspberry-60))',
+					70: 'hsl(var(--color-raspberry-70))',
+					80: 'hsl(var(--color-raspberry-80))',
+				},
+				coral: {
+					40: 'hsl(var(--color-coral-40))',
+					50: 'hsl(var(--color-coral-50))',
+					60: 'hsl(var(--color-coral-60))',
+				},
+				bone: {
+					10: 'hsl(var(--color-bone-10))',
+					20: 'hsl(var(--color-bone-20))',
+					30: 'hsl(var(--color-bone-30))',
+					40: 'hsl(var(--color-bone-40))',
+					50: 'hsl(var(--color-bone-50))',
+					60: 'hsl(var(--color-bone-60))',
+					70: 'hsl(var(--color-bone-70))',
+					80: 'hsl(var(--color-bone-80))',
+					90: 'hsl(var(--color-bone-90))',
+				},
+				// Shadcn Semantic Colors
 				border: 'hsl(var(--border))',
 				input: {
 					DEFAULT: 'hsl(var(--input))',

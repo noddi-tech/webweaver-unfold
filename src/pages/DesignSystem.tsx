@@ -6,6 +6,7 @@ import { EditableTypographySystem } from "@/components/design-system/EditableTyp
 import { EditableComponentLibrary } from "@/components/design-system/EditableComponentLibrary";
 import { EditableSpacingSystem } from "@/components/design-system/EditableSpacingSystem";
 import { IconLibrary } from "@/components/design-system/IconLibrary";
+import { ButtonShowcase } from "@/components/design-system/ButtonShowcase";
 import VideoManager from "@/components/design-system/VideoManager";
 import LogoManager from "@/components/design-system/LogoManager";
 import USPCms from "@/components/design-system/USPCms";
@@ -29,10 +30,11 @@ const DesignSystem = () => {
         </div>
 
         <Tabs defaultValue="colors" className="w-full">
-          <TabsList className="grid w-full grid-cols-10 mb-12">
+          <TabsList className="grid w-full grid-cols-11 mb-12">
             <TabsTrigger value="colors">Colors & Tokens</TabsTrigger>
             <TabsTrigger value="typography">Typography</TabsTrigger>
             <TabsTrigger value="spacing">Spacing</TabsTrigger>
+            <TabsTrigger value="buttons">Buttons/CTAs</TabsTrigger>
             <TabsTrigger value="components">Components</TabsTrigger>
             <TabsTrigger value="icons">Icons</TabsTrigger>
             <TabsTrigger value="logo">Logo</TabsTrigger>
@@ -52,6 +54,10 @@ const DesignSystem = () => {
 
           <TabsContent value="spacing" className="space-y-8">
             <EditableSpacingSystem />
+          </TabsContent>
+
+          <TabsContent value="buttons" className="space-y-8">
+            <ButtonShowcase />
           </TabsContent>
 
           <TabsContent value="components" className="space-y-8">

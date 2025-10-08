@@ -5,37 +5,37 @@ export const TYPOGRAPHY_SCALE = {
   headings: [
     { 
       tag: "h1", 
-      class: "text-6xl font-bold", 
+      class: "text-6xl font-bold text-[hsl(var(--text-primary))]", 
       sample: "Display Heading", 
       description: "Hero titles, main page headers" 
     },
     { 
       tag: "h2", 
-      class: "text-4xl font-bold", 
+      class: "text-4xl font-bold text-[hsl(var(--text-primary))]", 
       sample: "Section Heading", 
       description: "Major section titles" 
     },
     { 
       tag: "h3", 
-      class: "text-2xl font-semibold", 
+      class: "text-2xl font-semibold text-[hsl(var(--text-primary))]", 
       sample: "Subsection Heading", 
       description: "Subsection titles" 
     },
     { 
       tag: "h4", 
-      class: "text-xl font-semibold", 
+      class: "text-xl font-semibold text-[hsl(var(--text-secondary))]", 
       sample: "Component Heading", 
       description: "Component or card titles" 
     },
     { 
       tag: "h5", 
-      class: "text-lg font-medium", 
+      class: "text-lg font-medium text-[hsl(var(--text-secondary))]", 
       sample: "Small Heading", 
       description: "Minor section headings" 
     },
     { 
       tag: "h6", 
-      class: "text-base font-medium", 
+      class: "text-base font-medium text-[hsl(var(--text-secondary))]", 
       sample: "Tiny Heading", 
       description: "Labels and small titles" 
     },
@@ -44,22 +44,22 @@ export const TYPOGRAPHY_SCALE = {
   bodyText: [
     { 
       name: "Large Body", 
-      class: "text-xl", 
+      class: "text-xl text-[hsl(var(--text-primary))]", 
       sample: "This is large body text for important content and introductions." 
     },
     { 
       name: "Regular Body", 
-      class: "text-base", 
+      class: "text-base text-[hsl(var(--text-secondary))]", 
       sample: "This is regular body text for most content, paragraphs, and descriptions." 
     },
     { 
       name: "Small Body", 
-      class: "text-sm", 
+      class: "text-sm text-[hsl(var(--text-muted))]", 
       sample: "This is small body text for captions, metadata, and secondary information." 
     },
     { 
       name: "Extra Small", 
-      class: "text-xs", 
+      class: "text-xs text-[hsl(var(--text-muted))]", 
       sample: "This is extra small text for fine print and minimal details." 
     },
   ],
