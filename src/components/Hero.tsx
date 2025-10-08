@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Award, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
-import dashboardPreview from "@/assets/dashboard-preview.jpg";
+import bookingHero from "@/assets/booking-service-selection.jpg";
 import { useState } from "react";
 import { Counter } from "@/components/ui/counter";
 import { useTypography } from "@/hooks/useTypography";
@@ -69,8 +69,8 @@ const Hero = () => {
                 <div className="w-full aspect-video rounded-xl bg-muted animate-pulse" />
               )}
               <img
-                src={dashboardPreview}
-                alt="Noddi Tech Dashboard - Unified booking and ERP system"
+                src={bookingHero}
+                alt="Noddi booking interface - Service selection screen showing tire change options with pricing"
                 className={`w-full rounded-xl shadow-lg transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute inset-6'}`}
                 onLoad={() => setImageLoaded(true)}
               />
