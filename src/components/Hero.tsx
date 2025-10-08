@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Award, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
-import bookingHero from "@/assets/booking-service-selection.jpg";
+import bookingHero from "@/assets/booking-hero.svg";
 import { useState } from "react";
 import { Counter } from "@/components/ui/counter";
 import { useTypography } from "@/hooks/useTypography";
