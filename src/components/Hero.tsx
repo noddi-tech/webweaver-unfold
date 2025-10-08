@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Award, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
-import bookingHero from "@/assets/booking-hero.svg";
+import bookingHero from "@/assets/booking-hero.png";
 import { useState } from "react";
 import { Counter } from "@/components/ui/counter";
 import { useTypography } from "@/hooks/useTypography";
@@ -63,18 +63,15 @@ const Hero = () => {
 
           {/* Right Column - Dashboard Preview */}
           <div className="relative">
-            <div className="absolute -inset-4 bg-gradient-primary opacity-20 blur-3xl rounded-full" />
-            <div className="relative glass-card rounded-2xl p-6 shadow-2xl">
-              {!imageLoaded && (
-                <div className="w-full aspect-video rounded-xl bg-muted animate-pulse" />
-              )}
-              <img
-                src={bookingHero}
-                alt="Noddi booking interface - Service selection screen showing tire change options with pricing"
-                className={`w-full rounded-xl shadow-lg transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute inset-6'}`}
-                onLoad={() => setImageLoaded(true)}
-              />
-            </div>
+            {!imageLoaded && (
+              <div className="w-full aspect-[21/9] bg-muted/30 animate-pulse rounded-lg" />
+            )}
+            <img
+              src={bookingHero}
+              alt="Noddi booking flow - Complete mobile journey from location selection, car management, service selection, time booking to confirmation"
+              className={`w-full transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute inset-0'}`}
+              onLoad={() => setImageLoaded(true)}
+            />
           </div>
         </div>
       </div>
