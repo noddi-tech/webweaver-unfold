@@ -355,6 +355,36 @@ All colors MUST be HSL.
       backdrop-filter: blur(4px) !important;  /* Minimal blur */
     }
   }
+
+  /* ========================================
+     ACCESSIBILITY UTILITIES
+     ======================================== */
+
+  /* Consistent focus ring for all interactive elements */
+  .focus-ring {
+    @apply focus-visible:outline-none 
+           focus-visible:ring-2 
+           focus-visible:ring-ring 
+           focus-visible:ring-offset-2 
+           focus-visible:ring-offset-background
+           transition-shadow;
+  }
+
+  /* Skip to main content link (for keyboard navigation) */
+  .skip-to-content {
+    @apply absolute -top-10 left-4 z-50 
+           bg-primary text-primary-foreground 
+           px-4 py-2 rounded-md 
+           focus:top-4 
+           transition-all;
+  }
+
+  /* Reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .focus-ring {
+      transition: none;
+    }
+  }
   
   .gradient-text {
     background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--noddi-text)));

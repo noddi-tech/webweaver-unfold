@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Copy, RotateCcw, Save, Palette, AlertTriangle, CheckCircle2, Zap, Plus, Trash2, Sparkles } from "lucide-react";
+import { Copy, RotateCcw, Save, Palette, AlertTriangle, CheckCircle2, Zap, Plus, Trash2, Sparkles, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -66,6 +66,19 @@ export const EditableColorSystem = () => {
   const [autoContrast, setAutoContrast] = useState(true);
   const [hexInputValues, setHexInputValues] = useState<Record<number, string>>({});
   const { toast } = useToast();
+
+  // Filter to show only semantic tokens (hide primitives from CMS)
+  const semanticColors = colors.filter(color => {
+    const isPrimitive = 
+      color.cssVar.includes('color-primary-') ||
+      color.cssVar.includes('color-accent-') ||
+      color.cssVar.includes('color-neutral-') ||
+      color.cssVar.includes('color-success-') ||
+      color.cssVar.includes('color-warning-') ||
+      color.cssVar.includes('color-error-');
+    
+    return !isPrimitive; // Only show non-primitive tokens
+  });
 
   useEffect(() => {
     const root = document.documentElement;
@@ -153,16 +166,21 @@ export const EditableColorSystem = () => {
   const fixAllContrast = () => {
     const newColors = [...colors];
     let fixedCount = 0;
+    const failures: string[] = [];
 
     newColors.forEach((color, index) => {
       if (color.isForeground && color.backgroundPair) {
         const backgroundColor = newColors.find(c => c.cssVar === color.backgroundPair);
         if (backgroundColor) {
-          const currentRatio = calculateContrastRatio(color.value, backgroundColor.value);
+          const bgHex = hslToHex(`hsl(${backgroundColor.value})`);
+          const fgHex = hslToHex(`hsl(${color.value})`);
+          const currentRatio = calculateContrastRatio(bgHex, fgHex);
+          
           if (currentRatio < 4.5) {
             const optimalTextColor = getOptimalTextColor(backgroundColor.value);
             newColors[index].value = optimalTextColor;
             fixedCount++;
+            failures.push(`${color.name} (was ${currentRatio.toFixed(2)}:1)`);
           }
         }
       }
@@ -178,13 +196,25 @@ export const EditableColorSystem = () => {
       });
       
       toast({
-        title: "All contrast issues fixed",
-        description: `Fixed ${fixedCount} color${fixedCount > 1 ? 's' : ''} for better accessibility.`,
+        title: `🎯 Fixed ${fixedCount} Contrast Issue${fixedCount > 1 ? 's' : ''}`,
+        description: (
+          <div className="mt-2 text-xs">
+            <p className="font-semibold mb-1">Updated to meet WCAG AA (4.5:1):</p>
+            <ul className="list-disc list-inside space-y-1">
+              {failures.slice(0, 3).map((f, i) => (
+                <li key={i}>{f}</li>
+              ))}
+              {failures.length > 3 && <li>...and {failures.length - 3} more</li>}
+            </ul>
+          </div>
+        ),
+        duration: 6000,
       });
     } else {
       toast({
-        title: "No issues found",
-        description: "All colors already meet accessibility standards.",
+        title: "✅ All Contrast Ratios Pass",
+        description: "All text-background pairs meet WCAG AA accessibility standards (4.5:1 minimum)",
+        variant: "default",
       });
     }
   };
@@ -283,6 +313,59 @@ export const EditableColorSystem = () => {
     return hexInputValues[index] ?? formatColorValue(color.value, 'hex');
   };
 
+  const exportToFigma = () => {
+    const figmaTokens = {
+      name: "Noddi Tech Design Tokens",
+      version: "1.0.0",
+      updated: new Date().toISOString(),
+      description: "Semantic color tokens for Noddi Tech design system",
+      colors: semanticColors
+        .filter(c => !c.type || c.type === 'color')  // Exclude gradients
+        .map(c => {
+          const hexValue = c.value.includes('/') 
+            ? hslToHex(`hsl(${c.value.split('/')[0].trim()})`) 
+            : hslToHex(`hsl(${c.value})`);
+          
+          return {
+            name: c.name,
+            cssVar: c.cssVar,
+            value: hexValue,
+            hslValue: c.value,
+            description: c.description,
+            category: c.isForeground ? 'Text Colors' : 
+                      c.cssVar.includes('bg-') ? 'Surface Colors' :
+                      c.cssVar.includes('interactive-') ? 'Interactive Colors' :
+                      'Other',
+          };
+        })
+    };
+
+    const blob = new Blob([JSON.stringify(figmaTokens, null, 2)], 
+      { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const date = new Date().toISOString().split('T')[0];
+    a.download = `noddi-design-tokens-${date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "✅ Tokens Exported to Figma",
+      description: (
+        <div className="text-xs mt-2">
+          <p>Import this JSON file into Figma using:</p>
+          <ol className="list-decimal list-inside mt-1 space-y-1">
+            <li>Install "Tokens Studio" plugin</li>
+            <li>Click "Import" → Select JSON file</li>
+            <li>Map tokens to Figma styles</li>
+          </ol>
+        </div>
+      ),
+      duration: 8000,
+    });
+  };
+
   return (
     <section>
       <div className="flex items-center justify-between mb-8">
@@ -323,11 +406,29 @@ export const EditableColorSystem = () => {
             <Save className="w-4 h-4 mr-2" />
             Save
           </Button>
+          <Button onClick={exportToFigma} variant="outline">
+            <Download className="w-4 h-4 mr-2" />
+            Export to Figma
+          </Button>
+        </div>
+      </div>
+
+      <div className="bg-muted/50 border border-border rounded-lg p-4 mb-6">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-primary mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-sm mb-1">Editing Semantic Tokens</h4>
+            <p className="text-xs text-muted-foreground">
+              You're editing semantic tokens that control the design system. 
+              Primitive color scales (e.g., primary-500, neutral-700) are hidden to prevent accidental changes. 
+              Changes here will update both light and dark themes automatically.
+            </p>
+          </div>
         </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {colors.map((color, index) => {
+        {semanticColors.map((color, index) => {
           const contrastInfo = getContrastInfo(color);
           
           return (

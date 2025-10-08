@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Card } from "@/components/ui/card";
+import { FileText } from "lucide-react";
 import VideoManager from "@/components/design-system/VideoManager";
 import FeaturesManager from "@/components/design-system/FeaturesManager";
 import { supabase } from "@/integrations/supabase/client";
@@ -82,71 +83,98 @@ const Admin = () => {
 
           {/* CMS Section with nested tabs */}
           <TabsContent value="cms" className="space-y-8">
-            <Tabs defaultValue="pages" className="w-full">
-               <TabsList className="flex w-full flex-wrap gap-2 h-auto mb-8 justify-center">
-                <TabsTrigger value="pages">Pages CMS</TabsTrigger>
-                <TabsTrigger value="sections">Sections CMS</TabsTrigger>
-                <TabsTrigger value="header">Header CMS</TabsTrigger>
-                <TabsTrigger value="footer">Footer CMS</TabsTrigger>
-                <TabsTrigger value="favicon">Favicon</TabsTrigger>
-                <TabsTrigger value="social">Social Meta</TabsTrigger>
-                <TabsTrigger value="pricing">Pricing CMS</TabsTrigger>
-                <TabsTrigger value="videos">Videos CMS</TabsTrigger>
-                <TabsTrigger value="images">Images CMS</TabsTrigger>
-                <TabsTrigger value="features">Features CMS</TabsTrigger>
-                <TabsTrigger value="usps">USPs CMS</TabsTrigger>
-                <TabsTrigger value="employees">Employees CMS</TabsTrigger>
-                <TabsTrigger value="headings">Text Content CMS</TabsTrigger>
-                <TabsTrigger value="contact">Contact CMS</TabsTrigger>
-                <TabsTrigger value="files">Files CMS</TabsTrigger>
+            <Tabs defaultValue="content" className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-8">
+                <TabsTrigger value="content">Content Management</TabsTrigger>
+                <TabsTrigger value="media">Media Assets</TabsTrigger>
+                <TabsTrigger value="config">Configuration</TabsTrigger>
               </TabsList>
-              <TabsContent value="pages" className="space-y-8">
-                <PagesManager />
+
+              {/* Content Management Tab */}
+              <TabsContent value="content">
+                <Tabs defaultValue="pages">
+                  <TabsList className="flex flex-wrap gap-2 mb-6">
+                    <TabsTrigger value="pages">Pages</TabsTrigger>
+                    <TabsTrigger value="sections">Sections</TabsTrigger>
+                    <TabsTrigger value="text">Text Content</TabsTrigger>
+                    <TabsTrigger value="features">Features</TabsTrigger>
+                    <TabsTrigger value="usps">USPs</TabsTrigger>
+                    <TabsTrigger value="contact">Contact</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="pages" className="space-y-8">
+                    <PagesManager />
+                  </TabsContent>
+                  <TabsContent value="sections" className="space-y-8">
+                    <SectionsManager />
+                  </TabsContent>
+                  <TabsContent value="text" className="space-y-8">
+                    <TextContentManager />
+                  </TabsContent>
+                  <TabsContent value="features" className="space-y-8">
+                    <FeaturesManager />
+                  </TabsContent>
+                  <TabsContent value="usps" className="space-y-8">
+                    <USPCms />
+                  </TabsContent>
+                  <TabsContent value="contact" className="space-y-8">
+                    <ContactManager />
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
-              <TabsContent value="sections" className="space-y-8">
-                <SectionsManager />
+
+              {/* Media Assets Tab */}
+              <TabsContent value="media">
+                <Tabs defaultValue="images">
+                  <TabsList className="flex flex-wrap gap-2 mb-6">
+                    <TabsTrigger value="images">Images</TabsTrigger>
+                    <TabsTrigger value="videos">Videos</TabsTrigger>
+                    <TabsTrigger value="files">Files</TabsTrigger>
+                    <TabsTrigger value="favicon">Favicon</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="images" className="space-y-8">
+                    <ImageManager />
+                  </TabsContent>
+                  <TabsContent value="videos" className="space-y-8">
+                    <VideoManager />
+                  </TabsContent>
+                  <TabsContent value="files" className="space-y-8">
+                    <FileManager />
+                  </TabsContent>
+                  <TabsContent value="favicon" className="space-y-8">
+                    <FaviconManager />
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
-              <TabsContent value="header" className="space-y-8">
-                <HeaderManager />
+
+              {/* Configuration Tab */}
+              <TabsContent value="config">
+                <Tabs defaultValue="header">
+                  <TabsList className="flex flex-wrap gap-2 mb-6">
+                    <TabsTrigger value="header">Header</TabsTrigger>
+                    <TabsTrigger value="footer">Footer</TabsTrigger>
+                    <TabsTrigger value="social">Social Meta</TabsTrigger>
+                    <TabsTrigger value="pricing">Pricing</TabsTrigger>
+                    <TabsTrigger value="employees">Team</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="header" className="space-y-8">
+                    <HeaderManager />
+                  </TabsContent>
+                  <TabsContent value="footer" className="space-y-8">
+                    <FooterManager />
+                  </TabsContent>
+                  <TabsContent value="social" className="space-y-8">
+                    <SocialMetaManager />
+                  </TabsContent>
+                  <TabsContent value="pricing" className="space-y-8">
+                    <PricingManager />
+                  </TabsContent>
+                  <TabsContent value="employees" className="space-y-8">
+                    <EmployeesManager />
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
-              <TabsContent value="footer" className="space-y-8">
-                <FooterManager />
-              </TabsContent>
-              <TabsContent value="favicon" className="space-y-8">
-                <FaviconManager />
-              </TabsContent>
-              <TabsContent value="social" className="space-y-8">
-                <SocialMetaManager />
-              </TabsContent>
-              <TabsContent value="pricing" className="space-y-8">
-                <PricingManager />
-              </TabsContent>
-              <TabsContent value="videos" className="space-y-8">
-                <VideoManager />
-              </TabsContent>
-              <TabsContent value="images" className="space-y-8">
-                <ImageManager />
-              </TabsContent>
-              <TabsContent value="features" className="space-y-8">
-                <FeaturesManager />
-              </TabsContent>
-              <TabsContent value="usps" className="space-y-8">
-                <USPCms />
-              </TabsContent>
-              <TabsContent value="employees" className="space-y-8">
-                <EmployeesManager />
-              </TabsContent>
-               <TabsContent value="headings" className="space-y-8">
-                 <TextContentManager />
-               </TabsContent>
-               <TabsContent value="contact" className="space-y-8">
-                 <ContactManager />
-               </TabsContent>
-               <TabsContent value="files" className="space-y-8">
-                 <FileManager />
-               </TabsContent>
-             </Tabs>
-           </TabsContent>
+            </Tabs>
+          </TabsContent>
 
           {/* Design System Section with nested tabs */}
           <TabsContent value="design" className="space-y-8">
@@ -187,9 +215,31 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
 
-        <Card className="mt-8 p-4 bg-card border-border">
-          <p className="text-sm text-muted-foreground">All tools are now consolidated under /admin. Any signed-in user can edit.</p>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          <Card className="p-4 bg-card border-border">
+            <p className="text-sm text-muted-foreground">
+              All tools are now consolidated under /cms. Any signed-in user can edit.
+            </p>
+          </Card>
+
+          <Card className="p-4 bg-card border-border">
+            <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Design System Docs
+            </h3>
+            <p className="text-xs text-muted-foreground mb-3">
+              Learn about color tokens, spacing, and accessibility guidelines.
+            </p>
+            <a 
+              href="https://github.com/yourusername/noddi-tech/blob/main/content/design-system/README.md" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline"
+            >
+              View Documentation →
+            </a>
+          </Card>
+        </div>
       </main>
     </div>
   );
