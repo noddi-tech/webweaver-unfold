@@ -75,7 +75,7 @@ All colors MUST be HSL.
     /* Text Colors */
     --text-primary: var(--color-darkpurple-90);
     --text-secondary: var(--color-darkpurple-70);
-    --text-muted: var(--color-bone-60);
+    --text-muted: var(--color-darkpurple-70);
     --text-on-gradient: var(--color-darkpurple-90);
     --text-inverse: var(--color-bone-10);
 
@@ -180,7 +180,7 @@ All colors MUST be HSL.
     /* Dark Mode Adjustments */
     --text-primary: var(--color-bone-10);
     --text-secondary: var(--color-bone-30);
-    --text-muted: var(--color-bone-40);
+    --text-muted: var(--color-darkpurple-50);
     --text-on-gradient: var(--color-bone-10);
     --text-inverse: var(--color-darkpurple-90);
 

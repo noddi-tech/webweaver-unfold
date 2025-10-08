@@ -42,7 +42,7 @@ export const DesignTokens = () => {
       tokens: [
         { name: "--text-primary", value: "var(--color-darkpurple-90)", color: "hsl(264, 58%, 20%)", description: "Primary text" },
         { name: "--text-secondary", value: "var(--color-darkpurple-70)", color: "hsl(264, 55%, 45%)", description: "Secondary text" },
-        { name: "--text-muted", value: "var(--color-bone-60)", color: "hsl(35, 10%, 48%)", description: "Muted text (WCAG AA: 5.5:1)" },
+        { name: "--text-muted", value: "var(--color-darkpurple-70)", color: "hsl(264, 55%, 45%)", description: "Muted text (WCAG AAA: 7:1+)" },
         { name: "--interactive-primary", value: "var(--color-darkpurple-70)", color: "hsl(264, 55%, 45%)", description: "Primary CTA" },
         { name: "--interactive-secondary", value: "var(--color-raspberry-40)", color: "hsl(321, 57%, 85%)", description: "Secondary CTA" },
         { name: "--focus-ring", value: "var(--color-purple-70)", color: "hsl(252, 87%, 58%)", description: "Focus outline" },
