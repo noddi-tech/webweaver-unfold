@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Calendar, Package, Bell, Map, Workflow, PieChart, Building2, ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { useTypography } from "@/hooks/useTypography";
 
 const functions = [
   {
@@ -85,6 +86,7 @@ const functions = [
 
 export default function FunctionCards() {
   const [openCards, setOpenCards] = useState<number[]>([]);
+  const { h2, body } = useTypography();
 
   const toggleCard = (index: number) => {
     setOpenCards(prev =>
@@ -95,13 +97,13 @@ export default function FunctionCards() {
   };
 
   return (
-    <section className="py-20">
+    <section className="py-section bg-surface">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+          <h2 className={`${h2} mb-4 text-foreground`}>
             Functions That Talk to Each Other
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
             Every module shares the same data model. No syncing. No waiting.
           </p>
         </div>
@@ -113,7 +115,7 @@ export default function FunctionCards() {
 
             return (
               <Collapsible key={index} open={isOpen} onOpenChange={() => toggleCard(index)}>
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="glass-card hover:shadow-lg transition-shadow">
                   <CollapsibleTrigger className="w-full text-left">
                     <CardHeader>
                       <div className="flex items-start justify-between">

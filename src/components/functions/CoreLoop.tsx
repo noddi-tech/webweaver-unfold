@@ -1,4 +1,5 @@
 import { Calendar, Zap, Wrench, BarChart3, RefreshCcw } from "lucide-react";
+import { useTypography } from "@/hooks/useTypography";
 
 const steps = [
   {
@@ -29,14 +30,16 @@ const steps = [
 ];
 
 export default function CoreLoop() {
+  const { h2, body } = useTypography();
+  
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-section bg-alternate">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+          <h2 className={`${h2} mb-4 text-foreground`}>
             The Core Loop
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
             Every step feeds the next. No gaps. No manual handoffs.
           </p>
         </div>

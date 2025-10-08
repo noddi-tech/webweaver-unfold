@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, Users, Handshake, BarChart, Globe, Euro } from "lucide-react";
+import { useTypography } from "@/hooks/useTypography";
 
 const metrics = [
   {
@@ -41,14 +42,16 @@ const metrics = [
 ];
 
 export default function ProofMetrics() {
+  const { h2, body } = useTypography();
+  
   return (
-    <section className="py-20">
+    <section className="py-section bg-alternate">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+          <h2 className={`${h2} mb-4 text-foreground`}>
             Real Numbers. Real Results.
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
             Noddi powers operations across Europe with proven performance.
           </p>
         </div>
@@ -57,7 +60,7 @@ export default function ProofMetrics() {
           {metrics.map((metric, index) => {
             const Icon = metric.icon;
             return (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+              <Card key={index} className="glass-card text-center hover:shadow-lg transition-shadow">
                 <CardContent className="pt-8 pb-8">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
                     <Icon className="w-8 h-8 text-primary" />

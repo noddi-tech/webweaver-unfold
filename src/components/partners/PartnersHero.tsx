@@ -1,16 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTypography } from "@/hooks/useTypography";
 
 export default function PartnersHero() {
+  const { h1, body } = useTypography();
+  
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-section bg-hero">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-foreground">
+          <h1 className={`${h1} mb-6 text-foreground`}>
             Trusted by those who keep the world moving.
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8">
+          <p className={`${body} text-muted-foreground mb-8`}>
             20,000+ bookings and counting — powered by one platform.
           </p>
           <Button size="lg" className="text-lg px-8 py-6 group" asChild>

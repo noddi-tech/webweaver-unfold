@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
+import { useTypography } from "@/hooks/useTypography";
 
 const cases = [
   {
@@ -20,21 +21,23 @@ const cases = [
 ];
 
 export default function CaseStudies() {
+  const { h2, body } = useTypography();
+  
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-section bg-surface">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+          <h2 className={`${h2} mb-4 text-foreground`}>
             Partners in Action
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
             Before and after. Short stories, big impact.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {cases.map((caseStudy, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
+            <Card key={index} className="glass-card hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="text-xl">{caseStudy.title}</CardTitle>
               </CardHeader>

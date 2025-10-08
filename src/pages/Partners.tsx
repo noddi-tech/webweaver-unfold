@@ -12,7 +12,7 @@ export default function Partners() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen">
         <Header />
         <main>
           <PartnersHero />

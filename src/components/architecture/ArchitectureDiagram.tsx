@@ -1,38 +1,37 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowDown } from "lucide-react";
+import { useTypography } from "@/hooks/useTypography";
 
 const layers = [
   {
     title: "Frontend",
     subtitle: "Booking + Admin UI",
-    color: "bg-primary/10 text-primary",
   },
   {
     title: "Unified API Layer",
     subtitle: "Single source of truth",
-    color: "bg-secondary/10 text-secondary-foreground",
   },
   {
     title: "Backend Services",
     subtitle: "Booking, Capacity, Recall, Analytics",
-    color: "bg-accent/10 text-accent-foreground",
   },
   {
     title: "External Integrations",
     subtitle: "Tire DBs, Scanners, Payments, ERP",
-    color: "bg-muted text-muted-foreground",
   },
 ];
 
 export default function ArchitectureDiagram() {
+  const { h2, body } = useTypography();
+  
   return (
-    <section className="py-20">
+    <section className="py-section bg-alternate">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+          <h2 className={`${h2} mb-4 text-foreground`}>
             The Stack
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
             A unified architecture. Everything shares the same data model.
           </p>
         </div>
@@ -40,10 +39,10 @@ export default function ArchitectureDiagram() {
         <div className="max-w-3xl mx-auto space-y-4">
           {layers.map((layer, index) => (
             <div key={index} className="space-y-4">
-              <Card className={layer.color}>
+              <Card className="glass-card">
                 <CardContent className="py-8 text-center">
-                  <h3 className="text-2xl font-bold mb-2">{layer.title}</h3>
-                  <p className="text-sm">{layer.subtitle}</p>
+                  <h3 className="text-2xl font-bold mb-2 text-foreground">{layer.title}</h3>
+                  <p className="text-sm text-muted-foreground">{layer.subtitle}</p>
                 </CardContent>
               </Card>
               {index < layers.length - 1 && (
