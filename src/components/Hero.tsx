@@ -17,11 +17,11 @@ const Hero = () => {
           {/* Left Column - Text Content */}
           <div className="space-y-8">
             <h1 className={`${h1} text-foreground`}>
-              Where your customers book & your business runs — all in one system
+              One platform. Every function.
             </h1>
 
             <p className={`${body} text-muted-foreground`}>
-              From booking flow to back-office automation — built for automotive service providers: from tire hotels to repair networks
+              Booking to billing. Built for automotive services.
             </p>
 
             {/* Metrics Badges */}
