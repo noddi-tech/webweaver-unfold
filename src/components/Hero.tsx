@@ -72,7 +72,7 @@ const Hero = () => {
   return (
     <section className="py-section relative overflow-hidden">
       <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Column - Text Content */}
           <div className="space-y-8">
             <h1 className={`${h1} text-foreground`}>
@@ -136,7 +136,7 @@ const Hero = () => {
                       <img
                         src={step.image}
                         alt={step.alt}
-                        className="w-full max-w-2xl transition-opacity duration-500"
+                        className="w-full max-w-4xl transition-opacity duration-500"
                         loading={index === 0 ? "eager" : "lazy"}
                       />
                     </div>
