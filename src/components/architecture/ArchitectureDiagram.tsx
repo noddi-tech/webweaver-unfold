@@ -25,7 +25,7 @@ export default function ArchitectureDiagram() {
   const { h2, body } = useTypography();
   
   return (
-    <section className="py-section bg-alternate">
+    <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className={`${h2} mb-4 text-foreground`}>

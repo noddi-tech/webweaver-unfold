@@ -21,7 +21,7 @@ const expertise = [
 
 export default function TeamHighlight() {
   return (
-    <section className="py-20 md:py-28 bg-muted/30">
+    <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center gap-2 mb-4">

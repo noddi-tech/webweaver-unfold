@@ -36,37 +36,6 @@ interface Page {
   published: boolean;
 }
 
-// Helper functions to apply Tailwind CSS classes based on tokens
-const getBackgroundClass = (token?: string) => {
-  const mapping: Record<string, string> = {
-    background: 'bg-background',
-    card: 'bg-card',
-    muted: 'bg-muted',
-    primary: 'bg-primary',
-    secondary: 'bg-secondary',
-    accent: 'bg-accent',
-    'gradient-primary': 'bg-gradient-primary',
-    'gradient-background': 'bg-gradient-background',
-    'gradient-hero': 'bg-gradient-hero',
-    'gradient-subtle': 'bg-gradient-subtle',
-    transparent: 'bg-transparent',
-  };
-  return mapping[token || 'background'] || 'bg-background';
-};
-
-const getTextClass = (token?: string) => {
-  const mapping: Record<string, string> = {
-    foreground: 'text-foreground',
-    'muted-foreground': 'text-muted-foreground',
-    primary: 'text-primary',
-    secondary: 'text-secondary',
-    accent: 'text-accent',
-    'gradient-text': 'gradient-text',
-    destructive: 'text-destructive',
-  };
-  return mapping[token || 'foreground'] || 'text-foreground';
-};
-
 const Index = () => {
   const [pageData, setPageData] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
@@ -143,17 +112,6 @@ const Index = () => {
               document.head.appendChild(meta);
             }
           }
-
-          // Apply page background using proper background class mapping
-          const backgroundClass = getBackgroundClass(page.default_background_token);
-          const textClass = getTextClass(page.default_text_token);
-          
-          // Remove existing background classes and apply new ones
-          document.body.className = document.body.className
-            .replace(/bg-\S+/g, '')
-            .replace(/text-\S+/g, '')
-            .trim();
-          document.body.classList.add(...backgroundClass.split(' '), ...textClass.split(' '));
         }
       } catch (error) {
         console.error('Error fetching page data:', error);
@@ -164,13 +122,6 @@ const Index = () => {
 
     fetchPageData();
     fetchAndApplySocialMeta();
-  }, []);
-
-  // Cleanup body classes when component unmounts
-  useEffect(() => {
-    return () => {
-      document.body.className = '';
-    };
   }, []);
 
   if (loading) {

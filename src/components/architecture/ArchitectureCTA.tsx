@@ -7,7 +7,7 @@ export default function ArchitectureCTA() {
   const { h2 } = useTypography();
   
   return (
-    <section className="py-section bg-elevated">
+    <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           <h2 className={`${h2} mb-6 text-foreground`}>

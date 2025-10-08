@@ -253,7 +253,7 @@ All colors MUST be HSL.
   }
 
   html {
-    @apply bg-surface;
+    background: var(--gradient-hero);
     min-height: 100vh;
   }
 
@@ -472,6 +472,64 @@ All colors MUST be HSL.
     outline: 2px solid hsl(var(--primary));
     outline-offset: 2px;
     box-shadow: 0 0 0 4px hsl(var(--primary) / 0.2);
+  }
+
+  /* ========================================
+     CONTRAST ENHANCEMENT FOR GRADIENT BACKGROUNDS
+     Use these on text over the global gradient for readability
+     ======================================== */
+  .text-on-gradient {
+    text-shadow: 0 1px 3px hsl(var(--background) / 0.3);
+  }
+
+  .text-on-gradient-strong {
+    text-shadow: 0 2px 8px hsl(var(--background) / 0.5),
+                 0 1px 2px hsl(var(--background) / 0.8);
+  }
+
+  /* Semi-transparent overlay for sections needing extra contrast */
+  .section-overlay {
+    position: relative;
+  }
+
+  .section-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: hsl(var(--background) / 0.4);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .section-overlay > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ========================================
+     BACKGROUND OVERRIDE SYSTEM
+     Use ONLY when absolutely necessary for specific sections
+     Document usage in component comments
+     ======================================== */
+  .bg-override-solid {
+    background: hsl(var(--background)) !important;
+  }
+
+  .bg-override-dark {
+    background: hsl(var(--background) / 0.95) !important;
+  }
+
+  /* ========================================
+     PERFORMANCE: REDUCED MOTION
+     Fallbacks for glass effects
+     ======================================== */
+  @media (prefers-reduced-motion: reduce) {
+    .glass-card,
+    .glass-prominent,
+    .liquid-glass {
+      backdrop-filter: none;
+      background: hsl(var(--card) / 0.95);
+    }
   }
 
   .liquid-glass::before {

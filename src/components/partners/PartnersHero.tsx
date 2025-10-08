@@ -7,7 +7,7 @@ export default function PartnersHero() {
   const { h1, body } = useTypography();
   
   return (
-    <section className="py-section bg-hero">
+    <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className={`${h1} mb-6 text-foreground`}>

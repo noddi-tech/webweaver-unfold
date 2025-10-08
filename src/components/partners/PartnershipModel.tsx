@@ -15,7 +15,7 @@ export default function PartnershipModel() {
   const { h2, body } = useTypography();
   
   return (
-    <section className="py-section bg-elevated">
+    <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">

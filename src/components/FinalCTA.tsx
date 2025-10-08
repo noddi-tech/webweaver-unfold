@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function FinalCTA() {
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-2xl bg-gradient-hero p-12 md:p-16 text-center">
           <div className="absolute inset-0 bg-gradient-primary opacity-10" />

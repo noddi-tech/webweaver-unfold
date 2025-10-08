@@ -31,7 +31,7 @@ export default function ProductOverview() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
 
   return (
-    <section ref={ref as any} className="bg-surface py-20 md:py-28">
+    <section ref={ref as any} className="py-section">
       <div className="container max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">

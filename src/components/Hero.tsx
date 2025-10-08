@@ -11,7 +11,7 @@ const Hero = () => {
   const { h1, body } = useTypography();
 
   return (
-    <section className="bg-hero py-section relative overflow-hidden">
+    <section className="py-section relative overflow-hidden">
       <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left Column - Text Content */}

@@ -25,36 +25,6 @@ interface Page {
   default_text_token: string;
 }
 
-const getBackgroundClass = (token?: string) => {
-  const mapping: Record<string, string> = {
-    background: 'bg-background',
-    card: 'bg-card',
-    muted: 'bg-muted',
-    primary: 'bg-primary',
-    secondary: 'bg-secondary',
-    accent: 'bg-accent',
-    'gradient-primary': 'bg-gradient-primary',
-    'gradient-background': 'bg-gradient-background',
-    'gradient-hero': 'bg-gradient-hero',
-    'gradient-subtle': 'bg-gradient-subtle',
-    transparent: 'bg-transparent',
-  };
-  return mapping[token || 'background'] || 'bg-background';
-};
-
-const getTextClass = (token?: string) => {
-  const mapping: Record<string, string> = {
-    foreground: 'text-foreground',
-    'muted-foreground': 'text-muted-foreground',
-    primary: 'text-primary',
-    secondary: 'text-secondary',
-    accent: 'text-accent',
-    'gradient-text': 'gradient-text',
-    destructive: 'text-destructive',
-  };
-  return mapping[token || 'foreground'] || 'text-foreground';
-};
-
 const Pricing = () => {
   const [pageData, setPageData] = useState<Page | null>(null);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
@@ -92,26 +62,10 @@ const Pricing = () => {
             metaDescription.setAttribute('content', page.meta_description);
           }
         }
-
-        // Apply page background to body
-        const backgroundClass = getBackgroundClass(page.default_background_token);
-        const textClass = getTextClass(page.default_text_token);
-        
-        document.body.className = document.body.className
-          .replace(/bg-\S+/g, '')
-          .replace(/text-\S+/g, '')
-          .trim();
-        document.body.classList.add(...backgroundClass.split(' '), ...textClass.split(' '));
       }
     };
 
     loadPage();
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      document.body.className = '';
-    };
   }, []);
 
   useEffect(() => {

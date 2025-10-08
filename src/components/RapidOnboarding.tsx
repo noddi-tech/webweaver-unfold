@@ -34,7 +34,7 @@ const benefits = [
 
 export default function RapidOnboarding() {
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
