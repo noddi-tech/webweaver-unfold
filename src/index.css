@@ -9,42 +9,134 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Noddi Tech Brand Colors */
+    /* ========================================
+       TIER 0: COLOR PRIMITIVES (Base Scales)
+       ======================================== */
+
+    /* Primary Purple Scale */
+    --color-primary-50: 252 90% 97%;
+    --color-primary-100: 252 90% 93%;
+    --color-primary-200: 252 88% 85%;
+    --color-primary-300: 252 87% 75%;
+    --color-primary-400: 252 87% 65%;
+    --color-primary-500: 252 87% 58%;  /* Current primary */
+    --color-primary-600: 252 85% 50%;
+    --color-primary-700: 252 82% 42%;
+    --color-primary-800: 252 78% 35%;
+    --color-primary-900: 252 72% 28%;
+
+    /* Accent Pink Scale */
+    --color-accent-50: 321 59% 96%;
+    --color-accent-100: 321 59% 92%;
+    --color-accent-200: 321 59% 85%;  /* Current secondary */
+    --color-accent-300: 321 59% 75%;
+    --color-accent-400: 321 59% 65%;
+    --color-accent-500: 321 59% 55%;
+    --color-accent-600: 321 57% 48%;
+    --color-accent-700: 321 55% 40%;
+    --color-accent-800: 321 52% 32%;
+    --color-accent-900: 321 48% 25%;
+
+    /* Neutral Grey Scale */
+    --color-neutral-50: 0 0% 98%;
+    --color-neutral-100: 0 0% 96%;
+    --color-neutral-200: 0 0% 92%;
+    --color-neutral-300: 0 0% 85%;
+    --color-neutral-400: 0 0% 70%;
+    --color-neutral-500: 0 0% 50%;
+    --color-neutral-600: 0 0% 35%;
+    --color-neutral-700: 0 0% 25%;
+    --color-neutral-800: 0 0% 15%;
+    --color-neutral-900: 0 0% 5%;
+
+    /* Feedback Colors */
+    --color-success-300: 142 76% 50%;
+    --color-success-500: 142 76% 36%;
+    --color-success-700: 142 76% 28%;
+
+    --color-warning-300: 45 93% 60%;
+    --color-warning-500: 45 93% 47%;
+    --color-warning-700: 45 93% 35%;
+
+    --color-error-300: 0 84% 70%;
+    --color-error-500: 0 84% 60%;
+    --color-error-700: 0 84% 48%;
+
+    /* ========================================
+       TIER 1: SEMANTIC TOKENS (Purpose-Driven)
+       ======================================== */
+
+    /* Surface Colors */
+    --bg-surface: var(--color-neutral-50);
+    --bg-alternate: var(--color-neutral-100);
+    --bg-inset: var(--color-neutral-200);
+    --bg-elevated: var(--color-neutral-50);
+
+    /* Text Colors */
+    --text-primary: var(--color-neutral-900);
+    --text-secondary: var(--color-neutral-700);
+    --text-muted: var(--color-neutral-500);
+    --text-inverse: var(--color-neutral-50);
+
+    /* Interactive Colors */
+    --interactive-primary: var(--color-primary-500);
+    --interactive-primary-hover: var(--color-primary-600);
+    --interactive-secondary: var(--color-accent-200);
+    --interactive-secondary-hover: var(--color-accent-300);
+
+    /* Card & Border */
+    --card-background: var(--color-neutral-50) / 0.95;  /* Increased from 0.8 */
+    --card-background-hover: var(--color-neutral-50) / 0.98;
+    --card-border: var(--color-neutral-200) / 0.5;
+    --border-subtle: var(--color-neutral-200);
+    --border-strong: var(--color-neutral-300);
+
+    /* Feedback States */
+    --feedback-success: var(--color-success-500);
+    --feedback-warning: var(--color-warning-500);
+    --feedback-error: var(--color-error-500);
+
+    /* ========================================
+       LEGACY TOKENS (Backwards Compatibility)
+       ======================================== */
+
+    /* Noddi Tech Brand Colors */
     --noddi-primary: 252 87% 58%; /* #7C3AED */
     --noddi-text: 264 58% 28%; /* #35155A */
     --noddi-gradient-start: 321 59% 85%; /* #eec3eb */
     --noddi-gradient-end: 266 42% 96%; /* #f3eff9 */
     
-    /* Design System Colors */
-    --background: 266 42% 96%; /* Light purple from gradient end */
-    --foreground: 0 0% 5%; /* Very dark for maximum contrast */
+    /* Design System Colors - Mapped to Semantic Layer */
+    --background: var(--bg-surface);
+    --foreground: var(--text-primary);
 
-    --card: 0 0% 100% / 0.9; /* Glass morphism white with transparency */
-    --card-foreground: 0 0% 5%;
+    --card: var(--card-background);
+    --card-foreground: var(--text-primary);
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
+    --popover: var(--bg-elevated);
+    --popover-foreground: var(--text-primary);
 
-    --primary: 252 87% 58%; /* Noddi purple */
-    --primary-foreground: 0 0% 100%;
+    --primary: var(--interactive-primary);
+    --primary-foreground: var(--text-inverse);
 
-    --secondary: 321 59% 85%; /* Light pink from gradient */
-    --secondary-foreground: 0 0% 5%;
+    --secondary: var(--interactive-secondary);
+    --secondary-foreground: var(--text-primary);
 
-    --muted: 266 42% 92%;
-    --muted-foreground: 264 28% 38%;
+    --muted: var(--bg-alternate);
+    --muted-foreground: var(--text-secondary);
 
-    --accent: 252 87% 58%;
-    --accent-foreground: 0 0% 100%;
+    --accent: var(--interactive-primary);
+    --accent-foreground: var(--text-inverse);
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: var(--feedback-error);
+    --destructive-foreground: var(--text-inverse);
 
-    --border: 264 20% 85%;
-    --input: 0 0% 100%;
-    --ring: 252 87% 58%;
+    --border: var(--border-subtle);
+    --input: var(--card-background);
+    --ring: var(--interactive-primary);
     
     /* Form specific improvements for better contrast */
-    --input-foreground: 0 0% 5%;
+    --input-foreground: var(--text-primary);
 
     --radius: 1rem;
     
@@ -57,15 +149,9 @@ All colors MUST be HSL.
     --spacing-section: 5rem;
     
     /* Tier-based colors for pricing calculator */
-    --tier-low: 142 76% 36%; /* Green for lower tiers (Emerging) */
-    --tier-mid: 45 93% 47%; /* Amber for mid tiers (Large) */
-    --tier-high: 252 87% 58%; /* Purple for high tiers (Enterprise) */
-    
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
-    --gradient-background: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--noddi-gradient-start)), hsl(var(--noddi-gradient-end)));
-    --gradient-subtle: linear-gradient(180deg, hsl(var(--card)), hsl(var(--background)));
+    --tier-low: var(--color-success-500); /* Green for lower tiers (Emerging) */
+    --tier-mid: var(--color-warning-500); /* Amber for mid tiers (Large) */
+    --tier-high: var(--interactive-primary); /* Purple for high tiers (Enterprise) */
 
     --sidebar-background: 0 0% 98%;
 
@@ -91,58 +177,73 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Use the same brand colors as light mode */
-    --background: 266 42% 96%; /* Same as light mode */
-    --foreground: 0 0% 5%; /* Same as light mode */
+    /* ========================================
+       DARK MODE: Override ONLY Semantic Tokens
+       ======================================== */
 
-    --card: 0 0% 100% / 0.9; /* Same glass morphism */
-    --card-foreground: 0 0% 5%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
-
-    --primary: 252 87% 58%; /* Noddi purple */
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 321 59% 85%; /* Light pink from gradient */
-    --secondary-foreground: 0 0% 5%;
-
-    --muted: 266 42% 92%;
-    --muted-foreground: 264 28% 38%;
-
-    --accent: 252 87% 58%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 264 20% 85%;
-    --input: 0 0% 100%;
-    --input-foreground: 0 0% 5%;
-    --ring: 252 87% 58%;
+    /* Surface Colors */
+    --bg-surface: var(--color-neutral-900);
+    --bg-alternate: var(--color-neutral-800);
+    --bg-inset: var(--color-neutral-800);
+    --bg-elevated: var(--color-neutral-800);
     
-    /* Same spacing tokens as light mode */
-    --spacing-xs: 0.5rem;
-    --spacing-sm: 1rem;
-    --spacing-md: 2rem;
-    --spacing-lg: 3rem;
-    --spacing-xl: 4rem;
-    --spacing-section: 5rem;
+    /* Text Colors */
+    --text-primary: var(--color-neutral-50);
+    --text-secondary: var(--color-neutral-200);
+    --text-muted: var(--color-neutral-400);
+    --text-inverse: var(--color-neutral-900);
     
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Interactive Colors - Lighter for dark backgrounds */
+    --interactive-primary: var(--color-primary-400);
+    --interactive-primary-hover: var(--color-primary-300);
+    --interactive-secondary: var(--color-accent-300);
+    --interactive-secondary-hover: var(--color-accent-400);
     
-    /* Same gradients as light mode */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--noddi-text)));
-    --gradient-background: linear-gradient(135deg, hsl(var(--noddi-gradient-start)), hsl(var(--noddi-gradient-end)));
-    --gradient-hero: radial-gradient(80% 60% at 50% 0%, hsl(var(--primary) / 0.25), transparent 70%),
-                     linear-gradient(135deg, hsl(var(--noddi-gradient-start)), hsl(var(--noddi-gradient-end)));
+    /* Card & Border */
+    --card-background: var(--color-neutral-800) / 0.95;
+    --card-background-hover: var(--color-neutral-700) / 0.98;
+    --card-border: var(--color-neutral-700) / 0.5;
+    --border-subtle: var(--color-neutral-700);
+    --border-strong: var(--color-neutral-600);
+    
+    /* Legacy Tokens - Auto-mapped via semantic tokens */
+    --background: var(--bg-surface);
+    --foreground: var(--text-primary);
+    --card: var(--card-background);
+    --card-foreground: var(--text-primary);
+    --popover: var(--bg-elevated);
+    --popover-foreground: var(--text-primary);
+    --primary: var(--interactive-primary);
+    --primary-foreground: var(--text-inverse);
+    --secondary: var(--interactive-secondary);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--bg-alternate);
+    --muted-foreground: var(--text-secondary);
+    --accent: var(--interactive-primary);
+    --accent-foreground: var(--text-inverse);
+    --destructive: var(--feedback-error);
+    --destructive-foreground: var(--text-inverse);
+    --border: var(--border-subtle);
+    --input: var(--card-background);
+    --input-foreground: var(--text-primary);
+    --ring: var(--interactive-primary);
+    
+    /* Sidebar - Dark theme adjustments */
+    --sidebar-background: var(--color-neutral-800);
+    --sidebar-foreground: var(--color-neutral-200);
+    --sidebar-primary: var(--color-neutral-50);
+    --sidebar-primary-foreground: var(--color-neutral-900);
+    --sidebar-accent: var(--color-neutral-700);
+    --sidebar-accent-foreground: var(--color-neutral-50);
+    --sidebar-border: var(--color-neutral-700);
+    --sidebar-ring: var(--color-primary-400);
+    
+    /* Adjust gradients for dark theme visibility */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--interactive-primary)), hsl(var(--color-primary-700)));
+    --gradient-background: linear-gradient(135deg, hsl(var(--color-neutral-800)), hsl(var(--color-neutral-900)));
+    --gradient-hero: radial-gradient(60% 50% at 50% 0%, 
+      hsl(var(--color-primary-500) / 0.15), transparent 70%),
+      linear-gradient(135deg, hsl(264 40% 12%), hsl(264 35% 8%));
   }
 }
 
