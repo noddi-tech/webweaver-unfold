@@ -253,7 +253,7 @@ All colors MUST be HSL.
   }
 
   html {
-    @apply bg-gradient-hero;
+    @apply bg-surface;
     min-height: 100vh;
   }
 

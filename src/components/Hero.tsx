@@ -4,28 +4,29 @@ import { Link } from "react-router-dom";
 import dashboardPreview from "@/assets/dashboard-preview.jpg";
 import { useState } from "react";
 import { Counter } from "@/components/ui/counter";
+import { useTypography } from "@/hooks/useTypography";
 
 const Hero = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { h1, body } = useTypography();
 
   return (
-    <section className="bg-hero pt-32 pb-20 md:pb-28 relative overflow-hidden">
-      <div className="bg-hero-overlay" />
+    <section className="bg-hero py-section relative overflow-hidden">
       <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left Column - Text Content */}
           <div className="space-y-8">
-            <h1 className="text-5xl md:text-6xl font-extrabold leading-tight text-foreground">
+            <h1 className={`${h1} text-foreground`}>
               Where your customers book & your business runs — all in one system
             </h1>
 
-            <p className="text-xl md:text-2xl text-muted-foreground">
+            <p className={`${body} text-muted-foreground`}>
               From booking flow to back-office automation — built for automotive service providers: from tire hotels to repair networks
             </p>
 
             {/* Metrics Badges */}
             <div className="flex flex-wrap gap-6">
-              <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-card/80 backdrop-blur-sm border border-border shadow-lg hover-scale">
+            <div className="flex items-center gap-3 px-6 py-4 rounded-xl glass-card shadow-lg hover-scale">
                 <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
                   <Award className="w-6 h-6 text-primary-foreground" />
                 </div>
@@ -36,7 +37,7 @@ const Hero = () => {
                   <div className="text-xs text-muted-foreground">Industry leading</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 px-6 py-4 rounded-xl bg-card/80 backdrop-blur-sm border border-border shadow-lg hover-scale">
+              <div className="flex items-center gap-3 px-6 py-4 rounded-xl glass-card shadow-lg hover-scale">
                 <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-primary-foreground" />
                 </div>
@@ -63,7 +64,7 @@ const Hero = () => {
           {/* Right Column - Dashboard Preview */}
           <div className="relative">
             <div className="absolute -inset-4 bg-gradient-primary opacity-20 blur-3xl rounded-full" />
-            <div className="relative bg-card rounded-2xl p-6 shadow-2xl border border-border">
+            <div className="relative glass-card rounded-2xl p-6 shadow-2xl">
               {!imageLoaded && (
                 <div className="w-full aspect-video rounded-xl bg-muted animate-pulse" />
               )}
