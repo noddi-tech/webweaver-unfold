@@ -1,14 +1,73 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Award, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
-import bookingHero from "@/assets/booking-hero.png";
-import { useState } from "react";
+import bookingStep1 from "@/assets/booking-step-1-location.png";
+import bookingStep2 from "@/assets/booking-step-2-car.png";
+import bookingStep3 from "@/assets/booking-step-3-service.png";
+import bookingStep4 from "@/assets/booking-step-4-time.png";
+import bookingStep5 from "@/assets/booking-step-5-confirmation.png";
+import { useState, useEffect, useRef } from "react";
 import { Counter } from "@/components/ui/counter";
 import { useTypography } from "@/hooks/useTypography";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 const Hero = () => {
-  const [imageLoaded, setImageLoaded] = useState(false);
   const { h1, body } = useTypography();
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+  const plugin = useRef(
+    Autoplay({ delay: 3500, stopOnInteraction: true })
+  );
+
+  const bookingSteps = [
+    {
+      image: bookingStep1,
+      alt: "Noddi booking step 1 - Location selection screen for choosing service location",
+      title: "Choose Location"
+    },
+    {
+      image: bookingStep2,
+      alt: "Noddi booking step 2 - Car selection and management screen",
+      title: "Select Car"
+    },
+    {
+      image: bookingStep3,
+      alt: "Noddi booking step 3 - Service selection screen showing tire change and other options",
+      title: "Choose Service"
+    },
+    {
+      image: bookingStep4,
+      alt: "Noddi booking step 4 - Time slot selection for booking appointment",
+      title: "Pick Time"
+    },
+    {
+      image: bookingStep5,
+      alt: "Noddi booking step 5 - Booking confirmation screen with details",
+      title: "Confirmation"
+    }
+  ];
+
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
 
   return (
     <section className="py-section relative overflow-hidden">
@@ -61,17 +120,48 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Right Column - Dashboard Preview */}
+          {/* Right Column - Booking Flow Carousel */}
           <div className="relative">
-            {!imageLoaded && (
-              <div className="w-full aspect-[21/9] bg-muted/30 animate-pulse rounded-lg" />
-            )}
-            <img
-              src={bookingHero}
-              alt="Noddi booking flow - Complete mobile journey from location selection, car management, service selection, time booking to confirmation"
-              className={`w-full transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0 absolute inset-0'}`}
-              onLoad={() => setImageLoaded(true)}
-            />
+            <Carousel
+              setApi={setApi}
+              plugins={[plugin.current]}
+              className="w-full"
+              onMouseEnter={plugin.current.stop}
+              onMouseLeave={plugin.current.reset}
+            >
+              <CarouselContent>
+                {bookingSteps.map((step, index) => (
+                  <CarouselItem key={index}>
+                    <div className="flex items-center justify-center">
+                      <img
+                        src={step.image}
+                        alt={step.alt}
+                        className="w-full max-w-2xl transition-opacity duration-500"
+                        loading={index === 0 ? "eager" : "lazy"}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-4" />
+              <CarouselNext className="right-4" />
+            </Carousel>
+            
+            {/* Navigation Dots */}
+            <div className="flex justify-center gap-2 mt-6">
+              {Array.from({ length: count }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => api?.scrollTo(index)}
+                  className={`h-2 rounded-full transition-all ${
+                    index === current - 1
+                      ? "w-8 bg-primary"
+                      : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                  }`}
+                  aria-label={`Go to step ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
