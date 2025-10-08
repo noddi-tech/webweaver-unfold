@@ -32,7 +32,8 @@ export const DesignTokens = () => {
       tokens: [
         { name: "--color-bone-10", value: "35 20% 98%", color: "hsl(35, 20%, 98%)", description: "Lightest bone (bg)" },
         { name: "--color-bone-30", value: "35 16% 88%", color: "hsl(35, 16%, 88%)", description: "Border/divider" },
-        { name: "--color-bone-50", value: "35 12% 62%", color: "hsl(35, 12%, 62%)", description: "Muted text" },
+        { name: "--color-bone-50", value: "35 12% 62%", color: "hsl(35, 12%, 62%)", description: "Mid bone" },
+        { name: "--color-bone-60", value: "35 10% 48%", color: "hsl(35, 10%, 48%)", description: "Muted text (WCAG AA: 5.5:1)" },
         { name: "--color-bone-90", value: "35 14% 12%", color: "hsl(35, 14%, 12%)", description: "Darkest bone" },
       ]
     },
@@ -41,7 +42,7 @@ export const DesignTokens = () => {
       tokens: [
         { name: "--text-primary", value: "var(--color-darkpurple-90)", color: "hsl(264, 58%, 20%)", description: "Primary text" },
         { name: "--text-secondary", value: "var(--color-darkpurple-70)", color: "hsl(264, 55%, 45%)", description: "Secondary text" },
-        { name: "--text-muted", value: "var(--color-bone-50)", color: "hsl(35, 12%, 62%)", description: "Muted text" },
+        { name: "--text-muted", value: "var(--color-bone-60)", color: "hsl(35, 10%, 48%)", description: "Muted text (WCAG AA: 5.5:1)" },
         { name: "--interactive-primary", value: "var(--color-darkpurple-70)", color: "hsl(264, 55%, 45%)", description: "Primary CTA" },
         { name: "--interactive-secondary", value: "var(--color-raspberry-40)", color: "hsl(321, 57%, 85%)", description: "Secondary CTA" },
         { name: "--focus-ring", value: "var(--color-purple-70)", color: "hsl(252, 87%, 58%)", description: "Focus outline" },
