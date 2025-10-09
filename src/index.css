@@ -404,8 +404,10 @@ All colors MUST be HSL.
     inset 0 1px 0 0 hsl(var(--border) / 0.4);
   position: relative;
   overflow: hidden;
+  isolation: isolate;
+  transform: translateZ(0);
   will-change: transform;
-  contain: layout style;
+  contain: layout style paint;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
