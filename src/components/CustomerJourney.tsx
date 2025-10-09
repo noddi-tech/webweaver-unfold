@@ -1,48 +1,50 @@
 import { MousePointer, Calendar, CheckCircle, MapPin, Wrench, Mail } from "lucide-react";
-
-const journeySteps = [
-  {
-    icon: MousePointer,
-    title: "Customer discovers service",
-    description: "Browse available services online or mobile"
-  },
-  {
-    icon: Calendar,
-    title: "Books online",
-    description: "Select service, time, and preferred location"
-  },
-  {
-    icon: CheckCircle,
-    title: "Receives confirmation",
-    description: "Instant booking confirmation and reminders"
-  },
-  {
-    icon: MapPin,
-    title: "Arrives at shop",
-    description: "Seamless check-in with lane optimization"
-  },
-  {
-    icon: Wrench,
-    title: "Service completed",
-    description: "Real-time updates and service documentation"
-  },
-  {
-    icon: Mail,
-    title: "Follow-up/recall",
-    description: "Automated recall campaigns and feedback"
-  }
-];
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 export default function CustomerJourney() {
+  const { t } = useAppTranslation();
+
+  const journeySteps = [
+    {
+      icon: MousePointer,
+      title: t('customer_journey.step_1.title', 'Customer discovers service'),
+      description: t('customer_journey.step_1.description', 'Browse available services online or mobile')
+    },
+    {
+      icon: Calendar,
+      title: t('customer_journey.step_2.title', 'Books online'),
+      description: t('customer_journey.step_2.description', 'Select service, time, and preferred location')
+    },
+    {
+      icon: CheckCircle,
+      title: t('customer_journey.step_3.title', 'Receives confirmation'),
+      description: t('customer_journey.step_3.description', 'Instant booking confirmation and reminders')
+    },
+    {
+      icon: MapPin,
+      title: t('customer_journey.step_4.title', 'Arrives at shop'),
+      description: t('customer_journey.step_4.description', 'Seamless check-in with lane optimization')
+    },
+    {
+      icon: Wrench,
+      title: t('customer_journey.step_5.title', 'Service completed'),
+      description: t('customer_journey.step_5.description', 'Real-time updates and service documentation')
+    },
+    {
+      icon: Mail,
+      title: t('customer_journey.step_6.title', 'Follow-up/recall'),
+      description: t('customer_journey.step_6.description', 'Automated recall campaigns and feedback')
+    }
+  ];
   return (
     <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
-            Customer Journey
+            {t('customer_journey.title', 'Customer Journey')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            From booking to service and follow-up — seamlessly connected
+            {t('customer_journey.subtitle', 'From booking to service and follow-up — seamlessly connected')}
           </p>
         </div>
 

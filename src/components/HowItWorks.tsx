@@ -2,46 +2,48 @@ import React from "react";
 import { Calendar, Zap, Smartphone, RefreshCw, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-
-const steps = [
-  {
-    icon: Calendar,
-    title: "Customer books service",
-    description: "Online booking or in-garage entry",
-    details: "Mobile + desktop support with one-minute funnel"
-  },
-  {
-    icon: Zap,
-    title: "Platform auto-plans routes & capacity",
-    description: "Proprietary optimization algorithms",
-    details: "Real-time resource allocation and workforce dispatch"
-  },
-  {
-    icon: Smartphone,
-    title: "Technicians execute with Noddi Worker app",
-    description: "Native app for mobile + garage workflows",
-    details: "Standardized inspection capture and tire sales"
-  },
-  {
-    icon: RefreshCw,
-    title: "System captures data → triggers actions",
-    description: "Auto-recall campaigns, tire sales, inventory updates",
-    details: "No manual follow-up needed—fully automated"
-  }
-];
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 export default function HowItWorks() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
+  const { t } = useAppTranslation();
+
+  const steps = [
+    {
+      icon: Calendar,
+      title: t('how_it_works.step_1.title', 'Customer books service'),
+      description: t('how_it_works.step_1.description', 'Online booking or in-garage entry'),
+      details: t('how_it_works.step_1.details', 'Mobile + desktop support with one-minute funnel')
+    },
+    {
+      icon: Zap,
+      title: t('how_it_works.step_2.title', 'Platform auto-plans routes & capacity'),
+      description: t('how_it_works.step_2.description', 'Proprietary optimization algorithms'),
+      details: t('how_it_works.step_2.details', 'Real-time resource allocation and workforce dispatch')
+    },
+    {
+      icon: Smartphone,
+      title: t('how_it_works.step_3.title', 'Technicians execute with Noddi Worker app'),
+      description: t('how_it_works.step_3.description', 'Native app for mobile + garage workflows'),
+      details: t('how_it_works.step_3.details', 'Standardized inspection capture and tire sales')
+    },
+    {
+      icon: RefreshCw,
+      title: t('how_it_works.step_4.title', 'System captures data → triggers actions'),
+      description: t('how_it_works.step_4.description', 'Auto-recall campaigns, tire sales, inventory updates'),
+      details: t('how_it_works.step_4.details', 'No manual follow-up needed—fully automated')
+    }
+  ];
 
   return (
     <section ref={ref as any} className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-6 text-foreground">
-            How Noddi Powers Your Operations
+            {t('how_it_works.title', 'How Noddi Powers Your Operations')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            From customer booking to back-office automation—all in one unified platform
+            {t('how_it_works.subtitle', 'From customer booking to back-office automation—all in one unified platform')}
           </p>
         </div>
 
@@ -62,7 +64,7 @@ export default function HowItWorks() {
                     <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
                       <Icon className="w-7 h-7 text-primary-foreground" />
                     </div>
-                    <div className="text-sm font-bold text-primary mb-2">Step {index + 1}</div>
+                    <div className="text-sm font-bold text-primary mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
                     <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
                     <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
                     <p className="text-xs text-muted-foreground">{step.details}</p>
@@ -98,7 +100,7 @@ export default function HowItWorks() {
                         <Icon className="w-7 h-7 text-primary-foreground" />
                       </div>
                       <div className="flex-1">
-                        <div className="text-sm font-bold text-primary mb-2">Step {index + 1}</div>
+                        <div className="text-sm font-bold text-primary mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
                         <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
                         <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
                         <p className="text-xs text-muted-foreground">{step.details}</p>
@@ -120,10 +122,10 @@ export default function HowItWorks() {
         <div className="text-center">
           <div className="inline-block px-8 py-4 bg-primary/10 border-2 border-primary/20 rounded-xl">
             <p className="text-base md:text-lg font-semibold text-foreground mb-1">
-              It's not automation. It's orchestration.
+              {t('how_it_works.caption_main', "It's not automation. It's orchestration.")}
             </p>
             <p className="text-sm text-muted-foreground font-medium">
-              One platform. Every function. Zero friction.
+              {t('how_it_works.caption_sub', 'One platform. Every function. Zero friction.')}
             </p>
           </div>
         </div>

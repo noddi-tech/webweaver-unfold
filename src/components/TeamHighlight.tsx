@@ -1,25 +1,27 @@
 import { Award, Brain, TrendingUp, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
-const expertise = [
-  {
-    icon: Brain,
-    title: "AI & Route Planning",
-    description: "Pioneers from Oda and delivery-tech startups"
-  },
-  {
-    icon: TrendingUp,
-    title: "B2B Sales",
-    description: "Deep expertise in SaaS and enterprise sales"
-  },
-  {
-    icon: Users,
-    title: "Operations",
-    description: "Proven track record in logistics and automation"
-  }
-];
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 export default function TeamHighlight() {
+  const { t } = useAppTranslation();
+
+  const expertise = [
+    {
+      icon: Brain,
+      title: t('team_highlight.expertise_1.title', 'AI & Route Planning'),
+      description: t('team_highlight.expertise_1.description', 'Pioneers from Oda and delivery-tech startups')
+    },
+    {
+      icon: TrendingUp,
+      title: t('team_highlight.expertise_2.title', 'B2B Sales'),
+      description: t('team_highlight.expertise_2.description', 'Deep expertise in SaaS and enterprise sales')
+    },
+    {
+      icon: Users,
+      title: t('team_highlight.expertise_3.title', 'Operations'),
+      description: t('team_highlight.expertise_3.description', 'Proven track record in logistics and automation')
+    }
+  ];
   return (
     <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
@@ -27,11 +29,11 @@ export default function TeamHighlight() {
           <div className="inline-flex items-center justify-center gap-2 mb-4">
             <Award className="w-8 h-8 text-primary" />
             <h2 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              Built by Route-Planning Pioneers
+              {t('team_highlight.title', 'Built by Route-Planning Pioneers')}
             </h2>
           </div>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            World-class team combining deep technical expertise with business acumen
+            {t('team_highlight.subtitle', 'World-class team combining deep technical expertise with business acumen')}
           </p>
         </div>
 
@@ -54,7 +56,7 @@ export default function TeamHighlight() {
 
         <div className="text-center mt-8">
           <p className="text-base text-muted-foreground max-w-2xl mx-auto">
-            Our founding team brings together experience from Oda, leading delivery-tech startups, and enterprise software companies—combining cutting-edge AI, logistics automation, and B2B expertise to transform automotive services.
+            {t('team_highlight.footer_text', 'Our founding team brings together experience from Oda, leading delivery-tech startups, and enterprise software companies—combining cutting-edge AI, logistics automation, and B2B expertise to transform automotive services.')}
           </p>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { Star, TrendingUp, Award, Users, Target, Zap, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 const testimonials = [
   {
@@ -19,50 +20,51 @@ const testimonials = [
   }
 ];
 
-const npsCategories = [
-  { label: "Overall", score: 90 },
-  { label: "Communication", score: 92.8 },
-  { label: "Ease of use", score: 91.1 },
-  { label: "Politeness", score: 94.8 }
-];
-
-const tractionMetrics = [
-  {
-    icon: CheckCircle2,
-    value: "20,000+",
-    label: "Bookings completed — and growing",
-    description: "Proven platform with real commercial success"
-  },
-  {
-    icon: Users,
-    value: "4",
-    label: "Paying SaaS Partners",
-    description: "Take-rate per booking model validated"
-  },
-  {
-    icon: TrendingUp,
-    value: ">49%",
-    label: "Annual Market Growth",
-    description: "Convenience services exploding"
-  },
-  {
-    icon: Target,
-    value: "€65B",
-    label: "Addressable Market",
-    description: "Massive expansion opportunity"
-  }
-];
-
 export default function TrustProof() {
+  const { t } = useAppTranslation();
+
+  const npsCategories = [
+    { label: t('trust_proof.nps.category_1.label', 'Overall'), score: 90 },
+    { label: t('trust_proof.nps.category_2.label', 'Communication'), score: 92.8 },
+    { label: t('trust_proof.nps.category_3.label', 'Ease of use'), score: 91.1 },
+    { label: t('trust_proof.nps.category_4.label', 'Politeness'), score: 94.8 }
+  ];
+
+  const tractionMetrics = [
+    {
+      icon: CheckCircle2,
+      value: t('trust_proof.metric_1.value', '20,000+'),
+      label: t('trust_proof.metric_1.label', 'Bookings completed — and growing'),
+      description: t('trust_proof.metric_1.description', 'Proven platform with real commercial success')
+    },
+    {
+      icon: Users,
+      value: t('trust_proof.metric_2.value', '4'),
+      label: t('trust_proof.metric_2.label', 'Paying SaaS Partners'),
+      description: t('trust_proof.metric_2.description', 'Take-rate per booking model validated')
+    },
+    {
+      icon: TrendingUp,
+      value: t('trust_proof.metric_3.value', '>49%'),
+      label: t('trust_proof.metric_3.label', 'Annual Market Growth'),
+      description: t('trust_proof.metric_3.description', 'Convenience services exploding')
+    },
+    {
+      icon: Target,
+      value: t('trust_proof.metric_4.value', '€65B'),
+      label: t('trust_proof.metric_4.label', 'Addressable Market'),
+      description: t('trust_proof.metric_4.description', 'Massive expansion opportunity')
+    }
+  ];
   return (
     <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
-            Trusted by Service Professionals
+            {t('trust_proof.title', 'Trusted by Service Professionals')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Real results from real businesses—proven traction and customer satisfaction
+            {t('trust_proof.subtitle', 'Real results from real businesses—proven traction and customer satisfaction')}
           </p>
         </div>
 
@@ -95,16 +97,16 @@ export default function TrustProof() {
                 <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-background/90 backdrop-blur-sm mb-4 shadow-lg">
                   <div>
                     <div className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                      ~90
+                      {t('trust_proof.nps.value', '~90')}
                     </div>
-                    <div className="text-sm font-medium text-muted-foreground">NPS Score</div>
+                    <div className="text-sm font-medium text-muted-foreground">{t('trust_proof.nps.label', 'NPS Score')}</div>
                   </div>
                 </div>
                 <h3 className="text-2xl font-bold mb-2 text-foreground">
-                  Industry-Leading Customer Satisfaction
+                  {t('trust_proof.nps.title', 'Industry-Leading Customer Satisfaction')}
                 </h3>
                 <div className="inline-block px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg mb-6">
-                  <p className="text-sm font-medium text-primary">3x better than industry average (20-30)</p>
+                  <p className="text-sm font-medium text-primary">{t('trust_proof.nps.callout', '3x better than industry average (20-30)')}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {npsCategories.map((category, index) => (
@@ -127,26 +129,26 @@ export default function TrustProof() {
                 </div>
                 <div>
                   <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                    40%
+                    {t('trust_proof.conversion.value', '40%')}
                   </div>
-                  <div className="text-sm text-muted-foreground">Conversion Rate</div>
+                  <div className="text-sm text-muted-foreground">{t('trust_proof.conversion.label', 'Conversion Rate')}</div>
                 </div>
               </div>
               <p className="text-muted-foreground mb-6">
-                Our optimized 6-step booking funnel delivers industry-leading conversion rates, turning more visitors into customers.
+                {t('trust_proof.conversion.description', 'Our optimized 6-step booking funnel delivers industry-leading conversion rates, turning more visitors into customers.')}
               </p>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Step completion rate</span>
-                  <span className="text-sm font-semibold text-foreground">90%+</span>
+                  <span className="text-sm text-muted-foreground">{t('trust_proof.conversion.stat_1.label', 'Step completion rate')}</span>
+                  <span className="text-sm font-semibold text-foreground">{t('trust_proof.conversion.stat_1.value', '90%+')}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Customer return rate</span>
-                  <span className="text-sm font-semibold text-foreground">77.9%</span>
+                  <span className="text-sm text-muted-foreground">{t('trust_proof.conversion.stat_2.label', 'Customer return rate')}</span>
+                  <span className="text-sm font-semibold text-foreground">{t('trust_proof.conversion.stat_2.value', '77.9%')}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Booking abandonment</span>
-                  <span className="text-sm font-semibold text-foreground">&lt;10%</span>
+                  <span className="text-sm text-muted-foreground">{t('trust_proof.conversion.stat_3.label', 'Booking abandonment')}</span>
+                  <span className="text-sm font-semibold text-foreground">{t('trust_proof.conversion.stat_3.value', '<10%')}</span>
                 </div>
               </div>
             </CardContent>
@@ -155,7 +157,7 @@ export default function TrustProof() {
 
         {/* Testimonials */}
         <div>
-          <h3 className="text-2xl font-bold text-center mb-6 text-foreground">What Customers Say</h3>
+          <h3 className="text-2xl font-bold text-center mb-6 text-foreground">{t('trust_proof.testimonials.title', 'What Customers Say')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {testimonials.map((testimonial, index) => (
               <Card key={index} className="hover-scale">

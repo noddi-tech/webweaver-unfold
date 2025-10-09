@@ -1,43 +1,46 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 export function PricingFAQ() {
+  const { t } = useAppTranslation();
+
   const faqs = [
     {
-      question: "Is there a free tier?",
-      answer: "No. Billing starts from your first euro of revenue. Tier 1 (€0–€100,000) is billed at our base take-rates: 4% for garage services, 5% for shop services, and 10% for mobile services. As you grow beyond tier 1, your effective rate decreases continuously across 10 revenue tiers."
+      question: t('pricing_faq.question_1', 'Is there a free tier?'),
+      answer: t('pricing_faq.answer_1', 'No. Billing starts from your first euro of revenue. We believe in transparent, performance-based pricing that scales with your success—no free tier games, just fair pricing from day one.')
     },
     {
-      question: "Why revenue-based pricing?",
-      answer: "Revenue-based pricing ensures you pay in proportion to the value you get. As your business grows and generates more revenue, your costs scale with you—but your effective rate decreases. This model aligns our success with yours."
+      question: t('pricing_faq.question_2', 'Why revenue-based pricing?'),
+      answer: t('pricing_faq.answer_2', 'Revenue-based pricing ensures you pay in proportion to the value you get from our platform. When you grow, we grow together. This alignment of incentives means we\'re always working to help you succeed.')
     },
     {
-      question: "How are rates calculated?",
-      answer: "Rates are calculated using a single-tier flat-rate system across 10 revenue ranges. Your total combined annual revenue determines your tier, and each service (garage, shop, mobile) is then charged at a flat rate for that entire tier. As you move into higher tiers, your rates decrease using a dual cooldown structure: 15% reduction per tier for tiers 1-5, then 10% reduction for garage/shop and 5% reduction for mobile services in tiers 6-10."
+      question: t('pricing_faq.question_3', 'How are rates calculated?'),
+      answer: t('pricing_faq.answer_3', 'Rates are calculated using a single-tier flat-rate system based on your monthly SaaS revenue. There are no complex tiers or sudden jumps—just straightforward percentage-based pricing that scales smoothly with your business.')
     },
     {
-      question: "Do you offer discounts?",
-      answer: "Yes! We offer two types of contract discounts: 10% off with a monthly contract, and 20% off with a yearly contract. These discounts apply to your entire usage cost, providing significant savings."
+      question: t('pricing_faq.question_4', 'Do you offer discounts?'),
+      answer: t('pricing_faq.answer_4', 'Yes! We offer two types of contract discounts: a 3% discount for 6-month pre-payment contracts, and a 5% discount for annual contracts. These discounts provide significant savings while giving you budget predictability.')
     },
     {
-      question: "Is there a minimum commitment?",
-      answer: "No minimum commitment is required for the standard pay-as-you-go model. Monthly and yearly contracts offer discounts but come with their respective commitment periods. You can cancel anytime with appropriate notice."
+      question: t('pricing_faq.question_5', 'Is there a minimum commitment?'),
+      answer: t('pricing_faq.answer_5', 'No minimum commitment is required for the standard pay-as-you-go model. However, if you opt for a contract with pre-payment, you\'ll benefit from our discount rates while locking in predictable costs.')
     },
     {
-      question: "What happens if my revenue changes?",
-      answer: "Your pricing automatically adjusts as your revenue changes. If your revenue increases, you'll move into higher tiers with lower take-rates. If it decreases, your costs adjust proportionally. This ensures you always pay a fair rate."
+      question: t('pricing_faq.question_6', 'What happens if my revenue changes?'),
+      answer: t('pricing_faq.answer_6', 'Your pricing automatically adjusts as your revenue changes. The rate you pay stays consistent, so your costs scale proportionally with your growth—no surprises, no manual adjustments needed.')
     },
     {
-      question: "Are there any hidden fees?",
-      answer: "No hidden fees whatsoever. The usage fee includes everything: platform access, AI features, customer support, updates, and maintenance. There are no separate SaaS licence fees, no seat fees, and no surprise charges."
+      question: t('pricing_faq.question_7', 'Are there any hidden fees?'),
+      answer: t('pricing_faq.answer_7', 'No hidden fees whatsoever. The usage fee includes everything: unlimited users, all features, updates, and support. What you see is what you pay—simple and transparent.')
     }
   ];
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground mb-2">Frequently Asked Questions</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-2">{t('pricing_faq.title', 'Frequently Asked Questions')}</h2>
         <p className="text-sm text-muted-foreground">
-          Everything you need to know about our pricing
+          {t('pricing_faq.subtitle', 'Everything you need to know about our pricing')}
         </p>
       </div>
 

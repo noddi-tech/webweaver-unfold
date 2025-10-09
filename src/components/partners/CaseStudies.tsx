@@ -1,37 +1,39 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
-
-const cases = [
-  {
-    title: "Nordic Fleet Partner",
-    before: "Three disconnected systems.",
-    after: "Full automation. 20% fewer support tickets, 35% faster bookings.",
-  },
-  {
-    title: "Dealer Group",
-    before: "Manual reminders.",
-    after: "Auto recall campaigns with 77.9% acceptance rate.",
-  },
-  {
-    title: "Regional Service Chain",
-    before: "Route planning by spreadsheet.",
-    after: "AI-powered optimization. 25% more daily capacity.",
-  },
-];
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 export default function CaseStudies() {
   const { h2, body } = useTypography();
+  const { t } = useAppTranslation();
+
+  const cases = [
+    {
+      title: t('case_studies.case_1.title', 'Nordic Fleet Partner'),
+      before: t('case_studies.case_1.before', 'Three disconnected systems.'),
+      after: t('case_studies.case_1.after', 'Full automation. 20% fewer support tickets, 35% faster bookings.'),
+    },
+    {
+      title: t('case_studies.case_2.title', 'Dealer Group'),
+      before: t('case_studies.case_2.before', 'Manual reminders.'),
+      after: t('case_studies.case_2.after', 'Auto recall campaigns with 77.9% acceptance rate.'),
+    },
+    {
+      title: t('case_studies.case_3.title', 'Regional Service Chain'),
+      before: t('case_studies.case_3.before', 'Route planning by spreadsheet.'),
+      after: t('case_studies.case_3.after', 'AI-powered optimization. 25% more daily capacity.'),
+    },
+  ];
   
   return (
     <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className={`${h2} mb-4 text-foreground`}>
-            Partners in Action
+            {t('case_studies.title', 'Partners in Action')}
           </h2>
           <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
-            Before and after. Short stories, big impact.
+            {t('case_studies.subtitle', 'Before and after. Short stories, big impact.')}
           </p>
         </div>
 
@@ -44,12 +46,12 @@ export default function CaseStudies() {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">Before</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">{t('case_studies.label_before', 'Before')}</p>
                     <p className="text-base text-foreground">{caseStudy.before}</p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-primary mx-auto" />
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">After</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">{t('case_studies.label_after', 'After')}</p>
                     <p className="text-base text-foreground">{caseStudy.after}</p>
                   </div>
                 </div>
@@ -60,7 +62,7 @@ export default function CaseStudies() {
 
         <div className="text-center">
           <p className="text-xl font-semibold text-foreground">
-            When everything connects, customers come back.
+            {t('case_studies.footer_text', 'When everything connects, customers come back.')}
           </p>
         </div>
       </div>
