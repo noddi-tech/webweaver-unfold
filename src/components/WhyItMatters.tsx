@@ -1,72 +1,75 @@
 import { AlertTriangle, X, CheckCircle2, Zap, Users, Package, TrendingUp, Award, Target } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-const painPoints = [
-  {
-    icon: Package,
-    problem: "Tire sales can't be automated",
-    disconnected: "Manual cross-checking, delays, errors",
-    ourApproach: "Fully integrated tire sales tied to inventory & quoting"
-  },
-  {
-    icon: AlertTriangle,
-    problem: "Poor recall logic",
-    disconnected: "Static campaigns, low relevance",
-    ourApproach: "Recall campaigns driven by capacity, utilization, and data"
-  },
-  {
-    icon: X,
-    problem: "Sync issues when booking changes",
-    disconnected: "Broken flows, double bookings",
-    ourApproach: "Real-time sync across booking, backend, shop"
-  },
-  {
-    icon: AlertTriangle,
-    problem: "Lane optimization breaks",
-    disconnected: "Digital → analog friction upon arrival",
-    ourApproach: "Seamless experience from booking to garage floor"
-  },
-  {
-    icon: Users,
-    problem: "Contactless visits are limited",
-    disconnected: "Need in-person touchpoints",
-    ourApproach: "Fully self-servicable UI with mobile + in-lane support"
-  },
-  {
-    icon: Zap,
-    problem: "Splitting across systems",
-    disconnected: "Integration complexity + tech dependencies",
-    ourApproach: "We own both booking and ERP — one roadmap, one source of truth"
-  }
-];
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 export default function WhyItMatters() {
+  const { t } = useAppTranslation();
+
+  const painPoints = [
+    {
+      icon: Package,
+      problem: t('why_it_matters.pain_points.tire_sales.problem', "Tire sales can't be automated"),
+      disconnected: t('why_it_matters.pain_points.tire_sales.disconnected', "Manual cross-checking, delays, errors"),
+      ourApproach: t('why_it_matters.pain_points.tire_sales.approach', "Fully integrated tire sales tied to inventory & quoting")
+    },
+    {
+      icon: AlertTriangle,
+      problem: t('why_it_matters.pain_points.recall.problem', "Poor recall logic"),
+      disconnected: t('why_it_matters.pain_points.recall.disconnected', "Static campaigns, low relevance"),
+      ourApproach: t('why_it_matters.pain_points.recall.approach', "Recall campaigns driven by capacity, utilization, and data")
+    },
+    {
+      icon: X,
+      problem: t('why_it_matters.pain_points.sync.problem', "Sync issues when booking changes"),
+      disconnected: t('why_it_matters.pain_points.sync.disconnected', "Broken flows, double bookings"),
+      ourApproach: t('why_it_matters.pain_points.sync.approach', "Real-time sync across booking, backend, shop")
+    },
+    {
+      icon: AlertTriangle,
+      problem: t('why_it_matters.pain_points.lane.problem', "Lane optimization breaks"),
+      disconnected: t('why_it_matters.pain_points.lane.disconnected', "Digital → analog friction upon arrival"),
+      ourApproach: t('why_it_matters.pain_points.lane.approach', "Seamless experience from booking to garage floor")
+    },
+    {
+      icon: Users,
+      problem: t('why_it_matters.pain_points.contactless.problem', "Contactless visits are limited"),
+      disconnected: t('why_it_matters.pain_points.contactless.disconnected', "Need in-person touchpoints"),
+      ourApproach: t('why_it_matters.pain_points.contactless.approach', "Fully self-servicable UI with mobile + in-lane support")
+    },
+    {
+      icon: Zap,
+      problem: t('why_it_matters.pain_points.splitting.problem', "Splitting across systems"),
+      disconnected: t('why_it_matters.pain_points.splitting.disconnected', "Integration complexity + tech dependencies"),
+      ourApproach: t('why_it_matters.pain_points.splitting.approach', "We own both booking and ERP — one roadmap, one source of truth")
+    }
+  ];
+
   return (
     <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
-            Why Our Integrated Platform Matters
+            {t('why_it_matters.title', 'Why Our Integrated Platform Matters')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            When your booking system and ERP speak the same language, everything just works
+            {t('why_it_matters.subtitle', 'When your booking system and ERP speak the same language, everything just works')}
           </p>
         </div>
 
         <Tabs defaultValue="problem" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-12">
-            <TabsTrigger value="problem">The Industry Problem</TabsTrigger>
-            <TabsTrigger value="opportunity">Opportunity & Traction</TabsTrigger>
-            <TabsTrigger value="advantage">Integrated Tech Advantage</TabsTrigger>
+            <TabsTrigger value="problem">{t('why_it_matters.tab_problem', 'The Industry Problem')}</TabsTrigger>
+            <TabsTrigger value="opportunity">{t('why_it_matters.tab_opportunity', 'Opportunity & Traction')}</TabsTrigger>
+            <TabsTrigger value="advantage">{t('why_it_matters.tab_advantage', 'Integrated Tech Advantage')}</TabsTrigger>
           </TabsList>
 
           {/* Tab 1: The Industry Problem */}
           <TabsContent value="problem" className="space-y-8">
             <div className="text-center mb-8">
-              <h3 className="text-3xl font-bold mb-4 text-foreground">The Car Maintenance Experience Is Broken</h3>
+              <h3 className="text-3xl font-bold mb-4 text-foreground">{t('why_it_matters.problem.title', 'The Car Maintenance Experience Is Broken')}</h3>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Traditional automotive services are failing to meet modern customer expectations
+                {t('why_it_matters.problem.subtitle', 'Traditional automotive services are failing to meet modern customer expectations')}
               </p>
             </div>
             
@@ -75,8 +78,8 @@ export default function WhyItMatters() {
                 <div className="flex items-start gap-3 mb-3">
                   <AlertTriangle className="w-6 h-6 text-destructive flex-shrink-0 mt-1" />
                   <div>
-                    <h4 className="font-semibold text-foreground mb-2">Inconvenient & Time-Consuming</h4>
-                    <p className="text-sm text-muted-foreground">Customers waste hours driving to garages, waiting for service, and dealing with manual processes</p>
+                    <h4 className="font-semibold text-foreground mb-2">{t('why_it_matters.problem.card_1.title', 'Inconvenient & Time-Consuming')}</h4>
+                    <p className="text-sm text-muted-foreground">{t('why_it_matters.problem.card_1.description', 'Customers waste hours driving to garages, waiting for service, and dealing with manual processes')}</p>
                   </div>
                 </div>
               </Card>
@@ -85,8 +88,8 @@ export default function WhyItMatters() {
                 <div className="flex items-start gap-3 mb-3">
                   <X className="w-6 h-6 text-destructive flex-shrink-0 mt-1" />
                   <div>
-                    <h4 className="font-semibold text-foreground mb-2">Poor Customer Experience</h4>
-                    <p className="text-sm text-muted-foreground">Hidden fees, lack of transparency, and unreliable communication damage trust and satisfaction</p>
+                    <h4 className="font-semibold text-foreground mb-2">{t('why_it_matters.problem.card_2.title', 'Poor Customer Experience')}</h4>
+                    <p className="text-sm text-muted-foreground">{t('why_it_matters.problem.card_2.description', 'Hidden fees, lack of transparency, and unreliable communication damage trust and satisfaction')}</p>
                   </div>
                 </div>
               </Card>
@@ -95,8 +98,8 @@ export default function WhyItMatters() {
                 <div className="flex items-start gap-3 mb-3">
                   <Zap className="w-6 h-6 text-destructive flex-shrink-0 mt-1" />
                   <div>
-                    <h4 className="font-semibold text-foreground mb-2">Limited Digital Presence</h4>
-                    <p className="text-sm text-muted-foreground">Most providers aren't digital—still relying on phone calls and manual scheduling</p>
+                    <h4 className="font-semibold text-foreground mb-2">{t('why_it_matters.problem.card_3.title', 'Limited Digital Presence')}</h4>
+                    <p className="text-sm text-muted-foreground">{t('why_it_matters.problem.card_3.description', "Most providers aren't digital—still relying on phone calls and manual scheduling")}</p>
                   </div>
                 </div>
               </Card>
@@ -105,8 +108,8 @@ export default function WhyItMatters() {
                 <div className="flex items-start gap-3 mb-3">
                   <TrendingUp className="w-6 h-6 text-destructive flex-shrink-0 mt-1" />
                   <div>
-                    <h4 className="font-semibold text-foreground mb-2">Industry NPS: 20-30</h4>
-                    <p className="text-sm text-muted-foreground">Low customer satisfaction scores indicate widespread dissatisfaction with current service models</p>
+                    <h4 className="font-semibold text-foreground mb-2">{t('why_it_matters.problem.card_4.title', 'Industry NPS: 20-30')}</h4>
+                    <p className="text-sm text-muted-foreground">{t('why_it_matters.problem.card_4.description', 'Low customer satisfaction scores indicate widespread dissatisfaction with current service models')}</p>
                   </div>
                 </div>
               </Card>
@@ -116,9 +119,9 @@ export default function WhyItMatters() {
           {/* Tab 2: Opportunity & Traction */}
           <TabsContent value="opportunity" className="space-y-8">
             <div className="text-center mb-8">
-              <h3 className="text-3xl font-bold mb-4 text-foreground">Convenience Services Are Exploding</h3>
+              <h3 className="text-3xl font-bold mb-4 text-foreground">{t('why_it_matters.opportunity.title', 'Convenience Services Are Exploding')}</h3>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                The market is growing rapidly, and Noddi is leading the transformation
+                {t('why_it_matters.opportunity.subtitle', 'The market is growing rapidly, and Noddi is leading the transformation')}
               </p>
             </div>
 
@@ -129,8 +132,8 @@ export default function WhyItMatters() {
                     <TrendingUp className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">&gt;49%</div>
-                  <p className="text-sm text-muted-foreground">Annual Market Growth</p>
-                  <p className="text-xs text-muted-foreground mt-2">Convenience services are the fastest-growing segment</p>
+                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_1.label', 'Annual Market Growth')}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_1.description', 'Convenience services are the fastest-growing segment')}</p>
                 </div>
               </Card>
 
@@ -140,8 +143,8 @@ export default function WhyItMatters() {
                     <CheckCircle2 className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">20,000+</div>
-                  <p className="text-sm text-muted-foreground">Bookings Completed — and growing</p>
-                  <p className="text-xs text-muted-foreground mt-2">Proven platform with real commercial traction</p>
+                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_2.label', 'Bookings Completed — and growing')}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_2.description', 'Proven platform with real commercial traction')}</p>
                 </div>
               </Card>
 
@@ -151,8 +154,8 @@ export default function WhyItMatters() {
                     <Award className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">NPS ~90</div>
-                  <p className="text-sm text-muted-foreground">Customer Satisfaction</p>
-                  <p className="text-xs text-muted-foreground mt-2">3x better than industry average (20-30)</p>
+                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_3.label', 'Customer Satisfaction')}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_3.description', '3x better than industry average (20-30)')}</p>
                 </div>
               </Card>
 
@@ -162,8 +165,8 @@ export default function WhyItMatters() {
                     <Users className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">4</div>
-                  <p className="text-sm text-muted-foreground">Paying SaaS Partners</p>
-                  <p className="text-xs text-muted-foreground mt-2">Take-rate per booking model validated</p>
+                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_4.label', 'Paying SaaS Partners')}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_4.description', 'Take-rate per booking model validated')}</p>
                 </div>
               </Card>
 
@@ -173,8 +176,8 @@ export default function WhyItMatters() {
                     <Target className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">€65B</div>
-                  <p className="text-sm text-muted-foreground">Addressable Market</p>
-                  <p className="text-xs text-muted-foreground mt-2">Massive opportunity for platform expansion</p>
+                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_5.label', 'Addressable Market')}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_5.description', 'Massive opportunity for platform expansion')}</p>
                 </div>
               </Card>
 
@@ -184,8 +187,8 @@ export default function WhyItMatters() {
                     <Zap className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">&gt;€200M</div>
-                  <p className="text-sm text-muted-foreground">License Revenue Potential</p>
-                  <p className="text-xs text-muted-foreground mt-2">Annual recurring revenue opportunity</p>
+                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_6.label', 'License Revenue Potential')}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_6.description', 'Annual recurring revenue opportunity')}</p>
                 </div>
               </Card>
             </div>
@@ -194,13 +197,13 @@ export default function WhyItMatters() {
           {/* Tab 3: Integrated Tech Advantage */}
           <TabsContent value="advantage" className="space-y-8">
             <div className="text-center mb-8">
-              <h3 className="text-3xl font-bold mb-4 text-foreground">One Platform. One Source of Truth.</h3>
+              <h3 className="text-3xl font-bold mb-4 text-foreground">{t('why_it_matters.advantage.title', 'One Platform. One Source of Truth.')}</h3>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-4">
-                Noddi doesn't just provide a booking flow — we offer a fully automated logistics platform that eliminates API sync issues because the ERP backend and booking frontend share the same data model and automation engine
+                {t('why_it_matters.advantage.description', "Noddi doesn't just provide a booking flow — we offer a fully automated logistics platform that eliminates API sync issues because the ERP backend and booking frontend share the same data model and automation engine")}
               </p>
               <div className="inline-block px-6 py-3 bg-primary/10 border border-primary/20 rounded-lg">
                 <p className="text-base font-medium text-primary">
-                  When your booking system and ERP speak the same language, everything just works.
+                  {t('why_it_matters.advantage.tagline', 'When your booking system and ERP speak the same language, everything just works.')}
                 </p>
               </div>
             </div>
@@ -210,9 +213,9 @@ export default function WhyItMatters() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left p-4 font-semibold text-foreground">Problem</th>
-                    <th className="text-left p-4 font-semibold text-foreground">What Happens in Disconnected Systems</th>
-                    <th className="text-left p-4 font-semibold text-foreground">Noddi's Integrated Approach</th>
+                    <th className="text-left p-4 font-semibold text-foreground">{t('why_it_matters.advantage.table.problem', 'Problem')}</th>
+                    <th className="text-left p-4 font-semibold text-foreground">{t('why_it_matters.advantage.table.disconnected', 'What Happens in Disconnected Systems')}</th>
+                    <th className="text-left p-4 font-semibold text-foreground">{t('why_it_matters.advantage.table.approach', "Noddi's Integrated Approach")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -256,13 +259,13 @@ export default function WhyItMatters() {
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-1">Disconnected Systems:</p>
+                        <p className="text-sm font-medium text-muted-foreground mb-1">{t('why_it_matters.advantage.mobile.disconnected_label', 'Disconnected Systems:')}</p>
                         <p className="text-sm text-foreground">{point.disconnected}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-primary mb-1 flex items-center gap-1">
                           <CheckCircle2 className="w-4 h-4" />
-                          Noddi's Approach:
+                          {t('why_it_matters.advantage.mobile.approach_label', "Noddi's Approach:")}
                         </p>
                         <p className="text-sm text-foreground">{point.ourApproach}</p>
                       </div>

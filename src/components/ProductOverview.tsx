@@ -2,43 +2,45 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Workflow, Handshake, Layout } from "lucide-react";
 import { LanguageLink } from "@/components/LanguageLink";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-
-const products = [
-  {
-    icon: Workflow,
-    title: "Functions",
-    description: "See every capability—from booking to invoicing—in one platform",
-    link: "/functions",
-    color: "primary"
-  },
-  {
-    icon: Handshake,
-    title: "Partners",
-    description: "Built for automotive networks, tire hotels, and multi-location chains",
-    link: "/partners",
-    color: "secondary"
-  },
-  {
-    icon: Layout,
-    title: "Architecture",
-    description: "Understand the technology behind Noddi's unified system",
-    link: "/architecture",
-    color: "accent"
-  }
-];
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 export default function ProductOverview() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
+  const { t } = useAppTranslation();
+
+  const products = [
+    {
+      icon: Workflow,
+      title: t('product_overview.functions.title', "Functions"),
+      description: t('product_overview.functions.description', "See every capability—from booking to invoicing—in one platform"),
+      link: "/functions",
+      color: "primary"
+    },
+    {
+      icon: Handshake,
+      title: t('product_overview.partners.title', "Partners"),
+      description: t('product_overview.partners.description', "Built for automotive networks, tire hotels, and multi-location chains"),
+      link: "/partners",
+      color: "secondary"
+    },
+    {
+      icon: Layout,
+      title: t('product_overview.architecture.title', "Architecture"),
+      description: t('product_overview.architecture.description', "Understand the technology behind Noddi's unified system"),
+      link: "/architecture",
+      color: "accent"
+    }
+  ];
 
   return (
     <section ref={ref as any} className="py-section">
       <div className="container max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-            One platform. Every function.
+            {t('product_overview.title', 'One platform. Every function.')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Explore how Noddi unifies your entire operation
+            {t('product_overview.subtitle', 'Explore how Noddi unifies your entire operation')}
           </p>
         </div>
 
