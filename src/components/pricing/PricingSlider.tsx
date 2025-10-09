@@ -91,7 +91,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
   const savings = convertFromEUR(savingsEUR, currency);
 
   return (
-    <Card className="liquid-glass bg-gradient-primary/5 border-primary/20 p-6 md:p-8 max-w-4xl mx-auto">
+    <Card className="liquid-glass p-6 md:p-8 max-w-4xl mx-auto">
       <div className="space-y-6">
         {/* Currency Selector */}
         <div className="space-y-3">
@@ -259,7 +259,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
 
         {/* Clarifier Message */}
         <div className="bg-card/50 border border-border rounded-lg p-4 flex items-start gap-3">
-          <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+          <Info className="w-5 h-5 text-foreground shrink-0 mt-0.5" />
           <p className="text-sm text-foreground">
             {getCMSContent('clarifier', 'Your cost is a small percentage of your processed revenue — this calculator shows what that means for your business.')}
           </p>
