@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import * as Icons from "lucide-react";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { LanguageLink } from "@/components/LanguageLink";
 
 const Footer = () => {
   const [footerSettings, setFooterSettings] = useState<any>(null);
@@ -66,9 +68,9 @@ const Footer = () => {
               <ul className="space-y-2">
                 {footerSettings.quick_links.map((link: any, index: number) => (
                   <li key={index}>
-                    <a href={link.url} className="text-muted-foreground hover:text-primary transition-colors">
+                    <LanguageLink to={link.url} className="text-muted-foreground hover:text-primary transition-colors">
                       {link.title}
-                    </a>
+                    </LanguageLink>
                   </li>
                 ))}
               </ul>
@@ -82,9 +84,9 @@ const Footer = () => {
               <ul className="space-y-2">
                 {footerSettings.legal_links.map((link: any, index: number) => (
                   <li key={index}>
-                    <a href={link.url} className="text-muted-foreground hover:text-primary transition-colors">
+                    <LanguageLink to={link.url} className="text-muted-foreground hover:text-primary transition-colors">
                       {link.title}
-                    </a>
+                    </LanguageLink>
                   </li>
                 ))}
               </ul>
@@ -92,8 +94,13 @@ const Footer = () => {
           )}
         </div>
 
+        {/* Language Switcher */}
+        <div className="mt-12 pt-8 border-t border-border">
+          <LanguageSwitcher variant="footer" />
+        </div>
+
         {footerSettings.copyright_text && (
-          <div className="border-t border-border mt-12 pt-8 text-center text-muted-foreground">
+          <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
             <p>{footerSettings.copyright_text}</p>
           </div>
         )}
