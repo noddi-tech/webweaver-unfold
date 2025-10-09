@@ -121,7 +121,7 @@ const Hero = () => {
           </div>
 
           {/* Right Column - Booking Flow Carousel */}
-          <div className="relative">
+          <div className="relative max-w-2xl mx-auto">
             <Carousel
               setApi={setApi}
               plugins={[plugin.current]}
@@ -136,7 +136,7 @@ const Hero = () => {
                       <img
                         src={step.image}
                         alt={step.alt}
-                        className="w-full transition-opacity duration-500"
+                        className="w-full h-auto object-contain transition-opacity duration-500"
                         loading={index === 0 ? "eager" : "lazy"}
                       />
                     </div>
