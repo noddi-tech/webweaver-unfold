@@ -115,7 +115,7 @@ const Hero = () => {
           </div>
 
           {/* Right Column - Booking Flow Carousel */}
-          <div className="relative max-w-xs mx-auto">
+          <div className="relative max-w-[280px] mx-auto">
             <Carousel
               setApi={setApi}
               plugins={[plugin.current]}
@@ -125,7 +125,7 @@ const Hero = () => {
             >
               <CarouselContent>
                 {bookingSteps.map((step, index) => (
-                  <CarouselItem key={index} className="pl-0">
+                  <CarouselItem key={index}>
                     <div className="flex items-center">
                       <img
                         src={step.image}
@@ -137,8 +137,8 @@ const Hero = () => {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="left-2" />
-              <CarouselNext className="right-2" />
+              <CarouselPrevious className="-left-12" />
+              <CarouselNext className="-right-12" />
             </Carousel>
 
             {/* Navigation Dots */}
