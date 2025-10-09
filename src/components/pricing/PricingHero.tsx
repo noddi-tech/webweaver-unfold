@@ -23,7 +23,7 @@ export default function PricingHero({ textContent }: PricingHeroProps) {
     <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-left md:text-center max-w-4xl md:mx-auto space-y-8">
-          <h1 className={`${h1} gradient-text`}>
+          <h1 className={`${h1} text-foreground`}>
             {getCMSContent('h1', 'Pay as you grow')}
           </h1>
           <p className={`${body} text-muted-foreground`}>

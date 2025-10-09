@@ -38,7 +38,7 @@ export const NoHiddenCosts = ({ textContent, onOpenCalculator }: NoHiddenCostsPr
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">
-        <h3 className="text-2xl md:text-3xl font-bold gradient-text mb-2">
+        <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
           {getContent('h3', 'No Hidden Costs')}
         </h3>
         <p className="text-muted-foreground">

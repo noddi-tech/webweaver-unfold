@@ -163,10 +163,10 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
         {/* Revenue Display */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 flex-wrap">
-            <h3 className="text-3xl md:text-4xl font-bold gradient-text">
+            <h3 className="text-3xl md:text-4xl font-bold text-foreground">
               {getCMSContent('label_revenue', 'Revenue')}:
             </h3>
-            <div className="text-3xl md:text-4xl font-bold gradient-text">
+            <div className="text-3xl md:text-4xl font-bold text-foreground">
               {formatCompactCurrency(revenue, currency)}
             </div>
           </div>

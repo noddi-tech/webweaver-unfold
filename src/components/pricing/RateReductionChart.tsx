@@ -32,11 +32,11 @@ export function RateReductionChart({ currency }: RateReductionChartProps) {
   const maxRate = 4.5;
 
   return (
-    <Card className="p-6 max-w-4xl mx-auto">
+    <Card className="liquid-glass p-6 max-w-4xl mx-auto">
       <div className="space-y-6">
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <TrendingDown className="w-5 h-5 text-primary" />
+            <TrendingDown className="w-5 h-5 text-foreground" />
             <h3 className="text-xl font-bold text-foreground">How Your Rate Decreases as You Grow</h3>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -55,9 +55,9 @@ export function RateReductionChart({ currency }: RateReductionChartProps) {
                   <span className="text-muted-foreground font-medium">{point.tier}</span>
                   <span className="text-xs text-muted-foreground">{point.label}</span>
                 </div>
-                <div className="relative h-12 bg-muted/30 rounded-lg overflow-hidden">
+                <div className="relative h-12 bg-background/50 rounded-lg overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-lg transition-all duration-700 ease-out flex items-center justify-end pr-3"
+                    className="h-full bg-gradient-to-r from-primary/90 to-primary/70 rounded-lg transition-all duration-700 ease-out flex items-center justify-end pr-3"
                     style={{ 
                       width: `${widthPercent}%`,
                       animationDelay: `${index * 100}ms` 
