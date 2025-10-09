@@ -115,7 +115,7 @@ const Hero = () => {
           </div>
 
           {/* Right Column - Booking Flow Carousel */}
-          <div className="relative max-w-xl mx-auto">
+          <div className="relative max-w-2xl mx-auto">
             <Carousel
               setApi={setApi}
               plugins={[plugin.current]}
