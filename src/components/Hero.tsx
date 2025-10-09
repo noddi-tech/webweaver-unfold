@@ -7,7 +7,7 @@ import hurtigrutaLocationScreen from "@/assets/hurtigruta-location-screen.png";
 import { useState, useEffect, useRef } from "react";
 import { Counter } from "@/components/ui/counter";
 import { useTypography } from "@/hooks/useTypography";
-import { useTranslation } from "react-i18next";
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 import {
   Carousel,
   CarouselContent,
@@ -19,7 +19,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 
 const Hero = () => {
-  const { t } = useTranslation();
+  const { t } = useAppTranslation();
   const { h1, body } = useTypography();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
