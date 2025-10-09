@@ -130,7 +130,7 @@ const Hero = () => {
                       <img
                         src={step.image}
                         alt={step.alt}
-                        className="w-[20] h-auto object-contain transition-opacity duration-500"
+                        className="w-full h-auto object-contain transition-opacity duration-500"
                         loading={index === 0 ? "eager" : "lazy"}
                       />
                     </div>
