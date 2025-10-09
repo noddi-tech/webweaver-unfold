@@ -8,8 +8,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, Upload, Loader2 } from 'lucide-react';
+import { Check, X, Upload, Loader2, Plus } from 'lucide-react';
 import * as Flags from 'country-flag-icons/react/3x2';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 export default function TranslationManager() {
   const { toast } = useToast();
@@ -19,6 +29,10 @@ export default function TranslationManager() {
   const [searchFilter, setSearchFilter] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
   const [stats, setStats] = useState<any[]>([]);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newKey, setNewKey] = useState('');
+  const [newText, setNewText] = useState('');
+  const [newPageLocation, setNewPageLocation] = useState('homepage');
 
   useEffect(() => {
     loadData();
@@ -130,6 +144,35 @@ export default function TranslationManager() {
     }
   }
 
+  async function handleAddTranslation() {
+    if (!newKey || !newText) {
+      toast({ title: 'Please fill in all fields', variant: 'destructive' });
+      return;
+    }
+
+    // Add for English first
+    const { error } = await supabase
+      .from('translations')
+      .insert({
+        translation_key: newKey,
+        language_code: 'en',
+        translated_text: newText,
+        approved: true,
+        page_location: newPageLocation,
+      });
+
+    if (error) {
+      toast({ title: 'Error adding translation', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Translation added successfully' });
+      setNewKey('');
+      setNewText('');
+      setNewPageLocation('homepage');
+      setIsAddDialogOpen(false);
+      loadData();
+    }
+  }
+
   const currentFlag = languages.find(l => l.code === selectedLang);
   const FlagIcon = currentFlag ? (Flags as any)[currentFlag.flag_code] : null;
 
@@ -146,6 +189,56 @@ export default function TranslationManager() {
             </p>
 
             <div className="flex gap-4 mb-6">
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" variant="outline">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Translation Key
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Translation Key</DialogTitle>
+                    <DialogDescription>
+                      Create a new translation key with English text. Other languages can be AI-translated later.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <Label htmlFor="key">Translation Key</Label>
+                      <Input
+                        id="key"
+                        placeholder="e.g. hero.title"
+                        value={newKey}
+                        onChange={(e) => setNewKey(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="text">English Text</Label>
+                      <Textarea
+                        id="text"
+                        placeholder="Enter the English text..."
+                        value={newText}
+                        onChange={(e) => setNewText(e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="location">Page Location</Label>
+                      <Input
+                        id="location"
+                        placeholder="e.g. homepage, contact, pricing"
+                        value={newPageLocation}
+                        onChange={(e) => setNewPageLocation(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={handleAddTranslation}>Add Translation</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
               <Button 
                 onClick={handleTranslateAll} 
                 disabled={isTranslating}
