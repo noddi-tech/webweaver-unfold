@@ -581,6 +581,110 @@ export type Database = {
           },
         ]
       }
+      language_settings: {
+        Row: {
+          created_at: string
+          default_language_code: string
+          enable_browser_detection: boolean
+          fallback_language_code: string
+          id: string
+          show_language_switcher_footer: boolean
+          show_language_switcher_header: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_language_code?: string
+          enable_browser_detection?: boolean
+          fallback_language_code?: string
+          id?: string
+          show_language_switcher_footer?: boolean
+          show_language_switcher_header?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_language_code?: string
+          enable_browser_detection?: boolean
+          fallback_language_code?: string
+          id?: string
+          show_language_switcher_footer?: boolean
+          show_language_switcher_header?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "language_settings_default_language_code_fkey"
+            columns: ["default_language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "language_settings_default_language_code_fkey"
+            columns: ["default_language_code"]
+            isOneToOne: false
+            referencedRelation: "translation_stats"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "language_settings_fallback_language_code_fkey"
+            columns: ["fallback_language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "language_settings_fallback_language_code_fkey"
+            columns: ["fallback_language_code"]
+            isOneToOne: false
+            referencedRelation: "translation_stats"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      languages: {
+        Row: {
+          code: string
+          created_at: string
+          enabled: boolean
+          flag_code: string
+          id: string
+          is_default: boolean
+          name: string
+          native_name: string
+          rtl: boolean
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          enabled?: boolean
+          flag_code: string
+          id?: string
+          is_default?: boolean
+          name: string
+          native_name: string
+          rtl?: boolean
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          enabled?: boolean
+          flag_code?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          native_name?: string
+          rtl?: boolean
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pages: {
         Row: {
           active: boolean
@@ -877,6 +981,63 @@ export type Database = {
         }
         Relationships: []
       }
+      translations: {
+        Row: {
+          approved: boolean
+          approved_at: string | null
+          approved_by: string | null
+          context: string | null
+          created_at: string
+          id: string
+          language_code: string
+          page_location: string | null
+          translated_text: string
+          translation_key: string
+          updated_at: string
+        }
+        Insert: {
+          approved?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
+          context?: string | null
+          created_at?: string
+          id?: string
+          language_code: string
+          page_location?: string | null
+          translated_text: string
+          translation_key: string
+          updated_at?: string
+        }
+        Update: {
+          approved?: boolean
+          approved_at?: string | null
+          approved_by?: string | null
+          context?: string | null
+          created_at?: string
+          id?: string
+          language_code?: string
+          page_location?: string | null
+          translated_text?: string
+          translation_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "translation_stats"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       usps: {
         Row: {
           active: boolean
@@ -1074,6 +1235,18 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      translation_stats: {
+        Row: {
+          approval_percentage: number | null
+          approved_translations: number | null
+          code: string | null
+          enabled: boolean | null
+          name: string | null
+          sort_order: number | null
+          total_translations: number | null
+        }
+        Relationships: []
       }
     }
     Functions: {
