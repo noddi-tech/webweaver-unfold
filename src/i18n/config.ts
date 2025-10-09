@@ -9,6 +9,8 @@ const supabaseBackend = {
   init: () => {},
   read: async (language: string, namespace: string, callback: (err: Error | null, data?: any) => void) => {
     try {
+      console.log(`[i18n] Loading translations for language: ${language}`);
+      
       const { data, error } = await supabase
         .from('translations')
         .select('translation_key, translated_text')
@@ -32,9 +34,10 @@ const supabaseBackend = {
         });
       });
 
+      console.log(`[i18n] Loaded ${data?.length || 0} translations for ${language}`);
       callback(null, translations);
     } catch (error: any) {
-      console.error('Error loading translations:', error);
+      console.error('[i18n] Error loading translations:', error);
       callback(error, null);
     }
   }
@@ -90,8 +93,11 @@ i18n
 supabase
   .channel('translations-changes')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'translations' }, () => {
+    console.log('[i18n] Translations updated, reloading...');
     i18n.reloadResources();
   })
   .subscribe();
+
+console.log('[i18n] i18next initialized with Supabase backend');
 
 export default i18n;
