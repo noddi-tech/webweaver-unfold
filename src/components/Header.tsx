@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, icons } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import GlobalUSPBar from "@/components/GlobalUSPBar";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { LanguageLink } from "@/components/LanguageLink";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
@@ -120,7 +122,7 @@ const Header = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <HeadingTag className="m-0">
-            <Link to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
+            <LanguageLink to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
               {brand.logo_variant === 'image' && brand.logo_image_url ? (
                 <img src={brand.logo_image_url} alt={brand.logo_text || "Brand logo"} className="w-auto" style={{ height: brand.logo_image_height || 32 }} />
               ) : (
@@ -138,26 +140,27 @@ const Header = () => {
                   })()}
                 </span>
               )}
-            </Link>
+            </LanguageLink>
           </HeadingTag>
 
           {/* Desktop Navigation */}
           {headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
             <nav className="hidden md:flex items-center space-x-8">
               {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => (
-                <Link 
+                <LanguageLink 
                   key={index} 
                   to={link.url} 
                   className="text-foreground hover:text-primary transition-colors"
                 >
                   {link.title}
-                </Link>
+                </LanguageLink>
               ))}
             </nav>
           )}
 
           {/* CTA Buttons - Hidden for clean public interface */}
           <div className="hidden md:flex items-center space-x-4">
+            <LanguageSwitcher variant="header" />
             {authenticated && (
               <Button variant="outline" onClick={signOut}>Sign out</Button>
             )}
@@ -177,14 +180,14 @@ const Header = () => {
           <div className="md:hidden mt-4 pb-4">
             <nav className="flex flex-col space-y-4">
               {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => (
-                <Link 
+                <LanguageLink 
                   key={index} 
                   to={link.url} 
                   className="text-foreground hover:text-primary transition-colors" 
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.title}
-                </Link>
+                </LanguageLink>
               ))}
               <div className="flex flex-col space-y-2 pt-4">
                 {authenticated && (
