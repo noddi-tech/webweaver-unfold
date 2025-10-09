@@ -27,6 +27,8 @@ import FileManager from "@/components/design-system/FileManager";
 import FaviconManager from "@/components/design-system/FaviconManager";
 import SocialMetaManager from "@/components/design-system/SocialMetaManager";
 import PricingManager from "@/components/design-system/PricingManager";
+import TranslationManagerContent from "@/components/design-system/TranslationManagerContent";
+
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -76,8 +78,9 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="cms" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-12">
+          <TabsList className="grid w-full grid-cols-3 mb-12">
             <TabsTrigger value="cms">CMS</TabsTrigger>
+            <TabsTrigger value="translations">Translations</TabsTrigger>
             <TabsTrigger value="design">Design System</TabsTrigger>
           </TabsList>
 
@@ -174,6 +177,11 @@ const Admin = () => {
                 </Tabs>
               </TabsContent>
             </Tabs>
+          </TabsContent>
+
+          {/* Translations Section */}
+          <TabsContent value="translations" className="space-y-8">
+            <TranslationManagerContent />
           </TabsContent>
 
           {/* Design System Section with nested tabs */}

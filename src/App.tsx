@@ -18,7 +18,6 @@ import LlmsTxt from "./pages/LlmsTxt";
 import Functions from "./pages/Functions";
 import Partners from "./pages/Partners";
 import Architecture from "./pages/Architecture";
-import TranslationManager from "./pages/TranslationManager";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +42,7 @@ const App = () => (
           {/* CMS and special routes (no language prefix) */}
           <Route path="/cms-login" element={<Auth />} />
           <Route path="/cms" element={<Admin />} />
-          <Route path="/cms/translations" element={<TranslationManager />} />
+          <Route path="/cms/translations" element={<Navigate to="/cms" replace />} />
           <Route path="/llms.txt" element={<LlmsTxt />} />
           
           {/* Redirect root to default language */}
