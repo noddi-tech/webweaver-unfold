@@ -26,7 +26,7 @@ export default function PricingHero({ textContent }: PricingHeroProps) {
           <h1 className={`${h1} gradient-text`}>
             {getCMSContent('h1', 'Pay as you grow')}
           </h1>
-          <p className={`${body} text-primary`}>
+          <p className={`${body} text-muted-foreground`}>
             {getCMSContent('p', 'Transparent revenue-based pricing that scales with your business')}
           </p>
           <div className="flex flex-wrap justify-start md:justify-center gap-6 text-sm">
@@ -35,8 +35,8 @@ export default function PricingHero({ textContent }: PricingHeroProps) {
               { icon: TrendingDown, text: getCMSContent('usp_2', 'Rates decrease as you grow') },
               { icon: Zap, text: getCMSContent('usp_3', 'Optimize your margin, not your headcount') },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 text-primary">
-                <item.icon className="w-5 h-5 text-primary" />
+              <div key={i} className="flex items-center gap-2 text-foreground">
+                <item.icon className="w-5 h-5 text-foreground" />
                 <span>{item.text}</span>
               </div>
             ))}

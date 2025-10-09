@@ -225,7 +225,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
         </div>
 
         {/* Cost Preview */}
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center">
+        <div className="bg-card/50 border border-border rounded-lg p-4 text-center">
           <div className="text-sm text-muted-foreground mb-1 glass-text-high-contrast">
             {getCMSContent('preview_label', 'Estimated annual cost:')}
           </div>
@@ -258,7 +258,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
         </div>
 
         {/* Clarifier Message */}
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex items-start gap-3">
+        <div className="bg-card/50 border border-border rounded-lg p-4 flex items-start gap-3">
           <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
           <p className="text-sm text-foreground">
             {getCMSContent('clarifier', 'Your cost is a small percentage of your processed revenue — this calculator shows what that means for your business.')}
