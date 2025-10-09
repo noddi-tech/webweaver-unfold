@@ -131,8 +131,8 @@ const Hero = () => {
             >
               <CarouselContent>
                 {bookingSteps.map((step, index) => (
-                  <CarouselItem key={index}>
-                    <div className="flex items-center justify-center">
+                  <CarouselItem key={index} className="pl-0">
+                    <div className="flex items-center">
                       <img
                         src={step.image}
                         alt={step.alt}
