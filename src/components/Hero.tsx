@@ -24,36 +24,34 @@ const Hero = () => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
-  const plugin = useRef(
-    Autoplay({ delay: 3500, stopOnInteraction: true })
-  );
+  const plugin = useRef(Autoplay({ delay: 3500, stopOnInteraction: true }));
 
   const bookingSteps = [
     {
       image: bookingStep1,
       alt: "Noddi booking step 1 - Location selection screen for choosing service location",
-      title: "Choose Location"
+      title: "Choose Location",
     },
     {
       image: bookingStep2,
       alt: "Noddi booking step 2 - Car selection and management screen",
-      title: "Select Car"
+      title: "Select Car",
     },
     {
       image: bookingStep3,
       alt: "Noddi booking step 3 - Service selection screen showing tire change and other options",
-      title: "Choose Service"
+      title: "Choose Service",
     },
     {
       image: bookingStep4,
       alt: "Noddi booking step 4 - Time slot selection for booking appointment",
-      title: "Pick Time"
+      title: "Pick Time",
     },
     {
       image: bookingStep5,
       alt: "Noddi booking step 5 - Booking confirmation screen with details",
-      title: "Confirmation"
-    }
+      title: "Confirmation",
+    },
   ];
 
   useEffect(() => {
@@ -75,17 +73,13 @@ const Hero = () => {
         <div className="grid lg:grid-cols-[40%_60%] gap-8 items-center">
           {/* Left Column - Text Content */}
           <div className="space-y-8">
-            <h1 className={`${h1} text-foreground`}>
-              One platform. Every function.
-            </h1>
+            <h1 className={`${h1} text-foreground`}>One platform. Every function.</h1>
 
-            <p className={`${body} text-muted-foreground`}>
-              Booking to billing. Built for automotive services.
-            </p>
+            <p className={`${body} text-muted-foreground`}>Booking to billing. Built for automotive services.</p>
 
             {/* Metrics Badges */}
             <div className="flex flex-wrap gap-6">
-            <div className="flex items-center gap-3 px-6 py-4 rounded-xl glass-card shadow-lg hover-scale">
+              <div className="flex items-center gap-3 px-6 py-4 rounded-xl glass-card shadow-lg hover-scale">
                 <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
                   <Award className="w-6 h-6 text-primary-foreground" />
                 </div>
@@ -136,7 +130,7 @@ const Hero = () => {
                       <img
                         src={step.image}
                         alt={step.alt}
-                        className="w-full h-auto object-contain transition-opacity duration-500"
+                        className="w-[20] h-auto object-contain transition-opacity duration-500"
                         loading={index === 0 ? "eager" : "lazy"}
                       />
                     </div>
@@ -146,7 +140,7 @@ const Hero = () => {
               <CarouselPrevious className="left-2" />
               <CarouselNext className="right-2" />
             </Carousel>
-            
+
             {/* Navigation Dots */}
             <div className="flex justify-center gap-2 mt-6">
               {Array.from({ length: count }).map((_, index) => (
@@ -154,9 +148,7 @@ const Hero = () => {
                   key={index}
                   onClick={() => api?.scrollTo(index)}
                   className={`h-2 rounded-full transition-all ${
-                    index === current - 1
-                      ? "w-8 bg-primary"
-                      : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                    index === current - 1 ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
                   }`}
                   aria-label={`Go to step ${index + 1}`}
                 />
