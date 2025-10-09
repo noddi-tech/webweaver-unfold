@@ -154,7 +154,7 @@ const Contact = () => {
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}
-          <Card className="bg-card border-border">
+          <Card className="liquid-glass">
             <CardHeader>
               <CardTitle className="text-2xl text-foreground">{settings?.form_title ?? "Send us a message"}</CardTitle>
               <CardDescription>{settings?.form_description ?? "Fill out the form below and we'll get back to you as soon as possible."}</CardDescription>
@@ -228,7 +228,7 @@ const Contact = () => {
           {/* Contact Information */}
           <div className="space-y-8">
             {settings?.show_contact_methods_tab !== false && (
-              <Card className="bg-card border-border">
+              <Card className="liquid-glass">
                 <CardHeader>
                   <CardTitle className="text-2xl text-foreground">{settings?.get_in_touch_title ?? "Get in touch"}</CardTitle>
                   <CardDescription>
@@ -266,7 +266,7 @@ const Contact = () => {
             )}
 
             {settings?.show_business_hours_tab !== false && (
-              <Card className="bg-card border-border">
+              <Card className="liquid-glass">
                 <CardHeader>
                   <CardTitle className="text-xl text-foreground">{settings?.business_hours_title ?? "Business Hours"}</CardTitle>
                 </CardHeader>

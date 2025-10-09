@@ -10,7 +10,7 @@ export default function ContactHero() {
   const h1Heading = headings.find(h => h.element_type === 'h1');
   const h1Class = h1Heading?.color_token ? 
     `${getTypographyClass('h1')} mb-6 ${getColorClass(h1Heading.color_token)}` : 
-    `${h1} gradient-text mb-6`;
+    `${h1} text-foreground mb-6`;
   
   const subtitleHeading = headings.find(h => h.element_type === 'subtitle');
   const subtitleClass = subtitleHeading?.color_token ? 
