@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Award, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
-import bookingStep1 from "@/assets/booking-step-1-location.png";
-import bookingStep2 from "@/assets/booking-step-2-car.png";
-import bookingStep3 from "@/assets/booking-step-3-service.png";
-import bookingStep4 from "@/assets/booking-step-4-time.png";
-import bookingStep5 from "@/assets/booking-step-5-confirmation.png";
+import noddiLocationScreen from "@/assets/noddi-location-screen.png";
+import tiamatLocationScreen from "@/assets/tiamat-location-screen.png";
+import hurtigrutaLocationScreen from "@/assets/hurtigruta-location-screen.png";
 import { useState, useEffect, useRef } from "react";
 import { Counter } from "@/components/ui/counter";
 import { useTypography } from "@/hooks/useTypography";
@@ -28,29 +26,19 @@ const Hero = () => {
 
   const bookingSteps = [
     {
-      image: bookingStep1,
-      alt: "Noddi booking step 1 - Location selection screen for choosing service location",
-      title: "Choose Location",
+      image: noddiLocationScreen,
+      alt: "Noddi location selection screen showing saved addresses and search functionality",
+      title: "Noddi",
     },
     {
-      image: bookingStep2,
-      alt: "Noddi booking step 2 - Car selection and management screen",
-      title: "Select Car",
+      image: tiamatLocationScreen,
+      alt: "Tiamat Dekk location selection screen with address delivery confirmation",
+      title: "Tiamat Dekk",
     },
     {
-      image: bookingStep3,
-      alt: "Noddi booking step 3 - Service selection screen showing tire change and other options",
-      title: "Choose Service",
-    },
-    {
-      image: bookingStep4,
-      alt: "Noddi booking step 4 - Time slot selection for booking appointment",
-      title: "Pick Time",
-    },
-    {
-      image: bookingStep5,
-      alt: "Noddi booking step 5 - Booking confirmation screen with details",
-      title: "Confirmation",
+      image: hurtigrutaLocationScreen,
+      alt: "Hurtigruta Carglass location selection screen with address delivery options",
+      title: "Hurtigruta Carglass",
     },
   ];
 
