@@ -91,7 +91,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
   const savings = convertFromEUR(savingsEUR, currency);
 
   return (
-    <Card className="liquid-glass p-6 md:p-8 max-w-4xl mx-auto">
+    <Card className="liquid-glass bg-gradient-primary/5 border-primary/20 p-6 md:p-8 max-w-4xl mx-auto">
       <div className="space-y-6">
         {/* Currency Selector */}
         <div className="space-y-3">

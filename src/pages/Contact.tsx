@@ -1,63 +1,13 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
+import ContactHero from "@/components/contact/ContactHero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useHeadings } from "@/hooks/useHeadings";
 import { supabase } from "@/integrations/supabase/client";
-import { getTypographyClass } from "@/lib/typography";
-import { getColorClass } from "@/lib/colorUtils";
-
-interface Page {
-  id: string;
-  name: string;
-  slug: string;
-  title: string;
-  meta_description?: string;
-  default_background_token: string;
-  default_text_token: string;
-  default_padding_token: string;
-  default_margin_token: string;
-  default_max_width_token: string;
-  layout_type: string;
-  container_width: string;
-  active: boolean;
-  published: boolean;
-}
-
-// Helper functions to apply Tailwind CSS classes based on tokens
-const getBackgroundClass = (token?: string) => {
-  const mapping: Record<string, string> = {
-    background: 'bg-background',
-    card: 'bg-card',
-    muted: 'bg-muted',
-    primary: 'bg-primary',
-    secondary: 'bg-secondary',
-    accent: 'bg-accent',
-    'gradient-primary': 'bg-gradient-primary',
-    'gradient-background': 'bg-gradient-background',
-    'gradient-hero': 'bg-gradient-hero',
-    'gradient-subtle': 'bg-gradient-subtle',
-    transparent: 'bg-transparent',
-  };
-  return mapping[token || 'background'] || 'bg-background';
-};
-
-const getTextClass = (token?: string) => {
-  const mapping: Record<string, string> = {
-    foreground: 'text-foreground',
-    'muted-foreground': 'text-muted-foreground',
-    primary: 'text-primary',
-    secondary: 'text-secondary',
-    accent: 'text-accent',
-    'gradient-text': 'gradient-text',
-    destructive: 'text-destructive',
-  };
-  return mapping[token || 'foreground'] || 'text-foreground';
-};
 
 const Contact = () => {
   const { toast } = useToast();
@@ -99,25 +49,18 @@ const Contact = () => {
   const [settings, setSettings] = useState<ContactSettings | null>(null);
   const [contactItems, setContactItems] = useState<ContactItem[]>([]);
   const [hours, setHours] = useState<BusinessHour[]>([]);
-  const [pageData, setPageData] = useState<Page | null>(null);
-  
-  // Use headings CMS for page headings
-  const { getHeading, headings } = useHeadings('contact', 'hero');
 
   useEffect(() => {
     const load = async () => {
-      // Load page data for Contact page
-      const { data: page, error: pageError } = await supabase
+      // Load page data for meta tags
+      const { data: page } = await supabase
         .from('pages')
-        .select('*')
+        .select('title, meta_description')
         .eq('slug', 'contact')
         .eq('active', true)
         .maybeSingle();
 
       if (page) {
-        setPageData(page);
-        
-        // Update document head with page data
         document.title = page.title;
         if (page.meta_description) {
           const metaDescription = document.querySelector('meta[name="description"]');
@@ -130,17 +73,6 @@ const Contact = () => {
             document.head.appendChild(meta);
           }
         }
-
-        // Apply page background using proper background class mapping
-        const backgroundClass = getBackgroundClass(page.default_background_token);
-        const textClass = getTextClass(page.default_text_token);
-        
-        // Remove existing background classes and apply new ones
-        document.body.className = document.body.className
-          .replace(/bg-\S+/g, '')
-          .replace(/text-\S+/g, '')
-          .trim();
-        document.body.classList.add(...backgroundClass.split(' '), ...textClass.split(' '));
       }
 
       const [settingsRes, itemsRes, hoursRes] = await Promise.all([
@@ -153,13 +85,6 @@ const Contact = () => {
       if (hoursRes.data) setHours(hoursRes.data as any);
     };
     load();
-  }, []);
-
-  // Cleanup body classes when component unmounts
-  useEffect(() => {
-    return () => {
-      document.body.className = '';
-    };
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -219,36 +144,15 @@ const Contact = () => {
     }
   };
   return (
-    <div className="min-h-screen text-foreground">
+    <div className="min-h-screen">
       <Header />
       
-      <main className="container mx-auto px-6 py-12 pt-32">
-        <div className="text-center mb-16">
-          {(() => {
-            const h1Heading = headings.find(h => h.element_type === 'h1');
-            const h1Class = h1Heading?.color_token ? 
-              `${getTypographyClass('h1')} mb-6 ${getColorClass(h1Heading.color_token)}` : 
-              'text-6xl font-bold gradient-text mb-6';
-            
-            const subtitleHeading = headings.find(h => h.element_type === 'subtitle');
-            const subtitleClass = subtitleHeading?.color_token ? 
-              `${getTypographyClass('subtitle')} max-w-3xl mx-auto ${getColorClass(subtitleHeading.color_token)}` : 
-              'text-xl text-muted-foreground max-w-3xl mx-auto';
-            
-            return (
-              <>
-                <h1 className={h1Class}>
-                  {getHeading('h1', '')}
-                </h1>
-                <p className={subtitleClass}>
-                  {getHeading('subtitle', '')}
-                </p>
-              </>
-            );
-          })()}
-        </div>
+      <main>
+        <ContactHero />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+        <section className="py-section">
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}
           <Card className="bg-card border-border">
             <CardHeader>
@@ -384,6 +288,8 @@ const Contact = () => {
             )}
           </div>
         </div>
+          </div>
+        </section>
       </main>
     </div>
   );

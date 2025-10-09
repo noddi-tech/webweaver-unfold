@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, Zap, TrendingDown, Shield, Sparkles, Info } from "lucide-react";
-import { Link } from "react-router-dom";
-import { PricingFeatureCards } from "@/components/pricing/PricingFeatureCards";
+import { Card } from "@/components/ui/card";
+import PricingHero from "@/components/pricing/PricingHero";
 import { PricingSlider } from "@/components/pricing/PricingSlider";
 import { RateReductionChart } from "@/components/pricing/RateReductionChart";
 import { NoHiddenCosts } from "@/components/pricing/NoHiddenCosts";
@@ -15,18 +13,7 @@ import { DEFAULT_CURRENCY } from "@/config/pricing";
 import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 
-interface Page {
-  id: string;
-  name: string;
-  slug: string;
-  title: string;
-  meta_description?: string;
-  default_background_token: string;
-  default_text_token: string;
-}
-
 const Pricing = () => {
-  const [pageData, setPageData] = useState<Page | null>(null);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [currency, setCurrency] = useState(() => {
     const saved = localStorage.getItem('noddi-pricing-currency');
@@ -47,13 +34,12 @@ const Pricing = () => {
     const loadPage = async () => {
       const { data: page } = await supabase
         .from('pages')
-        .select('*')
+        .select('title, meta_description')
         .eq('slug', 'pricing')
         .eq('active', true)
         .maybeSingle();
 
       if (page) {
-        setPageData(page);
         document.title = page.title;
         
         if (page.meta_description) {
@@ -75,57 +61,29 @@ const Pricing = () => {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="container mx-auto px-6 pt-32 pb-20 space-y-20">
+      <main>
         {/* Hero Section */}
-        <div className="text-left md:text-center max-w-4xl md:mx-auto space-y-8">
-          <h1 className="text-4xl md:text-6xl font-bold gradient-text">
-            {getCMSContent('h1', 'Pay as you grow')}
-          </h1>
-          <p className="text-xl md:text-2xl text-primary">
-            {getCMSContent('p', 'Transparent revenue-based pricing that scales with your business')}
-          </p>
-          <div className="flex flex-wrap justify-start md:justify-center gap-6 text-sm">
-            {[
-              { icon: Sparkles, text: getCMSContent('usp_1', 'World class UX') },
-              { icon: TrendingDown, text: getCMSContent('usp_2', 'Rates decrease as you grow') },
-              { icon: Zap, text: getCMSContent('usp_3', 'Optimize your margin, not your headcount') },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 text-primary">
-                <item.icon className="w-5 h-5 text-primary" />
-                <span>{item.text}</span>
-              </div>
-          ))}
-          </div>
-        </div>
-
-        {/* Book a Demo CTA - After Hero */}
-        <section className="text-center animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
-            <a 
-              href="https://calendly.com/joachim-noddi/30min"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {getCMSContent('button_book_demo', 'Book a Demo')}
-            </a>
-          </Button>
-        </section>
+        <PricingHero textContent={textContent} />
 
         {/* Interactive Revenue Slider */}
-        <section className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-          <PricingSlider 
-            currency={currency}
-            onCurrencyChange={setCurrency}
-            contractType={contractType}
-            onContractTypeChange={setContractType}
-            onOpenCalculator={() => setIsCalculatorOpen(true)}
-            textContent={textContent}
-          />
+        <section className="py-section animate-fade-in" style={{ animationDelay: '150ms' }}>
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+            <PricingSlider 
+              currency={currency}
+              onCurrencyChange={setCurrency}
+              contractType={contractType}
+              onContractTypeChange={setContractType}
+              onOpenCalculator={() => setIsCalculatorOpen(true)}
+              textContent={textContent}
+            />
+          </div>
         </section>
 
         {/* No Hidden Costs Banner */}
-        <section className="animate-fade-in" style={{ animationDelay: '175ms' }}>
-          <NoHiddenCosts textContent={textContent} onOpenCalculator={() => setIsCalculatorOpen(true)} />
+        <section className="py-section animate-fade-in" style={{ animationDelay: '175ms' }}>
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+            <NoHiddenCosts textContent={textContent} onOpenCalculator={() => setIsCalculatorOpen(true)} />
+          </div>
         </section>
 
         {/* Contract Type Selector - Now integrated in PricingSlider */}
@@ -175,8 +133,10 @@ const Pricing = () => {
         </section> */}
 
         {/* Rate Reduction Chart */}
-        <section className="animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <RateReductionChart currency={currency} />
+        <section className="py-section animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+            <RateReductionChart currency={currency} />
+          </div>
         </section>
 
         {/* Value Proposition */}
@@ -206,21 +166,25 @@ const Pricing = () => {
         </section>
 
         {/* FAQ Section */}
-        <section className="animate-fade-in" style={{ animationDelay: '600ms' }}>
-          <PricingFAQ />
+        <section className="py-section animate-fade-in" style={{ animationDelay: '600ms' }}>
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+            <PricingFAQ />
+          </div>
         </section>
 
         {/* Book a Demo CTA - After FAQ */}
-        <section className="text-center animate-fade-in" style={{ animationDelay: '650ms' }}>
-          <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
-            <a 
-              href="https://calendly.com/joachim-noddi/30min"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {getCMSContent('button_book_demo', 'Book a Demo')}
-            </a>
-          </Button>
+        <section className="py-section text-center animate-fade-in" style={{ animationDelay: '650ms' }}>
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+            <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
+              <a 
+                href="https://calendly.com/joachim-noddi/30min"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {getCMSContent('button_book_demo', 'Book a Demo')}
+              </a>
+            </Button>
+          </div>
         </section>
 
         {/* Final CTA */}
