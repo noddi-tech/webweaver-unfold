@@ -37,7 +37,7 @@ export default function HowItWorks() {
     <section ref={ref as any} className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+          <h2 className="text-4xl font-bold mb-6 text-foreground">
             How Noddi Powers Your Operations
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -119,10 +119,10 @@ export default function HowItWorks() {
         {/* Caption */}
         <div className="text-center">
           <div className="inline-block px-8 py-4 bg-primary/10 border-2 border-primary/20 rounded-xl">
-            <p className="text-base md:text-lg font-semibold text-primary mb-1">
+            <p className="text-base md:text-lg font-semibold text-foreground mb-1">
               It's not automation. It's orchestration.
             </p>
-            <p className="text-sm text-primary/80 font-medium">
+            <p className="text-sm text-muted-foreground font-medium">
               One platform. Every function. Zero friction.
             </p>
           </div>
