@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageRedirect } from "./components/LanguageRedirect";
+import { LanguageSync } from "./components/LanguageSync";
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
 import FeaturesPage from "./pages/Features";
@@ -29,15 +30,15 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           {/* Language-prefixed routes */}
-          <Route path="/:lang" element={<Index />} />
-          <Route path="/:lang/functions" element={<Functions />} />
-          <Route path="/:lang/features" element={<FeaturesPage />} />
-          <Route path="/:lang/partners" element={<Partners />} />
-          <Route path="/:lang/architecture" element={<Architecture />} />
-          <Route path="/:lang/pricing" element={<Pricing />} />
-          <Route path="/:lang/contact" element={<Contact />} />
-          <Route path="/:lang/demo" element={<Demo />} />
-          <Route path="/:lang/team" element={<Team />} />
+          <Route path="/:lang" element={<LanguageSync><Index /></LanguageSync>} />
+          <Route path="/:lang/functions" element={<LanguageSync><Functions /></LanguageSync>} />
+          <Route path="/:lang/features" element={<LanguageSync><FeaturesPage /></LanguageSync>} />
+          <Route path="/:lang/partners" element={<LanguageSync><Partners /></LanguageSync>} />
+          <Route path="/:lang/architecture" element={<LanguageSync><Architecture /></LanguageSync>} />
+          <Route path="/:lang/pricing" element={<LanguageSync><Pricing /></LanguageSync>} />
+          <Route path="/:lang/contact" element={<LanguageSync><Contact /></LanguageSync>} />
+          <Route path="/:lang/demo" element={<LanguageSync><Demo /></LanguageSync>} />
+          <Route path="/:lang/team" element={<LanguageSync><Team /></LanguageSync>} />
           
           {/* CMS and special routes (no language prefix) */}
           <Route path="/cms-login" element={<Auth />} />

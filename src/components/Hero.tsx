@@ -7,6 +7,7 @@ import hurtigrutaLocationScreen from "@/assets/hurtigruta-location-screen.png";
 import { useState, useEffect, useRef } from "react";
 import { Counter } from "@/components/ui/counter";
 import { useTypography } from "@/hooks/useTypography";
+import { useTranslation } from "react-i18next";
 import {
   Carousel,
   CarouselContent,
@@ -18,6 +19,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 
 const Hero = () => {
+  const { t } = useTranslation();
   const { h1, body } = useTypography();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
@@ -61,9 +63,9 @@ const Hero = () => {
         <div className="grid lg:grid-cols-[40%_60%] gap-8 items-center">
           {/* Left Column - Text Content */}
           <div className="space-y-8">
-            <h1 className={`${h1} text-foreground`}>One platform. Every function.</h1>
+            <h1 className={`${h1} text-foreground`}>{t('hero.title', 'One platform. Every function.')}</h1>
 
-            <p className={`${body} text-muted-foreground`}>Booking to billing. Built for automotive services.</p>
+            <p className={`${body} text-muted-foreground`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
 
             {/* Metrics Badges */}
             <div className="flex flex-wrap gap-6">
@@ -75,7 +77,7 @@ const Hero = () => {
                   <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     NPS <Counter end={90} prefix="~" />
                   </div>
-                  <div className="text-xs text-muted-foreground">Industry leading</div>
+                  <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'Industry leading')}</div>
                 </div>
               </div>
               <div className="flex items-center gap-3 px-6 py-4 rounded-xl glass-card shadow-lg hover-scale">
@@ -86,7 +88,7 @@ const Hero = () => {
                   <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                     <Counter end={20000} suffix="+" />
                   </div>
-                  <div className="text-xs text-muted-foreground">Bookings completed</div>
+                  <div className="text-xs text-muted-foreground">{t('hero.metrics.bookings', 'Bookings completed')}</div>
                 </div>
               </div>
             </div>
@@ -95,7 +97,7 @@ const Hero = () => {
             <div>
               <LanguageLink to="/contact">
                 <Button size="lg" className="text-lg px-8 py-4 group shadow-lg">
-                  Get a Demo
+                  {t('hero.cta', 'Get a Demo')}
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </LanguageLink>
