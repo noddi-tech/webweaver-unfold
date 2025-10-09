@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { LanguageLink } from "@/components/LanguageLink";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -69,9 +69,9 @@ const GlobalUSPBar: React.FC = () => {
             </div>
           );
           return u.href ? (
-            <Link key={u.id} to={u.href} className="shrink-0 hover:opacity-90 transition-opacity">
+            <LanguageLink key={u.id} to={u.href} className="shrink-0 hover:opacity-90 transition-opacity">
               {pill}
-            </Link>
+            </LanguageLink>
           ) : (
             <span key={u.id} className="shrink-0">{pill}</span>
           );

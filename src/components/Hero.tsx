@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Award, TrendingUp } from "lucide-react";
-import { Link } from "react-router-dom";
+import { LanguageLink } from "@/components/LanguageLink";
 import noddiLocationScreen from "@/assets/noddi-location-screen.png";
 import tiamatLocationScreen from "@/assets/tiamat-location-screen.png";
 import hurtigrutaLocationScreen from "@/assets/hurtigruta-location-screen.png";
@@ -93,12 +93,12 @@ const Hero = () => {
 
             {/* CTA Button */}
             <div>
-              <Link to="/contact">
+              <LanguageLink to="/contact">
                 <Button size="lg" className="text-lg px-8 py-4 group shadow-lg">
                   Get a Demo
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
-              </Link>
+              </LanguageLink>
             </div>
           </div>
 

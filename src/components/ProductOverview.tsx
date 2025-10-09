@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Workflow, Handshake, Layout } from "lucide-react";
-import { Link } from "react-router-dom";
+import { LanguageLink } from "@/components/LanguageLink";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const products = [
@@ -46,7 +46,7 @@ export default function ProductOverview() {
           {products.map((product, index) => {
             const Icon = product.icon;
             return (
-              <Link 
+              <LanguageLink 
                 key={index} 
                 to={product.link}
                 className={`group transition-all duration-500 ${
@@ -67,7 +67,7 @@ export default function ProductOverview() {
                     </p>
                   </CardContent>
                 </Card>
-              </Link>
+              </LanguageLink>
             );
           })}
         </div>

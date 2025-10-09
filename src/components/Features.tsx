@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { LanguageLink } from "@/components/LanguageLink";
 import { useHeadings } from "@/hooks/useHeadings";
 import { getTypographyClass } from "@/lib/typography";
 import { getColorClass } from "@/lib/colorUtils";
@@ -129,9 +129,9 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
                 </div>
               );
               return u.href ? (
-                <Link key={u.id} to={u.href} className="shrink-0 hover:opacity-90 transition-opacity">
+                <LanguageLink key={u.id} to={u.href} className="shrink-0 hover:opacity-90 transition-opacity">
                   {pill}
-                </Link>
+                </LanguageLink>
               ) : (
                 <span key={u.id} className="shrink-0">{pill}</span>
               );

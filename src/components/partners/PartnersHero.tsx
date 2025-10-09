@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { LanguageLink } from "@/components/LanguageLink";
 import { useTypography } from "@/hooks/useTypography";
 
 export default function PartnersHero() {
@@ -17,10 +17,10 @@ export default function PartnersHero() {
             20,000+ bookings and counting — powered by one platform.
           </p>
           <Button size="lg" className="text-lg px-8 py-6 group" asChild>
-            <Link to="/contact">
+            <LanguageLink to="/contact">
               Become a partner
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            </LanguageLink>
           </Button>
         </div>
       </div>

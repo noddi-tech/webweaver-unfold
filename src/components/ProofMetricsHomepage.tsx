@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, Users, Award, Target } from "lucide-react";
 import { Counter } from "@/components/ui/counter";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { LanguageLink } from "@/components/LanguageLink";
 import { ArrowRight } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
@@ -91,12 +91,12 @@ export default function ProofMetricsHomepage() {
         </div>
 
         <div className="text-center">
-          <Link to="/partners">
+          <LanguageLink to="/partners">
             <Button size="lg" variant="secondary" className="text-lg px-8 py-6 group">
               See Customer Stories
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
-          </Link>
+          </LanguageLink>
         </div>
       </div>
     </section>

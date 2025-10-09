@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { X, Check, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { LanguageLink } from "@/components/LanguageLink";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const beforeItems = [
@@ -84,12 +84,12 @@ export default function WhyNoddi() {
         </div>
 
         <div className="text-center">
-          <Link to="/functions">
+          <LanguageLink to="/functions">
             <Button size="lg" className="text-lg px-8 py-6 group">
               See How It Works
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
-          </Link>
+          </LanguageLink>
         </div>
       </div>
     </section>
