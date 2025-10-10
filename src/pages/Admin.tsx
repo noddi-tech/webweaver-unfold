@@ -30,6 +30,8 @@ import PricingManager from "@/components/design-system/PricingManager";
 import TranslationManagerContent from "@/components/design-system/TranslationManagerContent";
 import PageMetaManager from "@/components/design-system/PageMetaManager";
 import SitemapGenerator from "@/components/design-system/SitemapGenerator";
+import UnifiedDashboard from "@/components/design-system/UnifiedDashboard";
+import SEOSetupWizard from "@/components/design-system/SEOSetupWizard";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -80,10 +82,9 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="cms" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-12">
+          <TabsList className="grid w-full grid-cols-3 mb-12">
             <TabsTrigger value="cms">CMS</TabsTrigger>
-            <TabsTrigger value="translations">Translations</TabsTrigger>
-            <TabsTrigger value="seo">SEO</TabsTrigger>
+            <TabsTrigger value="translations">Translations & SEO</TabsTrigger>
             <TabsTrigger value="design">Design System</TabsTrigger>
           </TabsList>
 
@@ -182,18 +183,32 @@ const Admin = () => {
             </Tabs>
           </TabsContent>
 
-          {/* Translations Section */}
+          {/* Translations & SEO Section */}
           <TabsContent value="translations" className="space-y-8">
-            <TranslationManagerContent />
-          </TabsContent>
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-8">
+                <TabsTrigger value="overview">📊 Overview</TabsTrigger>
+                <TabsTrigger value="translations">🌍 Translations</TabsTrigger>
+                <TabsTrigger value="seo">🚀 SEO & Meta</TabsTrigger>
+                <TabsTrigger value="sitemap">🗺️ Sitemap</TabsTrigger>
+              </TabsList>
 
-          {/* SEO Section */}
-          <TabsContent value="seo" className="space-y-8">
-            <PageMetaManager />
-            
-            <div className="mt-8">
-              <SitemapGenerator />
-            </div>
+              <TabsContent value="overview">
+                <UnifiedDashboard />
+              </TabsContent>
+
+              <TabsContent value="translations">
+                <TranslationManagerContent />
+              </TabsContent>
+
+              <TabsContent value="seo">
+                <PageMetaManager />
+              </TabsContent>
+
+              <TabsContent value="sitemap">
+                <SitemapGenerator />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           {/* Design System Section with nested tabs */}
