@@ -750,10 +750,14 @@ export default function TranslationManagerContent() {
           failureCount++;
           console.error(`Error evaluating ${lang.name}:`, error);
           
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          const isTimeout = errorMessage.toLowerCase().includes('timeout') || 
+                           errorMessage.toLowerCase().includes('timed out');
+          
           toast({
-            title: `${lang.name} evaluation failed`,
-            description: error.message || 'An unexpected error occurred',
-            variant: 'destructive',
+            title: `${lang.name} evaluation ${isTimeout ? 'paused' : 'failed'}`,
+            description: errorMessage || 'An unexpected error occurred',
+            variant: isTimeout ? 'default' : 'destructive',
             duration: 8000
           });
 
