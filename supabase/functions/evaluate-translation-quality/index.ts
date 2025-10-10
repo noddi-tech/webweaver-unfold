@@ -400,9 +400,13 @@ ${JSON.stringify(translationsForEvaluation, null, 2)}`;
           else if (score >= 70) mediumQualityCount++;
           else lowQualityCount++;
 
+          // Find the original translation text from the batch to preserve it
+          const batchItem = batch.find(b => b.translation_key === quality.key);
+
           return {
             translation_key: quality.key,
             language_code: targetLanguage,
+            translated_text: batchItem?.translated_text || '',
             quality_score: score,
             quality_metrics: {
               score: score,
