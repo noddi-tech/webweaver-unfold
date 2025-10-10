@@ -665,65 +665,128 @@ export default function TranslationManagerContent() {
         return;
       }
 
-      const { data: allKeys } = await supabase
+      // Check which languages already have evaluations
+      const { data: existingEvals } = await supabase
         .from('translations')
-        .select('translation_key')
-        .eq('language_code', 'en');
-      
-      if (!allKeys || allKeys.length === 0) {
-        throw new Error('No translation keys found');
+        .select('language_code, quality_metrics')
+        .neq('language_code', 'en')
+        .not('quality_metrics', 'is', null);
+
+      const languagesWithEvals = new Set(
+        existingEvals?.filter(e => {
+          const metrics = e.quality_metrics as any;
+          return metrics && typeof metrics === 'object' && metrics.overall_score !== undefined;
+        }).map(e => e.language_code) || []
+      );
+
+      const pendingLanguages = targetLanguages.filter(l => !languagesWithEvals.has(l.code));
+      const skippedCount = targetLanguages.length - pendingLanguages.length;
+
+      if (skippedCount > 0) {
+        toast({
+          title: `Skipping ${skippedCount} already evaluated languages`,
+          description: 'Will only evaluate languages without quality scores',
+          duration: 5000
+        });
       }
 
-      const translationKeys = allKeys.map(k => k.translation_key);
-
-      for (let i = 0; i < targetLanguages.length; i++) {
-        const lang = targetLanguages[i];
-        setTranslationProgress(`Evaluating ${lang.name} (${i + 1}/${targetLanguages.length})...`);
-
-        const { data, error } = await supabase.functions.invoke('evaluate-translation-quality', {
-          body: {
-            translationKeys,
-            targetLanguage: lang.code,
-            sourceLanguage: 'en'
-          }
+      if (pendingLanguages.length === 0) {
+        toast({
+          title: 'All languages already evaluated!',
+          description: 'Use individual language "Evaluate Quality" buttons to re-evaluate',
+          duration: 5000
         });
+        return;
+      }
 
-        if (error) {
-          console.error(`Error evaluating ${lang.name}:`, error);
-          toast({
-            title: `${lang.name} evaluation failed`,
-            description: error.message,
-            variant: 'destructive'
+      let successCount = 0;
+      let failureCount = 0;
+
+      for (let i = 0; i < pendingLanguages.length; i++) {
+        const lang = pendingLanguages[i];
+        const progressMsg = `Evaluating ${lang.name} (${i + 1}/${pendingLanguages.length})... This may take 1-2 minutes per language.`;
+        setTranslationProgress(progressMsg);
+
+        try {
+          // Add timeout wrapper (3 minutes per language)
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Evaluation timeout - this is normal for large datasets. Try again.')), 180000)
+          );
+
+          const evaluationPromise = supabase.functions.invoke('evaluate-translation-quality', {
+            body: {
+              targetLanguage: lang.code,
+              sourceLanguage: 'en'
+            }
           });
-          continue;
+
+          const { data, error } = await Promise.race([evaluationPromise, timeoutPromise]) as any;
+
+          if (error) {
+            throw error;
+          }
+
+          successCount++;
+          toast({
+            title: `✓ ${lang.name} evaluated`,
+            description: `Average: ${data.averageScore}% (${data.highQuality} high, ${data.mediumQuality} medium, ${data.lowQuality} low)`,
+            duration: 3000
+          });
+
+          await loadData();
+
+        } catch (error: any) {
+          failureCount++;
+          console.error(`Error evaluating ${lang.name}:`, error);
+          
+          const isTimeout = error.message?.includes('timeout');
+          toast({
+            title: `${lang.name} evaluation ${isTimeout ? 'timed out' : 'failed'}`,
+            description: isTimeout 
+              ? 'Click "Evaluate All Languages" again to continue where you left off'
+              : error.message,
+            variant: 'destructive',
+            duration: 8000
+          });
+
+          // If timeout, break the loop so user can restart
+          if (isTimeout) {
+            toast({
+              title: 'Evaluation paused',
+              description: `Completed ${successCount}/${pendingLanguages.length}. Click "Evaluate All Languages" to continue.`,
+              duration: 10000
+            });
+            break;
+          }
         }
 
-        toast({
-          title: `${lang.name} evaluated`,
-          description: `Average: ${data.averageScore}% (${data.highQuality} high, ${data.mediumQuality} medium, ${data.lowQuality} low)`,
-          duration: 3000
-        });
-
-        await loadData();
-
         // Small delay between languages
-        if (i < targetLanguages.length - 1) {
+        if (i < pendingLanguages.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
       }
 
-      toast({
-        title: 'All quality evaluations complete!',
-        description: `Evaluated ${targetLanguages.length} languages`,
-        duration: 5000
-      });
+      if (successCount === pendingLanguages.length) {
+        toast({
+          title: '🎉 All quality evaluations complete!',
+          description: `Successfully evaluated ${successCount} languages with 2-stage AI validation`,
+          duration: 8000
+        });
+      } else if (successCount > 0) {
+        toast({
+          title: 'Partial completion',
+          description: `Evaluated ${successCount}/${pendingLanguages.length} languages. ${failureCount} failed or timed out.`,
+          duration: 8000
+        });
+      }
 
     } catch (error: any) {
       console.error('Bulk evaluation error:', error);
       toast({
         title: 'Evaluation failed',
         description: error.message || 'An unexpected error occurred',
-        variant: 'destructive'
+        variant: 'destructive',
+        duration: 8000
       });
     } finally {
       setIsEvaluating(false);
