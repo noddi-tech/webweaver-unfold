@@ -69,7 +69,7 @@ export default function TranslationManagerContent() {
   async function loadData() {
     const [{ data: langs }, { data: trans }] = await Promise.all([
       supabase.from('languages').select('*').order('sort_order'),
-      supabase.from('translations').select('*').order('translation_key'),
+      supabase.from('translations').select('*').limit(100000).order('translation_key'),
     ]);
     
     // Get stats from view
