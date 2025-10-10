@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { HreflangTags } from "@/components/HreflangTags";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -145,6 +146,7 @@ const Contact = () => {
   };
   return (
     <div className="min-h-screen">
+      <HreflangTags pageSlug="/contact" />
       <Header />
       
       <main>

@@ -685,6 +685,66 @@ export type Database = {
         }
         Relationships: []
       }
+      page_meta_translations: {
+        Row: {
+          canonical_url: string | null
+          created_at: string
+          id: string
+          language_code: string
+          meta_description: string | null
+          meta_keywords: string | null
+          meta_title: string
+          og_description: string | null
+          og_image_url: string | null
+          og_title: string | null
+          page_slug: string
+          quality_score: number | null
+          review_status: string | null
+          twitter_description: string | null
+          twitter_image_url: string | null
+          twitter_title: string | null
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string
+          id?: string
+          language_code: string
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title: string
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          page_slug: string
+          quality_score?: number | null
+          review_status?: string | null
+          twitter_description?: string | null
+          twitter_image_url?: string | null
+          twitter_title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string
+          id?: string
+          language_code?: string
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          page_slug?: string
+          quality_score?: number | null
+          review_status?: string | null
+          twitter_description?: string | null
+          twitter_image_url?: string | null
+          twitter_title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pages: {
         Row: {
           active: boolean

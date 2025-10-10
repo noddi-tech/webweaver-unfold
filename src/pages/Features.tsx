@@ -5,6 +5,7 @@ import { useHeadings } from "@/hooks/useHeadings";
 import { getTypographyClass } from "@/lib/typography";
 import { getColorClass } from "@/lib/colorUtils";
 import { supabase } from "@/integrations/supabase/client";
+import { HreflangTags } from "@/components/HreflangTags";
 
 interface Page {
   id: string;
@@ -110,6 +111,7 @@ const FeaturesPage = () => {
   
   return (
     <div className="min-h-screen text-foreground">
+      <HreflangTags pageSlug="/features" />
       <Header />
       
       <main className="container mx-auto px-6 py-12 pt-32">

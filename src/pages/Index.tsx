@@ -7,6 +7,7 @@ import ProductOverview from "@/components/ProductOverview";
 import HowItWorks from "@/components/HowItWorks";
 import ProofMetricsHomepage from "@/components/ProofMetricsHomepage";
 import FinalCTA from "@/components/FinalCTA";
+import { HreflangTags } from "@/components/HreflangTags";
 import { supabase } from '@/integrations/supabase/client';
 
 interface SocialMetaSettings {
@@ -141,6 +142,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <HreflangTags pageSlug="/" />
       <Header />
       <main>
         <Hero />

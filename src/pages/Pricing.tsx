@@ -12,6 +12,7 @@ import { PricingFAQ } from "@/components/pricing/PricingFAQ";
 import { DEFAULT_CURRENCY } from "@/config/pricing";
 import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
+import { HreflangTags } from "@/components/HreflangTags";
 
 const Pricing = () => {
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
@@ -60,6 +61,7 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen">
+      <HreflangTags pageSlug="/pricing" />
       <Header />
       <main>
         {/* Hero Section */}
