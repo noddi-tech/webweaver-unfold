@@ -7,8 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, Upload, Loader2, Plus, RefreshCw } from 'lucide-react';
+import { Check, X, Upload, Loader2, Plus, RefreshCw, AlertTriangle } from 'lucide-react';
 import * as Flags from 'country-flag-icons/react/3x2';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -48,6 +50,9 @@ export default function TranslationManagerContent() {
   const [translationProgress, setTranslationProgress] = useState<string>('');
   const [isApprovingAll, setIsApprovingAll] = useState(false);
   const [approveAllLanguage, setApproveAllLanguage] = useState<string | null>(null);
+  const [showEmptyOnly, setShowEmptyOnly] = useState(false);
+  const [pageLocationFilter, setPageLocationFilter] = useState<string>('all');
+  const [contextFilter, setContextFilter] = useState<string>('all');
 
   useEffect(() => {
     loadData();
@@ -67,10 +72,57 @@ export default function TranslationManagerContent() {
     if (st) setStats(st);
   }
 
-  const filteredTranslations = translations.filter(
-    t => t.language_code === selectedLang &&
-         (searchFilter === '' || t.translation_key.toLowerCase().includes(searchFilter.toLowerCase()))
-  );
+  // Get unique page locations and contexts for filter dropdowns
+  const uniquePageLocations = Array.from(new Set(
+    translations
+      .filter(t => t.language_code === selectedLang)
+      .map(t => t.page_location)
+      .filter(Boolean)
+  )).sort();
+
+  const uniqueContexts = Array.from(new Set(
+    translations
+      .filter(t => t.language_code === selectedLang)
+      .map(t => t.context)
+      .filter(Boolean)
+  )).sort();
+
+  // Helper function to check for empty translations
+  const hasEmptyTranslations = (languageCode: string): number => {
+    return translations.filter(
+      t => t.language_code === languageCode && 
+           !t.approved && 
+           (!t.translated_text || t.translated_text.trim() === '')
+    ).length;
+  };
+
+  // Multi-filter logic
+  const filteredTranslations = translations.filter(t => {
+    // Language filter
+    if (t.language_code !== selectedLang) return false;
+    
+    // Search filter
+    if (searchFilter && !t.translation_key.toLowerCase().includes(searchFilter.toLowerCase())) {
+      return false;
+    }
+    
+    // Empty translations filter
+    if (showEmptyOnly && t.translated_text?.trim()) {
+      return false;
+    }
+    
+    // Page location filter
+    if (pageLocationFilter !== 'all' && t.page_location !== pageLocationFilter) {
+      return false;
+    }
+    
+    // Context filter
+    if (contextFilter !== 'all' && t.context !== contextFilter) {
+      return false;
+    }
+    
+    return true;
+  });
 
   async function handleApprove(id: string) {
     const { error } = await supabase
@@ -104,6 +156,20 @@ export default function TranslationManagerContent() {
     setIsApprovingAll(true);
     
     try {
+      // Check for empty translations first
+      const emptyCount = hasEmptyTranslations(languageCode);
+      
+      if (emptyCount > 0) {
+        toast({
+          title: `Cannot approve all translations`,
+          description: `Found ${emptyCount} empty translation${emptyCount > 1 ? 's' : ''}. Please add content to all translations before approving.`,
+          variant: 'destructive'
+        });
+        setApproveAllLanguage(null);
+        setIsApprovingAll(false);
+        return;
+      }
+
       // Get count of unapproved translations
       const { count } = await supabase
         .from('translations')
@@ -570,26 +636,108 @@ export default function TranslationManagerContent() {
         {languages.map((lang) => {
           const langStat = stats.find(s => s.code === lang.code);
           const unapprovedCount = langStat ? langStat.total_translations - langStat.approved_translations : 0;
+          const emptyCount = hasEmptyTranslations(lang.code);
           
           return (
             <TabsContent key={lang.code} value={lang.code}>
-              <div className="mb-4 flex gap-2">
-                <Input
-                  placeholder="Search translation keys..."
-                  value={searchFilter}
-                  onChange={(e) => setSearchFilter(e.target.value)}
-                  className="flex-1"
-                />
-                {unapprovedCount > 0 && (
-                  <Button 
-                    variant="outline"
-                    onClick={() => setApproveAllLanguage(lang.code)}
-                    disabled={isApprovingAll}
+              <div className="mb-4 space-y-3">
+                {/* Search and Approve All Row */}
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Search translation keys..."
+                    value={searchFilter}
+                    onChange={(e) => setSearchFilter(e.target.value)}
+                    className="flex-1"
+                  />
+                  {unapprovedCount > 0 && (
+                    <Button 
+                      variant={emptyCount > 0 ? "destructive" : "outline"}
+                      onClick={() => setApproveAllLanguage(lang.code)}
+                      disabled={isApprovingAll || emptyCount > 0}
+                    >
+                      {emptyCount > 0 ? (
+                        <>
+                          <AlertTriangle className="w-4 h-4 mr-2" />
+                          {emptyCount} Empty
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4 mr-2" />
+                          Approve All ({unapprovedCount})
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+
+                {/* Filter Options Row */}
+                <div className="flex gap-2 flex-wrap">
+                  {/* Show Empty Toggle */}
+                  <Button
+                    variant={showEmptyOnly ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setShowEmptyOnly(!showEmptyOnly)}
                   >
-                    <Check className="w-4 h-4 mr-2" />
-                    Approve All ({unapprovedCount})
+                    <AlertTriangle className="w-4 h-4 mr-2" />
+                    {showEmptyOnly ? "Show All" : "Show Empty Only"}
                   </Button>
-                )}
+
+                  {/* Page Location Filter */}
+                  <Select value={pageLocationFilter} onValueChange={setPageLocationFilter}>
+                    <SelectTrigger className="w-[200px] h-9">
+                      <SelectValue placeholder="Filter by page" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Pages</SelectItem>
+                      {uniquePageLocations.map(location => (
+                        <SelectItem key={location} value={location}>
+                          {location}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Context Filter */}
+                  {uniqueContexts.length > 0 && (
+                    <Select value={contextFilter} onValueChange={setContextFilter}>
+                      <SelectTrigger className="w-[200px] h-9">
+                        <SelectValue placeholder="Filter by component" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Components</SelectItem>
+                        {uniqueContexts.map(context => (
+                          <SelectItem key={context} value={context}>
+                            {context}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+
+                  {/* Active Filters Count */}
+                  {(showEmptyOnly || pageLocationFilter !== 'all' || contextFilter !== 'all') && (
+                    <Badge variant="secondary" className="h-9 px-3 flex items-center">
+                      {filteredTranslations.length} result{filteredTranslations.length !== 1 ? 's' : ''}
+                    </Badge>
+                  )}
+
+                  {/* Clear Filters */}
+                  {(showEmptyOnly || pageLocationFilter !== 'all' || contextFilter !== 'all' || searchFilter) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setShowEmptyOnly(false);
+                        setPageLocationFilter('all');
+                        setContextFilter('all');
+                        setSearchFilter('');
+                      }}
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Clear Filters
+                    </Button>
+                  )}
+                </div>
               </div>
 
             <div className="space-y-4">
@@ -615,9 +763,18 @@ export default function TranslationManagerContent() {
                     <Textarea
                       value={translation.translated_text}
                       onChange={(e) => handleUpdate(translation.id, e.target.value)}
-                      className="mb-2"
+                      className={cn(
+                        "mb-2",
+                        !translation.translated_text?.trim() && "border-destructive border-2"
+                      )}
                       rows={3}
                     />
+                    {!translation.translated_text?.trim() && (
+                      <p className="text-sm text-destructive flex items-center gap-1 mb-2">
+                        <AlertTriangle className="w-4 h-4" />
+                        Translation text is empty - please add content before approving
+                      </p>
+                    )}
                     <div className="flex gap-2">
                       <Button 
                         size="sm" 
