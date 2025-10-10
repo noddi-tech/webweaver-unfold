@@ -146,9 +146,20 @@ export default function TranslationManagerContent() {
       if (qualityFilter === 'medium' && (score === null || score < 70 || score >= 85)) return false;
       if (qualityFilter === 'low' && (score === null || score >= 70)) return false;
       if (qualityFilter === 'needs_review' && t.review_status !== 'needs_review') return false;
+      if (qualityFilter === 'technical_terms' && (!t.quality_metrics?.technical_term_issues || t.quality_metrics.technical_term_issues.length === 0)) return false;
     }
     
     return true;
+  });
+
+  // Debug logging for needs_review filter
+  console.log('Filter Debug:', {
+    selectedLang,
+    qualityFilter,
+    totalTranslations: translations.length,
+    afterLangFilter: translations.filter(t => t.language_code === selectedLang).length,
+    needsReviewInLang: translations.filter(t => t.language_code === selectedLang && t.review_status === 'needs_review').length,
+    finalFiltered: filteredTranslations.length
   });
 
   async function handleApprove(id: string) {
@@ -1205,6 +1216,7 @@ export default function TranslationManagerContent() {
                       <SelectItem value="medium">Medium (70-84%)</SelectItem>
                       <SelectItem value="low">Low (&lt;70%)</SelectItem>
                       <SelectItem value="needs_review">Needs Review</SelectItem>
+                      <SelectItem value="technical_terms">Technical Terms Issues</SelectItem>
                     </SelectContent>
                   </Select>
 
