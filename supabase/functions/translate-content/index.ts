@@ -15,11 +15,11 @@ serve(async (req) => {
   console.log('=== Translation Function Started ===');
 
   try {
-    const { translationKeys, targetLanguages, sourceLanguage = 'en' } = await req.json();
+    const { translationKeys, targetLanguage, sourceLanguage = 'en' } = await req.json();
     
     console.log('Request payload:', {
       keysCount: translationKeys?.length,
-      targetLanguages,
+      targetLanguage,
       sourceLanguage
     });
 
@@ -132,7 +132,6 @@ TEXT TYPE ADAPTATION:
 When translating, adapt idioms and expressions naturally to the target language while preserving meaning and tone.`;
 
     const BATCH_SIZE = 50;
-    const results: Record<string, any> = {};
 
     // Helper function to validate translations
     const validateTranslation = (original: any, translated: any): boolean => {
@@ -147,41 +146,32 @@ When translating, adapt idioms and expressions naturally to the target language 
       return true;
     };
 
-    // Process languages in parallel batches of 5 to prevent timeout
-    const CONCURRENT_LANGUAGES = 5;
+    console.log(`\n=== Starting translation for: ${targetLanguage} ===`);
 
-    for (let langIndex = 0; langIndex < targetLanguages.length; langIndex += CONCURRENT_LANGUAGES) {
-      const languageBatch = targetLanguages.slice(langIndex, langIndex + CONCURRENT_LANGUAGES);
-      console.log(`\n=== Processing language batch: ${languageBatch.join(', ')} ===`);
+    const allTextsToTranslate = sourceTexts.map(t => ({
+      key: t.translation_key,
+      text: t.translated_text,
+      page: t.page_location || 'general',
+      context: t.context || ''
+    }));
 
-      // Process this batch of languages concurrently
-      const languagePromises = languageBatch.map(async (targetLang) => {
-      console.log(`\n=== Starting translation for: ${targetLang} ===`);
+    // Split into batches
+    const batches = [];
+    for (let i = 0; i < allTextsToTranslate.length; i += BATCH_SIZE) {
+      batches.push(allTextsToTranslate.slice(i, i + BATCH_SIZE));
+    }
 
-      const allTextsToTranslate = sourceTexts.map(t => ({
-        key: t.translation_key,
-        text: t.translated_text,
-        page: t.page_location || 'general',
-        context: t.context || ''
-      }));
+    console.log(`Processing ${batches.length} batches for ${targetLanguage}`);
 
-      // Split into batches
-      const batches = [];
-      for (let i = 0; i < allTextsToTranslate.length; i += BATCH_SIZE) {
-        batches.push(allTextsToTranslate.slice(i, i + BATCH_SIZE));
-      }
+    let totalTranslated = 0;
+    let totalFailed = 0;
+    const failedBatches: number[] = [];
 
-      console.log(`Processing ${batches.length} batches for ${targetLang}`);
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const textsToTranslate = batches[batchIndex];
+      console.log(`\nBatch ${batchIndex + 1}/${batches.length} for ${targetLanguage} (${textsToTranslate.length} texts)`);
 
-      let totalTranslated = 0;
-      let totalFailed = 0;
-      const failedBatches: number[] = [];
-
-      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-        const textsToTranslate = batches[batchIndex];
-        console.log(`\nBatch ${batchIndex + 1}/${batches.length} for ${targetLang} (${textsToTranslate.length} texts)`);
-
-        const scandinavianGuide = getScandinavianGuidance(targetLang);
+      const scandinavianGuide = getScandinavianGuidance(targetLanguage);
         const fullGuide = scandinavianGuide ? `${tovGuide}\n\n${scandinavianGuide}` : tovGuide;
 
         const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -196,69 +186,69 @@ When translating, adapt idioms and expressions naturally to the target language 
               { role: 'system', content: fullGuide },
               { 
                 role: 'user', 
-                content: `Translate the following texts to ${targetLang}. Return ONLY valid JSON with the same structure. Each "text" field must contain the actual translation in ${targetLang}, NOT the English key:\n\n${JSON.stringify(textsToTranslate, null, 2)}`
+                content: `Translate the following texts to ${targetLanguage}. Return ONLY valid JSON with the same structure. Each "text" field must contain the actual translation in ${targetLanguage}, NOT the English key:\n\n${JSON.stringify(textsToTranslate, null, 2)}`
               }
             ],
           }),
         });
 
-        console.log(`AI API response status for batch ${batchIndex + 1}:`, response.status);
+      console.log(`AI API response status for batch ${batchIndex + 1}:`, response.status);
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`AI API error for batch ${batchIndex + 1}:`, errorText);
-          failedBatches.push(batchIndex + 1);
-          totalFailed += textsToTranslate.length;
-          
-          if (response.status === 429) {
-            console.log('Rate limit hit, waiting 2 seconds before continuing...');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-          }
-          continue;
-        }
-
-        const data = await response.json();
-        const translatedContent = data.choices[0].message.content;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`AI API error for batch ${batchIndex + 1}:`, errorText);
+        failedBatches.push(batchIndex + 1);
+        totalFailed += textsToTranslate.length;
         
-        // Parse AI translation response
-        let translations;
-        try {
-          const jsonMatch = translatedContent.match(/```json\n([\s\S]*?)\n```/);
-          const jsonToParse = jsonMatch ? jsonMatch[1] : translatedContent;
-          translations = JSON.parse(jsonToParse);
-          console.log(`Parsed ${translations.length} translations for batch ${batchIndex + 1}`);
-        } catch (e) {
-          console.error(`Failed to parse batch ${batchIndex + 1}:`, e);
-          failedBatches.push(batchIndex + 1);
-          totalFailed += textsToTranslate.length;
-          continue;
+        if (response.status === 429) {
+          console.log('Rate limit hit, waiting 2 seconds before continuing...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
         }
+        continue;
+      }
 
-        // Validate translations
-        const validTranslations = translations.filter((t: any) => {
-          const sourceText = textsToTranslate.find(s => s.key === t.key);
-          const isValid = validateTranslation(sourceText, t);
-          if (!isValid) {
-            console.warn(`Invalid translation for ${t.key}: text="${t.text}"`);
-          }
-          return isValid;
-        });
+      const data = await response.json();
+      const translatedContent = data.choices[0].message.content;
+      
+      // Parse AI translation response
+      let translations;
+      try {
+        const jsonMatch = translatedContent.match(/```json\n([\s\S]*?)\n```/);
+        const jsonToParse = jsonMatch ? jsonMatch[1] : translatedContent;
+        translations = JSON.parse(jsonToParse);
+        console.log(`Parsed ${translations.length} translations for batch ${batchIndex + 1}`);
+      } catch (e) {
+        console.error(`Failed to parse batch ${batchIndex + 1}:`, e);
+        failedBatches.push(batchIndex + 1);
+        totalFailed += textsToTranslate.length;
+        continue;
+      }
 
-        if (validTranslations.length === 0) {
-          console.error(`All translations invalid in batch ${batchIndex + 1}`);
-          failedBatches.push(batchIndex + 1);
-          totalFailed += textsToTranslate.length;
-          continue;
+      // Validate translations
+      const validTranslations = translations.filter((t: any) => {
+        const sourceText = textsToTranslate.find(s => s.key === t.key);
+        const isValid = validateTranslation(sourceText, t);
+        if (!isValid) {
+          console.warn(`Invalid translation for ${t.key}: text="${t.text}"`);
         }
+        return isValid;
+      });
 
-        if (validTranslations.length < translations.length) {
-          console.warn(`Only ${validTranslations.length}/${translations.length} translations valid in batch ${batchIndex + 1}`);
-        }
+      if (validTranslations.length === 0) {
+        console.error(`All translations invalid in batch ${batchIndex + 1}`);
+        failedBatches.push(batchIndex + 1);
+        totalFailed += textsToTranslate.length;
+        continue;
+      }
 
-        // QUALITY SCORING PASS for this batch
-        console.log(`Evaluating quality for batch ${batchIndex + 1}`);
-        
-        const qualityEvaluationPrompt = `Evaluate these ${targetLang} translations (0-100%). Return JSON:
+      if (validTranslations.length < translations.length) {
+        console.warn(`Only ${validTranslations.length}/${translations.length} translations valid in batch ${batchIndex + 1}`);
+      }
+
+      // QUALITY SCORING PASS for this batch
+      console.log(`Evaluating quality for batch ${batchIndex + 1}`);
+      
+      const qualityEvaluationPrompt = `Evaluate these ${targetLanguage} translations (0-100%). Return JSON:
 [{"key": "x", "score": 85, "issues": [], "strengths": []}]
 
 Criteria:
@@ -276,108 +266,84 @@ ${JSON.stringify(validTranslations.map((t: any) => ({
   translation: t.text
 })), null, 2)}`;
 
-        const qualityResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'google/gemini-2.5-flash',
-            messages: [
-              { role: 'system', content: 'You are a translation quality evaluator. Be critical but fair.' },
-              { role: 'user', content: qualityEvaluationPrompt }
-            ],
-          }),
-        });
+      const qualityResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            { role: 'system', content: 'You are a translation quality evaluator. Be critical but fair.' },
+            { role: 'user', content: qualityEvaluationPrompt }
+          ],
+        }),
+      });
 
-        let qualityScores: any[] = [];
-        if (qualityResponse.ok) {
-          try {
-            const qualityData = await qualityResponse.json();
-            const qualityContent = qualityData.choices[0].message.content;
-            const qualityJsonMatch = qualityContent.match(/```json\n([\s\S]*?)\n```/);
-            const qualityJsonToParse = qualityJsonMatch ? qualityJsonMatch[1] : qualityContent;
-            qualityScores = JSON.parse(qualityJsonToParse);
-            console.log(`Evaluated ${qualityScores.length} translations for batch ${batchIndex + 1}`);
-          } catch (e) {
-            console.error(`Quality evaluation parse error for batch ${batchIndex + 1}:`, e);
-          }
+      let qualityScores: any[] = [];
+      if (qualityResponse.ok) {
+        try {
+          const qualityData = await qualityResponse.json();
+          const qualityContent = qualityData.choices[0].message.content;
+          const qualityJsonMatch = qualityContent.match(/```json\n([\s\S]*?)\n```/);
+          const qualityJsonToParse = qualityJsonMatch ? qualityJsonMatch[1] : qualityContent;
+          qualityScores = JSON.parse(qualityJsonToParse);
+          console.log(`Evaluated ${qualityScores.length} translations for batch ${batchIndex + 1}`);
+        } catch (e) {
+          console.error(`Quality evaluation parse error for batch ${batchIndex + 1}:`, e);
         }
-
-        // Insert valid translations
-        const translationRecords = validTranslations.map((t: any) => {
-          const qualityData = qualityScores.find(q => q.key === t.key);
-          const score = qualityData?.score || null;
-          
-          return {
-            translation_key: t.key,
-            language_code: targetLang,
-            translated_text: t.text,
-            page_location: t.key.split('.')[0],
-            approved: false,
-            quality_score: score,
-            quality_metrics: qualityData ? {
-              score: score,
-              issues: qualityData.issues || [],
-              strengths: qualityData.strengths || [],
-              evaluated_at: new Date().toISOString()
-            } : null,
-            review_status: score >= 85 ? 'approved' : (score ? 'needs_review' : 'pending'),
-            ai_reviewed_at: qualityData ? new Date().toISOString() : null
-          };
-        });
-
-        const { error: insertError } = await supabase
-          .from('translations')
-          .upsert(translationRecords, {
-            onConflict: 'translation_key,language_code'
-          });
-
-        if (insertError) {
-          console.error(`Database error for batch ${batchIndex + 1}:`, insertError);
-          failedBatches.push(batchIndex + 1);
-          totalFailed += validTranslations.length;
-          continue;
-        }
-
-        totalTranslated += validTranslations.length;
-        console.log(`✓ Batch ${batchIndex + 1} complete: ${validTranslations.length} translations saved`);
       }
 
-        console.log(`\n✓ ${targetLang} complete: ${totalTranslated} translated, ${totalFailed} failed`);
+      // Insert valid translations
+      const translationRecords = validTranslations.map((t: any) => {
+        const qualityData = qualityScores.find(q => q.key === t.key);
+        const score = qualityData?.score || null;
         
         return {
-          language: targetLang,
-          count: totalTranslated,
-          failed: totalFailed,
-          failedBatches: failedBatches,
-          status: failedBatches.length > 0 ? 'partial' : 'success'
+          translation_key: t.key,
+          language_code: targetLanguage,
+          translated_text: t.text,
+          page_location: t.key.split('.')[0],
+          approved: false,
+          quality_score: score,
+          quality_metrics: qualityData ? {
+            score: score,
+            issues: qualityData.issues || [],
+            strengths: qualityData.strengths || [],
+            evaluated_at: new Date().toISOString()
+          } : null,
+          review_status: score >= 85 ? 'approved' : (score ? 'needs_review' : 'pending'),
+          ai_reviewed_at: qualityData ? new Date().toISOString() : null
         };
       });
 
-      // Wait for this batch of languages to complete
-      const batchResults = await Promise.all(languagePromises);
-      
-      // Store results
-      batchResults.forEach(result => {
-        results[result.language] = result;
-      });
+      const { error: insertError } = await supabase
+        .from('translations')
+        .upsert(translationRecords, {
+          onConflict: 'translation_key,language_code'
+        });
 
-      // Delay between language batches
-      if (langIndex + CONCURRENT_LANGUAGES < targetLanguages.length) {
-        console.log('\nWaiting before next language batch...');
-        await new Promise(resolve => setTimeout(resolve, 3000));
+      if (insertError) {
+        console.error(`Database error for batch ${batchIndex + 1}:`, insertError);
+        failedBatches.push(batchIndex + 1);
+        totalFailed += validTranslations.length;
+        continue;
       }
+
+      totalTranslated += validTranslations.length;
+      console.log(`✓ Batch ${batchIndex + 1} complete: ${validTranslations.length} translations saved`);
     }
 
-    // Convert results object to array
-    const resultsArray = Object.values(results);
+    console.log(`\n✓ ${targetLanguage} complete: ${totalTranslated} translated, ${totalFailed} failed`);
 
-    console.log('\n=== Translation Complete ===');
-    console.log('Results summary:', resultsArray);
-
-    return new Response(JSON.stringify({ results: resultsArray }), {
+    return new Response(JSON.stringify({ 
+      language: targetLanguage,
+      count: totalTranslated,
+      failed: totalFailed,
+      failedBatches: failedBatches,
+      status: failedBatches.length > 0 ? 'partial' : 'success'
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 

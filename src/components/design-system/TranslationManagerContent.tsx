@@ -461,7 +461,6 @@ export default function TranslationManagerContent() {
 
   async function handleTranslateAll() {
     setIsTranslating(true);
-    setTranslationProgress('Starting translation...');
     
     // Get all English keys
     const { data: englishKeys } = await supabase
@@ -477,9 +476,7 @@ export default function TranslationManagerContent() {
     }
 
     // Get enabled languages (except English)
-    const targetLanguages = languages
-      .filter(l => l.enabled && l.code !== 'en')
-      .map(l => l.code);
+    const targetLanguages = languages.filter(l => l.enabled && l.code !== 'en');
 
     if (targetLanguages.length === 0) {
       toast({ title: 'No target languages enabled', variant: 'destructive' });
@@ -490,92 +487,100 @@ export default function TranslationManagerContent() {
 
     const batchSize = 50;
     const totalBatches = Math.ceil(englishKeys.length / batchSize);
-    setTranslationProgress(`Translating ${englishKeys.length} keys to ${targetLanguages.length} languages (${totalBatches} batches per language)...`);
+    const translationKeys = englishKeys.map(k => k.translation_key);
+    
+    setTranslationProgress(`Preparing to translate ${translationKeys.length} keys to ${targetLanguages.length} languages...`);
 
     try {
-      console.log('Invoking translate-content function:', {
-        keysCount: englishKeys.length,
-        targetLanguages,
-        batchesPerLang: totalBatches
-      });
+      const results = [];
+      
+      // Process each language sequentially
+      for (let i = 0; i < targetLanguages.length; i++) {
+        const lang = targetLanguages[i];
+        setTranslationProgress(
+          `Translating ${lang.name} (${i + 1}/${targetLanguages.length})... ${totalBatches} batches`
+        );
 
-      const { data, error } = await supabase.functions.invoke('translate-content', {
-        body: {
-          translationKeys: englishKeys.map(k => k.translation_key),
-          targetLanguages,
-          sourceLanguage: 'en',
-        }
-      });
+        console.log(`Translating to ${lang.code}...`);
 
-      console.log('Translation response:', { data, error });
-
-      if (error) {
-        console.error('Translation error details:', error);
-        
-        // Handle specific error types
-        if (error.message?.includes('429')) {
-          throw new Error('Rate limit exceeded. Please try again in a few minutes.');
-        } else if (error.message?.includes('402')) {
-          throw new Error('Payment required. Please check your Lovable AI credits.');
-        } else if (error.message?.includes('LOVABLE_API_KEY')) {
-          throw new Error('API key not configured. Please contact support.');
-        }
-        
-        throw error;
-      }
-
-      // Parse results with detailed feedback
-      const results = data?.results || [];
-      const successCount = results.filter((r: any) => r.status === 'success').length;
-      const partialCount = results.filter((r: any) => r.status === 'partial').length;
-      const failedCount = results.filter((r: any) => r.status === 'error').length;
-
-      // Build success message
-      let description = `${successCount} languages completed successfully`;
-      if (partialCount > 0) {
-        description += `, ${partialCount} partially completed`;
-      }
-      if (failedCount > 0) {
-        description += `, ${failedCount} failed`;
-      }
-
-      // Show detailed results per language
-      results.forEach((r: any) => {
-        if (r.status === 'partial' && r.failedBatches?.length > 0) {
-          const langName = languages.find(l => l.code === r.language)?.name || r.language;
-          toast({ 
-            title: `${langName}: Partial success`,
-            description: `${r.count} translated, ${r.failed} failed (batches: ${r.failedBatches.join(', ')})`,
-            variant: 'default',
-            duration: 8000
-          });
-        } else if (r.status === 'error') {
-          const langName = languages.find(l => l.code === r.language)?.name || r.language;
-          toast({ 
-            title: `${langName}: Failed`,
-            description: r.error || 'Translation failed',
-            variant: 'destructive',
-            duration: 8000
-          });
-        }
-      });
-
-      if (successCount > 0 || partialCount > 0) {
-        toast({ 
-          title: 'Translation complete!', 
-          description 
+        const { data, error } = await supabase.functions.invoke('translate-content', {
+          body: {
+            translationKeys,
+            targetLanguage: lang.code,
+            sourceLanguage: 'en',
+          }
         });
-      } else {
-        throw new Error('All translations failed');
+
+        if (error) {
+          console.error(`Error translating ${lang.name}:`, error);
+          results.push({
+            language: lang.code,
+            languageName: lang.name,
+            status: 'error',
+            error: error.message
+          });
+          
+          // Handle specific errors but continue with other languages
+          if (error.message?.includes('429')) {
+            toast({
+              title: `${lang.name}: Rate limit`,
+              description: 'Waiting 30 seconds before continuing...',
+              variant: 'default'
+            });
+            await new Promise(resolve => setTimeout(resolve, 30000));
+          } else if (error.message?.includes('402')) {
+            toast({
+              title: `${lang.name}: Payment required`,
+              description: 'Please check your Lovable AI credits',
+              variant: 'destructive'
+            });
+          }
+          
+          continue;
+        }
+
+        // Store result
+        const result = {
+          ...data,
+          languageName: lang.name
+        };
+        results.push(result);
+
+        // Show per-language completion
+        toast({
+          title: `${lang.name} complete`,
+          description: `${data.count} translations saved${data.failed > 0 ? `, ${data.failed} failed` : ''}`,
+          duration: 3000
+        });
+
+        // Reload data to show updated translations
+        await loadData();
+
+        // Small delay between languages to avoid overwhelming the system
+        if (i < targetLanguages.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
       }
 
-      loadData();
+      // Show final summary
+      const successCount = results.filter(r => r.status === 'success').length;
+      const partialCount = results.filter(r => r.status === 'partial').length;
+      const failedCount = results.filter(r => r.status === 'error').length;
+      const totalTranslated = results.reduce((sum, r) => sum + (r.count || 0), 0);
+
+      toast({
+        title: 'Translation complete!',
+        description: `${successCount} languages completed successfully${partialCount > 0 ? `, ${partialCount} partial` : ''}${failedCount > 0 ? `, ${failedCount} failed` : ''}. Total: ${totalTranslated} translations.`,
+        duration: 8000
+      });
+
+      await loadData();
     } catch (error: any) {
       console.error('Translation error:', error);
-      toast({ 
-        title: 'Translation failed', 
-        description: error.message || 'Unknown error occurred',
-        variant: 'destructive' 
+      toast({
+        title: 'Translation failed',
+        description: error.message || 'An unexpected error occurred',
+        variant: 'destructive'
       });
     } finally {
       setIsTranslating(false);
