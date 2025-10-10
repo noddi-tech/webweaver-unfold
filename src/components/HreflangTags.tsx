@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -67,82 +66,90 @@ export function HreflangTags({ pageSlug }: HreflangTagsProps) {
     loadLanguagesAndMeta();
   }, [pageSlug, lang]);
 
-  // Generate canonical URL
-  const canonicalUrl = pageMeta?.canonical_url || 
-    `${defaultDomain}${lang !== 'en' ? `/${lang}` : ''}${pageSlug === '/' ? '' : pageSlug}`;
+  // Apply meta tags directly to DOM
+  useEffect(() => {
+    if (!pageMeta || languages.length === 0) return;
 
-  // Generate hreflang alternates
-  const hreflangLinks = languages.map(langCode => {
-    const href = `${defaultDomain}${langCode !== 'en' ? `/${langCode}` : ''}${pageSlug === '/' ? '' : pageSlug}`;
-    return { rel: 'alternate', hreflang: langCode, href };
-  });
+    const canonicalUrl = pageMeta.canonical_url || 
+      `${defaultDomain}${lang !== 'en' ? `/${lang}` : ''}${pageSlug === '/' ? '' : pageSlug}`;
 
-  // Add x-default (usually points to English version)
-  hreflangLinks.push({
-    rel: 'alternate',
-    hreflang: 'x-default',
-    href: `${defaultDomain}${pageSlug === '/' ? '' : pageSlug}`
-  });
+    // Update title
+    document.title = pageMeta.meta_title;
 
-  if (!pageMeta) return null;
+    // Helper to update or create meta tag
+    const updateMetaTag = (selector: string, content: string, property?: string) => {
+      let meta = document.querySelector(selector);
+      if (!meta) {
+        meta = document.createElement('meta');
+        if (property) {
+          meta.setAttribute('property', property);
+        } else {
+          const nameMatch = selector.match(/name="([^"]+)"/);
+          if (nameMatch) meta.setAttribute('name', nameMatch[1]);
+        }
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    };
 
-  return (
-    <Helmet>
-      {/* Title */}
-      <title>{pageMeta.meta_title}</title>
-      
-      {/* Meta Description */}
-      {pageMeta.meta_description && (
-        <meta name="description" content={pageMeta.meta_description} />
-      )}
-      
-      {/* Meta Keywords */}
-      {pageMeta.meta_keywords && (
-        <meta name="keywords" content={pageMeta.meta_keywords} />
-      )}
-      
-      {/* Canonical URL */}
-      <link rel="canonical" href={canonicalUrl} />
-      
-      {/* Hreflang Tags */}
-      {hreflangLinks.map(link => (
-        <link 
-          key={link.hreflang} 
-          rel={link.rel} 
-          hrefLang={link.hreflang} 
-          href={link.href} 
-        />
-      ))}
-      
-      {/* Open Graph Tags */}
-      <meta property="og:title" content={pageMeta.og_title || pageMeta.meta_title} />
-      {(pageMeta.og_description || pageMeta.meta_description) && (
-        <meta property="og:description" content={pageMeta.og_description || pageMeta.meta_description} />
-      )}
-      {pageMeta.og_image_url && (
-        <meta property="og:image" content={pageMeta.og_image_url} />
-      )}
-      <meta property="og:url" content={canonicalUrl} />
-      <meta property="og:type" content="website" />
-      <meta property="og:locale" content={lang} />
-      {languages
-        .filter(l => l !== lang)
-        .map(l => (
-          <meta key={l} property="og:locale:alternate" content={l} />
-        ))}
-      
-      {/* Twitter Card Tags */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={pageMeta.twitter_title || pageMeta.og_title || pageMeta.meta_title} />
-      {(pageMeta.twitter_description || pageMeta.og_description || pageMeta.meta_description) && (
-        <meta name="twitter:description" content={pageMeta.twitter_description || pageMeta.og_description || pageMeta.meta_description} />
-      )}
-      {(pageMeta.twitter_image_url || pageMeta.og_image_url) && (
-        <meta name="twitter:image" content={pageMeta.twitter_image_url || pageMeta.og_image_url} />
-      )}
-      
-      {/* Language */}
-      <html lang={lang} />
-    </Helmet>
-  );
+    // Helper to update or create link tag
+    const updateLinkTag = (rel: string, href: string, hreflang?: string) => {
+      const selector = hreflang 
+        ? `link[rel="${rel}"][hreflang="${hreflang}"]`
+        : `link[rel="${rel}"]`;
+      let link = document.querySelector(selector);
+      if (!link) {
+        link = document.createElement('link');
+        link.setAttribute('rel', rel);
+        if (hreflang) link.setAttribute('hreflang', hreflang);
+        document.head.appendChild(link);
+      }
+      link.setAttribute('href', href);
+    };
+
+    // Update basic meta tags
+    if (pageMeta.meta_description) {
+      updateMetaTag('meta[name="description"]', pageMeta.meta_description);
+    }
+    if (pageMeta.meta_keywords) {
+      updateMetaTag('meta[name="keywords"]', pageMeta.meta_keywords);
+    }
+
+    // Update canonical
+    updateLinkTag('canonical', canonicalUrl);
+
+    // Update hreflang tags
+    languages.forEach(langCode => {
+      const href = `${defaultDomain}${langCode !== 'en' ? `/${langCode}` : ''}${pageSlug === '/' ? '' : pageSlug}`;
+      updateLinkTag('alternate', href, langCode);
+    });
+    updateLinkTag('alternate', `${defaultDomain}${pageSlug === '/' ? '' : pageSlug}`, 'x-default');
+
+    // Update Open Graph tags
+    updateMetaTag('meta[property="og:title"]', pageMeta.og_title || pageMeta.meta_title, 'og:title');
+    if (pageMeta.og_description || pageMeta.meta_description) {
+      updateMetaTag('meta[property="og:description"]', pageMeta.og_description || pageMeta.meta_description || '', 'og:description');
+    }
+    if (pageMeta.og_image_url) {
+      updateMetaTag('meta[property="og:image"]', pageMeta.og_image_url, 'og:image');
+    }
+    updateMetaTag('meta[property="og:url"]', canonicalUrl, 'og:url');
+    updateMetaTag('meta[property="og:type"]', 'website', 'og:type');
+    updateMetaTag('meta[property="og:locale"]', lang, 'og:locale');
+
+    // Update Twitter Card tags
+    updateMetaTag('meta[name="twitter:card"]', 'summary_large_image');
+    updateMetaTag('meta[name="twitter:title"]', pageMeta.twitter_title || pageMeta.og_title || pageMeta.meta_title);
+    if (pageMeta.twitter_description || pageMeta.og_description || pageMeta.meta_description) {
+      updateMetaTag('meta[name="twitter:description"]', pageMeta.twitter_description || pageMeta.og_description || pageMeta.meta_description || '');
+    }
+    if (pageMeta.twitter_image_url || pageMeta.og_image_url) {
+      updateMetaTag('meta[name="twitter:image"]', pageMeta.twitter_image_url || pageMeta.og_image_url || '');
+    }
+
+    // Update html lang attribute
+    document.documentElement.setAttribute('lang', lang);
+  }, [pageMeta, languages, lang, pageSlug, defaultDomain]);
+
+  return null;
 }
