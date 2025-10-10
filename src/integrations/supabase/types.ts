@@ -340,13 +340,50 @@ export type Database = {
         }
         Relationships: []
       }
+      evaluation_batches: {
+        Row: {
+          batch_number: number
+          batch_size: number
+          completed_at: string | null
+          evaluated_count: number
+          failed_count: number
+          id: string
+          language_code: string
+          started_at: string
+        }
+        Insert: {
+          batch_number: number
+          batch_size?: number
+          completed_at?: string | null
+          evaluated_count?: number
+          failed_count?: number
+          id?: string
+          language_code: string
+          started_at?: string
+        }
+        Update: {
+          batch_number?: number
+          batch_size?: number
+          completed_at?: string | null
+          evaluated_count?: number
+          failed_count?: number
+          id?: string
+          language_code?: string
+          started_at?: string
+        }
+        Relationships: []
+      }
       evaluation_progress: {
         Row: {
+          batch_size: number | null
           completed_at: string | null
+          current_batch: number | null
+          error_count: number | null
           error_message: string | null
           evaluated_keys: number
           id: string
           language_code: string
+          last_error: string | null
           last_evaluated_key: string | null
           started_at: string
           status: string
@@ -354,11 +391,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          batch_size?: number | null
           completed_at?: string | null
+          current_batch?: number | null
+          error_count?: number | null
           error_message?: string | null
           evaluated_keys?: number
           id?: string
           language_code: string
+          last_error?: string | null
           last_evaluated_key?: string | null
           started_at?: string
           status?: string
@@ -366,11 +407,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          batch_size?: number | null
           completed_at?: string | null
+          current_batch?: number | null
+          error_count?: number | null
           error_message?: string | null
           evaluated_keys?: number
           id?: string
           language_code?: string
+          last_error?: string | null
           last_evaluated_key?: string | null
           started_at?: string
           status?: string
@@ -656,6 +701,13 @@ export type Database = {
             foreignKeyName: "language_settings_default_language_code_fkey"
             columns: ["default_language_code"]
             isOneToOne: false
+            referencedRelation: "language_translation_stats"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "language_settings_default_language_code_fkey"
+            columns: ["default_language_code"]
+            isOneToOne: false
             referencedRelation: "languages"
             referencedColumns: ["code"]
           },
@@ -671,6 +723,13 @@ export type Database = {
             columns: ["default_language_code"]
             isOneToOne: false
             referencedRelation: "translation_stats"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "language_settings_fallback_language_code_fkey"
+            columns: ["fallback_language_code"]
+            isOneToOne: false
+            referencedRelation: "language_translation_stats"
             referencedColumns: ["code"]
           },
           {
@@ -1151,6 +1210,13 @@ export type Database = {
             foreignKeyName: "translations_language_code_fkey"
             columns: ["language_code"]
             isOneToOne: false
+            referencedRelation: "language_translation_stats"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
             referencedRelation: "languages"
             referencedColumns: ["code"]
           },
@@ -1368,6 +1434,23 @@ export type Database = {
           },
         ]
       }
+      language_translation_stats: {
+        Row: {
+          approval_percentage: number | null
+          approved_translations: number | null
+          avg_quality_score: number | null
+          code: string | null
+          enabled: boolean | null
+          high_quality_count: number | null
+          low_quality_count: number | null
+          medium_quality_count: number | null
+          name: string | null
+          needs_review_count: number | null
+          sort_order: number | null
+          total_translations: number | null
+        }
+        Relationships: []
+      }
       page_meta_stats: {
         Row: {
           approved_count: number | null
@@ -1402,7 +1485,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      refresh_language_translation_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
