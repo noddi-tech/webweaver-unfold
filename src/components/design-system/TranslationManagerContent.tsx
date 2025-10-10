@@ -34,6 +34,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import LanguageSettings from './LanguageSettings';
+import EvaluationControls from './EvaluationControls';
 
 export default function TranslationManagerContent() {
   const { toast } = useToast();
@@ -949,6 +950,95 @@ export default function TranslationManagerContent() {
     }
   }
 
+  async function handleEvaluateIncomplete() {
+    setIsEvaluating(true);
+    
+    try {
+      const targetLanguages = languages.filter(l => l.enabled && l.code !== 'en');
+      
+      if (targetLanguages.length === 0) {
+        toast({ title: 'No target languages enabled', variant: 'destructive' });
+        return;
+      }
+
+      // Check progress to find incomplete languages
+      const { data: progressData } = await supabase
+        .from('evaluation_progress')
+        .select('*')
+        .neq('language_code', 'en');
+
+      const completedLanguages = new Set(
+        progressData?.filter(p => p.status === 'completed').map(p => p.language_code) || []
+      );
+
+      const incompleteLanguages = targetLanguages.filter(l => !completedLanguages.has(l.code));
+
+      if (incompleteLanguages.length === 0) {
+        toast({
+          title: 'All languages already evaluated!',
+          description: 'All enabled languages are at 100%',
+          duration: 5000
+        });
+        return;
+      }
+
+      toast({
+        title: `Evaluating ${incompleteLanguages.length} incomplete languages`,
+        description: `Skipping ${targetLanguages.length - incompleteLanguages.length} completed languages`,
+        duration: 3000
+      });
+
+      let successCount = 0;
+
+      for (let i = 0; i < incompleteLanguages.length; i++) {
+        const lang = incompleteLanguages[i];
+        const inProgress = progressData?.find(p => p.language_code === lang.code);
+        
+        const progressMsg = inProgress
+          ? `Resuming ${lang.name} from ${inProgress.evaluated_keys}/${inProgress.total_keys} (${i + 1}/${incompleteLanguages.length})...`
+          : `Evaluating ${lang.name} (${i + 1}/${incompleteLanguages.length})...`;
+        
+        setTranslationProgress(progressMsg);
+
+        try {
+          await handleEvaluateQuality(lang.code, inProgress?.last_evaluated_key || null);
+          successCount++;
+        } catch (error: any) {
+          console.error(`Error evaluating ${lang.name}:`, error);
+          
+          toast({
+            title: `${lang.name} evaluation failed`,
+            description: error.message,
+            variant: 'destructive',
+            duration: 5000
+          });
+        }
+
+        // Small delay between languages
+        if (i < incompleteLanguages.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+
+      toast({
+        title: 'Batch evaluation complete',
+        description: `Successfully evaluated ${successCount}/${incompleteLanguages.length} languages`,
+        duration: 8000
+      });
+
+    } catch (error: any) {
+      toast({
+        title: 'Evaluation failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsEvaluating(false);
+      setTranslationProgress('');
+      loadData();
+    }
+  }
+
   async function handleAddTranslation() {
     if (!newKey || !newText) {
       toast({ title: 'Please fill in all fields', variant: 'destructive' });
@@ -1091,7 +1181,7 @@ export default function TranslationManagerContent() {
           </Button>
 
           <Button 
-            onClick={handleEvaluateAllLanguages} 
+            onClick={handleEvaluateIncomplete} 
             disabled={isTranslating || isEvaluating}
             size="lg"
             variant="secondary"
@@ -1104,7 +1194,7 @@ export default function TranslationManagerContent() {
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
-                Evaluate All Languages
+                Evaluate Incomplete Languages
               </>
             )}
           </Button>
@@ -1159,6 +1249,17 @@ export default function TranslationManagerContent() {
                   {stat.needs_review_count > 0 && (
                     <div className="text-xs text-orange-600 mt-1">
                       {stat.needs_review_count} need review
+                    </div>
+                  )}
+                  
+                  {/* Individual evaluation controls for non-English languages */}
+                  {stat.code !== 'en' && (
+                    <div className="mt-3 pt-3 border-t">
+                      <EvaluationControls
+                        languageCode={stat.code}
+                        languageName={stat.name}
+                        onEvaluate={handleEvaluateQuality}
+                      />
                     </div>
                   )}
                 </CardContent>
