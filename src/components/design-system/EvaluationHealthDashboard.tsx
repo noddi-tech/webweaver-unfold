@@ -78,6 +78,19 @@ export default function EvaluationHealthDashboard() {
     });
   }
 
+  function detectStuckEvaluations() {
+    const now = Date.now();
+    const stuckThreshold = 10 * 60 * 1000; // 10 minutes
+    
+    return allProgress.filter(p => {
+      if (p.status !== 'in_progress') return false;
+      const lastUpdate = new Date(p.updated_at).getTime();
+      const timeSinceUpdate = now - lastUpdate;
+      return (timeSinceUpdate > stuckThreshold) || 
+             (p.evaluated_keys === 0 && timeSinceUpdate > 5 * 60 * 1000);
+    });
+  }
+
   function getStatusIcon(status: string) {
     switch (status) {
       case 'completed':
@@ -207,6 +220,26 @@ export default function EvaluationHealthDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Stuck Evaluations Warning */}
+      {(() => {
+        const stuckEvals = detectStuckEvaluations();
+        return stuckEvals.length > 0 && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>{stuckEvals.length} evaluation(s) appear stuck</strong>
+              <br />
+              Languages: {stuckEvals.map(e => {
+                const langStat = stats.find(s => s.code === e.language_code);
+                return langStat?.name || e.language_code;
+              }).join(', ')}
+              <br />
+              <span className="text-sm">Go to "Translations" tab and click "Reset Stuck Evaluations" to fix.</span>
+            </AlertDescription>
+          </Alert>
+        );
+      })()}
 
       {/* Active Evaluations */}
       {systemHealth.activeEvaluations > 0 && (

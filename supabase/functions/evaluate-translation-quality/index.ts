@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const BATCH_SIZE = 20; // Reduced from 100 to avoid timeouts
-const MAX_EXECUTION_TIME = 100000; // 100 seconds - leave buffer before 120s timeout
+const MAX_EXECUTION_TIME = 90000; // 90 seconds - more safety margin before 120s timeout
 const STAGE2_SAMPLE_SIZE = 5; // Only validate top 5 uncertain terms per batch
 
 serve(async (req) => {
@@ -217,6 +217,12 @@ ${JSON.stringify(translationsForEvaluation, null, 2)}`;
 
       console.log(`🔍 Stage 1: Running fast technical term scan with Gemini...`);
 
+      // Check timeout before AI call
+      if (Date.now() - startTime > MAX_EXECUTION_TIME) {
+        console.log('⏱️ Timeout approaching - skipping remaining batch processing');
+        break;
+      }
+
       let technicalIssues = [];
       try {
         const stage1Response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -264,6 +270,12 @@ ${JSON.stringify(translationsForEvaluation, null, 2)}`;
         console.log(`🧠 Stage 2: Validating top ${uncertainIssues.length} uncertain terms with GPT-5-mini...`);
         
         for (const uncertainIssue of uncertainIssues) {
+          // Check timeout before each Stage 2 AI call
+          if (Date.now() - startTime > MAX_EXECUTION_TIME) {
+            console.log('⏱️ Timeout approaching - skipping Stage 2 validation');
+            break;
+          }
+
           const stage2Prompt = `You are a technical translation expert. Analyze this term carefully:
 
 **Original English term:** "${uncertainIssue.term_original}"

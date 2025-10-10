@@ -65,6 +65,7 @@ export default function TranslationManagerContent() {
   const updateTimeouts = useRef<Record<string, NodeJS.Timeout>>({});
   const [refiningId, setRefiningId] = useState<string | null>(null);
   const [tovContent, setTovContent] = useState<string>('');
+  const [isResettingStuck, setIsResettingStuck] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -758,6 +759,73 @@ export default function TranslationManagerContent() {
     }
   }
 
+  // Find stuck evaluations
+  async function findStuckEvaluations() {
+    const { data: allProgress } = await supabase
+      .from('evaluation_progress')
+      .select('*');
+    
+    const now = Date.now();
+    const stuckThreshold = 10 * 60 * 1000; // 10 minutes
+    
+    return allProgress?.filter(p => {
+      if (p.status !== 'in_progress') return false;
+      const lastUpdate = new Date(p.updated_at).getTime();
+      const timeSinceUpdate = now - lastUpdate;
+      // Stuck if: in_progress but no update for 10+ min OR at 0% for 5+ min
+      return (timeSinceUpdate > stuckThreshold) || 
+             (p.evaluated_keys === 0 && timeSinceUpdate > 5 * 60 * 1000);
+    }) || [];
+  }
+
+  // Reset stuck evaluations
+  async function resetStuckEvaluations() {
+    setIsResettingStuck(true);
+    
+    try {
+      const stuckLangs = await findStuckEvaluations();
+      
+      if (stuckLangs.length === 0) {
+        toast({ title: 'No stuck evaluations found', variant: 'default' });
+        return;
+      }
+      
+      console.log('Resetting stuck evaluations:', stuckLangs.map(l => l.language_code));
+      
+      // Reset status to idle
+      const { error } = await supabase
+        .from('evaluation_progress')
+        .update({ 
+          status: 'idle',
+          evaluated_keys: 0,
+          last_evaluated_key: null,
+          error_count: 0,
+          last_error: null,
+          error_message: null,
+          updated_at: new Date().toISOString()
+        })
+        .in('language_code', stuckLangs.map(l => l.language_code));
+      
+      if (error) throw error;
+      
+      toast({ 
+        title: `Reset ${stuckLangs.length} stuck evaluations`,
+        description: 'You can now restart these languages'
+      });
+      
+      loadData(); // Refresh UI
+      
+    } catch (error: any) {
+      toast({ 
+        title: 'Reset failed', 
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsResettingStuck(false);
+    }
+  }
+
   // Enhanced evaluation with progress tracking and auto-resume
   async function handleEvaluateAllLanguages() {
     setIsEvaluating(true);
@@ -1037,6 +1105,25 @@ export default function TranslationManagerContent() {
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
                 Evaluate All Languages
+              </>
+            )}
+          </Button>
+
+          <Button
+            onClick={resetStuckEvaluations}
+            variant="outline"
+            size="lg"
+            disabled={isResettingStuck || isEvaluating}
+          >
+            {isResettingStuck ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Resetting...
+              </>
+            ) : (
+              <>
+                <AlertTriangle className="w-4 h-4 mr-2" />
+                Reset Stuck Evaluations
               </>
             )}
           </Button>
