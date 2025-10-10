@@ -28,6 +28,7 @@ import FaviconManager from "@/components/design-system/FaviconManager";
 import SocialMetaManager from "@/components/design-system/SocialMetaManager";
 import PricingManager from "@/components/design-system/PricingManager";
 import TranslationManagerContent from "@/components/design-system/TranslationManagerContent";
+import PageMetaManager from "@/components/design-system/PageMetaManager";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -78,9 +79,10 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="cms" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-12">
+          <TabsList className="grid w-full grid-cols-4 mb-12">
             <TabsTrigger value="cms">CMS</TabsTrigger>
             <TabsTrigger value="translations">Translations</TabsTrigger>
+            <TabsTrigger value="seo">SEO</TabsTrigger>
             <TabsTrigger value="design">Design System</TabsTrigger>
           </TabsList>
 
@@ -182,6 +184,11 @@ const Admin = () => {
           {/* Translations Section */}
           <TabsContent value="translations" className="space-y-8">
             <TranslationManagerContent />
+          </TabsContent>
+
+          {/* SEO Section */}
+          <TabsContent value="seo" className="space-y-8">
+            <PageMetaManager />
           </TabsContent>
 
           {/* Design System Section with nested tabs */}
