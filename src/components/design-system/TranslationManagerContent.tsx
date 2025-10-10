@@ -90,9 +90,19 @@ export default function TranslationManagerContent() {
     
     if (langs) setLanguages(langs);
     if (trans) {
-      setTranslations(trans);
+      // Filter out invalid translations where translated_text equals translation_key
+      const validTranslations = trans.filter(t => {
+        const isValid = t.translated_text !== t.translation_key;
+        if (!isValid) {
+          console.warn(`Filtered out invalid translation: ${t.translation_key} (${t.language_code})`);
+        }
+        return isValid;
+      });
+      
+      console.log(`Loaded ${trans.length} translations, ${validTranslations.length} valid`);
+      setTranslations(validTranslations);
       // Store English translations separately for reference
-      setEnglishTranslations(trans.filter(t => t.language_code === 'en'));
+      setEnglishTranslations(validTranslations.filter(t => t.language_code === 'en'));
     }
     if (st) setStats(st);
   }
