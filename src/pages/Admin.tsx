@@ -32,6 +32,7 @@ import PageMetaManager from "@/components/design-system/PageMetaManager";
 import SitemapGenerator from "@/components/design-system/SitemapGenerator";
 import UnifiedDashboard from "@/components/design-system/UnifiedDashboard";
 import SEOSetupWizard from "@/components/design-system/SEOSetupWizard";
+import EvaluationHealthDashboard from "@/components/design-system/EvaluationHealthDashboard";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -193,8 +194,9 @@ const Admin = () => {
                 <TabsTrigger value="sitemap">🗺️ Sitemap</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="overview">
+              <TabsContent value="overview" className="space-y-6">
                 <UnifiedDashboard />
+                <EvaluationHealthDashboard />
               </TabsContent>
 
               <TabsContent value="translations">
