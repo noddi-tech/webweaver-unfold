@@ -88,11 +88,16 @@ serve(async (req) => {
 
 Evaluation Criteria:
 - Semantic Accuracy (30%) - Does it convey the same meaning?
+- Tech Terms Preserved (25%) - **CRITICAL** Technical terms MUST be in English (API, Backend, Frontend, Dashboard, booking, NPS, etc.). Deduct heavily if translated.
 - Tone Match (20%) - Does it match the professional yet human tone?
 - Cultural Fit (15%) - Is it appropriate for the target culture?
-- Tech Terms Preserved (15%) - Are technical terms kept in English?
-- Grammar (10%) - Is it grammatically correct?
-- Length Appropriateness (10%) - Is the length reasonable?
+- Grammar & Length (10%) - Is it grammatically correct and appropriate length?
+
+**Tech Terms Check:** Look for these terms translated incorrectly:
+- API → エーピーアイ (wrong), Schnittstelle (wrong), APIen (wrong)
+- Backend → バックエンド (wrong), Bakende (wrong), Backende (wrong)
+- Dashboard → Dashbord (wrong), ダッシュボード (wrong)
+- booking → bestilling (wrong), Buchung (wrong), réservation (wrong)
 
 Be critical but fair. Score 85+ for excellent, 70-84 for good, <70 needs improvement.
 

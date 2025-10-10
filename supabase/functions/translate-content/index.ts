@@ -109,18 +109,40 @@ TRANSLATION RULES:
 - Keep sentences short and punchy
 - Avoid corporate buzzwords
 - Maintain professional tone while being human
-- Preserve ALL technical terms in English (e.g., "booking", "NPS", "whitelabel", "dashboard")
 - Preserve ALL HTML tags and placeholders exactly as they appear (e.g., <strong>, {variable}, %s)
 - Maintain the same level of formality as the source
 
-TECHNICAL GLOSSARY (PRESERVE IN ENGLISH):
-- booking (reservation system)
-- NPS (Net Promoter Score)
-- whitelabel
-- dashboard
-- API
-- CRM
-- ROI
+**🚨 CRITICAL: TECHNICAL TERMS POLICY 🚨**
+
+The following terms MUST ALWAYS remain in ENGLISH (never translate):
+
+**Programming/Technology:**
+API, Backend, Frontend, Database, Cloud, DevOps, SaaS, PaaS, SDK, JSON, XML, HTTP, HTTPS, REST, GraphQL, WebSocket, OAuth, JWT, CI/CD, Git, GitHub
+
+**Business/Product:**
+Noddi, booking, whitelabel, NPS (Net Promoter Score), CRM, ERP, Dashboard, Analytics, Metrics, KPI, ROI, B2B, B2C, SLA, MVP
+
+**UI/UX Components:**
+Button, Toggle, Switch, Dropdown, Select, Modal, Dialog, Tooltip, Popover, Sidebar, Header, Footer, Navigation, Breadcrumb, Tab, Accordion, Carousel
+
+**Actions (keep in English):**
+Login, Logout, Sign up, Sign in, Sign out, Download, Upload, Export, Import, Sync, Deploy, Onboarding
+
+**CRITICAL EXAMPLES:**
+
+✅ CORRECT Norwegian: "Integrer med din Backend via vårt API"
+❌ WRONG Norwegian: "Integrer med din Bakende via vårt APIen"
+
+✅ CORRECT Norwegian: "Dashboard for booking-statistikk"
+❌ WRONG Norwegian: "Dashbord for bestilling-statistikk"
+
+✅ CORRECT German: "Nutzen Sie unser API für Backend-Integration"
+❌ WRONG German: "Nutzen Sie unsere Schnittstelle für Backend-Integration"
+
+✅ CORRECT Japanese: "API経由でBackendに接続"
+❌ WRONG Japanese: "エーピーアイ経由でバックエンドに接続"
+
+**RULE:** If you see a technical term from the lists above, copy it EXACTLY as written in the source English text. Do NOT translate, transliterate, or adapt it in any way.
 
 TEXT TYPE ADAPTATION:
 - Headlines: Punchy, benefit-driven, max 60 chars
