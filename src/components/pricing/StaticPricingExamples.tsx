@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { calculatePricing } from "@/utils/pricing";
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 interface StaticPricingExamplesProps {
   currency: string;
@@ -8,39 +9,43 @@ interface StaticPricingExamplesProps {
 }
 
 export function StaticPricingExamples({ currency, contractType }: StaticPricingExamplesProps) {
+  const { t } = useAppTranslation();
+
   const examples = [
     {
-      description: "Small Business",
+      description: t('pricing.examples.small.title', 'Small Business'),
       revenues: { garage: 750_000, shop: 200_000, mobile: 50_000 },
-      label: "€1M total revenue"
+      label: t('pricing.examples.small.label', '€1M total revenue')
     },
     {
-      description: "Growing Business",
+      description: t('pricing.examples.growing.title', 'Growing Business'),
       revenues: { garage: 5_000_000, shop: 3_000_000, mobile: 0 },
-      label: "€8M total (no mobile)"
+      label: t('pricing.examples.growing.label', '€8M total (no mobile)')
     },
     {
-      description: "Large Business",
+      description: t('pricing.examples.large.title', 'Large Business'),
       revenues: { garage: 6_000_000, shop: 3_000_000, mobile: 1_000_000 },
-      label: "€10M total revenue"
+      label: t('pricing.examples.large.label', '€10M total revenue')
     },
     {
-      description: "Enterprise",
+      description: t('pricing.examples.enterprise.title', 'Enterprise'),
       revenues: { garage: 90_000_000, shop: 80_000_000, mobile: 24_000_000 },
-      label: "€194M total revenue"
+      label: t('pricing.examples.enterprise.label', '€194M total revenue')
     }
   ];
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground mb-2">Example Pricing Scenarios</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-2">
+          {t('pricing.examples.title', 'Example Pricing Scenarios')}
+        </h2>
         <p className="text-sm text-muted-foreground">
           {contractType === 'none' 
-            ? 'See what businesses like yours typically pay (base pricing)'
+            ? t('pricing.examples.subtitle_base', 'See what businesses like yours typically pay (base pricing)')
             : contractType === 'monthly'
-            ? 'See what businesses like yours typically pay (with monthly contract - Save 15%)'
-            : 'See what businesses like yours typically pay (with yearly contract - Save 25%)'
+            ? t('pricing.examples.subtitle_monthly', 'See what businesses like yours typically pay (with monthly contract - Save 15%)')
+            : t('pricing.examples.subtitle_yearly', 'See what businesses like yours typically pay (with yearly contract - Save 25%)')
           }
         </p>
       </div>
@@ -72,19 +77,19 @@ export function StaticPricingExamples({ currency, contractType }: StaticPricingE
                 <div className="space-y-1 text-sm">
                   {example.revenues.garage > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Garage:</span>
+                      <span className="text-muted-foreground">{t('pricing.examples.label_garage', 'Garage')}:</span>
                       <span className="font-medium">{formatCurrency(example.revenues.garage, currency)}</span>
                     </div>
                   )}
                   {example.revenues.shop > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Shop:</span>
+                      <span className="text-muted-foreground">{t('pricing.examples.label_shop', 'Shop')}:</span>
                       <span className="font-medium">{formatCurrency(example.revenues.shop, currency)}</span>
                     </div>
                   )}
                   {example.revenues.mobile > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Mobile:</span>
+                      <span className="text-muted-foreground">{t('pricing.examples.label_mobile', 'Mobile')}:</span>
                       <span className="font-medium">{formatCurrency(example.revenues.mobile, currency)}</span>
                     </div>
                   )}
@@ -92,7 +97,9 @@ export function StaticPricingExamples({ currency, contractType }: StaticPricingE
 
                 <div className="pt-3 border-t border-border space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-semibold text-foreground">Annual Cost:</span>
+                    <span className="text-sm font-semibold text-foreground">
+                      {t('pricing.examples.annual_cost', 'Annual Cost')}:
+                    </span>
                     <div className="text-right">
                       {hasDiscount && (
                         <div className="text-sm text-muted-foreground line-through">
@@ -107,13 +114,13 @@ export function StaticPricingExamples({ currency, contractType }: StaticPricingE
                   
                   {hasDiscount && (
                     <div className="bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium px-2 py-1 rounded">
-                      💰 Save {formatCurrency(savings, currency)} with {contractType} contract
+                      💰 {t('pricing.examples.save', 'Save')} {formatCurrency(savings, currency)} {t('pricing.examples.with_contract', 'with')} {contractType} {t('pricing.examples.contract', 'contract')}
                     </div>
                   )}
                 </div>
 
                 <div className="text-xs text-muted-foreground">
-                  Effective rate: ~{result.effectiveRate.toFixed(2)}%
+                  {t('pricing.examples.effective_rate', 'Effective rate')}: ~{result.effectiveRate.toFixed(2)}%
                 </div>
               </div>
             </Card>
@@ -122,7 +129,7 @@ export function StaticPricingExamples({ currency, contractType }: StaticPricingE
       </div>
 
       <p className="text-xs text-muted-foreground text-center italic">
-        These are examples only. Your actual rate depends on your exact revenue mix.
+        {t('pricing.examples.disclaimer', 'These are examples only. Your actual rate depends on your exact revenue mix.')}
       </p>
     </div>
   );
