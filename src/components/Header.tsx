@@ -189,7 +189,8 @@ const Header = () => {
                   {link.title}
                 </LanguageLink>
               ))}
-              <div className="flex flex-col space-y-2 pt-4">
+              <div className="flex flex-col space-y-2 pt-4 border-t border-border">
+                <LanguageSwitcher variant="header" />
                 {authenticated && (
                   <Button variant="outline" onClick={() => { setIsMenuOpen(false); signOut(); }}>
                     Sign out

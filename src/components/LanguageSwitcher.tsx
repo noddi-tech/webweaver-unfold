@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -11,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
 import * as Flags from 'country-flag-icons/react/3x2';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 type Language = {
   code: string;
@@ -21,7 +21,7 @@ type Language = {
 };
 
 export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 'footer' }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useAppTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { lang } = useParams();
@@ -81,18 +81,19 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
     );
   }
 
-  // Header: Dropdown
+  // Header: Dropdown with flag and text
   const CurrentFlag = currentLang ? (Flags as any)[currentLang.flag_code] : null;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="gap-2">
+        <Button variant="ghost" className="gap-2 h-auto px-3 py-2">
           {CurrentFlag ? (
             <CurrentFlag className="w-5 h-3" />
           ) : (
             <Globe className="w-5 h-5" />
           )}
+          <span className="text-sm">{t('common.switch_language', 'Switch language')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
