@@ -1,38 +1,40 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowDown } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
-
-const layers = [
-  {
-    title: "Frontend",
-    subtitle: "Booking + Admin UI",
-  },
-  {
-    title: "Unified API Layer",
-    subtitle: "Single source of truth",
-  },
-  {
-    title: "Backend Services",
-    subtitle: "Booking, Capacity, Recall, Analytics",
-  },
-  {
-    title: "External Integrations",
-    subtitle: "Tire DBs, Scanners, Payments, ERP",
-  },
-];
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 export default function ArchitectureDiagram() {
   const { h2, body } = useTypography();
+  const { t } = useAppTranslation();
+
+  const layers = [
+    {
+      title: t('architecture.diagram.layer_1.title', 'Frontend'),
+      subtitle: t('architecture.diagram.layer_1.subtitle', 'Booking + Admin UI'),
+    },
+    {
+      title: t('architecture.diagram.layer_2.title', 'Unified API Layer'),
+      subtitle: t('architecture.diagram.layer_2.subtitle', 'Single source of truth'),
+    },
+    {
+      title: t('architecture.diagram.layer_3.title', 'Backend Services'),
+      subtitle: t('architecture.diagram.layer_3.subtitle', 'Booking, Capacity, Recall, Analytics'),
+    },
+    {
+      title: t('architecture.diagram.layer_4.title', 'External Integrations'),
+      subtitle: t('architecture.diagram.layer_4.subtitle', 'Tire DBs, Scanners, Payments, ERP'),
+    },
+  ];
   
   return (
     <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className={`${h2} mb-4 text-foreground`}>
-            The Stack
+            {t('architecture.diagram.title', 'The Stack')}
           </h2>
           <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
-            A unified architecture. Everything shares the same data model.
+            {t('architecture.diagram.subtitle', 'A unified architecture. Everything shares the same data model.')}
           </p>
         </div>
 
@@ -56,7 +58,7 @@ export default function ArchitectureDiagram() {
 
         <div className="text-center mt-12">
           <p className="text-xl font-semibold text-foreground max-w-2xl mx-auto">
-            No integrations to chase. No sync jobs to fix. Just one living system.
+            {t('architecture.diagram.footer_text', 'No integrations to chase. No sync jobs to fix. Just one living system.')}
           </p>
         </div>
       </div>

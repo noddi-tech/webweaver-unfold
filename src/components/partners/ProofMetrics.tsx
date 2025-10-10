@@ -1,58 +1,60 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, Users, Handshake, BarChart, Globe, Euro } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
-
-const metrics = [
-  {
-    icon: TrendingUp,
-    headline: "~90 NPS.",
-    context: "Three times the industry average.",
-    comparison: "vs. 20-30 industry standard",
-  },
-  {
-    icon: Users,
-    headline: "20,000+ bookings.",
-    context: "Zero sync issues.",
-    comparison: "And growing",
-  },
-  {
-    icon: Handshake,
-    headline: "4 SaaS partners.",
-    context: "1 shared platform.",
-    comparison: "Active paying customers",
-  },
-  {
-    icon: BarChart,
-    headline: ">49% market growth YoY.",
-    context: "In convenience services.",
-    comparison: "Convenience services sector",
-  },
-  {
-    icon: Globe,
-    headline: "€65B addressable market.",
-    context: "Global automotive services.",
-    comparison: "Ready to scale",
-  },
-  {
-    icon: Euro,
-    headline: "Performance-based model.",
-    context: "We grow when you grow.",
-    comparison: "Pure SaaS pricing",
-  },
-];
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 export default function ProofMetrics() {
   const { h2, body } = useTypography();
+  const { t } = useAppTranslation();
+
+  const metrics = [
+    {
+      icon: TrendingUp,
+      headline: t('proof_metrics.metric_1.headline', '~90 NPS.'),
+      context: t('proof_metrics.metric_1.context', 'Three times the industry average.'),
+      comparison: t('proof_metrics.metric_1.comparison', 'vs. 20-30 industry standard'),
+    },
+    {
+      icon: Users,
+      headline: t('proof_metrics.metric_2.headline', '20,000+ bookings.'),
+      context: t('proof_metrics.metric_2.context', 'Zero sync issues.'),
+      comparison: t('proof_metrics.metric_2.comparison', 'And growing'),
+    },
+    {
+      icon: Handshake,
+      headline: t('proof_metrics.metric_3.headline', '4 SaaS partners.'),
+      context: t('proof_metrics.metric_3.context', '1 shared platform.'),
+      comparison: t('proof_metrics.metric_3.comparison', 'Active paying customers'),
+    },
+    {
+      icon: BarChart,
+      headline: t('proof_metrics.metric_4.headline', '>49% market growth YoY.'),
+      context: t('proof_metrics.metric_4.context', 'In convenience services.'),
+      comparison: t('proof_metrics.metric_4.comparison', 'Convenience services sector'),
+    },
+    {
+      icon: Globe,
+      headline: t('proof_metrics.metric_5.headline', '€65B addressable market.'),
+      context: t('proof_metrics.metric_5.context', 'Global automotive services.'),
+      comparison: t('proof_metrics.metric_5.comparison', 'Ready to scale'),
+    },
+    {
+      icon: Euro,
+      headline: t('proof_metrics.metric_6.headline', 'Performance-based model.'),
+      context: t('proof_metrics.metric_6.context', 'We grow when you grow.'),
+      comparison: t('proof_metrics.metric_6.comparison', 'Pure SaaS pricing'),
+    },
+  ];
   
   return (
     <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className={`${h2} mb-4 text-foreground`}>
-            Real Numbers. Real Results.
+            {t('proof_metrics.title', 'Real Numbers. Real Results.')}
           </h2>
           <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
-            Noddi powers operations across Europe with proven performance.
+            {t('proof_metrics.subtitle', 'Noddi powers operations across Europe with proven performance.')}
           </p>
         </div>
 
