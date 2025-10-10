@@ -18,6 +18,16 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import LanguageSettings from './LanguageSettings';
@@ -36,6 +46,8 @@ export default function TranslationManagerContent() {
   const [newPageLocation, setNewPageLocation] = useState('homepage');
   const [isSyncing, setIsSyncing] = useState(false);
   const [translationProgress, setTranslationProgress] = useState<string>('');
+  const [isApprovingAll, setIsApprovingAll] = useState(false);
+  const [approveAllLanguage, setApproveAllLanguage] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -88,19 +100,72 @@ export default function TranslationManagerContent() {
     }
   }
 
+  async function handleApproveAll(languageCode: string) {
+    setIsApprovingAll(true);
+    
+    try {
+      // Get count of unapproved translations
+      const { count } = await supabase
+        .from('translations')
+        .select('*', { count: 'exact', head: true })
+        .eq('language_code', languageCode)
+        .eq('approved', false);
+
+      if (!count || count === 0) {
+        toast({ title: 'All translations already approved' });
+        setApproveAllLanguage(null);
+        setIsApprovingAll(false);
+        return;
+      }
+
+      // Batch approve all translations for this language
+      const { error } = await supabase
+        .from('translations')
+        .update({ 
+          approved: true,
+          approved_at: new Date().toISOString()
+        })
+        .eq('language_code', languageCode)
+        .eq('approved', false);
+
+      if (error) {
+        toast({ 
+          title: 'Error approving translations', 
+          description: error.message,
+          variant: 'destructive' 
+        });
+      } else {
+        const langName = languages.find(l => l.code === languageCode)?.name || languageCode;
+        toast({ 
+          title: 'All translations approved!', 
+          description: `Approved ${count} ${langName} translations`
+        });
+        loadData();
+      }
+    } catch (error: any) {
+      toast({ 
+        title: 'Approval failed', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    } finally {
+      setIsApprovingAll(false);
+      setApproveAllLanguage(null);
+    }
+  }
+
   async function handleSyncKeys() {
     setIsSyncing(true);
     
     try {
-      // Get all approved English translations (the master set)
+      // Get ALL English translations (the master set)
       const { data: englishKeys, error: englishError } = await supabase
         .from('translations')
         .select('translation_key, page_location, context')
-        .eq('language_code', 'en')
-        .eq('approved', true);
+        .eq('language_code', 'en');
 
       if (englishError || !englishKeys || englishKeys.length === 0) {
-        toast({ title: 'No approved English translations found', variant: 'destructive' });
+        toast({ title: 'No English translations found', variant: 'destructive' });
         setIsSyncing(false);
         return;
       }
@@ -442,6 +507,52 @@ export default function TranslationManagerContent() {
         </div>
       </div>
 
+      {/* Approve All Confirmation Dialog */}
+      <AlertDialog open={approveAllLanguage !== null} onOpenChange={(open) => !open && setApproveAllLanguage(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Approve all translations?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {approveAllLanguage && (() => {
+                const lang = languages.find(l => l.code === approveAllLanguage);
+                const stat = stats.find(s => s.code === approveAllLanguage);
+                const unapprovedCount = stat ? stat.total_translations - stat.approved_translations : 0;
+                const Flag = lang ? (Flags as any)[lang.flag_code] : null;
+                
+                return (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      {Flag && <Flag className="w-6 h-4" />}
+                      <span className="font-semibold">{lang?.name}</span>
+                    </div>
+                    <p>
+                      This will mark <strong>{unapprovedCount} translation{unapprovedCount !== 1 ? 's' : ''}</strong> as approved. 
+                      You can still edit them later if needed.
+                    </p>
+                  </div>
+                );
+              })()}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isApprovingAll}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => approveAllLanguage && handleApproveAll(approveAllLanguage)}
+              disabled={isApprovingAll}
+            >
+              {isApprovingAll ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Approving...
+                </>
+              ) : (
+                'Approve All'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Language Tabs */}
       <Tabs value={selectedLang} onValueChange={setSelectedLang}>
         <TabsList className="flex-wrap h-auto">
@@ -456,15 +567,30 @@ export default function TranslationManagerContent() {
           })}
         </TabsList>
 
-        {languages.map((lang) => (
-          <TabsContent key={lang.code} value={lang.code}>
-            <div className="mb-4">
-              <Input
-                placeholder="Search translation keys..."
-                value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
-              />
-            </div>
+        {languages.map((lang) => {
+          const langStat = stats.find(s => s.code === lang.code);
+          const unapprovedCount = langStat ? langStat.total_translations - langStat.approved_translations : 0;
+          
+          return (
+            <TabsContent key={lang.code} value={lang.code}>
+              <div className="mb-4 flex gap-2">
+                <Input
+                  placeholder="Search translation keys..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  className="flex-1"
+                />
+                {unapprovedCount > 0 && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => setApproveAllLanguage(lang.code)}
+                    disabled={isApprovingAll}
+                  >
+                    <Check className="w-4 h-4 mr-2" />
+                    Approve All ({unapprovedCount})
+                  </Button>
+                )}
+              </div>
 
             <div className="space-y-4">
               {filteredTranslations.map((translation) => (
@@ -515,7 +641,8 @@ export default function TranslationManagerContent() {
               ))}
             </div>
           </TabsContent>
-        ))}
+          );
+        })}
       </Tabs>
     </div>
   );
