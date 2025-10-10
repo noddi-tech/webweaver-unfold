@@ -559,6 +559,7 @@ export default function TranslationManagerContent() {
         });
 
         // Reload data to show updated translations
+        await new Promise(resolve => setTimeout(resolve, 1000));
         await loadData();
 
         // Show quality evaluation dialog
@@ -617,24 +618,12 @@ export default function TranslationManagerContent() {
     setIsEvaluating(true);
     
     try {
-      // Get all translation keys
-      const { data: allKeys } = await supabase
-        .from('translations')
-        .select('translation_key')
-        .eq('language_code', 'en');
-      
-      if (!allKeys || allKeys.length === 0) {
-        throw new Error('No translation keys found');
-      }
-
-      const translationKeys = allKeys.map(k => k.translation_key);
       const langName = languages.find(l => l.code === languageCode)?.name || languageCode;
 
       setTranslationProgress(`Evaluating ${langName} quality...`);
 
       const { data, error } = await supabase.functions.invoke('evaluate-translation-quality', {
         body: {
-          translationKeys,
           targetLanguage: languageCode,
           sourceLanguage: 'en'
         }

@@ -15,10 +15,9 @@ serve(async (req) => {
   console.log('=== Quality Evaluation Function Started ===');
 
   try {
-    const { translationKeys, targetLanguage, sourceLanguage = 'en' } = await req.json();
+    const { targetLanguage, sourceLanguage = 'en' } = await req.json();
     
     console.log('Request payload:', {
-      keysCount: translationKeys?.length,
       targetLanguage,
       sourceLanguage
     });
@@ -38,8 +37,7 @@ serve(async (req) => {
     const { data: sourceTexts, error: sourceError } = await supabase
       .from('translations')
       .select('translation_key, translated_text, page_location, context')
-      .eq('language_code', sourceLanguage)
-      .in('translation_key', translationKeys);
+      .eq('language_code', sourceLanguage);
 
     if (sourceError || !sourceTexts || sourceTexts.length === 0) {
       throw new Error(`Failed to fetch source texts: ${sourceError?.message || 'No data'}`);
@@ -50,8 +48,7 @@ serve(async (req) => {
     const { data: targetTexts, error: targetError } = await supabase
       .from('translations')
       .select('translation_key, translated_text')
-      .eq('language_code', targetLanguage)
-      .in('translation_key', translationKeys);
+      .eq('language_code', targetLanguage);
 
     if (targetError || !targetTexts || targetTexts.length === 0) {
       throw new Error(`Failed to fetch target translations: ${targetError?.message || 'No data'}`);
