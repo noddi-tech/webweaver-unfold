@@ -55,6 +55,11 @@ export default function TranslationManagerContent() {
   const [pageLocationFilter, setPageLocationFilter] = useState<string>('all');
   const [contextFilter, setContextFilter] = useState<string>('all');
   const [qualityFilter, setQualityFilter] = useState<string>('all'); // all, high (>=85), medium (70-84), low (<70)
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [showQualityDialog, setShowQualityDialog] = useState(false);
+  const [completedLanguage, setCompletedLanguage] = useState<string>('');
+  const [completedLanguageName, setCompletedLanguageName] = useState<string>('');
+  const [translatedCount, setTranslatedCount] = useState<number>(0);
 
   useEffect(() => {
     loadData();
@@ -485,7 +490,7 @@ export default function TranslationManagerContent() {
       return;
     }
 
-    const batchSize = 50;
+    const batchSize = 100;
     const totalBatches = Math.ceil(englishKeys.length / batchSize);
     const translationKeys = englishKeys.map(k => k.translation_key);
     
@@ -556,6 +561,12 @@ export default function TranslationManagerContent() {
         // Reload data to show updated translations
         await loadData();
 
+        // Show quality evaluation dialog
+        setCompletedLanguage(lang.code);
+        setCompletedLanguageName(lang.name);
+        setTranslatedCount(data.count);
+        setShowQualityDialog(true);
+
         // Small delay between languages to avoid overwhelming the system
         if (i < targetLanguages.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 2000));
@@ -599,6 +610,134 @@ export default function TranslationManagerContent() {
     } else {
       toast({ title: 'Translation updated' });
       loadData();
+    }
+  }
+
+  async function handleEvaluateQuality(languageCode: string) {
+    setIsEvaluating(true);
+    
+    try {
+      // Get all translation keys
+      const { data: allKeys } = await supabase
+        .from('translations')
+        .select('translation_key')
+        .eq('language_code', 'en');
+      
+      if (!allKeys || allKeys.length === 0) {
+        throw new Error('No translation keys found');
+      }
+
+      const translationKeys = allKeys.map(k => k.translation_key);
+      const langName = languages.find(l => l.code === languageCode)?.name || languageCode;
+
+      setTranslationProgress(`Evaluating ${langName} quality...`);
+
+      const { data, error } = await supabase.functions.invoke('evaluate-translation-quality', {
+        body: {
+          translationKeys,
+          targetLanguage: languageCode,
+          sourceLanguage: 'en'
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: 'Quality evaluation complete',
+        description: `Evaluated ${data.evaluatedCount} translations. Average: ${data.averageScore}% (${data.highQuality} high, ${data.mediumQuality} medium, ${data.lowQuality} low)`,
+        duration: 8000
+      });
+
+      await loadData();
+    } catch (error: any) {
+      console.error('Quality evaluation error:', error);
+      toast({
+        title: 'Evaluation failed',
+        description: error.message || 'An unexpected error occurred',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsEvaluating(false);
+      setTranslationProgress('');
+    }
+  }
+
+  async function handleEvaluateAllLanguages() {
+    setIsEvaluating(true);
+    
+    try {
+      const targetLanguages = languages.filter(l => l.enabled && l.code !== 'en');
+      
+      if (targetLanguages.length === 0) {
+        toast({ title: 'No target languages enabled', variant: 'destructive' });
+        return;
+      }
+
+      const { data: allKeys } = await supabase
+        .from('translations')
+        .select('translation_key')
+        .eq('language_code', 'en');
+      
+      if (!allKeys || allKeys.length === 0) {
+        throw new Error('No translation keys found');
+      }
+
+      const translationKeys = allKeys.map(k => k.translation_key);
+
+      for (let i = 0; i < targetLanguages.length; i++) {
+        const lang = targetLanguages[i];
+        setTranslationProgress(`Evaluating ${lang.name} (${i + 1}/${targetLanguages.length})...`);
+
+        const { data, error } = await supabase.functions.invoke('evaluate-translation-quality', {
+          body: {
+            translationKeys,
+            targetLanguage: lang.code,
+            sourceLanguage: 'en'
+          }
+        });
+
+        if (error) {
+          console.error(`Error evaluating ${lang.name}:`, error);
+          toast({
+            title: `${lang.name} evaluation failed`,
+            description: error.message,
+            variant: 'destructive'
+          });
+          continue;
+        }
+
+        toast({
+          title: `${lang.name} evaluated`,
+          description: `Average: ${data.averageScore}% (${data.highQuality} high, ${data.mediumQuality} medium, ${data.lowQuality} low)`,
+          duration: 3000
+        });
+
+        await loadData();
+
+        // Small delay between languages
+        if (i < targetLanguages.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+
+      toast({
+        title: 'All quality evaluations complete!',
+        description: `Evaluated ${targetLanguages.length} languages`,
+        duration: 5000
+      });
+
+    } catch (error: any) {
+      console.error('Bulk evaluation error:', error);
+      toast({
+        title: 'Evaluation failed',
+        description: error.message || 'An unexpected error occurred',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsEvaluating(false);
+      setTranslationProgress('');
     }
   }
 
@@ -727,7 +866,7 @@ export default function TranslationManagerContent() {
 
           <Button 
             onClick={handleTranslateAll} 
-            disabled={isTranslating}
+            disabled={isTranslating || isEvaluating}
             size="lg"
           >
             {isTranslating ? (
@@ -739,6 +878,25 @@ export default function TranslationManagerContent() {
               <>
                 <Upload className="w-4 h-4 mr-2" />
                 AI Translate All Languages
+              </>
+            )}
+          </Button>
+
+          <Button 
+            onClick={handleEvaluateAllLanguages} 
+            disabled={isTranslating || isEvaluating}
+            size="lg"
+            variant="secondary"
+          >
+            {isEvaluating ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Evaluating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Evaluate All Languages
               </>
             )}
           </Button>
@@ -829,6 +987,38 @@ export default function TranslationManagerContent() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Quality Evaluation Dialog */}
+      <AlertDialog open={showQualityDialog} onOpenChange={setShowQualityDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Translation Complete!</AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="space-y-3">
+                <p>
+                  {completedLanguageName} translation is complete with {translatedCount} translations saved.
+                </p>
+                <p>
+                  Would you like to evaluate translation quality now? This will check accuracy, tone, grammar, and cultural fit.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Takes ~2-3 minutes. You can also evaluate later from the language tab.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Skip for now</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              setShowQualityDialog(false);
+              handleEvaluateQuality(completedLanguage);
+            }}>
+              <Sparkles className="w-4 h-4 mr-2" />
+              Evaluate Quality
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Language Tabs */}
       <Tabs value={selectedLang} onValueChange={setSelectedLang}>
         <TabsList className="flex-wrap h-auto">
@@ -906,6 +1096,24 @@ export default function TranslationManagerContent() {
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     Export JSON
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleEvaluateQuality(lang.code)}
+                    disabled={isEvaluating}
+                  >
+                    {isEvaluating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Evaluating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Evaluate Quality
+                      </>
+                    )}
                   </Button>
                 </div>
 
