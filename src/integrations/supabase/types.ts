@@ -340,6 +340,45 @@ export type Database = {
         }
         Relationships: []
       }
+      evaluation_progress: {
+        Row: {
+          completed_at: string | null
+          error_message: string | null
+          evaluated_keys: number
+          id: string
+          language_code: string
+          last_evaluated_key: string | null
+          started_at: string
+          status: string
+          total_keys: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          error_message?: string | null
+          evaluated_keys?: number
+          id?: string
+          language_code: string
+          last_evaluated_key?: string | null
+          started_at?: string
+          status?: string
+          total_keys?: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          error_message?: string | null
+          evaluated_keys?: number
+          id?: string
+          language_code?: string
+          last_evaluated_key?: string | null
+          started_at?: string
+          status?: string
+          total_keys?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       features: {
         Row: {
           created_at: string
@@ -624,6 +663,13 @@ export type Database = {
             foreignKeyName: "language_settings_default_language_code_fkey"
             columns: ["default_language_code"]
             isOneToOne: false
+            referencedRelation: "page_meta_stats"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "language_settings_default_language_code_fkey"
+            columns: ["default_language_code"]
+            isOneToOne: false
             referencedRelation: "translation_stats"
             referencedColumns: ["code"]
           },
@@ -632,6 +678,13 @@ export type Database = {
             columns: ["fallback_language_code"]
             isOneToOne: false
             referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "language_settings_fallback_language_code_fkey"
+            columns: ["fallback_language_code"]
+            isOneToOne: false
+            referencedRelation: "page_meta_stats"
             referencedColumns: ["code"]
           },
           {
@@ -1105,6 +1158,13 @@ export type Database = {
             foreignKeyName: "translations_language_code_fkey"
             columns: ["language_code"]
             isOneToOne: false
+            referencedRelation: "page_meta_stats"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
             referencedRelation: "translation_stats"
             referencedColumns: ["code"]
           },
@@ -1307,6 +1367,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      page_meta_stats: {
+        Row: {
+          approved_count: number | null
+          avg_quality_score: number | null
+          code: string | null
+          completed_entries: number | null
+          enabled: boolean | null
+          missing_entries: number | null
+          name: string | null
+          needs_review_count: number | null
+          sort_order: number | null
+          total_pages: number | null
+        }
+        Relationships: []
       }
       translation_stats: {
         Row: {
