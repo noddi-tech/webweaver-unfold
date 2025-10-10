@@ -53,6 +53,7 @@ export default function TranslationManagerContent() {
   const [showEmptyOnly, setShowEmptyOnly] = useState(false);
   const [pageLocationFilter, setPageLocationFilter] = useState<string>('all');
   const [contextFilter, setContextFilter] = useState<string>('all');
+  const [qualityFilter, setQualityFilter] = useState<string>('all'); // all, high (>=85), medium (70-84), low (<70)
 
   useEffect(() => {
     loadData();
@@ -119,6 +120,15 @@ export default function TranslationManagerContent() {
     // Context filter
     if (contextFilter !== 'all' && t.context !== contextFilter) {
       return false;
+    }
+    
+    // Quality filter
+    if (qualityFilter !== 'all') {
+      const score = t.quality_score;
+      if (qualityFilter === 'high' && (score === null || score < 85)) return false;
+      if (qualityFilter === 'medium' && (score === null || score < 70 || score >= 85)) return false;
+      if (qualityFilter === 'low' && (score === null || score >= 70)) return false;
+      if (qualityFilter === 'needs_review' && t.review_status !== 'needs_review') return false;
     }
     
     return true;
@@ -318,11 +328,10 @@ export default function TranslationManagerContent() {
     const { data: englishKeys } = await supabase
       .from('translations')
       .select('translation_key')
-      .eq('language_code', 'en')
-      .eq('approved', true);
+      .eq('language_code', 'en');
 
     if (!englishKeys || englishKeys.length === 0) {
-      toast({ title: 'No approved English translations found', variant: 'destructive' });
+      toast({ title: 'No English translations found', variant: 'destructive' });
       setIsTranslating(false);
       setTranslationProgress('');
       return;
@@ -557,6 +566,9 @@ export default function TranslationManagerContent() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {stats.map((stat: any) => {
             const Flag = (Flags as any)[languages.find(l => l.code === stat.code)?.flag_code];
+            const avgQuality = stat.avg_quality_score ? Math.round(stat.avg_quality_score) : null;
+            const qualityColor = avgQuality >= 85 ? 'text-green-600' : avgQuality >= 70 ? 'text-yellow-600' : avgQuality ? 'text-red-600' : 'text-muted-foreground';
+            
             return (
               <Card key={stat.code}>
                 <CardContent className="pt-6">
@@ -566,6 +578,16 @@ export default function TranslationManagerContent() {
                   </div>
                   <div className="text-2xl font-bold">{stat.approved_translations}/{stat.total_translations}</div>
                   <div className="text-sm text-muted-foreground">{stat.approval_percentage}% approved</div>
+                  {avgQuality && (
+                    <div className={cn("text-sm font-medium mt-1", qualityColor)}>
+                      Quality: {avgQuality}%
+                    </div>
+                  )}
+                  {stat.needs_review_count > 0 && (
+                    <div className="text-xs text-orange-600 mt-1">
+                      {stat.needs_review_count} need review
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -682,6 +704,20 @@ export default function TranslationManagerContent() {
                     {showEmptyOnly ? "Show All" : "Show Empty Only"}
                   </Button>
 
+                  {/* Quality Filter */}
+                  <Select value={qualityFilter} onValueChange={setQualityFilter}>
+                    <SelectTrigger className="w-[180px] h-9">
+                      <SelectValue placeholder="Filter by quality" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Quality</SelectItem>
+                      <SelectItem value="high">High (≥85%)</SelectItem>
+                      <SelectItem value="medium">Medium (70-84%)</SelectItem>
+                      <SelectItem value="low">Low (&lt;70%)</SelectItem>
+                      <SelectItem value="needs_review">Needs Review</SelectItem>
+                    </SelectContent>
+                  </Select>
+
                   {/* Page Location Filter */}
                   <Select value={pageLocationFilter} onValueChange={setPageLocationFilter}>
                     <SelectTrigger className="w-[200px] h-9">
@@ -715,14 +751,14 @@ export default function TranslationManagerContent() {
                   )}
 
                   {/* Active Filters Count */}
-                  {(showEmptyOnly || pageLocationFilter !== 'all' || contextFilter !== 'all') && (
+                  {(showEmptyOnly || pageLocationFilter !== 'all' || contextFilter !== 'all' || qualityFilter !== 'all') && (
                     <Badge variant="secondary" className="h-9 px-3 flex items-center">
                       {filteredTranslations.length} result{filteredTranslations.length !== 1 ? 's' : ''}
                     </Badge>
                   )}
 
                   {/* Clear Filters */}
-                  {(showEmptyOnly || pageLocationFilter !== 'all' || contextFilter !== 'all' || searchFilter) && (
+                  {(showEmptyOnly || pageLocationFilter !== 'all' || contextFilter !== 'all' || qualityFilter !== 'all' || searchFilter) && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -730,6 +766,7 @@ export default function TranslationManagerContent() {
                         setShowEmptyOnly(false);
                         setPageLocationFilter('all');
                         setContextFilter('all');
+                        setQualityFilter('all');
                         setSearchFilter('');
                       }}
                     >
@@ -747,13 +784,31 @@ export default function TranslationManagerContent() {
                     <CardTitle className="flex items-center justify-between">
                       <span className="text-base font-mono">{translation.translation_key}</span>
                       <div className="flex gap-2">
+                        {translation.quality_score && (
+                          <Badge 
+                            variant="outline" 
+                            className={cn(
+                              translation.quality_score >= 85 ? "border-green-600 text-green-600" :
+                              translation.quality_score >= 70 ? "border-yellow-600 text-yellow-600" :
+                              "border-red-600 text-red-600"
+                            )}
+                          >
+                            Quality: {translation.quality_score}%
+                          </Badge>
+                        )}
+                        {translation.review_status === 'needs_review' && (
+                          <Badge variant="destructive" className="gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            Needs Review
+                          </Badge>
+                        )}
                         {translation.approved ? (
                           <Badge variant="default" className="gap-1">
                             <Check className="w-3 h-3" />
                             Approved
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">Pending Review</Badge>
+                          <Badge variant="secondary">Pending</Badge>
                         )}
                         <Badge variant="outline">{translation.page_location}</Badge>
                       </div>
@@ -775,6 +830,43 @@ export default function TranslationManagerContent() {
                         Translation text is empty - please add content before approving
                       </p>
                     )}
+                    
+                    {/* Quality Metrics Collapsible */}
+                    {translation.quality_metrics && (
+                      <Collapsible className="mb-3">
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" size="sm" className="w-full justify-start text-xs">
+                            View Quality Analysis →
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-2 p-3 bg-muted/50 rounded-md space-y-2">
+                          <div className="text-xs">
+                            <div className="font-semibold mb-1">Score: {translation.quality_score}%</div>
+                            {translation.quality_metrics.strengths?.length > 0 && (
+                              <div className="mb-2">
+                                <div className="font-medium text-green-600">✓ Strengths:</div>
+                                <ul className="list-disc list-inside pl-2">
+                                  {translation.quality_metrics.strengths.map((s: string, i: number) => (
+                                    <li key={i}>{s}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {translation.quality_metrics.issues?.length > 0 && (
+                              <div>
+                                <div className="font-medium text-orange-600">⚠ Issues:</div>
+                                <ul className="list-disc list-inside pl-2">
+                                  {translation.quality_metrics.issues.map((issue: string, i: number) => (
+                                    <li key={i}>{issue}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    )}
+                    
                     <div className="flex gap-2">
                       <Button 
                         size="sm" 

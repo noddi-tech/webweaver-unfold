@@ -983,6 +983,7 @@ export type Database = {
       }
       translations: {
         Row: {
+          ai_reviewed_at: string | null
           approved: boolean
           approved_at: string | null
           approved_by: string | null
@@ -991,11 +992,15 @@ export type Database = {
           id: string
           language_code: string
           page_location: string | null
+          quality_metrics: Json | null
+          quality_score: number | null
+          review_status: string | null
           translated_text: string
           translation_key: string
           updated_at: string
         }
         Insert: {
+          ai_reviewed_at?: string | null
           approved?: boolean
           approved_at?: string | null
           approved_by?: string | null
@@ -1004,11 +1009,15 @@ export type Database = {
           id?: string
           language_code: string
           page_location?: string | null
+          quality_metrics?: Json | null
+          quality_score?: number | null
+          review_status?: string | null
           translated_text: string
           translation_key: string
           updated_at?: string
         }
         Update: {
+          ai_reviewed_at?: string | null
           approved?: boolean
           approved_at?: string | null
           approved_by?: string | null
@@ -1017,6 +1026,9 @@ export type Database = {
           id?: string
           language_code?: string
           page_location?: string | null
+          quality_metrics?: Json | null
+          quality_score?: number | null
+          review_status?: string | null
           translated_text?: string
           translation_key?: string
           updated_at?: string
@@ -1240,9 +1252,14 @@ export type Database = {
         Row: {
           approval_percentage: number | null
           approved_translations: number | null
+          avg_quality_score: number | null
           code: string | null
           enabled: boolean | null
+          high_quality_count: number | null
+          low_quality_count: number | null
+          medium_quality_count: number | null
           name: string | null
+          needs_review_count: number | null
           sort_order: number | null
           total_translations: number | null
         }
