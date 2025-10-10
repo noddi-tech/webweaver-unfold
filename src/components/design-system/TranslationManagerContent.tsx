@@ -615,18 +615,24 @@ export default function TranslationManagerContent() {
     }
   }
 
-  async function handleEvaluateQuality(languageCode: string) {
+  // Enhanced evaluation with auto-resume capability
+  async function handleEvaluateQuality(languageCode: string, startFromKey: string | null = null) {
     setIsEvaluating(true);
     
     try {
       const langName = languages.find(l => l.code === languageCode)?.name || languageCode;
 
-      setTranslationProgress(`Evaluating ${langName} quality...`);
+      if (!startFromKey) {
+        setTranslationProgress(`Starting evaluation for ${langName}...`);
+      } else {
+        setTranslationProgress(`Resuming evaluation for ${langName}...`);
+      }
 
       const { data, error } = await supabase.functions.invoke('evaluate-translation-quality', {
         body: {
           targetLanguage: languageCode,
-          sourceLanguage: 'en'
+          sourceLanguage: 'en',
+          startFromKey
         }
       });
 
@@ -634,9 +640,31 @@ export default function TranslationManagerContent() {
         throw error;
       }
 
+      // Check if we need to continue
+      if (data.shouldContinue && data.lastKey) {
+        console.log(`Partial completion: ${data.evaluatedCount} translations. Resuming from ${data.lastKey}...`);
+        
+        toast({
+          title: `${langName}: Batch complete`,
+          description: `${data.totalEvaluated}/${data.totalKeys} translations evaluated (${Math.round((data.totalEvaluated/data.totalKeys)*100)}%). Continuing automatically...`,
+          duration: 3000
+        });
+
+        await loadData();
+        
+        // Small delay then continue
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Recursively call with last key to resume
+        return await handleEvaluateQuality(languageCode, data.lastKey);
+      }
+
+      // Evaluation complete
       toast({
-        title: 'Quality evaluation complete',
-        description: `Evaluated ${data.evaluatedCount} translations. Average: ${data.averageScore}% (${data.highQuality} high, ${data.mediumQuality} medium, ${data.lowQuality} low)`,
+        title: `${langName} evaluation complete! ✓`,
+        description: data.status === 'completed' 
+          ? `All translations evaluated successfully` 
+          : `Evaluated ${data.evaluatedCount} translations. Average: ${data.averageScore}% (${data.highQuality} high, ${data.mediumQuality} medium, ${data.lowQuality} low)`,
         duration: 8000
       });
 
@@ -649,11 +677,13 @@ export default function TranslationManagerContent() {
         variant: 'destructive'
       });
     } finally {
+      if (!isEvaluating) return; // Prevent setting to false if recursion is happening
       setIsEvaluating(false);
       setTranslationProgress('');
     }
   }
 
+  // Enhanced evaluation with progress tracking and auto-resume
   async function handleEvaluateAllLanguages() {
     setIsEvaluating(true);
     
@@ -665,27 +695,25 @@ export default function TranslationManagerContent() {
         return;
       }
 
-      // Check which languages already have evaluations
-      const { data: existingEvals } = await supabase
-        .from('translations')
-        .select('language_code, quality_metrics')
-        .neq('language_code', 'en')
-        .not('quality_metrics', 'is', null);
+      // Check progress to determine which languages need evaluation
+      const { data: progressData } = await supabase
+        .from('evaluation_progress')
+        .select('*')
+        .neq('language_code', 'en');
 
-      const languagesWithEvals = new Set(
-        existingEvals?.filter(e => {
-          const metrics = e.quality_metrics as any;
-          return metrics && typeof metrics === 'object' && metrics.overall_score !== undefined;
-        }).map(e => e.language_code) || []
+      const completedLanguages = new Set(
+        progressData?.filter(p => p.status === 'completed').map(p => p.language_code) || []
       );
 
-      const pendingLanguages = targetLanguages.filter(l => !languagesWithEvals.has(l.code));
+      const inProgressLanguages = progressData?.filter(p => p.status === 'in_progress') || [];
+
+      const pendingLanguages = targetLanguages.filter(l => !completedLanguages.has(l.code));
       const skippedCount = targetLanguages.length - pendingLanguages.length;
 
       if (skippedCount > 0) {
         toast({
-          title: `Skipping ${skippedCount} already evaluated languages`,
-          description: 'Will only evaluate languages without quality scores',
+          title: `Skipping ${skippedCount} completed languages`,
+          description: 'Will only evaluate pending languages',
           duration: 5000
         });
       }
@@ -693,7 +721,7 @@ export default function TranslationManagerContent() {
       if (pendingLanguages.length === 0) {
         toast({
           title: 'All languages already evaluated!',
-          description: 'Use individual language "Evaluate Quality" buttons to re-evaluate',
+          description: 'Use individual "Restart Evaluation" buttons to re-evaluate',
           duration: 5000
         });
         return;
@@ -704,47 +732,27 @@ export default function TranslationManagerContent() {
 
       for (let i = 0; i < pendingLanguages.length; i++) {
         const lang = pendingLanguages[i];
-        const progressMsg = `Evaluating ${lang.name} (${i + 1}/${pendingLanguages.length})... This may take 1-2 minutes per language.`;
+        const inProgress = inProgressLanguages.find(p => p.language_code === lang.code);
+        
+        const progressMsg = inProgress
+          ? `Resuming ${lang.name} from ${inProgress.evaluated_keys}/${inProgress.total_keys} (${i + 1}/${pendingLanguages.length})...`
+          : `Evaluating ${lang.name} (${i + 1}/${pendingLanguages.length})...`;
+        
         setTranslationProgress(progressMsg);
 
         try {
-          // Add timeout wrapper (3 minutes per language)
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Evaluation timeout - this is normal for large datasets. Try again.')), 180000)
-          );
-
-          const evaluationPromise = supabase.functions.invoke('evaluate-translation-quality', {
-            body: {
-              targetLanguage: lang.code,
-              sourceLanguage: 'en'
-            }
-          });
-
-          const { data, error } = await Promise.race([evaluationPromise, timeoutPromise]) as any;
-
-          if (error) {
-            throw error;
-          }
+          // Use the enhanced evaluation function with auto-resume
+          await handleEvaluateQuality(lang.code, inProgress?.last_evaluated_key || null);
 
           successCount++;
-          toast({
-            title: `✓ ${lang.name} evaluated`,
-            description: `Average: ${data.averageScore}% (${data.highQuality} high, ${data.mediumQuality} medium, ${data.lowQuality} low)`,
-            duration: 3000
-          });
-
-          await loadData();
 
         } catch (error: any) {
           failureCount++;
           console.error(`Error evaluating ${lang.name}:`, error);
           
-          const isTimeout = error.message?.includes('timeout');
           toast({
-            title: `${lang.name} evaluation ${isTimeout ? 'timed out' : 'failed'}`,
-            description: isTimeout 
-              ? 'Click "Evaluate All Languages" again to continue where you left off'
-              : error.message,
+            title: `${lang.name} evaluation failed`,
+            description: error.message || 'An unexpected error occurred',
             variant: 'destructive',
             duration: 8000
           });
