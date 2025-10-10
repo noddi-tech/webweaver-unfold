@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,9 +61,19 @@ export default function TranslationManagerContent() {
   const [completedLanguage, setCompletedLanguage] = useState<string>('');
   const [completedLanguageName, setCompletedLanguageName] = useState<string>('');
   const [translatedCount, setTranslatedCount] = useState<number>(0);
+  const [editingValues, setEditingValues] = useState<Record<string, string>>({});
+  const updateTimeouts = useRef<Record<string, NodeJS.Timeout>>({});
+  const [refiningId, setRefiningId] = useState<string | null>(null);
+  const [tovContent, setTovContent] = useState<string>('');
 
   useEffect(() => {
     loadData();
+    
+    // Load TOV content
+    fetch('/content/brand/tov-noddi-tech.md')
+      .then(res => res.text())
+      .then(setTovContent)
+      .catch(console.error);
   }, []);
 
   async function loadData() {
@@ -612,17 +622,71 @@ export default function TranslationManagerContent() {
     }
   }
 
-  async function handleUpdate(id: string, newText: string) {
-    const { error } = await supabase
-      .from('translations')
-      .update({ translated_text: newText, approved: false })
-      .eq('id', id);
+  function handleLocalUpdate(id: string, newText: string) {
+    // Update local state immediately for smooth typing
+    setEditingValues(prev => ({ ...prev, [id]: newText }));
+    
+    // Clear existing timeout
+    if (updateTimeouts.current[id]) {
+      clearTimeout(updateTimeouts.current[id]);
+    }
+    
+    // Debounce database update (1 second after typing stops)
+    updateTimeouts.current[id] = setTimeout(async () => {
+      const { error } = await supabase
+        .from('translations')
+        .update({ translated_text: newText, approved: false })
+        .eq('id', id);
 
-    if (error) {
-      toast({ title: 'Error updating translation', variant: 'destructive' });
-    } else {
-      toast({ title: 'Translation updated' });
-      loadData();
+      if (error) {
+        toast({ title: 'Error saving', variant: 'destructive' });
+      } else {
+        // Silent save - no reload, update local state
+        setTranslations(prev => 
+          prev.map(t => t.id === id ? { ...t, translated_text: newText, approved: false } : t)
+        );
+        setEditingValues(prev => {
+          const newVals = { ...prev };
+          delete newVals[id];
+          return newVals;
+        });
+      }
+    }, 1000);
+  }
+
+  async function handleAIRefine(translation: any) {
+    setRefiningId(translation.id);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('refine-translation', {
+        body: {
+          englishText: getEnglishText(translation.translation_key),
+          currentTranslation: translation.translated_text,
+          targetLanguage: selectedLang,
+          targetLanguageName: languages.find(l => l.code === selectedLang)?.name,
+          context: translation.context,
+          pageLocation: translation.page_location,
+          tovContent: tovContent
+        }
+      });
+
+      if (error) throw error;
+
+      // Update with refined text
+      handleLocalUpdate(translation.id, data.refinedText);
+      toast({ 
+        title: 'Translation refined!',
+        description: 'Review the AI suggestion and approve if it looks good.'
+      });
+
+    } catch (error: any) {
+      toast({ 
+        title: 'AI refinement failed', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    } finally {
+      setRefiningId(null);
     }
   }
 
@@ -1335,8 +1399,8 @@ export default function TranslationManagerContent() {
                         </Label>
                         <Textarea
                           id={`translation-${translation.id}`}
-                          value={translation.translated_text}
-                          onChange={(e) => handleUpdate(translation.id, e.target.value)}
+                          value={editingValues[translation.id] ?? translation.translated_text}
+                          onChange={(e) => handleLocalUpdate(translation.id, e.target.value)}
                           className={cn(
                             "font-mono text-sm",
                             !translation.translated_text?.trim() && "border-destructive border-2"
@@ -1428,7 +1492,25 @@ export default function TranslationManagerContent() {
                       </Collapsible>
                     )}
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleAIRefine(translation)}
+                        disabled={refiningId === translation.id}
+                      >
+                        {refiningId === translation.id ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                            Refining...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-1" />
+                            AI Refine
+                          </>
+                        )}
+                      </Button>
                       <Button 
                         size="sm" 
                         onClick={() => handleApprove(translation.id)}
