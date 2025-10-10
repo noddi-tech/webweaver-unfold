@@ -38,6 +38,7 @@ export default function TranslationManagerContent() {
   const { toast } = useToast();
   const [languages, setLanguages] = useState<any[]>([]);
   const [translations, setTranslations] = useState<any[]>([]);
+  const [englishTranslations, setEnglishTranslations] = useState<any[]>([]);
   const [selectedLang, setSelectedLang] = useState('en');
   const [searchFilter, setSearchFilter] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
@@ -69,9 +70,19 @@ export default function TranslationManagerContent() {
     const { data: st } = await supabase.from('translation_stats' as any).select('*');
     
     if (langs) setLanguages(langs);
-    if (trans) setTranslations(trans);
+    if (trans) {
+      setTranslations(trans);
+      // Store English translations separately for reference
+      setEnglishTranslations(trans.filter(t => t.language_code === 'en'));
+    }
     if (st) setStats(st);
   }
+
+  // Helper to get English source text for a key
+  const getEnglishText = (translationKey: string): string => {
+    const englishTranslation = englishTranslations.find(t => t.translation_key === translationKey);
+    return englishTranslation?.translated_text || '';
+  };
 
   // Get unique page locations and contexts for filter dropdowns
   const uniquePageLocations = Array.from(new Set(
@@ -1016,21 +1027,40 @@ export default function TranslationManagerContent() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Textarea
-                      value={translation.translated_text}
-                      onChange={(e) => handleUpdate(translation.id, e.target.value)}
-                      className={cn(
-                        "mb-2",
-                        !translation.translated_text?.trim() && "border-destructive border-2"
-                      )}
-                      rows={3}
-                    />
-                    {!translation.translated_text?.trim() && (
-                      <p className="text-sm text-destructive flex items-center gap-1 mb-2">
-                        <AlertTriangle className="w-4 h-4" />
-                        Translation text is empty - please add content before approving
-                      </p>
-                    )}
+                    <div className="space-y-4">
+                      {/* English Source Text */}
+                      <div className="space-y-2">
+                        <Label className="text-xs text-muted-foreground">
+                          English (Source)
+                        </Label>
+                        <div className="rounded-md bg-muted/50 p-3 font-mono text-sm text-muted-foreground border border-border">
+                          {getEnglishText(translation.translation_key) || 'No English text found'}
+                        </div>
+                      </div>
+
+                      {/* Translation Input */}
+                      <div className="space-y-2">
+                        <Label htmlFor={`translation-${translation.id}`}>
+                          {languages.find(l => l.code === selectedLang)?.name || selectedLang} Translation
+                        </Label>
+                        <Textarea
+                          id={`translation-${translation.id}`}
+                          value={translation.translated_text}
+                          onChange={(e) => handleUpdate(translation.id, e.target.value)}
+                          className={cn(
+                            "font-mono text-sm",
+                            !translation.translated_text?.trim() && "border-destructive border-2"
+                          )}
+                          rows={3}
+                        />
+                        {!translation.translated_text?.trim() && (
+                          <p className="text-sm text-destructive flex items-center gap-1">
+                            <AlertTriangle className="w-4 h-4" />
+                            Translation text is empty - please add content before approving
+                          </p>
+                        )}
+                      </div>
+                    </div>
                     
                     {/* Quality Metrics Collapsible */}
                     {translation.quality_metrics && (

@@ -132,7 +132,7 @@ TEXT TYPE ADAPTATION:
 When translating, adapt idioms and expressions naturally to the target language while preserving meaning and tone.`;
 
     const BATCH_SIZE = 50;
-    const results = [];
+    const results: Record<string, any> = {};
 
     // Helper function to validate translations
     const validateTranslation = (original: any, translated: any): boolean => {
@@ -147,7 +147,15 @@ When translating, adapt idioms and expressions naturally to the target language 
       return true;
     };
 
-    for (const targetLang of targetLanguages) {
+    // Process languages in parallel batches of 5 to prevent timeout
+    const CONCURRENT_LANGUAGES = 5;
+
+    for (let langIndex = 0; langIndex < targetLanguages.length; langIndex += CONCURRENT_LANGUAGES) {
+      const languageBatch = targetLanguages.slice(langIndex, langIndex + CONCURRENT_LANGUAGES);
+      console.log(`\n=== Processing language batch: ${languageBatch.join(', ')} ===`);
+
+      // Process this batch of languages concurrently
+      const languagePromises = languageBatch.map(async (targetLang) => {
       console.log(`\n=== Starting translation for: ${targetLang} ===`);
 
       const allTextsToTranslate = sourceTexts.map(t => ({
@@ -337,21 +345,39 @@ ${JSON.stringify(validTranslations.map((t: any) => ({
         console.log(`✓ Batch ${batchIndex + 1} complete: ${validTranslations.length} translations saved`);
       }
 
-      console.log(`\n✓ ${targetLang} complete: ${totalTranslated} translated, ${totalFailed} failed`);
-      
-      results.push({
-        language: targetLang,
-        count: totalTranslated,
-        failed: totalFailed,
-        failedBatches: failedBatches,
-        status: failedBatches.length > 0 ? 'partial' : 'success'
+        console.log(`\n✓ ${targetLang} complete: ${totalTranslated} translated, ${totalFailed} failed`);
+        
+        return {
+          language: targetLang,
+          count: totalTranslated,
+          failed: totalFailed,
+          failedBatches: failedBatches,
+          status: failedBatches.length > 0 ? 'partial' : 'success'
+        };
       });
+
+      // Wait for this batch of languages to complete
+      const batchResults = await Promise.all(languagePromises);
+      
+      // Store results
+      batchResults.forEach(result => {
+        results[result.language] = result;
+      });
+
+      // Delay between language batches
+      if (langIndex + CONCURRENT_LANGUAGES < targetLanguages.length) {
+        console.log('\nWaiting before next language batch...');
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
     }
 
-    console.log('\n=== Translation Complete ===');
-    console.log('Results summary:', results);
+    // Convert results object to array
+    const resultsArray = Object.values(results);
 
-    return new Response(JSON.stringify({ results }), {
+    console.log('\n=== Translation Complete ===');
+    console.log('Results summary:', resultsArray);
+
+    return new Response(JSON.stringify({ results: resultsArray }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
