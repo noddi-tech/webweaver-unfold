@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, Upload, Loader2, Plus, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Check, X, Upload, Loader2, Plus, RefreshCw, AlertTriangle, Sparkles } from 'lucide-react';
 import * as Flags from 'country-flag-icons/react/3x2';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -227,6 +227,134 @@ export default function TranslationManagerContent() {
     } finally {
       setIsApprovingAll(false);
       setApproveAllLanguage(null);
+    }
+  }
+
+  async function handleApproveHighQuality(languageCode: string) {
+    setIsApprovingAll(true);
+    
+    try {
+      // Get count of high-quality unapproved translations (score >= 85)
+      const { count } = await supabase
+        .from('translations')
+        .select('*', { count: 'exact', head: true })
+        .eq('language_code', languageCode)
+        .eq('approved', false)
+        .gte('quality_score', 85);
+
+      if (!count || count === 0) {
+        toast({ 
+          title: 'No high-quality translations to approve',
+          description: 'All high-quality translations are already approved'
+        });
+        setIsApprovingAll(false);
+        return;
+      }
+
+      // Batch approve high-quality translations
+      const { error } = await supabase
+        .from('translations')
+        .update({ 
+          approved: true,
+          approved_at: new Date().toISOString(),
+          review_status: 'approved'
+        })
+        .eq('language_code', languageCode)
+        .eq('approved', false)
+        .gte('quality_score', 85);
+
+      if (error) {
+        toast({ 
+          title: 'Error approving translations', 
+          description: error.message,
+          variant: 'destructive' 
+        });
+      } else {
+        const langName = languages.find(l => l.code === languageCode)?.name || languageCode;
+        toast({ 
+          title: 'High-quality translations approved!', 
+          description: `Auto-approved ${count} high-quality ${langName} translations (≥85% quality)`
+        });
+        loadData();
+      }
+    } catch (error: any) {
+      toast({ 
+        title: 'Auto-approval failed', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    } finally {
+      setIsApprovingAll(false);
+    }
+  }
+
+  async function handleFlagLowQuality(languageCode: string) {
+    try {
+      // Flag translations with quality score < 70 for review
+      const { count } = await supabase
+        .from('translations')
+        .select('*', { count: 'exact', head: true })
+        .eq('language_code', languageCode)
+        .lt('quality_score', 70);
+
+      if (!count || count === 0) {
+        toast({ title: 'No low-quality translations found' });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('translations')
+        .update({ review_status: 'needs_review' })
+        .eq('language_code', languageCode)
+        .lt('quality_score', 70);
+
+      if (error) throw error;
+
+      toast({ 
+        title: 'Low-quality translations flagged',
+        description: `Flagged ${count} translations for review (quality <70%)`
+      });
+      loadData();
+    } catch (error: any) {
+      toast({ 
+        title: 'Error flagging translations', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    }
+  }
+
+  async function handleExportTranslations(languageCode: string) {
+    try {
+      const exportData = translations
+        .filter(t => t.language_code === languageCode)
+        .map(t => ({
+          key: t.translation_key,
+          text: t.translated_text,
+          page: t.page_location,
+          context: t.context,
+          quality_score: t.quality_score,
+          review_status: t.review_status,
+          approved: t.approved
+        }));
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `translations-${languageCode}-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({ title: 'Translations exported successfully' });
+    } catch (error: any) {
+      toast({ 
+        title: 'Export failed', 
+        description: error.message,
+        variant: 'destructive' 
+      });
     }
   }
 
@@ -690,6 +818,35 @@ export default function TranslationManagerContent() {
                       )}
                     </Button>
                   )}
+                </div>
+
+                {/* Quality-Based Actions Row */}
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => handleApproveHighQuality(lang.code)}
+                    disabled={isApprovingAll}
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Auto-Approve Quality (≥85%)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleFlagLowQuality(lang.code)}
+                  >
+                    <AlertTriangle className="w-4 h-4 mr-2" />
+                    Flag Low Quality (&lt;70%)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleExportTranslations(lang.code)}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Export JSON
+                  </Button>
                 </div>
 
                 {/* Filter Options Row */}

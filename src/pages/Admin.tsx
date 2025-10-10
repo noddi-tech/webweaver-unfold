@@ -29,6 +29,7 @@ import SocialMetaManager from "@/components/design-system/SocialMetaManager";
 import PricingManager from "@/components/design-system/PricingManager";
 import TranslationManagerContent from "@/components/design-system/TranslationManagerContent";
 import PageMetaManager from "@/components/design-system/PageMetaManager";
+import SitemapGenerator from "@/components/design-system/SitemapGenerator";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -189,6 +190,10 @@ const Admin = () => {
           {/* SEO Section */}
           <TabsContent value="seo" className="space-y-8">
             <PageMetaManager />
+            
+            <div className="mt-8">
+              <SitemapGenerator />
+            </div>
           </TabsContent>
 
           {/* Design System Section with nested tabs */}
