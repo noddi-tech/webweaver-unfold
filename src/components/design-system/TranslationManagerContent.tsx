@@ -92,14 +92,15 @@ export default function TranslationManagerContent() {
     setIsSyncing(true);
     
     try {
-      // Get all unique English translation keys
-      const { data: englishKeys } = await supabase
+      // Get all approved English translations (the master set)
+      const { data: englishKeys, error: englishError } = await supabase
         .from('translations')
-        .select('translation_key, page_location')
-        .eq('language_code', 'en');
+        .select('translation_key, page_location, context')
+        .eq('language_code', 'en')
+        .eq('approved', true);
 
-      if (!englishKeys) {
-        toast({ title: 'Error loading English keys', variant: 'destructive' });
+      if (englishError || !englishKeys || englishKeys.length === 0) {
+        toast({ title: 'No approved English translations found', variant: 'destructive' });
         setIsSyncing(false);
         return;
       }
@@ -107,38 +108,66 @@ export default function TranslationManagerContent() {
       // Get enabled languages (except English)
       const targetLanguages = languages.filter(l => l.enabled && l.code !== 'en');
       
-      let keysCreated = 0;
+      if (targetLanguages.length === 0) {
+        toast({ title: 'No target languages enabled', variant: 'destructive' });
+        setIsSyncing(false);
+        return;
+      }
 
-      for (const lang of targetLanguages) {
-        for (const enKey of englishKeys) {
-          // Check if translation already exists
-          const { data: existing } = await supabase
+      let totalKeysCreated = 0;
+
+      // Process each language
+      for (let i = 0; i < targetLanguages.length; i++) {
+        const lang = targetLanguages[i];
+        setTranslationProgress(`Syncing ${lang.name} (${i + 1}/${targetLanguages.length})...`);
+
+        // Fetch ALL existing translations for this language in one query
+        const { data: existingTranslations } = await supabase
+          .from('translations')
+          .select('translation_key')
+          .eq('language_code', lang.code);
+
+        // Create a Set for fast lookup of existing keys
+        const existingKeys = new Set(
+          existingTranslations?.map(t => t.translation_key) || []
+        );
+
+        // Find missing keys by comparing with English keys
+        const missingKeys = englishKeys.filter(
+          enKey => !existingKeys.has(enKey.translation_key)
+        );
+
+        // Batch insert all missing keys in one operation
+        if (missingKeys.length > 0) {
+          const newTranslations = missingKeys.map(enKey => ({
+            translation_key: enKey.translation_key,
+            language_code: lang.code,
+            translated_text: enKey.translation_key, // Use key as placeholder
+            approved: false,
+            page_location: enKey.page_location,
+            context: enKey.context,
+          }));
+
+          const { error: insertError } = await supabase
             .from('translations')
-            .select('id')
-            .eq('translation_key', enKey.translation_key)
-            .eq('language_code', lang.code)
-            .single();
+            .insert(newTranslations);
 
-          if (!existing) {
-            // Create placeholder translation
-            const { error } = await supabase
-              .from('translations')
-              .insert({
-                translation_key: enKey.translation_key,
-                language_code: lang.code,
-                translated_text: '',
-                approved: false,
-                page_location: enKey.page_location,
-              });
-
-            if (!error) keysCreated++;
+          if (insertError) {
+            console.error(`Error inserting translations for ${lang.name}:`, insertError);
+            toast({ 
+              title: `Failed to sync ${lang.name}`, 
+              description: insertError.message, 
+              variant: 'destructive' 
+            });
+          } else {
+            totalKeysCreated += missingKeys.length;
           }
         }
       }
 
       toast({ 
-        title: 'Keys synced successfully!', 
-        description: `Created ${keysCreated} placeholder translations`
+        title: 'Sync complete!', 
+        description: `Created ${totalKeysCreated} placeholder translations across ${targetLanguages.length} languages`
       });
       loadData();
     } catch (error: any) {
@@ -146,6 +175,7 @@ export default function TranslationManagerContent() {
       toast({ title: 'Sync failed', description: error.message, variant: 'destructive' });
     } finally {
       setIsSyncing(false);
+      setTranslationProgress('');
     }
   }
 
