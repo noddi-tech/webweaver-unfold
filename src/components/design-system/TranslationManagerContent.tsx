@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, Upload, Loader2, Plus } from 'lucide-react';
+import { Check, X, Upload, Loader2, Plus, RefreshCw } from 'lucide-react';
 import * as Flags from 'country-flag-icons/react/3x2';
 import {
   Dialog,
@@ -19,6 +19,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import LanguageSettings from './LanguageSettings';
 
 export default function TranslationManagerContent() {
   const { toast } = useToast();
@@ -32,6 +34,8 @@ export default function TranslationManagerContent() {
   const [newKey, setNewKey] = useState('');
   const [newText, setNewText] = useState('');
   const [newPageLocation, setNewPageLocation] = useState('homepage');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [translationProgress, setTranslationProgress] = useState<string>('');
 
   useEffect(() => {
     loadData();
@@ -84,8 +88,70 @@ export default function TranslationManagerContent() {
     }
   }
 
+  async function handleSyncKeys() {
+    setIsSyncing(true);
+    
+    try {
+      // Get all unique English translation keys
+      const { data: englishKeys } = await supabase
+        .from('translations')
+        .select('translation_key, page_location')
+        .eq('language_code', 'en');
+
+      if (!englishKeys) {
+        toast({ title: 'Error loading English keys', variant: 'destructive' });
+        setIsSyncing(false);
+        return;
+      }
+
+      // Get enabled languages (except English)
+      const targetLanguages = languages.filter(l => l.enabled && l.code !== 'en');
+      
+      let keysCreated = 0;
+
+      for (const lang of targetLanguages) {
+        for (const enKey of englishKeys) {
+          // Check if translation already exists
+          const { data: existing } = await supabase
+            .from('translations')
+            .select('id')
+            .eq('translation_key', enKey.translation_key)
+            .eq('language_code', lang.code)
+            .single();
+
+          if (!existing) {
+            // Create placeholder translation
+            const { error } = await supabase
+              .from('translations')
+              .insert({
+                translation_key: enKey.translation_key,
+                language_code: lang.code,
+                translated_text: '',
+                approved: false,
+                page_location: enKey.page_location,
+              });
+
+            if (!error) keysCreated++;
+          }
+        }
+      }
+
+      toast({ 
+        title: 'Keys synced successfully!', 
+        description: `Created ${keysCreated} placeholder translations`
+      });
+      loadData();
+    } catch (error: any) {
+      console.error('Sync error:', error);
+      toast({ title: 'Sync failed', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsSyncing(false);
+    }
+  }
+
   async function handleTranslateAll() {
     setIsTranslating(true);
+    setTranslationProgress('Starting translation...');
     
     // Get all English keys
     const { data: englishKeys } = await supabase
@@ -94,9 +160,10 @@ export default function TranslationManagerContent() {
       .eq('language_code', 'en')
       .eq('approved', true);
 
-    if (!englishKeys) {
-      toast({ title: 'Error loading source translations', variant: 'destructive' });
+    if (!englishKeys || englishKeys.length === 0) {
+      toast({ title: 'No approved English translations found', variant: 'destructive' });
       setIsTranslating(false);
+      setTranslationProgress('');
       return;
     }
 
@@ -105,7 +172,21 @@ export default function TranslationManagerContent() {
       .filter(l => l.enabled && l.code !== 'en')
       .map(l => l.code);
 
+    if (targetLanguages.length === 0) {
+      toast({ title: 'No target languages enabled', variant: 'destructive' });
+      setIsTranslating(false);
+      setTranslationProgress('');
+      return;
+    }
+
+    setTranslationProgress(`Translating ${englishKeys.length} keys to ${targetLanguages.length} languages...`);
+
     try {
+      console.log('Invoking translate-content function:', {
+        keysCount: englishKeys.length,
+        targetLanguages,
+      });
+
       const { data, error } = await supabase.functions.invoke('translate-content', {
         body: {
           translationKeys: englishKeys.map(k => k.translation_key),
@@ -114,7 +195,22 @@ export default function TranslationManagerContent() {
         }
       });
 
-      if (error) throw error;
+      console.log('Translation response:', { data, error });
+
+      if (error) {
+        console.error('Translation error details:', error);
+        
+        // Handle specific error types
+        if (error.message?.includes('429')) {
+          throw new Error('Rate limit exceeded. Please try again in a few minutes.');
+        } else if (error.message?.includes('402')) {
+          throw new Error('Payment required. Please check your Lovable AI credits.');
+        } else if (error.message?.includes('LOVABLE_API_KEY')) {
+          throw new Error('API key not configured. Please contact support.');
+        }
+        
+        throw error;
+      }
 
       toast({ 
         title: 'Translation complete!', 
@@ -123,9 +219,14 @@ export default function TranslationManagerContent() {
       loadData();
     } catch (error: any) {
       console.error('Translation error:', error);
-      toast({ title: 'Translation failed', description: error.message, variant: 'destructive' });
+      toast({ 
+        title: 'Translation failed', 
+        description: error.message || 'Unknown error occurred',
+        variant: 'destructive' 
+      });
     } finally {
       setIsTranslating(false);
+      setTranslationProgress('');
     }
   }
 
@@ -180,7 +281,23 @@ export default function TranslationManagerContent() {
           Manage translations across all languages. AI-translate, review, and approve content.
         </p>
 
-        <div className="flex gap-4 mb-6">
+        {/* Language Settings Section */}
+        <Collapsible className="mb-6">
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="mb-4">
+              Language Settings
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <Card className="mb-6">
+              <CardContent className="pt-6">
+                <LanguageSettings />
+              </CardContent>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
+
+        <div className="flex flex-wrap gap-4 mb-6">
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button size="lg" variant="outline">
@@ -232,6 +349,25 @@ export default function TranslationManagerContent() {
           </Dialog>
 
           <Button 
+            onClick={handleSyncKeys} 
+            disabled={isSyncing}
+            size="lg"
+            variant="outline"
+          >
+            {isSyncing ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Syncing...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Sync Translation Keys
+              </>
+            )}
+          </Button>
+
+          <Button 
             onClick={handleTranslateAll} 
             disabled={isTranslating}
             size="lg"
@@ -249,6 +385,12 @@ export default function TranslationManagerContent() {
             )}
           </Button>
         </div>
+
+        {translationProgress && (
+          <div className="mb-4 p-4 bg-muted rounded-lg">
+            <p className="text-sm text-muted-foreground">{translationProgress}</p>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
