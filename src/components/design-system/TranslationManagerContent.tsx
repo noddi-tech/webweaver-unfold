@@ -35,6 +35,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import LanguageSettings from './LanguageSettings';
 import EvaluationControls from './EvaluationControls';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function TranslationManagerContent() {
   const { toast } = useToast();
@@ -1180,24 +1181,61 @@ export default function TranslationManagerContent() {
             )}
           </Button>
 
-          <Button 
-            onClick={handleEvaluateIncomplete} 
-            disabled={isTranslating || isEvaluating}
-            size="lg"
-            variant="secondary"
-          >
-            {isEvaluating ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Evaluating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Evaluate Incomplete Languages
-              </>
-            )}
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  onClick={handleEvaluateIncomplete} 
+                  disabled={isTranslating || isEvaluating}
+                  size="lg"
+                  variant="secondary"
+                >
+                  {isEvaluating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Evaluating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Evaluate Incomplete
+                    </>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Only evaluate languages not yet at 100%</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  onClick={handleEvaluateAllLanguages} 
+                  disabled={isTranslating || isEvaluating}
+                  size="lg"
+                  variant="outline"
+                >
+                  {isEvaluating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Evaluating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Evaluate All Languages
+                    </>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Re-evaluate all languages including completed ones</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
           <Button
             onClick={resetStuckEvaluations}
