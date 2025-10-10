@@ -111,16 +111,19 @@ export default function PageMetaManager() {
       
       for (const lang of targetLanguages) {
         for (const page of pages) {
+          // Normalize slug: homepage -> /, others remain unchanged
+          const normalizedSlug = page.slug === 'homepage' ? '/' : page.slug;
+          
           // Check if entry already exists
           const exists = pageMetas.some(
-            m => m.language_code === lang.code && m.page_slug === page.slug
+            m => m.language_code === lang.code && m.page_slug === normalizedSlug
           );
           
           if (!exists) {
             newEntries.push({
-              page_slug: page.slug,
+              page_slug: normalizedSlug,
               language_code: lang.code,
-              meta_title: page.title || page.slug,
+              meta_title: page.title || normalizedSlug,
               meta_description: `${page.title} - Description needed`,
               review_status: 'needs_review'
             });

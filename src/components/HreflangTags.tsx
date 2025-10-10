@@ -38,11 +38,14 @@ export function HreflangTags({ pageSlug }: HreflangTagsProps) {
         setLanguages(enabledLangs.map(l => l.code));
       }
 
+      // Normalize pageSlug for comparison: remove leading slash (except for '/')
+      const normalizedPageSlug = pageSlug === '/' ? '/' : pageSlug.replace(/^\//, '');
+      
       // Get page meta for current language
       const { data: meta } = await supabase
         .from('page_meta_translations' as any)
         .select('*')
-        .eq('page_slug', pageSlug)
+        .eq('page_slug', normalizedPageSlug)
         .eq('language_code', lang)
         .maybeSingle();
 
@@ -53,7 +56,7 @@ export function HreflangTags({ pageSlug }: HreflangTagsProps) {
         const { data: fallbackMeta } = await supabase
           .from('page_meta_translations' as any)
           .select('*')
-          .eq('page_slug', pageSlug)
+          .eq('page_slug', normalizedPageSlug)
           .eq('language_code', 'en')
           .maybeSingle();
         
