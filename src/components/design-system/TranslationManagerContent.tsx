@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Check, X, Upload, Loader2, Plus, RefreshCw, AlertTriangle, Sparkles } from 'lucide-react';
 import * as Flags from 'country-flag-icons/react/3x2';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -1263,6 +1264,46 @@ export default function TranslationManagerContent() {
                         )}
                       </div>
                     </div>
+                    
+                    {/* Technical Term Issues Warning */}
+                    {translation.quality_metrics?.technical_term_issues && 
+                     translation.quality_metrics.technical_term_issues.length > 0 && (
+                      <Alert variant="destructive" className="mt-4">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>Technical Terms Incorrectly Translated</AlertTitle>
+                        <AlertDescription className="space-y-2">
+                          {translation.quality_metrics.technical_term_issues.map((issue: any, idx: number) => (
+                            <div key={idx} className="border-l-2 border-red-400 pl-3 py-1 text-sm">
+                              <div className="font-semibold">
+                                <span className="text-red-600">{issue.term_original}</span> → {issue.term_translated}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                <strong>Should be:</strong> <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">{issue.suggestion}</code>
+                              </div>
+                              {issue.confidence && (
+                                <Badge 
+                                  variant={issue.confidence === 'high' ? 'destructive' : 'secondary'} 
+                                  className="text-xs mt-1"
+                                >
+                                  {issue.confidence} confidence
+                                  {issue.validated_by_stage2 && ' (AI validated)'}
+                                </Badge>
+                              )}
+                              {issue.deep_reasoning && (
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  <strong>Reasoning:</strong> {issue.deep_reasoning}
+                                </div>
+                              )}
+                              {issue.industry_standard && (
+                                <div className="text-xs text-green-700 dark:text-green-400 mt-1">
+                                  <strong>Industry standard:</strong> {issue.industry_standard}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </AlertDescription>
+                      </Alert>
+                    )}
                     
                     {/* Quality Metrics Collapsible */}
                     {translation.quality_metrics && (

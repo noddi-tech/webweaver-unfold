@@ -83,6 +83,168 @@ serve(async (req) => {
         };
       });
 
+      // STAGE 1: Fast technical term detection with Gemini
+      const stage1TermPrompt = `Analyze these ${targetLanguage} translations and identify technical terms that were incorrectly translated.
+
+**CRITICAL TECHNICAL TERMS TO CHECK (MUST be in English):**
+API, Backend, Frontend, Database, Cloud, DevOps, SaaS, SDK, JSON, HTTP, REST, GraphQL, OAuth, JWT, Git, GitHub, Noddi, booking, whitelabel, NPS, CRM, ERP, Dashboard, Analytics, Metrics, KPI, ROI, Button, Toggle, Modal, Dialog, Tooltip, Sidebar, Header, Footer, Login, Logout, Download, Upload, Sync, Deploy, Onboarding
+
+**YOUR TASK:**
+1. Compare each translation against the original English text
+2. Identify ANY technical terms that were translated instead of kept in English
+3. For each issue, provide:
+   - key: translation_key
+   - term_original: the English technical term
+   - term_translated: the incorrectly translated version
+   - confidence: "high" (obvious error), "medium" (likely error), or "low" (uncertain)
+   - suggestion: what it should be
+   - context: brief explanation
+
+**Return ONLY valid JSON array:**
+[{
+  "key": "translation_key",
+  "term_original": "Backend",
+  "term_translated": "Bakende", 
+  "confidence": "high",
+  "suggestion": "Keep as 'Backend'",
+  "context": "Technical infrastructure term"
+}]
+
+If no issues found, return: []
+
+Translations to check:
+${JSON.stringify(translationsForEvaluation, null, 2)}`;
+
+      console.log(`Stage 1: Running fast technical term scan with Gemini...`);
+
+      let technicalIssues = [];
+      try {
+        const stage1Response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'google/gemini-2.5-flash',
+            messages: [
+              { 
+                role: 'system', 
+                content: 'You are a technical term validator. Be strict about technical terms. Return ONLY valid JSON array.' 
+              },
+              { role: 'user', content: stage1TermPrompt }
+            ],
+          }),
+        });
+
+        if (stage1Response.ok) {
+          const stage1Data = await stage1Response.json();
+          const stage1Content = stage1Data.choices[0].message.content;
+          try {
+            const jsonMatch = stage1Content.match(/```json\n([\s\S]*?)\n```/);
+            const jsonToParse = jsonMatch ? jsonMatch[1] : stage1Content;
+            technicalIssues = JSON.parse(jsonToParse);
+            console.log(`Stage 1: Found ${technicalIssues.length} potential technical term issues in batch ${batchIndex + 1}`);
+          } catch (e) {
+            console.error('Stage 1: Failed to parse technical term validation:', e);
+          }
+        } else {
+          console.error(`Stage 1: AI API error:`, stage1Response.status);
+        }
+      } catch (e) {
+        console.error('Stage 1: Technical term scan failed:', e);
+      }
+
+      // STAGE 2: Deep reasoning for uncertain cases
+      const uncertainIssues = technicalIssues.filter(issue => 
+        issue.confidence === 'low' || issue.confidence === 'medium'
+      );
+
+      if (uncertainIssues.length > 0) {
+        console.log(`Stage 2: Validating ${uncertainIssues.length} uncertain terms with GPT-5-mini...`);
+        
+        for (const uncertainIssue of uncertainIssues) {
+          const stage2Prompt = `You are a technical translation expert. Analyze this term carefully:
+
+**Original English term:** "${uncertainIssue.term_original}"
+**Translated as:** "${uncertainIssue.term_translated}" (in ${targetLanguage})
+**Context:** ${uncertainIssue.context}
+
+**Question:** Should "${uncertainIssue.term_original}" be kept in English or translated to ${targetLanguage}?
+
+Consider:
+1. Is this a widely-recognized technical term in the software/business industry?
+2. What is the standard practice in ${targetLanguage}-speaking countries?
+3. Would translating it cause confusion or reduce clarity?
+4. Is this a product name, brand, or proprietary term?
+
+Return ONLY valid JSON:
+{
+  "should_keep_english": true/false,
+  "confidence": "high"/"medium"/"low",
+  "reasoning": "Brief explanation",
+  "industry_standard": "What professionals typically do"
+}`;
+
+          try {
+            const stage2Response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                model: 'openai/gpt-5-mini',
+                messages: [
+                  { 
+                    role: 'system', 
+                    content: 'You are a technical translation expert. Provide authoritative answers about industry standard terminology usage. Return ONLY valid JSON.' 
+                  },
+                  { role: 'user', content: stage2Prompt }
+                ],
+              }),
+            });
+            
+            if (stage2Response.ok) {
+              const stage2Data = await stage2Response.json();
+              const stage2Content = stage2Data.choices[0].message.content;
+              
+              try {
+                const jsonMatch = stage2Content.match(/```json\n([\s\S]*?)\n```/);
+                const jsonToParse = jsonMatch ? jsonMatch[1] : stage2Content;
+                const validation = JSON.parse(jsonToParse);
+                
+                // Add deep reasoning to the issue
+                uncertainIssue.deep_reasoning = validation.reasoning;
+                uncertainIssue.industry_standard = validation.industry_standard;
+                
+                // Update confidence based on Stage 2 validation
+                if (validation.should_keep_english && validation.confidence === 'high') {
+                  uncertainIssue.confidence = 'high';
+                  uncertainIssue.validated_by_stage2 = true;
+                } else if (!validation.should_keep_english) {
+                  uncertainIssue.false_positive = true;
+                }
+                
+                console.log(`Stage 2: Validated "${uncertainIssue.term_original}" - should_keep_english: ${validation.should_keep_english}`);
+                
+              } catch (e) {
+                console.error(`Stage 2: Failed to parse validation for "${uncertainIssue.term_original}":`, e);
+              }
+            } else {
+              console.error(`Stage 2: AI API error for "${uncertainIssue.term_original}":`, stage2Response.status);
+            }
+            
+          } catch (e) {
+            console.error(`Stage 2: Validation failed for "${uncertainIssue.term_original}":`, e);
+          }
+        }
+        
+        // Remove false positives
+        technicalIssues = technicalIssues.filter(issue => !issue.false_positive);
+        console.log(`Stage 2 complete: ${technicalIssues.length} confirmed technical term issues`);
+      }
+
       const qualityEvaluationPrompt = `Evaluate these ${targetLanguage} translations and return a quality score (0-100%) for each. Return ONLY valid JSON array:
 [{"key": "x", "score": 85, "issues": ["issue1"], "strengths": ["strength1"]}]
 
@@ -160,6 +322,7 @@ ${JSON.stringify(translationsForEvaluation, null, 2)}`;
                 score: score,
                 issues: quality.issues || [],
                 strengths: quality.strengths || [],
+                technical_term_issues: technicalIssues.filter(t => t.key === quality.key),
                 evaluated_at: new Date().toISOString()
               },
               review_status: score >= 85 ? 'approved' : (score >= 70 ? 'pending' : 'needs_review'),
