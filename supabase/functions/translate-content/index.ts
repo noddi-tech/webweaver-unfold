@@ -131,211 +131,220 @@ TEXT TYPE ADAPTATION:
 
 When translating, adapt idioms and expressions naturally to the target language while preserving meaning and tone.`;
 
+    const BATCH_SIZE = 50;
     const results = [];
+
+    // Helper function to validate translations
+    const validateTranslation = (original: any, translated: any): boolean => {
+      // Check if translation text is empty
+      if (!translated.text || translated.text.trim() === '') {
+        return false;
+      }
+      // Check if translation is the same as the key (AI failed to translate)
+      if (translated.text === translated.key) {
+        return false;
+      }
+      return true;
+    };
 
     for (const targetLang of targetLanguages) {
       console.log(`\n=== Starting translation for: ${targetLang} ===`);
 
-      const textsToTranslate = sourceTexts.map(t => ({
+      const allTextsToTranslate = sourceTexts.map(t => ({
         key: t.translation_key,
         text: t.translated_text,
         page: t.page_location || 'general',
         context: t.context || ''
       }));
 
-      console.log(`Calling Lovable AI API for ${targetLang} with ${textsToTranslate.length} texts`);
+      // Split into batches
+      const batches = [];
+      for (let i = 0; i < allTextsToTranslate.length; i += BATCH_SIZE) {
+        batches.push(allTextsToTranslate.slice(i, i + BATCH_SIZE));
+      }
 
-      const scandinavianGuide = getScandinavianGuidance(targetLang);
-      const fullGuide = scandinavianGuide ? `${tovGuide}\n\n${scandinavianGuide}` : tovGuide;
+      console.log(`Processing ${batches.length} batches for ${targetLang}`);
 
-      const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
-          messages: [
-            { role: 'system', content: fullGuide },
-            { 
-              role: 'user', 
-              content: `Translate the following texts to ${targetLang}. Consider the page location and context for each text. Return ONLY valid JSON with the same structure:\n\n${JSON.stringify(textsToTranslate, null, 2)}`
-            }
-          ],
-        }),
-      });
+      let totalTranslated = 0;
+      let totalFailed = 0;
+      const failedBatches: number[] = [];
 
-      console.log(`AI API response status for ${targetLang}:`, response.status);
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const textsToTranslate = batches[batchIndex];
+        console.log(`\nBatch ${batchIndex + 1}/${batches.length} for ${targetLang} (${textsToTranslate.length} texts)`);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`AI API error for ${targetLang} (${response.status}):`, errorText);
-        
-        if (response.status === 429) {
-          results.push({
-            language: targetLang,
-            count: 0,
-            status: 'error',
-            error: 'Rate limit exceeded'
-          });
-          continue;
-        } else if (response.status === 402) {
-          results.push({
-            language: targetLang,
-            count: 0,
-            status: 'error',
-            error: 'Payment required - check Lovable AI credits'
-          });
+        const scandinavianGuide = getScandinavianGuidance(targetLang);
+        const fullGuide = scandinavianGuide ? `${tovGuide}\n\n${scandinavianGuide}` : tovGuide;
+
+        const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'google/gemini-2.5-flash',
+            messages: [
+              { role: 'system', content: fullGuide },
+              { 
+                role: 'user', 
+                content: `Translate the following texts to ${targetLang}. Return ONLY valid JSON with the same structure. Each "text" field must contain the actual translation in ${targetLang}, NOT the English key:\n\n${JSON.stringify(textsToTranslate, null, 2)}`
+              }
+            ],
+          }),
+        });
+
+        console.log(`AI API response status for batch ${batchIndex + 1}:`, response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`AI API error for batch ${batchIndex + 1}:`, errorText);
+          failedBatches.push(batchIndex + 1);
+          totalFailed += textsToTranslate.length;
+          
+          if (response.status === 429) {
+            console.log('Rate limit hit, waiting 2 seconds before continuing...');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
           continue;
         }
+
+        const data = await response.json();
+        const translatedContent = data.choices[0].message.content;
         
-        results.push({
-          language: targetLang,
-          count: 0,
-          status: 'error',
-          error: `API error: ${response.status}`
+        // Parse AI translation response
+        let translations;
+        try {
+          const jsonMatch = translatedContent.match(/```json\n([\s\S]*?)\n```/);
+          const jsonToParse = jsonMatch ? jsonMatch[1] : translatedContent;
+          translations = JSON.parse(jsonToParse);
+          console.log(`Parsed ${translations.length} translations for batch ${batchIndex + 1}`);
+        } catch (e) {
+          console.error(`Failed to parse batch ${batchIndex + 1}:`, e);
+          failedBatches.push(batchIndex + 1);
+          totalFailed += textsToTranslate.length;
+          continue;
+        }
+
+        // Validate translations
+        const validTranslations = translations.filter((t: any) => {
+          const sourceText = textsToTranslate.find(s => s.key === t.key);
+          const isValid = validateTranslation(sourceText, t);
+          if (!isValid) {
+            console.warn(`Invalid translation for ${t.key}: text="${t.text}"`);
+          }
+          return isValid;
         });
-        continue;
-      }
 
-      const data = await response.json();
-      const translatedContent = data.choices[0].message.content;
-      
-      console.log(`Received AI response for ${targetLang}, length: ${translatedContent?.length || 0}`);
-      
-      // Parse AI translation response
-      let translations;
-      try {
-        // Extract JSON from markdown code blocks if present
-        const jsonMatch = translatedContent.match(/```json\n([\s\S]*?)\n```/);
-        const jsonToParse = jsonMatch ? jsonMatch[1] : translatedContent;
-        translations = JSON.parse(jsonToParse);
-        console.log(`Successfully parsed ${translations.length} translations for ${targetLang}`);
-      } catch (e) {
-        console.error(`Failed to parse translations for ${targetLang}:`, e);
-        console.error('Raw content:', translatedContent?.substring(0, 500));
-        results.push({
-          language: targetLang,
-          count: 0,
-          status: 'error',
-          error: 'Failed to parse AI response'
-        });
-        continue;
-      }
+        if (validTranslations.length === 0) {
+          console.error(`All translations invalid in batch ${batchIndex + 1}`);
+          failedBatches.push(batchIndex + 1);
+          totalFailed += textsToTranslate.length;
+          continue;
+        }
 
-      // QUALITY SCORING PASS - Evaluate each translation
-      console.log(`Starting quality evaluation for ${targetLang}`);
-      
-      const qualityEvaluationPrompt = `Evaluate the quality of these translations from English to ${targetLang}. Score each translation 0-100% based on:
+        if (validTranslations.length < translations.length) {
+          console.warn(`Only ${validTranslations.length}/${translations.length} translations valid in batch ${batchIndex + 1}`);
+        }
 
-1. Semantic Accuracy (30%): Does it convey the exact meaning?
-2. Tone & Voice Match (20%): Does it match Noddi Tech's tone (confident, clear, direct)?
-3. Cultural Fit (15%): Is it natural for ${targetLang} speakers?
-4. Technical Term Preservation (15%): Are English tech terms preserved correctly?
-5. Grammar & Fluency (10%): Is it grammatically perfect and natural?
-6. Length Appropriateness (10%): Similar length to source, fits UI context?
+        // QUALITY SCORING PASS for this batch
+        console.log(`Evaluating quality for batch ${batchIndex + 1}`);
+        
+        const qualityEvaluationPrompt = `Evaluate these ${targetLang} translations (0-100%). Return JSON:
+[{"key": "x", "score": 85, "issues": [], "strengths": []}]
 
-Return JSON array with format:
-[{
-  "key": "translation.key",
-  "score": 85,
-  "issues": ["Minor: Could be more concise"],
-  "strengths": ["Perfect tone match", "Natural phrasing"]
-}]
+Criteria:
+- Semantic Accuracy (30%)
+- Tone Match (20%)
+- Cultural Fit (15%)
+- Tech Terms Preserved (15%)
+- Grammar (10%)
+- Length (10%)
 
-Translations to evaluate:
-${JSON.stringify(translations.map((t: any) => ({
+Translations:
+${JSON.stringify(validTranslations.map((t: any) => ({
   key: t.key,
   original: sourceTexts.find(s => s.translation_key === t.key)?.translated_text,
-  translation: t.text,
-  page: t.page,
-  context: t.context
+  translation: t.text
 })), null, 2)}`;
 
-      const qualityResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
-          messages: [
-            { role: 'system', content: 'You are a professional translation quality evaluator. Be critical but fair.' },
-            { role: 'user', content: qualityEvaluationPrompt }
-          ],
-        }),
-      });
+        const qualityResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'google/gemini-2.5-flash',
+            messages: [
+              { role: 'system', content: 'You are a translation quality evaluator. Be critical but fair.' },
+              { role: 'user', content: qualityEvaluationPrompt }
+            ],
+          }),
+        });
 
-      if (!qualityResponse.ok) {
-        console.error(`Quality evaluation failed for ${targetLang}:`, qualityResponse.status);
-        // Continue without quality scores
-      }
-
-      let qualityScores: any[] = [];
-      if (qualityResponse.ok) {
-        const qualityData = await qualityResponse.json();
-        const qualityContent = qualityData.choices[0].message.content;
-        
-        try {
-          const qualityJsonMatch = qualityContent.match(/```json\n([\s\S]*?)\n```/);
-          const qualityJsonToParse = qualityJsonMatch ? qualityJsonMatch[1] : qualityContent;
-          qualityScores = JSON.parse(qualityJsonToParse);
-          console.log(`Successfully evaluated ${qualityScores.length} translations for ${targetLang}`);
-        } catch (e) {
-          console.error(`Failed to parse quality scores for ${targetLang}:`, e);
+        let qualityScores: any[] = [];
+        if (qualityResponse.ok) {
+          try {
+            const qualityData = await qualityResponse.json();
+            const qualityContent = qualityData.choices[0].message.content;
+            const qualityJsonMatch = qualityContent.match(/```json\n([\s\S]*?)\n```/);
+            const qualityJsonToParse = qualityJsonMatch ? qualityJsonMatch[1] : qualityContent;
+            qualityScores = JSON.parse(qualityJsonToParse);
+            console.log(`Evaluated ${qualityScores.length} translations for batch ${batchIndex + 1}`);
+          } catch (e) {
+            console.error(`Quality evaluation parse error for batch ${batchIndex + 1}:`, e);
+          }
         }
-      }
 
-      // Insert translations into database with quality scores
-      console.log(`Preparing to upsert ${translations.length} records for ${targetLang}`);
-      
-      const translationRecords = translations.map((t: any) => {
-        const qualityData = qualityScores.find(q => q.key === t.key);
-        const score = qualityData?.score || null;
-        
-        return {
-          translation_key: t.key,
-          language_code: targetLang,
-          translated_text: t.text,
-          page_location: t.key.split('.')[0],
-          approved: false,
-          quality_score: score,
-          quality_metrics: qualityData ? {
-            score: score,
-            issues: qualityData.issues || [],
-            strengths: qualityData.strengths || [],
-            evaluated_at: new Date().toISOString()
-          } : null,
-          review_status: score >= 85 ? 'approved' : (score ? 'needs_review' : 'pending'),
-          ai_reviewed_at: qualityData ? new Date().toISOString() : null
-        };
-      });
-
-      const { error: insertError } = await supabase
-        .from('translations')
-        .upsert(translationRecords, {
-          onConflict: 'translation_key,language_code'
+        // Insert valid translations
+        const translationRecords = validTranslations.map((t: any) => {
+          const qualityData = qualityScores.find(q => q.key === t.key);
+          const score = qualityData?.score || null;
+          
+          return {
+            translation_key: t.key,
+            language_code: targetLang,
+            translated_text: t.text,
+            page_location: t.key.split('.')[0],
+            approved: false,
+            quality_score: score,
+            quality_metrics: qualityData ? {
+              score: score,
+              issues: qualityData.issues || [],
+              strengths: qualityData.strengths || [],
+              evaluated_at: new Date().toISOString()
+            } : null,
+            review_status: score >= 85 ? 'approved' : (score ? 'needs_review' : 'pending'),
+            ai_reviewed_at: qualityData ? new Date().toISOString() : null
+          };
         });
 
-      if (insertError) {
-        console.error(`Database insert error for ${targetLang}:`, insertError);
-        results.push({
-          language: targetLang,
-          count: 0,
-          status: 'error',
-          error: `Database error: ${insertError.message}`
-        });
-        continue;
+        const { error: insertError } = await supabase
+          .from('translations')
+          .upsert(translationRecords, {
+            onConflict: 'translation_key,language_code'
+          });
+
+        if (insertError) {
+          console.error(`Database error for batch ${batchIndex + 1}:`, insertError);
+          failedBatches.push(batchIndex + 1);
+          totalFailed += validTranslations.length;
+          continue;
+        }
+
+        totalTranslated += validTranslations.length;
+        console.log(`✓ Batch ${batchIndex + 1} complete: ${validTranslations.length} translations saved`);
       }
 
-      console.log(`✓ Successfully inserted ${translations.length} translations for ${targetLang}`);
+      console.log(`\n✓ ${targetLang} complete: ${totalTranslated} translated, ${totalFailed} failed`);
       
       results.push({
         language: targetLang,
-        count: translations.length,
-        status: 'success'
+        count: totalTranslated,
+        failed: totalFailed,
+        failedBatches: failedBatches,
+        status: failedBatches.length > 0 ? 'partial' : 'success'
       });
     }
 

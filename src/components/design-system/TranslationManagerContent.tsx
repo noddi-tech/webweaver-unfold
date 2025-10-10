@@ -477,12 +477,15 @@ export default function TranslationManagerContent() {
       return;
     }
 
-    setTranslationProgress(`Translating ${englishKeys.length} keys to ${targetLanguages.length} languages...`);
+    const batchSize = 50;
+    const totalBatches = Math.ceil(englishKeys.length / batchSize);
+    setTranslationProgress(`Translating ${englishKeys.length} keys to ${targetLanguages.length} languages (${totalBatches} batches per language)...`);
 
     try {
       console.log('Invoking translate-content function:', {
         keysCount: englishKeys.length,
         targetLanguages,
+        batchesPerLang: totalBatches
       });
 
       const { data, error } = await supabase.functions.invoke('translate-content', {
@@ -510,10 +513,51 @@ export default function TranslationManagerContent() {
         throw error;
       }
 
-      toast({ 
-        title: 'Translation complete!', 
-        description: `Translated ${englishKeys.length} keys to ${targetLanguages.length} languages`
+      // Parse results with detailed feedback
+      const results = data?.results || [];
+      const successCount = results.filter((r: any) => r.status === 'success').length;
+      const partialCount = results.filter((r: any) => r.status === 'partial').length;
+      const failedCount = results.filter((r: any) => r.status === 'error').length;
+
+      // Build success message
+      let description = `${successCount} languages completed successfully`;
+      if (partialCount > 0) {
+        description += `, ${partialCount} partially completed`;
+      }
+      if (failedCount > 0) {
+        description += `, ${failedCount} failed`;
+      }
+
+      // Show detailed results per language
+      results.forEach((r: any) => {
+        if (r.status === 'partial' && r.failedBatches?.length > 0) {
+          const langName = languages.find(l => l.code === r.language)?.name || r.language;
+          toast({ 
+            title: `${langName}: Partial success`,
+            description: `${r.count} translated, ${r.failed} failed (batches: ${r.failedBatches.join(', ')})`,
+            variant: 'default',
+            duration: 8000
+          });
+        } else if (r.status === 'error') {
+          const langName = languages.find(l => l.code === r.language)?.name || r.language;
+          toast({ 
+            title: `${langName}: Failed`,
+            description: r.error || 'Translation failed',
+            variant: 'destructive',
+            duration: 8000
+          });
+        }
       });
+
+      if (successCount > 0 || partialCount > 0) {
+        toast({ 
+          title: 'Translation complete!', 
+          description 
+        });
+      } else {
+        throw new Error('All translations failed');
+      }
+
       loadData();
     } catch (error: any) {
       console.error('Translation error:', error);
