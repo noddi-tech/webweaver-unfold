@@ -68,6 +68,8 @@ export default function TranslationManagerContent() {
   const [refiningId, setRefiningId] = useState<string | null>(null);
   const [tovContent, setTovContent] = useState<string>('');
   const [isResettingStuck, setIsResettingStuck] = useState(false);
+  const [isRefiningBulk, setIsRefiningBulk] = useState(false);
+  const [bulkRefineProgress, setBulkRefineProgress] = useState({ current: 0, total: 0 });
 
   useEffect(() => {
     loadData();
@@ -675,23 +677,42 @@ export default function TranslationManagerContent() {
         body: {
           englishText: getEnglishText(translation.translation_key),
           currentTranslation: translation.translated_text,
-          targetLanguage: selectedLang,
-          targetLanguageName: languages.find(l => l.code === selectedLang)?.name,
+          targetLanguage: translation.language_code,
+          targetLanguageName: languages.find(l => l.code === translation.language_code)?.name,
           context: translation.context,
           pageLocation: translation.page_location,
-          tovContent: tovContent
+          tovContent
         }
       });
 
       if (error) throw error;
 
       // Update with refined text
-      handleLocalUpdate(translation.id, data.refinedText);
-      toast({ 
+      const { error: updateError } = await supabase
+        .from('translations')
+        .update({ 
+          translated_text: data.refinedText,
+          approved: false 
+        })
+        .eq('id', translation.id);
+
+      if (updateError) throw updateError;
+
+      // Re-evaluate quality for this specific translation
+      toast({
         title: 'Translation refined!',
-        description: 'Review the AI suggestion and approve if it looks good.'
+        description: 'Re-evaluating quality...',
+        duration: 3000
       });
 
+      // Trigger quality evaluation for the language
+      await handleEvaluateQuality(translation.language_code);
+
+      toast({ 
+        title: 'Translation refined and re-evaluated!',
+        description: 'Check the updated quality score'
+      });
+      loadData();
     } catch (error: any) {
       toast({ 
         title: 'AI refinement failed', 
@@ -700,6 +721,124 @@ export default function TranslationManagerContent() {
       });
     } finally {
       setRefiningId(null);
+    }
+  }
+
+  async function handleAIRefineSelected(languageCode: string) {
+    setIsRefiningBulk(true);
+    setBulkRefineProgress({ current: 0, total: 0 });
+    
+    try {
+      // Get filtered translations (respects current filters)
+      const filtered = filteredTranslations.filter(t => 
+        t.language_code === languageCode &&
+        !t.approved // Only refine unapproved
+      );
+
+      if (filtered.length === 0) {
+        toast({ 
+          title: 'No translations to refine',
+          description: 'All filtered translations are already approved.'
+        });
+        return;
+      }
+
+      const total = filtered.length;
+      setBulkRefineProgress({ current: 0, total });
+
+      toast({
+        title: 'Starting bulk refinement',
+        description: `Refining ${total} translations...`,
+        duration: 3000
+      });
+
+      // Process in small batches to avoid rate limits
+      const BATCH_SIZE = 5;
+      let refined = 0;
+      let failed = 0;
+
+      for (let i = 0; i < filtered.length; i += BATCH_SIZE) {
+        const batch = filtered.slice(i, Math.min(i + BATCH_SIZE, filtered.length));
+        
+        // Refine batch in parallel
+        const refinePromises = batch.map(async (trans) => {
+          try {
+            const { data, error } = await supabase.functions.invoke('refine-translation', {
+              body: {
+                englishText: getEnglishText(trans.translation_key),
+                currentTranslation: trans.translated_text,
+                targetLanguage: languageCode,
+                targetLanguageName: languages.find(l => l.code === languageCode)?.name,
+                context: trans.context,
+                pageLocation: trans.page_location,
+                tovContent
+              }
+            });
+
+            if (error) throw error;
+
+            // Update translation
+            await supabase
+              .from('translations')
+              .update({ 
+                translated_text: data.refinedText,
+                approved: false 
+              })
+              .eq('id', trans.id);
+
+            return { success: true, key: trans.translation_key };
+          } catch (err) {
+            console.error('Refine failed for', trans.translation_key, err);
+            return { success: false, key: trans.translation_key };
+          }
+        });
+
+        const results = await Promise.allSettled(refinePromises);
+        
+        results.forEach(result => {
+          if (result.status === 'fulfilled' && result.value.success) {
+            refined++;
+          } else {
+            failed++;
+          }
+        });
+
+        setBulkRefineProgress({ current: refined + failed, total });
+
+        // Small delay between batches to avoid rate limiting
+        if (i + BATCH_SIZE < filtered.length) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+
+      // After all refinements, re-evaluate quality for the language
+      toast({
+        title: 'Bulk refinement complete!',
+        description: `Refined ${refined} translations. Now re-evaluating quality...`,
+        duration: 5000
+      });
+
+      // Trigger quality evaluation for the entire language
+      await handleEvaluateQuality(languageCode);
+
+      const langName = languages.find(l => l.code === languageCode)?.name || languageCode;
+      toast({
+        title: `${refined} ${langName} translations refined and re-evaluated!`,
+        description: failed > 0 ? `${failed} translations failed to refine.` : 'All selected translations were refined successfully.',
+        duration: 8000
+      });
+
+      loadData();
+
+    } catch (error: any) {
+      toast({
+        title: 'Bulk refinement failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsRefiningBulk(false);
+      setBulkRefineProgress({ current: 0, total: 0 });
     }
   }
 
@@ -1450,6 +1589,24 @@ export default function TranslationManagerContent() {
                 <div className="flex gap-2 flex-wrap">
                   <Button
                     variant="default"
+                    size="sm"
+                    onClick={() => handleAIRefineSelected(lang.code)}
+                    disabled={isRefiningBulk || isTranslating || filteredTranslations.filter(t => !t.approved).length === 0}
+                  >
+                    {isRefiningBulk ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Refining {bulkRefineProgress.current}/{bulkRefineProgress.total}...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        AI Refine Selected ({filteredTranslations.filter(t => !t.approved).length})
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => handleApproveHighQuality(lang.code)}
                     disabled={isApprovingAll}
