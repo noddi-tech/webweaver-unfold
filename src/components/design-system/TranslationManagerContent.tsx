@@ -144,9 +144,16 @@ export default function TranslationManagerContent() {
     // Language filter
     if (t.language_code !== selectedLang) return false;
     
-    // Search filter
-    if (searchFilter && !t.translation_key.toLowerCase().includes(searchFilter.toLowerCase())) {
-      return false;
+    // Search filter - search in translation key, translated text, AND English source
+    if (searchFilter) {
+      const searchLower = searchFilter.toLowerCase();
+      const keyMatch = t.translation_key.toLowerCase().includes(searchLower);
+      const textMatch = t.translated_text?.toLowerCase().includes(searchLower);
+      const englishMatch = getEnglishText(t.translation_key).toLowerCase().includes(searchLower);
+      
+      if (!keyMatch && !textMatch && !englishMatch) {
+        return false;
+      }
     }
     
     // Empty translations filter
