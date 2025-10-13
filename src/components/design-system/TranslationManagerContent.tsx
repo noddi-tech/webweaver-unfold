@@ -70,6 +70,7 @@ export default function TranslationManagerContent() {
   const [isResettingStuck, setIsResettingStuck] = useState(false);
   const [isRefiningBulk, setIsRefiningBulk] = useState(false);
   const [bulkRefineProgress, setBulkRefineProgress] = useState({ current: 0, total: 0 });
+  const [showApprovedTranslations, setShowApprovedTranslations] = useState(true);
 
   useEffect(() => {
     loadData();
@@ -144,6 +145,9 @@ export default function TranslationManagerContent() {
     // Language filter
     if (t.language_code !== selectedLang) return false;
     
+    // Approved filter
+    if (!showApprovedTranslations && t.approved) return false;
+    
     // Search filter - search in translation key, translated text, AND English source
     if (searchFilter) {
       const searchLower = searchFilter.toLowerCase();
@@ -184,14 +188,31 @@ export default function TranslationManagerContent() {
     return true;
   });
 
-  // Debug logging for needs_review filter
-  console.log('Filter Debug:', {
+  // Debug logging
+  console.log('Translation Search Debug:', {
+    searchFilter,
     selectedLang,
-    qualityFilter,
     totalTranslations: translations.length,
     afterLangFilter: translations.filter(t => t.language_code === selectedLang).length,
-    needsReviewInLang: translations.filter(t => t.language_code === selectedLang && t.review_status === 'needs_review').length,
-    finalFiltered: filteredTranslations.length
+    afterSearchFilter: searchFilter ? translations.filter(t => {
+      if (t.language_code !== selectedLang) return false;
+      const searchLower = searchFilter.toLowerCase();
+      const keyMatch = t.translation_key.toLowerCase().includes(searchLower);
+      const textMatch = t.translated_text?.toLowerCase().includes(searchLower);
+      const englishMatch = getEnglishText(t.translation_key).toLowerCase().includes(searchLower);
+      return keyMatch || textMatch || englishMatch;
+    }).length : 'N/A',
+    finalFiltered: filteredTranslations.length,
+    sampleMatches: searchFilter ? translations
+      .filter(t => t.language_code === selectedLang)
+      .filter(t => {
+        const searchLower = searchFilter.toLowerCase();
+        const textMatch = t.translated_text?.toLowerCase().includes(searchLower);
+        return textMatch;
+      })
+      .slice(0, 3)
+      .map(t => ({ key: t.translation_key, text: t.translated_text?.substring(0, 50) }))
+      : []
   });
 
   async function handleApprove(id: string) {
@@ -1590,7 +1611,7 @@ export default function TranslationManagerContent() {
                 {/* Search and Approve All Row */}
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Search translation keys..."
+                    placeholder="Search keys, translations, or English text..."
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                     className="flex-1"
@@ -1748,11 +1769,12 @@ export default function TranslationManagerContent() {
                   )}
 
                   {/* Clear Filters */}
-                  {(showEmptyOnly || pageLocationFilter !== 'all' || contextFilter !== 'all' || qualityFilter !== 'all' || searchFilter) && (
+                  {(!showApprovedTranslations || showEmptyOnly || pageLocationFilter !== 'all' || contextFilter !== 'all' || qualityFilter !== 'all' || searchFilter) && (
                     <Button
-                      variant="ghost"
+                      variant={filteredTranslations.length === 0 ? "destructive" : "ghost"}
                       size="sm"
                       onClick={() => {
+                        setShowApprovedTranslations(true);
                         setShowEmptyOnly(false);
                         setPageLocationFilter('all');
                         setContextFilter('all');
@@ -1761,14 +1783,51 @@ export default function TranslationManagerContent() {
                       }}
                     >
                       <X className="w-4 h-4 mr-2" />
-                      Clear Filters
+                      Clear All Filters
                     </Button>
                   )}
                 </div>
               </div>
 
             <div className="space-y-4">
-              {filteredTranslations.map((translation) => (
+              {filteredTranslations.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12">
+                    <div className="text-center space-y-4">
+                      <AlertTriangle className="w-12 h-12 mx-auto text-muted-foreground" />
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">No translations found</h3>
+                        <p className="text-muted-foreground mb-4">
+                          {searchFilter && `No results for "${searchFilter}"`}
+                          {!searchFilter && "Try adjusting your filters"}
+                        </p>
+                        <div className="flex flex-wrap gap-2 justify-center mb-4">
+                          {searchFilter && <Badge variant="outline">Search: {searchFilter}</Badge>}
+                          {!showApprovedTranslations && <Badge variant="outline">Hiding approved</Badge>}
+                          {showEmptyOnly && <Badge variant="outline">Empty only</Badge>}
+                          {pageLocationFilter !== 'all' && <Badge variant="outline">Page: {pageLocationFilter}</Badge>}
+                          {contextFilter !== 'all' && <Badge variant="outline">Context: {contextFilter}</Badge>}
+                          {qualityFilter !== 'all' && <Badge variant="outline">Quality: {qualityFilter}</Badge>}
+                        </div>
+                        <Button
+                          variant="default"
+                          onClick={() => {
+                            setShowApprovedTranslations(true);
+                            setShowEmptyOnly(false);
+                            setPageLocationFilter('all');
+                            setContextFilter('all');
+                            setQualityFilter('all');
+                            setSearchFilter('');
+                          }}
+                        >
+                          Clear All Filters
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredTranslations.map((translation) => (
                 <Card key={translation.id}>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
@@ -1954,7 +2013,8 @@ export default function TranslationManagerContent() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              ))
+              )}
             </div>
           </TabsContent>
           );
