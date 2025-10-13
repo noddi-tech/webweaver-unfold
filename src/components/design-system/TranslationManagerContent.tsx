@@ -698,21 +698,40 @@ export default function TranslationManagerContent() {
 
       if (updateError) throw updateError;
 
-      // Re-evaluate quality for this specific translation
-      toast({
-        title: 'Translation refined!',
-        description: 'Re-evaluating quality...',
-        duration: 3000
-      });
+      // Evaluate quality for this single translation
+      const { data: qualityData, error: qualityError } = await supabase.functions.invoke(
+        'evaluate-single-translation',
+        {
+          body: {
+            translationKey: translation.translation_key,
+            languageCode: translation.language_code,
+            originalText: getEnglishText(translation.translation_key),
+            translatedText: data.refinedText
+          }
+        }
+      );
 
-      // Trigger quality evaluation for the language
-      await handleEvaluateQuality(translation.language_code);
+      // Update local state immediately
+      setTranslations(prev => 
+        prev.map(t => 
+          t.id === translation.id 
+            ? { 
+                ...t, 
+                translated_text: data.refinedText, 
+                approved: false,
+                quality_score: qualityData?.qualityScore || t.quality_score,
+                quality_metrics: qualityData?.qualityMetrics || t.quality_metrics
+              }
+            : t
+        )
+      );
 
       toast({ 
-        title: 'Translation refined and re-evaluated!',
-        description: 'Check the updated quality score'
+        title: 'Translation refined!',
+        description: qualityError ? 'Quality score will be updated shortly' : `Quality score: ${qualityData?.qualityScore || 'N/A'}%`,
+        duration: 5000
       });
-      loadData();
+
     } catch (error: any) {
       toast({ 
         title: 'AI refinement failed', 
@@ -811,24 +830,29 @@ export default function TranslationManagerContent() {
         }
       }
 
-      // After all refinements, re-evaluate quality for the language
+      // After all refinements, show immediate results
+      const langName = languages.find(l => l.code === languageCode)?.name || languageCode;
+      
       toast({
         title: 'Bulk refinement complete!',
-        description: `Refined ${refined} translations. Now re-evaluating quality...`,
-        duration: 5000
+        description: `Refined ${refined} ${langName} translations${failed > 0 ? ` (${failed} failed)` : ''}. Quality evaluation running in background...`,
+        duration: 6000
       });
 
-      // Trigger quality evaluation for the entire language
-      await handleEvaluateQuality(languageCode);
+      // Immediate refresh to show refined translations
+      await loadData();
 
-      const langName = languages.find(l => l.code === languageCode)?.name || languageCode;
-      toast({
-        title: `${refined} ${langName} translations refined and re-evaluated!`,
-        description: failed > 0 ? `${failed} translations failed to refine.` : 'All selected translations were refined successfully.',
-        duration: 8000
+      // Trigger quality evaluation in background (non-blocking)
+      handleEvaluateQuality(languageCode).then(() => {
+        toast({
+          title: 'Quality scores updated!',
+          description: `${langName} translations have been re-evaluated.`,
+          duration: 5000
+        });
+        loadData(); // Refresh again after evaluation completes
+      }).catch(error => {
+        console.error('Background quality evaluation failed:', error);
       });
-
-      loadData();
 
     } catch (error: any) {
       toast({

@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.refine-translation]
 verify_jwt = false
+
+[functions.evaluate-single-translation]
+verify_jwt = false
