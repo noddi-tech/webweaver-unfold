@@ -23,16 +23,38 @@ export default function UnifiedDashboard() {
     const [
       { data: translationStats },
       { data: metaStats },
-      { data: evalProgress }
+      { data: evalProgress },
+      { data: allTranslations }
     ] = await Promise.all([
       supabase.from('translation_stats' as any).select('*'),
       supabase.from('page_meta_stats' as any).select('*'),
-      supabase.from('evaluation_progress').select('*')
+      supabase.from('evaluation_progress').select('*'),
+      supabase.from('translations').select('language_code, quality_score').neq('language_code', 'en')
     ]);
 
     if (translationStats) setStats(translationStats);
     if (metaStats) setPageMetaStats(metaStats);
-    if (evalProgress) setEvaluationProgress(evalProgress);
+    
+    // Calculate actual evaluated counts from translations with quality_score
+    if (evalProgress && allTranslations) {
+      const evaluatedCountsMap: Record<string, number> = {};
+      allTranslations.forEach(t => {
+        if (t.quality_score !== null) {
+          evaluatedCountsMap[t.language_code] = (evaluatedCountsMap[t.language_code] || 0) + 1;
+        }
+      });
+      
+      // Update evaluation progress with actual counts
+      const updatedEvalProgress = evalProgress.map(ep => ({
+        ...ep,
+        evaluated_keys: evaluatedCountsMap[ep.language_code] || ep.evaluated_keys || 0
+      }));
+      
+      setEvaluationProgress(updatedEvalProgress);
+    } else if (evalProgress) {
+      setEvaluationProgress(evalProgress);
+    }
+    
     setLoading(false);
   }
 
@@ -44,10 +66,11 @@ export default function UnifiedDashboard() {
     );
   }
 
-  // Calculate global stats
+  // Calculate global stats - use English as baseline
   const totalLanguages = stats.filter(s => s.enabled).length;
-  const totalTranslationKeys = stats[0]?.total_translations || 0;
-  const totalTranslations = totalLanguages * totalTranslationKeys;
+  const englishCount = stats.find(s => s.code === 'en')?.total_translations || 0;
+  const totalTranslationKeys = englishCount;
+  const totalTranslations = totalLanguages * englishCount;
   
   const totalEvaluated = stats.reduce((sum, s) => {
     const progress = evaluationProgress.find(ep => ep.language_code === s.code);
@@ -164,8 +187,8 @@ export default function UnifiedDashboard() {
                   const progress = evaluationProgress.find(ep => ep.language_code === lang.code);
                   const metaStat = pageMetaStats.find(m => m.code === lang.code);
                   
-                  const translationComplete = lang.total_translations === totalTranslationKeys;
-                  const evaluationComplete = progress?.status === 'completed';
+                  const translationComplete = lang.total_translations === englishCount;
+                  const evaluationComplete = progress?.evaluated_keys === lang.total_translations;
                   const hasPageMeta = metaStat && metaStat.completed_entries > 0;
                   
                   return (
@@ -178,7 +201,7 @@ export default function UnifiedDashboard() {
                       </td>
                       <td className="py-3">
                         <div className="flex items-center gap-2">
-                          <span>{lang.total_translations}/{totalTranslationKeys}</span>
+                          <span>{lang.total_translations}/{englishCount}</span>
                           {translationComplete && <Check className="w-4 h-4 text-green-600" />}
                         </div>
                       </td>
@@ -187,7 +210,7 @@ export default function UnifiedDashboard() {
                           <span className="text-muted-foreground">N/A</span>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <span>{progress?.evaluated_keys || 0}/{totalTranslationKeys}</span>
+                            <span>{progress?.evaluated_keys || 0}/{englishCount}</span>
                             {evaluationComplete && <Check className="w-4 h-4 text-green-600" />}
                             {progress?.status === 'in_progress' && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
                           </div>
@@ -209,7 +232,7 @@ export default function UnifiedDashboard() {
                         )}
                       </td>
                       <td className="py-3">
-                        <span>{lang.approved_translations || 0}/{lang.total_translations}</span>
+                        <span>{lang.approved_translations || 0}/{englishCount}</span>
                       </td>
                       <td className="py-3">
                         {metaStat ? (

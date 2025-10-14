@@ -55,6 +55,7 @@ export default function TranslationManagerContent() {
   const [isApprovingAll, setIsApprovingAll] = useState(false);
   const [approveAllLanguage, setApproveAllLanguage] = useState<string | null>(null);
   const [showEmptyOnly, setShowEmptyOnly] = useState(false);
+  const [showMissingOnly, setShowMissingOnly] = useState(false);
   const [pageLocationFilter, setPageLocationFilter] = useState<string>('all');
   const [contextFilter, setContextFilter] = useState<string>('all');
   const [qualityFilter, setQualityFilter] = useState<string>('all'); // all, high (>=85), medium (70-84), low (<70)
@@ -173,8 +174,53 @@ export default function TranslationManagerContent() {
     ).length;
   };
 
-  // Multi-filter logic
-  const filteredTranslations = translations.filter(t => {
+  // Helper function to get missing translations count
+  const getMissingTranslationsCount = (languageCode: string): number => {
+    if (languageCode === 'en') return 0;
+    
+    const englishKeys = new Set(englishTranslations.map(t => t.translation_key));
+    const existingKeys = new Set(
+      translations
+        .filter(t => t.language_code === languageCode)
+        .map(t => t.translation_key)
+    );
+    
+    return Array.from(englishKeys).filter(key => !existingKeys.has(key)).length;
+  };
+
+  // Multi-filter logic - if showing missing only, generate virtual translations
+  const filteredTranslations = (() => {
+    // Handle missing only filter first
+    if (showMissingOnly && selectedLang !== 'en') {
+      const englishKeys = new Set(englishTranslations.map(t => t.translation_key));
+      const existingKeys = new Set(
+        translations
+          .filter(t => t.language_code === selectedLang)
+          .map(t => t.translation_key)
+      );
+      
+      const missingKeys = Array.from(englishKeys).filter(key => !existingKeys.has(key));
+      
+      return missingKeys.map(key => {
+        const englishTrans = englishTranslations.find(t => t.translation_key === key);
+        return {
+          id: `missing-${key}`,
+          translation_key: key,
+          language_code: selectedLang,
+          translated_text: '',
+          approved: false,
+          quality_score: null,
+          context: englishTrans?.context || null,
+          page_location: englishTrans?.page_location || null,
+          review_status: 'pending',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+      });
+    }
+    
+    // Normal filtering
+    return translations.filter(t => {
     // Language filter
     if (t.language_code !== selectedLang) return false;
     
@@ -220,6 +266,7 @@ export default function TranslationManagerContent() {
     
     return true;
   });
+  })();
 
   // Debug logging
   console.log('Translation Search Debug:', {
@@ -399,6 +446,69 @@ export default function TranslationManagerContent() {
       });
     } finally {
       setIsApprovingAll(false);
+    }
+  }
+
+  async function handleTranslateMissing(languageCode: string) {
+    const englishKeys = new Set(englishTranslations.map(t => t.translation_key));
+    const existingKeys = new Set(
+      translations
+        .filter(t => t.language_code === languageCode)
+        .map(t => t.translation_key)
+    );
+    
+    const missingKeys = Array.from(englishKeys).filter(key => !existingKeys.has(key));
+    
+    if (missingKeys.length === 0) {
+      toast({ title: 'No missing translations!', description: 'All keys are already translated for this language' });
+      return;
+    }
+
+    const targetLang = languages.find(l => l.code === languageCode);
+    if (!targetLang) return;
+
+    toast({ 
+      title: `Translating ${missingKeys.length} missing keys...`,
+      description: `Target language: ${targetLang.name}`
+    });
+    setIsTranslating(true);
+
+    try {
+      // Prepare content to translate
+      const contentToTranslate = missingKeys.map(key => {
+        const englishTrans = englishTranslations.find(t => t.translation_key === key);
+        return {
+          key,
+          text: englishTrans?.translated_text || key,
+          context: englishTrans?.context || null,
+          page_location: englishTrans?.page_location || null
+        };
+      });
+
+      // Call translate-content edge function
+      const { error } = await supabase.functions.invoke('translate-content', {
+        body: {
+          targetLanguages: [languageCode],
+          content: contentToTranslate
+        }
+      });
+
+      if (error) throw error;
+
+      toast({ 
+        title: 'Translation complete!',
+        description: `Successfully translated ${missingKeys.length} missing keys to ${targetLang.name}`
+      });
+      await loadData();
+    } catch (error: any) {
+      console.error('Translation error:', error);
+      toast({ 
+        title: 'Translation failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsTranslating(false);
     }
   }
 
@@ -1741,11 +1851,50 @@ export default function TranslationManagerContent() {
                   <Button
                     variant={showEmptyOnly ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setShowEmptyOnly(!showEmptyOnly)}
+                    onClick={() => {
+                      setShowEmptyOnly(!showEmptyOnly);
+                      if (!showEmptyOnly) setShowMissingOnly(false);
+                    }}
                   >
                     <AlertTriangle className="w-4 h-4 mr-2" />
-                    {showEmptyOnly ? "Show All" : "Show Empty Only"}
+                    Show Empty Only ({emptyCount})
                   </Button>
+                  
+                  {/* Show Missing Only */}
+                  {lang.code !== 'en' && (
+                    <>
+                      <Button
+                        variant={showMissingOnly ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          setShowMissingOnly(!showMissingOnly);
+                          if (!showMissingOnly) setShowEmptyOnly(false);
+                        }}
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Show Missing Only ({getMissingTranslationsCount(lang.code)})
+                      </Button>
+                      
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleTranslateMissing(lang.code)}
+                        disabled={isTranslating || getMissingTranslationsCount(lang.code) === 0}
+                      >
+                        {isTranslating ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Translating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Translate {getMissingTranslationsCount(lang.code)} Missing
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  )}
 
                   {/* Quality Filter */}
                   <Select value={qualityFilter} onValueChange={setQualityFilter}>
