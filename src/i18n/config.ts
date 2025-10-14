@@ -76,6 +76,8 @@ i18n
   .init({
     fallbackLng: 'en',
     supportedLngs: ['en', 'de', 'fr', 'es', 'it', 'pt', 'nl', 'pl', 'sv', 'no', 'da', 'fi', 'cs', 'hu', 'ro', 'el'],
+    partialBundledLanguages: true,
+    load: 'languageOnly',
     detection: {
       order: ['customDetector', 'localStorage', 'navigator'],
       caches: ['localStorage'],

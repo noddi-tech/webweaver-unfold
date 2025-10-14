@@ -27,6 +27,7 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
   const { lang } = useParams();
   const [languages, setLanguages] = useState<Language[]>([]);
   const [settings, setSettings] = useState<any>(null);
+  const [isChangingLanguage, setIsChangingLanguage] = useState(false);
 
   useEffect(() => {
     async function loadLanguages() {
@@ -40,13 +41,29 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
     loadLanguages();
   }, []);
 
-  const changeLanguage = (newLang: string) => {
-    // Update i18next
-    i18n.changeLanguage(newLang);
+  const changeLanguage = async (newLang: string) => {
+    if (isChangingLanguage) return;
     
-    // Update URL
-    const pathWithoutLang = location.pathname.split('/').slice(2).join('/') || '';
-    navigate(`/${newLang}/${pathWithoutLang}`, { replace: true });
+    setIsChangingLanguage(true);
+    try {
+      console.log(`[LanguageSwitcher] Loading resources for ${newLang}...`);
+      
+      // Force load resources for the new language
+      await i18n.loadLanguages(newLang);
+      
+      // Then change the language
+      await i18n.changeLanguage(newLang);
+      
+      // Update URL
+      const pathWithoutLang = location.pathname.split('/').slice(2).join('/') || '';
+      navigate(`/${newLang}/${pathWithoutLang}`, { replace: true });
+      
+      console.log(`[LanguageSwitcher] Successfully switched to ${newLang}`);
+    } catch (error) {
+      console.error('[LanguageSwitcher] Error changing language:', error);
+    } finally {
+      setIsChangingLanguage(false);
+    }
   };
 
   const currentLang = languages.find(l => l.code === (lang || i18n.language)) || languages[0];
@@ -104,6 +121,7 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
               key={language.code}
               onClick={() => changeLanguage(language.code)}
               className="flex items-center gap-3 cursor-pointer"
+              disabled={isChangingLanguage}
             >
               {FlagIcon && <FlagIcon className="w-5 h-3" />}
               <div>
