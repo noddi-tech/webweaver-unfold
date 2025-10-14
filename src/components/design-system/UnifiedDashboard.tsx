@@ -36,23 +36,23 @@ export default function UnifiedDashboard() {
     if (metaStats) setPageMetaStats(metaStats);
     
     // Calculate actual evaluated counts from translations with quality_score
-    if (evalProgress && allTranslations) {
-      const evaluatedCountsMap: Record<string, number> = {};
+    const evaluatedCountsMap: Record<string, number> = {};
+    if (allTranslations) {
       allTranslations.forEach(t => {
         if (t.quality_score !== null) {
           evaluatedCountsMap[t.language_code] = (evaluatedCountsMap[t.language_code] || 0) + 1;
         }
       });
-      
-      // Update evaluation progress with actual counts
+    }
+    
+    // Update evaluation progress with actual counts from database
+    if (evalProgress) {
       const updatedEvalProgress = evalProgress.map(ep => ({
         ...ep,
-        evaluated_keys: evaluatedCountsMap[ep.language_code] || ep.evaluated_keys || 0
+        evaluated_keys: evaluatedCountsMap[ep.language_code] || 0
       }));
       
       setEvaluationProgress(updatedEvalProgress);
-    } else if (evalProgress) {
-      setEvaluationProgress(evalProgress);
     }
     
     setLoading(false);
