@@ -19,19 +19,41 @@ const supabaseBackend = {
 
       if (error) throw error;
 
-      // Convert array to nested object structure
+      // Convert array to nested object structure with conflict resolution
       const translations: any = {};
-      data?.forEach((item) => {
+      
+      // Sort to ensure parent keys are processed before children
+      const sortedData = data?.sort((a, b) => {
+        const aDepth = a.translation_key.split('.').length;
+        const bDepth = b.translation_key.split('.').length;
+        return aDepth - bDepth;
+      }) || [];
+      
+      sortedData.forEach((item) => {
         const keys = item.translation_key.split('.');
         let current = translations;
-        keys.forEach((key, index) => {
+        
+        for (let index = 0; index < keys.length; index++) {
+          const key = keys[index];
+          
           if (index === keys.length - 1) {
-            current[key] = item.translated_text;
+            // Only set value if current[key] is not already an object with children
+            if (typeof current[key] !== 'object' || Object.keys(current[key] || {}).length === 0) {
+              current[key] = item.translated_text;
+            } else {
+              console.warn(`[i18n] Skipping conflicting key "${item.translation_key}" - child keys already exist`);
+            }
           } else {
+            // Only create nested object if current[key] is not already a string value
+            if (typeof current[key] === 'string') {
+              console.warn(`[i18n] Key conflict: "${keys.slice(0, index + 1).join('.')}" is both a parent and value`);
+              // Keep the existing string value, don't overwrite
+              break;
+            }
             current[key] = current[key] || {};
             current = current[key];
           }
-        });
+        }
       });
 
       console.log(`[i18n] Loaded ${data?.length || 0} translations for ${language}`);
