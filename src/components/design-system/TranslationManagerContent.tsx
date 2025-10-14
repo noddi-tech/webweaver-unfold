@@ -474,30 +474,22 @@ export default function TranslationManagerContent() {
     setIsTranslating(true);
 
     try {
-      // Prepare content to translate
-      const contentToTranslate = missingKeys.map(key => {
-        const englishTrans = englishTranslations.find(t => t.translation_key === key);
-        return {
-          key,
-          text: englishTrans?.translated_text || key,
-          context: englishTrans?.context || null,
-          page_location: englishTrans?.page_location || null
-        };
-      });
-
-      // Call translate-content edge function
-      const { error } = await supabase.functions.invoke('translate-content', {
+      // Call translate-content edge function with correct payload format
+      const { data, error } = await supabase.functions.invoke('translate-content', {
         body: {
-          targetLanguages: [languageCode],
-          content: contentToTranslate
+          translationKeys: missingKeys,
+          targetLanguage: languageCode,
+          sourceLanguage: 'en'
         }
       });
 
       if (error) throw error;
 
+      const result = data as { translated: number; failed: number };
+      
       toast({ 
         title: 'Translation complete!',
-        description: `Successfully translated ${missingKeys.length} missing keys to ${targetLang.name}`
+        description: `Successfully translated ${result.translated} of ${missingKeys.length} missing keys to ${targetLang.name}`
       });
       await loadData();
     } catch (error: any) {
