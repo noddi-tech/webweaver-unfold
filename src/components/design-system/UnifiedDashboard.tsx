@@ -23,37 +23,16 @@ export default function UnifiedDashboard() {
     const [
       { data: translationStats },
       { data: metaStats },
-      { data: evalProgress },
-      { data: allTranslations }
+      { data: evalProgress }
     ] = await Promise.all([
       supabase.from('translation_stats' as any).select('*'),
       supabase.from('page_meta_stats' as any).select('*'),
-      supabase.from('evaluation_progress').select('*'),
-      supabase.from('translations').select('language_code, quality_score').neq('language_code', 'en')
+      supabase.from('evaluation_progress').select('*')
     ]);
 
     if (translationStats) setStats(translationStats);
     if (metaStats) setPageMetaStats(metaStats);
-    
-    // Calculate actual evaluated counts from translations with quality_score
-    const evaluatedCountsMap: Record<string, number> = {};
-    if (allTranslations) {
-      allTranslations.forEach(t => {
-        if (t.quality_score !== null) {
-          evaluatedCountsMap[t.language_code] = (evaluatedCountsMap[t.language_code] || 0) + 1;
-        }
-      });
-    }
-    
-    // Update evaluation progress with actual counts from database
-    if (evalProgress) {
-      const updatedEvalProgress = evalProgress.map(ep => ({
-        ...ep,
-        evaluated_keys: evaluatedCountsMap[ep.language_code] || 0
-      }));
-      
-      setEvaluationProgress(updatedEvalProgress);
-    }
+    if (evalProgress) setEvaluationProgress(evalProgress);
     
     setLoading(false);
   }
@@ -66,16 +45,21 @@ export default function UnifiedDashboard() {
     );
   }
 
-  // Calculate global stats - use English as baseline
-  const totalLanguages = stats.filter(s => s.enabled).length;
+  // Calculate global stats - use English as baseline, exclude English from evaluation counts
+  const totalLanguages = stats.filter(s => s.enabled && s.code !== 'en').length;
   const englishCount = stats.find(s => s.code === 'en')?.total_translations || 0;
   const totalTranslationKeys = englishCount;
-  const totalTranslations = totalLanguages * englishCount;
+  const totalTranslations = (totalLanguages + 1) * englishCount; // +1 to include English
   
-  const totalEvaluated = stats.reduce((sum, s) => {
-    const progress = evaluationProgress.find(ep => ep.language_code === s.code);
-    return sum + (progress?.evaluated_keys || 0);
-  }, 0);
+  // Only count evaluation for non-English languages
+  const totalEvaluated = stats
+    .filter(s => s.code !== 'en')
+    .reduce((sum, s) => {
+      const progress = evaluationProgress.find(ep => ep.language_code === s.code);
+      return sum + (progress?.evaluated_keys || 0);
+    }, 0);
+  
+  const totalEvaluationRequired = totalLanguages * englishCount;
   
   const totalApproved = stats.reduce((sum, s) => sum + (s.approved_translations || 0), 0);
   
@@ -86,8 +70,8 @@ export default function UnifiedDashboard() {
     sum + (s.completed_entries || 0), 0
   );
 
-  const translationCompletionRate = Math.round((totalTranslations / (totalLanguages * totalTranslationKeys)) * 100) || 0;
-  const evaluationCompletionRate = Math.round((totalEvaluated / totalTranslations) * 100) || 0;
+  const translationCompletionRate = Math.round((totalTranslations / ((totalLanguages + 1) * totalTranslationKeys)) * 100) || 0;
+  const evaluationCompletionRate = Math.round((totalEvaluated / totalEvaluationRequired) * 100) || 0;
   const pageMetaCompletionRate = Math.round((totalPageMetaCompleted / totalPageMetaRequired) * 100) || 0;
 
   return (
@@ -122,7 +106,7 @@ export default function UnifiedDashboard() {
             <div className="text-3xl font-bold mb-2">{evaluationCompletionRate}%</div>
             <Progress value={evaluationCompletionRate} className="h-2" />
             <p className="text-xs text-muted-foreground mt-2">
-              {totalEvaluated} / {totalTranslations} evaluated
+              {totalEvaluated} / {totalEvaluationRequired} evaluated
             </p>
           </CardContent>
         </Card>

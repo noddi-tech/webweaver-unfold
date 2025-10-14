@@ -81,64 +81,27 @@ export default function TranslationManagerContent() {
       .then(res => res.text())
       .then(setTovContent)
       .catch(console.error);
-  }, []);
+  }, [selectedLang]); // Reload when language changes
 
   async function loadData() {
-    const PAGE_SIZE = 1000;
-    
     // Load languages
     const { data: langs } = await supabase.from('languages').select('*').order('sort_order');
     
-    // Load all translations with pagination
-    let allTranslations: any[] = [];
-    let page = 0;
-    let hasMore = true;
+    // Only load English translations + currently selected language (much faster!)
+    const { data: trans } = await supabase
+      .from('translations')
+      .select('*')
+      .in('language_code', ['en', selectedLang])
+      .order('translation_key');
     
-    console.log('Loading translations in batches...');
-    
-    while (hasMore) {
-      const { data: trans, error } = await supabase
-        .from('translations')
-        .select('*')
-        .order('translation_key')
-        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-      
-      if (error) {
-        console.error('Error loading translations:', error);
-        break;
-      }
-      
-      if (trans && trans.length > 0) {
-        allTranslations = [...allTranslations, ...trans];
-        hasMore = trans.length === PAGE_SIZE;
-        page++;
-        console.log(`Loaded page ${page}, total translations so far: ${allTranslations.length}`);
-      } else {
-        hasMore = false;
-      }
-    }
-    
-    console.log(`Finished loading ${allTranslations.length} total translations across ${page} pages`);
-    
-    // Get stats from view
+    // Get stats from optimized views
     const { data: st } = await supabase.from('translation_stats' as any).select('*');
     
     if (langs) setLanguages(langs);
     
-    if (allTranslations.length > 0) {
-      // Filter out invalid translations where translated_text equals translation_key
-      const validTranslations = allTranslations.filter(t => {
-        const isValid = t.translated_text !== t.translation_key;
-        if (!isValid) {
-          console.warn(`Filtered out invalid translation: ${t.translation_key} (${t.language_code})`);
-        }
-        return isValid;
-      });
-      
-      console.log(`Loaded ${allTranslations.length} translations, ${validTranslations.length} valid`);
-      setTranslations(validTranslations);
-      // Store English translations separately for reference
-      setEnglishTranslations(validTranslations.filter(t => t.language_code === 'en'));
+    if (trans) {
+      setTranslations(trans);
+      setEnglishTranslations(trans.filter(t => t.language_code === 'en'));
     }
     
     if (st) setStats(st);
