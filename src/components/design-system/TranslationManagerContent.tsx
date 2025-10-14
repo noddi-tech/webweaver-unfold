@@ -8,10 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, Upload, Loader2, Plus, RefreshCw, AlertTriangle, Sparkles } from 'lucide-react';
+import { Check, X, Upload, Loader2, Plus, RefreshCw, AlertTriangle, Sparkles, Search, CheckCircle2, Clock, TrendingUp, TrendingDown, AlertCircle, FileText, Code, RotateCcw } from 'lucide-react';
 import * as Flags from 'country-flag-icons/react/3x2';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -72,7 +73,37 @@ export default function TranslationManagerContent() {
   const [isResettingStuck, setIsResettingStuck] = useState(false);
   const [isRefiningBulk, setIsRefiningBulk] = useState(false);
   const [bulkRefineProgress, setBulkRefineProgress] = useState({ current: 0, total: 0 });
-  const [showApprovedTranslations, setShowApprovedTranslations] = useState(true);
+  const [approvalStatusFilter, setApprovalStatusFilter] = useState<string>('all'); // 'all', 'pending', 'approved'
+  const [activePreset, setActivePreset] = useState<string | null>(null);
+
+  // Load saved filters on mount
+  useEffect(() => {
+    const savedFilters = localStorage.getItem('translation-filters');
+    if (savedFilters) {
+      try {
+        const filters = JSON.parse(savedFilters);
+        setApprovalStatusFilter(filters.approvalStatusFilter || 'all');
+        setQualityFilter(filters.qualityFilter || 'all');
+        setPageLocationFilter(filters.pageLocationFilter || 'all');
+        setContextFilter(filters.contextFilter || 'all');
+        setShowEmptyOnly(filters.showEmptyOnly || false);
+      } catch (e) {
+        console.error('Failed to load saved filters', e);
+      }
+    }
+  }, []);
+
+  // Save filters whenever they change
+  useEffect(() => {
+    const filters = {
+      approvalStatusFilter,
+      qualityFilter,
+      pageLocationFilter,
+      contextFilter,
+      showEmptyOnly,
+    };
+    localStorage.setItem('translation-filters', JSON.stringify(filters));
+  }, [approvalStatusFilter, qualityFilter, pageLocationFilter, contextFilter, showEmptyOnly]);
 
   useEffect(() => {
     loadData();
@@ -188,8 +219,9 @@ export default function TranslationManagerContent() {
     // Language filter
     if (t.language_code !== selectedLang) return false;
     
-    // Approved filter
-    if (!showApprovedTranslations && t.approved) return false;
+    // Approval status filter
+    if (approvalStatusFilter === 'pending' && t.approved) return false;
+    if (approvalStatusFilter === 'approved' && !t.approved) return false;
     
     // Search filter - search in translation key, translated text, AND English source
     if (searchFilter) {
@@ -231,6 +263,192 @@ export default function TranslationManagerContent() {
     return true;
   });
   })();
+
+  // Apply smart preset filters
+  function applyPreset(preset: string) {
+    setActivePreset(preset);
+    
+    switch(preset) {
+      case 'needs_attention':
+        setApprovalStatusFilter('pending');
+        setQualityFilter('all');
+        setShowEmptyOnly(false);
+        setShowMissingOnly(false);
+        break;
+      case 'ready_to_approve':
+        setApprovalStatusFilter('pending');
+        setQualityFilter('high');
+        setShowEmptyOnly(false);
+        setShowMissingOnly(false);
+        break;
+      case 'low_quality':
+        setApprovalStatusFilter('all');
+        setQualityFilter('low');
+        setShowEmptyOnly(false);
+        setShowMissingOnly(false);
+        break;
+      case 'recently_translated':
+        setApprovalStatusFilter('pending');
+        setQualityFilter('all');
+        setShowEmptyOnly(false);
+        setShowMissingOnly(false);
+        break;
+    }
+  }
+
+  // Bulk approve filtered translations
+  async function handleBulkApprove(translations: any[]) {
+    setIsApprovingAll(true);
+    try {
+      const ids = translations.filter(t => !t.approved).map(t => t.id);
+      if (ids.length === 0) {
+        toast({ title: 'No pending translations to approve' });
+        return;
+      }
+
+      const { error } = await supabase
+        .from('translations')
+        .update({ approved: true, approved_at: new Date().toISOString() })
+        .in('id', ids);
+
+      if (error) throw error;
+
+      toast({ 
+        title: 'Bulk approval complete!',
+        description: `Approved ${ids.length} translation${ids.length !== 1 ? 's' : ''}`
+      });
+      loadData();
+    } catch (error: any) {
+      toast({ title: 'Bulk approval failed', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsApprovingAll(false);
+    }
+  }
+
+  // Bulk evaluate filtered translations
+  async function handleBulkEvaluate(translations: any[]) {
+    setIsEvaluating(true);
+    try {
+      const keys = translations.map(t => t.translation_key);
+      
+      const { error } = await supabase.functions.invoke('evaluate-translation-quality', {
+        body: { 
+          languageCode: selectedLang,
+          translationKeys: keys
+        }
+      });
+
+      if (error) throw error;
+
+      toast({ 
+        title: 'Bulk evaluation queued!',
+        description: `Evaluating ${keys.length} translation${keys.length !== 1 ? 's' : ''}`
+      });
+      
+      setTimeout(loadData, 2000);
+    } catch (error: any) {
+      toast({ title: 'Bulk evaluation failed', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsEvaluating(false);
+    }
+  }
+
+  // Bulk refine filtered translations
+  async function handleBulkRefine(translations: any[]) {
+    setIsRefiningBulk(true);
+    setBulkRefineProgress({ current: 0, total: 0 });
+    
+    try {
+      const filtered = translations.filter(t => !t.approved);
+
+      if (filtered.length === 0) {
+        toast({ 
+          title: 'No translations to refine',
+          description: 'All filtered translations are already approved.'
+        });
+        return;
+      }
+
+      const total = filtered.length;
+      setBulkRefineProgress({ current: 0, total });
+
+      toast({
+        title: 'Starting bulk refinement',
+        description: `Refining ${total} translations...`,
+        duration: 3000
+      });
+
+      // Process in small batches to avoid rate limits
+      const BATCH_SIZE = 5;
+      let refined = 0;
+      let failed = 0;
+
+      for (let i = 0; i < filtered.length; i += BATCH_SIZE) {
+        const batch = filtered.slice(i, Math.min(i + BATCH_SIZE, filtered.length));
+        
+        // Refine batch in parallel
+        const refinePromises = batch.map(async (trans) => {
+          try {
+            const { data, error } = await supabase.functions.invoke('refine-translation', {
+              body: {
+                englishText: getEnglishText(trans.translation_key),
+                currentTranslation: trans.translated_text,
+                targetLanguage: selectedLang,
+                targetLanguageName: languages.find(l => l.code === selectedLang)?.name,
+                context: trans.context,
+                pageLocation: trans.page_location,
+                tovContent
+              }
+            });
+
+            if (error) throw error;
+
+            // Update translation
+            await supabase
+              .from('translations')
+              .update({ 
+                translated_text: data.refinedText,
+                approved: false 
+              })
+              .eq('id', trans.id);
+
+            return { success: true, key: trans.translation_key };
+          } catch (err) {
+            console.error('Refine failed for', trans.translation_key, err);
+            return { success: false, key: trans.translation_key };
+          }
+        });
+
+        const results = await Promise.all(refinePromises);
+        refined += results.filter(r => r.success).length;
+        failed += results.filter(r => !r.success).length;
+        
+        setBulkRefineProgress({ current: i + batch.length, total });
+
+        // Small delay between batches
+        if (i + BATCH_SIZE < filtered.length) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      toast({
+        title: 'Bulk refinement complete!',
+        description: `Refined ${refined} translations${failed > 0 ? `, ${failed} failed` : ''}`,
+        duration: 5000
+      });
+
+      await loadData();
+    } catch (error: any) {
+      toast({ 
+        title: 'Bulk refinement failed', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    } finally {
+      setIsRefiningBulk(false);
+      setBulkRefineProgress({ current: 0, total: 0 });
+    }
+  }
 
   // Debug logging
   console.log('Translation Search Debug:', {
@@ -1849,175 +2067,526 @@ export default function TranslationManagerContent() {
                   </Button>
                 </div>
 
-                {/* Filter Options Row */}
-                <div className="flex gap-2 flex-wrap">
-                  {/* Show Empty Toggle */}
-                  <Button
-                    variant={showEmptyOnly ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => {
-                      setShowEmptyOnly(!showEmptyOnly);
-                      if (!showEmptyOnly) setShowMissingOnly(false);
-                    }}
-                  >
-                    <AlertTriangle className="w-4 h-4 mr-2" />
-                    Show Empty Only ({emptyCount})
-                  </Button>
-                  
-                  {/* Show Missing Only */}
-                  {lang.code !== 'en' && (
-                    <>
-                      <Button
-                        variant={showMissingOnly ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => {
-                          setShowMissingOnly(!showMissingOnly);
-                          if (!showMissingOnly) setShowEmptyOnly(false);
-                        }}
-                      >
-                        <X className="w-4 h-4 mr-2" />
-                        Show Missing Only ({getMissingTranslationsCount(lang.code)})
-                      </Button>
-                      
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleTranslateMissing(lang.code)}
-                        disabled={isTranslating || getMissingTranslationsCount(lang.code) === 0}
-                      >
-                        {isTranslating ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Translating...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            Translate {getMissingTranslationsCount(lang.code)} Missing
-                          </>
-                        )}
-                      </Button>
-                    </>
-                  )}
+                {/* Active Filter Pills */}
+                {(searchFilter || approvalStatusFilter !== 'all' || qualityFilter !== 'all' || pageLocationFilter !== 'all' || contextFilter !== 'all' || showEmptyOnly) && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {searchFilter && (
+                      <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => setSearchFilter('')}>
+                        Search: "{searchFilter}"
+                        <X className="w-3 h-3" />
+                      </Badge>
+                    )}
+                    {approvalStatusFilter !== 'all' && (
+                      <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => setApprovalStatusFilter('all')}>
+                        Status: {approvalStatusFilter}
+                        <X className="w-3 h-3" />
+                      </Badge>
+                    )}
+                    {qualityFilter !== 'all' && (
+                      <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => setQualityFilter('all')}>
+                        Quality: {qualityFilter}
+                        <X className="w-3 h-3" />
+                      </Badge>
+                    )}
+                    {pageLocationFilter !== 'all' && (
+                      <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => setPageLocationFilter('all')}>
+                        Page: {pageLocationFilter}
+                        <X className="w-3 h-3" />
+                      </Badge>
+                    )}
+                    {contextFilter !== 'all' && (
+                      <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => setContextFilter('all')}>
+                        Context: {contextFilter}
+                        <X className="w-3 h-3" />
+                      </Badge>
+                    )}
+                    {showEmptyOnly && (
+                      <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => setShowEmptyOnly(false)}>
+                        Empty only
+                        <X className="w-3 h-3" />
+                      </Badge>
+                    )}
+                  </div>
+                )}
 
-                  {/* Quality Filter */}
-                  <Select value={qualityFilter} onValueChange={setQualityFilter}>
-                    <SelectTrigger className="w-[180px] h-9">
-                      <SelectValue placeholder="Filter by quality" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Quality</SelectItem>
-                      <SelectItem value="high">High (≥85%)</SelectItem>
-                      <SelectItem value="medium">Medium (70-84%)</SelectItem>
-                      <SelectItem value="low">Low (&lt;70%)</SelectItem>
-                      <SelectItem value="needs_review">Needs Review</SelectItem>
-                      <SelectItem value="technical_terms">Technical Terms Issues</SelectItem>
-                    </SelectContent>
-                  </Select>
+                {/* Smart Presets Section */}
+                <div className="space-y-2 mb-4">
+                  <Label className="text-sm font-medium">Quick Filters</Label>
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      variant={activePreset === 'needs_attention' ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => applyPreset('needs_attention')}
+                    >
+                      <AlertTriangle className="w-4 h-4 mr-2" />
+                      Needs Attention
+                    </Button>
+                    <Button
+                      variant={activePreset === 'ready_to_approve' ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => applyPreset('ready_to_approve')}
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Ready to Approve
+                    </Button>
+                    <Button
+                      variant={activePreset === 'low_quality' ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => applyPreset('low_quality')}
+                    >
+                      <TrendingDown className="w-4 h-4 mr-2" />
+                      Low Quality
+                    </Button>
+                    <Button
+                      variant={activePreset === 'recently_translated' ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => applyPreset('recently_translated')}
+                    >
+                      <Clock className="w-4 h-4 mr-2" />
+                      Recently Added
+                    </Button>
+                  </div>
+                </div>
 
-                  {/* Page Location Filter */}
-                  <Select value={pageLocationFilter} onValueChange={setPageLocationFilter}>
-                    <SelectTrigger className="w-[200px] h-9">
-                      <SelectValue placeholder="Filter by page" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Pages</SelectItem>
-                      {uniquePageLocations.map(location => (
-                        <SelectItem key={location} value={location}>
-                          {location}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {/* Context Filter */}
-                  {uniqueContexts.length > 0 && (
-                    <Select value={contextFilter} onValueChange={setContextFilter}>
-                      <SelectTrigger className="w-[200px] h-9">
-                        <SelectValue placeholder="Filter by component" />
+                {/* Filter Options Section */}
+                <div className="space-y-2 mb-4">
+                  <Label className="text-sm font-medium">Filter Options</Label>
+                  <div className="flex gap-2 flex-wrap">
+                    {/* Approval Status Filter */}
+                    <Select value={approvalStatusFilter} onValueChange={setApprovalStatusFilter}>
+                      <SelectTrigger className="w-[180px] h-9">
+                        <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Components</SelectItem>
-                        {uniqueContexts.map(context => (
-                          <SelectItem key={context} value={context}>
-                            {context}
+                        <SelectItem value="all">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            All Status
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="pending">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-orange-500" />
+                            Pending Only
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="approved">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                            Approved Only
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {/* Quality Filter */}
+                    <Select value={qualityFilter} onValueChange={setQualityFilter}>
+                      <SelectTrigger className="w-[180px] h-9">
+                        <SelectValue placeholder="Filter by quality" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            All Quality
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="high">
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-green-500" />
+                            High (≥85%)
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="medium">
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-yellow-500" />
+                            Medium (70-84%)
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="low">
+                          <div className="flex items-center gap-2">
+                            <TrendingDown className="w-4 h-4 text-red-500" />
+                            Low (&lt;70%)
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="needs_review">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 text-orange-500" />
+                            Needs Review
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="technical_terms">
+                          <div className="flex items-center gap-2">
+                            <Code className="w-4 h-4 text-purple-500" />
+                            Technical Terms Issues
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {/* Page Location Filter */}
+                    <Select value={pageLocationFilter} onValueChange={setPageLocationFilter}>
+                      <SelectTrigger className="w-[200px] h-9">
+                        <SelectValue placeholder="Filter by page" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Pages</SelectItem>
+                        {uniquePageLocations.map(location => (
+                          <SelectItem key={location} value={location}>
+                            {location}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                  )}
 
-                  {/* Active Filters Count */}
-                  {(showEmptyOnly || pageLocationFilter !== 'all' || contextFilter !== 'all' || qualityFilter !== 'all') && (
-                    <Badge variant="secondary" className="h-9 px-3 flex items-center">
-                      {filteredTranslations.length} result{filteredTranslations.length !== 1 ? 's' : ''}
-                    </Badge>
-                  )}
+                    {/* Context Filter */}
+                    {uniqueContexts.length > 0 && (
+                      <Select value={contextFilter} onValueChange={setContextFilter}>
+                        <SelectTrigger className="w-[200px] h-9">
+                          <SelectValue placeholder="Filter by component" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Components</SelectItem>
+                          {uniqueContexts.map(context => (
+                            <SelectItem key={context} value={context}>
+                              {context}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </div>
 
-                  {/* Clear Filters */}
-                  {(!showApprovedTranslations || showEmptyOnly || pageLocationFilter !== 'all' || contextFilter !== 'all' || qualityFilter !== 'all' || searchFilter) && (
+                {/* Actions Section */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Actions</Label>
+                  <div className="flex gap-2 flex-wrap">
+                    {/* Show Empty Toggle */}
                     <Button
-                      variant={filteredTranslations.length === 0 ? "destructive" : "ghost"}
+                      variant={showEmptyOnly ? "default" : "outline"}
                       size="sm"
                       onClick={() => {
-                        setShowApprovedTranslations(true);
-                        setShowEmptyOnly(false);
-                        setPageLocationFilter('all');
-                        setContextFilter('all');
-                        setQualityFilter('all');
-                        setSearchFilter('');
+                        setShowEmptyOnly(!showEmptyOnly);
+                        if (!showEmptyOnly) setShowMissingOnly(false);
                       }}
                     >
-                      <X className="w-4 h-4 mr-2" />
-                      Clear All Filters
+                      <AlertTriangle className="w-4 h-4 mr-2" />
+                      Show Empty Only ({emptyCount})
                     </Button>
-                  )}
+                    
+                    {/* Show Missing Only */}
+                    {lang.code !== 'en' && (
+                      <>
+                        <Button
+                          variant={showMissingOnly ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            setShowMissingOnly(!showMissingOnly);
+                            if (!showMissingOnly) setShowEmptyOnly(false);
+                          }}
+                        >
+                          <X className="w-4 h-4 mr-2" />
+                          Show Missing Only ({getMissingTranslationsCount(lang.code)})
+                        </Button>
+                        
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleTranslateMissing(lang.code)}
+                          disabled={isTranslating || getMissingTranslationsCount(lang.code) === 0}
+                        >
+                          {isTranslating ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Translating...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4 mr-2" />
+                              Translate {getMissingTranslationsCount(lang.code)} Missing
+                            </>
+                          )}
+                        </Button>
+                      </>
+                    )}
+
+                    {/* Reset to Defaults */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        localStorage.removeItem('translation-filters');
+                        setApprovalStatusFilter('all');
+                        setQualityFilter('all');
+                        setPageLocationFilter('all');
+                        setContextFilter('all');
+                        setShowEmptyOnly(false);
+                        setActivePreset(null);
+                        toast({ title: 'Filters reset to defaults' });
+                      }}
+                    >
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Reset to Defaults
+                    </Button>
+
+                    {/* Clear All Filters */}
+                    {(approvalStatusFilter !== 'all' || showEmptyOnly || pageLocationFilter !== 'all' || contextFilter !== 'all' || qualityFilter !== 'all' || searchFilter) && (
+                      <Button
+                        variant={filteredTranslations.length === 0 ? "destructive" : "ghost"}
+                        size="sm"
+                        onClick={() => {
+                          setApprovalStatusFilter('all');
+                          setShowEmptyOnly(false);
+                          setPageLocationFilter('all');
+                          setContextFilter('all');
+                          setQualityFilter('all');
+                          setSearchFilter('');
+                          setActivePreset(null);
+                        }}
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Clear All Filters
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
+
+              {/* Enhanced Results Counter */}
+              {filteredTranslations.length > 0 && (
+                <Card className="bg-muted/50 mb-4">
+                  <CardContent className="py-2 px-3">
+                    <div className="flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        <span className="font-medium">
+                          Showing {filteredTranslations.length} of {translations.filter(t => t.language_code === selectedLang).length}
+                        </span>
+                      </div>
+                      <Separator orientation="vertical" className="h-4" />
+                      <div className="flex items-center gap-4 text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-orange-500" />
+                          {filteredTranslations.filter(t => !t.approved).length} pending
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-green-500" />
+                          {filteredTranslations.filter(t => t.approved).length} approved
+                        </span>
+                        {filteredTranslations.some(t => t.quality_score) && (
+                          <span className="flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3 text-blue-500" />
+                            Avg: {Math.round(
+                              filteredTranslations
+                                .filter(t => t.quality_score)
+                                .reduce((sum, t) => sum + t.quality_score, 0) / 
+                              filteredTranslations.filter(t => t.quality_score).length
+                            )}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Bulk Actions Bar */}
+              {filteredTranslations.length > 0 && approvalStatusFilter === 'pending' && filteredTranslations.some(t => !t.approved) && (
+                <Card className="mb-4 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+                  <CardContent className="py-3">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600" />
+                        <div>
+                          <p className="font-medium text-sm">
+                            {filteredTranslations.filter(t => !t.approved).length} pending translation{filteredTranslations.filter(t => !t.approved).length !== 1 ? 's' : ''}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Select actions to perform on filtered results
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => handleBulkApprove(filteredTranslations)}
+                          disabled={isApprovingAll}
+                        >
+                          {isApprovingAll ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Approving...
+                            </>
+                          ) : (
+                            <>
+                              <Check className="w-4 h-4 mr-2" />
+                              Approve All ({filteredTranslations.filter(t => !t.approved).length})
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => handleBulkRefine(filteredTranslations)}
+                          disabled={isRefiningBulk}
+                        >
+                          {isRefiningBulk ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Refining {bulkRefineProgress.current}/{bulkRefineProgress.total}
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4 mr-2" />
+                              Refine All ({filteredTranslations.length})
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleBulkEvaluate(filteredTranslations)}
+                          disabled={isEvaluating}
+                        >
+                          {isEvaluating ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Evaluating...
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw className="w-4 h-4 mr-2" />
+                              Re-evaluate All
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
             <div className="space-y-4">
               {filteredTranslations.length === 0 ? (
                 <Card>
                   <CardContent className="py-12">
                     <div className="text-center space-y-4">
-                      <AlertTriangle className="w-12 h-12 mx-auto text-muted-foreground" />
-                      <div>
-                        <h3 className="text-lg font-semibold mb-2">No translations found</h3>
-                        <p className="text-muted-foreground mb-4">
-                          {searchFilter && `No results for "${searchFilter}"`}
-                          {!searchFilter && "Try adjusting your filters"}
-                        </p>
-                        <div className="flex flex-wrap gap-2 justify-center mb-4">
-                          {searchFilter && <Badge variant="outline">Search: {searchFilter}</Badge>}
-                          {!showApprovedTranslations && <Badge variant="outline">Hiding approved</Badge>}
-                          {showEmptyOnly && <Badge variant="outline">Empty only</Badge>}
-                          {pageLocationFilter !== 'all' && <Badge variant="outline">Page: {pageLocationFilter}</Badge>}
-                          {contextFilter !== 'all' && <Badge variant="outline">Context: {contextFilter}</Badge>}
-                          {qualityFilter !== 'all' && <Badge variant="outline">Quality: {qualityFilter}</Badge>}
-                        </div>
-                        <Button
-                          variant="default"
-                          onClick={() => {
-                            setShowApprovedTranslations(true);
-                            setShowEmptyOnly(false);
-                            setPageLocationFilter('all');
-                            setContextFilter('all');
-                            setQualityFilter('all');
-                            setSearchFilter('');
-                          }}
-                        >
-                          Clear All Filters
-                        </Button>
-                      </div>
+                      {approvalStatusFilter === 'pending' && !searchFilter ? (
+                        <>
+                          <CheckCircle2 className="w-12 h-12 mx-auto text-green-500" />
+                          <div>
+                            <h3 className="text-lg font-semibold mb-2">All caught up! 🎉</h3>
+                            <p className="text-muted-foreground mb-4">
+                              No pending translations for {languages.find(l => l.code === selectedLang)?.name}
+                            </p>
+                            <Button
+                              variant="default"
+                              onClick={() => {
+                                setApprovalStatusFilter('all');
+                              }}
+                            >
+                              View All Translations
+                            </Button>
+                          </div>
+                        </>
+                      ) : qualityFilter === 'low' && !searchFilter ? (
+                        <>
+                          <TrendingUp className="w-12 h-12 mx-auto text-green-500" />
+                          <div>
+                            <h3 className="text-lg font-semibold mb-2">Great quality! ✨</h3>
+                            <p className="text-muted-foreground mb-4">
+                              No low-quality translations found
+                            </p>
+                            <Button
+                              variant="default"
+                              onClick={() => setQualityFilter('all')}
+                            >
+                              View All Translations
+                            </Button>
+                          </div>
+                        </>
+                      ) : searchFilter ? (
+                        <>
+                          <Search className="w-12 h-12 mx-auto text-muted-foreground" />
+                          <div>
+                            <h3 className="text-lg font-semibold mb-2">No matches found</h3>
+                            <p className="text-muted-foreground mb-4">
+                              No results for "{searchFilter}"
+                            </p>
+                            <div className="flex gap-2 justify-center">
+                              <Button
+                                variant="default"
+                                onClick={() => setSearchFilter('')}
+                              >
+                                Clear Search
+                              </Button>
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setApprovalStatusFilter('all');
+                                  setQualityFilter('all');
+                                  setPageLocationFilter('all');
+                                  setContextFilter('all');
+                                  setShowEmptyOnly(false);
+                                  setSearchFilter('');
+                                  setActivePreset(null);
+                                }}
+                              >
+                                Clear All Filters
+                              </Button>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <AlertTriangle className="w-12 h-12 mx-auto text-muted-foreground" />
+                          <div>
+                            <h3 className="text-lg font-semibold mb-2">No translations found</h3>
+                            <p className="text-muted-foreground mb-4">
+                              Try adjusting your filters
+                            </p>
+                            <Button
+                              variant="default"
+                              onClick={() => {
+                                setApprovalStatusFilter('all');
+                                setShowEmptyOnly(false);
+                                setPageLocationFilter('all');
+                                setContextFilter('all');
+                                setQualityFilter('all');
+                                setSearchFilter('');
+                                setActivePreset(null);
+                              }}
+                            >
+                              Clear All Filters
+                            </Button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               ) : (
                 filteredTranslations.map((translation) => (
-                <Card key={translation.id}>
+                <Card 
+                  key={translation.id}
+                  className={cn(
+                    "transition-all",
+                    !translation.approved && "border-l-4 border-l-orange-500",
+                    translation.approved && "border-l-4 border-l-green-500",
+                    translation.quality_score && translation.quality_score < 70 && "border-l-4 border-l-red-500"
+                  )}
+                >
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
-                      <span className="text-base font-mono">{translation.translation_key}</span>
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "w-2 h-2 rounded-full",
+                          translation.approved ? "bg-green-500" : "bg-orange-500"
+                        )} />
+                        <span className="text-base font-mono">{translation.translation_key}</span>
+                      </div>
                       <div className="flex gap-2">
                         {translation.quality_score && (
                           <Badge 
