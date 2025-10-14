@@ -3,6 +3,7 @@ import TranslationManagerContent from '@/components/design-system/TranslationMan
 import PageMetaManager from '@/components/design-system/PageMetaManager';
 import SitemapGenerator from '@/components/design-system/SitemapGenerator';
 import UnifiedDashboard from '@/components/design-system/UnifiedDashboard';
+import LanguageVisibilityManager from '@/components/design-system/LanguageVisibilityManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function TranslationManager() {
@@ -13,11 +14,12 @@ export default function TranslationManager() {
       <main className="py-section">
         <div className="container max-w-7xl px-4 sm:px-6 lg:px-8">
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">📊 Overview</TabsTrigger>
               <TabsTrigger value="translations">🌍 Translations</TabsTrigger>
               <TabsTrigger value="seo">🚀 SEO & Meta</TabsTrigger>
               <TabsTrigger value="sitemap">🗺️ Sitemap</TabsTrigger>
+              <TabsTrigger value="settings">⚙️ Settings</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview">
@@ -34,6 +36,10 @@ export default function TranslationManager() {
 
             <TabsContent value="sitemap">
               <SitemapGenerator />
+            </TabsContent>
+
+            <TabsContent value="settings">
+              <LanguageVisibilityManager />
             </TabsContent>
           </Tabs>
         </div>

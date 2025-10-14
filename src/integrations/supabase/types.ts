@@ -766,6 +766,7 @@ export type Database = {
           name: string
           native_name: string
           rtl: boolean
+          show_in_switcher: boolean
           sort_order: number | null
           updated_at: string
         }
@@ -779,6 +780,7 @@ export type Database = {
           name: string
           native_name: string
           rtl?: boolean
+          show_in_switcher?: boolean
           sort_order?: number | null
           updated_at?: string
         }
@@ -792,6 +794,7 @@ export type Database = {
           name?: string
           native_name?: string
           rtl?: boolean
+          show_in_switcher?: boolean
           sort_order?: number | null
           updated_at?: string
         }

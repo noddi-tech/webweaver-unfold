@@ -1041,7 +1041,7 @@ export default function TranslationManagerContent() {
         title: `${langName} evaluation complete! ✓`,
         description: data.status === 'completed' 
           ? `All translations evaluated successfully` 
-          : `Evaluated ${data.evaluatedCount} translations. Average: ${data.averageScore}% (${data.highQuality} high, ${data.mediumQuality} medium, ${data.lowQuality} low)`,
+          : `Evaluated ${data.totalEvaluated}/${data.totalKeys} translations. Average: ${data.averageScore}% (${data.highQuality} high, ${data.mediumQuality} medium, ${data.lowQuality} low)`,
         duration: 8000
       });
 

@@ -31,7 +31,7 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
   useEffect(() => {
     async function loadLanguages() {
       const [{ data: langs }, { data: set }] = await Promise.all([
-        supabase.from('languages').select('*').eq('enabled', true).order('sort_order'),
+        supabase.from('languages').select('*').eq('enabled', true).eq('show_in_switcher', true).order('sort_order'),
         supabase.from('language_settings').select('*').single()
       ]);
       if (langs) setLanguages(langs);
