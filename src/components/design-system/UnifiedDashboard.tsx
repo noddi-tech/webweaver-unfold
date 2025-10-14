@@ -4,11 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
 import * as Flags from 'country-flag-icons/react/3x2';
 import { Check, X, AlertTriangle, Loader2, RefreshCw, Sparkles, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function UnifiedDashboard() {
+  const { toast } = useToast();
   const [stats, setStats] = useState<any[]>([]);
   const [pageMetaStats, setPageMetaStats] = useState<any[]>([]);
   const [evaluationProgress, setEvaluationProgress] = useState<any[]>([]);
@@ -23,18 +26,61 @@ export default function UnifiedDashboard() {
     const [
       { data: translationStats },
       { data: metaStats },
-      { data: evalProgress }
+      { data: evalProgress },
+      { data: languages }
     ] = await Promise.all([
       supabase.from('translation_stats' as any).select('*'),
       supabase.from('page_meta_stats' as any).select('*'),
-      supabase.from('evaluation_progress').select('*')
+      supabase.from('evaluation_progress').select('*'),
+      supabase.from('languages').select('code, show_in_switcher')
     ]);
 
-    if (translationStats) setStats(translationStats);
+    // Merge show_in_switcher into stats
+    if (translationStats && languages) {
+      const enrichedStats = translationStats.map((stat: any) => ({
+        ...stat,
+        show_in_switcher: languages.find((l: any) => l.code === stat.code)?.show_in_switcher ?? true
+      }));
+      setStats(enrichedStats);
+    } else if (translationStats) {
+      setStats(translationStats);
+    }
+    
     if (metaStats) setPageMetaStats(metaStats);
     if (evalProgress) setEvaluationProgress(evalProgress);
     
     setLoading(false);
+  }
+
+  async function handleToggleSwitcher(languageCode: string, languageName: string, currentValue: boolean) {
+    const newValue = !currentValue;
+    
+    // Optimistic update
+    setStats(prev => prev.map(s => 
+      s.code === languageCode ? { ...s, show_in_switcher: newValue } : s
+    ));
+
+    const { error } = await supabase
+      .from('languages')
+      .update({ show_in_switcher: newValue })
+      .eq('code', languageCode);
+
+    if (error) {
+      // Revert on error
+      setStats(prev => prev.map(s => 
+        s.code === languageCode ? { ...s, show_in_switcher: currentValue } : s
+      ));
+      toast({
+        title: 'Error updating language',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Language visibility updated',
+        description: `${languageName} ${newValue ? 'will show' : 'is hidden'} in language switcher`,
+      });
+    }
   }
 
   if (loading) {
@@ -162,6 +208,7 @@ export default function UnifiedDashboard() {
                   <th className="pb-3 font-medium">Quality</th>
                   <th className="pb-3 font-medium">Approved</th>
                   <th className="pb-3 font-medium">Page Meta</th>
+                  <th className="pb-3 font-medium">Show in Switcher</th>
                   <th className="pb-3 font-medium">Status</th>
                 </tr>
               </thead>
@@ -229,6 +276,12 @@ export default function UnifiedDashboard() {
                         ) : (
                           <span className="text-muted-foreground">0/0</span>
                         )}
+                      </td>
+                      <td className="py-3">
+                        <Switch
+                          checked={lang.show_in_switcher ?? true}
+                          onCheckedChange={() => handleToggleSwitcher(lang.code, lang.name, lang.show_in_switcher ?? true)}
+                        />
                       </td>
                       <td className="py-3">
                         {translationComplete && (evaluationComplete || lang.code === 'en') && hasPageMeta ? (

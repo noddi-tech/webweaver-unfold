@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Check, X, Upload, Loader2, Plus, RefreshCw, AlertTriangle, Sparkles } from 'lucide-react';
 import * as Flags from 'country-flag-icons/react/3x2';
@@ -84,7 +85,7 @@ export default function TranslationManagerContent() {
   }, [selectedLang]); // Reload when language changes
 
   async function loadData() {
-    // Load languages
+    // Load languages with show_in_switcher
     const { data: langs } = await supabase.from('languages').select('*').order('sort_order');
     
     // Only load English translations + currently selected language (much faster!)
@@ -533,6 +534,37 @@ export default function TranslationManagerContent() {
         title: 'Export failed', 
         description: error.message,
         variant: 'destructive' 
+      });
+    }
+  }
+
+  async function handleToggleSwitcher(languageCode: string, languageName: string, currentValue: boolean) {
+    const newValue = !currentValue;
+    
+    // Optimistic update
+    setLanguages(prev => prev.map(l => 
+      l.code === languageCode ? { ...l, show_in_switcher: newValue } : l
+    ));
+
+    const { error } = await supabase
+      .from('languages')
+      .update({ show_in_switcher: newValue })
+      .eq('code', languageCode);
+
+    if (error) {
+      // Revert on error
+      setLanguages(prev => prev.map(l => 
+        l.code === languageCode ? { ...l, show_in_switcher: currentValue } : l
+      ));
+      toast({
+        title: 'Error updating language',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Language visibility updated',
+        description: `${languageName} ${newValue ? 'will show' : 'is hidden'} in language switcher`,
       });
     }
   }
@@ -1599,6 +1631,23 @@ export default function TranslationManagerContent() {
                       />
                     </div>
                   )}
+                  
+                  {/* Language switcher visibility toggle */}
+                  <div className="mt-3 pt-3 border-t">
+                    <div className="flex items-center justify-between">
+                      <label htmlFor={`switcher-${stat.code}`} className="text-sm text-muted-foreground cursor-pointer">
+                        Show in switcher
+                      </label>
+                      <Switch
+                        id={`switcher-${stat.code}`}
+                        checked={languages.find(l => l.code === stat.code)?.show_in_switcher ?? true}
+                        onCheckedChange={() => {
+                          const lang = languages.find(l => l.code === stat.code);
+                          if (lang) handleToggleSwitcher(stat.code, stat.name, lang.show_in_switcher ?? true);
+                        }}
+                      />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             );
