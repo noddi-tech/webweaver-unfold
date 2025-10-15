@@ -208,6 +208,10 @@ const FooterManager = () => {
           {/* Company Information */}
           <div className="space-y-4">
             <Label className="text-base font-semibold">Company Information</Label>
+            <p className="text-sm text-muted-foreground">
+              💡 Tip: These fields support direct text or translation keys (e.g., footer.company_name). 
+              Translation keys will be automatically translated based on the user's language.
+            </p>
             
             <div>
               <Label htmlFor="company-name">Company Name</Label>
@@ -215,8 +219,11 @@ const FooterManager = () => {
                 id="company-name"
                 value={settings.company_name}
                 onChange={(e) => setSettings(prev => ({ ...prev, company_name: e.target.value }))}
-                placeholder="Noddi Tech"
+                placeholder="Noddi Tech or footer.company_name"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Current translations managed in Translation Manager
+              </p>
             </div>
 
             <div>
@@ -225,9 +232,12 @@ const FooterManager = () => {
                 id="company-description"
                 value={settings.company_description || ""}
                 onChange={(e) => setSettings(prev => ({ ...prev, company_description: e.target.value }))}
-                placeholder="Empowering automotive maintenance providers..."
+                placeholder="Direct text or footer.company_description"
                 rows={3}
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Use footer.company_description for multilingual support
+              </p>
             </div>
 
             <div>
@@ -236,8 +246,11 @@ const FooterManager = () => {
                 id="copyright-text"
                 value={settings.copyright_text || ""}
                 onChange={(e) => setSettings(prev => ({ ...prev, copyright_text: e.target.value }))}
-                placeholder="© 2024 Noddi Tech. All rights reserved."
+                placeholder="Direct text or footer.copyright"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Use footer.copyright for multilingual support
+              </p>
             </div>
           </div>
 
@@ -250,6 +263,10 @@ const FooterManager = () => {
                 Add Contact
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground">
+              💡 Use translation keys like footer.contact.email_label for multilingual labels. 
+              Empty strings will show icon only.
+            </p>
             
             {settings.contact_info.map((contact, index) => (
               <Card key={index}>
@@ -263,13 +280,16 @@ const FooterManager = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor={`contact-title-${index}`}>Title</Label>
+                      <Label htmlFor={`contact-title-${index}`}>Title / Translation Key</Label>
                       <Input
                         id={`contact-title-${index}`}
                         value={contact.title}
                         onChange={(e) => updateContactInfo(index, 'title', e.target.value)}
-                        placeholder="Email"
+                        placeholder="footer.contact.email_label (or direct text)"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Leave empty to show icon only
+                      </p>
                     </div>
                     <div>
                       <Label htmlFor={`contact-value-${index}`}>Value</Label>
@@ -314,6 +334,9 @@ const FooterManager = () => {
                 Add Link
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground">
+              💡 Use translation keys like footer.links.pricing for multilingual link titles
+            </p>
             
             {settings.quick_links.map((link, index) => (
               <Card key={index}>
@@ -321,12 +344,12 @@ const FooterManager = () => {
                   <div className="flex items-center gap-4">
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor={`quick-title-${index}`}>Title</Label>
+                        <Label htmlFor={`quick-title-${index}`}>Title / Translation Key</Label>
                         <Input
                           id={`quick-title-${index}`}
                           value={link.title}
                           onChange={(e) => updateQuickLink(index, 'title', e.target.value)}
-                          placeholder="Home"
+                          placeholder="footer.links.home (or direct text)"
                         />
                       </div>
                       <div>
@@ -371,6 +394,9 @@ const FooterManager = () => {
                 Add Link
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground">
+              💡 Use translation keys like footer.legal.privacy_policy for multilingual link titles
+            </p>
             
             {settings.legal_links.map((link, index) => (
               <Card key={index}>
@@ -378,12 +404,12 @@ const FooterManager = () => {
                   <div className="flex items-center gap-4">
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor={`legal-title-${index}`}>Title</Label>
+                        <Label htmlFor={`legal-title-${index}`}>Title / Translation Key</Label>
                         <Input
                           id={`legal-title-${index}`}
                           value={link.title}
                           onChange={(e) => updateLegalLink(index, 'title', e.target.value)}
-                          placeholder="Privacy Policy"
+                          placeholder="footer.legal.privacy_policy (or direct text)"
                         />
                       </div>
                       <div>
