@@ -119,7 +119,7 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
           <span className="text-sm truncate">{t('common.switch_language', 'Switch language')}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48 z-[60]">
+      <DropdownMenuContent align="end" className="w-48 z-[60] data-[state=open]:animate-none data-[state=closed]:animate-none transition-none">
         {languages.map((language) => {
           const FlagIcon = (Flags as any)[language.flag_code];
           return (
