@@ -46,12 +46,9 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
     
     setIsChangingLanguage(true);
     try {
-      console.log(`[LanguageSwitcher] Loading resources for ${newLang}...`);
+      console.log(`[LanguageSwitcher] Switching to ${newLang}...`);
       
-      // Force load resources for the new language
-      await i18n.loadLanguages(newLang);
-      
-      // Then change the language
+      // Change language - i18next will handle loading resources
       await i18n.changeLanguage(newLang);
       
       // Update URL
@@ -104,7 +101,7 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="gap-2 h-auto px-3 py-2">
+        <Button variant="ghost" className="gap-2 h-10 px-3 py-2">
           {CurrentFlag ? (
             <CurrentFlag className="w-5 h-3" />
           ) : (
@@ -113,7 +110,7 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
           <span className="text-sm">{t('common.switch_language', 'Switch language')}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-48 z-[60]">
         {languages.map((language) => {
           const FlagIcon = (Flags as any)[language.flag_code];
           return (
