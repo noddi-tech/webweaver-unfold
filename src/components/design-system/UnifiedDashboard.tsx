@@ -194,7 +194,7 @@ export default function UnifiedDashboard() {
                       </td>
                       <td className="py-3">
                         <div className="flex items-center gap-2">
-                          <span>{lang.total_translations}/{englishCount}</span>
+                          <span className="font-mono">{lang.total_translations}/{englishCount}</span>
                           {translationComplete && <Check className="w-4 h-4 text-green-600" />}
                         </div>
                       </td>
@@ -203,9 +203,10 @@ export default function UnifiedDashboard() {
                           <span className="text-muted-foreground">N/A</span>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <span>{progress?.evaluated_keys || 0}/{englishCount}</span>
+                            <span className="font-mono">{progress?.evaluated_keys || 0}/{englishCount}</span>
                             {evaluationComplete && <Check className="w-4 h-4 text-green-600" />}
                             {progress?.status === 'in_progress' && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+                            {progress?.status === 'paused' && <AlertTriangle className="w-4 h-4 text-orange-500" />}
                           </div>
                         )}
                       </td>
@@ -225,7 +226,7 @@ export default function UnifiedDashboard() {
                         )}
                       </td>
                       <td className="py-3">
-                        <span>{lang.approved_translations || 0}/{englishCount}</span>
+                        <span className="font-mono">{lang.approved_translations || 0}/{englishCount}</span>
                       </td>
                       <td className="py-3">
                         {metaStat ? (

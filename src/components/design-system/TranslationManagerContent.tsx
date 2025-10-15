@@ -2032,10 +2032,13 @@ export default function TranslationManagerContent() {
                     {Flag && <Flag className="w-6 h-4" />}
                     <span className="font-semibold">{stat.name}</span>
                   </div>
-                  <div className="text-2xl font-bold">{stat.approved_translations}/{stat.total_translations}</div>
-                  <div className="text-sm text-muted-foreground">{stat.approval_percentage}% approved</div>
+                  <div className="space-y-1">
+                    <div className="text-sm text-muted-foreground">Approved</div>
+                    <div className="text-2xl font-bold">{stat.approved_translations}/{stat.total_translations}</div>
+                    <div className="text-sm text-muted-foreground">{stat.approval_percentage}%</div>
+                  </div>
                   {avgQuality && (
-                    <div className={cn("text-sm font-medium mt-1", qualityColor)}>
+                    <div className={cn("text-sm font-medium mt-2", qualityColor)}>
                       Quality: {avgQuality}%
                     </div>
                   )}
