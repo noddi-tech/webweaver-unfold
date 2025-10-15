@@ -976,7 +976,7 @@ export default function TranslationManagerContent() {
 
           toast({
             title: `${lang.name} complete`,
-            description: `Translated ${data.translated} missing keys${data.failed > 0 ? `, ${data.failed} failed` : ''}`,
+            description: `Translated ${data.translated || 0} missing keys${data.failed > 0 ? `, ${data.failed} failed` : ''}`,
             duration: 3000
           });
 
