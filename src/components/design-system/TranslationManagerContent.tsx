@@ -877,6 +877,119 @@ export default function TranslationManagerContent() {
     }
   }
 
+  async function handleTranslateMissingOnly() {
+    setIsTranslating(true);
+    
+    try {
+      // Get enabled languages (except English)
+      const targetLanguages = languages.filter(l => l.enabled && l.code !== 'en');
+
+      if (targetLanguages.length === 0) {
+        toast({ title: 'No target languages enabled', variant: 'destructive' });
+        return;
+      }
+
+      // Calculate missing keys for each language
+      const englishKeys = new Set(englishTranslations.map(t => t.translation_key));
+      const languageStats = targetLanguages.map(lang => {
+        const existingKeys = new Set(
+          translations
+            .filter(t => t.language_code === lang.code)
+            .map(t => t.translation_key)
+        );
+        const missingKeys = Array.from(englishKeys).filter(key => !existingKeys.has(key));
+        return { lang, missingKeys };
+      }).filter(stat => stat.missingKeys.length > 0);
+
+      if (languageStats.length === 0) {
+        toast({ 
+          title: 'Nothing to translate!', 
+          description: 'All languages have all translation keys'
+        });
+        return;
+      }
+
+      const totalMissing = languageStats.reduce((sum, stat) => sum + stat.missingKeys.length, 0);
+      
+      toast({
+        title: `Translating ${totalMissing} missing keys across ${languageStats.length} languages`,
+        description: 'This may take a few minutes...',
+        duration: 5000
+      });
+
+      let totalTranslated = 0;
+      const results = [];
+
+      for (let i = 0; i < languageStats.length; i++) {
+        const { lang, missingKeys } = languageStats[i];
+        
+        setTranslationProgress(
+          `Translating ${lang.name} (${i + 1}/${languageStats.length}): ${missingKeys.length} missing keys...`
+        );
+
+        try {
+          const { data, error } = await supabase.functions.invoke('translate-content', {
+            body: {
+              translationKeys: missingKeys,
+              targetLanguage: lang.code,
+              sourceLanguage: 'en'
+            }
+          });
+
+          if (error) throw error;
+
+          totalTranslated += data.translated || 0;
+          results.push({ lang: lang.name, translated: data.translated, failed: data.failed });
+
+          toast({
+            title: `${lang.name} complete`,
+            description: `Translated ${data.translated} missing keys${data.failed > 0 ? `, ${data.failed} failed` : ''}`,
+            duration: 3000
+          });
+
+          await loadData();
+
+          // Small delay between languages
+          if (i < languageStats.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        } catch (error: any) {
+          console.error(`Error translating ${lang.name}:`, error);
+          results.push({ lang: lang.name, error: error.message });
+          
+          if (error.message?.includes('429') || error.message?.includes('402')) {
+            toast({
+              title: `${lang.name}: ${error.message.includes('429') ? 'Rate limit' : 'Credits required'}`,
+              description: error.message.includes('429') 
+                ? 'Waiting 30 seconds...' 
+                : 'Please add Lovable AI credits',
+              variant: 'destructive'
+            });
+            if (error.message.includes('429')) {
+              await new Promise(resolve => setTimeout(resolve, 30000));
+            }
+          }
+        }
+      }
+
+      toast({
+        title: '✅ Missing translations complete!',
+        description: `Successfully translated ${totalTranslated} keys across ${languageStats.length} languages`,
+        duration: 8000
+      });
+
+    } catch (error: any) {
+      toast({
+        title: 'Translation failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsTranslating(false);
+      setTranslationProgress('');
+    }
+  }
+
   async function handleTranslateAll() {
     setIsTranslating(true);
     
@@ -1713,7 +1826,7 @@ export default function TranslationManagerContent() {
           </Button>
 
           <Button 
-            onClick={handleTranslateAll} 
+            onClick={handleTranslateMissingOnly} 
             disabled={isTranslating || isEvaluating}
             size="lg"
           >
@@ -1724,11 +1837,41 @@ export default function TranslationManagerContent() {
               </>
             ) : (
               <>
-                <Upload className="w-4 h-4 mr-2" />
-                AI Translate All Languages
+                <Sparkles className="w-4 h-4 mr-2" />
+                AI Translate Missing Only
               </>
             )}
           </Button>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  onClick={handleTranslateAll} 
+                  disabled={isTranslating || isEvaluating}
+                  size="lg"
+                  variant="outline"
+                  className="border-orange-500/50 text-orange-600 hover:bg-orange-50"
+                >
+                  {isTranslating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Translating...
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="w-4 h-4 mr-2" />
+                      AI Re-translate Everything
+                    </>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="bg-orange-100 border-orange-500">
+                <p className="font-semibold text-orange-900">⚠️ Warning: Overwrites ALL translations</p>
+                <p className="text-sm text-orange-800">Use "Translate Missing Only" instead</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
           <TooltipProvider>
             <Tooltip>
