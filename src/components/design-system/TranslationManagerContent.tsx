@@ -76,6 +76,7 @@ export default function TranslationManagerContent() {
   const [bulkRefineProgress, setBulkRefineProgress] = useState({ current: 0, total: 0 });
   const [approvalStatusFilter, setApprovalStatusFilter] = useState<string>('all'); // 'all', 'pending', 'approved'
   const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [isSyncingVisibility, setIsSyncingVisibility] = useState(false);
 
   // Load saved filters on mount
   useEffect(() => {
@@ -783,6 +784,32 @@ export default function TranslationManagerContent() {
         title: 'Language visibility updated',
         description: `${languageName} ${newValue ? 'will show' : 'is hidden'} in language switcher`,
       });
+    }
+  }
+
+  async function handleSyncLanguageVisibility() {
+    setIsSyncingVisibility(true);
+    try {
+      const { error } = await supabase.rpc('sync_language_visibility');
+      
+      if (error) throw error;
+      
+      // Reload data to reflect changes
+      await loadData();
+      await refreshStats();
+      
+      toast({
+        title: 'Language visibility synced',
+        description: 'Languages automatically shown/hidden based on approval rates (95% threshold)',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Sync failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSyncingVisibility(false);
     }
   }
 
@@ -1953,6 +1980,36 @@ export default function TranslationManagerContent() {
               </>
             )}
           </Button>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={handleSyncLanguageVisibility}
+                  variant="outline"
+                  size="lg"
+                  disabled={isSyncingVisibility}
+                  className="border-blue-500/50 text-blue-600 hover:bg-blue-50"
+                >
+                  {isSyncingVisibility ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Sync Language Visibility
+                    </>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="bg-blue-100 border-blue-500">
+                <p className="font-semibold text-blue-900">Auto-hide incomplete languages</p>
+                <p className="text-sm text-blue-800">Languages with &lt;95% approval will be hidden from switcher</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {translationProgress && (

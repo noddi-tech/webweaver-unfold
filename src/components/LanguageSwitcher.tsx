@@ -31,11 +31,20 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
 
   useEffect(() => {
     async function loadLanguages() {
-      const [{ data: langs }, { data: set }] = await Promise.all([
+      const [{ data: langs }, { data: set }, { data: stats }] = await Promise.all([
         supabase.from('languages').select('*').eq('enabled', true).eq('show_in_switcher', true).order('sort_order'),
-        supabase.from('language_settings').select('*').single()
+        supabase.from('language_settings').select('*').single(),
+        supabase.from('translation_stats').select('*')
       ]);
-      if (langs) setLanguages(langs);
+      
+      // Frontend safety check: only show languages with >= 95% approval or English
+      const safeLanguages = langs?.filter(lang => {
+        if (lang.code === 'en') return true;
+        const stat = stats?.find(s => s.code === lang.code);
+        return stat && (stat.approval_percentage ?? 0) >= 95;
+      }) || [];
+      
+      if (safeLanguages) setLanguages(safeLanguages);
       if (set) setSettings(set);
     }
     loadLanguages();
@@ -101,7 +110,7 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="gap-2 h-10 px-3 py-2">
+        <Button variant="ghost" className="gap-2 h-10 px-3 py-2 min-w-[180px] justify-start">
           {CurrentFlag ? (
             <CurrentFlag className="w-5 h-3" />
           ) : (
