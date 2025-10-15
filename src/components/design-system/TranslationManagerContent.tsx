@@ -39,10 +39,11 @@ import LanguageSettings from './LanguageSettings';
 import EvaluationControls from './EvaluationControls';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslationStats } from '@/hooks/useTranslationStats';
+import LanguageStatsTable from './LanguageStatsTable';
 
 export default function TranslationManagerContent() {
   const { toast } = useToast();
-  const { stats: sharedStats, refresh: refreshStats } = useTranslationStats();
+  const { stats: sharedStats, pageMetaStats, evaluationProgress, refresh: refreshStats } = useTranslationStats();
   const [languages, setLanguages] = useState<any[]>([]);
   const [translations, setTranslations] = useState<any[]>([]);
   const [englishTranslations, setEnglishTranslations] = useState<any[]>([]);
@@ -1788,103 +1789,96 @@ export default function TranslationManagerContent() {
           </CollapsibleContent>
         </Collapsible>
 
-        <div className="flex flex-wrap gap-4 mb-6">
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="lg" variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Translation Key
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Translation Key</DialogTitle>
-                <DialogDescription>
-                  Create a new translation key with English text. Other languages can be AI-translated later.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div>
-                  <Label htmlFor="key">Translation Key</Label>
-                  <Input
-                    id="key"
-                    placeholder="e.g. hero.title"
-                    value={newKey}
-                    onChange={(e) => setNewKey(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="text">English Text</Label>
-                  <Textarea
-                    id="text"
-                    placeholder="Enter the English text..."
-                    value={newText}
-                    onChange={(e) => setNewText(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="location">Page Location</Label>
-                  <Input
-                    id="location"
-                    placeholder="e.g. homepage, contact, pricing"
-                    value={newPageLocation}
-                    onChange={(e) => setNewPageLocation(e.target.value)}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button onClick={handleAddTranslation}>Add Translation</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+        {/* Action Groups - Organized by Function */}
+        <div className="space-y-6 mb-6">
+          {/* Setup Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Setup & Sync</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Translation Key
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add New Translation Key</DialogTitle>
+                      <DialogDescription>
+                        Create a new translation key with English text. Other languages can be AI-translated later.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div>
+                        <Label htmlFor="key">Translation Key</Label>
+                        <Input
+                          id="key"
+                          placeholder="e.g. hero.title"
+                          value={newKey}
+                          onChange={(e) => setNewKey(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="text">English Text</Label>
+                        <Textarea
+                          id="text"
+                          placeholder="Enter the English text..."
+                          value={newText}
+                          onChange={(e) => setNewText(e.target.value)}
+                          rows={3}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="location">Page Location</Label>
+                        <Input
+                          id="location"
+                          placeholder="e.g. homepage, contact, pricing"
+                          value={newPageLocation}
+                          onChange={(e) => setNewPageLocation(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button onClick={handleAddTranslation}>Add Translation</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
 
-          <Button 
-            onClick={handleSyncKeys} 
-            disabled={isSyncing}
-            size="lg"
-            variant="outline"
-          >
-            {isSyncing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Syncing...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Sync Translation Keys
-              </>
-            )}
-          </Button>
-
-          <Button 
-            onClick={handleTranslateMissingOnly} 
-            disabled={isTranslating || isEvaluating}
-            size="lg"
-          >
-            {isTranslating ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Translating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4 mr-2" />
-                AI Translate Missing Only
-              </>
-            )}
-          </Button>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
                 <Button 
-                  onClick={handleTranslateAll} 
-                  disabled={isTranslating || isEvaluating}
-                  size="lg"
+                  onClick={handleSyncKeys} 
+                  disabled={isSyncing}
                   variant="outline"
-                  className="border-orange-500/50 text-orange-600 hover:bg-orange-50"
+                >
+                  {isSyncing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Sync Translation Keys
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Translation Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">AI Translation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  onClick={handleTranslateMissingOnly} 
+                  disabled={isTranslating || isEvaluating}
                 >
                   {isTranslating ? (
                     <>
@@ -1893,123 +1887,164 @@ export default function TranslationManagerContent() {
                     </>
                   ) : (
                     <>
-                      <AlertTriangle className="w-4 h-4 mr-2" />
-                      AI Re-translate Everything
-                    </>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="bg-orange-100 border-orange-500">
-                <p className="font-semibold text-orange-900">⚠️ Warning: Overwrites ALL translations</p>
-                <p className="text-sm text-orange-800">Use "Translate Missing Only" instead</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  onClick={handleEvaluateIncomplete} 
-                  disabled={isTranslating || isEvaluating}
-                  size="lg"
-                  variant="secondary"
-                >
-                  {isEvaluating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Evaluating...
-                    </>
-                  ) : (
-                    <>
                       <Sparkles className="w-4 h-4 mr-2" />
-                      Evaluate Incomplete
+                      AI Translate Missing Only
                     </>
                   )}
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Only evaluate languages not yet at 100%</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  onClick={handleEvaluateAllLanguages} 
-                  disabled={isTranslating || isEvaluating}
-                  size="lg"
-                  variant="outline"
-                >
-                  {isEvaluating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Evaluating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Evaluate All Languages
-                    </>
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Re-evaluate all languages including completed ones</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        onClick={handleTranslateAll} 
+                        disabled={isTranslating || isEvaluating}
+                        variant="outline"
+                        className="border-orange-500/50 text-orange-600 hover:bg-orange-50"
+                      >
+                        {isTranslating ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Translating...
+                          </>
+                        ) : (
+                          <>
+                            <AlertTriangle className="w-4 h-4 mr-2" />
+                            AI Re-translate Everything
+                          </>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-orange-100 border-orange-500">
+                      <p className="font-semibold text-orange-900">⚠️ Warning: Overwrites ALL translations</p>
+                      <p className="text-sm text-orange-800">Use "Translate Missing Only" instead</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </CardContent>
+          </Card>
 
-          <Button
-            onClick={resetStuckEvaluations}
-            variant="outline"
-            size="lg"
-            disabled={isResettingStuck || isEvaluating}
-          >
-            {isResettingStuck ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Resetting...
-              </>
-            ) : (
-              <>
-                <AlertTriangle className="w-4 h-4 mr-2" />
-                Reset Stuck Evaluations
-              </>
-            )}
-          </Button>
+          {/* Evaluation Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Quality Evaluation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        onClick={handleEvaluateIncomplete} 
+                        disabled={isTranslating || isEvaluating}
+                        variant="secondary"
+                      >
+                        {isEvaluating ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Evaluating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Evaluate Incomplete
+                          </>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Only evaluate languages not yet at 100%</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        onClick={handleEvaluateAllLanguages} 
+                        disabled={isTranslating || isEvaluating}
+                        variant="outline"
+                      >
+                        {isEvaluating ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Evaluating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Evaluate All Languages
+                          </>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Re-evaluate all languages including completed ones</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
                 <Button
-                  onClick={handleSyncLanguageVisibility}
+                  onClick={resetStuckEvaluations}
                   variant="outline"
-                  size="lg"
-                  disabled={isSyncingVisibility}
-                  className="border-blue-500/50 text-blue-600 hover:bg-blue-50"
+                  disabled={isResettingStuck || isEvaluating}
                 >
-                  {isSyncingVisibility ? (
+                  {isResettingStuck ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Syncing...
+                      Resetting...
                     </>
                   ) : (
                     <>
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Sync Language Visibility
+                      <AlertTriangle className="w-4 h-4 mr-2" />
+                      Reset Stuck Evaluations
                     </>
                   )}
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent className="bg-blue-100 border-blue-500">
-                <p className="font-semibold text-blue-900">Auto-hide incomplete languages</p>
-                <p className="text-sm text-blue-800">Languages with &lt;95% approval will be hidden from switcher</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Language Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Language Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={handleSyncLanguageVisibility}
+                        variant="outline"
+                        disabled={isSyncingVisibility}
+                        className="border-blue-500/50 text-blue-600 hover:bg-blue-50"
+                      >
+                        {isSyncingVisibility ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Syncing...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Sync Language Visibility
+                          </>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-blue-100 border-blue-500">
+                      <p className="font-semibold text-blue-900">Auto-hide incomplete languages</p>
+                      <p className="text-sm text-blue-800">Languages with &lt;95% approval will be hidden from switcher</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {translationProgress && (
@@ -2018,67 +2053,16 @@ export default function TranslationManagerContent() {
           </div>
         )}
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {sharedStats.map((stat: any) => {
-            const Flag = (Flags as any)[languages.find(l => l.code === stat.code)?.flag_code];
-            const avgQuality = stat.avg_quality_score ? Math.round(stat.avg_quality_score) : null;
-            const qualityColor = avgQuality >= 85 ? 'text-green-600' : avgQuality >= 70 ? 'text-yellow-600' : avgQuality ? 'text-red-600' : 'text-muted-foreground';
-            
-            return (
-              <Card key={stat.code}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    {Flag && <Flag className="w-6 h-4" />}
-                    <span className="font-semibold">{stat.name}</span>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground">Approved</div>
-                    <div className="text-2xl font-bold">{stat.approved_translations}/{stat.total_translations}</div>
-                    <div className="text-sm text-muted-foreground">{stat.approval_percentage}%</div>
-                  </div>
-                  {avgQuality && (
-                    <div className={cn("text-sm font-medium mt-2", qualityColor)}>
-                      Quality: {avgQuality}%
-                    </div>
-                  )}
-                  {stat.needs_review_count > 0 && (
-                    <div className="text-xs text-orange-600 mt-1">
-                      {stat.needs_review_count} need review
-                    </div>
-                  )}
-                  
-                  {/* Individual evaluation controls for non-English languages */}
-                  {stat.code !== 'en' && (
-                    <div className="mt-3 pt-3 border-t">
-                      <EvaluationControls
-                        languageCode={stat.code}
-                        languageName={stat.name}
-                        onEvaluate={handleEvaluateQuality}
-                      />
-                    </div>
-                  )}
-                  
-                  {/* Language switcher visibility toggle */}
-                  <div className="mt-3 pt-3 border-t">
-                    <div className="flex items-center justify-between">
-                      <label htmlFor={`switcher-${stat.code}`} className="text-sm text-muted-foreground cursor-pointer">
-                        Show in switcher
-                      </label>
-                      <Switch
-                        id={`switcher-${stat.code}`}
-                        checked={languages.find(l => l.code === stat.code)?.show_in_switcher ?? true}
-                        onCheckedChange={() => {
-                          const lang = languages.find(l => l.code === stat.code);
-                          if (lang) handleToggleSwitcher(stat.code, stat.name, lang.show_in_switcher ?? true);
-                        }}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+        {/* Language Stats Table - Same as Overview */}
+        <div className="mb-8">
+          <LanguageStatsTable
+            stats={sharedStats}
+            pageMetaStats={pageMetaStats}
+            evaluationProgress={evaluationProgress}
+            englishCount={englishTranslations.length}
+            onToggleSwitcher={handleToggleSwitcher}
+            onRefresh={refreshStats}
+          />
         </div>
       </div>
 
