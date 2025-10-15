@@ -45,11 +45,13 @@ export default function UnifiedDashboard() {
     );
   }
 
-  // Calculate global stats - use English as baseline, exclude English from evaluation counts
+  // Calculate global stats - use ACTUAL data from stats, not theoretical calculations
   const totalLanguages = stats.filter(s => s.enabled && s.code !== 'en').length;
   const englishCount = stats.find(s => s.code === 'en')?.total_translations || 0;
-  const totalTranslationKeys = englishCount;
-  const totalTranslations = (totalLanguages + 1) * englishCount; // +1 to include English
+  
+  // ✓ Use actual sum from database instead of theoretical calculation
+  const actualTotalTranslations = stats.reduce((sum, s) => sum + s.total_translations, 0);
+  const expectedTotalTranslations = (totalLanguages + 1) * englishCount;
   
   // Only count evaluation for non-English languages
   const totalEvaluated = stats
@@ -70,7 +72,8 @@ export default function UnifiedDashboard() {
     sum + (s.completed_entries || 0), 0
   );
 
-  const translationCompletionRate = Math.round((totalTranslations / ((totalLanguages + 1) * totalTranslationKeys)) * 100) || 0;
+  // ✓ Fix completion rate to compare actual vs expected
+  const translationCompletionRate = Math.round((actualTotalTranslations / expectedTotalTranslations) * 100) || 0;
   const evaluationCompletionRate = Math.round((totalEvaluated / totalEvaluationRequired) * 100) || 0;
   const pageMetaCompletionRate = Math.round((totalPageMetaCompleted / totalPageMetaRequired) * 100) || 0;
 
@@ -93,7 +96,7 @@ export default function UnifiedDashboard() {
             <div className="text-3xl font-bold mb-2">{translationCompletionRate}%</div>
             <Progress value={translationCompletionRate} className="h-2" />
             <p className="text-xs text-muted-foreground mt-2">
-              {totalTranslations} / {totalLanguages * totalTranslationKeys} keys translated
+              {actualTotalTranslations} / {expectedTotalTranslations} keys translated
             </p>
           </CardContent>
         </Card>
@@ -130,11 +133,11 @@ export default function UnifiedDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold mb-2">
-              {Math.round((totalApproved / totalTranslations) * 100)}%
+              {Math.round((totalApproved / actualTotalTranslations) * 100)}%
             </div>
-            <Progress value={(totalApproved / totalTranslations) * 100} className="h-2" />
+            <Progress value={(totalApproved / actualTotalTranslations) * 100} className="h-2" />
             <p className="text-xs text-muted-foreground mt-2">
-              {totalApproved} / {totalTranslations} approved
+              {totalApproved} / {actualTotalTranslations} approved
             </p>
           </CardContent>
         </Card>

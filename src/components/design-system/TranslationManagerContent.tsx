@@ -38,16 +38,17 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import LanguageSettings from './LanguageSettings';
 import EvaluationControls from './EvaluationControls';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTranslationStats } from '@/hooks/useTranslationStats';
 
 export default function TranslationManagerContent() {
   const { toast } = useToast();
+  const { stats: sharedStats, refresh: refreshStats } = useTranslationStats();
   const [languages, setLanguages] = useState<any[]>([]);
   const [translations, setTranslations] = useState<any[]>([]);
   const [englishTranslations, setEnglishTranslations] = useState<any[]>([]);
   const [selectedLang, setSelectedLang] = useState('en');
   const [searchFilter, setSearchFilter] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
-  const [stats, setStats] = useState<any[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newKey, setNewKey] = useState('');
   const [newText, setNewText] = useState('');
@@ -126,9 +127,6 @@ export default function TranslationManagerContent() {
       .in('language_code', ['en', selectedLang])
       .order('translation_key');
     
-    // Get stats from optimized views - use shared hook data
-    const { data: st } = await supabase.from('translation_stats' as any).select('*');
-    
     if (langs) setLanguages(langs);
     
     if (trans) {
@@ -136,14 +134,8 @@ export default function TranslationManagerContent() {
       setEnglishTranslations(trans.filter(t => t.language_code === 'en'));
     }
     
-    if (st) {
-      console.log('[TranslationManagerContent] Loaded stats:', {
-        timestamp: new Date().toISOString(),
-        languages: st.length,
-        sampleData: st.slice(0, 2)
-      });
-      setStats(st);
-    }
+    // Refresh shared stats after loading
+    refreshStats();
   }
 
   // Helper to get English source text for a key
@@ -1971,7 +1963,7 @@ export default function TranslationManagerContent() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {stats.map((stat: any) => {
+          {sharedStats.map((stat: any) => {
             const Flag = (Flags as any)[languages.find(l => l.code === stat.code)?.flag_code];
             const avgQuality = stat.avg_quality_score ? Math.round(stat.avg_quality_score) : null;
             const qualityColor = avgQuality >= 85 ? 'text-green-600' : avgQuality >= 70 ? 'text-yellow-600' : avgQuality ? 'text-red-600' : 'text-muted-foreground';
@@ -2038,7 +2030,7 @@ export default function TranslationManagerContent() {
             <AlertDialogDescription>
               {approveAllLanguage && (() => {
                 const lang = languages.find(l => l.code === approveAllLanguage);
-                const stat = stats.find(s => s.code === approveAllLanguage);
+                const stat = sharedStats.find(s => s.code === approveAllLanguage);
                 const unapprovedCount = stat ? stat.total_translations - stat.approved_translations : 0;
                 const Flag = lang ? (Flags as any)[lang.flag_code] : null;
                 
@@ -2123,7 +2115,7 @@ export default function TranslationManagerContent() {
         </TabsList>
 
         {languages.map((lang) => {
-          const langStat = stats.find(s => s.code === lang.code);
+          const langStat = sharedStats.find(s => s.code === lang.code);
           const unapprovedCount = langStat ? langStat.total_translations - langStat.approved_translations : 0;
           const emptyCount = hasEmptyTranslations(lang.code);
           
