@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,59 +5,16 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslationStats } from '@/hooks/useTranslationStats';
 import * as Flags from 'country-flag-icons/react/3x2';
-import { Check, X, AlertTriangle, Loader2, RefreshCw, Sparkles, FileText } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Check, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
 
 export default function UnifiedDashboard() {
   const { toast } = useToast();
-  const [stats, setStats] = useState<any[]>([]);
-  const [pageMetaStats, setPageMetaStats] = useState<any[]>([]);
-  const [evaluationProgress, setEvaluationProgress] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
-    setLoading(true);
-    const [
-      { data: translationStats },
-      { data: metaStats },
-      { data: evalProgress },
-      { data: languages }
-    ] = await Promise.all([
-      supabase.from('translation_stats' as any).select('*'),
-      supabase.from('page_meta_stats' as any).select('*'),
-      supabase.from('evaluation_progress').select('*'),
-      supabase.from('languages').select('code, show_in_switcher')
-    ]);
-
-    // Merge show_in_switcher into stats
-    if (translationStats && languages) {
-      const enrichedStats = translationStats.map((stat: any) => ({
-        ...stat,
-        show_in_switcher: languages.find((l: any) => l.code === stat.code)?.show_in_switcher ?? true
-      }));
-      setStats(enrichedStats);
-    } else if (translationStats) {
-      setStats(translationStats);
-    }
-    
-    if (metaStats) setPageMetaStats(metaStats);
-    if (evalProgress) setEvaluationProgress(evalProgress);
-    
-    setLoading(false);
-  }
+  const { stats, pageMetaStats, evaluationProgress, loading, lastUpdated, refresh } = useTranslationStats();
 
   async function handleToggleSwitcher(languageCode: string, languageName: string, currentValue: boolean) {
     const newValue = !currentValue;
-    
-    // Optimistic update
-    setStats(prev => prev.map(s => 
-      s.code === languageCode ? { ...s, show_in_switcher: newValue } : s
-    ));
 
     const { error } = await supabase
       .from('languages')
@@ -66,10 +22,6 @@ export default function UnifiedDashboard() {
       .eq('code', languageCode);
 
     if (error) {
-      // Revert on error
-      setStats(prev => prev.map(s => 
-        s.code === languageCode ? { ...s, show_in_switcher: currentValue } : s
-      ));
       toast({
         title: 'Error updating language',
         description: error.message,
@@ -80,6 +32,8 @@ export default function UnifiedDashboard() {
         title: 'Language visibility updated',
         description: `${languageName} ${newValue ? 'will show' : 'is hidden'} in language switcher`,
       });
+      // Refresh data after update
+      refresh();
     }
   }
 
@@ -190,8 +144,13 @@ export default function UnifiedDashboard() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Language-by-Language Status</CardTitle>
-            <Button onClick={loadData} variant="ghost" size="sm">
+            <div>
+              <CardTitle>Language-by-Language Status</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Last updated: {lastUpdated.toLocaleTimeString()}
+              </p>
+            </div>
+            <Button onClick={refresh} variant="ghost" size="sm">
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>

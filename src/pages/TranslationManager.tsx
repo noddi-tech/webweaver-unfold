@@ -5,8 +5,12 @@ import SitemapGenerator from '@/components/design-system/SitemapGenerator';
 import UnifiedDashboard from '@/components/design-system/UnifiedDashboard';
 import LanguageVisibilityManager from '@/components/design-system/LanguageVisibilityManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTranslationStats } from '@/hooks/useTranslationStats';
 
 export default function TranslationManager() {
+  // Pre-load shared data for both tabs
+  useTranslationStats();
+
   return (
     <div className="min-h-screen">
       <Header />

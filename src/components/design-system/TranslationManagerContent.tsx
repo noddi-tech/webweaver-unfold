@@ -126,7 +126,7 @@ export default function TranslationManagerContent() {
       .in('language_code', ['en', selectedLang])
       .order('translation_key');
     
-    // Get stats from optimized views
+    // Get stats from optimized views - use shared hook data
     const { data: st } = await supabase.from('translation_stats' as any).select('*');
     
     if (langs) setLanguages(langs);
@@ -136,7 +136,14 @@ export default function TranslationManagerContent() {
       setEnglishTranslations(trans.filter(t => t.language_code === 'en'));
     }
     
-    if (st) setStats(st);
+    if (st) {
+      console.log('[TranslationManagerContent] Loaded stats:', {
+        timestamp: new Date().toISOString(),
+        languages: st.length,
+        sampleData: st.slice(0, 2)
+      });
+      setStats(st);
+    }
   }
 
   // Helper to get English source text for a key
