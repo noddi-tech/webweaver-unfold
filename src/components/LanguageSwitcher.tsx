@@ -110,7 +110,7 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="gap-2 h-10 px-3 py-2 w-[180px] justify-start">
+        <Button variant="ghost" className="gap-2 h-10 px-3 py-2 w-[180px] justify-start transition-none hover:scale-100 hover:translate-y-0">
           {CurrentFlag ? (
             <CurrentFlag className="w-5 h-3 flex-shrink-0" />
           ) : (
