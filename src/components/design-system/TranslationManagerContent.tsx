@@ -896,11 +896,18 @@ export default function TranslationManagerContent() {
         return;
       }
 
+      // Fetch fresh, unfiltered translations from database to accurately detect missing keys
+      const { data: allTranslations, error: fetchError } = await supabase
+        .from('translations')
+        .select('translation_key, language_code');
+
+      if (fetchError) throw fetchError;
+
       // Calculate missing keys for each language
       const englishKeys = new Set(englishTranslations.map(t => t.translation_key));
       const languageStats = targetLanguages.map(lang => {
         const existingKeys = new Set(
-          translations
+          (allTranslations || [])
             .filter(t => t.language_code === lang.code)
             .map(t => t.translation_key)
         );
