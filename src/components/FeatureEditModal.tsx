@@ -69,9 +69,12 @@ export function FeatureEditModal({
       if (error) throw error;
 
       toast.success('Feature updated successfully');
-      onSave?.();
       onOpenChange(false);
-      window.location.reload();
+      
+      // Call optional callback for refresh logic
+      if (onSave) {
+        onSave();
+      }
     } catch (error) {
       console.error('Error saving feature:', error);
       toast.error('Failed to save feature');

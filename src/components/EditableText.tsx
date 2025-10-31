@@ -8,6 +8,7 @@ interface EditableTextProps {
   contentId: string;
   translationKey?: string;
   className?: string;
+  onSave?: () => void;
 }
 
 export function EditableText({
@@ -15,6 +16,7 @@ export function EditableText({
   contentId,
   translationKey,
   className = '',
+  onSave,
 }: EditableTextProps) {
   const { editMode } = useEditMode();
   const [isHovered, setIsHovered] = useState(false);
@@ -51,6 +53,7 @@ export function EditableText({
         contentId={contentId}
         contentTable="text_content"
         translationKey={translationKey}
+        onSave={onSave}
       />
     </>
   );
