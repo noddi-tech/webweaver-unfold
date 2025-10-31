@@ -10,6 +10,8 @@ import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { LockedText } from "@/components/LockedText";
+import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Carousel,
   CarouselContent,
@@ -27,8 +29,21 @@ const Hero = () => {
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const plugin = useRef(Autoplay({ delay: 3500, stopOnInteraction: true }));
+  
+  // Media settings state
+  const [displayType, setDisplayType] = useState<'image' | 'carousel'>('carousel');
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageAlt, setImageAlt] = useState('');
+  const [carouselImages, setCarouselImages] = useState<any[]>([]);
+  const [carouselSettings, setCarouselSettings] = useState({
+    autoplay: true,
+    autoplay_delay: 3500,
+    show_navigation: true,
+    show_dots: true,
+  });
 
-  const bookingSteps = [
+  // Fallback images
+  const fallbackImages = [
     {
       image: noddiLocationScreen,
       alt: "Noddi location selection screen showing saved addresses and search functionality",
@@ -45,6 +60,64 @@ const Hero = () => {
       title: "Hurtigruta Carglass",
     },
   ];
+
+  useEffect(() => {
+    loadMediaSettings();
+  }, []);
+
+  const loadMediaSettings = async () => {
+    try {
+      const { data: settings } = await supabase
+        .from('image_carousel_settings')
+        .select(`
+          *,
+          carousel_config:carousel_configs(*)
+        `)
+        .eq('location_id', 'homepage-hero')
+        .maybeSingle();
+
+      if (settings) {
+        setDisplayType(settings.display_type as 'image' | 'carousel');
+        
+        if (settings.display_type === 'image') {
+          setImageUrl(settings.image_url || '');
+          setImageAlt(settings.image_alt || '');
+        } else if (settings.carousel_config) {
+          const config = settings.carousel_config as any;
+          setCarouselSettings({
+            autoplay: config.autoplay,
+            autoplay_delay: config.autoplay_delay,
+            show_navigation: config.show_navigation,
+            show_dots: config.show_dots,
+          });
+          
+          // Parse carousel images
+          const images = Array.isArray(config.images) ? config.images : [];
+          setCarouselImages(images.map((img: any) => ({
+            // Convert /src/assets paths to actual imports
+            image: img.url.includes('noddi-location-screen') ? noddiLocationScreen :
+                   img.url.includes('tiamat-location-screen') ? tiamatLocationScreen :
+                   img.url.includes('hurtigruta-location-screen') ? hurtigrutaLocationScreen :
+                   img.url,
+            alt: img.alt || '',
+            title: img.title || '',
+          })));
+          
+          // Update autoplay plugin delay
+          if (plugin.current) {
+            plugin.current = Autoplay({ 
+              delay: config.autoplay_delay,
+              stopOnInteraction: true 
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading media settings:', error);
+    }
+  };
+
+  const bookingSteps = carouselImages.length > 0 ? carouselImages : fallbackImages;
 
   useEffect(() => {
     if (!api) {
@@ -105,47 +178,69 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Right Column - Booking Flow Carousel */}
-          <div className="relative max-w-[280px] mx-auto">
-            <Carousel
-              setApi={setApi}
-              plugins={[plugin.current]}
-              className="w-full"
-              onMouseEnter={plugin.current.stop}
-              onMouseLeave={plugin.current.reset}
-            >
-              <CarouselContent>
-                {bookingSteps.map((step, index) => (
-                  <CarouselItem key={index}>
-                    <div className="flex items-center">
-                      <img
-                        src={step.image}
-                        alt={step.alt}
-                        className="w-full h-auto object-contain transition-opacity duration-500"
-                        loading={index === 0 ? "eager" : "lazy"}
-                      />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="-left-12" />
-              <CarouselNext className="-right-12" />
-            </Carousel>
+          {/* Right Column - Booking Flow Carousel or Image */}
+          <EditableUniversalMedia
+            locationId="homepage-hero"
+            onSave={loadMediaSettings}
+            placeholder="Click to configure hero image/carousel"
+          >
+            {displayType === 'carousel' ? (
+              <div className="relative max-w-[280px] mx-auto">
+                <Carousel
+                  setApi={setApi}
+                  plugins={carouselSettings.autoplay ? [plugin.current] : []}
+                  className="w-full"
+                  onMouseEnter={plugin.current.stop}
+                  onMouseLeave={plugin.current.reset}
+                >
+                  <CarouselContent>
+                    {bookingSteps.map((step, index) => (
+                      <CarouselItem key={index}>
+                        <div className="flex items-center">
+                          <img
+                            src={step.image}
+                            alt={step.alt}
+                            className="w-full h-auto object-contain transition-opacity duration-500"
+                            loading={index === 0 ? "eager" : "lazy"}
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {carouselSettings.show_navigation && (
+                    <>
+                      <CarouselPrevious className="-left-12" />
+                      <CarouselNext className="-right-12" />
+                    </>
+                  )}
+                </Carousel>
 
-            {/* Navigation Dots */}
-            <div className="flex justify-center gap-2 mt-6">
-              {Array.from({ length: count }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => api?.scrollTo(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    index === current - 1 ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                  }`}
-                  aria-label={`Go to step ${index + 1}`}
+                {/* Navigation Dots */}
+                {carouselSettings.show_dots && (
+                  <div className="flex justify-center gap-2 mt-6">
+                    {Array.from({ length: count }).map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => api?.scrollTo(index)}
+                        className={`h-2 rounded-full transition-all ${
+                          index === current - 1 ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                        }`}
+                        aria-label={`Go to step ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="relative max-w-[280px] mx-auto">
+                <img
+                  src={imageUrl}
+                  alt={imageAlt}
+                  className="w-full h-auto object-contain rounded-2xl shadow-xl"
                 />
-              ))}
-            </div>
-          </div>
+              </div>
+            )}
+          </EditableUniversalMedia>
         </div>
       </div>
     </section>
