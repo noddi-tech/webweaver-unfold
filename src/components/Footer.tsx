@@ -102,11 +102,6 @@ const Footer = () => {
           )}
         </div>
 
-        {/* Language Switcher */}
-        <div className="mt-12 pt-8 border-t border-border">
-          <LanguageSwitcher variant="footer" />
-        </div>
-
         {(footerSettings.copyright_text || t('footer.copyright')) && (
           <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
             <p>{t('footer.copyright', footerSettings.copyright_text)}</p>
