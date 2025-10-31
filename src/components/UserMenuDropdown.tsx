@@ -55,17 +55,20 @@ export function UserMenuDropdown({ user }: UserMenuDropdownProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="flex items-center justify-between cursor-pointer"
+          className="flex items-center justify-between"
           onSelect={(e) => {
             e.preventDefault();
-            toggleEditMode();
           }}
         >
           <div className="flex items-center gap-2">
             <Edit3 className="h-4 w-4" />
             <span>Edit Mode</span>
           </div>
-          <Switch checked={editMode} onCheckedChange={toggleEditMode} />
+          <Switch 
+            checked={editMode} 
+            onCheckedChange={toggleEditMode}
+            onClick={(e) => e.stopPropagation()}
+          />
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
