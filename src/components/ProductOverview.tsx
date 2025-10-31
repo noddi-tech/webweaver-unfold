@@ -11,18 +11,18 @@ export default function ProductOverview() {
 
   const products = [
     {
+      icon: Handshake,
+      title: t('product_overview.solutions.title', "Solutions"),
+      description: t('product_overview.solutions.description', "Built for automotive networks, tire hotels, and multi-location chains"),
+      link: "/solutions",
+      color: "secondary"
+    },
+    {
       icon: Workflow,
       title: t('product_overview.functions.title', "Functions"),
       description: t('product_overview.functions.description', "See every capability—from booking to invoicing—in one platform"),
       link: "/functions",
       color: "primary"
-    },
-    {
-      icon: Handshake,
-      title: t('product_overview.partners.title', "Partners"),
-      description: t('product_overview.partners.description', "Built for automotive networks, tire hotels, and multi-location chains"),
-      link: "/partners",
-      color: "secondary"
     },
     {
       icon: Layout,
