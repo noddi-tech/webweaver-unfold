@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Pencil, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
+import i18n from '@/i18n/config';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ interface TranslationEditModalProps {
   contentId: string;
   contentTable: 'text_content' | 'translations';
   translationKey?: string;
+  onSave?: () => void;
 }
 
 interface Translation {
@@ -35,6 +37,7 @@ export function TranslationEditModal({
   contentId,
   contentTable,
   translationKey,
+  onSave,
 }: TranslationEditModalProps) {
   const [content, setContent] = useState('');
   const [translations, setTranslations] = useState<Translation[]>([]);
@@ -151,7 +154,14 @@ export function TranslationEditModal({
 
       toast.success('Content updated successfully');
       onOpenChange(false);
-      window.location.reload(); // Refresh to show updated content
+      
+      // Trigger i18n reload to refresh translations without full page reload
+      await i18n.reloadResources();
+      
+      // Call optional callback for additional refresh logic
+      if (onSave) {
+        onSave();
+      }
     } catch (error) {
       console.error('Error saving content:', error);
       toast.error('Failed to save content');
@@ -179,6 +189,14 @@ export function TranslationEditModal({
       if (error) throw error;
 
       toast.success(`Translation updated for ${languageCode}`);
+      
+      // Trigger i18n reload to refresh translations
+      await i18n.reloadResources();
+      
+      // Call optional callback for additional refresh logic
+      if (onSave) {
+        onSave();
+      }
     } catch (error) {
       console.error('Error saving translation:', error);
       toast.error('Failed to save translation');

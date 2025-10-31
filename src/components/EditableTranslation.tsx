@@ -9,12 +9,14 @@ interface EditableTranslationProps {
   children: React.ReactNode;
   translationKey: string;
   className?: string;
+  onSave?: () => void;
 }
 
 export function EditableTranslation({
   children,
   translationKey,
   className = '',
+  onSave,
 }: EditableTranslationProps) {
   const { editMode } = useEditMode();
   const { currentLanguage } = useAppTranslation();
@@ -75,6 +77,7 @@ export function EditableTranslation({
           contentId={contentId}
           contentTable="translations"
           translationKey={translationKey}
+          onSave={onSave}
         />
       )}
     </>
