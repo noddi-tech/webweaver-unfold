@@ -276,6 +276,18 @@ const SolutionsManager = () => {
     setEditingSolution({ ...editingSolution, key_benefits: newBenefits });
   };
 
+  const autoSaveSortOrder = async (id: string, sortOrder: number) => {
+    updateLocal(id, { sort_order: sortOrder });
+    const { error } = await supabase
+      .from("solutions")
+      .update({ sort_order: sortOrder })
+      .eq("id", id);
+    
+    if (error) {
+      toast({ title: "Failed to update sort order", description: error.message, variant: "destructive" });
+    }
+  };
+
   const saveSettings = async () => {
     if (!settings) return;
     setSavingSettings(true);
@@ -511,7 +523,7 @@ const SolutionsManager = () => {
                       <Input
                         type="number"
                         value={s.sort_order}
-                        onChange={(e) => updateLocal(s.id, { sort_order: Number(e.target.value) })}
+                        onChange={(e) => autoSaveSortOrder(s.id, Number(e.target.value))}
                       />
                     </TableCell>
                     <TableCell className="text-right space-x-2">
