@@ -154,12 +154,12 @@ const Hero = () => {
                 </div>
                 <div>
                   <LockedText reason="Metric value - Update in code">
-                    <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                      NPS <Counter end={90} prefix="~" />
+                    <div className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
+                      Net Promoter Score <Counter end={90} prefix="~" />
                     </div>
                   </LockedText>
                   <EditableTranslation translationKey="hero.metrics.nps">
-                    <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'Industry leading')}</div>
+                    <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'from end customers. Like no one else in the industry')}</div>
                   </EditableTranslation>
                 </div>
               </div>
