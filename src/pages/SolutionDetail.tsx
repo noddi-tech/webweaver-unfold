@@ -99,10 +99,7 @@ const SolutionDetail = () => {
     try {
       const { data: settings } = await supabase
         .from('image_carousel_settings')
-        .select(`
-          *,
-          carousel_config:carousel_configs(*)
-        `)
+        .select('*')
         .eq('location_id', `solution-hero-${slug}`)
         .maybeSingle();
 
