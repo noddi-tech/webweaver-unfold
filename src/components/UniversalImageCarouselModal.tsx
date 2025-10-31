@@ -177,7 +177,7 @@ export function UniversalImageCarouselModal({
     }
 
     const configData = {
-      name: carouselName,
+      name: carouselSource === 'new' ? `${carouselName} (${Date.now()})` : carouselName,
       description: carouselDescription,
       autoplay: carouselAutoplay,
       autoplay_delay: carouselAutoplayDelay,
