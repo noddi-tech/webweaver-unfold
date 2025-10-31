@@ -21,9 +21,9 @@ export default function ProductOverview() {
     },
     {
       icon: Workflow,
-      title: t('product_overview.functions.title', "Features"),
-      description: t('product_overview.functions.description', "See every capability—from booking to invoicing—in one platform"),
-      link: "/functions",
+      title: t('product_overview.features.title', "Features"),
+      description: t('product_overview.features.description', "See every capability—from booking to invoicing—in one platform"),
+      link: "/features",
       color: "primary"
     },
     {
