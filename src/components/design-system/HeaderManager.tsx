@@ -4,14 +4,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, Plus, GripVertical } from "lucide-react";
+import { Trash2, Plus, GripVertical, ChevronDown, ChevronUp } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface NavigationLink {
+interface NavigationChild {
   title: string;
   url: string;
   active: boolean;
+  description?: string;
+}
+
+interface NavigationLink {
+  title: string;
+  url?: string;
+  active: boolean;
+  type: 'link' | 'dropdown';
+  children?: NavigationChild[];
   [key: string]: any;
 }
 
@@ -110,7 +120,45 @@ const HeaderManager = () => {
   const addNavigationLink = () => {
     setSettings(prev => ({
       ...prev,
-      navigation_links: [...prev.navigation_links, { title: "", url: "", active: true }]
+      navigation_links: [...prev.navigation_links, { title: "", url: "", active: true, type: 'link' }]
+    }));
+  };
+
+  const addChildLink = (parentIndex: number) => {
+    setSettings(prev => ({
+      ...prev,
+      navigation_links: prev.navigation_links.map((link, i) => 
+        i === parentIndex 
+          ? { ...link, children: [...(link.children || []), { title: "", url: "", active: true }] }
+          : link
+      )
+    }));
+  };
+
+  const updateChildLink = (parentIndex: number, childIndex: number, field: keyof NavigationChild, value: string | boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      navigation_links: prev.navigation_links.map((link, i) => 
+        i === parentIndex 
+          ? {
+              ...link,
+              children: (link.children || []).map((child, j) => 
+                j === childIndex ? { ...child, [field]: value } : child
+              )
+            }
+          : link
+      )
+    }));
+  };
+
+  const removeChildLink = (parentIndex: number, childIndex: number) => {
+    setSettings(prev => ({
+      ...prev,
+      navigation_links: prev.navigation_links.map((link, i) => 
+        i === parentIndex 
+          ? { ...link, children: (link.children || []).filter((_, j) => j !== childIndex) }
+          : link
+      )
     }));
   };
 
@@ -167,7 +215,7 @@ const HeaderManager = () => {
             
             {settings.navigation_links.map((link, index) => (
               <Card key={index}>
-                <CardContent className="pt-4">
+                <CardContent className="pt-4 space-y-4">
                   <div className="flex items-center gap-4">
                     <div className="flex flex-col gap-2 cursor-grab">
                       <Button
@@ -189,24 +237,43 @@ const HeaderManager = () => {
                       </Button>
                     </div>
                     
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor={`title-${index}`}>Title</Label>
-                        <Input
-                          id={`title-${index}`}
-                          value={link.title}
-                          onChange={(e) => updateNavigationLink(index, 'title', e.target.value)}
-                          placeholder="Features"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor={`url-${index}`}>URL</Label>
-                        <Input
-                          id={`url-${index}`}
-                          value={link.url}
-                          onChange={(e) => updateNavigationLink(index, 'url', e.target.value)}
-                          placeholder="/features"
-                        />
+                    <div className="flex-1 space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor={`title-${index}`}>Title</Label>
+                          <Input
+                            id={`title-${index}`}
+                            value={link.title}
+                            onChange={(e) => updateNavigationLink(index, 'title', e.target.value)}
+                            placeholder="Features"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`type-${index}`}>Type</Label>
+                          <Select
+                            value={link.type || 'link'}
+                            onValueChange={(value) => updateNavigationLink(index, 'type', value)}
+                          >
+                            <SelectTrigger id={`type-${index}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="link">Link</SelectItem>
+                              <SelectItem value="dropdown">Dropdown</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        {link.type !== 'dropdown' && (
+                          <div>
+                            <Label htmlFor={`url-${index}`}>URL</Label>
+                            <Input
+                              id={`url-${index}`}
+                              value={link.url || ''}
+                              onChange={(e) => updateNavigationLink(index, 'url', e.target.value)}
+                              placeholder="/features"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                     
@@ -227,6 +294,73 @@ const HeaderManager = () => {
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
+
+                  {/* Dropdown Children */}
+                  {link.type === 'dropdown' && (
+                    <div className="ml-16 space-y-2 border-l-2 border-border pl-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-semibold">Dropdown Items</Label>
+                        <Button onClick={() => addChildLink(index)} size="sm" variant="outline">
+                          <Plus className="w-3 h-3 mr-1" />
+                          Add Item
+                        </Button>
+                      </div>
+                      
+                      {(link.children || []).map((child, childIndex) => (
+                        <div key={childIndex} className="p-3 bg-muted/50 rounded-md space-y-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div>
+                              <Label htmlFor={`child-title-${index}-${childIndex}`} className="text-xs">Title</Label>
+                              <Input
+                                id={`child-title-${index}-${childIndex}`}
+                                value={child.title}
+                                onChange={(e) => updateChildLink(index, childIndex, 'title', e.target.value)}
+                                placeholder="Tire Services"
+                                className="h-8"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`child-url-${index}-${childIndex}`} className="text-xs">URL</Label>
+                              <Input
+                                id={`child-url-${index}-${childIndex}`}
+                                value={child.url}
+                                onChange={(e) => updateChildLink(index, childIndex, 'url', e.target.value)}
+                                placeholder="/solutions/tire-services"
+                                className="h-8"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor={`child-desc-${index}-${childIndex}`} className="text-xs">Description (optional)</Label>
+                            <Input
+                              id={`child-desc-${index}-${childIndex}`}
+                              value={child.description || ''}
+                              onChange={(e) => updateChildLink(index, childIndex, 'description', e.target.value)}
+                              placeholder="Complete tire management and sales"
+                              className="h-8"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={child.active}
+                                onCheckedChange={(checked) => updateChildLink(index, childIndex, 'active', checked)}
+                              />
+                              <Label className="text-xs">Active</Label>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeChildLink(index, childIndex)}
+                              className="text-destructive hover:text-destructive h-7"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}

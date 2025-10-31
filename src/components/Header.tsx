@@ -1,13 +1,22 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, icons } from "lucide-react";
+import { Menu, X, icons, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import GlobalUSPBar from "@/components/GlobalUSPBar";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LanguageLink } from "@/components/LanguageLink";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground", logo_image_url: null as string | null, logo_variant: "text", logo_image_height: 32, logo_icon_name: null as string | null, logo_icon_position: "top-right", logo_icon_size: "default" });
   const [headerSettings, setHeaderSettings] = useState<any>(null);
@@ -145,17 +154,48 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           {headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
-            <nav className="hidden md:flex items-center space-x-8">
-              {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => (
-                <LanguageLink 
-                  key={index} 
-                  to={link.url} 
-                  className="text-foreground hover:text-primary transition-colors"
-                >
-                  {link.title}
-                </LanguageLink>
-              ))}
-            </nav>
+            <NavigationMenu className="hidden md:flex">
+              <NavigationMenuList>
+                {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => (
+                  <NavigationMenuItem key={index}>
+                    {link.type === 'dropdown' && link.children && link.children.length > 0 ? (
+                      <>
+                        <NavigationMenuTrigger className="bg-transparent data-[state=open]:animate-none data-[state=closed]:animate-none">
+                          {link.title}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent className="data-[state=open]:animate-none data-[state=closed]:animate-none transition-none">
+                          <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                            {link.children.filter((child: any) => child.active).map((child: any, childIndex: number) => (
+                              <LanguageLink
+                                key={childIndex}
+                                to={child.url}
+                                className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                              >
+                                <div className="text-sm font-medium leading-none">{child.title}</div>
+                                {child.description && (
+                                  <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                    {child.description}
+                                  </p>
+                                )}
+                              </LanguageLink>
+                            ))}
+                          </div>
+                        </NavigationMenuContent>
+                      </>
+                    ) : (
+                      <NavigationMenuLink asChild>
+                        <LanguageLink 
+                          to={link.url || '#'} 
+                          className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                        >
+                          {link.title}
+                        </LanguageLink>
+                      </NavigationMenuLink>
+                    )}
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
           )}
 
           {/* CTA Buttons - Hidden for clean public interface */}
@@ -178,16 +218,43 @@ const Header = () => {
         {/* Mobile Menu */}
         {isMenuOpen && headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
           <div className="md:hidden mt-4 pb-4">
-            <nav className="flex flex-col space-y-4">
+            <nav className="flex flex-col space-y-2">
               {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => (
-                <LanguageLink 
-                  key={index} 
-                  to={link.url} 
-                  className="text-foreground hover:text-primary transition-colors" 
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.title}
-                </LanguageLink>
+                <div key={index}>
+                  {link.type === 'dropdown' && link.children && link.children.length > 0 ? (
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
+                        className="w-full flex items-center justify-between text-foreground hover:text-primary transition-colors py-2"
+                      >
+                        <span>{link.title}</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === index ? 'rotate-180' : ''}`} />
+                      </button>
+                      {openDropdown === index && (
+                        <div className="pl-4 space-y-2 border-l-2 border-border">
+                          {link.children.filter((child: any) => child.active).map((child: any, childIndex: number) => (
+                            <LanguageLink
+                              key={childIndex}
+                              to={child.url}
+                              className="block text-sm text-foreground hover:text-primary transition-colors py-1"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              {child.title}
+                            </LanguageLink>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <LanguageLink 
+                      to={link.url || '#'} 
+                      className="block text-foreground hover:text-primary transition-colors py-2" 
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {link.title}
+                    </LanguageLink>
+                  )}
+                </div>
               ))}
               <div className="flex flex-col space-y-2 pt-4 border-t border-border">
                 <LanguageSwitcher variant="header" />
