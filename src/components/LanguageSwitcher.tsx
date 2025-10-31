@@ -110,13 +110,12 @@ export function LanguageSwitcher({ variant = 'header' }: { variant?: 'header' | 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="gap-2 h-10 px-3 py-2 w-[180px] justify-start transition-none hover:scale-100 hover:translate-y-0">
+        <Button variant="ghost" className="h-10 px-3 py-2 transition-none hover:scale-100 hover:translate-y-0">
           {CurrentFlag ? (
             <CurrentFlag className="w-5 h-3 flex-shrink-0" />
           ) : (
             <Globe className="w-5 h-5 flex-shrink-0" />
           )}
-          <span className="text-sm truncate">{t('common.switch_language', 'Switch language')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 z-[60] data-[state=open]:animate-none data-[state=closed]:animate-none transition-none">
