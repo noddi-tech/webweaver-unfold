@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { LanguageLink } from "@/components/LanguageLink";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { EditableSolutionText } from "@/components/EditableSolutionText";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -144,17 +145,23 @@ const SolutionDetail = () => {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
                 {solution.hero_subtitle && (
-                  <p className="text-primary font-semibold mb-4 text-lg">
-                    {solution.hero_subtitle}
-                  </p>
+                  <EditableSolutionText solutionId={solution.id} field="hero_subtitle">
+                    <p className="text-primary font-semibold mb-4 text-lg">
+                      {solution.hero_subtitle}
+                    </p>
+                  </EditableSolutionText>
                 )}
-                <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
-                  {solution.hero_title}
-                </h1>
+                <EditableSolutionText solutionId={solution.id} field="hero_title">
+                  <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
+                    {solution.hero_title}
+                  </h1>
+                </EditableSolutionText>
                 {solution.hero_description && (
-                  <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-                    {solution.hero_description}
-                  </p>
+                  <EditableSolutionText solutionId={solution.id} field="hero_description">
+                    <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+                      {solution.hero_description}
+                    </p>
+                  </EditableSolutionText>
                 )}
                 {solution.hero_cta_text && solution.hero_cta_url && (
                   <Button size="lg" className="text-lg px-8" asChild>
@@ -183,13 +190,17 @@ const SolutionDetail = () => {
       {solution.description_heading && (
         <section className="py-20 px-6 bg-muted/20">
           <div className="container mx-auto max-w-4xl text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-              {solution.description_heading}
-            </h2>
+            <EditableSolutionText solutionId={solution.id} field="description_heading">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
+                {solution.description_heading}
+              </h2>
+            </EditableSolutionText>
             {solution.description_text && (
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                {solution.description_text}
-              </p>
+              <EditableSolutionText solutionId={solution.id} field="description_text">
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  {solution.description_text}
+                </p>
+              </EditableSolutionText>
             )}
           </div>
         </section>
@@ -235,13 +246,17 @@ const SolutionDetail = () => {
       {solution.footer_heading && (
         <section className="py-20 px-6 bg-gradient-primary">
           <div className="container mx-auto max-w-4xl text-center">
-            <h3 className="text-4xl md:text-5xl font-bold mb-6 text-primary-foreground">
-              {solution.footer_heading}
-            </h3>
+            <EditableSolutionText solutionId={solution.id} field="footer_heading">
+              <h3 className="text-4xl md:text-5xl font-bold mb-6 text-primary-foreground">
+                {solution.footer_heading}
+              </h3>
+            </EditableSolutionText>
             {solution.footer_text && (
-              <p className="text-xl text-primary-foreground/90 mb-8">
-                {solution.footer_text}
-              </p>
+              <EditableSolutionText solutionId={solution.id} field="footer_text">
+                <p className="text-xl text-primary-foreground/90 mb-8">
+                  {solution.footer_text}
+                </p>
+              </EditableSolutionText>
             )}
             {solution.footer_cta_text && solution.footer_cta_url && (
               <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
