@@ -1,8 +1,9 @@
 import { User } from '@supabase/supabase-js';
-import { LogOut, Edit3 } from 'lucide-react';
+import { LogOut, Edit3, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useEditMode } from '@/contexts/EditModeContext';
+import { LanguageLink } from '@/components/LanguageLink';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,6 +70,13 @@ export function UserMenuDropdown({ user }: UserMenuDropdownProps) {
             onCheckedChange={toggleEditMode}
             onClick={(e) => e.stopPropagation()}
           />
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <LanguageLink to="/admin" className="cursor-pointer">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>CMS Dashboard</span>
+          </LanguageLink>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
