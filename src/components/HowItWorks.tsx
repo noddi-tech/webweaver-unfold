@@ -3,6 +3,8 @@ import { Calendar, Zap, Smartphone, RefreshCw, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { EditableTranslation } from "@/components/EditableTranslation";
+import { LockedText } from "@/components/LockedText";
 
 export default function HowItWorks() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -39,12 +41,16 @@ export default function HowItWorks() {
     <section ref={ref as any} className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-6 text-foreground">
-            {t('how_it_works.title', 'How Noddi Powers Your Operations')}
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t('how_it_works.subtitle', 'From customer booking to back-office automation—all in one unified platform')}
-          </p>
+          <EditableTranslation translationKey="how_it_works.title">
+            <h2 className="text-4xl font-bold mb-6 text-foreground">
+              {t('how_it_works.title', 'How Noddi Powers Your Operations')}
+            </h2>
+          </EditableTranslation>
+          <EditableTranslation translationKey="how_it_works.subtitle">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              {t('how_it_works.subtitle', 'From customer booking to back-office automation—all in one unified platform')}
+            </p>
+          </EditableTranslation>
         </div>
 
         {/* Desktop: Horizontal Flow */}
@@ -64,10 +70,18 @@ export default function HowItWorks() {
                     <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
                       <Icon className="w-7 h-7 text-primary-foreground" />
                     </div>
-                    <div className="text-sm font-bold text-primary mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
-                    <p className="text-xs text-muted-foreground">{step.details}</p>
+                    <LockedText reason="Step number - Update in code">
+                      <div className="text-sm font-bold text-primary mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
+                    </LockedText>
+                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`}>
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`}>
+                      <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`}>
+                      <p className="text-xs text-muted-foreground">{step.details}</p>
+                    </EditableTranslation>
                   </CardContent>
                 </Card>
                 </div>
@@ -100,10 +114,18 @@ export default function HowItWorks() {
                         <Icon className="w-7 h-7 text-primary-foreground" />
                       </div>
                       <div className="flex-1">
-                        <div className="text-sm font-bold text-primary mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
-                        <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
-                        <p className="text-xs text-muted-foreground">{step.details}</p>
+                        <LockedText reason="Step number - Update in code">
+                          <div className="text-sm font-bold text-primary mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
+                        </LockedText>
+                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`}>
+                          <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
+                        </EditableTranslation>
+                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`}>
+                          <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
+                        </EditableTranslation>
+                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`}>
+                          <p className="text-xs text-muted-foreground">{step.details}</p>
+                        </EditableTranslation>
                       </div>
                     </div>
                   </CardContent>
@@ -121,12 +143,16 @@ export default function HowItWorks() {
         {/* Caption */}
         <div className="text-center">
           <div className="inline-block px-8 py-4 bg-primary/10 border-2 border-primary/20 rounded-xl">
-            <p className="text-base md:text-lg font-semibold text-foreground mb-1">
-              {t('how_it_works.caption_main', "It's not automation. It's orchestration.")}
-            </p>
-            <p className="text-sm text-muted-foreground font-medium">
-              {t('how_it_works.caption_sub', 'One platform. Every function. Zero friction.')}
-            </p>
+            <EditableTranslation translationKey="how_it_works.caption_main">
+              <p className="text-base md:text-lg font-semibold text-foreground mb-1">
+                {t('how_it_works.caption_main', "It's not automation. It's orchestration.")}
+              </p>
+            </EditableTranslation>
+            <EditableTranslation translationKey="how_it_works.caption_sub">
+              <p className="text-sm text-muted-foreground font-medium">
+                {t('how_it_works.caption_sub', 'One platform. Every function. Zero friction.')}
+              </p>
+            </EditableTranslation>
           </div>
         </div>
       </div>
