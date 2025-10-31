@@ -92,6 +92,45 @@ export type Database = {
         }
         Relationships: []
       }
+      carousel_configs: {
+        Row: {
+          autoplay: boolean
+          autoplay_delay: number
+          created_at: string
+          description: string | null
+          id: string
+          images: Json
+          name: string
+          show_dots: boolean
+          show_navigation: boolean
+          updated_at: string
+        }
+        Insert: {
+          autoplay?: boolean
+          autoplay_delay?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: Json
+          name: string
+          show_dots?: boolean
+          show_navigation?: boolean
+          updated_at?: string
+        }
+        Update: {
+          autoplay?: boolean
+          autoplay_delay?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: Json
+          name?: string
+          show_dots?: boolean
+          show_navigation?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_items: {
         Row: {
           active: boolean
@@ -575,6 +614,63 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      image_carousel_settings: {
+        Row: {
+          carousel_config_id: string | null
+          created_at: string
+          display_type: string
+          id: string
+          image_alt: string | null
+          image_url: string | null
+          location_id: string
+          saved_carousel_config_id: string | null
+          saved_image_alt: string | null
+          saved_image_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          carousel_config_id?: string | null
+          created_at?: string
+          display_type?: string
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          location_id: string
+          saved_carousel_config_id?: string | null
+          saved_image_alt?: string | null
+          saved_image_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          carousel_config_id?: string | null
+          created_at?: string
+          display_type?: string
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          location_id?: string
+          saved_carousel_config_id?: string | null
+          saved_image_alt?: string | null
+          saved_image_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_carousel_settings_carousel_config_id_fkey"
+            columns: ["carousel_config_id"]
+            isOneToOne: false
+            referencedRelation: "carousel_configs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "image_carousel_settings_saved_carousel_config_id_fkey"
+            columns: ["saved_carousel_config_id"]
+            isOneToOne: false
+            referencedRelation: "carousel_configs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       image_sections: {
         Row: {
