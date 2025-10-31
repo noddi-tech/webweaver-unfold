@@ -27,7 +27,7 @@ export function EditableText({
   return (
     <>
       <div
-        className={`relative inline-block group ${className}`}
+        className={`relative group ${className}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => setModalOpen(true)}

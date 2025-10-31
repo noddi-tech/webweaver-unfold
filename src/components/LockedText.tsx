@@ -17,7 +17,7 @@ export function LockedText({ children, reason = 'Hard-coded text' }: LockedTextP
 
   return (
     <div
-      className="relative inline-block group"
+      className="relative group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
