@@ -288,6 +288,20 @@ const SolutionsManager = () => {
     }
   };
 
+  const autoSaveActive = async (id: string, active: boolean) => {
+    updateLocal(id, { active });
+    const { error } = await supabase
+      .from("solutions")
+      .update({ active })
+      .eq("id", id);
+    
+    if (error) {
+      toast({ title: "Failed to update active status", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: `Solution ${active ? 'activated' : 'deactivated'}` });
+    }
+  };
+
   const saveSettings = async () => {
     if (!settings) return;
     setSavingSettings(true);
@@ -516,7 +530,7 @@ const SolutionsManager = () => {
                     <TableCell>
                       <Switch
                         checked={s.active}
-                        onCheckedChange={(checked) => updateLocal(s.id, { active: checked })}
+                        onCheckedChange={(checked) => autoSaveActive(s.id, checked)}
                       />
                     </TableCell>
                     <TableCell>
