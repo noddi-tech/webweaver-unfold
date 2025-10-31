@@ -50,8 +50,8 @@ export function EditableTranslation({
 
   return (
     <>
-      <div
-        className={`relative group ${className}`}
+      <span
+        className={`relative inline-block group ${className}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -68,7 +68,7 @@ export function EditableTranslation({
             <Pencil className="h-3 w-3" />
           </button>
         )}
-      </div>
+      </span>
 
       {contentId && (
         <TranslationEditModal
