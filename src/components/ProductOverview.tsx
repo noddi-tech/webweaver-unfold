@@ -3,6 +3,7 @@ import { Workflow, Handshake, Layout } from "lucide-react";
 import { LanguageLink } from "@/components/LanguageLink";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { EditableTranslation } from "@/components/EditableTranslation";
 
 export default function ProductOverview() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -36,12 +37,16 @@ export default function ProductOverview() {
     <section ref={ref as any} className="py-section">
       <div className="container max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-            {t('product_overview.title', 'One platform. Every function.')}
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t('product_overview.subtitle', 'Explore how Noddi unifies your entire operation')}
-          </p>
+          <EditableTranslation translationKey="product_overview.title">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
+              {t('product_overview.title', 'One platform. Every function.')}
+            </h2>
+          </EditableTranslation>
+          <EditableTranslation translationKey="product_overview.subtitle">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              {t('product_overview.subtitle', 'Explore how Noddi unifies your entire operation')}
+            </p>
+          </EditableTranslation>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -61,12 +66,16 @@ export default function ProductOverview() {
                     <div className="w-16 h-16 rounded-xl bg-gradient-primary flex items-center justify-center mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
                       <Icon className="w-8 h-8 text-primary-foreground" />
                     </div>
-                    <h3 className="text-2xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors">
-                      {product.title}
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {product.description}
-                    </p>
+                    <EditableTranslation translationKey={`product_overview.${product.link.slice(1)}.title`}>
+                      <h3 className="text-2xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors">
+                        {product.title}
+                      </h3>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey={`product_overview.${product.link.slice(1)}.description`}>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {product.description}
+                      </p>
+                    </EditableTranslation>
                   </CardContent>
                 </Card>
               </LanguageLink>

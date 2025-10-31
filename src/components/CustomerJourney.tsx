@@ -1,5 +1,6 @@
 import { MousePointer, Calendar, CheckCircle, MapPin, Wrench, Mail } from "lucide-react";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { EditableTranslation } from "@/components/EditableTranslation";
 
 export default function CustomerJourney() {
   const { t } = useAppTranslation();
@@ -40,12 +41,16 @@ export default function CustomerJourney() {
     <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
-            {t('customer_journey.title', 'Customer Journey')}
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t('customer_journey.subtitle', 'From booking to service and follow-up — seamlessly connected')}
-          </p>
+          <EditableTranslation translationKey="customer_journey.title">
+            <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+              {t('customer_journey.title', 'Customer Journey')}
+            </h2>
+          </EditableTranslation>
+          <EditableTranslation translationKey="customer_journey.subtitle">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              {t('customer_journey.subtitle', 'From booking to service and follow-up — seamlessly connected')}
+            </p>
+          </EditableTranslation>
         </div>
 
         {/* Desktop Timeline */}
@@ -61,8 +66,12 @@ export default function CustomerJourney() {
                       <Icon className="w-8 h-8 text-primary-foreground" />
                     </div>
                     <div className="absolute top-16 left-1/2 -translate-x-1/2 w-8 h-8 bg-background rounded-full border-4 border-primary" />
-                    <h3 className="font-semibold text-sm mb-2 mt-8 text-foreground">{step.title}</h3>
-                    <p className="text-xs text-muted-foreground">{step.description}</p>
+                    <EditableTranslation translationKey={`customer_journey.step_${index + 1}.title`}>
+                      <h3 className="font-semibold text-sm mb-2 mt-8 text-foreground">{step.title}</h3>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey={`customer_journey.step_${index + 1}.description`}>
+                      <p className="text-xs text-muted-foreground">{step.description}</p>
+                    </EditableTranslation>
                   </div>
                 </div>
               );
@@ -85,8 +94,12 @@ export default function CustomerJourney() {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1 text-foreground">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                  <EditableTranslation translationKey={`customer_journey.step_${index + 1}.title`}>
+                    <h3 className="font-semibold mb-1 text-foreground">{step.title}</h3>
+                  </EditableTranslation>
+                  <EditableTranslation translationKey={`customer_journey.step_${index + 1}.description`}>
+                    <p className="text-sm text-muted-foreground">{step.description}</p>
+                  </EditableTranslation>
                 </div>
               </div>
             );

@@ -2,6 +2,7 @@ import { MapPin, Palette, DollarSign, Rocket, CheckCircle2, Zap } from "lucide-r
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { EditableTranslation } from "@/components/EditableTranslation";
 
 export default function RapidOnboarding() {
   const { t } = useAppTranslation();
@@ -40,17 +41,23 @@ export default function RapidOnboarding() {
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <h2 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              {t('rapid_onboarding.title', 'Launch in Less Than 1 Day')}
-            </h2>
+            <EditableTranslation translationKey="rapid_onboarding.title">
+              <h2 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                {t('rapid_onboarding.title', 'Launch in Less Than 1 Day')}
+              </h2>
+            </EditableTranslation>
             <Badge variant="default" className="text-lg px-4 py-2 bg-gradient-primary shadow-lg animate-pulse">
               <Zap className="w-4 h-4 mr-1" />
-              {t('rapid_onboarding.badge', '< 24h')}
+              <EditableTranslation translationKey="rapid_onboarding.badge">
+                <span>{t('rapid_onboarding.badge', '< 24h')}</span>
+              </EditableTranslation>
             </Badge>
           </div>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t('rapid_onboarding.subtitle', 'Onboard new partners in any geography with plug-and-play simplicity')}
-          </p>
+          <EditableTranslation translationKey="rapid_onboarding.subtitle">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              {t('rapid_onboarding.subtitle', 'Onboard new partners in any geography with plug-and-play simplicity')}
+            </p>
+          </EditableTranslation>
         </div>
 
         {/* Onboarding Timeline */}
@@ -67,8 +74,12 @@ export default function RapidOnboarding() {
                     <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
                       <Icon className="w-8 h-8 text-primary-foreground" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground">{step.description}</p>
+                    <EditableTranslation translationKey={`rapid_onboarding.step_${index + 1}.title`}>
+                      <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey={`rapid_onboarding.step_${index + 1}.description`}>
+                      <p className="text-sm text-muted-foreground">{step.description}</p>
+                    </EditableTranslation>
                   </CardContent>
                 </Card>
               );
@@ -78,12 +89,16 @@ export default function RapidOnboarding() {
 
         {/* Benefits List */}
         <div className="max-w-3xl mx-auto">
-          <h3 className="text-2xl font-bold text-center mb-6 text-foreground">{t('rapid_onboarding.benefits.title', 'Key Benefits')}</h3>
+          <EditableTranslation translationKey="rapid_onboarding.benefits.title">
+            <h3 className="text-2xl font-bold text-center mb-6 text-foreground">{t('rapid_onboarding.benefits.title', 'Key Benefits')}</h3>
+          </EditableTranslation>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {benefits.map((benefit, index) => (
               <div key={index} className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border hover-scale">
                 <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-foreground">{benefit}</p>
+                <EditableTranslation translationKey={`rapid_onboarding.benefit_${index + 1}`}>
+                  <p className="text-sm text-foreground">{benefit}</p>
+                </EditableTranslation>
               </div>
             ))}
           </div>
@@ -92,9 +107,11 @@ export default function RapidOnboarding() {
         {/* Bottom CTA */}
         <div className="text-center mt-12">
           <div className="inline-block px-6 py-3 bg-primary/10 border border-primary/20 rounded-lg">
-            <p className="text-base font-medium text-primary">
-              {t('rapid_onboarding.bottom_cta', 'Scale globally without technical barriers — Noddi handles the complexity')}
-            </p>
+            <EditableTranslation translationKey="rapid_onboarding.bottom_cta">
+              <p className="text-base font-medium text-primary">
+                {t('rapid_onboarding.bottom_cta', 'Scale globally without technical barriers — Noddi handles the complexity')}
+              </p>
+            </EditableTranslation>
           </div>
         </div>
       </div>
