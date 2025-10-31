@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { X, Check, ArrowRight } from "lucide-react";
@@ -9,6 +10,7 @@ import { EditableTranslation } from "@/components/EditableTranslation";
 export default function WhyNoddi() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const { t } = useAppTranslation();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const beforeItems = [
     t('why_noddi.before.item_1', 'Multiple disconnected tools'),
@@ -26,14 +28,14 @@ export default function WhyNoddi() {
 
   return (
     <section ref={ref as any} className="py-section">
-      <div className="container max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="container max-w-7xl px-4 sm:px-6 lg:px-8" key={refreshKey}>
         <div className="text-center mb-16">
-          <EditableTranslation translationKey="why_noddi.title">
+          <EditableTranslation translationKey="why_noddi.title" onSave={() => setRefreshKey(prev => prev + 1)}>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
               {t('why_noddi.title', 'Stop chasing problems. Start maximizing profits')}
             </h2>
           </EditableTranslation>
-          <EditableTranslation translationKey="why_noddi.subtitle">
+          <EditableTranslation translationKey="why_noddi.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               {t('why_noddi.subtitle', 'Most automotive service providers patch together 5+ tools. Noddi replaces them all.')}
             </p>
@@ -52,7 +54,7 @@ export default function WhyNoddi() {
                 <div className="w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center">
                   <X className="w-6 h-6 text-destructive" />
                 </div>
-                <EditableTranslation translationKey="why_noddi.before.title">
+                <EditableTranslation translationKey="why_noddi.before.title" onSave={() => setRefreshKey(prev => prev + 1)}>
                   <h3 className="text-2xl font-bold text-foreground">{t('why_noddi.before.title', 'Before Noddi')}</h3>
                 </EditableTranslation>
               </div>
@@ -60,7 +62,7 @@ export default function WhyNoddi() {
                 {beforeItems.map((item, index) => (
                   <li key={index} className="flex items-start gap-3">
                     <X className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
-                    <EditableTranslation translationKey={`why_noddi.before.item_${index + 1}`}>
+                    <EditableTranslation translationKey={`why_noddi.before.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
                       <span className="text-muted-foreground">{item}</span>
                     </EditableTranslation>
                   </li>
@@ -80,7 +82,7 @@ export default function WhyNoddi() {
                 <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center">
                   <Check className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <EditableTranslation translationKey="why_noddi.after.title">
+                <EditableTranslation translationKey="why_noddi.after.title" onSave={() => setRefreshKey(prev => prev + 1)}>
                   <h3 className="text-2xl font-bold text-foreground">{t('why_noddi.after.title', 'With Noddi')}</h3>
                 </EditableTranslation>
               </div>
@@ -88,7 +90,7 @@ export default function WhyNoddi() {
                 {afterItems.map((item, index) => (
                   <li key={index} className="flex items-start gap-3">
                     <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                    <EditableTranslation translationKey={`why_noddi.after.item_${index + 1}`}>
+                    <EditableTranslation translationKey={`why_noddi.after.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
                       <span className="text-foreground font-medium">{item}</span>
                     </EditableTranslation>
                   </li>
@@ -100,7 +102,7 @@ export default function WhyNoddi() {
 
         <div className="text-center">
           <LanguageLink to="/functions">
-            <EditableTranslation translationKey="why_noddi.button_cta">
+            <EditableTranslation translationKey="why_noddi.button_cta" onSave={() => setRefreshKey(prev => prev + 1)}>
               <Button size="lg" className="text-lg px-8 py-6 group">
                 {t('why_noddi.button_cta', 'See How It Works')}
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />

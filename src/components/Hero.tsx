@@ -29,6 +29,7 @@ const Hero = () => {
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const plugin = useRef(Autoplay({ delay: 3500, stopOnInteraction: true }));
+  const [refreshKey, setRefreshKey] = useState(0);
   
   // Media settings state
   const [displayType, setDisplayType] = useState<'image' | 'carousel'>('carousel');
@@ -137,12 +138,12 @@ const Hero = () => {
       <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         <div className="grid lg:grid-cols-[40%_60%] gap-8 items-center">
           {/* Left Column - Text Content */}
-          <div className="space-y-8">
-            <EditableTranslation translationKey="hero.title">
+          <div className="space-y-8" key={refreshKey}>
+            <EditableTranslation translationKey="hero.title" onSave={() => setRefreshKey(prev => prev + 1)}>
               <h1 className={`${h1} text-foreground`}>{t('hero.title', 'One platform. Every function.')}</h1>
             </EditableTranslation>
 
-            <EditableTranslation translationKey="hero.subtitle">
+            <EditableTranslation translationKey="hero.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
               <p className={`${body} text-muted-foreground`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
             </EditableTranslation>
 
@@ -158,7 +159,7 @@ const Hero = () => {
                       Net Promoter Score <Counter end={90} prefix="~" />
                     </div>
                   </LockedText>
-                  <EditableTranslation translationKey="hero.metrics.nps">
+                  <EditableTranslation translationKey="hero.metrics.nps" onSave={() => setRefreshKey(prev => prev + 1)}>
                     <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'from end customers. Like no one else in the industry')}</div>
                   </EditableTranslation>
                 </div>
@@ -168,7 +169,7 @@ const Hero = () => {
             {/* CTA Button */}
             <div>
               <LanguageLink to="/contact">
-                <EditableTranslation translationKey="hero.cta">
+                <EditableTranslation translationKey="hero.cta" onSave={() => setRefreshKey(prev => prev + 1)}>
                   <Button size="lg" className="text-lg px-8 py-4 group shadow-lg">
                     {t('hero.cta', 'Get a Demo')}
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />

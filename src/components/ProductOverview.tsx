@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Workflow, Handshake, Layout } from "lucide-react";
 import { LanguageLink } from "@/components/LanguageLink";
@@ -8,6 +9,7 @@ import { EditableTranslation } from "@/components/EditableTranslation";
 export default function ProductOverview() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const { t } = useAppTranslation();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const products = [
     {
@@ -35,14 +37,14 @@ export default function ProductOverview() {
 
   return (
     <section ref={ref as any} className="py-section">
-      <div className="container max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="container max-w-7xl px-4 sm:px-6 lg:px-8" key={refreshKey}>
         <div className="text-center mb-16">
-          <EditableTranslation translationKey="product_overview.title">
+          <EditableTranslation translationKey="product_overview.title" onSave={() => setRefreshKey(prev => prev + 1)}>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
               {t('product_overview.title', 'One platform. Every function.')}
             </h2>
           </EditableTranslation>
-          <EditableTranslation translationKey="product_overview.subtitle">
+          <EditableTranslation translationKey="product_overview.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               {t('product_overview.subtitle', 'Explore how Noddi unifies your entire operation')}
             </p>
@@ -66,12 +68,12 @@ export default function ProductOverview() {
                     <div className="w-16 h-16 rounded-xl bg-gradient-primary flex items-center justify-center mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
                       <Icon className="w-8 h-8 text-primary-foreground" />
                     </div>
-                    <EditableTranslation translationKey={`product_overview.${product.link.slice(1)}.title`}>
+                    <EditableTranslation translationKey={`product_overview.${product.link.slice(1)}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
                       <h3 className="text-2xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors">
                         {product.title}
                       </h3>
                     </EditableTranslation>
-                    <EditableTranslation translationKey={`product_overview.${product.link.slice(1)}.description`}>
+                    <EditableTranslation translationKey={`product_overview.${product.link.slice(1)}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
                       <p className="text-muted-foreground leading-relaxed">
                         {product.description}
                       </p>

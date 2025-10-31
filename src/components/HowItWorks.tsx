@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Calendar, Zap, Smartphone, RefreshCw, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
@@ -9,6 +9,7 @@ import { LockedText } from "@/components/LockedText";
 export default function HowItWorks() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const { t } = useAppTranslation();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const steps = [
     {
@@ -39,14 +40,14 @@ export default function HowItWorks() {
 
   return (
     <section ref={ref as any} className="py-section">
-      <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+      <div className="container max-w-container px-4 sm:px-6 lg:px-8" key={refreshKey}>
         <div className="text-center mb-16">
-          <EditableTranslation translationKey="how_it_works.title">
+          <EditableTranslation translationKey="how_it_works.title" onSave={() => setRefreshKey(prev => prev + 1)}>
             <h2 className="text-4xl font-bold mb-6 text-foreground">
               {t('how_it_works.title', 'How Noddi Powers Your Operations')}
             </h2>
           </EditableTranslation>
-          <EditableTranslation translationKey="how_it_works.subtitle">
+          <EditableTranslation translationKey="how_it_works.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               {t('how_it_works.subtitle', 'From customer booking to back-office automation—all in one unified platform')}
             </p>
@@ -73,13 +74,13 @@ export default function HowItWorks() {
                     <LockedText reason="Step number - Update in code">
                       <div className="text-sm font-bold text-primary mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
                     </LockedText>
-                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`}>
+                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
                       <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
                     </EditableTranslation>
-                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`}>
+                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
                       <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
                     </EditableTranslation>
-                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`}>
+                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
                       <p className="text-xs text-muted-foreground">{step.details}</p>
                     </EditableTranslation>
                   </CardContent>
@@ -117,13 +118,13 @@ export default function HowItWorks() {
                         <LockedText reason="Step number - Update in code">
                           <div className="text-sm font-bold text-primary mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
                         </LockedText>
-                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`}>
+                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
                           <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
                         </EditableTranslation>
-                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`}>
+                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
                           <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
                         </EditableTranslation>
-                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`}>
+                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
                           <p className="text-xs text-muted-foreground">{step.details}</p>
                         </EditableTranslation>
                       </div>
@@ -143,12 +144,12 @@ export default function HowItWorks() {
         {/* Caption */}
         <div className="text-center">
           <div className="inline-block px-8 py-4 bg-primary/10 border-2 border-primary/20 rounded-xl">
-            <EditableTranslation translationKey="how_it_works.caption_main">
+            <EditableTranslation translationKey="how_it_works.caption_main" onSave={() => setRefreshKey(prev => prev + 1)}>
               <p className="text-base md:text-lg font-semibold text-foreground mb-1">
                 {t('how_it_works.caption_main', "It's not automation. It's orchestration.")}
               </p>
             </EditableTranslation>
-            <EditableTranslation translationKey="how_it_works.caption_sub">
+            <EditableTranslation translationKey="how_it_works.caption_sub" onSave={() => setRefreshKey(prev => prev + 1)}>
               <p className="text-sm text-muted-foreground font-medium">
                 {t('how_it_works.caption_sub', 'One platform. Every function. Zero friction.')}
               </p>
