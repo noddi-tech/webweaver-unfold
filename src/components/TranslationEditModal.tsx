@@ -134,16 +134,16 @@ export function TranslationEditModal({
 
         if (error) throw error;
       } else if (contentTable === 'translations' && translationKey) {
-        // Save English translation
+        // Save English translation - update existing record
         const { error } = await supabase
           .from('translations')
-          .upsert({
-            translation_key: translationKey,
-            language_code: 'en',
+          .update({
             translated_text: content,
             approved: false,
             review_status: 'pending',
-          });
+          })
+          .eq('translation_key', translationKey)
+          .eq('language_code', currentLanguage);
 
         if (error) throw error;
       }
@@ -166,13 +166,13 @@ export function TranslationEditModal({
     try {
       const { error } = await supabase
         .from('translations')
-        .upsert({
-          translation_key: translationKey,
-          language_code: languageCode,
+        .update({
           translated_text: text,
           approved: false,
           review_status: 'pending',
-        });
+        })
+        .eq('translation_key', translationKey)
+        .eq('language_code', languageCode);
 
       if (error) throw error;
 
