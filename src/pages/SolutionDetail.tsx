@@ -6,6 +6,14 @@ import Footer from "@/components/Footer";
 import { LanguageLink } from "@/components/LanguageLink";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 
 interface KeyBenefit {
   id: string;
@@ -105,9 +113,32 @@ const SolutionDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
+      {/* Breadcrumb */}
+      <div className="container mx-auto max-w-7xl px-6 pt-24 pb-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <LanguageLink to="/">Home</LanguageLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <LanguageLink to="/solutions">Solutions</LanguageLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{solution.hero_title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+      
       {/* Hero Section */}
       {solution.hero_title && (
-        <section className="pt-32 pb-20 px-6">
+        <section className="pt-8 pb-20 px-6">
           <div className="container mx-auto max-w-7xl">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
