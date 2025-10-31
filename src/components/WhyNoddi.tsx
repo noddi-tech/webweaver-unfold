@@ -28,7 +28,7 @@ export default function WhyNoddi() {
       <div className="container max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-            {t('why_noddi.title', 'Stop juggling tools. Start running operations.')}
+            {t('why_noddi.title', 'Stop chasing problems. Start maximizing profits')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             {t('why_noddi.subtitle', 'Most automotive service providers patch together 5+ tools. Noddi replaces them all.')}
