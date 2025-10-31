@@ -174,16 +174,14 @@ const Solutions = () => {
                   )}
 
                   {/* CTA */}
-                  {solution.cta_text && solution.cta_url && (
-                    <div className="mt-6">
-                      <Button asChild size="lg" className="w-full">
-                        <LanguageLink to={solution.cta_url}>
-                          {solution.cta_text}
-                          <icons.ArrowRight className="w-4 h-4 ml-2" />
-                        </LanguageLink>
-                      </Button>
-                    </div>
-                  )}
+                  <div className="mt-6">
+                    <Button asChild size="lg" className="w-full">
+                      <LanguageLink to={`/solutions/${solution.id}`}>
+                        {solution.cta_text || "Learn More"}
+                        <icons.ArrowRight className="w-4 h-4 ml-2" />
+                      </LanguageLink>
+                    </Button>
+                  </div>
                 </div>
               );
             })}

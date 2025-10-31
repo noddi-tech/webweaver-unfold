@@ -19,6 +19,7 @@ import Functions from "./pages/Functions";
 import Partners from "./pages/Partners";
 import Architecture from "./pages/Architecture";
 import Solutions from "./pages/Solutions";
+import SolutionDetail from "./pages/SolutionDetail";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/:lang/functions" element={<LanguageSync><Functions /></LanguageSync>} />
           <Route path="/:lang/features" element={<LanguageSync><FeaturesPage /></LanguageSync>} />
           <Route path="/:lang/solutions" element={<LanguageSync><Solutions /></LanguageSync>} />
+          <Route path="/:lang/solutions/:slug" element={<LanguageSync><SolutionDetail /></LanguageSync>} />
           <Route path="/:lang/partners" element={<LanguageSync><Partners /></LanguageSync>} />
           <Route path="/:lang/architecture" element={<LanguageSync><Architecture /></LanguageSync>} />
           <Route path="/:lang/pricing" element={<LanguageSync><Pricing /></LanguageSync>} />
