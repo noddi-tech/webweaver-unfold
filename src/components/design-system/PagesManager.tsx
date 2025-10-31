@@ -42,6 +42,287 @@ const designTokenOptions = {
 
 const layoutTypes = ['standard', 'wide', 'full-width', 'sidebar'];
 
+interface PageFormContentProps {
+  formData: any;
+  setFormData: React.Dispatch<React.SetStateAction<any>>;
+  handleSubmit: (e: React.FormEvent) => void;
+  selectedPage: Page | null;
+  setIsEditModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsCreateModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  resetForm: () => void;
+}
+
+const PageFormContent = ({ 
+  formData, 
+  setFormData, 
+  handleSubmit, 
+  selectedPage,
+  setIsEditModalOpen,
+  setIsCreateModalOpen,
+  resetForm
+}: PageFormContentProps) => {
+  const generateSlugFromName = (name: string) => {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <Tabs defaultValue="basic" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="basic">
+            <Globe className="h-4 w-4 mr-2" />
+            Basic Info
+          </TabsTrigger>
+          <TabsTrigger value="design">
+            <Settings className="h-4 w-4 mr-2" />
+            Design Tokens
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="basic" className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Page Name</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => {
+                  const name = e.target.value;
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    name,
+                    slug: generateSlugFromName(name)
+                  }));
+                }}
+                placeholder="Homepage"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="slug">URL Slug</Label>
+              <Input
+                id="slug"
+                value={formData.slug}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, slug: e.target.value }))}
+                placeholder="homepage"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="title">SEO Title</Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, title: e.target.value }))}
+              placeholder="Software that transforms car maintenance"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="meta_description">Meta Description</Label>
+            <Textarea
+              id="meta_description"
+              value={formData.meta_description}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, meta_description: e.target.value }))}
+              placeholder="Brief description for search engines..."
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="meta_keywords">Meta Keywords</Label>
+            <Input
+              id="meta_keywords"
+              value={formData.meta_keywords}
+              onChange={(e) => setFormData((prev: any) => ({ ...prev, meta_keywords: e.target.value }))}
+              placeholder="keyword1, keyword2, keyword3"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="layout_type">Layout Type</Label>
+              <Select
+                value={formData.layout_type}
+                onValueChange={(value) => setFormData((prev: any) => ({ ...prev, layout_type: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {layoutTypes.map((layout) => (
+                    <SelectItem key={layout} value={layout}>
+                      {layout.charAt(0).toUpperCase() + layout.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="container_width">Container Width</Label>
+              <Select
+                value={formData.container_width}
+                onValueChange={(value) => setFormData((prev: any) => ({ ...prev, container_width: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {designTokenOptions.container.map((width) => (
+                    <SelectItem key={width} value={width}>
+                      {width}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="active"
+                checked={formData.active}
+                onCheckedChange={(checked) => setFormData((prev: any) => ({ ...prev, active: checked }))}
+              />
+              <Label htmlFor="active">Active</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="published"
+                checked={formData.published}
+                onCheckedChange={(checked) => setFormData((prev: any) => ({ ...prev, published: checked }))}
+              />
+              <Label htmlFor="published">Published</Label>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="design" className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="default_background_token">Default Background</Label>
+              <Select
+                value={formData.default_background_token}
+                onValueChange={(value) => setFormData((prev: any) => ({ ...prev, default_background_token: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {designTokenOptions.background.map((token) => (
+                    <SelectItem key={token} value={token}>
+                      {token}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="default_text_token">Default Text Color</Label>
+              <Select
+                value={formData.default_text_token}
+                onValueChange={(value) => setFormData((prev: any) => ({ ...prev, default_text_token: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {designTokenOptions.text.map((token) => (
+                    <SelectItem key={token} value={token}>
+                      {token}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="default_padding_token">Default Padding</Label>
+              <Select
+                value={formData.default_padding_token}
+                onValueChange={(value) => setFormData((prev: any) => ({ ...prev, default_padding_token: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {designTokenOptions.spacing.map((token) => (
+                    <SelectItem key={token} value={token}>
+                      {token}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="default_margin_token">Default Margin</Label>
+              <Select
+                value={formData.default_margin_token}
+                onValueChange={(value) => setFormData((prev: any) => ({ ...prev, default_margin_token: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {designTokenOptions.spacing.map((token) => (
+                    <SelectItem key={token} value={token}>
+                      {token}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="default_max_width_token">Default Max Width</Label>
+              <Select
+                value={formData.default_max_width_token}
+                onValueChange={(value) => setFormData((prev: any) => ({ ...prev, default_max_width_token: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {designTokenOptions.container.map((token) => (
+                    <SelectItem key={token} value={token}>
+                      {token}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <div className="flex space-x-4 pt-4">
+        <Button type="submit" className="bg-primary hover:bg-primary/90">
+          {selectedPage ? 'Update Page' : 'Create Page'}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            if (selectedPage) {
+              setIsEditModalOpen(false);
+            } else {
+              setIsCreateModalOpen(false);
+            }
+            resetForm();
+          }}
+        >
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+};
+
 export const PagesManager = () => {
   const [pages, setPages] = useState<Page[]>([]);
   const [selectedPage, setSelectedPage] = useState<Page | null>(null);
@@ -207,10 +488,6 @@ export const PagesManager = () => {
     }
   };
 
-  const generateSlugFromName = (name: string) => {
-    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  };
-
   const filteredPages = pages.filter(page => {
     // Filter by status (published/draft)
     if (statusFilter === 'published' && !page.published) return false;
@@ -223,262 +500,6 @@ export const PagesManager = () => {
     return true;
   });
 
-  const PageFormContent = () => (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <Tabs defaultValue="basic" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="basic">
-            <Globe className="h-4 w-4 mr-2" />
-            Basic Info
-          </TabsTrigger>
-          <TabsTrigger value="design">
-            <Settings className="h-4 w-4 mr-2" />
-            Design Tokens
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="basic" className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Page Name</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => {
-                  const name = e.target.value;
-                  setFormData(prev => ({
-                    ...prev,
-                    name,
-                    slug: generateSlugFromName(name)
-                  }));
-                }}
-                placeholder="Homepage"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="slug">URL Slug</Label>
-              <Input
-                id="slug"
-                value={formData.slug}
-                onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                placeholder="homepage"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="title">SEO Title</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Software that transforms car maintenance"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="meta_description">Meta Description</Label>
-            <Textarea
-              id="meta_description"
-              value={formData.meta_description}
-              onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
-              placeholder="Brief description for search engines..."
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="meta_keywords">Meta Keywords</Label>
-            <Input
-              id="meta_keywords"
-              value={formData.meta_keywords}
-              onChange={(e) => setFormData(prev => ({ ...prev, meta_keywords: e.target.value }))}
-              placeholder="keyword1, keyword2, keyword3"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="layout_type">Layout Type</Label>
-              <Select
-                value={formData.layout_type}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, layout_type: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {layoutTypes.map((layout) => (
-                    <SelectItem key={layout} value={layout}>
-                      {layout.charAt(0).toUpperCase() + layout.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="container_width">Container Width</Label>
-              <Select
-                value={formData.container_width}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, container_width: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {designTokenOptions.container.map((width) => (
-                    <SelectItem key={width} value={width}>
-                      {width}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="active"
-                checked={formData.active}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
-              />
-              <Label htmlFor="active">Active</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="published"
-                checked={formData.published}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, published: checked }))}
-              />
-              <Label htmlFor="published">Published</Label>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="design" className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="default_background_token">Default Background</Label>
-              <Select
-                value={formData.default_background_token}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, default_background_token: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {designTokenOptions.background.map((token) => (
-                    <SelectItem key={token} value={token}>
-                      {token}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="default_text_token">Default Text Color</Label>
-              <Select
-                value={formData.default_text_token}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, default_text_token: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {designTokenOptions.text.map((token) => (
-                    <SelectItem key={token} value={token}>
-                      {token}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="default_padding_token">Default Padding</Label>
-              <Select
-                value={formData.default_padding_token}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, default_padding_token: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {designTokenOptions.spacing.map((token) => (
-                    <SelectItem key={token} value={token}>
-                      {token}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="default_margin_token">Default Margin</Label>
-              <Select
-                value={formData.default_margin_token}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, default_margin_token: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {designTokenOptions.spacing.map((token) => (
-                    <SelectItem key={token} value={token}>
-                      {token}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="default_max_width_token">Default Max Width</Label>
-              <Select
-                value={formData.default_max_width_token}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, default_max_width_token: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {designTokenOptions.container.map((token) => (
-                    <SelectItem key={token} value={token}>
-                      {token}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      <div className="flex space-x-4 pt-4">
-        <Button type="submit" className="bg-primary hover:bg-primary/90">
-          {selectedPage ? 'Update Page' : 'Create Page'}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            if (selectedPage) {
-              setIsEditModalOpen(false);
-            } else {
-              setIsCreateModalOpen(false);
-            }
-            resetForm();
-          }}
-        >
-          Cancel
-        </Button>
-      </div>
-    </form>
-  );
 
   if (loading) {
     return (
@@ -514,7 +535,15 @@ export const PagesManager = () => {
                 Set up page information, SEO settings, and default design tokens
               </DialogDescription>
             </DialogHeader>
-            <PageFormContent />
+            <PageFormContent 
+              formData={formData}
+              setFormData={setFormData}
+              handleSubmit={handleSubmit}
+              selectedPage={selectedPage}
+              setIsEditModalOpen={setIsEditModalOpen}
+              setIsCreateModalOpen={setIsCreateModalOpen}
+              resetForm={resetForm}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -591,7 +620,15 @@ export const PagesManager = () => {
                           Update page information, SEO settings, and default design tokens
                         </DialogDescription>
                       </DialogHeader>
-                      <PageFormContent />
+                      <PageFormContent 
+                        formData={formData}
+                        setFormData={setFormData}
+                        handleSubmit={handleSubmit}
+                        selectedPage={selectedPage}
+                        setIsEditModalOpen={setIsEditModalOpen}
+                        setIsCreateModalOpen={setIsCreateModalOpen}
+                        resetForm={resetForm}
+                      />
                     </DialogContent>
                   </Dialog>
                   <Button
