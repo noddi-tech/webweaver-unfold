@@ -8,6 +8,7 @@ import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EditableSolutionText } from "@/components/EditableSolutionText";
 import { EditableKeyBenefit } from "@/components/EditableKeyBenefit";
+import { EditableImage } from "@/components/EditableImage";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -87,6 +88,49 @@ const SolutionDetail = () => {
 
   const handleContentSave = () => {
     setRefreshKey(prev => prev + 1);
+  };
+
+  const handleImageSave = async (field: string, newUrl: string) => {
+    try {
+      const { error } = await supabase
+        .from('solutions')
+        .update({ [field]: newUrl })
+        .eq('id', slug!);
+
+      if (error) throw error;
+      
+      // Refresh the solution data
+      setRefreshKey(prev => prev + 1);
+    } catch (error) {
+      console.error('Error saving image:', error);
+    }
+  };
+
+  const handleKeyBenefitImageSave = async (benefitIndex: number, newUrl: string) => {
+    if (!solution) return;
+
+    try {
+      const benefits = [...solution.key_benefits] as any[];
+      if (benefits[benefitIndex]) {
+        benefits[benefitIndex].imageUrl = newUrl;
+        // Also update image_url if it exists
+        if ('image_url' in benefits[benefitIndex]) {
+          benefits[benefitIndex].image_url = newUrl;
+        }
+
+        const { error } = await supabase
+          .from('solutions')
+          .update({ key_benefits: benefits })
+          .eq('id', slug!);
+
+        if (error) throw error;
+        
+        // Refresh the solution data
+        setRefreshKey(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('Error saving benefit image:', error);
+    }
   };
 
   if (loading) {
@@ -191,13 +235,19 @@ const SolutionDetail = () => {
                 )}
               </div>
               {solution.hero_image_url && (
-                <div className="rounded-2xl overflow-hidden shadow-2xl">
-                  <img 
-                    src={solution.hero_image_url} 
-                    alt={solution.hero_title}
-                    className="w-full h-auto object-cover"
-                  />
-                </div>
+                <EditableImage
+                  imageUrl={solution.hero_image_url}
+                  onSave={(newUrl) => handleImageSave('hero_image_url', newUrl)}
+                  altText={solution.hero_title || 'Hero image'}
+                >
+                  <div className="rounded-2xl overflow-hidden shadow-2xl">
+                    <img 
+                      src={solution.hero_image_url} 
+                      alt={solution.hero_title || ''}
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                </EditableImage>
               )}
             </div>
           </div>
@@ -267,13 +317,19 @@ const SolutionDetail = () => {
                     </EditableKeyBenefit>
                   </div>
                   {benefit.imageUrl && (
-                    <div className={`rounded-2xl overflow-hidden shadow-xl ${!isEven ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
-                      <img 
-                        src={benefit.imageUrl}
-                        alt={benefit.heading}
-                        className="w-full h-auto object-cover"
-                      />
-                    </div>
+                    <EditableImage
+                      imageUrl={benefit.imageUrl}
+                      onSave={(newUrl) => handleKeyBenefitImageSave(index, newUrl)}
+                      altText={benefit.heading}
+                    >
+                      <div className={`rounded-2xl overflow-hidden shadow-xl ${!isEven ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
+                        <img 
+                          src={benefit.imageUrl}
+                          alt={benefit.heading}
+                          className="w-full h-auto object-cover"
+                        />
+                      </div>
+                    </EditableImage>
                   )}
                 </div>
               );
