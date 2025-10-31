@@ -19,6 +19,7 @@ interface SolutionEditModalProps {
   onOpenChange: (open: boolean) => void;
   solutionId: string;
   field: string;
+  onSave?: () => void;
 }
 
 const fieldLabels: Record<string, string> = {
@@ -38,6 +39,7 @@ export function SolutionEditModal({
   onOpenChange,
   solutionId,
   field,
+  onSave,
 }: SolutionEditModalProps) {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
@@ -80,8 +82,11 @@ export function SolutionEditModal({
 
       toast.success('Content updated successfully');
       onOpenChange(false);
-      // Reload the page to show updated content
-      setTimeout(() => window.location.reload(), 500);
+      
+      // Trigger content refresh without page reload
+      if (onSave) {
+        onSave();
+      }
     } catch (error) {
       console.error('Error saving content:', error);
       toast.error('Failed to save content');

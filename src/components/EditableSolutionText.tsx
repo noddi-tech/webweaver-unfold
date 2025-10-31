@@ -8,6 +8,7 @@ interface EditableSolutionTextProps {
   solutionId: string;
   field: string;
   className?: string;
+  onSave?: () => void;
 }
 
 export function EditableSolutionText({
@@ -15,6 +16,7 @@ export function EditableSolutionText({
   solutionId,
   field,
   className = '',
+  onSave,
 }: EditableSolutionTextProps) {
   const { editMode } = useEditMode();
   const [isHovered, setIsHovered] = useState(false);
@@ -51,6 +53,7 @@ export function EditableSolutionText({
         onOpenChange={setModalOpen}
         solutionId={solutionId}
         field={field}
+        onSave={onSave}
       />
     </>
   );

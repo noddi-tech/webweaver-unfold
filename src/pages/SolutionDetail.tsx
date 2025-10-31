@@ -45,6 +45,7 @@ const SolutionDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const [solution, setSolution] = useState<Solution | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const loadSolution = async () => {
@@ -81,7 +82,11 @@ const SolutionDetail = () => {
     };
 
     loadSolution();
-  }, [slug]);
+  }, [slug, refreshKey]);
+
+  const handleContentSave = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   if (loading) {
     return (
@@ -145,19 +150,31 @@ const SolutionDetail = () => {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
                 {solution.hero_subtitle && (
-                  <EditableSolutionText solutionId={solution.id} field="hero_subtitle">
+                  <EditableSolutionText 
+                    solutionId={solution.id} 
+                    field="hero_subtitle"
+                    onSave={handleContentSave}
+                  >
                     <p className="text-primary font-semibold mb-4 text-lg">
                       {solution.hero_subtitle}
                     </p>
                   </EditableSolutionText>
                 )}
-                <EditableSolutionText solutionId={solution.id} field="hero_title">
+                <EditableSolutionText 
+                  solutionId={solution.id} 
+                  field="hero_title"
+                  onSave={handleContentSave}
+                >
                   <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
                     {solution.hero_title}
                   </h1>
                 </EditableSolutionText>
                 {solution.hero_description && (
-                  <EditableSolutionText solutionId={solution.id} field="hero_description">
+                  <EditableSolutionText 
+                    solutionId={solution.id} 
+                    field="hero_description"
+                    onSave={handleContentSave}
+                  >
                     <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
                       {solution.hero_description}
                     </p>
@@ -190,13 +207,21 @@ const SolutionDetail = () => {
       {solution.description_heading && (
         <section className="py-20 px-6 bg-muted/20">
           <div className="container mx-auto max-w-4xl text-center">
-            <EditableSolutionText solutionId={solution.id} field="description_heading">
+            <EditableSolutionText 
+              solutionId={solution.id} 
+              field="description_heading"
+              onSave={handleContentSave}
+            >
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
                 {solution.description_heading}
               </h2>
             </EditableSolutionText>
             {solution.description_text && (
-              <EditableSolutionText solutionId={solution.id} field="description_text">
+              <EditableSolutionText 
+                solutionId={solution.id} 
+                field="description_text"
+                onSave={handleContentSave}
+              >
                 <p className="text-lg text-muted-foreground leading-relaxed">
                   {solution.description_text}
                 </p>
@@ -246,13 +271,21 @@ const SolutionDetail = () => {
       {solution.footer_heading && (
         <section className="py-20 px-6 bg-gradient-primary">
           <div className="container mx-auto max-w-4xl text-center">
-            <EditableSolutionText solutionId={solution.id} field="footer_heading">
+            <EditableSolutionText 
+              solutionId={solution.id} 
+              field="footer_heading"
+              onSave={handleContentSave}
+            >
               <h3 className="text-4xl md:text-5xl font-bold mb-6 text-primary-foreground">
                 {solution.footer_heading}
               </h3>
             </EditableSolutionText>
             {solution.footer_text && (
-              <EditableSolutionText solutionId={solution.id} field="footer_text">
+              <EditableSolutionText 
+                solutionId={solution.id} 
+                field="footer_text"
+                onSave={handleContentSave}
+              >
                 <p className="text-xl text-primary-foreground/90 mb-8">
                   {solution.footer_text}
                 </p>
