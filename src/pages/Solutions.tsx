@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LanguageLink } from "@/components/LanguageLink";
+import { EditableSolutionText } from "@/components/EditableSolutionText";
 
 type IconName = keyof typeof icons;
 
@@ -54,28 +55,28 @@ const Solutions = () => {
   const [settings, setSettings] = useState<SolutionSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const loadData = async () => {
+    const [{ data: sols }, { data: setts }] = await Promise.all([
+      supabase
+        .from("solutions")
+        .select("*")
+        .eq("active", true)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("solutions_settings")
+        .select("*")
+        .limit(1),
+    ]);
+
+    setSolutions((sols || []).map(s => ({
+      ...s,
+      benefits: (Array.isArray(s.benefits) ? s.benefits : []) as string[]
+    })));
+    setSettings((setts && setts[0]) || null);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const loadData = async () => {
-      const [{ data: sols }, { data: setts }] = await Promise.all([
-        supabase
-          .from("solutions")
-          .select("*")
-          .eq("active", true)
-          .order("sort_order", { ascending: true }),
-        supabase
-          .from("solutions_settings")
-          .select("*")
-          .limit(1),
-      ]);
-
-      setSolutions((sols || []).map(s => ({
-        ...s,
-        benefits: (Array.isArray(s.benefits) ? s.benefits : []) as string[]
-      })));
-      setSettings((setts && setts[0]) || null);
-      setLoading(false);
-    };
-
     loadData();
   }, []);
 
@@ -138,9 +139,15 @@ const Solutions = () => {
                     {solution.title}
                   </h2>
                   {solution.subtitle && (
-                    <p className={`text-lg mb-4 ${subtitleClr} font-medium`}>
-                      {solution.subtitle}
-                    </p>
+                    <EditableSolutionText
+                      solutionId={solution.id}
+                      field="subtitle"
+                      onSave={() => loadData()}
+                    >
+                      <p className={`text-lg mb-4 ${subtitleClr} font-medium`}>
+                        {solution.subtitle}
+                      </p>
+                    </EditableSolutionText>
                   )}
 
                   {/* Description */}
