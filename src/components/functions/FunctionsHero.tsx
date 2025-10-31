@@ -19,7 +19,7 @@ export default function FunctionsHero() {
             </h1>
           </EditableTranslation>
           <EditableTranslation translationKey="functions_hero.subtitle">
-            <p className={`${body} text-muted-foreground mb-8`}>
+            <p className={`${body} text-muted-foreground mb-8 block mt-6`}>
               {t('functions_hero.subtitle', 'From booking to billing, everything connects — automatically.')}
             </p>
           </EditableTranslation>
