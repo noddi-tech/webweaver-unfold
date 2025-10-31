@@ -110,12 +110,12 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
                 <>
                   <h2 className={h2Class}>
                     <EditableTranslation translationKey="homepage.features.h2">
-                      {getHeading('h2', settings?.section_title || '')}
+                      {getHeading('h2', settings?.section_title || 'Stand out with mobile services')}
                     </EditableTranslation>
                   </h2>
                   <p className={subtitleClass}>
                     <EditableTranslation translationKey="homepage.features.subtitle">
-                      {getHeading('subtitle', settings?.section_subtitle || '')}
+                      {getHeading('subtitle', settings?.section_subtitle || 'Our platform coordinates the operations, so you can take the lead on your market')}
                     </EditableTranslation>
                   </p>
                 </>

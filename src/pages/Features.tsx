@@ -132,12 +132,12 @@ const FeaturesPage = () => {
               <>
                 <h1 className={h1Class}>
                   <EditableTranslation translationKey="features.hero.h1">
-                    {getHeading('h1', '')}
+                    {getHeading('h1', 'Features')}
                   </EditableTranslation>
                 </h1>
                 <p className={subtitleClass}>
                   <EditableTranslation translationKey="features.hero.subtitle">
-                    {getHeading('subtitle', '')}
+                    {getHeading('subtitle', 'Discover what makes our platform special')}
                   </EditableTranslation>
                 </p>
               </>
