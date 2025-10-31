@@ -149,7 +149,7 @@ const SolutionDetail = () => {
 
       {/* Description Section */}
       {solution.description_heading && (
-        <section className="py-20 px-6 bg-muted/30">
+        <section className="py-20 px-6 bg-muted/20">
           <div className="container mx-auto max-w-4xl text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
               {solution.description_heading}
