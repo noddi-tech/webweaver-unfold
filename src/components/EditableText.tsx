@@ -30,7 +30,6 @@ export function EditableText({
         className={`relative group ${className}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={() => setModalOpen(true)}
       >
         {children}
         {isHovered && (

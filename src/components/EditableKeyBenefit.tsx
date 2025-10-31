@@ -34,7 +34,6 @@ export function EditableKeyBenefit({
         className={`relative inline-block group ${className}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={() => setModalOpen(true)}
       >
         {children}
         {isHovered && (
