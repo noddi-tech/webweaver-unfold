@@ -20,6 +20,7 @@ const Header = () => {
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground", logo_image_url: null as string | null, logo_variant: "text", logo_image_height: 32, logo_icon_name: null as string | null, logo_icon_position: "top-right", logo_icon_size: "default" });
   const [headerSettings, setHeaderSettings] = useState<any>(null);
+  const [dynamicDropdowns, setDynamicDropdowns] = useState<Record<number, any[]>>({});
   const location = useLocation();
   const isHome = location.pathname === "/";
   const HeadingTag = (isHome ? "h1" : "h2") as keyof JSX.IntrinsicElements;
@@ -70,6 +71,42 @@ const Header = () => {
     load();
     return () => { mounted = false; };
   }, []);
+
+  // Fetch dynamic dropdown items
+  useEffect(() => {
+    if (!headerSettings?.navigation_links) return;
+
+    const fetchDynamicItems = async () => {
+      const dynamicLinks = headerSettings.navigation_links
+        .map((link: any, index: number) => ({ link, index }))
+        .filter(({ link }: any) => link.type === 'dynamic-dropdown' && link.collection);
+
+      const results: Record<number, any[]> = {};
+
+      for (const { link, index } of dynamicLinks) {
+        try {
+          let query = supabase.from(link.collection).select('*').eq('active', true);
+          
+          // Add sort order if available
+          if (['solutions', 'features'].includes(link.collection)) {
+            query = query.order('sort_order', { ascending: true });
+          }
+          
+          const { data, error } = await query;
+          
+          if (!error && data) {
+            results[index] = data;
+          }
+        } catch (error) {
+          console.error(`Error fetching ${link.collection}:`, error);
+        }
+      }
+
+      setDynamicDropdowns(results);
+    };
+
+    fetchDynamicItems();
+  }, [headerSettings]);
 
   // Listen for brand settings updates via Supabase realtime and local events
   useEffect(() => {
@@ -156,44 +193,57 @@ const Header = () => {
           {headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
             <NavigationMenu className="hidden md:flex">
               <NavigationMenuList>
-                {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => (
-                  <NavigationMenuItem key={index}>
-                    {link.type === 'dropdown' && link.children && link.children.length > 0 ? (
-                      <>
-                        <NavigationMenuTrigger className="bg-transparent data-[state=open]:animate-none data-[state=closed]:animate-none">
-                          {link.title}
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent className="data-[state=open]:animate-none data-[state=closed]:animate-none transition-none">
-                          <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                            {link.children.filter((child: any) => child.active).map((child: any, childIndex: number) => (
-                              <LanguageLink
-                                key={childIndex}
-                                to={child.url}
-                                className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                              >
-                                <div className="text-sm font-medium leading-none">{child.title}</div>
-                                {child.description && (
-                                  <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                                    {child.description}
-                                  </p>
-                                )}
-                              </LanguageLink>
-                            ))}
-                          </div>
-                        </NavigationMenuContent>
-                      </>
-                    ) : (
-                      <NavigationMenuLink asChild>
-                        <LanguageLink 
-                          to={link.url || '#'} 
-                          className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
-                        >
-                          {link.title}
-                        </LanguageLink>
-                      </NavigationMenuLink>
-                    )}
-                  </NavigationMenuItem>
-                ))}
+                {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => {
+                  const dropdownItems = link.type === 'static-dropdown' 
+                    ? link.children?.filter((child: any) => child.active) || []
+                    : link.type === 'dynamic-dropdown' 
+                    ? (dynamicDropdowns[index] || []).map((item: any) => ({
+                        title: item.title || item.name,
+                        url: `/${link.collection}/${item.slug || item.id}`,
+                        description: item.subtitle || item.description,
+                        active: true
+                      }))
+                    : [];
+
+                  return (
+                    <NavigationMenuItem key={index}>
+                      {(link.type === 'static-dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0 ? (
+                        <>
+                          <NavigationMenuTrigger className="bg-transparent data-[state=open]:animate-none data-[state=closed]:animate-none">
+                            {link.title}
+                          </NavigationMenuTrigger>
+                          <NavigationMenuContent className="data-[state=open]:animate-none data-[state=closed]:animate-none transition-none">
+                            <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                              {dropdownItems.map((child: any, childIndex: number) => (
+                                <LanguageLink
+                                  key={childIndex}
+                                  to={child.url}
+                                  className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                >
+                                  <div className="text-sm font-medium leading-none">{child.title}</div>
+                                  {child.description && (
+                                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                      {child.description}
+                                    </p>
+                                  )}
+                                </LanguageLink>
+                              ))}
+                            </div>
+                          </NavigationMenuContent>
+                        </>
+                      ) : (
+                        <NavigationMenuLink asChild>
+                          <LanguageLink 
+                            to={link.url || '#'} 
+                            className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                          >
+                            {link.title}
+                          </LanguageLink>
+                        </NavigationMenuLink>
+                      )}
+                    </NavigationMenuItem>
+                  );
+                })}
               </NavigationMenuList>
             </NavigationMenu>
           )}
@@ -219,43 +269,56 @@ const Header = () => {
         {isMenuOpen && headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
           <div className="md:hidden mt-4 pb-4">
             <nav className="flex flex-col space-y-2">
-              {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => (
-                <div key={index}>
-                  {link.type === 'dropdown' && link.children && link.children.length > 0 ? (
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
-                        className="w-full flex items-center justify-between text-foreground hover:text-primary transition-colors py-2"
+              {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => {
+                const dropdownItems = link.type === 'static-dropdown' 
+                  ? link.children?.filter((child: any) => child.active) || []
+                  : link.type === 'dynamic-dropdown' 
+                  ? (dynamicDropdowns[index] || []).map((item: any) => ({
+                      title: item.title || item.name,
+                      url: `/${link.collection}/${item.slug || item.id}`,
+                      description: item.subtitle || item.description,
+                      active: true
+                    }))
+                  : [];
+
+                return (
+                  <div key={index}>
+                    {(link.type === 'static-dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0 ? (
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
+                          className="w-full flex items-center justify-between text-foreground hover:text-primary transition-colors py-2"
+                        >
+                          <span>{link.title}</span>
+                          <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === index ? 'rotate-180' : ''}`} />
+                        </button>
+                        {openDropdown === index && (
+                          <div className="pl-4 space-y-2 border-l-2 border-border">
+                            {dropdownItems.map((child: any, childIndex: number) => (
+                              <LanguageLink
+                                key={childIndex}
+                                to={child.url}
+                                className="block text-sm text-foreground hover:text-primary transition-colors py-1"
+                                onClick={() => setIsMenuOpen(false)}
+                              >
+                                {child.title}
+                              </LanguageLink>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <LanguageLink 
+                        to={link.url || '#'} 
+                        className="block text-foreground hover:text-primary transition-colors py-2" 
+                        onClick={() => setIsMenuOpen(false)}
                       >
-                        <span>{link.title}</span>
-                        <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === index ? 'rotate-180' : ''}`} />
-                      </button>
-                      {openDropdown === index && (
-                        <div className="pl-4 space-y-2 border-l-2 border-border">
-                          {link.children.filter((child: any) => child.active).map((child: any, childIndex: number) => (
-                            <LanguageLink
-                              key={childIndex}
-                              to={child.url}
-                              className="block text-sm text-foreground hover:text-primary transition-colors py-1"
-                              onClick={() => setIsMenuOpen(false)}
-                            >
-                              {child.title}
-                            </LanguageLink>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <LanguageLink 
-                      to={link.url || '#'} 
-                      className="block text-foreground hover:text-primary transition-colors py-2" 
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {link.title}
-                    </LanguageLink>
-                  )}
-                </div>
-              ))}
+                        {link.title}
+                      </LanguageLink>
+                    )}
+                  </div>
+                );
+              })}
               <div className="flex flex-col space-y-2 pt-4 border-t border-border">
                 <LanguageSwitcher variant="header" />
                 {authenticated && (

@@ -20,8 +20,9 @@ interface NavigationLink {
   title: string;
   url?: string;
   active: boolean;
-  type: 'link' | 'dropdown';
+  type: 'link' | 'static-dropdown' | 'dynamic-dropdown';
   children?: NavigationChild[];
+  collection?: string;
   [key: string]: any;
 }
 
@@ -259,11 +260,30 @@ const HeaderManager = () => {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="link">Link</SelectItem>
-                              <SelectItem value="dropdown">Dropdown</SelectItem>
+                              <SelectItem value="static-dropdown">Static Dropdown</SelectItem>
+                              <SelectItem value="dynamic-dropdown">Dynamic Dropdown</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
-                        {link.type !== 'dropdown' && (
+                        {link.type === 'dynamic-dropdown' && (
+                          <div>
+                            <Label htmlFor={`collection-${index}`}>Collection</Label>
+                            <Select
+                              value={link.collection || ''}
+                              onValueChange={(value) => updateNavigationLink(index, 'collection', value)}
+                            >
+                              <SelectTrigger id={`collection-${index}`}>
+                                <SelectValue placeholder="Select collection" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="solutions">Solutions</SelectItem>
+                                <SelectItem value="features">Features</SelectItem>
+                                <SelectItem value="pages">Pages</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+                        {link.type === 'link' && (
                           <div>
                             <Label htmlFor={`url-${index}`}>URL</Label>
                             <Input
@@ -296,7 +316,7 @@ const HeaderManager = () => {
                   </div>
 
                   {/* Dropdown Children */}
-                  {link.type === 'dropdown' && (
+                  {link.type === 'static-dropdown' && (
                     <div className="ml-16 space-y-2 border-l-2 border-border pl-4">
                       <div className="flex items-center justify-between">
                         <Label className="text-sm font-semibold">Dropdown Items</Label>
