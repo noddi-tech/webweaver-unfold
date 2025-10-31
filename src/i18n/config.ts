@@ -11,11 +11,18 @@ const supabaseBackend = {
     try {
       console.log(`[i18n] Loading translations for language: ${language}`);
       
-      const { data, error } = await supabase
+      // For English (source language), load all translations regardless of approval status
+      // For other languages, only load approved translations
+      const query = supabase
         .from('translations')
         .select('translation_key, translated_text')
-        .eq('language_code', language)
-        .eq('approved', true);
+        .eq('language_code', language);
+      
+      if (language !== 'en') {
+        query.eq('approved', true);
+      }
+      
+      const { data, error } = await query;
 
       if (error) throw error;
 

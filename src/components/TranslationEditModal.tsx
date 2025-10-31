@@ -134,13 +134,14 @@ export function TranslationEditModal({
 
         if (error) throw error;
       } else if (contentTable === 'translations' && translationKey) {
-        // Save English translation - update existing record
+        // Save translation - update existing record
+        // English is the source language, so auto-approve it
         const { error } = await supabase
           .from('translations')
           .update({
             translated_text: content,
-            approved: false,
-            review_status: 'pending',
+            approved: currentLanguage === 'en',
+            review_status: currentLanguage === 'en' ? 'approved' : 'pending',
           })
           .eq('translation_key', translationKey)
           .eq('language_code', currentLanguage);
@@ -164,12 +165,13 @@ export function TranslationEditModal({
 
     setSaving(true);
     try {
+      // English is the source language, so auto-approve it
       const { error } = await supabase
         .from('translations')
         .update({
           translated_text: text,
-          approved: false,
-          review_status: 'pending',
+          approved: languageCode === 'en',
+          review_status: languageCode === 'en' ? 'approved' : 'pending',
         })
         .eq('translation_key', translationKey)
         .eq('language_code', languageCode);
