@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditableSolutionText } from "@/components/EditableSolutionText";
 import { EditableKeyBenefit } from "@/components/EditableKeyBenefit";
 import { EditableImage } from "@/components/EditableImage";
+import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
 import { EditableButton } from "@/components/EditableButton";
 import {
   Breadcrumb,
@@ -49,6 +50,8 @@ const SolutionDetail = () => {
   const [solution, setSolution] = useState<Solution | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
+  const [heroDisplayType, setHeroDisplayType] = useState<'image' | 'carousel'>('image');
 
   useEffect(() => {
     const loadSolution = async () => {
@@ -80,12 +83,40 @@ const SolutionDetail = () => {
               }))
             : []
         });
+        
+        // Load hero media settings
+        loadHeroMediaSettings();
       }
       setLoading(false);
     };
 
     loadSolution();
   }, [slug, refreshKey]);
+
+  const loadHeroMediaSettings = async () => {
+    if (!slug) return;
+    
+    try {
+      const { data: settings } = await supabase
+        .from('image_carousel_settings')
+        .select(`
+          *,
+          carousel_config:carousel_configs(*)
+        `)
+        .eq('location_id', `solution-hero-${slug}`)
+        .maybeSingle();
+
+      if (settings) {
+        setHeroDisplayType(settings.display_type as 'image' | 'carousel');
+        
+        if (settings.display_type === 'image' && settings.image_url) {
+          setHeroImageUrl(settings.image_url);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading hero media settings:', error);
+    }
+  };
 
   const handleContentSave = () => {
     setRefreshKey(prev => prev + 1);
@@ -260,14 +291,23 @@ const SolutionDetail = () => {
                   </EditableButton>
                 )}
               </div>
-              <EditableImage
-                imageUrl={solution.hero_image_url}
-                onSave={(newUrl) => handleImageSave('hero_image_url', newUrl)}
-                altText={solution.hero_title || 'Hero image'}
-                placeholder="Add hero image"
-                aspectRatio="16/9"
+              <EditableUniversalMedia
+                locationId={`solution-hero-${slug}`}
+                onSave={() => {
+                  loadHeroMediaSettings();
+                  setRefreshKey(prev => prev + 1);
+                }}
+                placeholder="Add hero image or carousel"
               >
-                {solution.hero_image_url && (
+                {(heroDisplayType === 'image' && heroImageUrl) ? (
+                  <div className="rounded-2xl overflow-hidden shadow-2xl">
+                    <img 
+                      src={heroImageUrl} 
+                      alt={solution.hero_title || ''}
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                ) : solution.hero_image_url && (
                   <div className="rounded-2xl overflow-hidden shadow-2xl">
                     <img 
                       src={solution.hero_image_url} 
@@ -276,7 +316,7 @@ const SolutionDetail = () => {
                     />
                   </div>
                 )}
-              </EditableImage>
+              </EditableUniversalMedia>
             </div>
           </div>
         </section>
