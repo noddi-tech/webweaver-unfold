@@ -1084,6 +1084,99 @@ export type Database = {
         }
         Relationships: []
       }
+      solutions: {
+        Row: {
+          active: boolean
+          benefits: Json | null
+          created_at: string
+          cta_text: string | null
+          cta_url: string | null
+          description: string | null
+          icon_name: string
+          id: string
+          image_url: string | null
+          sort_order: number | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          benefits?: Json | null
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          description?: string | null
+          icon_name?: string
+          id?: string
+          image_url?: string | null
+          sort_order?: number | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          benefits?: Json | null
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          description?: string | null
+          icon_name?: string
+          id?: string
+          image_url?: string | null
+          sort_order?: number | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      solutions_settings: {
+        Row: {
+          background_token: string
+          border_token: string
+          card_bg_token: string
+          created_at: string
+          description_token: string
+          icon_token: string
+          id: string
+          section_subtitle: string | null
+          section_title: string
+          subtitle_token: string
+          title_token: string
+          updated_at: string
+        }
+        Insert: {
+          background_token?: string
+          border_token?: string
+          card_bg_token?: string
+          created_at?: string
+          description_token?: string
+          icon_token?: string
+          id?: string
+          section_subtitle?: string | null
+          section_title?: string
+          subtitle_token?: string
+          title_token?: string
+          updated_at?: string
+        }
+        Update: {
+          background_token?: string
+          border_token?: string
+          card_bg_token?: string
+          created_at?: string
+          description_token?: string
+          icon_token?: string
+          id?: string
+          section_subtitle?: string | null
+          section_title?: string
+          subtitle_token?: string
+          title_token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       static_files: {
         Row: {
           content: string
@@ -1488,14 +1581,8 @@ export type Database = {
       }
     }
     Functions: {
-      refresh_language_translation_stats: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      sync_language_visibility: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      refresh_language_translation_stats: { Args: never; Returns: undefined }
+      sync_language_visibility: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

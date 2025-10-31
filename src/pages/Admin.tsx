@@ -17,6 +17,7 @@ import USPCms from "@/components/design-system/USPCms";
 import LogoManager from "@/components/design-system/LogoManager";
 import ImageManager from "@/components/design-system/ImageManager";
 import EmployeesManager from "@/components/design-system/EmployeesManager";
+import SolutionsManager from "@/components/design-system/SolutionsManager";
 import TextContentManager from "@/components/design-system/TextContentManager";
 import ContactManager from "@/components/design-system/ContactManager";
 import SectionsManager from "@/components/design-system/SectionsManager";
@@ -106,6 +107,7 @@ const Admin = () => {
                     <TabsTrigger value="sections">Sections</TabsTrigger>
                     <TabsTrigger value="text">Text Content</TabsTrigger>
                     <TabsTrigger value="features">Features</TabsTrigger>
+                    <TabsTrigger value="solutions">Solutions</TabsTrigger>
                     <TabsTrigger value="usps">USPs</TabsTrigger>
                     <TabsTrigger value="contact">Contact</TabsTrigger>
                   </TabsList>
@@ -120,6 +122,9 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="features" className="space-y-8">
                     <FeaturesManager />
+                  </TabsContent>
+                  <TabsContent value="solutions" className="space-y-8">
+                    <SolutionsManager />
                   </TabsContent>
                   <TabsContent value="usps" className="space-y-8">
                     <USPCms />
