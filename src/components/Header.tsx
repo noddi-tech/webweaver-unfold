@@ -3,9 +3,11 @@ import { Menu, X, icons, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
 import GlobalUSPBar from "@/components/GlobalUSPBar";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LanguageLink } from "@/components/LanguageLink";
+import { UserMenuDropdown } from "@/components/UserMenuDropdown";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -17,7 +19,7 @@ import {
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
-  const [authenticated, setAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
   const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground", logo_image_url: null as string | null, logo_variant: "text", logo_image_height: 32, logo_icon_name: null as string | null, logo_icon_position: "top-right", logo_icon_size: "default" });
   const [headerSettings, setHeaderSettings] = useState<any>(null);
   const [dynamicDropdowns, setDynamicDropdowns] = useState<Record<number, any[]>>({});
@@ -26,9 +28,9 @@ const Header = () => {
   const HeadingTag = (isHome ? "h1" : "h2") as keyof JSX.IntrinsicElements;
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthenticated(!!session?.user);
+      setUser(session?.user || null);
     });
-    supabase.auth.getSession().then(({ data }) => setAuthenticated(!!data.session?.user));
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user || null));
     return () => listener.subscription.unsubscribe();
   }, []);
 
@@ -251,9 +253,7 @@ const Header = () => {
           {/* CTA Buttons - Hidden for clean public interface */}
           <div className="hidden md:flex items-center space-x-4">
             <LanguageSwitcher variant="header" />
-            {authenticated && (
-              <Button variant="outline" onClick={signOut}>Sign out</Button>
-            )}
+            {user && <UserMenuDropdown user={user} />}
           </div>
 
           {/* Mobile Menu Button */}
@@ -321,10 +321,10 @@ const Header = () => {
               })}
               <div className="flex flex-col space-y-2 pt-4 border-t border-border">
                 <LanguageSwitcher variant="header" />
-                {authenticated && (
-                  <Button variant="outline" onClick={() => { setIsMenuOpen(false); signOut(); }}>
-                    Sign out
-                  </Button>
+                {user && (
+                  <div className="flex items-center justify-between">
+                    <UserMenuDropdown user={user} />
+                  </div>
                 )}
               </div>
             </nav>

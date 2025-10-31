@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageRedirect } from "./components/LanguageRedirect";
 import { LanguageSync } from "./components/LanguageSync";
+import { EditModeProvider } from "@/contexts/EditModeContext";
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
 import FeaturesPage from "./pages/Features";
@@ -26,9 +27,10 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+      <EditModeProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
         <Routes>
           {/* Language-prefixed routes */}
           <Route path="/:lang" element={<LanguageSync><Index /></LanguageSync>} />
@@ -56,7 +58,8 @@ const App = () => (
           {/* Catch-all for 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </EditModeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
