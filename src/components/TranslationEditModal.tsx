@@ -86,6 +86,34 @@ export function TranslationEditModal({
             })) || []
           );
         }
+      } else if (contentTable === 'translations' && translationKey) {
+        // Load all translations for this key
+        const { data: langData } = await supabase
+          .from('languages')
+          .select('code, name')
+          .eq('enabled', true)
+          .order('sort_order');
+
+        const { data: transData } = await supabase
+          .from('translations')
+          .select('language_code, translated_text')
+          .eq('translation_key', translationKey);
+
+        const translationsMap = new Map(
+          transData?.map(t => [t.language_code, t.translated_text]) || []
+        );
+
+        // Get English content as the main content
+        const englishContent = translationsMap.get('en') || '';
+        setContent(englishContent);
+
+        setTranslations(
+          langData?.map(lang => ({
+            language_code: lang.code,
+            language_name: lang.name,
+            translated_text: translationsMap.get(lang.code) || '',
+          })) || []
+        );
       }
     } catch (error) {
       console.error('Error loading content:', error);
@@ -98,12 +126,27 @@ export function TranslationEditModal({
   const saveContent = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('text_content')
-        .update({ content })
-        .eq('id', contentId);
+      if (contentTable === 'text_content') {
+        const { error } = await supabase
+          .from('text_content')
+          .update({ content })
+          .eq('id', contentId);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else if (contentTable === 'translations' && translationKey) {
+        // Save English translation
+        const { error } = await supabase
+          .from('translations')
+          .upsert({
+            translation_key: translationKey,
+            language_code: 'en',
+            translated_text: content,
+            approved: false,
+            review_status: 'pending',
+          });
+
+        if (error) throw error;
+      }
 
       toast.success('Content updated successfully');
       onOpenChange(false);

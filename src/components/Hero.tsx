@@ -8,6 +8,8 @@ import { useState, useEffect, useRef } from "react";
 import { Counter } from "@/components/ui/counter";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { EditableTranslation } from "@/components/EditableTranslation";
+import { LockedText } from "@/components/LockedText";
 import {
   Carousel,
   CarouselContent,
@@ -63,9 +65,13 @@ const Hero = () => {
         <div className="grid lg:grid-cols-[40%_60%] gap-8 items-center">
           {/* Left Column - Text Content */}
           <div className="space-y-8">
-            <h1 className={`${h1} text-foreground`}>{t('hero.title', 'One platform. Every function.')}</h1>
+            <EditableTranslation translationKey="hero.title">
+              <h1 className={`${h1} text-foreground`}>{t('hero.title', 'One platform. Every function.')}</h1>
+            </EditableTranslation>
 
-            <p className={`${body} text-muted-foreground`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
+            <EditableTranslation translationKey="hero.subtitle">
+              <p className={`${body} text-muted-foreground`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
+            </EditableTranslation>
 
             {/* Metrics Badges */}
             <div className="flex flex-wrap gap-6">
@@ -74,10 +80,14 @@ const Hero = () => {
                   <Award className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                    NPS <Counter end={90} prefix="~" />
-                  </div>
-                  <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'Industry leading')}</div>
+                  <LockedText reason="Metric value - Update in code">
+                    <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                      NPS <Counter end={90} prefix="~" />
+                    </div>
+                  </LockedText>
+                  <EditableTranslation translationKey="hero.metrics.nps">
+                    <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'Industry leading')}</div>
+                  </EditableTranslation>
                 </div>
               </div>
               <div className="flex items-center gap-3 px-6 py-4 rounded-xl glass-card shadow-lg hover-scale">
@@ -85,10 +95,14 @@ const Hero = () => {
                   <TrendingUp className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                    <Counter end={20000} suffix="+" />
-                  </div>
-                  <div className="text-xs text-muted-foreground">{t('hero.metrics.bookings', 'Bookings completed')}</div>
+                  <LockedText reason="Metric value - Update in code">
+                    <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                      <Counter end={20000} suffix="+" />
+                    </div>
+                  </LockedText>
+                  <EditableTranslation translationKey="hero.metrics.bookings">
+                    <div className="text-xs text-muted-foreground">{t('hero.metrics.bookings', 'Bookings completed')}</div>
+                  </EditableTranslation>
                 </div>
               </div>
             </div>
@@ -96,10 +110,12 @@ const Hero = () => {
             {/* CTA Button */}
             <div>
               <LanguageLink to="/contact">
-                <Button size="lg" className="text-lg px-8 py-4 group shadow-lg">
-                  {t('hero.cta', 'Get a Demo')}
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
+                <EditableTranslation translationKey="hero.cta">
+                  <Button size="lg" className="text-lg px-8 py-4 group shadow-lg">
+                    {t('hero.cta', 'Get a Demo')}
+                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </EditableTranslation>
               </LanguageLink>
             </div>
           </div>
