@@ -156,7 +156,9 @@ export function TranslationEditModal({
       onOpenChange(false);
       
       // Trigger i18n reload to refresh translations without full page reload
-      await i18n.reloadResources();
+      await i18n.reloadResources(currentLanguage);
+      // Force language change event to trigger React re-renders
+      await i18n.changeLanguage(currentLanguage);
       
       // Call optional callback for additional refresh logic
       if (onSave) {
@@ -191,7 +193,9 @@ export function TranslationEditModal({
       toast.success(`Translation updated for ${languageCode}`);
       
       // Trigger i18n reload to refresh translations
-      await i18n.reloadResources();
+      await i18n.reloadResources(currentLanguage);
+      // Force language change event to trigger React re-renders
+      await i18n.changeLanguage(currentLanguage);
       
       // Call optional callback for additional refresh logic
       if (onSave) {
