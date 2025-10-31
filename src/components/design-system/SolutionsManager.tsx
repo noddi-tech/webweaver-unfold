@@ -613,6 +613,14 @@ const SolutionsManager = () => {
 
               <TabsContent value="description" className="space-y-4 mt-4">
                 <div>
+                  <Label>Card Subtitle (Listing Page)</Label>
+                  <Input
+                    value={editingSolution.subtitle ?? ""}
+                    onChange={(e) => updateEditing({ subtitle: e.target.value })}
+                    placeholder="Professional tire care and maintenance"
+                  />
+                </div>
+                <div>
                   <Label>Description Heading (H2)</Label>
                   <Input
                     value={editingSolution.description_heading ?? ""}
