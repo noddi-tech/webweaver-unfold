@@ -234,12 +234,14 @@ const SolutionDetail = () => {
                   </Button>
                 )}
               </div>
-              {solution.hero_image_url && (
-                <EditableImage
-                  imageUrl={solution.hero_image_url}
-                  onSave={(newUrl) => handleImageSave('hero_image_url', newUrl)}
-                  altText={solution.hero_title || 'Hero image'}
-                >
+              <EditableImage
+                imageUrl={solution.hero_image_url}
+                onSave={(newUrl) => handleImageSave('hero_image_url', newUrl)}
+                altText={solution.hero_title || 'Hero image'}
+                placeholder="Add hero image"
+                aspectRatio="16/9"
+              >
+                {solution.hero_image_url && (
                   <div className="rounded-2xl overflow-hidden shadow-2xl">
                     <img 
                       src={solution.hero_image_url} 
@@ -247,8 +249,8 @@ const SolutionDetail = () => {
                       className="w-full h-auto object-cover"
                     />
                   </div>
-                </EditableImage>
-              )}
+                )}
+              </EditableImage>
             </div>
           </div>
         </section>
@@ -314,14 +316,16 @@ const SolutionDetail = () => {
                       <p className="text-lg text-muted-foreground leading-relaxed">
                         {benefit.description}
                       </p>
-                    </EditableKeyBenefit>
+                  </EditableKeyBenefit>
                   </div>
-                  {benefit.imageUrl && (
-                    <EditableImage
-                      imageUrl={benefit.imageUrl}
-                      onSave={(newUrl) => handleKeyBenefitImageSave(index, newUrl)}
-                      altText={benefit.heading}
-                    >
+                  <EditableImage
+                    imageUrl={benefit.imageUrl || null}
+                    onSave={(newUrl) => handleKeyBenefitImageSave(index, newUrl)}
+                    altText={benefit.heading}
+                    placeholder="Add benefit image"
+                    aspectRatio="4/3"
+                  >
+                    {benefit.imageUrl && (
                       <div className={`rounded-2xl overflow-hidden shadow-xl ${!isEven ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
                         <img 
                           src={benefit.imageUrl}
@@ -329,8 +333,8 @@ const SolutionDetail = () => {
                           className="w-full h-auto object-cover"
                         />
                       </div>
-                    </EditableImage>
-                  )}
+                    )}
+                  </EditableImage>
                 </div>
               );
             })}
