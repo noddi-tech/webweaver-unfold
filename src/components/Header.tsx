@@ -20,6 +20,7 @@ const Header = () => {
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [brand, setBrand] = useState({ logo_text: "", gradient_token: "gradient-primary", text_token: "foreground", logo_image_url: null as string | null, logo_variant: "text", logo_image_height: 32, logo_icon_name: null as string | null, logo_icon_position: "top-right", logo_icon_size: "default" });
   const [headerSettings, setHeaderSettings] = useState<any>(null);
+  const [navigationLinks, setNavigationLinks] = useState<any[]>([]);
   const location = useLocation();
   const isHome = location.pathname === "/";
   const HeadingTag = (isHome ? "h1" : "h2") as keyof JSX.IntrinsicElements;
@@ -34,7 +35,7 @@ const Header = () => {
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      const [brandData, headerData] = await Promise.all([
+      const [brandData, headerData, pagesData] = await Promise.all([
         supabase
           .from("brand_settings")
           .select("logo_text,gradient_token,text_token,logo_image_url,logo_variant,logo_image_height,logo_icon_name,logo_icon_position,logo_icon_size")
@@ -46,7 +47,13 @@ const Header = () => {
           .select("*")
           .order("created_at", { ascending: true })
           .limit(1)
-          .maybeSingle()
+          .maybeSingle(),
+        supabase
+          .from("pages")
+          .select("name, slug, active, published")
+          .eq("active", true)
+          .eq("published", true)
+          .order("name", { ascending: true })
       ]);
       
       if (!mounted) return;
@@ -66,6 +73,17 @@ const Header = () => {
       }
       
       setHeaderSettings(headerData.data);
+      
+      // Convert pages to navigation links format
+      if (pagesData.data) {
+        const links = pagesData.data.map(page => ({
+          title: page.name,
+          url: `/${page.slug}`,
+          active: true,
+          type: 'link'
+        }));
+        setNavigationLinks(links);
+      }
     };
     load();
     return () => { mounted = false; };
@@ -115,6 +133,36 @@ const Header = () => {
     };
   }, []);
 
+  // Listen for pages table changes to update navigation
+  useEffect(() => {
+    const channel = supabase
+      .channel('pages_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pages' }, async () => {
+        // Refetch pages when any change occurs
+        const { data } = await supabase
+          .from("pages")
+          .select("name, slug, active, published")
+          .eq("active", true)
+          .eq("published", true)
+          .order("name", { ascending: true });
+        
+        if (data) {
+          const links = data.map(page => ({
+            title: page.name,
+            url: `/${page.slug}`,
+            active: true,
+            type: 'link'
+          }));
+          setNavigationLinks(links);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      try { supabase.removeChannel(channel); } catch {}
+    };
+  }, []);
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut({ scope: "global" });
@@ -153,10 +201,10 @@ const Header = () => {
           </HeadingTag>
 
           {/* Desktop Navigation */}
-          {headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
+          {navigationLinks && navigationLinks.length > 0 && (
             <NavigationMenu className="hidden md:flex">
               <NavigationMenuList>
-                {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => (
+                {navigationLinks.map((link: any, index: number) => (
                   <NavigationMenuItem key={index}>
                     {link.type === 'dropdown' && link.children && link.children.length > 0 ? (
                       <>
@@ -216,10 +264,10 @@ const Header = () => {
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
+        {isMenuOpen && navigationLinks && navigationLinks.length > 0 && (
           <div className="md:hidden mt-4 pb-4">
             <nav className="flex flex-col space-y-2">
-              {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => (
+              {navigationLinks.map((link: any, index: number) => (
                 <div key={index}>
                   {link.type === 'dropdown' && link.children && link.children.length > 0 ? (
                     <div className="space-y-2">
