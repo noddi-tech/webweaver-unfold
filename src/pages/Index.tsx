@@ -5,7 +5,6 @@ import Hero from "@/components/Hero";
 import WhyNoddi from "@/components/WhyNoddi";
 import ProductOverview from "@/components/ProductOverview";
 import HowItWorks from "@/components/HowItWorks";
-import ProofMetricsHomepage from "@/components/ProofMetricsHomepage";
 import FinalCTA from "@/components/FinalCTA";
 import { HreflangTags } from "@/components/HreflangTags";
 import { supabase } from '@/integrations/supabase/client';
@@ -149,7 +148,6 @@ const Index = () => {
         <WhyNoddi />
         <ProductOverview />
         <HowItWorks />
-        <ProofMetricsHomepage />
         <FinalCTA />
       </main>
       <Footer />
