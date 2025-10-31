@@ -5,6 +5,8 @@ import { LanguageLink } from "@/components/LanguageLink";
 import { useHeadings } from "@/hooks/useHeadings";
 import { getTypographyClass } from "@/lib/typography";
 import { getColorClass } from "@/lib/colorUtils";
+import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableText } from "@/components/EditableText";
 
 type IconName = keyof typeof icons;
 interface DbFeature { id: string; title: string; description: string | null; icon_name: string; sort_order: number | null; }
@@ -107,10 +109,14 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
               return (
                 <>
                   <h2 className={h2Class}>
-                    {getHeading('h2', settings?.section_title || '')}
+                    <EditableTranslation translationKey="homepage.features.h2">
+                      {getHeading('h2', settings?.section_title || '')}
+                    </EditableTranslation>
                   </h2>
                   <p className={subtitleClass}>
-                    {getHeading('subtitle', settings?.section_subtitle || '')}
+                    <EditableTranslation translationKey="homepage.features.subtitle">
+                      {getHeading('subtitle', settings?.section_subtitle || '')}
+                    </EditableTranslation>
                   </p>
                 </>
               );
@@ -125,7 +131,11 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
               const pill = (
                 <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${borderClr} ${bgClass[u.bg_token] || "bg-secondary"} ${textClass[u.text_token] || "text-foreground"}`}>
                   <IconCmp className="w-3.5 h-3.5" />
-                  <span className="text-xs font-medium whitespace-nowrap">{u.title}</span>
+                  <span className="text-xs font-medium whitespace-nowrap">
+                    <EditableText contentId={u.id}>
+                      {u.title}
+                    </EditableText>
+                  </span>
                 </div>
               );
               return u.href ? (
@@ -149,8 +159,16 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
                   <div className={`${iconClr} mb-4`}>
                     <Icon className="w-8 h-8" />
                   </div>
-                  <h3 className={`text-xl font-semibold mb-3 ${titleClr}`}>{f.title}</h3>
-                  <p className={`${descClr}`}>{f.description}</p>
+                  <h3 className={`text-xl font-semibold mb-3 ${titleClr}`}>
+                    <EditableText contentId={f.id} translationKey="title">
+                      {f.title}
+                    </EditableText>
+                  </h3>
+                  <p className={`${descClr}`}>
+                    <EditableText contentId={f.id} translationKey="description">
+                      {f.description}
+                    </EditableText>
+                  </p>
                 </div>
               );
             })}

@@ -6,6 +6,7 @@ import { getTypographyClass } from "@/lib/typography";
 import { getColorClass } from "@/lib/colorUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { HreflangTags } from "@/components/HreflangTags";
+import { EditableTranslation } from "@/components/EditableTranslation";
 
 interface Page {
   id: string;
@@ -130,10 +131,14 @@ const FeaturesPage = () => {
             return (
               <>
                 <h1 className={h1Class}>
-                  {getHeading('h1', '')}
+                  <EditableTranslation translationKey="features.hero.h1">
+                    {getHeading('h1', '')}
+                  </EditableTranslation>
                 </h1>
                 <p className={subtitleClass}>
-                  {getHeading('subtitle', '')}
+                  <EditableTranslation translationKey="features.hero.subtitle">
+                    {getHeading('subtitle', '')}
+                  </EditableTranslation>
                 </p>
               </>
             );
