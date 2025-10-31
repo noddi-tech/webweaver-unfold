@@ -81,7 +81,7 @@ const SolutionDetail = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="py-20 px-6">
+      <section className="pt-32 pb-20 px-6">
         <div className="container mx-auto max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
