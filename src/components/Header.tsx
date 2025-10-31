@@ -237,7 +237,7 @@ const Header = () => {
                         <NavigationMenuLink asChild>
                           <LanguageLink 
                             to={link.url || '#'} 
-                            className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                            className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
                           >
                             {link.title}
                           </LanguageLink>
@@ -287,7 +287,7 @@ const Header = () => {
                       <div className="space-y-2">
                         <button
                           onClick={() => setOpenDropdown(openDropdown === originalIndex ? null : originalIndex)}
-                          className="w-full flex items-center justify-between text-foreground hover:text-primary transition-colors py-2"
+                          className="w-full flex items-center justify-between text-foreground hover:text-primary transition-colors py-2 text-base"
                         >
                           <span>{link.title}</span>
                           <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === originalIndex ? 'rotate-180' : ''}`} />
@@ -298,7 +298,7 @@ const Header = () => {
                               <LanguageLink
                                 key={childIndex}
                                 to={child.url}
-                                className="block text-sm text-foreground hover:text-primary transition-colors py-1"
+                                className="block text-base text-foreground hover:text-primary transition-colors py-1"
                                 onClick={() => setIsMenuOpen(false)}
                               >
                                 {child.title}
@@ -310,7 +310,7 @@ const Header = () => {
                     ) : (
                       <LanguageLink 
                         to={link.url || '#'} 
-                        className="block text-foreground hover:text-primary transition-colors py-2" 
+                        className="block text-foreground hover:text-primary transition-colors py-2 text-base" 
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {link.title}
