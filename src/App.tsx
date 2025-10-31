@@ -42,6 +42,7 @@ const App = () => (
           {/* CMS and special routes (no language prefix) */}
           <Route path="/cms-login" element={<Auth />} />
           <Route path="/cms" element={<Admin />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/cms/translations" element={<Navigate to="/cms" replace />} />
           <Route path="/llms.txt" element={<LlmsTxt />} />
           
