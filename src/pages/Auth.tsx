@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import { Rocket } from "lucide-react";
 
 const Auth = () => {
   const { toast } = useToast();
@@ -43,6 +44,26 @@ const Auth = () => {
     }
   };
 
+  const handleDevBypass = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ 
+        email: "dev@test.com", 
+        password: "dev123456" 
+      });
+      if (error) throw error;
+      window.location.href = "/cms";
+    } catch (err: any) {
+      toast({ 
+        title: "Dev bypass failed", 
+        description: "Create account: dev@test.com / dev123456", 
+        variant: "destructive" 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -61,6 +82,17 @@ const Auth = () => {
               </div>
               <Button type="submit" disabled={loading}>{loading ? "Please wait..." : mode === "signin" ? "Sign In" : "Sign Up"}</Button>
             </form>
+            {import.meta.env.DEV && (
+              <Button 
+                onClick={handleDevBypass} 
+                disabled={loading}
+                variant="outline"
+                className="w-full mt-4 border-primary/50 hover:bg-primary/10"
+              >
+                <Rocket className="mr-2 h-4 w-4" />
+                Authenticate me (Dev Mode)
+              </Button>
+            )}
             <div className="mt-4 text-sm text-muted-foreground">
               {mode === "signin" ? (
                 <button className="underline" onClick={() => setMode("signup")}>Need an account? Sign up</button>
