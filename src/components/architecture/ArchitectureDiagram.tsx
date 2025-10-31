@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowDown } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { EditableTranslation } from "@/components/EditableTranslation";
 
 export default function ArchitectureDiagram() {
   const { h2, body } = useTypography();
@@ -30,12 +31,16 @@ export default function ArchitectureDiagram() {
     <section className="py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className={`${h2} mb-4 text-foreground`}>
-            {t('architecture.diagram.title', 'The Stack')}
-          </h2>
-          <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
-            {t('architecture.diagram.subtitle', 'A unified architecture. Everything shares the same data model.')}
-          </p>
+          <EditableTranslation translationKey="architecture.diagram.title">
+            <h2 className={`${h2} mb-4 text-foreground`}>
+              {t('architecture.diagram.title', 'The Stack')}
+            </h2>
+          </EditableTranslation>
+          <EditableTranslation translationKey="architecture.diagram.subtitle">
+            <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
+              {t('architecture.diagram.subtitle', 'A unified architecture. Everything shares the same data model.')}
+            </p>
+          </EditableTranslation>
         </div>
 
         <div className="max-w-3xl mx-auto space-y-4">
@@ -43,8 +48,12 @@ export default function ArchitectureDiagram() {
             <div key={index} className="space-y-4">
               <Card className="glass-card">
                 <CardContent className="py-8 text-center">
-                  <h3 className="text-2xl font-bold mb-2 text-foreground">{layer.title}</h3>
-                  <p className="text-sm text-muted-foreground">{layer.subtitle}</p>
+                  <EditableTranslation translationKey={`architecture.diagram.layer_${index + 1}.title`}>
+                    <h3 className="text-2xl font-bold mb-2 text-foreground">{layer.title}</h3>
+                  </EditableTranslation>
+                  <EditableTranslation translationKey={`architecture.diagram.layer_${index + 1}.subtitle`}>
+                    <p className="text-sm text-muted-foreground">{layer.subtitle}</p>
+                  </EditableTranslation>
                 </CardContent>
               </Card>
               {index < layers.length - 1 && (
@@ -57,9 +66,11 @@ export default function ArchitectureDiagram() {
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-xl font-semibold text-foreground max-w-2xl mx-auto">
-            {t('architecture.diagram.footer_text', 'No integrations to chase. No sync jobs to fix. Just one living system.')}
-          </p>
+          <EditableTranslation translationKey="architecture.diagram.footer_text">
+            <p className="text-xl font-semibold text-foreground max-w-2xl mx-auto">
+              {t('architecture.diagram.footer_text', 'No integrations to chase. No sync jobs to fix. Just one living system.')}
+            </p>
+          </EditableTranslation>
         </div>
       </div>
     </section>
