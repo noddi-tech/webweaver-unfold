@@ -265,7 +265,7 @@ const HeaderManager = () => {
                             </SelectContent>
                           </Select>
                         </div>
-                        {link.type === 'link' && (
+                        {(!link.type || link.type === 'link') && (
                           <div>
                             <Label htmlFor={`url-${index}`}>URL</Label>
                             <Input
