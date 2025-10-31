@@ -193,11 +193,11 @@ const Header = () => {
           {headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
             <NavigationMenu className="hidden md:flex">
               <NavigationMenuList>
-                {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => {
+                {headerSettings.navigation_links.map((link: any, originalIndex: number) => link.active ? { link, originalIndex } : null).filter(Boolean).map(({ link, originalIndex }: any) => {
                   const dropdownItems = (link.type === 'static-dropdown' || link.type === 'dropdown')
                     ? link.children?.filter((child: any) => child.active) || []
                     : link.type === 'dynamic-dropdown' 
-                    ? (dynamicDropdowns[index] || []).map((item: any) => ({
+                    ? (dynamicDropdowns[originalIndex] || []).map((item: any) => ({
                         title: item.title || item.name,
                         url: `/${link.collection}/${item.slug || item.id}`,
                         description: item.subtitle || item.description,
@@ -206,7 +206,7 @@ const Header = () => {
                     : [];
 
                   return (
-                    <NavigationMenuItem key={index}>
+                    <NavigationMenuItem key={originalIndex}>
                       {((link.type === 'static-dropdown' || link.type === 'dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0) ? (
                         <>
                           <NavigationMenuTrigger className="bg-transparent data-[state=open]:animate-none data-[state=closed]:animate-none">
@@ -269,11 +269,11 @@ const Header = () => {
         {isMenuOpen && headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
           <div className="md:hidden mt-4 pb-4">
             <nav className="flex flex-col space-y-2">
-              {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => {
+              {headerSettings.navigation_links.map((link: any, originalIndex: number) => link.active ? { link, originalIndex } : null).filter(Boolean).map(({ link, originalIndex }: any) => {
                 const dropdownItems = (link.type === 'static-dropdown' || link.type === 'dropdown')
                   ? link.children?.filter((child: any) => child.active) || []
                   : link.type === 'dynamic-dropdown' 
-                  ? (dynamicDropdowns[index] || []).map((item: any) => ({
+                  ? (dynamicDropdowns[originalIndex] || []).map((item: any) => ({
                       title: item.title || item.name,
                       url: `/${link.collection}/${item.slug || item.id}`,
                       description: item.subtitle || item.description,
@@ -282,17 +282,17 @@ const Header = () => {
                   : [];
 
                 return (
-                  <div key={index}>
+                  <div key={originalIndex}>
                     {((link.type === 'static-dropdown' || link.type === 'dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0) ? (
                       <div className="space-y-2">
                         <button
-                          onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
+                          onClick={() => setOpenDropdown(openDropdown === originalIndex ? null : originalIndex)}
                           className="w-full flex items-center justify-between text-foreground hover:text-primary transition-colors py-2"
                         >
                           <span>{link.title}</span>
-                          <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === index ? 'rotate-180' : ''}`} />
+                          <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === originalIndex ? 'rotate-180' : ''}`} />
                         </button>
-                        {openDropdown === index && (
+                        {openDropdown === originalIndex && (
                           <div className="pl-4 space-y-2 border-l-2 border-border">
                             {dropdownItems.map((child: any, childIndex: number) => (
                               <LanguageLink
