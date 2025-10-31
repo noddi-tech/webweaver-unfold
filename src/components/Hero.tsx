@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Award, TrendingUp } from "lucide-react";
+import { ArrowRight, Award } from "lucide-react";
 import { LanguageLink } from "@/components/LanguageLink";
 import noddiLocationScreen from "@/assets/noddi-location-screen.png";
 import tiamatLocationScreen from "@/assets/tiamat-location-screen.png";
@@ -87,21 +87,6 @@ const Hero = () => {
                   </LockedText>
                   <EditableTranslation translationKey="hero.metrics.nps">
                     <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'Industry leading')}</div>
-                  </EditableTranslation>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 px-6 py-4 rounded-xl glass-card shadow-lg hover-scale">
-                <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <div>
-                  <LockedText reason="Metric value - Update in code">
-                    <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                      <Counter end={20000} suffix="+" />
-                    </div>
-                  </LockedText>
-                  <EditableTranslation translationKey="hero.metrics.bookings">
-                    <div className="text-xs text-muted-foreground">{t('hero.metrics.bookings', 'Bookings completed')}</div>
                   </EditableTranslation>
                 </div>
               </div>
