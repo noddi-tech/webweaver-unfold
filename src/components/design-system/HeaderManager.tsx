@@ -238,7 +238,7 @@ const HeaderManager = () => {
                       </Button>
                     </div>
                     
-                    <div className="flex-1 space-y-4">
+                      <div className="flex-1 space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                           <Label htmlFor={`title-${index}`}>Title</Label>
@@ -265,6 +265,17 @@ const HeaderManager = () => {
                             </SelectContent>
                           </Select>
                         </div>
+                        {link.type === 'link' && (
+                          <div>
+                            <Label htmlFor={`url-${index}`}>URL</Label>
+                            <Input
+                              id={`url-${index}`}
+                              value={link.url || ''}
+                              onChange={(e) => updateNavigationLink(index, 'url', e.target.value)}
+                              placeholder="/features"
+                            />
+                          </div>
+                        )}
                         {link.type === 'dynamic-dropdown' && (
                           <div>
                             <Label htmlFor={`collection-${index}`}>Collection</Label>
@@ -281,17 +292,6 @@ const HeaderManager = () => {
                                 <SelectItem value="pages">Pages</SelectItem>
                               </SelectContent>
                             </Select>
-                          </div>
-                        )}
-                        {link.type === 'link' && (
-                          <div>
-                            <Label htmlFor={`url-${index}`}>URL</Label>
-                            <Input
-                              id={`url-${index}`}
-                              value={link.url || ''}
-                              onChange={(e) => updateNavigationLink(index, 'url', e.target.value)}
-                              placeholder="/features"
-                            />
                           </div>
                         )}
                       </div>
