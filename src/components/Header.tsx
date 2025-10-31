@@ -194,7 +194,7 @@ const Header = () => {
             <NavigationMenu className="hidden md:flex">
               <NavigationMenuList>
                 {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => {
-                  const dropdownItems = link.type === 'static-dropdown' 
+                  const dropdownItems = (link.type === 'static-dropdown' || link.type === 'dropdown')
                     ? link.children?.filter((child: any) => child.active) || []
                     : link.type === 'dynamic-dropdown' 
                     ? (dynamicDropdowns[index] || []).map((item: any) => ({
@@ -207,7 +207,7 @@ const Header = () => {
 
                   return (
                     <NavigationMenuItem key={index}>
-                      {(link.type === 'static-dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0 ? (
+                      {((link.type === 'static-dropdown' || link.type === 'dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0) ? (
                         <>
                           <NavigationMenuTrigger className="bg-transparent data-[state=open]:animate-none data-[state=closed]:animate-none">
                             {link.title}
@@ -270,7 +270,7 @@ const Header = () => {
           <div className="md:hidden mt-4 pb-4">
             <nav className="flex flex-col space-y-2">
               {headerSettings.navigation_links.filter((link: any) => link.active).map((link: any, index: number) => {
-                const dropdownItems = link.type === 'static-dropdown' 
+                const dropdownItems = (link.type === 'static-dropdown' || link.type === 'dropdown')
                   ? link.children?.filter((child: any) => child.active) || []
                   : link.type === 'dynamic-dropdown' 
                   ? (dynamicDropdowns[index] || []).map((item: any) => ({
@@ -283,7 +283,7 @@ const Header = () => {
 
                 return (
                   <div key={index}>
-                    {(link.type === 'static-dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0 ? (
+                    {((link.type === 'static-dropdown' || link.type === 'dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0) ? (
                       <div className="space-y-2">
                         <button
                           onClick={() => setOpenDropdown(openDropdown === index ? null : index)}

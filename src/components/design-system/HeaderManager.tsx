@@ -20,7 +20,7 @@ interface NavigationLink {
   title: string;
   url?: string;
   active: boolean;
-  type: 'link' | 'static-dropdown' | 'dynamic-dropdown';
+  type: 'link' | 'static-dropdown' | 'dynamic-dropdown' | 'dropdown'; // 'dropdown' for backward compatibility
   children?: NavigationChild[];
   collection?: string;
   [key: string]: any;
@@ -252,7 +252,7 @@ const HeaderManager = () => {
                         <div>
                           <Label htmlFor={`type-${index}`}>Type</Label>
                           <Select
-                            value={link.type || 'link'}
+                            value={link.type === 'dropdown' ? 'static-dropdown' : (link.type || 'link')}
                             onValueChange={(value) => updateNavigationLink(index, 'type', value)}
                           >
                             <SelectTrigger id={`type-${index}`}>
@@ -316,7 +316,7 @@ const HeaderManager = () => {
                   </div>
 
                   {/* Dropdown Children */}
-                  {link.type === 'static-dropdown' && (
+                  {(link.type === 'static-dropdown' || link.type === 'dropdown') && (
                     <div className="ml-16 space-y-2 border-l-2 border-border pl-4">
                       <div className="flex items-center justify-between">
                         <Label className="text-sm font-semibold">Dropdown Items</Label>
