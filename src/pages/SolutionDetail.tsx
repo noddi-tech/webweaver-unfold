@@ -7,6 +7,7 @@ import { LanguageLink } from "@/components/LanguageLink";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EditableSolutionText } from "@/components/EditableSolutionText";
+import { EditableKeyBenefit } from "@/components/EditableKeyBenefit";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -244,12 +245,26 @@ const SolutionDetail = () => {
                   className={`grid lg:grid-cols-2 gap-12 items-center ${!isEven ? 'lg:grid-flow-dense' : ''}`}
                 >
                   <div className={!isEven ? 'lg:col-start-2' : ''}>
-                    <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-                      {benefit.heading}
-                    </h3>
-                    <p className="text-lg text-muted-foreground leading-relaxed">
-                      {benefit.description}
-                    </p>
+                    <EditableKeyBenefit
+                      solutionId={solution.id}
+                      benefitIndex={index}
+                      field="heading"
+                      onSave={handleContentSave}
+                    >
+                      <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+                        {benefit.heading}
+                      </h3>
+                    </EditableKeyBenefit>
+                    <EditableKeyBenefit
+                      solutionId={solution.id}
+                      benefitIndex={index}
+                      field="description"
+                      onSave={handleContentSave}
+                    >
+                      <p className="text-lg text-muted-foreground leading-relaxed">
+                        {benefit.description}
+                      </p>
+                    </EditableKeyBenefit>
                   </div>
                   {benefit.imageUrl && (
                     <div className={`rounded-2xl overflow-hidden shadow-xl ${!isEven ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
