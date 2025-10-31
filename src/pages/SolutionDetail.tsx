@@ -24,6 +24,7 @@ interface KeyBenefit {
 
 interface Solution {
   id: string;
+  title: string;
   hero_title: string | null;
   hero_subtitle: string | null;
   hero_description: string | null;
@@ -130,7 +131,7 @@ const SolutionDetail = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{solution.hero_title}</BreadcrumbPage>
+              <BreadcrumbPage>{solution.title}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
