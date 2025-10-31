@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditableSolutionText } from "@/components/EditableSolutionText";
 import { EditableKeyBenefit } from "@/components/EditableKeyBenefit";
 import { EditableImage } from "@/components/EditableImage";
+import { EditableButton } from "@/components/EditableButton";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -88,6 +89,25 @@ const SolutionDetail = () => {
 
   const handleContentSave = () => {
     setRefreshKey(prev => prev + 1);
+  };
+
+  const handleButtonSave = async (textField: string, urlField: string, text: string, url: string) => {
+    try {
+      const { error } = await supabase
+        .from('solutions')
+        .update({ 
+          [textField]: text,
+          [urlField]: url 
+        })
+        .eq('id', slug!);
+
+      if (error) throw error;
+      
+      // Refresh the solution data
+      setRefreshKey(prev => prev + 1);
+    } catch (error) {
+      console.error('Error saving button:', error);
+    }
   };
 
   const handleImageSave = async (field: string, newUrl: string) => {
@@ -226,12 +246,18 @@ const SolutionDetail = () => {
                   </EditableSolutionText>
                 )}
                 {solution.hero_cta_text && solution.hero_cta_url && (
-                  <Button size="lg" className="text-lg px-8" asChild>
-                    <LanguageLink to={solution.hero_cta_url}>
-                      {solution.hero_cta_text}
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </LanguageLink>
-                  </Button>
+                  <EditableButton
+                    buttonText={solution.hero_cta_text}
+                    buttonUrl={solution.hero_cta_url}
+                    onSave={(text, url) => handleButtonSave('hero_cta_text', 'hero_cta_url', text, url)}
+                  >
+                    <Button size="lg" className="text-lg px-8" asChild>
+                      <LanguageLink to={solution.hero_cta_url}>
+                        {solution.hero_cta_text}
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </LanguageLink>
+                    </Button>
+                  </EditableButton>
                 )}
               </div>
               <EditableImage
@@ -367,12 +393,18 @@ const SolutionDetail = () => {
               </EditableSolutionText>
             )}
             {solution.footer_cta_text && solution.footer_cta_url && (
-              <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
-                <LanguageLink to={solution.footer_cta_url}>
-                  {solution.footer_cta_text}
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </LanguageLink>
-              </Button>
+              <EditableButton
+                buttonText={solution.footer_cta_text}
+                buttonUrl={solution.footer_cta_url}
+                onSave={(text, url) => handleButtonSave('footer_cta_text', 'footer_cta_url', text, url)}
+              >
+                <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
+                  <LanguageLink to={solution.footer_cta_url}>
+                    {solution.footer_cta_text}
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </LanguageLink>
+                </Button>
+              </EditableButton>
             )}
           </div>
         </section>
