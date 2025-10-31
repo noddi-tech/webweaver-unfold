@@ -9,9 +9,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import IconPicker from "./IconPicker";
-import { Trash2, Plus, X } from "lucide-react";
+import { Trash2, Plus, X, Edit, MoveUp, MoveDown } from "lucide-react";
+
+interface KeyBenefit {
+  heading: string;
+  text: string;
+  image_url: string;
+}
 
 interface SolutionRow {
   id: string;
@@ -25,6 +33,19 @@ interface SolutionRow {
   benefits: string[];
   sort_order: number;
   active: boolean;
+  hero_title: string | null;
+  hero_subtitle: string | null;
+  hero_description: string | null;
+  hero_image_url: string | null;
+  hero_cta_text: string | null;
+  hero_cta_url: string | null;
+  description_heading: string | null;
+  description_text: string | null;
+  key_benefits: KeyBenefit[];
+  footer_heading: string | null;
+  footer_text: string | null;
+  footer_cta_text: string | null;
+  footer_cta_url: string | null;
 }
 
 interface SolutionSettings {
@@ -51,6 +72,19 @@ const emptyNew: Omit<SolutionRow, "id"> = {
   benefits: [],
   sort_order: 0,
   active: true,
+  hero_title: null,
+  hero_subtitle: null,
+  hero_description: null,
+  hero_image_url: null,
+  hero_cta_text: null,
+  hero_cta_url: null,
+  description_heading: null,
+  description_text: null,
+  key_benefits: [],
+  footer_heading: null,
+  footer_text: null,
+  footer_cta_text: null,
+  footer_cta_url: null,
 };
 
 const tokenOptions = {
@@ -68,6 +102,8 @@ const SolutionsManager = () => {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [newBenefit, setNewBenefit] = useState("");
+  const [editingSolution, setEditingSolution] = useState<SolutionRow | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const [settings, setSettings] = useState<SolutionSettings | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -90,7 +126,12 @@ const SolutionsManager = () => {
 
     setSolutions((sols || []).map(s => ({
       ...s,
-      benefits: (Array.isArray(s.benefits) ? s.benefits : []) as string[]
+      benefits: (Array.isArray(s.benefits) ? s.benefits : []) as string[],
+      key_benefits: (Array.isArray(s.key_benefits) ? s.key_benefits.map((kb: any) => ({
+        heading: kb?.heading || "",
+        text: kb?.text || "",
+        image_url: kb?.image_url || ""
+      })) : []) as KeyBenefit[]
     })));
     setSettings((setts && setts[0]) || null);
     setLoading(false);
@@ -156,6 +197,19 @@ const SolutionsManager = () => {
         benefits: row.benefits,
         sort_order: row.sort_order ?? 0,
         active: row.active,
+        hero_title: row.hero_title?.trim() || null,
+        hero_subtitle: row.hero_subtitle?.trim() || null,
+        hero_description: row.hero_description?.trim() || null,
+        hero_image_url: row.hero_image_url?.trim() || null,
+        hero_cta_text: row.hero_cta_text?.trim() || null,
+        hero_cta_url: row.hero_cta_url?.trim() || null,
+        description_heading: row.description_heading?.trim() || null,
+        description_text: row.description_text?.trim() || null,
+        key_benefits: row.key_benefits as any,
+        footer_heading: row.footer_heading?.trim() || null,
+        footer_text: row.footer_text?.trim() || null,
+        footer_cta_text: row.footer_cta_text?.trim() || null,
+        footer_cta_url: row.footer_cta_url?.trim() || null,
       })
       .eq("id", row.id);
     setSavingId(null);
@@ -163,6 +217,8 @@ const SolutionsManager = () => {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Solution saved" });
+      setShowEditDialog(false);
+      setEditingSolution(null);
       fetchSolutions();
     }
   };
@@ -181,6 +237,43 @@ const SolutionsManager = () => {
 
   const updateLocal = (id: string, patch: Partial<SolutionRow>) => {
     setSolutions((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+  };
+
+  const updateEditing = (patch: Partial<SolutionRow>) => {
+    if (editingSolution) {
+      setEditingSolution({ ...editingSolution, ...patch });
+    }
+  };
+
+  const addKeyBenefit = () => {
+    if (editingSolution) {
+      const newBenefits = [...editingSolution.key_benefits, { heading: "", text: "", image_url: "" }];
+      setEditingSolution({ ...editingSolution, key_benefits: newBenefits });
+    }
+  };
+
+  const removeKeyBenefit = (index: number) => {
+    if (editingSolution) {
+      const newBenefits = editingSolution.key_benefits.filter((_, i) => i !== index);
+      setEditingSolution({ ...editingSolution, key_benefits: newBenefits });
+    }
+  };
+
+  const updateKeyBenefit = (index: number, field: keyof KeyBenefit, value: string) => {
+    if (editingSolution) {
+      const newBenefits = [...editingSolution.key_benefits];
+      newBenefits[index] = { ...newBenefits[index], [field]: value };
+      setEditingSolution({ ...editingSolution, key_benefits: newBenefits });
+    }
+  };
+
+  const moveKeyBenefit = (index: number, direction: 'up' | 'down') => {
+    if (!editingSolution) return;
+    const newBenefits = [...editingSolution.key_benefits];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= newBenefits.length) return;
+    [newBenefits[index], newBenefits[newIndex]] = [newBenefits[newIndex], newBenefits[index]];
+    setEditingSolution({ ...editingSolution, key_benefits: newBenefits });
   };
 
   const saveSettings = async () => {
@@ -422,11 +515,11 @@ const SolutionsManager = () => {
                       />
                     </TableCell>
                     <TableCell className="text-right space-x-2">
-                      <Button size="sm" onClick={() => saveSolution(s)} disabled={savingId === s.id}>
-                        {savingId === s.id ? "Saving..." : "Save"}
+                      <Button size="sm" onClick={() => { setEditingSolution(s); setShowEditDialog(true); }}>
+                        <Edit className="w-4 h-4 mr-1" /> Edit
                       </Button>
                       <Button variant="destructive" size="sm" onClick={() => deleteSolution(s.id)} disabled={deletingId === s.id}>
-                        {deletingId === s.id ? "Deleting..." : "Delete"}
+                        {deletingId === s.id ? "Deleting..." : <><Trash2 className="w-4 h-4" /></>}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -436,6 +529,217 @@ const SolutionsManager = () => {
           </Table>
         </div>
       </Card>
+
+      {/* Edit Solution Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Solution: {editingSolution?.title}</DialogTitle>
+          </DialogHeader>
+          {editingSolution && (
+            <Tabs defaultValue="hero" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="hero">Hero Section</TabsTrigger>
+                <TabsTrigger value="description">Description</TabsTrigger>
+                <TabsTrigger value="benefits">Key Benefits</TabsTrigger>
+                <TabsTrigger value="footer">Footer CTA</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="hero" className="space-y-4 mt-4">
+                <div>
+                  <Label>Hero Title</Label>
+                  <Input
+                    value={editingSolution.hero_title ?? ""}
+                    onChange={(e) => updateEditing({ hero_title: e.target.value })}
+                    placeholder="Main hero heading"
+                  />
+                </div>
+                <div>
+                  <Label>Hero Subtitle</Label>
+                  <Input
+                    value={editingSolution.hero_subtitle ?? ""}
+                    onChange={(e) => updateEditing({ hero_subtitle: e.target.value })}
+                    placeholder="Supporting text"
+                  />
+                </div>
+                <div>
+                  <Label>Hero Description</Label>
+                  <Textarea
+                    value={editingSolution.hero_description ?? ""}
+                    onChange={(e) => updateEditing({ hero_description: e.target.value })}
+                    placeholder="Additional description text"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label>Hero Image URL</Label>
+                  <Input
+                    value={editingSolution.hero_image_url ?? ""}
+                    onChange={(e) => updateEditing({ hero_image_url: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>CTA Button Text</Label>
+                    <Input
+                      value={editingSolution.hero_cta_text ?? ""}
+                      onChange={(e) => updateEditing({ hero_cta_text: e.target.value })}
+                      placeholder="Get Started"
+                    />
+                  </div>
+                  <div>
+                    <Label>CTA Button URL</Label>
+                    <Input
+                      value={editingSolution.hero_cta_url ?? ""}
+                      onChange={(e) => updateEditing({ hero_cta_url: e.target.value })}
+                      placeholder="/contact"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="description" className="space-y-4 mt-4">
+                <div>
+                  <Label>Description Heading (H2)</Label>
+                  <Input
+                    value={editingSolution.description_heading ?? ""}
+                    onChange={(e) => updateEditing({ description_heading: e.target.value })}
+                    placeholder="Section heading"
+                  />
+                </div>
+                <div>
+                  <Label>Description Text</Label>
+                  <Textarea
+                    value={editingSolution.description_text ?? ""}
+                    onChange={(e) => updateEditing({ description_text: e.target.value })}
+                    placeholder="Detailed description of the solution..."
+                    rows={6}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="benefits" className="space-y-4 mt-4">
+                <div className="flex justify-between items-center mb-4">
+                  <Label>Key Benefits</Label>
+                  <Button size="sm" onClick={addKeyBenefit}>
+                    <Plus className="w-4 h-4 mr-1" /> Add Benefit
+                  </Button>
+                </div>
+                {editingSolution.key_benefits.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No key benefits yet. Click "Add Benefit" to create one.</p>
+                ) : (
+                  <div className="space-y-6">
+                    {editingSolution.key_benefits.map((benefit, index) => (
+                      <Card key={index} className="p-4 relative">
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => moveKeyBenefit(index, 'up')}
+                            disabled={index === 0}
+                          >
+                            <MoveUp className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => moveKeyBenefit(index, 'down')}
+                            disabled={index === editingSolution.key_benefits.length - 1}
+                          >
+                            <MoveDown className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => removeKeyBenefit(index)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <div className="space-y-3 pr-32">
+                          <div>
+                            <Label>Heading (H3)</Label>
+                            <Input
+                              value={benefit.heading}
+                              onChange={(e) => updateKeyBenefit(index, 'heading', e.target.value)}
+                              placeholder="Benefit heading"
+                            />
+                          </div>
+                          <div>
+                            <Label>Text</Label>
+                            <Textarea
+                              value={benefit.text}
+                              onChange={(e) => updateKeyBenefit(index, 'text', e.target.value)}
+                              placeholder="Benefit description..."
+                              rows={3}
+                            />
+                          </div>
+                          <div>
+                            <Label>Image URL</Label>
+                            <Input
+                              value={benefit.image_url}
+                              onChange={(e) => updateKeyBenefit(index, 'image_url', e.target.value)}
+                              placeholder="https://..."
+                            />
+                          </div>
+                        </div>
+                        <Badge variant="secondary" className="mt-2">Benefit #{index + 1}</Badge>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="footer" className="space-y-4 mt-4">
+                <div>
+                  <Label>Footer Heading (H3)</Label>
+                  <Input
+                    value={editingSolution.footer_heading ?? ""}
+                    onChange={(e) => updateEditing({ footer_heading: e.target.value })}
+                    placeholder="Ready to get started?"
+                  />
+                </div>
+                <div>
+                  <Label>Footer Text</Label>
+                  <Textarea
+                    value={editingSolution.footer_text ?? ""}
+                    onChange={(e) => updateEditing({ footer_text: e.target.value })}
+                    placeholder="Call to action text..."
+                    rows={3}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>CTA Button Text</Label>
+                    <Input
+                      value={editingSolution.footer_cta_text ?? ""}
+                      onChange={(e) => updateEditing({ footer_cta_text: e.target.value })}
+                      placeholder="Contact Us"
+                    />
+                  </div>
+                  <div>
+                    <Label>CTA Button URL</Label>
+                    <Input
+                      value={editingSolution.footer_cta_url ?? ""}
+                      onChange={(e) => updateEditing({ footer_cta_url: e.target.value })}
+                      placeholder="/contact"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
+          <div className="flex justify-end gap-2 mt-6">
+            <Button variant="outline" onClick={() => { setShowEditDialog(false); setEditingSolution(null); }}>
+              Cancel
+            </Button>
+            <Button onClick={() => editingSolution && saveSolution(editingSolution)} disabled={savingId === editingSolution?.id}>
+              {savingId === editingSolution?.id ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1092,9 +1092,22 @@ export type Database = {
           cta_text: string | null
           cta_url: string | null
           description: string | null
+          description_heading: string | null
+          description_text: string | null
+          footer_cta_text: string | null
+          footer_cta_url: string | null
+          footer_heading: string | null
+          footer_text: string | null
+          hero_cta_text: string | null
+          hero_cta_url: string | null
+          hero_description: string | null
+          hero_image_url: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
           icon_name: string
           id: string
           image_url: string | null
+          key_benefits: Json | null
           sort_order: number | null
           subtitle: string | null
           title: string
@@ -1107,9 +1120,22 @@ export type Database = {
           cta_text?: string | null
           cta_url?: string | null
           description?: string | null
+          description_heading?: string | null
+          description_text?: string | null
+          footer_cta_text?: string | null
+          footer_cta_url?: string | null
+          footer_heading?: string | null
+          footer_text?: string | null
+          hero_cta_text?: string | null
+          hero_cta_url?: string | null
+          hero_description?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
           icon_name?: string
           id?: string
           image_url?: string | null
+          key_benefits?: Json | null
           sort_order?: number | null
           subtitle?: string | null
           title: string
@@ -1122,9 +1148,22 @@ export type Database = {
           cta_text?: string | null
           cta_url?: string | null
           description?: string | null
+          description_heading?: string | null
+          description_text?: string | null
+          footer_cta_text?: string | null
+          footer_cta_url?: string | null
+          footer_heading?: string | null
+          footer_text?: string | null
+          hero_cta_text?: string | null
+          hero_cta_url?: string | null
+          hero_description?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
           icon_name?: string
           id?: string
           image_url?: string | null
+          key_benefits?: Json | null
           sort_order?: number | null
           subtitle?: string | null
           title?: string
