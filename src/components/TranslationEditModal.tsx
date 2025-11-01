@@ -59,10 +59,10 @@ export function TranslationEditModal({
           .from('text_content')
           .select('content')
           .eq('id', contentId)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
-        setContent(data.content);
+        setContent(data?.content || '');
 
         // Load translations if translation key exists
         if (translationKey) {
@@ -99,7 +99,7 @@ export function TranslationEditModal({
 
         const { data: transData } = await supabase
           .from('translations')
-          .select('language_code, translated_text')
+          .select('language_code, translated_text, id')
           .eq('translation_key', translationKey);
 
         const translationsMap = new Map(
@@ -137,19 +137,41 @@ export function TranslationEditModal({
 
         if (error) throw error;
       } else if (contentTable === 'translations' && translationKey) {
-        // Save translation - update existing record
-        // English is the source language, so auto-approve it
-        const { error } = await supabase
+        // Check if translation exists
+        const { data: existing } = await supabase
           .from('translations')
-          .update({
-            translated_text: content,
-            approved: currentLanguage === 'en',
-            review_status: currentLanguage === 'en' ? 'approved' : 'pending',
-          })
+          .select('id')
           .eq('translation_key', translationKey)
-          .eq('language_code', currentLanguage);
+          .eq('language_code', currentLanguage)
+          .maybeSingle();
 
-        if (error) throw error;
+        if (existing) {
+          // Update existing translation
+          const { error } = await supabase
+            .from('translations')
+            .update({
+              translated_text: content,
+              approved: currentLanguage === 'en',
+              review_status: currentLanguage === 'en' ? 'approved' : 'pending',
+            })
+            .eq('translation_key', translationKey)
+            .eq('language_code', currentLanguage);
+
+          if (error) throw error;
+        } else {
+          // Insert new translation
+          const { error } = await supabase
+            .from('translations')
+            .insert({
+              translation_key: translationKey,
+              language_code: currentLanguage,
+              translated_text: content,
+              approved: currentLanguage === 'en',
+              review_status: currentLanguage === 'en' ? 'approved' : 'pending',
+            });
+
+          if (error) throw error;
+        }
       }
 
       toast.success('Content updated successfully');
@@ -177,25 +199,51 @@ export function TranslationEditModal({
 
     setSaving(true);
     try {
-      // English is the source language, so auto-approve it
-      const { error } = await supabase
+      // Check if translation exists
+      const { data: existing } = await supabase
         .from('translations')
-        .update({
-          translated_text: text,
-          approved: languageCode === 'en',
-          review_status: languageCode === 'en' ? 'approved' : 'pending',
-        })
+        .select('id')
         .eq('translation_key', translationKey)
-        .eq('language_code', languageCode);
+        .eq('language_code', languageCode)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (existing) {
+        // Update existing translation
+        const { error } = await supabase
+          .from('translations')
+          .update({
+            translated_text: text,
+            approved: languageCode === 'en',
+            review_status: languageCode === 'en' ? 'approved' : 'pending',
+          })
+          .eq('translation_key', translationKey)
+          .eq('language_code', languageCode);
 
-      toast.success(`Translation updated for ${languageCode}`);
+        if (error) throw error;
+      } else {
+        // Insert new translation
+        const { error } = await supabase
+          .from('translations')
+          .insert({
+            translation_key: translationKey,
+            language_code: languageCode,
+            translated_text: text,
+            approved: languageCode === 'en',
+            review_status: languageCode === 'en' ? 'approved' : 'pending',
+          });
+
+        if (error) throw error;
+      }
+
+      toast.success(`Translation ${existing ? 'updated' : 'created'} for ${languageCode}`);
       
       // Trigger i18n reload to refresh translations
       await i18n.reloadResources(currentLanguage);
       // Force language change event to trigger React re-renders
       await i18n.changeLanguage(currentLanguage);
+      
+      // Reload content to show the new translation
+      await loadContent();
       
       // Call optional callback for additional refresh logic
       if (onSave) {
