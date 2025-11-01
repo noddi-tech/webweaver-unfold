@@ -211,7 +211,7 @@ const Header = () => {
                     <NavigationMenuItem key={originalIndex}>
                       {((link.type === 'static-dropdown' || link.type === 'dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0) ? (
                         <>
-                          <NavigationMenuTrigger className="bg-transparent data-[state=open]:animate-none data-[state=closed]:animate-none">
+                          <NavigationMenuTrigger className="bg-transparent text-base font-medium data-[state=open]:animate-none data-[state=closed]:animate-none">
                             {link.title}
                           </NavigationMenuTrigger>
                           <NavigationMenuContent className="data-[state=open]:animate-none data-[state=closed]:animate-none transition-none">

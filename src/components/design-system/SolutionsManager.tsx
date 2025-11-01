@@ -93,6 +93,16 @@ const tokenOptions = {
   border: ["border"],
 };
 
+// Generate URL-friendly slug from title
+const generateSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+};
+
 const SolutionsManager = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -162,6 +172,7 @@ const SolutionsManager = () => {
     setCreating(true);
     const { error } = await supabase.from("solutions").insert({
       title: newSolution.title.trim(),
+      slug: generateSlug(newSolution.title.trim()),
       subtitle: newSolution.subtitle?.trim() || null,
       description: newSolution.description?.trim() || null,
       icon_name: newSolution.icon_name?.trim() || "Sparkles",
