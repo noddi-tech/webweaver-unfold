@@ -1204,6 +1204,7 @@ export type Database = {
           id: string
           image_url: string | null
           key_benefits: Json | null
+          slug: string
           sort_order: number | null
           subtitle: string | null
           title: string
@@ -1232,6 +1233,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           key_benefits?: Json | null
+          slug: string
           sort_order?: number | null
           subtitle?: string | null
           title: string
@@ -1260,6 +1262,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           key_benefits?: Json | null
+          slug?: string
           sort_order?: number | null
           subtitle?: string | null
           title?: string
@@ -1716,6 +1719,7 @@ export type Database = {
       }
     }
     Functions: {
+      generate_slug: { Args: { text_input: string }; Returns: string }
       refresh_language_translation_stats: { Args: never; Returns: undefined }
       sync_language_visibility: { Args: never; Returns: undefined }
     }
