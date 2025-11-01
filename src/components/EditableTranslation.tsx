@@ -70,16 +70,14 @@ export function EditableTranslation({
         )}
       </span>
 
-      {contentId && (
-        <TranslationEditModal
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-          contentId={contentId}
-          contentTable="translations"
-          translationKey={translationKey}
-          onSave={onSave}
-        />
-      )}
+      <TranslationEditModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        contentId={contentId || ''}
+        contentTable="translations"
+        translationKey={translationKey}
+        onSave={onSave}
+      />
     </>
   );
 }
