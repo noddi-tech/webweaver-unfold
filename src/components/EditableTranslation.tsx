@@ -10,6 +10,7 @@ interface EditableTranslationProps {
   translationKey: string;
   className?: string;
   onSave?: () => void;
+  fallbackText?: string;
 }
 
 export function EditableTranslation({
@@ -17,6 +18,7 @@ export function EditableTranslation({
   translationKey,
   className = '',
   onSave,
+  fallbackText,
 }: EditableTranslationProps) {
   const { editMode } = useEditMode();
   const { currentLanguage } = useAppTranslation();
@@ -77,6 +79,7 @@ export function EditableTranslation({
         contentTable="translations"
         translationKey={translationKey}
         onSave={onSave}
+        fallbackText={fallbackText}
       />
     </>
   );

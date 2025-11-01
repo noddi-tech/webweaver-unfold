@@ -68,12 +68,20 @@ export default function ProductOverview() {
                     <div className="w-16 h-16 rounded-xl bg-gradient-primary flex items-center justify-center mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
                       <Icon className="w-8 h-8 text-primary-foreground" />
                     </div>
-                    <EditableTranslation translationKey={`product_overview.${product.link.slice(1)}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
+                     <EditableTranslation 
+                      translationKey={`product_overview.${product.link.slice(1)}.title`} 
+                      onSave={() => setRefreshKey(prev => prev + 1)}
+                      fallbackText={product.title}
+                    >
                       <h3 className="text-2xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors">
                         {product.title}
                       </h3>
                     </EditableTranslation>
-                    <EditableTranslation translationKey={`product_overview.${product.link.slice(1)}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
+                    <EditableTranslation 
+                      translationKey={`product_overview.${product.link.slice(1)}.description`} 
+                      onSave={() => setRefreshKey(prev => prev + 1)}
+                      fallbackText={product.description}
+                    >
                       <p className="text-muted-foreground leading-relaxed">
                         {product.description}
                       </p>

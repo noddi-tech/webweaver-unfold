@@ -23,6 +23,7 @@ interface TranslationEditModalProps {
   contentTable: 'text_content' | 'translations';
   translationKey?: string;
   onSave?: () => void;
+  fallbackText?: string;
 }
 
 interface Translation {
@@ -38,6 +39,7 @@ export function TranslationEditModal({
   contentTable,
   translationKey,
   onSave,
+  fallbackText,
 }: TranslationEditModalProps) {
   const [content, setContent] = useState('');
   const [translations, setTranslations] = useState<Translation[]>([]);
@@ -106,8 +108,8 @@ export function TranslationEditModal({
           transData?.map(t => [t.language_code, t.translated_text]) || []
         );
 
-        // Get English content as the main content
-        const englishContent = translationsMap.get('en') || '';
+        // Get English content as the main content, use fallback if not found
+        const englishContent = translationsMap.get('en') || fallbackText || '';
         setContent(englishContent);
 
         setTranslations(
