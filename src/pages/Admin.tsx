@@ -111,6 +111,7 @@ const Admin = () => {
                     <TabsTrigger value="solutions">Solutions</TabsTrigger>
                     <TabsTrigger value="usps">USPs</TabsTrigger>
                     <TabsTrigger value="contact">Contact</TabsTrigger>
+                    <TabsTrigger value="faqs">FAQs</TabsTrigger>
                   </TabsList>
                   <TabsContent value="pages" className="space-y-8">
                     <PagesManager />
@@ -132,6 +133,9 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="contact" className="space-y-8">
                     <ContactManager />
+                  </TabsContent>
+                  <TabsContent value="faqs" className="space-y-8">
+                    <FAQManager />
                   </TabsContent>
                 </Tabs>
               </TabsContent>
@@ -169,7 +173,6 @@ const Admin = () => {
                     <TabsTrigger value="social">Social Meta</TabsTrigger>
                     <TabsTrigger value="pricing">Pricing</TabsTrigger>
                     <TabsTrigger value="employees">Team</TabsTrigger>
-                    <TabsTrigger value="faqs">FAQs</TabsTrigger>
                   </TabsList>
                   <TabsContent value="header" className="space-y-8">
                     <HeaderManager />
@@ -185,9 +188,6 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="employees" className="space-y-8">
                     <EmployeesManager />
-                  </TabsContent>
-                  <TabsContent value="faqs" className="space-y-8">
-                    <FAQManager />
                   </TabsContent>
                 </Tabs>
               </TabsContent>
