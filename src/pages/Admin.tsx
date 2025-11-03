@@ -28,6 +28,7 @@ import FileManager from "@/components/design-system/FileManager";
 import FaviconManager from "@/components/design-system/FaviconManager";
 import SocialMetaManager from "@/components/design-system/SocialMetaManager";
 import PricingManager from "@/components/design-system/PricingManager";
+import { FAQManager } from "@/components/design-system/FAQManager";
 import TranslationManagerContent from "@/components/design-system/TranslationManagerContent";
 import PageMetaManager from "@/components/design-system/PageMetaManager";
 import SitemapGenerator from "@/components/design-system/SitemapGenerator";
@@ -168,6 +169,7 @@ const Admin = () => {
                     <TabsTrigger value="social">Social Meta</TabsTrigger>
                     <TabsTrigger value="pricing">Pricing</TabsTrigger>
                     <TabsTrigger value="employees">Team</TabsTrigger>
+                    <TabsTrigger value="faqs">FAQs</TabsTrigger>
                   </TabsList>
                   <TabsContent value="header" className="space-y-8">
                     <HeaderManager />
@@ -183,6 +185,9 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="employees" className="space-y-8">
                     <EmployeesManager />
+                  </TabsContent>
+                  <TabsContent value="faqs" className="space-y-8">
+                    <FAQManager />
                   </TabsContent>
                 </Tabs>
               </TabsContent>

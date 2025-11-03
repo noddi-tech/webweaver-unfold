@@ -463,6 +463,39 @@ export type Database = {
         }
         Relationships: []
       }
+      faqs: {
+        Row: {
+          active: boolean
+          answer: string
+          created_at: string
+          id: string
+          question: string
+          sort_order: number | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          answer: string
+          created_at?: string
+          id?: string
+          question: string
+          sort_order?: number | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          answer?: string
+          created_at?: string
+          id?: string
+          question?: string
+          sort_order?: number | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       features: {
         Row: {
           created_at: string
