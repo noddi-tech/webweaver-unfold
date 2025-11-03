@@ -1,6 +1,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { useFAQs } from "@/hooks/useFAQs";
+import { EditableText } from "@/components/EditableText";
 
 export function PricingFAQ() {
   const { t } = useAppTranslation();
@@ -33,12 +34,22 @@ export function PricingFAQ() {
         {faqs.map((faq) => (
           <AccordionItem key={faq.id} value={faq.id}>
             <AccordionTrigger className="text-left hover:no-underline">
-              <span className="font-semibold text-foreground">{faq.question}</span>
+              <EditableText
+                contentId={`faq_${faq.id}_question`}
+                translationKey={`faq.${faq.id}.question`}
+                className="font-semibold text-foreground"
+              >
+                {faq.question}
+              </EditableText>
             </AccordionTrigger>
             <AccordionContent>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <EditableText
+                contentId={`faq_${faq.id}_answer`}
+                translationKey={`faq.${faq.id}.answer`}
+                className="text-sm text-muted-foreground leading-relaxed"
+              >
                 {faq.answer}
-              </p>
+              </EditableText>
             </AccordionContent>
           </AccordionItem>
         ))}
