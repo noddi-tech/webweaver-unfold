@@ -42,7 +42,7 @@ export default function PricingHero({ textContent }: PricingHeroProps) {
             ))}
           </div>
           
-          <div className="pt-4">
+          <div className="pt-12">
             <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
               <a 
                 href="https://calendly.com/joachim-noddi/30min"
