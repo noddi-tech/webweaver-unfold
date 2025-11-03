@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Plus, Trash2, Save, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Save, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface FAQ {
   id: string;
@@ -117,6 +117,31 @@ export function FAQManager() {
     await handleUpdate(id, { active });
   };
 
+  const handleMoveFAQ = async (faq: FAQ, direction: 'up' | 'down') => {
+    const typeFAQs = faqs.filter(f => f.type === faq.type).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    const currentIndex = typeFAQs.findIndex(f => f.id === faq.id);
+    
+    if (direction === 'up' && currentIndex === 0) return;
+    if (direction === 'down' && currentIndex === typeFAQs.length - 1) return;
+    
+    const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const swapFAQ = typeFAQs[swapIndex];
+    
+    try {
+      const currentSortOrder = faq.sort_order || 0;
+      const swapSortOrder = swapFAQ.sort_order || 0;
+      
+      await supabase.from('faqs').update({ sort_order: swapSortOrder }).eq('id', faq.id);
+      await supabase.from('faqs').update({ sort_order: currentSortOrder }).eq('id', swapFAQ.id);
+      
+      toast.success('FAQ order updated');
+      fetchFAQs();
+    } catch (error) {
+      console.error('Error updating FAQ order:', error);
+      toast.error('Failed to update order');
+    }
+  };
+
   if (loading) {
     return <div>Loading FAQs...</div>;
   }
@@ -195,31 +220,51 @@ export function FAQManager() {
                 <Card key={faq.id} className="p-4">
                   {editingId === faq.id ? (
                     <div className="space-y-4">
-                      <Input
-                        value={faq.question}
-                        onChange={(e) => {
-                          const updated = faqs.map(f => 
-                            f.id === faq.id ? { ...f, question: e.target.value } : f
-                          );
-                          setFaqs(updated);
-                        }}
-                      />
-                      <Textarea
-                        value={faq.answer}
-                        onChange={(e) => {
-                          const updated = faqs.map(f => 
-                            f.id === faq.id ? { ...f, answer: e.target.value } : f
-                          );
-                          setFaqs(updated);
-                        }}
-                        rows={4}
-                      />
+                      <div className="space-y-2">
+                        <Label>Question</Label>
+                        <Input
+                          value={faq.question}
+                          onChange={(e) => {
+                            const updated = faqs.map(f => 
+                              f.id === faq.id ? { ...f, question: e.target.value } : f
+                            );
+                            setFaqs(updated);
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Answer</Label>
+                        <Textarea
+                          value={faq.answer}
+                          onChange={(e) => {
+                            const updated = faqs.map(f => 
+                              f.id === faq.id ? { ...f, answer: e.target.value } : f
+                            );
+                            setFaqs(updated);
+                          }}
+                          rows={4}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Sort Order</Label>
+                        <Input
+                          type="number"
+                          value={faq.sort_order || 0}
+                          onChange={(e) => {
+                            const updated = faqs.map(f => 
+                              f.id === faq.id ? { ...f, sort_order: parseInt(e.target.value) || 0 } : f
+                            );
+                            setFaqs(updated);
+                          }}
+                        />
+                      </div>
                       <div className="flex gap-2">
                         <Button 
                           size="sm"
                           onClick={() => handleUpdate(faq.id, { 
                             question: faq.question, 
-                            answer: faq.answer 
+                            answer: faq.answer,
+                            sort_order: faq.sort_order
                           })}
                         >
                           <Save className="h-4 w-4 mr-2" />
@@ -240,12 +285,34 @@ export function FAQManager() {
                   ) : (
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <GripVertical className="h-4 w-4 text-muted-foreground" />
-                            <h4 className="font-semibold">{faq.question}</h4>
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="flex flex-col gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0"
+                              onClick={() => handleMoveFAQ(faq, 'up')}
+                              disabled={faqsByType[type].findIndex(f => f.id === faq.id) === 0}
+                            >
+                              <ChevronUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0"
+                              onClick={() => handleMoveFAQ(faq, 'down')}
+                              disabled={faqsByType[type].findIndex(f => f.id === faq.id) === faqsByType[type].length - 1}
+                            >
+                              <ChevronDown className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <p className="text-sm text-muted-foreground">{faq.answer}</p>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs text-muted-foreground font-mono">#{faq.sort_order || 0}</span>
+                              <h4 className="font-semibold">{faq.question}</h4>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{faq.answer}</p>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Switch
