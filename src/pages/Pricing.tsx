@@ -52,7 +52,7 @@ const Pricing = () => {
         <PricingHero textContent={textContent} />
 
         {/* No Hidden Costs Banner */}
-        <section className="py-section animate-fade-in" style={{ animationDelay: '175ms' }}>
+        <section className="pt-0 pb-section animate-fade-in" style={{ animationDelay: '175ms' }}>
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <NoHiddenCosts textContent={textContent} />
           </div>

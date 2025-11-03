@@ -20,7 +20,7 @@ export default function PricingHero({ textContent }: PricingHeroProps) {
   };
 
   return (
-    <section className="py-section">
+    <section className="pt-section pb-12">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-left md:text-center max-w-4xl md:mx-auto space-y-8">
           <h1 className={`${h1} text-foreground`}>
