@@ -89,20 +89,32 @@ export function ImageEditModal({
     setUploading(true);
     try {
       // Check authentication
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error('Please log in to the CMS to upload images');
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('Auth check error:', authError);
+        toast.error('Authentication error. Please log in again.');
         setUploading(false);
         return;
       }
+      
+      if (!user) {
+        toast.error('Please log in to the CMS (/cms-login) to upload images');
+        setUploading(false);
+        return;
+      }
+
+      console.log('User authenticated:', user.id);
 
       // Generate unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `solutions/${fileName}`;
 
+      console.log('Attempting upload to:', filePath);
+
       // Upload to storage
-      const { error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('site-images')
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -110,10 +122,18 @@ export function ImageEditModal({
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
-        toast.error(`Upload failed: ${uploadError.message}`);
-        throw uploadError;
+        console.error('Upload error details:', {
+          message: uploadError.message,
+          name: uploadError.name,
+          statusCode: (uploadError as any).statusCode,
+          error: uploadError
+        });
+        toast.error(`Upload failed: ${uploadError.message || 'Unknown error'}`);
+        setUploading(false);
+        return;
       }
+
+      console.log('Upload successful:', uploadData);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
