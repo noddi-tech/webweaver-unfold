@@ -57,6 +57,19 @@ const App = () => (
           {/* Redirect root to default language */}
           <Route path="/" element={<LanguageRedirect />} />
           
+          {/* Redirect all non-prefixed routes to language-prefixed versions */}
+          <Route path="/functions" element={<LanguageRedirect />} />
+          <Route path="/features" element={<LanguageRedirect />} />
+          <Route path="/solutions" element={<LanguageRedirect />} />
+          <Route path="/solutions/:slug" element={<LanguageRedirect />} />
+          <Route path="/partners" element={<LanguageRedirect />} />
+          <Route path="/architecture" element={<LanguageRedirect />} />
+          <Route path="/pricing" element={<LanguageRedirect />} />
+          <Route path="/pricing_detailed" element={<LanguageRedirect />} />
+          <Route path="/contact" element={<LanguageRedirect />} />
+          <Route path="/demo" element={<LanguageRedirect />} />
+          <Route path="/team" element={<LanguageRedirect />} />
+          
           {/* Catch-all for 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
