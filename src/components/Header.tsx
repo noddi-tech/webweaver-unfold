@@ -196,16 +196,16 @@ const Header = () => {
             <NavigationMenu className="hidden md:flex">
               <NavigationMenuList>
                 {headerSettings.navigation_links.map((link: any, originalIndex: number) => link.active ? { link, originalIndex } : null).filter(Boolean).map(({ link, originalIndex }: any) => {
-                  const dropdownItems = (link.type === 'static-dropdown' || link.type === 'dropdown')
-                    ? link.children?.filter((child: any) => child.active) || []
-                    : link.type === 'dynamic-dropdown' 
-                    ? (dynamicDropdowns[originalIndex] || []).map((item: any) => ({
-                        title: item.title || item.name,
-                        url: `/${link.collection}/${item.slug || item.id}`,
-                        description: item.subtitle || item.description,
-                        active: true
-                      }))
-                    : [];
+                const dropdownItems = (link.type === 'static-dropdown' || link.type === 'dropdown')
+                  ? link.children?.filter((child: any) => child.active) || []
+                  : link.type === 'dynamic-dropdown' 
+                  ? (dynamicDropdowns[originalIndex] || []).map((item: any) => ({
+                      title: item.title || item.name,
+                      url: `/${link.collection}/${item.slug || item.id}`,
+                      description: item.subtitle || item.description,
+                      active: true
+                    }))
+                  : [];
 
                   return (
                     <NavigationMenuItem key={originalIndex}>

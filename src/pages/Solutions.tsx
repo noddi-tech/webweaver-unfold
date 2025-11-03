@@ -11,6 +11,7 @@ type IconName = keyof typeof icons;
 
 interface Solution {
   id: string;
+  slug: string;
   title: string;
   subtitle: string | null;
   description: string | null;
@@ -183,7 +184,7 @@ const Solutions = () => {
                   {/* CTA */}
                   <div className="mt-6">
                     <Button asChild size="lg" className="w-full">
-                      <LanguageLink to={`/solutions/${solution.id}`}>
+                      <LanguageLink to={`/solutions/${solution.slug}`}>
                         {solution.cta_text || "Learn More"}
                         <icons.ArrowRight className="w-4 h-4 ml-2" />
                       </LanguageLink>
