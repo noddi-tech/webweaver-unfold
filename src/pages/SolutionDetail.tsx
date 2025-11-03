@@ -300,10 +300,10 @@ const SolutionDetail = () => {
                 }}
                 placeholder="Add hero image or carousel"
               >
-                {((heroDisplayType === 'image' && heroImageUrl) || solution.hero_image_url) && (
+                {heroDisplayType === 'image' && heroImageUrl && (
                   <div className="rounded-2xl overflow-hidden shadow-2xl">
                     <img 
-                      src={heroImageUrl || solution.hero_image_url || ''} 
+                      src={heroImageUrl} 
                       alt={solution.hero_title || ''}
                       className="w-full h-auto object-cover"
                     />
