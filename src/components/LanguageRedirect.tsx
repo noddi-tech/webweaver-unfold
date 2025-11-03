@@ -12,8 +12,12 @@ export function LanguageRedirect() {
       const browserLang = navigator.language.split('-')[0];
       const defaultLang = storedLang || browserLang || 'en';
       
+      // Clean pathname by removing incorrect prefixes like /auth/ or /admin/
+      let cleanPath = window.location.pathname;
+      cleanPath = cleanPath.replace(/^\/(auth|admin)\//, '/');
+      
       // Redirect to language-prefixed route
-      navigate(`/${defaultLang}${window.location.pathname}`, { replace: true });
+      navigate(`/${defaultLang}${cleanPath}`, { replace: true });
     }
   }, [lang, navigate]);
 
