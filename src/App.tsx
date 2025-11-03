@@ -11,6 +11,7 @@ import Demo from "./pages/Demo";
 import FeaturesPage from "./pages/Features";
 import Contact from "./pages/Contact";
 import Pricing from "./pages/Pricing";
+import PricingDetailed from "./pages/PricingDetailed";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/:lang/partners" element={<LanguageSync><Partners /></LanguageSync>} />
           <Route path="/:lang/architecture" element={<LanguageSync><Architecture /></LanguageSync>} />
           <Route path="/:lang/pricing" element={<LanguageSync><Pricing /></LanguageSync>} />
+          <Route path="/:lang/pricing_detailed" element={<LanguageSync><PricingDetailed /></LanguageSync>} />
           <Route path="/:lang/contact" element={<LanguageSync><Contact /></LanguageSync>} />
           <Route path="/:lang/demo" element={<LanguageSync><Demo /></LanguageSync>} />
           <Route path="/:lang/team" element={<LanguageSync><Team /></LanguageSync>} />
