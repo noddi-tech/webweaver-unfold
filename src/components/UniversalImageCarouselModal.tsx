@@ -153,6 +153,13 @@ export function UniversalImageCarouselModal({
   const handleImageUpload = async () => {
     if (!uploadFile) return null;
 
+    // Check authentication
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error('Please log in to upload images');
+      throw new Error('Authentication required for image upload');
+    }
+
     const fileExt = uploadFile.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
@@ -161,7 +168,11 @@ export function UniversalImageCarouselModal({
       .from('site-images')
       .upload(filePath, uploadFile);
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      toast.error(`Upload failed: ${uploadError.message}`);
+      throw uploadError;
+    }
 
     const { data: { publicUrl } } = supabase.storage
       .from('site-images')

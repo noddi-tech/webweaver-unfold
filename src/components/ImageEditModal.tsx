@@ -88,6 +88,14 @@ export function ImageEditModal({
 
     setUploading(true);
     try {
+      // Check authentication
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Please log in to the CMS to upload images');
+        setUploading(false);
+        return;
+      }
+
       // Generate unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
@@ -101,7 +109,11 @@ export function ImageEditModal({
           upsert: false
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast.error(`Upload failed: ${uploadError.message}`);
+        throw uploadError;
+      }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
