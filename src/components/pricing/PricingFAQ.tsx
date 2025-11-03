@@ -1,11 +1,15 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { useFAQs } from "@/hooks/useFAQs";
-import { EditableText } from "@/components/EditableText";
+import { EditableFAQ } from "@/components/EditableFAQ";
 
 export function PricingFAQ() {
   const { t } = useAppTranslation();
-  const { faqs, loading } = useFAQs('pricing');
+  const { faqs, loading, error } = useFAQs('pricing');
+
+  const refetchFAQs = () => {
+    window.location.reload();
+  };
 
   if (loading) {
     return (
@@ -32,26 +36,24 @@ export function PricingFAQ() {
 
       <Accordion type="single" collapsible className="w-full">
         {faqs.map((faq) => (
-          <AccordionItem key={faq.id} value={faq.id}>
-            <AccordionTrigger className="text-left hover:no-underline">
-              <EditableText
-                contentId={`faq_${faq.id}_question`}
-                translationKey={`faq.${faq.id}.question`}
-                className="font-semibold text-foreground"
-              >
-                {faq.question}
-              </EditableText>
-            </AccordionTrigger>
-            <AccordionContent>
-              <EditableText
-                contentId={`faq_${faq.id}_answer`}
-                translationKey={`faq.${faq.id}.answer`}
-                className="text-sm text-muted-foreground leading-relaxed"
-              >
-                {faq.answer}
-              </EditableText>
-            </AccordionContent>
-          </AccordionItem>
+          <EditableFAQ
+            key={faq.id}
+            faqId={faq.id}
+            question={faq.question}
+            answer={faq.answer}
+            onUpdate={refetchFAQs}
+          >
+            <AccordionItem value={faq.id}>
+              <AccordionTrigger className="text-left hover:no-underline">
+                <span className="font-semibold text-foreground">{faq.question}</span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {faq.answer}
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+          </EditableFAQ>
         ))}
       </Accordion>
     </div>
