@@ -1,5 +1,7 @@
 import { UserX, MapPinOff, ShieldCheck, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EditableText } from "@/components/EditableText";
+import { LockedText } from "@/components/LockedText";
 
 interface TextContent {
   element_type: string;
@@ -38,12 +40,16 @@ export const NoHiddenCosts = ({ textContent, onOpenCalculator }: NoHiddenCostsPr
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">
-        <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-          {getContent('h3', 'No Hidden Costs')}
-        </h3>
-        <p className="text-muted-foreground">
-          {getContent('subtitle', 'Simple, transparent pricing with no surprises')}
-        </p>
+        <EditableText contentId="pricing-no-hidden-costs-h3" className="">
+          <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+            {getContent('h3', 'No Hidden Costs')}
+          </h3>
+        </EditableText>
+        <EditableText contentId="pricing-no-hidden-costs-subtitle" className="">
+          <p className="text-muted-foreground">
+            {getContent('subtitle', 'Simple, transparent pricing with no surprises')}
+          </p>
+        </EditableText>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 mb-12">
@@ -57,12 +63,14 @@ export const NoHiddenCosts = ({ textContent, onOpenCalculator }: NoHiddenCostsPr
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10">
               <item.icon className="w-6 h-6 text-primary" aria-hidden="true" />
             </div>
-            <h4 className="text-lg font-semibold text-foreground">
-              {item.title}
-            </h4>
-            <p className="text-sm text-muted-foreground">
-              {item.description}
-            </p>
+            <LockedText reason="Dynamic list item">
+              <h4 className="text-lg font-semibold text-foreground">
+                {item.title}
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                {item.description}
+              </p>
+            </LockedText>
           </div>
         ))}
       </div>
@@ -70,15 +78,21 @@ export const NoHiddenCosts = ({ textContent, onOpenCalculator }: NoHiddenCostsPr
       {/* Calculator CTA Section - Only shown when onOpenCalculator is provided */}
       {onOpenCalculator && (
         <div className="text-center pt-8 border-t border-border/50">
-          <h2 className="text-2xl font-bold text-foreground mb-4">
-            {getContent('h2_calculator', 'Need a Precise Estimate?')}
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            {getContent('p_calculator', 'Enter your revenue and service mix to see your cost.')}
-          </p>
+          <EditableText contentId="pricing-calculator-h2" className="">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
+              {getContent('h2_calculator', 'Need a Precise Estimate?')}
+            </h2>
+          </EditableText>
+          <EditableText contentId="pricing-calculator-subtitle" className="">
+            <p className="text-muted-foreground mb-6">
+              {getContent('p_calculator', 'Enter your revenue and service mix to see your cost.')}
+            </p>
+          </EditableText>
           <Button size="lg" onClick={onOpenCalculator} className="accessible-focus">
             <Calculator className="w-5 h-5 mr-2" />
-            {getContent('button_calculator', 'Open Advanced Calculator')}
+            <LockedText reason="Button text">
+              {getContent('button_calculator', 'Open Advanced Calculator')}
+            </LockedText>
           </Button>
         </div>
       )}

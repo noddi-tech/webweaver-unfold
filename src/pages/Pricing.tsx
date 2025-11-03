@@ -8,6 +8,7 @@ import PricingHero from "@/components/pricing/PricingHero";
 import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
+import { LockedText } from "@/components/LockedText";
 
 const Pricing = () => {
   // Fetch CMS content for pricing page
@@ -74,7 +75,9 @@ const Pricing = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {getCMSContent('button_book_demo', 'Book a Demo')}
+                <LockedText reason="CTA button text">
+                  {getCMSContent('button_book_demo', 'Book a Demo')}
+                </LockedText>
               </a>
             </Button>
           </div>

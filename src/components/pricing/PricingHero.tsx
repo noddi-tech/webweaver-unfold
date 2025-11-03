@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, TrendingDown, Zap } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
+import { EditableText } from "@/components/EditableText";
+import { LockedText } from "@/components/LockedText";
 
 interface TextContent {
   element_type: string;
@@ -23,21 +25,27 @@ export default function PricingHero({ textContent }: PricingHeroProps) {
     <section className="pt-section pb-20">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-left md:text-center max-w-4xl md:mx-auto space-y-8">
-          <h1 className={`${h1} text-foreground`}>
-            {getCMSContent('h1', 'Pay as you grow')}
-          </h1>
-          <p className={`${body} text-muted-foreground`}>
-            {getCMSContent('p', 'Transparent revenue-based pricing that scales with your business')}
-          </p>
+          <EditableText contentId="pricing-h1" className="">
+            <h1 className={`${h1} text-foreground`}>
+              {getCMSContent('h1', 'Pay as you grow')}
+            </h1>
+          </EditableText>
+          <EditableText contentId="pricing-subtitle" className="">
+            <p className={`${body} text-muted-foreground`}>
+              {getCMSContent('p', 'Transparent revenue-based pricing that scales with your business')}
+            </p>
+          </EditableText>
           <div className="flex flex-wrap justify-start md:justify-center gap-6 text-sm">
             {[
-              { icon: Sparkles, text: getCMSContent('usp_1', 'World class UX') },
-              { icon: TrendingDown, text: getCMSContent('usp_2', 'Rates decrease as you grow') },
-              { icon: Zap, text: getCMSContent('usp_3', 'Optimize your margin, not your headcount') },
+              { icon: Sparkles, contentId: 'pricing-usp-1', text: getCMSContent('usp_1', 'World class UX') },
+              { icon: TrendingDown, contentId: 'pricing-usp-2', text: getCMSContent('usp_2', 'Rates decrease as you grow') },
+              { icon: Zap, contentId: 'pricing-usp-3', text: getCMSContent('usp_3', 'Optimize your margin, not your headcount') },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-foreground">
                 <item.icon className="w-5 h-5 text-foreground" />
-                <span>{item.text}</span>
+                <EditableText contentId={item.contentId} className="">
+                  <span>{item.text}</span>
+                </EditableText>
               </div>
             ))}
           </div>
@@ -49,7 +57,9 @@ export default function PricingHero({ textContent }: PricingHeroProps) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {getCMSContent('button_book_demo', 'Book a Demo')}
+                <LockedText reason="CTA button text">
+                  {getCMSContent('button_book_demo', 'Book a Demo')}
+                </LockedText>
               </a>
             </Button>
           </div>
