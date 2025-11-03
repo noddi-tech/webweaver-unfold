@@ -58,7 +58,7 @@ export default function PricingHero({ textContent }: PricingHeroProps) {
                 rel="noopener noreferrer"
               >
                 <LockedText reason="CTA button text">
-                  {getCMSContent('button_book_demo', 'Book a Demo')}
+                  {getCMSContent('button_book_demo', 'Book a meeting with us')}
                 </LockedText>
               </a>
             </Button>
