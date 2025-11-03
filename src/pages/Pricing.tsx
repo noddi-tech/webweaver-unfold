@@ -70,13 +70,9 @@ const Pricing = () => {
         <section className="py-section text-center animate-fade-in" style={{ animationDelay: '650ms' }}>
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
-              <a 
-                href="https://calendly.com/joachim-noddi/30min"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="/contact">
                 <LockedText reason="CTA button text">
-                  {getCMSContent('button_book_demo', 'Book a Demo')}
+                  {getCMSContent('button_book_demo', 'Contact us')}
                 </LockedText>
               </a>
             </Button>
