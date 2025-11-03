@@ -61,7 +61,7 @@ const SolutionDetail = () => {
       const { data, error } = await supabase
         .from("solutions")
         .select("*")
-        .eq("id", slug)
+        .eq("slug", slug)
         .eq("active", true)
         .single();
 
@@ -120,6 +120,8 @@ const SolutionDetail = () => {
   };
 
   const handleButtonSave = async (textField: string, urlField: string, text: string, url: string) => {
+    if (!solution) return;
+    
     try {
       const { error } = await supabase
         .from('solutions')
@@ -127,7 +129,7 @@ const SolutionDetail = () => {
           [textField]: text,
           [urlField]: url 
         })
-        .eq('id', slug!);
+        .eq('id', solution.id);
 
       if (error) throw error;
       
@@ -139,11 +141,13 @@ const SolutionDetail = () => {
   };
 
   const handleImageSave = async (field: string, newUrl: string) => {
+    if (!solution) return;
+    
     try {
       const { error } = await supabase
         .from('solutions')
         .update({ [field]: newUrl })
-        .eq('id', slug!);
+        .eq('id', solution.id);
 
       if (error) throw error;
       
@@ -169,7 +173,7 @@ const SolutionDetail = () => {
         const { error } = await supabase
           .from('solutions')
           .update({ key_benefits: benefits })
-          .eq('id', slug!);
+          .eq('id', solution.id);
 
         if (error) throw error;
         
