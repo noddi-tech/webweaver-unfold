@@ -59,7 +59,7 @@ const Pricing = () => {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-section animate-fade-in" style={{ animationDelay: '600ms' }}>
+        <section className="py-12 animate-fade-in" style={{ animationDelay: '600ms' }}>
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <PricingFAQ />
           </div>
