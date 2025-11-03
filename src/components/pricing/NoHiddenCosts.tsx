@@ -8,7 +8,7 @@ interface TextContent {
 
 interface NoHiddenCostsProps {
   textContent: TextContent[];
-  onOpenCalculator: () => void;
+  onOpenCalculator?: () => void;
 }
 
 export const NoHiddenCosts = ({ textContent, onOpenCalculator }: NoHiddenCostsProps) => {
@@ -80,19 +80,21 @@ export const NoHiddenCosts = ({ textContent, onOpenCalculator }: NoHiddenCostsPr
         </Button>
       </div>
 
-      {/* Calculator CTA Section */}
-      <div className="text-center pt-8 border-t border-border/50">
-        <h2 className="text-2xl font-bold text-foreground mb-4">
-          {getContent('h2_calculator', 'Need a Precise Estimate?')}
-        </h2>
-        <p className="text-muted-foreground mb-6">
-          {getContent('p_calculator', 'Enter your revenue and service mix to see your cost.')}
-        </p>
-        <Button size="lg" onClick={onOpenCalculator} className="accessible-focus">
-          <Calculator className="w-5 h-5 mr-2" />
-          {getContent('button_calculator', 'Open Advanced Calculator')}
-        </Button>
-      </div>
+      {/* Calculator CTA Section - Only shown when onOpenCalculator is provided */}
+      {onOpenCalculator && (
+        <div className="text-center pt-8 border-t border-border/50">
+          <h2 className="text-2xl font-bold text-foreground mb-4">
+            {getContent('h2_calculator', 'Need a Precise Estimate?')}
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            {getContent('p_calculator', 'Enter your revenue and service mix to see your cost.')}
+          </p>
+          <Button size="lg" onClick={onOpenCalculator} className="accessible-focus">
+            <Calculator className="w-5 h-5 mr-2" />
+            {getContent('button_calculator', 'Open Advanced Calculator')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

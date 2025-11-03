@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { NoHiddenCosts } from "@/components/pricing/NoHiddenCosts";
-import { PricingCalculatorModal } from "@/components/pricing/PricingCalculatorModal";
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
 import PricingHero from "@/components/pricing/PricingHero";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,8 +10,6 @@ import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
 
 const Pricing = () => {
-  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
-  
   // Fetch CMS content for pricing page
   const { textContent, loading: contentLoading } = useTextContent('pricing');
   
@@ -57,7 +54,7 @@ const Pricing = () => {
         {/* No Hidden Costs Banner */}
         <section className="py-section animate-fade-in" style={{ animationDelay: '175ms' }}>
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
-            <NoHiddenCosts textContent={textContent} onOpenCalculator={() => setIsCalculatorOpen(true)} />
+            <NoHiddenCosts textContent={textContent} />
           </div>
         </section>
 
@@ -85,9 +82,6 @@ const Pricing = () => {
       </main>
 
       <Footer />
-
-      {/* Calculator Modal */}
-      <PricingCalculatorModal open={isCalculatorOpen} onOpenChange={setIsCalculatorOpen} />
     </div>
   );
 };
