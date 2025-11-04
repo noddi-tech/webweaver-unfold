@@ -90,10 +90,10 @@ export default function TrustProof() {
                     </div>
                   </EditableTranslation>
                   <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.label`}>
-                    <div className="text-sm font-semibold text-foreground mb-2">{metric.label}</div>
+                    <div className="text-sm font-semibold text-white/90 mb-2">{metric.label}</div>
                   </EditableTranslation>
                   <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.description`}>
-                    <div className="text-xs text-muted-foreground">{metric.description}</div>
+                    <div className="text-xs text-white/70">{metric.description}</div>
                   </EditableTranslation>
                 </CardContent>
               </Card>
@@ -119,7 +119,7 @@ export default function TrustProof() {
                   </div>
                 </div>
                 <EditableTranslation translationKey="trust_proof.nps.title">
-                  <h3 className="text-2xl font-bold mb-2 text-foreground">
+                  <h3 className="text-2xl font-bold mb-2 text-white">
                     {t('trust_proof.nps.title', 'Industry-Leading Customer Satisfaction')}
                   </h3>
                 </EditableTranslation>

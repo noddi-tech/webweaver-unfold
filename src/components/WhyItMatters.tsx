@@ -132,8 +132,8 @@ export default function WhyItMatters() {
                     <TrendingUp className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">&gt;49%</div>
-                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_1.label', 'Annual Market Growth')}</p>
-                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_1.description', 'Convenience services are the fastest-growing segment')}</p>
+                  <p className="text-sm text-white/90">{t('why_it_matters.opportunity.metric_1.label', 'Annual Market Growth')}</p>
+                  <p className="text-xs text-white/70 mt-2">{t('why_it_matters.opportunity.metric_1.description', 'Convenience services are the fastest-growing segment')}</p>
                 </div>
               </Card>
 
@@ -143,8 +143,8 @@ export default function WhyItMatters() {
                     <CheckCircle2 className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">20,000+</div>
-                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_2.label', 'Bookings Completed — and growing')}</p>
-                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_2.description', 'Proven platform with real commercial traction')}</p>
+                  <p className="text-sm text-white/90">{t('why_it_matters.opportunity.metric_2.label', 'Bookings Completed — and growing')}</p>
+                  <p className="text-xs text-white/70 mt-2">{t('why_it_matters.opportunity.metric_2.description', 'Proven platform with real commercial traction')}</p>
                 </div>
               </Card>
 
@@ -154,8 +154,8 @@ export default function WhyItMatters() {
                     <Award className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">NPS ~90</div>
-                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_3.label', 'Customer Satisfaction')}</p>
-                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_3.description', '3x better than industry average (20-30)')}</p>
+                  <p className="text-sm text-white/90">{t('why_it_matters.opportunity.metric_3.label', 'Customer Satisfaction')}</p>
+                  <p className="text-xs text-white/70 mt-2">{t('why_it_matters.opportunity.metric_3.description', '3x better than industry average (20-30)')}</p>
                 </div>
               </Card>
 
@@ -165,8 +165,8 @@ export default function WhyItMatters() {
                     <Users className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">4</div>
-                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_4.label', 'Paying SaaS Partners')}</p>
-                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_4.description', 'Take-rate per booking model validated')}</p>
+                  <p className="text-sm text-white/90">{t('why_it_matters.opportunity.metric_4.label', 'Paying SaaS Partners')}</p>
+                  <p className="text-xs text-white/70 mt-2">{t('why_it_matters.opportunity.metric_4.description', 'Take-rate per booking model validated')}</p>
                 </div>
               </Card>
 
@@ -176,8 +176,8 @@ export default function WhyItMatters() {
                     <Target className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">€65B</div>
-                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_5.label', 'Addressable Market')}</p>
-                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_5.description', 'Massive opportunity for platform expansion')}</p>
+                  <p className="text-sm text-white/90">{t('why_it_matters.opportunity.metric_5.label', 'Addressable Market')}</p>
+                  <p className="text-xs text-white/70 mt-2">{t('why_it_matters.opportunity.metric_5.description', 'Massive opportunity for platform expansion')}</p>
                 </div>
               </Card>
 
@@ -187,8 +187,8 @@ export default function WhyItMatters() {
                     <Zap className="w-8 h-8 text-primary-foreground" />
                   </div>
                   <div className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">&gt;€200M</div>
-                  <p className="text-sm text-muted-foreground">{t('why_it_matters.opportunity.metric_6.label', 'License Revenue Potential')}</p>
-                  <p className="text-xs text-muted-foreground mt-2">{t('why_it_matters.opportunity.metric_6.description', 'Annual recurring revenue opportunity')}</p>
+                  <p className="text-sm text-white/90">{t('why_it_matters.opportunity.metric_6.label', 'License Revenue Potential')}</p>
+                  <p className="text-xs text-white/70 mt-2">{t('why_it_matters.opportunity.metric_6.description', 'Annual recurring revenue opportunity')}</p>
                 </div>
               </Card>
             </div>

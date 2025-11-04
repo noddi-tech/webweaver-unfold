@@ -55,7 +55,7 @@ export default function WhyNoddi() {
                   <X className="w-6 h-6 text-destructive" />
                 </div>
                 <EditableTranslation translationKey="why_noddi.before.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-                  <h3 className="text-2xl font-bold text-foreground">{t('why_noddi.before.title', 'Before Noddi')}</h3>
+                  <h3 className="text-2xl font-bold">{t('why_noddi.before.title', 'Before Noddi')}</h3>
                 </EditableTranslation>
               </div>
               <ul className="space-y-4">
@@ -63,7 +63,7 @@ export default function WhyNoddi() {
                   <li key={index} className="flex items-start gap-3">
                     <X className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
                     <EditableTranslation translationKey={`why_noddi.before.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <span className="text-muted-foreground">{item}</span>
+                      <span className="text-white/80">{item}</span>
                     </EditableTranslation>
                   </li>
                 ))}
