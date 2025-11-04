@@ -46,7 +46,7 @@ const defaultColors: ColorToken[] = [
   {
     name: "Foreground",
     cssVar: "--foreground",
-    value: "264 58% 20%",
+    value: "220 60% 25%",
     className: "bg-foreground",
     isForeground: true,
     backgroundPair: "--background",
@@ -56,7 +56,7 @@ const defaultColors: ColorToken[] = [
   {
     name: "Card",
     cssVar: "--card",
-    value: "264 60% 15%",
+    value: "220 65% 18%",
     className: "bg-card",
     description: "Dark blue card background",
     type: "color"
@@ -82,7 +82,7 @@ const defaultColors: ColorToken[] = [
   {
     name: "Primary",
     cssVar: "--primary",
-    value: "264 58% 20%",
+    value: "220 60% 25%",
     className: "bg-primary",
     description: "Primary dark blue for buttons",
     type: "color"
@@ -136,12 +136,12 @@ const defaultColors: ColorToken[] = [
   {
     name: "Hero Gradient",
     cssVar: "--gradient-hero",
-    value: "linear-gradient(135deg, hsl(264 60% 15%), hsl(252 70% 25%))",
+    value: "linear-gradient(135deg, hsl(220 65% 18%), hsl(230 70% 28%))",
     className: "bg-gradient-hero",
     type: "gradient",
     gradientDirection: "135deg",
-    gradientStops: ["264 60% 15%", "252 70% 25%"],
-    description: "Dark blue to purple gradient for cards and headings"
+    gradientStops: ["220 65% 18%", "230 70% 28%"],
+    description: "Dark blue to cyan-blue gradient for cards and headings"
   }
 ];
 

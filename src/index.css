@@ -13,9 +13,9 @@ All colors MUST be HSL.
        ======================================== */
     
     /* Core Brand Colors */
-    --color-brand-dark: 264 58% 20%;      /* Dark blue for text and primary actions */
-    --color-brand-gradient-start: 264 60% 15%;  /* Dark blue gradient start */
-    --color-brand-gradient-end: 252 70% 25%;    /* Purple-blue gradient end */
+    --color-brand-dark: 220 60% 25%;      /* Dark blue for text and primary actions */
+    --color-brand-gradient-start: 220 65% 18%;  /* Dark blue gradient start */
+    --color-brand-gradient-end: 230 70% 28%;    /* Lighter cyan-blue gradient end */
 
     /* Feedback Colors (essential) */
     --color-error: 0 84% 60%;
