@@ -167,6 +167,13 @@ export const EditableColorSystem = () => {
 
   useEffect(() => {
     const root = document.documentElement;
+    
+    // CLEAR all inline style overrides first to read from CSS file
+    defaultColors.forEach(color => {
+      root.style.removeProperty(color.cssVar);
+    });
+    
+    // NOW read the clean computed styles from CSS file
     const computed = getComputedStyle(root);
     const initial = defaultColors.map((c) => ({
       ...c,
