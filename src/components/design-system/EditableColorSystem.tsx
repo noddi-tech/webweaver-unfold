@@ -46,19 +46,19 @@ const defaultColors: ColorToken[] = [
   {
     name: "Foreground",
     cssVar: "--foreground",
-    value: "224 71% 24%",
+    value: "249 67% 24%",
     className: "bg-foreground",
     isForeground: true,
     backgroundPair: "--background",
-    description: "Rich dark blue text on white backgrounds",
+    description: "Federal blue text on white backgrounds",
     type: "color"
   },
   {
     name: "Card",
     cssVar: "--card",
-    value: "224 71% 24%",
+    value: "249 67% 24%",
     className: "bg-card",
-    description: "Dark blue card background",
+    description: "Federal blue card background",
     type: "color"
   },
   {
@@ -82,9 +82,9 @@ const defaultColors: ColorToken[] = [
   {
     name: "Primary",
     cssVar: "--primary",
-    value: "224 71% 24%",
+    value: "249 67% 24%",
     className: "bg-primary",
-    description: "Rich dark blue for buttons",
+    description: "Federal blue for buttons",
     type: "color"
   },
   {
@@ -136,12 +136,12 @@ const defaultColors: ColorToken[] = [
   {
     name: "Hero Gradient",
     cssVar: "--gradient-hero",
-    value: "linear-gradient(135deg, hsl(224 71% 24%), hsl(266 85% 58%))",
+    value: "linear-gradient(135deg, hsl(249 67% 24%), hsl(266 85% 58%))",
     className: "bg-gradient-hero",
     type: "gradient",
     gradientDirection: "135deg",
-    gradientStops: ["224 71% 24%", "266 85% 58%"],
-    description: "Modern dark blue to vibrant purple gradient for cards and headings"
+    gradientStops: ["249 67% 24%", "266 85% 58%"],
+    description: "Federal blue to vibrant purple gradient for cards and headings"
   }
 ];
 

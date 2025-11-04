@@ -13,8 +13,8 @@ All colors MUST be HSL.
        ======================================== */
     
     /* Core Brand Colors */
-    --color-brand-dark: 224 71% 24%;      /* Rich dark blue for text and primary actions */
-    --color-brand-gradient-start: 224 71% 24%;  /* Dark blue gradient start */
+    --color-brand-dark: 249 67% 24%;      /* Federal blue for text and primary actions */
+    --color-brand-gradient-start: 249 67% 24%;  /* Federal blue gradient start */
     --color-brand-gradient-end: 266 85% 58%;    /* Vibrant purple gradient end */
 
     /* Feedback Colors (essential) */
@@ -81,9 +81,9 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Gradient token - Dark Blue to Purple Gradient */
+    /* Gradient token - Federal Blue to Purple Gradient */
     --gradient-hero: linear-gradient(135deg, 
-      hsl(224 71% 24%), 
+      hsl(249 67% 24%), 
       hsl(266 85% 58%));
     --gradient-primary: var(--gradient-hero);
     --gradient-background: var(--gradient-hero);
