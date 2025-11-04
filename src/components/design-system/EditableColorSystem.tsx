@@ -35,29 +35,114 @@ interface ColorToken {
 }
 
 const defaultColors: ColorToken[] = [
-  { name: "Primary", cssVar: "--primary", value: "252 87% 58%", className: "bg-primary", description: "Main brand color used for primary actions and key UI elements" },
-  { name: "Primary Foreground", cssVar: "--primary-foreground", value: "0 0% 100%", className: "bg-primary-foreground", isForeground: true, backgroundPair: "--primary", description: "Text color that appears on primary backgrounds" },
-  { name: "Secondary", cssVar: "--secondary", value: "321 59% 85%", className: "bg-secondary", description: "Secondary brand color for less prominent elements and backgrounds" },
-  { name: "Secondary Foreground", cssVar: "--secondary-foreground", value: "264 58% 28%", className: "bg-secondary-foreground", isForeground: true, backgroundPair: "--secondary", description: "Text color that appears on secondary backgrounds" },
-  { name: "Background", cssVar: "--background", value: "266 42% 96%", className: "bg-background", description: "Main page background color" },
-  { name: "Foreground", cssVar: "--foreground", value: "264 58% 28%", className: "bg-foreground", isForeground: true, backgroundPair: "--background", description: "Primary text color for body content" },
-  { name: "Muted", cssVar: "--muted", value: "266 42% 92%", className: "bg-muted", description: "Subtle background color for less prominent areas" },
-  { name: "Muted Foreground", cssVar: "--muted-foreground", value: "264 30% 50%", className: "bg-muted-foreground", isForeground: true, backgroundPair: "--muted", description: "Text color for secondary or disabled content" },
-  { name: "Accent", cssVar: "--accent", value: "252 87% 58%", className: "bg-accent", description: "Accent color for highlights and interactive elements" },
-  { name: "Accent Foreground", cssVar: "--accent-foreground", value: "0 0% 100%", className: "bg-accent-foreground", isForeground: true, backgroundPair: "--accent", description: "Text color that appears on accent backgrounds" },
-  { name: "Card", cssVar: "--card", value: "0 0% 100% / 0.8", className: "bg-card", description: "Background color for cards and elevated surfaces" },
-  { name: "Card Foreground", cssVar: "--card-foreground", value: "264 58% 28%", className: "bg-card-foreground", isForeground: true, backgroundPair: "--card", description: "Text color that appears on card backgrounds" },
-  { name: "Border", cssVar: "--border", value: "264 20% 85%", className: "bg-border", description: "Color for borders and dividers throughout the interface" },
-  { name: "Input", cssVar: "--input", value: "0 0% 100% / 0.9", className: "bg-input", description: "Background color for form inputs" },
-  { name: "Input Foreground", cssVar: "--input-foreground", value: "264 58% 28%", className: "bg-input-foreground", isForeground: true, backgroundPair: "--input", description: "Text color for form inputs" },
-  { name: "Ring", cssVar: "--ring", value: "252 87% 58%", className: "bg-ring", description: "Focus ring color for interactive elements" },
-  { name: "Destructive", cssVar: "--destructive", value: "0 84% 60%", className: "bg-destructive", description: "Color for destructive actions like delete buttons and error states" },
-  { name: "Destructive Foreground", cssVar: "--destructive-foreground", value: "0 0% 100%", className: "bg-destructive-foreground", isForeground: true, backgroundPair: "--destructive", description: "Text color that appears on destructive backgrounds" },
-  
-  // Gradients
-  { name: "Primary Gradient", cssVar: "--gradient-primary", value: "linear-gradient(135deg, hsl(252 87% 58%), hsl(321 59% 85%))", className: "bg-gradient-primary", type: "gradient", gradientDirection: "135deg", gradientStops: ["252 87% 58%", "321 59% 85%"], description: "Primary brand gradient from purple to pink" },
-  { name: "Background Gradient", cssVar: "--gradient-background", value: "linear-gradient(180deg, hsl(266 42% 96%), hsl(321 59% 85%))", className: "bg-gradient-background", type: "gradient", gradientDirection: "180deg", gradientStops: ["266 42% 96%", "321 59% 85%"], description: "Subtle background gradient" },
-  { name: "Hero Gradient", cssVar: "--gradient-hero", value: "linear-gradient(135deg, hsl(252 87% 58%), hsl(264 58% 28%))", className: "bg-gradient-hero", type: "gradient", gradientDirection: "135deg", gradientStops: ["252 87% 58%", "264 58% 28%"], description: "Bold hero section gradient" },
+  {
+    name: "Background",
+    cssVar: "--background",
+    value: "0 0% 100%",
+    className: "bg-background",
+    description: "Pure white main background",
+    type: "color"
+  },
+  {
+    name: "Foreground",
+    cssVar: "--foreground",
+    value: "264 58% 20%",
+    className: "bg-foreground",
+    isForeground: true,
+    backgroundPair: "--background",
+    description: "Dark blue text on white backgrounds",
+    type: "color"
+  },
+  {
+    name: "Card",
+    cssVar: "--card",
+    value: "264 60% 15%",
+    className: "bg-card",
+    description: "Dark blue card background",
+    type: "color"
+  },
+  {
+    name: "Card Foreground",
+    cssVar: "--card-foreground",
+    value: "0 0% 100%",
+    className: "bg-card-foreground",
+    isForeground: true,
+    backgroundPair: "--card",
+    description: "White text on dark cards",
+    type: "color"
+  },
+  {
+    name: "Border",
+    cssVar: "--border",
+    value: "0 0% 90%",
+    className: "border-border",
+    description: "Light gray borders",
+    type: "color"
+  },
+  {
+    name: "Primary",
+    cssVar: "--primary",
+    value: "264 58% 20%",
+    className: "bg-primary",
+    description: "Primary dark blue for buttons",
+    type: "color"
+  },
+  {
+    name: "Primary Foreground",
+    cssVar: "--primary-foreground",
+    value: "0 0% 100%",
+    className: "bg-primary-foreground",
+    isForeground: true,
+    backgroundPair: "--primary",
+    description: "White text on primary",
+    type: "color"
+  },
+  {
+    name: "Muted",
+    cssVar: "--muted",
+    value: "0 0% 96%",
+    className: "bg-muted",
+    description: "Light gray for disabled states",
+    type: "color"
+  },
+  {
+    name: "Muted Foreground",
+    cssVar: "--muted-foreground",
+    value: "0 0% 45%",
+    className: "bg-muted-foreground",
+    isForeground: true,
+    backgroundPair: "--muted",
+    description: "Gray text for muted content",
+    type: "color"
+  },
+  {
+    name: "Destructive",
+    cssVar: "--destructive",
+    value: "0 84% 60%",
+    className: "bg-destructive",
+    description: "Red for errors and delete actions",
+    type: "color"
+  },
+  {
+    name: "Destructive Foreground",
+    cssVar: "--destructive-foreground",
+    value: "0 0% 100%",
+    className: "bg-destructive-foreground",
+    isForeground: true,
+    backgroundPair: "--destructive",
+    description: "White text on destructive",
+    type: "color"
+  },
+  {
+    name: "Hero Gradient",
+    cssVar: "--gradient-hero",
+    value: "linear-gradient(135deg, hsl(264 60% 15%), hsl(252 70% 25%))",
+    className: "bg-gradient-hero",
+    type: "gradient",
+    gradientDirection: "135deg",
+    gradientStops: ["264 60% 15%", "252 70% 25%"],
+    description: "Dark blue to purple gradient for cards and headings"
+  }
 ];
 
 export const EditableColorSystem = () => {

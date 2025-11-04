@@ -9,134 +9,52 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* ========================================
-       B2B SaaS Color Palette - Refined Scales
+       SIMPLIFIED COLOR SYSTEM - White + Dark Blue Gradient
        ======================================== */
     
-    /* Darkpurple Scale (264° hue) - Primary text & actions */
-    --color-darkpurple-30: 264 45% 95%;
-    --color-darkpurple-40: 264 48% 88%;
-    --color-darkpurple-50: 264 50% 75%;
-    --color-darkpurple-60: 264 52% 60%;
-    --color-darkpurple-70: 264 55% 45%;
-    --color-darkpurple-80: 264 58% 32%;
-    --color-darkpurple-90: 264 58% 20%;
-    --color-darkpurple-100: 264 60% 12%;
+    /* Core Brand Colors */
+    --color-brand-dark: 264 58% 20%;      /* Dark blue for text and primary actions */
+    --color-brand-gradient-start: 264 60% 15%;  /* Dark blue gradient start */
+    --color-brand-gradient-end: 252 70% 25%;    /* Purple-blue gradient end */
 
-    /* Purple Scale (252° hue) - Brand accent */
-    --color-purple-30: 252 85% 95%;
-    --color-purple-40: 252 85% 85%;
-    --color-purple-50: 252 87% 75%;
-    --color-purple-60: 252 87% 65%;
-    --color-purple-70: 252 87% 58%;
-    --color-purple-80: 252 87% 48%;
-    --color-purple-90: 252 85% 38%;
-
-    /* Raspberry Scale (321° hue) - Secondary actions */
-    --color-raspberry-30: 321 55% 92%;
-    --color-raspberry-40: 321 57% 85%;
-    --color-raspberry-50: 321 59% 75%;
-    --color-raspberry-60: 321 59% 65%;
-    --color-raspberry-70: 321 59% 55%;
-    --color-raspberry-80: 321 57% 45%;
-
-    /* Coral Scale (15° hue) - Warm accents */
-    --color-coral-40: 15 75% 85%;
-    --color-coral-50: 15 75% 70%;
-    --color-coral-60: 15 75% 60%;
-
-    /* Bone Neutrals (35° hue) - Backgrounds & muted text */
-    --color-bone-10: 35 20% 98%;
-    --color-bone-20: 35 18% 94%;
-    --color-bone-30: 35 16% 88%;
-    --color-bone-40: 35 14% 78%;
-    --color-bone-50: 35 12% 62%;
-    --color-bone-60: 35 10% 48%;
-    --color-bone-70: 35 10% 35%;
-    --color-bone-80: 35 12% 22%;
-    --color-bone-90: 35 14% 12%;
-
-    /* Feedback Colors */
-    --color-success-300: 142 76% 50%;
-    --color-success-500: 142 76% 36%;
-    --color-success-700: 142 76% 28%;
-
-    --color-warning-300: 45 93% 60%;
-    --color-warning-500: 45 93% 47%;
-    --color-warning-700: 45 93% 35%;
-
-    --color-error-300: 0 84% 70%;
-    --color-error-500: 0 84% 60%;
-    --color-error-700: 0 84% 48%;
+    /* Feedback Colors (essential) */
+    --color-error: 0 84% 60%;
+    --color-success: 142 76% 36%;
 
     /* ========================================
-       SEMANTIC TOKENS - Purpose-Driven Colors
+       SEMANTIC TOKENS
        ======================================== */
 
-    /* Text Colors */
-    --text-primary: var(--color-darkpurple-90);
-    --text-secondary: var(--color-darkpurple-70);
-    --text-muted: var(--color-darkpurple-70);
-    --text-on-gradient: var(--color-darkpurple-90);
-    --text-inverse: var(--color-bone-10);
-
-    /* Interactive Colors */
-    --interactive-primary: var(--color-darkpurple-70);
-    --interactive-primary-hover: var(--color-darkpurple-80);
-    --interactive-secondary: var(--color-raspberry-40);
-    --interactive-secondary-hover: var(--color-raspberry-50);
-
-    /* Focus States */
-    --focus-ring: var(--color-purple-70);
-    --focus-glow: 0 0 0 3px hsl(var(--color-purple-70) / 0.2);
-
-    /* Surface Colors */
-    --bg-surface: var(--color-bone-10);
-    --bg-alternate: var(--color-bone-20);
-    --bg-inset: var(--color-bone-30);
-    --bg-elevated: var(--color-bone-10);
-
-    /* Card & Border */
-    --card-background: var(--color-bone-10);
-    --card-background-hover: var(--color-bone-10);
-    --card-border: var(--color-bone-30) / 0.5;
-    --border-subtle: var(--color-bone-30);
-    --border-strong: var(--color-bone-40);
-
-    /* Feedback States */
-    --feedback-success: var(--color-success-500);
-    --feedback-warning: var(--color-warning-500);
-    --feedback-error: var(--color-error-500);
-
-    /* ========================================
-       SHADCN UI SEMANTIC TOKENS
-       ======================================== */
-
-    /* Legacy brand colors (for compatibility) */
-    --noddi-primary: 252 87% 58%;
-    --noddi-text: 264 58% 28%;
-    --noddi-gradient-start: 321 59% 85%;
-    --noddi-gradient-end: 266 42% 96%;
-
-    --background: var(--bg-surface);
-    --foreground: var(--text-primary);
-    --card: 0 0% 100%;
-    --card-foreground: var(--text-primary);
-    --popover: 0 0% 100%;
-    --popover-foreground: var(--text-primary);
-    --primary: var(--interactive-primary);
+    /* Main background is pure white */
+    --background: 0 0% 100%;
+    --foreground: var(--color-brand-dark);
+    
+    /* Cards use dark blue gradient background */
+    --card: var(--color-brand-gradient-start);
+    --card-foreground: 0 0% 100%;
+    
+    /* Borders */
+    --border: 0 0% 90%;
+    
+    /* Primary actions use dark blue */
+    --primary: var(--color-brand-dark);
     --primary-foreground: 0 0% 100%;
-    --secondary: var(--interactive-secondary);
-    --secondary-foreground: var(--color-darkpurple-90);
-    --muted: var(--bg-alternate);
-    --muted-foreground: var(--text-muted);
-    --accent: var(--color-purple-70);
-    --accent-foreground: 0 0% 100%;
-    --destructive: var(--feedback-error);
+    
+    /* Destructive (errors/delete) */
+    --destructive: var(--color-error);
     --destructive-foreground: 0 0% 100%;
-    --border: var(--border-subtle);
-    --input: var(--border-subtle);
-    --input-foreground: var(--text-primary);
-    --ring: var(--focus-ring);
+    
+    /* Popover uses white like background */
+    --popover: 0 0% 100%;
+    --popover-foreground: var(--color-brand-dark);
+    
+    /* Muted variants for disabled states */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    
+    /* Input styling */
+    --input: var(--border);
+    --ring: var(--primary);
 
     --radius: 1rem;
     
@@ -146,98 +64,61 @@ All colors MUST be HSL.
     --spacing-md: 2rem;     /* 32px */
     --spacing-lg: 3rem;     /* 48px */
     --spacing-xl: 4rem;     /* 64px */
-    --spacing-section: 7.5rem;  /* 120px - increased from 80px */
+    --spacing-section: 7.5rem;  /* 120px */
     
     /* Tier-based colors for pricing calculator */
-    --tier-low: var(--color-success-500); /* Green for lower tiers (Emerging) */
-    --tier-mid: var(--color-warning-500); /* Amber for mid tiers (Large) */
-    --tier-high: var(--interactive-primary); /* Purple for high tiers (Enterprise) */
+    --tier-low: var(--color-success); 
+    --tier-mid: 45 93% 47%; /* Amber */
+    --tier-high: var(--primary);
 
+    /* Sidebar colors */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Gradient tokens (editable via Admin > Design System) */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--noddi-text)));
-    --gradient-background: linear-gradient(135deg, hsl(var(--noddi-gradient-start)), hsl(var(--noddi-gradient-end)));
-    --gradient-hero: radial-gradient(80% 60% at 50% 0%, hsl(var(--primary) / 0.25), transparent 70%),
-                     linear-gradient(135deg, hsl(var(--noddi-gradient-start)), hsl(var(--noddi-gradient-end)));
+    /* Gradient token - Dark Blue Gradient */
+    --gradient-hero: linear-gradient(135deg, 
+      hsl(var(--color-brand-gradient-start)), 
+      hsl(var(--color-brand-gradient-end)));
+    --gradient-primary: var(--gradient-hero);
+    --gradient-background: var(--gradient-hero);
   }
 
   .dark {
-    /* Dark Mode Adjustments */
-    --text-primary: var(--color-bone-10);
-    --text-secondary: var(--color-bone-30);
-    --text-muted: var(--color-darkpurple-50);
-    --text-on-gradient: var(--color-bone-10);
-    --text-inverse: var(--color-darkpurple-90);
-
-    --interactive-primary: var(--color-purple-50);
-    --interactive-primary-hover: var(--color-purple-60);
-    --interactive-secondary: var(--color-raspberry-50);
-    --interactive-secondary-hover: var(--color-raspberry-60);
-
-    --bg-surface: var(--color-darkpurple-100);
-    --bg-alternate: var(--color-darkpurple-90);
-    --bg-inset: var(--color-darkpurple-80);
-    --bg-elevated: var(--color-darkpurple-90);
-
-    --card-background: var(--color-darkpurple-90);
-    --card-background-hover: var(--color-darkpurple-80);
-    --card-border: var(--color-darkpurple-70) / 0.5;
-    --border-subtle: var(--color-darkpurple-70);
-    --border-strong: var(--color-darkpurple-60);
-
-    /* Shadcn UI tokens for dark mode */
-    --background: var(--bg-surface);
-    --foreground: var(--text-primary);
-    --card: var(--card-background);
-    --card-foreground: var(--text-primary);
-    --popover: var(--bg-elevated);
-    --popover-foreground: var(--text-primary);
-    --primary: var(--interactive-primary);
-    --primary-foreground: var(--text-inverse);
-    --secondary: var(--interactive-secondary);
-    --secondary-foreground: var(--text-inverse);
-    --muted: var(--bg-alternate);
-    --muted-foreground: var(--text-secondary);
-    --accent: var(--color-purple-60);
-    --accent-foreground: var(--text-inverse);
-    --destructive: var(--feedback-error);
+    /* Dark mode - inverted color scheme */
+    --background: var(--color-brand-dark);
+    --foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: var(--color-brand-dark);
+    --border: 0 0% 30%;
+    --primary: 252 87% 65%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --popover: var(--color-brand-dark);
+    --popover-foreground: 0 0% 100%;
+    --destructive: var(--color-error);
     --destructive-foreground: 0 0% 100%;
-    --border: var(--border-subtle);
-    --input: var(--border-subtle);
-    --input-foreground: var(--text-primary);
-    --ring: var(--color-purple-50);
 
     /* Sidebar - Dark theme */
-    --sidebar-background: var(--color-darkpurple-90);
-    --sidebar-foreground: var(--color-bone-20);
-    --sidebar-primary: var(--color-purple-50);
-    --sidebar-primary-foreground: var(--color-darkpurple-90);
-    --sidebar-accent: var(--color-darkpurple-80);
-    --sidebar-accent-foreground: var(--color-bone-10);
-    --sidebar-border: var(--color-darkpurple-70);
-    --sidebar-ring: var(--color-purple-50);
+    --sidebar-background: 264 58% 15%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 252 87% 65%;
+    --sidebar-primary-foreground: 264 58% 15%;
+    --sidebar-accent: 264 58% 20%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 264 58% 25%;
+    --sidebar-ring: 252 87% 65%;
 
-    /* Adjust gradients for dark mode */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--color-purple-50)), hsl(var(--color-purple-80)));
-    --gradient-background: linear-gradient(135deg, hsl(var(--color-darkpurple-90)), hsl(var(--color-darkpurple-100)));
-    --gradient-hero: radial-gradient(60% 50% at 50% 0%, 
-      hsl(var(--color-purple-70) / 0.15), transparent 70%),
-      linear-gradient(135deg, hsl(264 58% 12%), hsl(264 60% 8%));
+    /* Adjust gradient for dark mode */
+    --gradient-hero: linear-gradient(135deg, 
+      hsl(252 87% 45%), 
+      hsl(264 70% 35%));
   }
 }
 
@@ -286,14 +167,6 @@ All colors MUST be HSL.
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid hsl(var(--card-border));
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  }
-
-  /* Add text shadow for legibility on glass */
-  .glass-card h1,
-  .glass-card h2,
-  .glass-card h3,
-  .glass-card .glass-text {
-    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
   }
 
   /* Tier 3: Prominent glass (for modals, popovers) */
@@ -381,7 +254,7 @@ All colors MUST be HSL.
   }
   
   .gradient-text {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--noddi-text)));
+    background: var(--gradient-hero);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -474,13 +347,10 @@ All colors MUST be HSL.
     font-size: 18px;
   }
 
-  /* Hero text with strong shadow for gradient backgrounds */
+  /* Hero text with strong contrast for gradient backgrounds */
   .glass-text-hero {
     color: hsl(0 0% 100%);
     font-weight: 700;
-    text-shadow: 
-      0 2px 4px hsl(0 0% 0% / 0.3),
-      0 4px 8px hsl(0 0% 0% / 0.2);
   }
 
   /* Accessible focus states - WCAG 2.1 visible focus */
@@ -514,12 +384,10 @@ All colors MUST be HSL.
      ======================================== */
   .text-on-gradient {
     color: hsl(var(--text-on-gradient));
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
   .text-on-gradient-strong {
     color: hsl(var(--text-on-gradient));
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   }
 
   /* Semi-transparent overlay for sections needing extra contrast */
