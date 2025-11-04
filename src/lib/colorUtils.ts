@@ -109,12 +109,21 @@ export const hexToHsl = (hex: string) => {
     h /= 6;
   }
 
-  return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+  // Return CSS variable format: "H S% L%" (space-separated, no wrapper)
+  return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 };
 
 export const hslToHex = (hslString: string): string => {
-  // Parse HSL string like "hsl(240, 100%, 50%)"
-  const matches = hslString.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+  // Parse HSL string - supports both formats:
+  // CSS variable format: "240 100% 50%" (space-separated, no wrapper)
+  // Full HSL format: "hsl(240, 100%, 50%)" (comma-separated, with wrapper)
+  let matches = hslString.match(/^(\d+)\s+(\d+)%\s+(\d+)%$/);
+  
+  if (!matches) {
+    // Try the full hsl() format
+    matches = hslString.match(/hsl\((\d+),?\s*(\d+)%,?\s*(\d+)%\)/);
+  }
+  
   if (!matches) return '#000000';
   
   let h = parseInt(matches[1]) / 360;
