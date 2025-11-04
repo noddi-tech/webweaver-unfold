@@ -247,7 +247,7 @@ All colors MUST be HSL.
   }
 
   html {
-    background: var(--gradient-hero);
+    background: hsl(var(--background));
     min-height: 100vh;
   }
 
