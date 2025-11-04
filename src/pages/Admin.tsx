@@ -77,7 +77,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
       <main className="container mx-auto px-6 py-12 pt-32">
         <div className="flex items-center justify-between mb-6">
