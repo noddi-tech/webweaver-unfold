@@ -48,7 +48,7 @@ export default function HowItWorks() {
             </h2>
           </EditableTranslation>
           <EditableTranslation translationKey="how_it_works.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-xl text-foreground max-w-3xl mx-auto">
               {t('how_it_works.subtitle', 'From customer booking to back-office automation—all in one unified platform')}
             </p>
           </EditableTranslation>
@@ -72,16 +72,16 @@ export default function HowItWorks() {
                       <Icon className="w-7 h-7 text-primary-foreground" />
                     </div>
                     <LockedText reason="Step number - Update in code">
-                      <div className="text-sm font-bold text-primary mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
+                      <div className="text-sm font-bold text-white mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
                     </LockedText>
                     <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
+                      <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
                     </EditableTranslation>
                     <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
+                      <p className="text-sm mb-2">{step.description}</p>
                     </EditableTranslation>
                     <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <p className="text-xs text-muted-foreground">{step.details}</p>
+                      <p className="text-xs">{step.details}</p>
                     </EditableTranslation>
                   </CardContent>
                 </Card>
@@ -116,16 +116,16 @@ export default function HowItWorks() {
                       </div>
                       <div className="flex-1">
                         <LockedText reason="Step number - Update in code">
-                          <div className="text-sm font-bold text-primary mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
+                          <div className="text-sm font-bold text-white mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
                         </LockedText>
                         <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                          <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
+                          <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
                         </EditableTranslation>
                         <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                          <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
+                          <p className="text-sm mb-2">{step.description}</p>
                         </EditableTranslation>
                         <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                          <p className="text-xs text-muted-foreground">{step.details}</p>
+                          <p className="text-xs">{step.details}</p>
                         </EditableTranslation>
                       </div>
                     </div>
@@ -150,7 +150,7 @@ export default function HowItWorks() {
               </p>
             </EditableTranslation>
             <EditableTranslation translationKey="how_it_works.caption_sub" onSave={() => setRefreshKey(prev => prev + 1)}>
-              <p className="text-sm text-muted-foreground font-medium">
+              <p className="text-sm text-foreground font-medium">
                 {t('how_it_works.caption_sub', 'One platform. Every function. Zero friction.')}
               </p>
             </EditableTranslation>

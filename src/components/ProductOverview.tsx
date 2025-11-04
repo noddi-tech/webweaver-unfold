@@ -45,7 +45,7 @@ export default function ProductOverview() {
             </h2>
           </EditableTranslation>
           <EditableTranslation translationKey="product_overview.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-xl text-foreground max-w-3xl mx-auto">
               {t('product_overview.subtitle', 'Explore how Noddi unifies your entire operation')}
             </p>
           </EditableTranslation>
@@ -68,12 +68,12 @@ export default function ProductOverview() {
                     <div className="w-16 h-16 rounded-xl bg-gradient-primary flex items-center justify-center mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
                       <Icon className="w-8 h-8 text-primary-foreground" />
                     </div>
-                     <EditableTranslation 
+                      <EditableTranslation 
                       translationKey={`product_overview.${product.link.slice(1)}.title`} 
                       onSave={() => setRefreshKey(prev => prev + 1)}
                       fallbackText={product.title}
                     >
-                      <h3 className="text-2xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors">
+                      <h3 className="text-2xl font-bold mb-4 transition-colors">
                         {product.title}
                       </h3>
                     </EditableTranslation>
@@ -82,7 +82,7 @@ export default function ProductOverview() {
                       onSave={() => setRefreshKey(prev => prev + 1)}
                       fallbackText={product.description}
                     >
-                      <p className="text-muted-foreground leading-relaxed">
+                      <p className="leading-relaxed">
                         {product.description}
                       </p>
                     </EditableTranslation>

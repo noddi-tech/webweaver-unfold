@@ -20,6 +20,13 @@ All colors MUST be HSL.
     /* Feedback Colors (essential) */
     --color-error: 0 84% 60%;
     --color-success: 142 76% 36%;
+    
+    /* Interactive elements (buttons, links) */
+    --interactive-primary: var(--color-brand-dark);           /* Federal blue buttons */
+    --interactive-primary-hover: 249 67% 20%;                 /* Slightly darker on hover */
+    --interactive-secondary: 0 0% 100%;                       /* White secondary buttons */
+    --interactive-secondary-hover: 0 0% 96%;                  /* Light gray on hover */
+    --text-primary: var(--color-brand-dark);                  /* Federal blue text */
 
     /* ========================================
        SEMANTIC TOKENS

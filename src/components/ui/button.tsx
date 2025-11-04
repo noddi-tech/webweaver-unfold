@@ -9,12 +9,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[hsl(var(--interactive-primary))] text-white hover:bg-[hsl(var(--interactive-primary-hover))] shadow-md hover:shadow-lg motion-safe:hover:scale-[1.02] motion-safe:hover:-translate-y-0.5 transition-all",
-        secondary: "bg-[hsl(var(--interactive-secondary))] border-2 border-[hsl(var(--color-raspberry-60))] text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--interactive-secondary-hover))] shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
-        outline: "border-2 border-[hsl(var(--interactive-primary))] text-[hsl(var(--interactive-primary))] bg-transparent hover:bg-[hsl(var(--color-darkpurple-30))] shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
-        ghost: "text-[hsl(var(--interactive-primary))] hover:bg-[hsl(var(--color-bone-20))] motion-safe:hover:scale-[1.02]",
+        default: "bg-primary text-primary-foreground hover:opacity-90 shadow-md hover:shadow-lg motion-safe:hover:scale-[1.02] motion-safe:hover:-translate-y-0.5 transition-all",
+        secondary: "bg-secondary text-secondary-foreground border-2 border-border hover:bg-muted shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
+        outline: "border-2 border-primary text-primary bg-transparent hover:bg-primary/10 shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
+        ghost: "text-primary hover:bg-muted motion-safe:hover:scale-[1.02]",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm hover:shadow-md motion-safe:hover:scale-[1.02]",
-        link: "text-[hsl(var(--interactive-primary))] underline-offset-4 hover:underline",
+        link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2 min-h-[44px]",
