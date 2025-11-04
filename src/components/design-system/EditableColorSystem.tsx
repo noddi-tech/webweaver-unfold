@@ -172,8 +172,8 @@ export const EditableColorSystem = () => {
       if (color.isForeground && color.backgroundPair) {
         const backgroundColor = newColors.find(c => c.cssVar === color.backgroundPair);
         if (backgroundColor) {
-          const bgHex = hslToHex(`hsl(${backgroundColor.value})`);
-          const fgHex = hslToHex(`hsl(${color.value})`);
+          const bgHex = hslToHex(backgroundColor.value);
+          const fgHex = hslToHex(color.value);
           const currentRatio = calculateContrastRatio(bgHex, fgHex);
           
           if (currentRatio < 4.5) {
@@ -259,7 +259,10 @@ export const EditableColorSystem = () => {
     const backgroundColor = colors.find(c => c.cssVar === color.backgroundPair);
     if (!backgroundColor) return null;
     
-    const ratio = calculateContrastRatio(color.value, backgroundColor.value);
+    // Convert HSL to HEX for contrast calculation
+    const fgHex = hslToHex(color.value);
+    const bgHex = hslToHex(backgroundColor.value);
+    const ratio = calculateContrastRatio(fgHex, bgHex);
     const level = getContrastLevel(ratio);
     
     // Determine badge variant based on contrast level

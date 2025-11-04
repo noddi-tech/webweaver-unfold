@@ -186,10 +186,13 @@ export const calculateContrastRatio = (color1: string, color2: string): number =
 };
 
 export const getOptimalTextColor = (backgroundColor: string): string => {
-  const whiteContrast = calculateContrastRatio(backgroundColor, '#ffffff');
-  const blackContrast = calculateContrastRatio(backgroundColor, '#000000');
+  // Convert HSL to HEX for contrast calculation
+  const bgHex = hslToHex(backgroundColor);
+  const whiteContrast = calculateContrastRatio(bgHex, '#ffffff');
+  const blackContrast = calculateContrastRatio(bgHex, '#000000');
   
-  return whiteContrast > blackContrast ? '#ffffff' : '#000000';
+  // Return the optimal color in HSL format (same as input format)
+  return whiteContrast > blackContrast ? hexToHsl('#ffffff') : hexToHsl('#000000');
 };
 
 export const getContrastLevel = (ratio: number): string => {
