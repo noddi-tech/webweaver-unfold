@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Copy, Download, Check } from "lucide-react";
+import { Copy, Download, Check, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -14,8 +14,39 @@ import {
   hslToHex,
   hslToRgb,
   copyToClipboard,
-  getCssVariableValue
+  getCssVariableValue,
+  meetsContrastRequirement
 } from "@/config/colorSystem";
+
+// Map text colors to their intended backgrounds for accurate preview and contrast checking
+const TEXT_COLOR_BACKGROUND_MAP: Record<string, Array<{ bg: string; label: string }>> = {
+  'text-white': [
+    { bg: 'bg-card', label: 'Card' },
+    { bg: 'bg-gradient-hero', label: 'Hero Gradient' }
+  ],
+  'text-foreground': [
+    { bg: 'bg-background', label: 'Background' }
+  ],
+  'text-card-foreground': [
+    { bg: 'bg-card', label: 'Card' }
+  ],
+  'text-muted-foreground': [
+    { bg: 'bg-background', label: 'Background' },
+    { bg: 'bg-muted', label: 'Muted' }
+  ],
+  'text-primary-foreground': [
+    { bg: 'bg-primary', label: 'Primary' }
+  ],
+  'text-secondary-foreground': [
+    { bg: 'bg-secondary', label: 'Secondary' }
+  ],
+  'text-accent-foreground': [
+    { bg: 'bg-accent', label: 'Accent' }
+  ],
+  'text-destructive-foreground': [
+    { bg: 'bg-destructive', label: 'Destructive' }
+  ]
+};
 
 interface ColorCategory {
   title: string;
@@ -245,45 +276,93 @@ export function ColorPaletteTab() {
   };
 
   const renderTextColor = (color: TextColorOption) => {
+    const backgrounds = TEXT_COLOR_BACKGROUND_MAP[color.value] || [
+      { bg: 'bg-background', label: 'Background' }
+    ];
+
     return (
-      <Card key={color.value} className="p-4 space-y-3 hover:shadow-md transition-shadow bg-background text-foreground">
-        {/* Color Preview - Dual Background */}
-        <div className="h-24 rounded-lg border overflow-hidden flex">
-          {/* Dark background - shows light text */}
-          <div className="flex-1 bg-card flex items-center justify-center border-r">
-            <span className={`text-2xl font-bold ${color.className}`}>Aa</span>
-          </div>
-          {/* Light background - shows dark text */}
-          <div className="flex-1 bg-background flex items-center justify-center">
-            <span className={`text-2xl font-bold ${color.className}`}>Aa</span>
-          </div>
+      <Card key={color.value} className="p-4 space-y-3 hover:shadow-md transition-shadow bg-background text-foreground border">
+        {/* Color Info Header */}
+        <div>
+          <h4 className="font-semibold text-sm">{color.label}</h4>
+          <p className="text-xs text-muted-foreground">{color.description}</p>
         </div>
 
-        {/* Color Info */}
-        <div className="space-y-2">
-          <div>
-            <h4 className="font-semibold text-sm">{color.label}</h4>
-            <p className="text-xs text-muted-foreground">{color.description}</p>
-          </div>
+        {/* Preview on intended backgrounds with contrast info */}
+        <div className="space-y-3">
+          {backgrounds.map((bgInfo) => {
+            // Calculate contrast using the function from colorSystem
+            const contrastInfo = meetsContrastRequirement(bgInfo.bg, color.value);
+            
+            return (
+              <div key={bgInfo.bg} className="space-y-1.5">
+                {/* Background label and contrast info */}
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground font-medium">On {bgInfo.label}</span>
+                  <div className="flex items-center gap-2">
+                    {/* Contrast ratio */}
+                    <span className="font-mono font-semibold text-foreground">{contrastInfo.ratio.toFixed(2)}:1</span>
+                    
+                    {/* WCAG Level Badge */}
+                    <Badge 
+                      variant={
+                        contrastInfo.level === 'AAA' ? 'default' : 
+                        contrastInfo.level === 'AA' || contrastInfo.level === 'AA Large' ? 'secondary' : 
+                        'destructive'
+                      }
+                      className="text-xs h-5 gap-1"
+                    >
+                      {contrastInfo.level === 'AAA' && <CheckCircle2 className="h-3 w-3" />}
+                      {contrastInfo.level === 'Fail' && <AlertCircle className="h-3 w-3" />}
+                      {contrastInfo.level}
+                    </Badge>
+                    
+                    {/* Fix button for insufficient contrast */}
+                    {contrastInfo.level !== 'AAA' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => {
+                          toast({
+                            title: "Contrast Improvement Needed",
+                            description: `${color.label} on ${bgInfo.label} has ${contrastInfo.ratio.toFixed(2)}:1 contrast (${contrastInfo.level}). For AAA compliance, aim for 7:1 or higher. Consider adjusting colors in your theme settings.`,
+                            duration: 5000,
+                          });
+                        }}
+                      >
+                        Fix
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Preview box with actual background */}
+                <div className={`h-16 rounded-lg ${bgInfo.bg} border flex items-center justify-center`}>
+                  <span className={`text-2xl font-bold ${color.className}`}>Aa</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
-          {/* CSS Class */}
-          <div className="flex items-center justify-between gap-2">
-            <code className="text-xs bg-muted px-2 py-1 rounded flex-1 truncate">
-              {color.value}
-            </code>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 w-7 p-0"
-              onClick={() => handleCopy(color.value, color.label, 'css')}
-            >
-              {copiedValue === color.value ? (
-                <Check className="h-3 w-3 text-green-500" />
-              ) : (
-                <Copy className="h-3 w-3" />
-              )}
-            </Button>
-          </div>
+        {/* CSS Class - copyable */}
+        <div className="flex items-center justify-between gap-2 pt-2 border-t">
+          <code className="text-xs bg-muted px-2 py-1 rounded flex-1 truncate">
+            {color.value}
+          </code>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 w-7 p-0"
+            onClick={() => handleCopy(color.value, color.label, 'css')}
+          >
+            {copiedValue === color.value ? (
+              <Check className="h-3 w-3 text-green-500" />
+            ) : (
+              <Copy className="h-3 w-3" />
+            )}
+          </Button>
         </div>
       </Card>
     );
