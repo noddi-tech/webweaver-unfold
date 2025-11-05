@@ -567,20 +567,20 @@ export const EditableColorSystem = () => {
       <Accordion type="multiple" defaultValue={["surfaces", "text", "interactive", "feedback", "gradients"]} className="space-y-4">
         
         {/* Surface Colors */}
-        <AccordionItem value="surfaces" className="border border-border/50 rounded-lg px-6 bg-card/5">
+        <AccordionItem value="surfaces" className="border border-border/50 rounded-lg px-6 bg-background">
           <AccordionTrigger className="text-xl font-bold hover:no-underline">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-hero flex items-center justify-center">
                 <Layers className="w-5 h-5 text-white" />
               </div>
               <div className="text-left">
-                <div className="text-white">Surface Colors</div>
-                <div className="text-sm font-normal text-white/70">Backgrounds, cards, and containers</div>
+                <div className="text-foreground">Surface Colors</div>
+                <div className="text-sm font-normal text-muted-foreground">Backgrounds, cards, and containers</div>
               </div>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4">
-            <p className="text-white/80 mb-6 text-sm">
+            <p className="text-muted-foreground mb-6 text-sm">
               Foundation of your UI. Main backgrounds, card surfaces, and container colors.
             </p>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -604,20 +604,20 @@ export const EditableColorSystem = () => {
         </AccordionItem>
 
         {/* Text Colors */}
-        <AccordionItem value="text" className="border border-border/50 rounded-lg px-6 bg-card/5">
+        <AccordionItem value="text" className="border border-border/50 rounded-lg px-6 bg-background">
           <AccordionTrigger className="text-xl font-bold hover:no-underline">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-hero flex items-center justify-center">
                 <Type className="w-5 h-5 text-white" />
               </div>
               <div className="text-left">
-                <div className="text-white">Text Colors</div>
-                <div className="text-sm font-normal text-white/70">Foreground colors for all text</div>
+                <div className="text-foreground">Text Colors</div>
+                <div className="text-sm font-normal text-muted-foreground">Foreground colors for all text</div>
               </div>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4">
-            <p className="text-white/80 mb-6 text-sm">
+            <p className="text-muted-foreground mb-6 text-sm">
               Text and foreground colors. Always paired with a background for proper contrast (WCAG AA minimum 4.5:1).
             </p>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -642,20 +642,20 @@ export const EditableColorSystem = () => {
         </AccordionItem>
 
         {/* Interactive Colors */}
-        <AccordionItem value="interactive" className="border border-border/50 rounded-lg px-6 bg-card/5">
+        <AccordionItem value="interactive" className="border border-border/50 rounded-lg px-6 bg-background">
           <AccordionTrigger className="text-xl font-bold hover:no-underline">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-hero flex items-center justify-center">
                 <MousePointer className="w-5 h-5 text-white" />
               </div>
               <div className="text-left">
-                <div className="text-white">Interactive Colors</div>
-                <div className="text-sm font-normal text-white/70">Buttons, links, inputs, and actions</div>
+                <div className="text-foreground">Interactive Colors</div>
+                <div className="text-sm font-normal text-muted-foreground">Buttons, links, inputs, and actions</div>
               </div>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4">
-            <p className="text-white/80 mb-6 text-sm">
+            <p className="text-muted-foreground mb-6 text-sm">
               Colors for interactive elements including buttons, links, inputs, and focus states.
             </p>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -680,20 +680,20 @@ export const EditableColorSystem = () => {
         </AccordionItem>
 
         {/* Feedback Colors */}
-        <AccordionItem value="feedback" className="border border-border/50 rounded-lg px-6 bg-card/5">
+        <AccordionItem value="feedback" className="border border-border/50 rounded-lg px-6 bg-background">
           <AccordionTrigger className="text-xl font-bold hover:no-underline">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-hero flex items-center justify-center">
                 <AlertCircle className="w-5 h-5 text-white" />
               </div>
               <div className="text-left">
-                <div className="text-white">Feedback Colors</div>
-                <div className="text-sm font-normal text-white/70">Errors, success, warnings</div>
+                <div className="text-foreground">Feedback Colors</div>
+                <div className="text-sm font-normal text-muted-foreground">Errors, success, warnings</div>
               </div>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4">
-            <p className="text-white/80 mb-6 text-sm">
+            <p className="text-muted-foreground mb-6 text-sm">
               Colors for system feedback including errors, success states, and warnings.
             </p>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -717,20 +717,20 @@ export const EditableColorSystem = () => {
         </AccordionItem>
 
         {/* Gradients */}
-        <AccordionItem value="gradients" className="border border-border/50 rounded-lg px-6 bg-card/5">
+        <AccordionItem value="gradients" className="border border-border/50 rounded-lg px-6 bg-background">
           <AccordionTrigger className="text-xl font-bold hover:no-underline">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-hero flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <div className="text-left">
-                <div className="text-white">Gradients</div>
-                <div className="text-sm font-normal text-white/70">Brand gradient backgrounds</div>
+                <div className="text-foreground">Gradients</div>
+                <div className="text-sm font-normal text-muted-foreground">Brand gradient backgrounds</div>
               </div>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4">
-            <p className="text-white/80 mb-6 text-sm">
+            <p className="text-muted-foreground mb-6 text-sm">
               Federal blue to vibrant purple gradient. Used in hero sections, cards, and special elements. Always use white text.
             </p>
             <div className="grid grid-cols-1 gap-4">

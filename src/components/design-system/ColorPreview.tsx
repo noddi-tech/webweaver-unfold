@@ -20,11 +20,24 @@ const getLuminanceFromHSL = (hsl: string): number => {
 
 // Determine if we need dark or light text based on background luminance
 const getContrastingTextColor = (backgroundColor: string): string => {
-  const luminance = getLuminanceFromHSL(backgroundColor);
+  const parts = backgroundColor.trim().split(/\s+/);
+  if (parts.length !== 3) return "0 0% 100%"; // Default to white
   
-  // WCAG threshold: backgrounds with >50% lightness get dark text
-  if (luminance > 0.5) {
-    return "249 67% 24%"; // Federal blue (--foreground)
+  const h = parseFloat(parts[0]);
+  const s = parseFloat(parts[1]) / 100;
+  const l = parseFloat(parts[2]) / 100;
+  
+  // Calculate perceived brightness using saturation-aware threshold
+  // Saturated colors need higher lightness to appear bright enough for dark text
+  const threshold = 0.5 + (s * 0.15); // Range: 0.5 (grays) to 0.65 (vivid colors)
+  
+  // Special handling for yellow/orange hues (30-90 degrees) - they appear brighter
+  const isYellowOrange = h >= 30 && h <= 90;
+  const adjustedThreshold = isYellowOrange ? threshold - 0.1 : threshold;
+  
+  // Use dark text if lightness is above the adjusted threshold
+  if (l > adjustedThreshold) {
+    return "249 67% 24%"; // Federal blue (dark)
   } else {
     return "0 0% 100%"; // White
   }
