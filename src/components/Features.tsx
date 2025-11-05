@@ -7,6 +7,7 @@ import { getTypographyClass } from "@/lib/typography";
 import { getColorClass } from "@/lib/colorUtils";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { EditableFeature } from "@/components/EditableFeature";
+import { EditableBackground } from "@/components/EditableBackground";
 
 type IconName = keyof typeof icons;
 interface DbFeature { id: string; title: string; description: string | null; icon_name: string; sort_order: number | null; }
@@ -153,21 +154,40 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
             {dbFeatures!.map((f) => {
               const Icon = icons[(f.icon_name as IconName)] || icons["Sparkles"];
               return (
-                <div key={f.id} className={`${cardBg} rounded-xl p-6 hover:scale-105 transition-transform duration-300 border ${borderClr} shadow-sm`}>
-                  <div className={`${iconClr} mb-4`}>
-                    <Icon className="w-8 h-8" />
+                <EditableBackground
+                  key={f.id}
+                  elementId={`feature-card-${f.id}`}
+                  defaultBackground={cardBg}
+                  allowedBackgrounds={[
+                    'bg-gradient-hero',
+                    'bg-gradient-sunset',
+                    'bg-gradient-warmth',
+                    'bg-gradient-ocean',
+                    'bg-gradient-fire',
+                    'glass-card',
+                    'liquid-glass',
+                    'glass-prominent',
+                    'bg-card',
+                    'bg-background',
+                    'bg-muted'
+                  ]}
+                >
+                  <div className={`rounded-xl p-6 hover:scale-105 transition-transform duration-300 border shadow-sm`}>
+                    <div className={`${iconClr} mb-4`}>
+                      <Icon className="w-8 h-8" />
+                    </div>
+                    <h3 className={`text-xl font-semibold mb-3 ${titleClr}`}>
+                      <EditableFeature featureId={f.id} field="title">
+                        {f.title}
+                      </EditableFeature>
+                    </h3>
+                    <p className={`${descClr}`}>
+                      <EditableFeature featureId={f.id} field="description">
+                        {f.description}
+                      </EditableFeature>
+                    </p>
                   </div>
-                  <h3 className={`text-xl font-semibold mb-3 ${titleClr}`}>
-                    <EditableFeature featureId={f.id} field="title">
-                      {f.title}
-                    </EditableFeature>
-                  </h3>
-                  <p className={`${descClr}`}>
-                    <EditableFeature featureId={f.id} field="description">
-                      {f.description}
-                    </EditableFeature>
-                  </p>
-                </div>
+                </EditableBackground>
               );
             })}
           </div>

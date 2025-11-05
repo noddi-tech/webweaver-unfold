@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LanguageLink } from "@/components/LanguageLink";
 import { EditableSolutionText } from "@/components/EditableSolutionText";
+import { EditableBackground } from "@/components/EditableBackground";
 
 type IconName = keyof typeof icons;
 
@@ -126,71 +127,87 @@ const Solutions = () => {
               const Icon = icons[(solution.icon_name as IconName)] || icons["Sparkles"];
               
               return (
-                <div
+                <EditableBackground
                   key={solution.id}
-                  className={`${cardBg} rounded-2xl p-8 border border-border hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animate-fade-in`}
+                  elementId={`solution-card-${solution.id}`}
+                  defaultBackground={cardBg}
+                  allowedBackgrounds={[
+                    'bg-gradient-hero',
+                    'bg-gradient-sunset',
+                    'bg-gradient-warmth',
+                    'bg-gradient-ocean',
+                    'bg-gradient-fire',
+                    'glass-card',
+                    'liquid-glass',
+                    'glass-prominent',
+                    'bg-card',
+                    'bg-background',
+                    'bg-muted'
+                  ]}
                 >
-                  {/* Icon */}
-                  <div className={`${iconClr} mb-6`}>
-                    <Icon className="w-12 h-12" />
-                  </div>
-
-                  {/* Title & Subtitle */}
-                  <h2 className={`text-3xl font-bold mb-2 ${titleClr}`}>
-                    {solution.title}
-                  </h2>
-                  {solution.subtitle && (
-                    <EditableSolutionText
-                      solutionId={solution.id}
-                      field="subtitle"
-                      onSave={() => loadData()}
-                    >
-                      <p className={`text-lg mb-4 ${subtitleClr} font-medium`}>
-                        {solution.subtitle}
-                      </p>
-                    </EditableSolutionText>
-                  )}
-
-                  {/* Description */}
-                  {solution.description && (
-                    <p className={`${descClr} mb-6 leading-relaxed`}>
-                      {solution.description}
-                    </p>
-                  )}
-
-                  {/* Benefits */}
-                  {solution.benefits && solution.benefits.length > 0 && (
-                    <ul className="space-y-3 mb-6">
-                      {solution.benefits.map((benefit, idx) => (
-                        <li key={idx} className={`flex items-start gap-2 ${descClr}`}>
-                          <icons.Check className={`w-5 h-5 ${iconClr} shrink-0 mt-0.5`} />
-                          <span>{benefit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {/* Image */}
-                  {solution.image_url && (
-                    <div className="mb-6 rounded-lg overflow-hidden">
-                      <img
-                        src={solution.image_url}
-                        alt={solution.title}
-                        className="w-full h-auto object-cover"
-                      />
+                  <div className="rounded-2xl p-8 border border-border hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animate-fade-in">
+                    {/* Icon */}
+                    <div className={`${iconClr} mb-6`}>
+                      <Icon className="w-12 h-12" />
                     </div>
-                  )}
 
-                  {/* CTA */}
-                  <div className="mt-6">
-                    <Button asChild size="lg" className="w-full">
-                      <LanguageLink to={`/solutions/${solution.slug}`}>
-                        {solution.cta_text || "Learn More"}
-                        <icons.ArrowRight className="w-4 h-4 ml-2" />
-                      </LanguageLink>
-                    </Button>
+                    {/* Title & Subtitle */}
+                    <h2 className={`text-3xl font-bold mb-2 ${titleClr}`}>
+                      {solution.title}
+                    </h2>
+                    {solution.subtitle && (
+                      <EditableSolutionText
+                        solutionId={solution.id}
+                        field="subtitle"
+                        onSave={() => loadData()}
+                      >
+                        <p className={`text-lg mb-4 ${subtitleClr} font-medium`}>
+                          {solution.subtitle}
+                        </p>
+                      </EditableSolutionText>
+                    )}
+
+                    {/* Description */}
+                    {solution.description && (
+                      <p className={`${descClr} mb-6 leading-relaxed`}>
+                        {solution.description}
+                      </p>
+                    )}
+
+                    {/* Benefits */}
+                    {solution.benefits && solution.benefits.length > 0 && (
+                      <ul className="space-y-3 mb-6">
+                        {solution.benefits.map((benefit, idx) => (
+                          <li key={idx} className={`flex items-start gap-2 ${descClr}`}>
+                            <icons.Check className={`w-5 h-5 ${iconClr} shrink-0 mt-0.5`} />
+                            <span>{benefit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {/* Image */}
+                    {solution.image_url && (
+                      <div className="mb-6 rounded-lg overflow-hidden">
+                        <img
+                          src={solution.image_url}
+                          alt={solution.title}
+                          className="w-full h-auto object-cover"
+                        />
+                      </div>
+                    )}
+
+                    {/* CTA */}
+                    <div className="mt-6">
+                      <Button asChild size="lg" className="w-full">
+                        <LanguageLink to={`/solutions/${solution.slug}`}>
+                          {solution.cta_text || "Learn More"}
+                          <icons.ArrowRight className="w-4 h-4 ml-2" />
+                        </LanguageLink>
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </EditableBackground>
               );
             })}
           </div>
