@@ -70,14 +70,14 @@ const Auth = () => {
       <main className="pt-32 pb-20 px-6">
         <div className="container mx-auto max-w-md">
           <Card className="p-6 bg-card border-border">
-            <h1 className="text-2xl font-bold text-foreground mb-4">{mode === "signin" ? "Sign In" : "Create Account"}</h1>
+            <h1 className="text-2xl font-bold text-card-foreground mb-4">{mode === "signin" ? "Sign In" : "Create Account"}</h1>
             <form onSubmit={onSubmit} className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-card-foreground">Email</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-card-foreground">Password</Label>
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <Button type="submit" disabled={loading}>{loading ? "Please wait..." : mode === "signin" ? "Sign In" : "Sign Up"}</Button>
@@ -93,11 +93,11 @@ const Auth = () => {
                 Authenticate me (Dev Mode)
               </Button>
             )}
-            <div className="mt-4 text-sm text-muted-foreground">
+            <div className="mt-4 text-sm text-card-foreground">
               {mode === "signin" ? (
-                <button className="underline" onClick={() => setMode("signup")}>Need an account? Sign up</button>
+                <button className="underline hover:text-white transition-colors" onClick={() => setMode("signup")}>Need an account? Sign up</button>
               ) : (
-                <button className="underline" onClick={() => setMode("signin")}>Have an account? Sign in</button>
+                <button className="underline hover:text-white transition-colors" onClick={() => setMode("signin")}>Have an account? Sign in</button>
               )}
             </div>
           </Card>
