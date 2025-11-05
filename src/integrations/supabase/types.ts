@@ -158,6 +158,33 @@ export type Database = {
         }
         Relationships: []
       }
+      color_tokens: {
+        Row: {
+          created_at: string
+          css_var: string
+          description: string | null
+          id: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          css_var: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          css_var?: string
+          description?: string | null
+          id?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       contact_items: {
         Row: {
           active: boolean

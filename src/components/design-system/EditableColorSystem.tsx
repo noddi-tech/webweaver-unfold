@@ -22,6 +22,7 @@ import {
   getContrastLevel,
   isValidHex 
 } from "@/lib/colorUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ColorToken {
   name: string;
@@ -252,6 +253,9 @@ export const EditableColorSystem = () => {
   const [colorFormat, setColorFormat] = useState<'hsl' | 'hex' | 'rgb'>('hsl');
   const [autoContrast, setAutoContrast] = useState(true);
   const [hexInputValues, setHexInputValues] = useState<Record<number, string>>({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedColors, setSavedColors] = useState<ColorToken[]>(defaultColors);
   const { toast } = useToast();
 
   // Filter to show only semantic tokens (hide primitives from CMS)
@@ -267,21 +271,49 @@ export const EditableColorSystem = () => {
     return !isPrimitive; // Only show non-primitive tokens
   });
 
+  // Load colors from database on mount
   useEffect(() => {
-    const root = document.documentElement;
+    const loadColors = async () => {
+      const root = document.documentElement;
+      
+      // Fetch saved colors from database
+      const { data: savedTokens, error } = await supabase
+        .from('color_tokens')
+        .select('*');
+      
+      if (error) {
+        console.error('Error loading colors:', error);
+      }
+      
+      // Merge database values with defaults
+      const initial = defaultColors.map((c) => {
+        const dbToken = savedTokens?.find(t => t.css_var === c.cssVar);
+        if (dbToken) {
+          return {
+            ...c,
+            value: dbToken.value,
+            description: dbToken.description || c.description
+          };
+        }
+        
+        // Fall back to CSS computed value
+        const computed = getComputedStyle(root);
+        return {
+          ...c,
+          value: (computed.getPropertyValue(c.cssVar) || c.value).trim(),
+        };
+      });
+      
+      setColors(initial);
+      setSavedColors(initial);
+      
+      // Apply loaded colors to CSS variables
+      initial.forEach(color => {
+        root.style.setProperty(color.cssVar, color.value);
+      });
+    };
     
-    // CLEAR all inline style overrides first to read from CSS file
-    defaultColors.forEach(color => {
-      root.style.removeProperty(color.cssVar);
-    });
-    
-    // NOW read the clean computed styles from CSS file
-    const computed = getComputedStyle(root);
-    const initial = defaultColors.map((c) => ({
-      ...c,
-      value: (computed.getPropertyValue(c.cssVar) || c.value).trim(),
-    }));
-    setColors(initial);
+    loadColors();
   }, []);
 
   const updateColor = (index: number, value: string, format: 'hsl' | 'hex' = 'hsl') => {
@@ -319,6 +351,7 @@ export const EditableColorSystem = () => {
     }
     
     setColors(newColors);
+    setHasUnsavedChanges(true);
     
     // Apply to CSS variables immediately
     const root = document.documentElement;
@@ -413,30 +446,80 @@ export const EditableColorSystem = () => {
     }
   };
 
-  const saveColors = () => {
-    toast({
-      title: "Applied",
-      description: "Changes apply instantly via CSS variables (no storage).",
-    });
+  const saveColors = async () => {
+    setIsSaving(true);
+    
+    try {
+      // Delete all existing color tokens
+      await supabase.from('color_tokens').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      
+      // Insert current colors
+      const tokensToSave = colors.map(color => ({
+        css_var: color.cssVar,
+        value: color.value,
+        description: color.description
+      }));
+      
+      const { error } = await supabase
+        .from('color_tokens')
+        .insert(tokensToSave);
+      
+      if (error) throw error;
+      
+      setSavedColors(colors);
+      setHasUnsavedChanges(false);
+      
+      toast({
+        title: "Colors saved",
+        description: "Your color changes have been saved to the database.",
+      });
+    } catch (error) {
+      console.error('Error saving colors:', error);
+      toast({
+        title: "Error saving colors",
+        description: "Failed to save changes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const resetColors = () => {
-    const root = document.documentElement;
-    // Remove inline overrides to fall back to CSS defaults
-    defaultColors.forEach(color => {
-      root.style.removeProperty(color.cssVar);
-    });
-    // Re-read computed styles after reset
-    const computed = getComputedStyle(root);
-    const refreshed = defaultColors.map(c => ({
-      ...c,
-      value: (computed.getPropertyValue(c.cssVar) || c.value).trim(),
-    }));
-    setColors(refreshed);
-    toast({
-      title: "Colors reset",
-      description: "Reverted to CSS defaults from index.css.",
-    });
+  const resetColors = async () => {
+    try {
+      // Delete all saved color tokens from database
+      await supabase.from('color_tokens').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      
+      const root = document.documentElement;
+      
+      // Remove inline overrides to fall back to CSS defaults
+      defaultColors.forEach(color => {
+        root.style.removeProperty(color.cssVar);
+      });
+      
+      // Re-read computed styles after reset
+      const computed = getComputedStyle(root);
+      const refreshed = defaultColors.map(c => ({
+        ...c,
+        value: (computed.getPropertyValue(c.cssVar) || c.value).trim(),
+      }));
+      
+      setColors(refreshed);
+      setSavedColors(refreshed);
+      setHasUnsavedChanges(false);
+      
+      toast({
+        title: "Colors reset",
+        description: "Reverted to CSS defaults from index.css.",
+      });
+    } catch (error) {
+      console.error('Error resetting colors:', error);
+      toast({
+        title: "Error resetting colors",
+        description: "Failed to reset. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const copyColor = (color: ColorToken) => {
@@ -580,6 +663,20 @@ export const EditableColorSystem = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {hasUnsavedChanges && (
+            <Badge variant="secondary" className="mr-2">
+              <AlertCircle className="w-3 h-3 mr-1" />
+              Unsaved Changes
+            </Badge>
+          )}
+          <Button 
+            onClick={saveColors} 
+            disabled={!hasUnsavedChanges || isSaving}
+            className="relative"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? "Saving..." : "Save Changes"}
+          </Button>
           <Button variant="outline" onClick={fixAllContrast}>
             <CheckCircle2 className="w-4 h-4 mr-2" />
             Fix All
@@ -594,7 +691,7 @@ export const EditableColorSystem = () => {
           </div>
           <Button variant="outline" onClick={resetColors}>
             <RotateCcw className="w-4 h-4 mr-2" />
-            Reset
+            Reset to Defaults
           </Button>
           <Button onClick={exportToFigma} variant="outline">
             <Download className="w-4 h-4 mr-2" />
