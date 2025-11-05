@@ -7,6 +7,7 @@ import ProductOverview from "@/components/ProductOverview";
 import HowItWorks from "@/components/HowItWorks";
 import FinalCTA from "@/components/FinalCTA";
 import { HreflangTags } from "@/components/HreflangTags";
+import { ScrollingFeatureCards } from "@/components/ScrollingFeatureCards";
 import { supabase } from '@/integrations/supabase/client';
 
 interface SocialMetaSettings {
@@ -146,6 +147,7 @@ const Index = () => {
       <main>
         <Hero />
         <WhyNoddi />
+        <ScrollingFeatureCards />
         <ProductOverview />
         <HowItWorks />
         <FinalCTA />
