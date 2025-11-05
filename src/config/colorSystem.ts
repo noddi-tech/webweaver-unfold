@@ -416,3 +416,185 @@ export const getBackgroundOption = (backgroundValue: string): ColorOption | unde
 export const getTextColorOption = (textColorValue: string): TextColorOption | undefined => {
   return TEXT_COLOR_OPTIONS.find(opt => opt.value === textColorValue);
 };
+
+// ============================================================================
+// COLOR CONVERSION UTILITIES
+// ============================================================================
+
+/**
+ * Gets the computed CSS variable value from the document
+ * 
+ * @param cssVar - CSS variable name (e.g., '--primary')
+ * @returns HSL value as string (e.g., '249 67% 24%')
+ */
+export const getCssVariableValue = (cssVar: string): string => {
+  if (typeof window === 'undefined') return '';
+  const root = document.documentElement;
+  const value = getComputedStyle(root).getPropertyValue(cssVar).trim();
+  return value;
+};
+
+/**
+ * Converts HSL color to HEX format
+ * 
+ * @param hsl - HSL string (e.g., '249 67% 24%' or '249deg 67% 24%')
+ * @returns HEX color (e.g., '#1E2875')
+ */
+export const hslToHex = (hsl: string): string => {
+  // Parse HSL string - handle both "249 67% 24%" and "249deg 67% 24%" formats
+  const parts = hsl.trim().split(/\s+/);
+  if (parts.length < 3) return '';
+
+  const h = parseFloat(parts[0].replace('deg', ''));
+  const s = parseFloat(parts[1].replace('%', '')) / 100;
+  const l = parseFloat(parts[2].replace('%', '')) / 100;
+
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+
+  let r = 0, g = 0, b = 0;
+
+  if (h >= 0 && h < 60) {
+    r = c; g = x; b = 0;
+  } else if (h >= 60 && h < 120) {
+    r = x; g = c; b = 0;
+  } else if (h >= 120 && h < 180) {
+    r = 0; g = c; b = x;
+  } else if (h >= 180 && h < 240) {
+    r = 0; g = x; b = c;
+  } else if (h >= 240 && h < 300) {
+    r = x; g = 0; b = c;
+  } else if (h >= 300 && h < 360) {
+    r = c; g = 0; b = x;
+  }
+
+  const toHex = (n: number) => {
+    const hex = Math.round((n + m) * 255).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+};
+
+/**
+ * Converts HSL color to RGB format
+ * 
+ * @param hsl - HSL string (e.g., '249 67% 24%')
+ * @returns RGB string (e.g., 'rgb(30, 40, 117)')
+ */
+export const hslToRgb = (hsl: string): string => {
+  const parts = hsl.trim().split(/\s+/);
+  if (parts.length < 3) return '';
+
+  const h = parseFloat(parts[0].replace('deg', ''));
+  const s = parseFloat(parts[1].replace('%', '')) / 100;
+  const l = parseFloat(parts[2].replace('%', '')) / 100;
+
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+
+  let r = 0, g = 0, b = 0;
+
+  if (h >= 0 && h < 60) {
+    r = c; g = x; b = 0;
+  } else if (h >= 60 && h < 120) {
+    r = x; g = c; b = 0;
+  } else if (h >= 120 && h < 180) {
+    r = 0; g = c; b = x;
+  } else if (h >= 180 && h < 240) {
+    r = 0; g = x; b = c;
+  } else if (h >= 240 && h < 300) {
+    r = x; g = 0; b = c;
+  } else if (h >= 300 && h < 360) {
+    r = c; g = 0; b = x;
+  }
+
+  const toRgb = (n: number) => Math.round((n + m) * 255);
+
+  return `rgb(${toRgb(r)}, ${toRgb(g)}, ${toRgb(b)})`;
+};
+
+// ============================================================================
+// PALETTE EXPORT & CLIPBOARD UTILITIES
+// ============================================================================
+
+/**
+ * Exports the complete color palette as a structured object
+ * Includes all colors with HSL, HEX, RGB values and metadata
+ * Format compatible with Figma Tokens Studio plugin
+ * 
+ * @returns Object containing complete color palette data
+ */
+export const exportColorPalette = () => {
+  const palette: Record<string, any> = {
+    metadata: {
+      exportDate: new Date().toISOString(),
+      version: '1.0',
+      description: 'Complete color palette with all design tokens',
+      format: 'Figma Tokens Studio compatible'
+    },
+    backgrounds: {
+      solid: {},
+      gradient: {},
+      glass: {}
+    },
+    text: {}
+  };
+
+  // Process background colors
+  ALL_BACKGROUND_OPTIONS.forEach(color => {
+    const hslValue = color.cssVar ? getCssVariableValue(color.cssVar) : '';
+    const colorData = {
+      label: color.label,
+      description: color.description,
+      cssClass: color.value,
+      cssVariable: color.cssVar || '',
+      hsl: hslValue,
+      hex: hslValue ? hslToHex(hslValue) : '',
+      rgb: hslValue ? hslToRgb(hslValue) : '',
+      category: color.category,
+      optimalTextColor: color.optimalTextColor,
+      contrastRatio: color.contrastRatio,
+      type: color.type
+    };
+
+    if (color.type === 'solid') {
+      palette.backgrounds.solid[color.label] = colorData;
+    } else if (color.type === 'gradient') {
+      palette.backgrounds.gradient[color.label] = colorData;
+    } else if (color.type === 'glass') {
+      palette.backgrounds.glass[color.label] = colorData;
+    }
+  });
+
+  // Process text colors
+  TEXT_COLOR_OPTIONS.forEach(color => {
+    palette.text[color.label] = {
+      label: color.label,
+      description: color.description,
+      cssClass: color.value,
+      className: color.className
+    };
+  });
+
+  return palette;
+};
+
+/**
+ * Copies text to clipboard and shows a toast notification
+ * 
+ * @param text - Text to copy
+ * @param label - Label for the toast notification
+ */
+export const copyToClipboard = async (text: string, label: string): Promise<void> => {
+  try {
+    await navigator.clipboard.writeText(text);
+    // Note: Toast must be triggered by the component using this function
+    // This function only handles the clipboard operation
+  } catch (error) {
+    console.error('Failed to copy to clipboard:', error);
+    throw error;
+  }
+};

@@ -13,6 +13,7 @@ import {
   getOptimalTextColorForBackground,
   meetsContrastRequirement
 } from "@/config/colorSystem";
+import { ColorPaletteTab } from "@/components/design-system/ColorPaletteTab";
 
 interface BackgroundEditModalProps {
   isOpen: boolean;
@@ -71,8 +72,10 @@ export function BackgroundEditModal({
       setActiveTab('gradients');
     } else if (currentBackground.includes('glass')) {
       setActiveTab('glass');
-    } else {
+    } else if (currentBackground.startsWith('bg-')) {
       setActiveTab('solids');
+    } else {
+      setActiveTab('palette');
     }
   }, [currentBackground, isOpen]);
 
@@ -127,7 +130,7 @@ export function BackgroundEditModal({
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="gradients">
               Gradients ({getFilteredOptions('gradients').length})
             </TabsTrigger>
@@ -136,6 +139,9 @@ export function BackgroundEditModal({
             </TabsTrigger>
             <TabsTrigger value="solids">
               Solids ({getFilteredOptions('solids').length})
+            </TabsTrigger>
+            <TabsTrigger value="palette">
+              Palette
             </TabsTrigger>
           </TabsList>
 
@@ -233,6 +239,10 @@ export function BackgroundEditModal({
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          <TabsContent value="palette" className="mt-4">
+            <ColorPaletteTab />
           </TabsContent>
         </Tabs>
 
