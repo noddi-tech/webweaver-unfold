@@ -3,6 +3,7 @@ import { useEffect, useState, useRef, RefObject } from 'react';
 interface CardState {
   opacity: number;
   translateY: number;
+  scale: number;
 }
 
 interface ScrollProgressReturn {
@@ -49,41 +50,47 @@ export function useScrollProgress(
       );
       setActiveCardIndex(newActiveIndex);
 
-      // Calculate states for all cards with improved logic
+      // Calculate states for all cards - keep all visible
       const newCardStates = Array.from({ length: totalCards }, (_, index) => {
         const cardStart = index * cardStep;
         const cardEnd = (index + 1) * cardStep;
-        const cardMid = cardStart + cardStep / 2;
         
-        if (progress < cardStart - 0.1) {
-          // Card is far in the future - hidden below
-          return { opacity: 0, translateY: 30 };
-        } else if (progress < cardStart) {
-          // Card is approaching - fade in
-          const fadeProgress = (progress - (cardStart - 0.1)) / 0.1;
-          return { opacity: fadeProgress * 0.6, translateY: 30 - fadeProgress * 22 };
+        if (progress < cardStart) {
+          // Future cards - visible but dimmed, positioned below
+          const distanceFromActive = (cardStart - progress) / cardStep;
+          return { 
+            opacity: Math.max(0.3, 1 - distanceFromActive * 0.4), 
+            translateY: Math.min(20, distanceFromActive * 15),
+            scale: 0.98
+          };
         } else if (progress >= cardStart && progress < cardEnd) {
-          // Card is active - fully visible
-          const activeProgress = (progress - cardStart) / cardStep;
-          return { opacity: 1, translateY: 0 };
-        } else if (progress < cardEnd + 0.05) {
-          // Card just passed - slight fade
-          return { opacity: 0.6, translateY: -5 };
+          // Active card - full visibility with emphasis
+          return { 
+            opacity: 1, 
+            translateY: 0,
+            scale: 1.02
+          };
         } else {
-          // Card has passed - hidden above
-          return { opacity: 0, translateY: -20 };
+          // Passed cards - visible but dimmed, positioned above
+          const distanceFromActive = (progress - cardEnd) / cardStep;
+          return { 
+            opacity: Math.max(0.4, 1 - distanceFromActive * 0.3), 
+            translateY: -Math.min(10, distanceFromActive * 8),
+            scale: 0.99
+          };
         }
       });
 
       setCardStates(newCardStates);
     };
 
-    // Check for reduced motion preference
+    // Check for reduced motion preference and mobile
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = window.innerWidth < 1024;
     
-    if (prefersReducedMotion) {
-      // If reduced motion, show all cards without animation
-      setCardStates(Array(totalCards).fill({ opacity: 1, translateY: 0 }));
+    if (prefersReducedMotion || isMobile) {
+      // If reduced motion or mobile, show all cards without animation
+      setCardStates(Array(totalCards).fill({ opacity: 1, translateY: 0, scale: 1 }));
       return;
     }
 

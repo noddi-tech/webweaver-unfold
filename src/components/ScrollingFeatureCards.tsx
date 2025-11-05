@@ -95,7 +95,7 @@ export function ScrollingFeatureCards() {
     <section
       ref={sectionRef}
       className="relative py-24 bg-background"
-      style={{ minHeight: `${100 + (cards.length * 40)}vh` }}
+      style={{ minHeight: `${100 + (cards.length * 20)}vh` }}
     >
       <div className="container-responsive">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
@@ -122,9 +122,9 @@ export function ScrollingFeatureCards() {
           </div>
 
           {/* Right Column - Scrolling Cards */}
-          <div className="relative space-y-16 lg:space-y-24">
+          <div className="relative space-y-12 lg:space-y-16">
             {cards.map((card, index) => {
-              const state = cardStates[index] || { opacity: 0, translateY: 20 };
+              const state = cardStates[index] || { opacity: 0, translateY: 20, scale: 1 };
               const Icon = card.icon;
               const isActive = index === activeCardIndex;
               
@@ -132,12 +132,12 @@ export function ScrollingFeatureCards() {
                 <div
                   key={card.number}
                   className="relative"
-                  style={{
-                    opacity: state.opacity,
-                    transform: `translateY(${state.translateY}px)`,
-                    transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                    willChange: state.opacity > 0.3 ? 'transform, opacity' : 'auto',
-                  }}
+              style={{
+                opacity: state.opacity,
+                transform: `translateY(${state.translateY}px) scale(${state.scale})`,
+                transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                willChange: state.opacity > 0.2 ? 'transform, opacity' : 'auto',
+              }}
                 >
                   <div className="bg-gradient-hero/90 backdrop-blur-xl border border-white/10 rounded-3xl p-8 lg:p-10 shadow-2xl">
                     <div className="grid md:grid-cols-2 gap-8 items-center">
