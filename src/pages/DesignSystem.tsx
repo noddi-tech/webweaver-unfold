@@ -12,6 +12,7 @@ import LogoManager from "@/components/design-system/LogoManager";
 import USPCms from "@/components/design-system/USPCms";
 import PatternsShowcase from "@/components/design-system/PatternsShowcase";
 import SectionsManager from "@/components/design-system/SectionsManager";
+import { ColorPaletteTab } from "@/components/design-system/ColorPaletteTab";
 
 const DesignSystem = () => {
   return (
@@ -46,6 +47,14 @@ const DesignSystem = () => {
 
           <TabsContent value="colors" className="space-y-8">
             <EditableColorSystem />
+            
+            <div className="mt-12">
+              <h2 className="text-3xl font-bold mb-4">Color Palette Reference</h2>
+              <p className="text-muted-foreground mb-6">
+                Complete color system with copyable values for sharing with designers and developers.
+              </p>
+              <ColorPaletteTab />
+            </div>
           </TabsContent>
 
           <TabsContent value="typography" className="space-y-8">
