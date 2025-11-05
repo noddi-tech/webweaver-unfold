@@ -9,55 +9,56 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* ========================================
-       SIMPLIFIED COLOR SYSTEM - White + Dark Blue Gradient
+       CORE BRAND COLORS - Foundation primitives
+       All colors in HSL format for consistency
        ======================================== */
     
-    /* Core Brand Colors */
-    --color-brand-dark: 249 67% 24%;      /* Federal blue for text and primary actions */
-    --color-brand-gradient-start: 249 67% 24%;  /* Federal blue gradient start */
-    --color-brand-gradient-end: 266 85% 58%;    /* Vibrant purple gradient end */
-
-    /* Feedback Colors (essential) */
-    --color-error: 0 84% 60%;
-    --color-success: 142 76% 36%;
-    
-    /* Interactive elements (buttons, links) */
-    --interactive-primary: var(--color-brand-dark);           /* Federal blue buttons */
-    --interactive-primary-hover: 249 67% 20%;                 /* Slightly darker on hover */
-    --interactive-secondary: 0 0% 100%;                       /* White secondary buttons */
-    --interactive-secondary-hover: 0 0% 96%;                  /* Light gray on hover */
-    --text-primary: var(--color-brand-dark);                  /* Federal blue text */
+    --color-brand-dark: 249 67% 24%;           /* Federal blue - Primary brand color */
+    --color-brand-gradient-start: 249 67% 24%; /* Gradient start point */
+    --color-brand-gradient-end: 266 85% 58%;   /* Vibrant purple - Gradient end point */
 
     /* ========================================
-       SEMANTIC TOKENS
+       FEEDBACK COLORS - System states
+       ======================================== */
+    --color-error: 0 84% 60%;                  /* Red for errors and destructive actions */
+    --color-success: 142 76% 36%;              /* Green for success states */
+    
+    /* ========================================
+       INTERACTIVE PRIMITIVES - Base interaction colors
+       ======================================== */
+    --interactive-primary: var(--color-brand-dark);      /* Primary action color (buttons, CTAs) */
+    --interactive-primary-hover: 249 67% 20%;            /* Darker on hover/active */
+    --interactive-secondary: 0 0% 100%;                  /* Secondary action backgrounds */
+    --interactive-secondary-hover: 0 0% 96%;             /* Light gray on hover */
+    --text-primary: var(--color-brand-dark);             /* Primary text color */
+
+    /* ========================================
+       SEMANTIC TOKENS - Application layer
+       These are what components use directly
        ======================================== */
 
-    /* Main background is pure white */
-    --background: 0 0% 100%;
-    --foreground: var(--color-brand-dark);
+    /* Surface Colors - Backgrounds and containers */
+    --background: 0 0% 100%;                   /* Pure white page background | Used in: All pages, sections */
+    --card: var(--color-brand-gradient-start); /* Federal blue cards | Used in: Feature cards, Hero, Metrics */
+    --card-foreground: 0 0% 100%;              /* White text on cards | Used in: Card content, Hero text */
+    --muted: 0 0% 96%;                         /* Light gray surfaces | Used in: Disabled states, secondary sections */
+    --muted-foreground: 0 0% 45%;              /* Gray text | Used in: Descriptions, labels, helper text */
     
-    /* Cards use dark blue gradient background */
-    --card: var(--color-brand-gradient-start);
-    --card-foreground: 0 0% 100%;
+    /* Borders and dividers */
+    --border: 0 0% 90%;                        /* Light gray borders | Used in: Inputs, cards, dividers */
     
-    /* Borders */
-    --border: 0 0% 90%;
+    /* Interactive Colors - Buttons, links, actions */
+    --primary: var(--color-brand-dark);        /* Primary actions | Used in: Default buttons, active states */
+    --primary-foreground: 0 0% 100%;           /* Text on primary | Used in: Button text, CTA text */
     
-    /* Primary actions use dark blue */
-    --primary: var(--color-brand-dark);
-    --primary-foreground: 0 0% 100%;
+    /* Text Colors - Foreground colors for content */
+    --foreground: var(--color-brand-dark);     /* Federal blue text | Used in: Body text, headings on white */
+    --popover: 0 0% 100%;                      /* Popover background | Used in: Dropdowns, tooltips */
+    --popover-foreground: var(--color-brand-dark); /* Popover text | Used in: Dropdown text */
     
-    /* Destructive (errors/delete) */
-    --destructive: var(--color-error);
-    --destructive-foreground: 0 0% 100%;
-    
-    /* Popover uses white like background */
-    --popover: 0 0% 100%;
-    --popover-foreground: var(--color-brand-dark);
-    
-    /* Muted variants for disabled states */
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    /* Feedback States */
+    --destructive: var(--color-error);         /* Error/delete color | Used in: Error messages, delete buttons */
+    --destructive-foreground: 0 0% 100%;       /* Text on destructive | Used in: Error button text */
     
     /* Input styling */
     --input: var(--border);
