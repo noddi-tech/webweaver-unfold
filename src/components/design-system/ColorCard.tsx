@@ -70,7 +70,7 @@ export const ColorCard = ({
     : undefined;
 
   return (
-    <Card className="bg-card/5 border-border/50">
+    <Card className="bg-gradient-hero border-border/50">
       <CardContent className="p-5">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
