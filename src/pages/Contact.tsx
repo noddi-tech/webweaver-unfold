@@ -9,6 +9,7 @@ import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { HreflangTags } from "@/components/HreflangTags";
+import { EditableBackground } from "@/components/EditableBackground";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -156,137 +157,97 @@ const Contact = () => {
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}
-          <Card className="liquid-glass">
-            <CardHeader>
-              <CardTitle className="text-2xl text-foreground">{settings?.form_title ?? "Send us a message"}</CardTitle>
-              <CardDescription>{settings?.form_description ?? "Fill out the form below and we'll get back to you as soon as possible."}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="text-sm font-medium text-foreground">First Name *</label>
-                    <Input 
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      placeholder="Your first name" 
-                      className="mt-1" 
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground">Last Name</label>
-                    <Input 
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      placeholder="Your last name" 
-                      className="mt-1" 
-                    />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <label className="text-sm font-medium text-foreground">Email *</label>
-                  <Input 
-                    name="email"
-                    type="email" 
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="your@email.com" 
-                    className="mt-1" 
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="text-sm font-medium text-foreground">Subject</label>
-                  <Input 
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    placeholder="What's this about?" 
-                    className="mt-1" 
-                  />
-                </div>
-                <div className="mb-6">
-                  <label className="text-sm font-medium text-foreground">Message *</label>
-                  <Textarea 
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    placeholder="Tell us more about your inquiry..." 
-                    className="mt-1 min-h-[120px]" 
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  <Send className="mr-2" size={20} />
-                  {isSubmitting ? "Sending..." : "Send Message"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          <EditableBackground
+            elementId="contact-form-card"
+            defaultBackground="liquid-glass"
+            allowedBackgrounds={[
+              'bg-gradient-hero',
+              'bg-gradient-sunset',
+              'bg-gradient-warmth',
+              'bg-gradient-ocean',
+              'bg-gradient-fire',
+              'glass-card',
+              'liquid-glass',
+              'glass-prominent',
+              'bg-card',
+              'bg-background',
+              'bg-muted'
+            ]}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl text-foreground">{settings?.form_title ?? "Send us a message"}</CardTitle>
+                <CardDescription>{settings?.form_description ?? "Fill out the form below and we'll get back to you as soon as possible."}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <form onSubmit={handleSubmit}>
+...
+                </form>
+              </CardContent>
+            </Card>
+          </EditableBackground>
 
           {/* Contact Information */}
           <div className="space-y-8">
             {settings?.show_contact_methods_tab !== false && (
-              <Card className="liquid-glass">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-foreground">{settings?.get_in_touch_title ?? "Get in touch"}</CardTitle>
-                  <CardDescription>
-                    Reach out to us through any of these channels.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {contactItems.length > 0 ? (
-                    contactItems.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-4">
-                        <div className="bg-primary/10 p-3 rounded-lg">
-                          {item.icon_name === 'Phone' ? (
-                            <Phone className="h-6 w-6 text-primary" />
-                          ) : item.icon_name === 'MapPin' ? (
-                            <MapPin className="h-6 w-6 text-primary" />
-                          ) : (
-                            <Mail className="h-6 w-6 text-primary" />
-                          )}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-foreground">{item.title}</h3>
-                          {item.link_url ? (
-                            <a href={item.link_url} className="text-muted-foreground underline underline-offset-4">{item.value}</a>
-                          ) : (
-                            <p className="text-muted-foreground">{item.value}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground">No contact items configured yet.</p>
-                  )}
-                </CardContent>
-              </Card>
+              <EditableBackground
+                elementId="contact-methods-card"
+                defaultBackground="liquid-glass"
+                allowedBackgrounds={[
+                  'bg-gradient-hero',
+                  'bg-gradient-sunset',
+                  'bg-gradient-warmth',
+                  'bg-gradient-ocean',
+                  'bg-gradient-fire',
+                  'glass-card',
+                  'liquid-glass',
+                  'glass-prominent',
+                  'bg-card',
+                  'bg-background',
+                  'bg-muted'
+                ]}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-foreground">{settings?.get_in_touch_title ?? "Get in touch"}</CardTitle>
+                    <CardDescription>
+                      Reach out to us through any of these channels.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+...
+                  </CardContent>
+                </Card>
+              </EditableBackground>
             )}
 
             {settings?.show_business_hours_tab !== false && (
-              <Card className="liquid-glass">
-                <CardHeader>
-                  <CardTitle className="text-xl text-foreground">{settings?.business_hours_title ?? "Business Hours"}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm">
-                    {hours.length > 0 ? (
-                      hours.map((h) => (
-                        <div key={h.id} className="flex justify-between">
-                          <span className="text-muted-foreground">{h.day_name}</span>
-                          <span className="text-foreground">{h.closed ? 'Closed' : `${h.open_time ?? ''}${h.open_time && h.close_time ? ' - ' : ''}${h.close_time ?? ''}`}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-muted-foreground">No business hours configured yet.</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <EditableBackground
+                elementId="contact-hours-card"
+                defaultBackground="liquid-glass"
+                allowedBackgrounds={[
+                  'bg-gradient-hero',
+                  'bg-gradient-sunset',
+                  'bg-gradient-warmth',
+                  'bg-gradient-ocean',
+                  'bg-gradient-fire',
+                  'glass-card',
+                  'liquid-glass',
+                  'glass-prominent',
+                  'bg-card',
+                  'bg-background',
+                  'bg-muted'
+                ]}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl text-foreground">{settings?.business_hours_title ?? "Business Hours"}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+...
+                  </CardContent>
+                </Card>
+              </EditableBackground>
             )}
           </div>
         </div>
