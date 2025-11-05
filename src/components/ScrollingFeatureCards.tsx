@@ -1,12 +1,15 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Calendar, Package, Users, BarChart3, Settings, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useScrollProgress } from '@/hooks/useScrollProgress';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { EditableTranslation } from '@/components/EditableTranslation';
+import { EditableUniversalMedia } from '@/components/EditableUniversalMedia';
+import { EditableButton } from '@/components/EditableButton';
 import { useTypography } from '@/hooks/useTypography';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FeatureCard {
   number: string;
@@ -17,6 +20,7 @@ interface FeatureCard {
   descriptionKey: string;
   ctaText: string;
   ctaKey: string;
+  ctaUrl?: string;
   imageUrl: string;
   imageAlt: string;
 }
@@ -25,6 +29,39 @@ export function ScrollingFeatureCards() {
   const sectionRef = useRef<HTMLElement>(null);
   const { t } = useAppTranslation();
   const headingStyles = useTypography();
+  
+  const [imageUrls, setImageUrls] = useState<Record<number, string>>({
+    0: '/src/assets/booking-hero.png',
+    1: '/src/assets/dashboard-preview.jpg',
+    2: '/src/assets/booking-step-4-time.png',
+    3: '/src/assets/nps-dashboard.png',
+    4: '/src/assets/whitelabel-demo.png',
+  });
+  const [mainCtaUrl, setMainCtaUrl] = useState('/functions');
+
+  const loadImageSettings = async () => {
+    const newImageUrls: Record<number, string> = {};
+    
+    for (let i = 0; i < 5; i++) {
+      const { data } = await supabase
+        .from('image_carousel_settings')
+        .select('image_url, display_type, carousel_config_id')
+        .eq('location_id', `scrolling-card-${i + 1}`)
+        .maybeSingle();
+      
+      if (data?.image_url) {
+        newImageUrls[i] = data.image_url;
+      }
+    }
+    
+    if (Object.keys(newImageUrls).length > 0) {
+      setImageUrls(prev => ({ ...prev, ...newImageUrls }));
+    }
+  };
+
+  useEffect(() => {
+    loadImageSettings();
+  }, []);
 
   const cards: FeatureCard[] = [
     {
@@ -113,12 +150,22 @@ export function ScrollingFeatureCards() {
                 </EditableTranslation>
               </p>
             </div>
-            <Button size="lg" className="group">
-              <EditableTranslation translationKey="scrolling_features.cta">
-                See All Functions
-              </EditableTranslation>
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Button>
+            <EditableButton
+              buttonText="See All Functions"
+              buttonUrl={mainCtaUrl}
+              onSave={(text, url) => {
+                setMainCtaUrl(url);
+              }}
+            >
+              <Button size="lg" className="group" asChild>
+                <a href={mainCtaUrl}>
+                  <EditableTranslation translationKey="scrolling_features.cta">
+                    See All Functions
+                  </EditableTranslation>
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </a>
+              </Button>
+            </EditableButton>
           </div>
 
           {/* Right Column - Scrolling Cards */}
@@ -166,27 +213,44 @@ export function ScrollingFeatureCards() {
                           </EditableTranslation>
                         </p>
                         
-                        <Button 
-                          variant="ghost" 
-                          className="text-white hover:bg-white/20 border border-white/20 group mt-2"
+                        <EditableButton
+                          buttonText={card.ctaText}
+                          buttonUrl={card.ctaUrl || '#'}
+                          onSave={(text, url) => {
+                            // URL updated in state
+                          }}
                         >
-                          <EditableTranslation translationKey={card.ctaKey}>
-                            {card.ctaText}
-                          </EditableTranslation>
-                          <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </Button>
+                          <Button 
+                            variant="ghost" 
+                            className="text-white hover:bg-white/20 border border-white/20 group mt-2"
+                            asChild
+                          >
+                            <a href={card.ctaUrl || '#'}>
+                              <EditableTranslation translationKey={card.ctaKey}>
+                                {card.ctaText}
+                              </EditableTranslation>
+                              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            </a>
+                          </Button>
+                        </EditableButton>
                       </div>
                       
                       {/* Right: Image */}
-                      <div className="relative min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10">
-                        <img 
-                          src={card.imageUrl}
-                          alt={card.imageAlt}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                      <EditableUniversalMedia
+                        locationId={`scrolling-card-${index + 1}`}
+                        onSave={() => loadImageSettings()}
+                        placeholder={`Click to set image for ${card.title}`}
+                      >
+                        <div className="relative min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10">
+                          <img 
+                            src={imageUrls[index] || card.imageUrl}
+                            alt={card.imageAlt}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </EditableUniversalMedia>
                     </div>
                   </div>
                 </div>
