@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      background_styles: {
+        Row: {
+          background_class: string
+          created_at: string
+          element_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          background_class: string
+          created_at?: string
+          element_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          background_class?: string
+          created_at?: string
+          element_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brand_settings: {
         Row: {
           created_at: string

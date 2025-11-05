@@ -6,6 +6,7 @@ import { LanguageLink } from "@/components/LanguageLink";
 import { ArrowRight } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { EditableBackground } from "@/components/EditableBackground";
 
 export default function ProofMetricsHomepage() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -62,32 +63,45 @@ export default function ProofMetricsHomepage() {
           {metrics.map((metric, index) => {
             const Icon = metric.icon;
             return (
-              <Card 
+              <EditableBackground
                 key={index}
-                className={`hover-scale transition-all duration-500 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
+                elementId={`proof-metric-card-${index}`}
+                defaultBackground="bg-card"
+                allowedBackgrounds={[
+                  'bg-card',
+                  'bg-gradient-warmth',
+                  'bg-gradient-sunset',
+                  'bg-gradient-hero',
+                  'bg-gradient-ocean',
+                  'bg-gradient-fire'
+                ]}
               >
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <Icon className="w-6 h-6 text-primary-foreground" />
-                  </div>
-                  <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
-                    <Counter 
-                      end={metric.value} 
-                      suffix={metric.suffix}
-                      prefix={metric.prefix}
-                    />
-                  </div>
-                  <div className="text-sm font-semibold text-foreground mb-2">
-                    {metric.label}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {metric.context}
-                  </p>
-                </CardContent>
-              </Card>
+                <Card 
+                  className={`hover-scale transition-all duration-500 ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  }`}
+                  style={{ transitionDelay: `${index * 100}ms` }}
+                >
+                  <CardContent className="p-6 text-center">
+                    <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center mx-auto mb-4 shadow-lg">
+                      <Icon className="w-6 h-6 text-primary-foreground" />
+                    </div>
+                    <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
+                      <Counter 
+                        end={metric.value} 
+                        suffix={metric.suffix}
+                        prefix={metric.prefix}
+                      />
+                    </div>
+                    <div className="text-sm font-semibold text-foreground mb-2">
+                      {metric.label}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {metric.context}
+                    </p>
+                  </CardContent>
+                </Card>
+              </EditableBackground>
             );
           })}
         </div>
