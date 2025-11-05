@@ -46,14 +46,16 @@ const DesignSystem = () => {
           </TabsList>
 
           <TabsContent value="colors" className="space-y-8">
-            <EditableColorSystem />
-            
-            <div className="mt-12">
+            <div>
               <h2 className="text-3xl font-bold mb-4">Color Palette Reference</h2>
               <p className="text-muted-foreground mb-6">
                 Complete color system with copyable values for sharing with designers and developers.
               </p>
               <ColorPaletteTab />
+            </div>
+            
+            <div className="mt-12">
+              <EditableColorSystem />
             </div>
           </TabsContent>
 
