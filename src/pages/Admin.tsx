@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { EditableColorSystem } from "@/components/design-system/EditableColorSystem";
 import { EditableTypographySystem } from "@/components/design-system/EditableTypographySystem";
+import { ColorPaletteTab } from "@/components/design-system/ColorPaletteTab";
 import { EditableComponentLibrary } from "@/components/design-system/EditableComponentLibrary";
 import { EditableSpacingSystem } from "@/components/design-system/EditableSpacingSystem";
 import { IconLibrary } from "@/components/design-system/IconLibrary";
@@ -236,7 +237,17 @@ const Admin = () => {
               </TabsList>
 
               <TabsContent value="colors" className="space-y-8">
-                <EditableColorSystem />
+                <div>
+                  <h2 className="text-3xl font-bold mb-4">Color Palette Reference</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Complete color system with copyable values for sharing with designers and developers.
+                  </p>
+                  <ColorPaletteTab />
+                </div>
+                
+                <div className="mt-12">
+                  <EditableColorSystem />
+                </div>
               </TabsContent>
 
               <TabsContent value="typography" className="space-y-8">
