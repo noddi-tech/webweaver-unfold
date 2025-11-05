@@ -11,6 +11,7 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { LockedText } from "@/components/LockedText";
 import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
+import { EditableBackground } from "@/components/EditableBackground";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Carousel,
@@ -149,21 +150,27 @@ const Hero = () => {
 
             {/* Metrics Badges */}
             <div className="flex flex-wrap gap-6">
-              <div className="flex items-center gap-3 px-6 py-4 rounded-xl glass-card shadow-lg hover-scale">
-                <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
-                  <Award className="w-6 h-6 text-primary-foreground" />
+              <EditableBackground
+                elementId="hero-metrics-badge"
+                defaultBackground="glass-card"
+                allowedBackgrounds={['glass-card', 'bg-card', 'bg-gradient-warmth', 'bg-gradient-hero']}
+              >
+                <div className="flex items-center gap-3 px-6 py-4 rounded-xl shadow-lg hover-scale">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
+                    <Award className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <LockedText reason="Metric value - Update in code">
+                      <div className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
+                        Net Promoter Score <Counter end={90} prefix="~" />
+                      </div>
+                    </LockedText>
+                    <EditableTranslation translationKey="hero.metrics.nps" onSave={() => setRefreshKey(prev => prev + 1)}>
+                      <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'from end customers. Like no one else in the industry')}</div>
+                    </EditableTranslation>
+                  </div>
                 </div>
-                <div>
-                  <LockedText reason="Metric value - Update in code">
-                    <div className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                      Net Promoter Score <Counter end={90} prefix="~" />
-                    </div>
-                  </LockedText>
-                  <EditableTranslation translationKey="hero.metrics.nps" onSave={() => setRefreshKey(prev => prev + 1)}>
-                    <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'from end customers. Like no one else in the industry')}</div>
-                  </EditableTranslation>
-                </div>
-              </div>
+              </EditableBackground>
             </div>
 
             {/* CTA Button */}

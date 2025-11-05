@@ -5,6 +5,7 @@ import { LanguageLink } from "@/components/LanguageLink";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableBackground } from "@/components/EditableBackground";
 
 export default function ProductOverview() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -63,31 +64,44 @@ export default function ProductOverview() {
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <Card className="h-full hover-scale border-2 hover:border-primary/30 transition-all duration-300">
-                  <CardContent className="p-8">
-                    <div className="w-16 h-16 rounded-xl bg-gradient-primary flex items-center justify-center mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
-                      <Icon className="w-8 h-8 text-primary-foreground" />
-                    </div>
+                <EditableBackground
+                  elementId={`product-overview-card-${index}`}
+                  defaultBackground="bg-card"
+                  allowedBackgrounds={[
+                    'bg-card',
+                    'bg-gradient-hero',
+                    'bg-gradient-warmth',
+                    'bg-gradient-sunset',
+                    'bg-gradient-ocean',
+                    'bg-gradient-fire'
+                  ]}
+                >
+                  <Card className="h-full hover-scale border-2 hover:border-primary/30 transition-all duration-300">
+                    <CardContent className="p-8">
+                      <div className="w-16 h-16 rounded-xl bg-gradient-primary flex items-center justify-center mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
+                        <Icon className="w-8 h-8 text-primary-foreground" />
+                      </div>
+                        <EditableTranslation 
+                        translationKey={`product_overview.${product.link.slice(1)}.title`} 
+                        onSave={() => setRefreshKey(prev => prev + 1)}
+                        fallbackText={product.title}
+                      >
+                        <h3 className="text-2xl font-bold mb-4 transition-colors">
+                          {product.title}
+                        </h3>
+                      </EditableTranslation>
                       <EditableTranslation 
-                      translationKey={`product_overview.${product.link.slice(1)}.title`} 
-                      onSave={() => setRefreshKey(prev => prev + 1)}
-                      fallbackText={product.title}
-                    >
-                      <h3 className="text-2xl font-bold mb-4 transition-colors">
-                        {product.title}
-                      </h3>
-                    </EditableTranslation>
-                    <EditableTranslation 
-                      translationKey={`product_overview.${product.link.slice(1)}.description`} 
-                      onSave={() => setRefreshKey(prev => prev + 1)}
-                      fallbackText={product.description}
-                    >
-                      <p className="leading-relaxed">
-                        {product.description}
-                      </p>
-                    </EditableTranslation>
-                  </CardContent>
-                </Card>
+                        translationKey={`product_overview.${product.link.slice(1)}.description`} 
+                        onSave={() => setRefreshKey(prev => prev + 1)}
+                        fallbackText={product.description}
+                      >
+                        <p className="leading-relaxed">
+                          {product.description}
+                        </p>
+                      </EditableTranslation>
+                    </CardContent>
+                  </Card>
+                </EditableBackground>
               </LanguageLink>
             );
           })}

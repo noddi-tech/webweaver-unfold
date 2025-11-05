@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Palette } from 'lucide-react';
 import { useEditMode } from '@/contexts/EditModeContext';
 import { useBackgroundStyle } from '@/hooks/useBackgroundStyle';
@@ -29,26 +29,29 @@ export function EditableBackground({
   };
 
   if (isLoading) {
-    return <div className={`${defaultBackground} ${className}`}>{children}</div>;
+    return <>{children}</>;
   }
+
+  // Clone the child and merge the background className
+  const childWithBackground = React.cloneElement(children as React.ReactElement, {
+    className: `${(children as React.ReactElement).props.className || ''} ${background}`.trim()
+  });
 
   return (
     <div
-      className={`relative ${className}`}
+      className={`relative inline-block w-full ${className}`}
       onMouseEnter={() => editMode && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className={background}>
-        {children}
-      </div>
+      {childWithBackground}
 
       {editMode && isHovered && (
         <button
           onClick={() => setIsModalOpen(true)}
-          className="absolute top-2 right-2 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform z-10"
-          title="Change background"
+          className="absolute top-2 right-2 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform z-50"
+          title="Change background color"
         >
-          <Palette className="w-4 h-4" />
+          <Palette className="w-5 h-5" />
         </button>
       )}
 

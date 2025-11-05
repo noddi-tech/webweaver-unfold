@@ -5,6 +5,7 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { LockedText } from "@/components/LockedText";
+import { EditableBackground } from "@/components/EditableBackground";
 
 export default function HowItWorks() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -66,25 +67,36 @@ export default function HowItWorks() {
                   }`}
                   style={{ transitionDelay: `${index * 100}ms` }}
                 >
-                <Card className="hover-scale h-full">
-                  <CardContent className="p-6 h-full flex flex-col">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
-                      <Icon className="w-7 h-7 text-primary-foreground" />
-                    </div>
-                    <LockedText reason="Step number - Update in code">
-                      <div className="text-sm font-bold text-white mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
-                    </LockedText>
-                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                    </EditableTranslation>
-                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <p className="text-sm mb-2">{step.description}</p>
-                    </EditableTranslation>
-                    <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <p className="text-xs">{step.details}</p>
-                    </EditableTranslation>
-                  </CardContent>
-                </Card>
+                  <EditableBackground
+                    elementId={`how-it-works-step-${index}`}
+                    defaultBackground="bg-card"
+                    allowedBackgrounds={[
+                      'bg-card',
+                      'bg-gradient-warmth',
+                      'bg-gradient-ocean',
+                      'bg-gradient-hero'
+                    ]}
+                  >
+                    <Card className="hover-scale h-full">
+                      <CardContent className="p-6 h-full flex flex-col">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
+                          <Icon className="w-7 h-7 text-primary-foreground" />
+                        </div>
+                        <LockedText reason="Step number - Update in code">
+                          <div className="text-sm font-bold text-white mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
+                        </LockedText>
+                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
+                          <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+                        </EditableTranslation>
+                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
+                          <p className="text-sm mb-2">{step.description}</p>
+                        </EditableTranslation>
+                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
+                          <p className="text-xs">{step.details}</p>
+                        </EditableTranslation>
+                      </CardContent>
+                    </Card>
+                  </EditableBackground>
                 </div>
                 {index < steps.length - 1 && (
                   <div className="flex items-center justify-center">
@@ -108,29 +120,40 @@ export default function HowItWorks() {
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <Card className="hover-scale h-full">
-                  <CardContent className="p-6 h-full flex flex-col">
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center flex-shrink-0 shadow-lg">
-                        <Icon className="w-7 h-7 text-primary-foreground" />
+                <EditableBackground
+                  elementId={`how-it-works-step-${index}`}
+                  defaultBackground="bg-card"
+                  allowedBackgrounds={[
+                    'bg-card',
+                    'bg-gradient-warmth',
+                    'bg-gradient-ocean',
+                    'bg-gradient-hero'
+                  ]}
+                >
+                  <Card className="hover-scale h-full">
+                    <CardContent className="p-6 h-full flex flex-col">
+                      <div className="flex items-start gap-4">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center flex-shrink-0 shadow-lg">
+                          <Icon className="w-7 h-7 text-primary-foreground" />
+                        </div>
+                        <div className="flex-1">
+                          <LockedText reason="Step number - Update in code">
+                            <div className="text-sm font-bold text-white mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
+                          </LockedText>
+                          <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
+                            <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+                          </EditableTranslation>
+                          <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
+                            <p className="text-sm mb-2">{step.description}</p>
+                          </EditableTranslation>
+                          <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
+                            <p className="text-xs">{step.details}</p>
+                          </EditableTranslation>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <LockedText reason="Step number - Update in code">
-                          <div className="text-sm font-bold text-white mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
-                        </LockedText>
-                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                          <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                        </EditableTranslation>
-                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                          <p className="text-sm mb-2">{step.description}</p>
-                        </EditableTranslation>
-                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                          <p className="text-xs">{step.details}</p>
-                        </EditableTranslation>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </EditableBackground>
                 {index < steps.length - 1 && (
                   <div className="flex justify-center py-2">
                     <div className="w-0.5 h-8 bg-gradient-primary" />
@@ -143,18 +166,28 @@ export default function HowItWorks() {
 
         {/* Caption */}
         <div className="text-center">
-          <div className="inline-block px-8 py-4 bg-primary/10 border-2 border-primary/20 rounded-xl">
-            <EditableTranslation translationKey="how_it_works.caption_main" onSave={() => setRefreshKey(prev => prev + 1)}>
-              <p className="text-base md:text-lg font-semibold text-foreground mb-1">
-                {t('how_it_works.caption_main', "It's not automation. It's orchestration.")}
-              </p>
-            </EditableTranslation>
-            <EditableTranslation translationKey="how_it_works.caption_sub" onSave={() => setRefreshKey(prev => prev + 1)}>
-              <p className="text-sm text-foreground font-medium">
-                {t('how_it_works.caption_sub', 'One platform. Every function. Zero friction.')}
-              </p>
-            </EditableTranslation>
-          </div>
+          <EditableBackground
+            elementId="how-it-works-caption"
+            defaultBackground="bg-primary/10"
+            allowedBackgrounds={[
+              'bg-primary/10',
+              'bg-gradient-warmth',
+              'bg-card'
+            ]}
+          >
+            <div className="inline-block px-8 py-4 border-2 border-primary/20 rounded-xl">
+              <EditableTranslation translationKey="how_it_works.caption_main" onSave={() => setRefreshKey(prev => prev + 1)}>
+                <p className="text-base md:text-lg font-semibold text-foreground mb-1">
+                  {t('how_it_works.caption_main', "It's not automation. It's orchestration.")}
+                </p>
+              </EditableTranslation>
+              <EditableTranslation translationKey="how_it_works.caption_sub" onSave={() => setRefreshKey(prev => prev + 1)}>
+                <p className="text-sm text-foreground font-medium">
+                  {t('how_it_works.caption_sub', 'One platform. Every function. Zero friction.')}
+                </p>
+              </EditableTranslation>
+            </div>
+          </EditableBackground>
         </div>
       </div>
     </section>
