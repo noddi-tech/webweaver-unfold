@@ -139,8 +139,8 @@ export function ScrollingFeatureCards() {
                 willChange: state.opacity > 0.2 ? 'transform, opacity' : 'auto',
               }}
                 >
-                  <div className="bg-gradient-hero/90 backdrop-blur-xl border border-white/10 rounded-3xl p-8 lg:p-10 shadow-2xl">
-                    <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div className="bg-gradient-hero/90 backdrop-blur-xl border border-white/10 rounded-3xl p-10 lg:p-12 shadow-2xl">
+                <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
                       {/* Left: Content */}
                       <div className="space-y-6">
                         <div className="flex items-center gap-3">
@@ -178,7 +178,7 @@ export function ScrollingFeatureCards() {
                       </div>
                       
                       {/* Right: Image */}
-                      <div className="relative aspect-video rounded-2xl overflow-hidden shadow-xl border border-white/10">
+                      <div className="relative min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10">
                         <img 
                           src={card.imageUrl}
                           alt={card.imageAlt}
