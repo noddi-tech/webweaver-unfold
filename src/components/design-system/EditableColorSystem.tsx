@@ -192,6 +192,58 @@ const defaultColors: ColorToken[] = [
     category: "gradients",
     usedIn: ["Hero sections", "Feature cards", "Metric cards", "CTA backgrounds"],
     components: ["Hero", "Card backgrounds", "FinalCTA", "TrustProof metrics"]
+  },
+  {
+    name: "Gradient Sunset",
+    cssVar: "--gradient-sunset",
+    value: "linear-gradient(135deg, hsl(249 67% 24%), hsl(266 85% 58%), hsl(25 95% 63%))",
+    className: "bg-gradient-sunset",
+    type: "gradient",
+    gradientDirection: "135deg",
+    gradientStops: ["249 67% 24%", "266 85% 58%", "25 95% 63%"],
+    description: "Federal blue → Purple → Orange (3-color blend)",
+    category: "gradients",
+    usedIn: ["Hero sections", "Charts", "Data cards"],
+    components: ["Charts", "Dashboard cards", "Feature highlights"]
+  },
+  {
+    name: "Gradient Warmth",
+    cssVar: "--gradient-warmth",
+    value: "linear-gradient(135deg, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))",
+    className: "bg-gradient-warmth",
+    type: "gradient",
+    gradientDirection: "135deg",
+    gradientStops: ["266 85% 58%", "321 59% 85%", "25 95% 70%"],
+    description: "Purple → Pink → Peach (soft, welcoming)",
+    category: "gradients",
+    usedIn: ["Secondary heroes", "CTA sections", "Testimonials"],
+    components: ["Marketing sections", "Social proof"]
+  },
+  {
+    name: "Gradient Ocean",
+    cssVar: "--gradient-ocean",
+    value: "linear-gradient(135deg, hsl(210 100% 50%), hsl(180 70% 45%), hsl(142 76% 50%))",
+    className: "bg-gradient-ocean",
+    type: "gradient",
+    gradientDirection: "135deg",
+    gradientStops: ["210 100% 50%", "180 70% 45%", "142 76% 50%"],
+    description: "Blue → Teal → Green (fresh, technical)",
+    category: "gradients",
+    usedIn: ["Platform sections", "Technical content", "Features"],
+    components: ["Architecture diagrams", "Tech features"]
+  },
+  {
+    name: "Gradient Fire",
+    cssVar: "--gradient-fire",
+    value: "linear-gradient(135deg, hsl(25 95% 53%), hsl(266 85% 58%))",
+    className: "bg-gradient-fire",
+    type: "gradient",
+    gradientDirection: "135deg",
+    gradientStops: ["25 95% 53%", "266 85% 58%"],
+    description: "Orange → Purple (bold, energetic)",
+    category: "gradients",
+    usedIn: ["CTAs", "Alerts", "Highlights"],
+    components: ["Action buttons", "Important cards"]
   }
 ];
 

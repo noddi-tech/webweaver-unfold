@@ -16,6 +16,7 @@ All colors MUST be HSL.
     --color-brand-dark: 249 67% 24%;           /* Federal blue - Primary brand color */
     --color-brand-gradient-start: 249 67% 24%; /* Gradient start point */
     --color-brand-gradient-end: 266 85% 58%;   /* Vibrant purple - Gradient end point */
+    --color-brand-orange: 25 95% 53%;          /* Vibrant orange accent */
 
     /* ========================================
        FEEDBACK COLORS - System states
@@ -89,9 +90,26 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Gradient token - Federal Blue to Purple Gradient */
+    /* ========================================
+       GRADIENT SYSTEM - Multi-color combinations
+       ======================================== */
     --gradient-hero: linear-gradient(135deg, 
       hsl(249 67% 24%), 
+      hsl(266 85% 58%));
+    --gradient-sunset: linear-gradient(135deg,
+      hsl(249 67% 24%),
+      hsl(266 85% 58%),
+      hsl(25 95% 63%));
+    --gradient-warmth: linear-gradient(135deg,
+      hsl(266 85% 58%),
+      hsl(321 59% 85%),
+      hsl(25 95% 70%));
+    --gradient-ocean: linear-gradient(135deg,
+      hsl(210 100% 50%),
+      hsl(180 70% 45%),
+      hsl(142 76% 50%));
+    --gradient-fire: linear-gradient(135deg,
+      hsl(25 95% 53%),
       hsl(266 85% 58%));
     --gradient-primary: var(--gradient-hero);
     --gradient-background: var(--gradient-hero);
@@ -123,10 +141,25 @@ All colors MUST be HSL.
     --sidebar-border: 264 58% 25%;
     --sidebar-ring: 252 87% 65%;
 
-    /* Adjust gradient for dark mode */
+    /* Adjust gradients for dark mode */
     --gradient-hero: linear-gradient(135deg, 
       hsl(252 87% 45%), 
       hsl(264 70% 35%));
+    --gradient-sunset: linear-gradient(135deg,
+      hsl(249 67% 30%),
+      hsl(266 85% 48%),
+      hsl(25 95% 53%));
+    --gradient-warmth: linear-gradient(135deg,
+      hsl(266 85% 48%),
+      hsl(321 59% 75%),
+      hsl(25 95% 60%));
+    --gradient-ocean: linear-gradient(135deg,
+      hsl(210 100% 40%),
+      hsl(180 70% 35%),
+      hsl(142 76% 40%));
+    --gradient-fire: linear-gradient(135deg,
+      hsl(25 95% 43%),
+      hsl(266 85% 48%));
   }
 }
 
@@ -495,9 +528,29 @@ All colors MUST be HSL.
   }
 
   /* Gradient background utility tokens used for wordmarks and chips */
-  .bg-gradient-primary {
-    background-image: var(--gradient-primary);
-  }
+.bg-gradient-primary {
+  background-image: var(--gradient-primary);
+}
+
+.bg-gradient-sunset {
+  background-image: var(--gradient-sunset);
+}
+
+.bg-gradient-warmth {
+  background-image: var(--gradient-warmth);
+}
+
+.bg-gradient-ocean {
+  background-image: var(--gradient-ocean);
+}
+
+.bg-gradient-fire {
+  background-image: var(--gradient-fire);
+}
+
+.bg-gradient-fire {
+  background-image: var(--gradient-fire);
+}
   .bg-gradient-background {
     background-image: var(--gradient-background);
   }
