@@ -533,7 +533,7 @@ export const EditableColorSystem = () => {
             Fix All
           </Button>
           <div className="flex items-center gap-2">
-            <Label htmlFor="auto-contrast" className="text-sm text-white">Auto</Label>
+            <Label htmlFor="auto-contrast" className="text-sm text-foreground">Auto</Label>
             <Switch 
               id="auto-contrast"
               checked={autoContrast} 
@@ -551,12 +551,12 @@ export const EditableColorSystem = () => {
         </div>
       </div>
 
-      <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-8">
+      <div className="bg-muted border border-border rounded-lg p-4 mb-8">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-primary mt-0.5" />
+          <AlertTriangle className="w-5 h-5 text-foreground mt-0.5" />
           <div>
-            <h4 className="font-semibold text-sm mb-1 text-white">Single Source of Truth</h4>
-            <p className="text-xs text-white/80">
+            <h4 className="font-semibold text-sm mb-1 text-foreground">Single Source of Truth</h4>
+            <p className="text-xs text-muted-foreground">
               All colors flow from index.css → These tokens → Components. Changes apply instantly via CSS variables.
               Each category shows WHERE colors are used and includes live previews.
             </p>
@@ -737,7 +737,7 @@ export const EditableColorSystem = () => {
               {gradientColors.map((color, index) => {
                 const originalIndex = semanticColors.findIndex(c => c.cssVar === color.cssVar);
                 return (
-                  <Card key={color.cssVar} className="bg-card/5 border-border/50">
+                  <Card key={color.cssVar} className="bg-gradient-hero border-border/50">
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
