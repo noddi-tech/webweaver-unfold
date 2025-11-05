@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, Users, Handshake, BarChart, Globe, Euro } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { EditableBackground } from "@/components/EditableBackground";
 
 export default function ProofMetrics() {
   const { h2, body } = useTypography();
@@ -62,22 +63,36 @@ export default function ProofMetrics() {
           {metrics.map((metric, index) => {
             const Icon = metric.icon;
             return (
-              <Card key={index} className="glass-card text-center hover:shadow-lg transition-shadow">
-                <CardContent className="pt-8 pb-8">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
-                    <Icon className="w-8 h-8 text-primary" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2 text-foreground">
-                    {metric.headline}
-                  </h3>
-                  <p className="text-base font-medium text-foreground mb-2">
-                    {metric.context}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {metric.comparison}
-                  </p>
-                </CardContent>
-              </Card>
+              <EditableBackground
+                key={index}
+                elementId={`partners-metric-${index}`}
+                defaultBackground="glass-card"
+                allowedBackgrounds={[
+                  'bg-card',
+                  'glass-card',
+                  'bg-gradient-hero',
+                  'bg-gradient-warmth',
+                  'bg-gradient-sunset',
+                  'bg-gradient-ocean'
+                ]}
+              >
+                <Card className="text-center hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-8 pb-8">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
+                      <Icon className="w-8 h-8 text-primary" />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2 text-foreground">
+                      {metric.headline}
+                    </h3>
+                    <p className="text-base font-medium text-foreground mb-2">
+                      {metric.context}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {metric.comparison}
+                    </p>
+                  </CardContent>
+                </Card>
+              </EditableBackground>
             );
           })}
         </div>

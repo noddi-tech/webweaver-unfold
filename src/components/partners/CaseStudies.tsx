@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { EditableBackground } from "@/components/EditableBackground";
 
 export default function CaseStudies() {
   const { h2, body } = useTypography();
@@ -39,24 +40,37 @@ export default function CaseStudies() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {cases.map((caseStudy, index) => (
-            <Card key={index} className="glass-card hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-xl">{caseStudy.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">{t('case_studies.label_before', 'Before')}</p>
-                    <p className="text-base text-foreground">{caseStudy.before}</p>
+            <EditableBackground
+              key={index}
+              elementId={`partners-case-${index}`}
+              defaultBackground="glass-card"
+              allowedBackgrounds={[
+                'bg-card',
+                'glass-card',
+                'bg-gradient-warmth',
+                'bg-gradient-ocean',
+                'bg-gradient-sunset'
+              ]}
+            >
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-xl">{caseStudy.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground mb-1">{t('case_studies.label_before', 'Before')}</p>
+                      <p className="text-base text-foreground">{caseStudy.before}</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-primary mx-auto" />
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground mb-1">{t('case_studies.label_after', 'After')}</p>
+                      <p className="text-base text-foreground">{caseStudy.after}</p>
+                    </div>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-primary mx-auto" />
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">{t('case_studies.label_after', 'After')}</p>
-                    <p className="text-base text-foreground">{caseStudy.after}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </EditableBackground>
           ))}
         </div>
 
