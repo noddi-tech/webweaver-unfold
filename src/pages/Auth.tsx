@@ -87,7 +87,7 @@ const Auth = () => {
                 onClick={handleDevBypass} 
                 disabled={loading}
                 variant="outline"
-                className="w-full mt-4 border-primary/50 hover:bg-primary/10"
+                className="w-full mt-4 border-white/30 hover:bg-white/10 text-card-foreground hover:text-white"
               >
                 <Rocket className="mr-2 h-4 w-4" />
                 Authenticate me (Dev Mode)
