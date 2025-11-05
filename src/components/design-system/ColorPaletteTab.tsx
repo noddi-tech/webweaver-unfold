@@ -244,7 +244,7 @@ export function ColorPaletteTab() {
 
   const renderTextColor = (color: TextColorOption) => {
     return (
-      <Card key={color.value} className="p-4 space-y-3 hover:shadow-md transition-shadow">
+      <Card key={color.value} className="p-4 space-y-3 hover:shadow-md transition-shadow bg-background text-foreground">
         {/* Color Preview */}
         <div className="h-24 rounded-lg bg-muted border relative flex items-center justify-center">
           <span className={`text-2xl font-bold ${color.className}`}>
