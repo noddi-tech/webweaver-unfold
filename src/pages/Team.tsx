@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { TYPOGRAPHY_SCALE } from "@/lib/typography";
 import { getColorClass } from "@/lib/colorUtils";
+import { EditableBackground } from "@/components/EditableBackground";
 
 interface Page {
   id: string;
@@ -341,30 +342,48 @@ const Team = () => {
             return null;
           })()}
           {experienceLogos.length > 0 && (
-            <Card className="mt-6 bg-card border-border">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 p-4 place-items-center" aria-label="Experience logos">
-                {experienceLogos.map((img) => {
-                  const Img = (
-                      <div className="flex h-16 md:h-16 w-full items-center justify-center opacity-80 hover:opacity-100 transition-opacity">
-                        <img
-                          key={img.id}
-                          src={img.file_url}
-                          alt={img.alt ?? img.title}
-                          className="h-10 md:h-12 w-auto object-contain"
-                          loading="lazy"
-                        />
-                      </div>
-                  );
-                  return img.link_url ? (
-                    <a key={img.id} href={img.link_url} target="_blank" rel="noopener noreferrer" aria-label={`${img.title} website`}>
-                      {Img}
-                    </a>
-                  ) : (
-                    <div key={img.id}>{Img}</div>
-                  );
-                })}
-              </div>
-            </Card>
+            <EditableBackground
+              elementId="team-experience-logos"
+              defaultBackground="bg-card"
+              allowedBackgrounds={[
+                'bg-gradient-hero',
+                'bg-gradient-sunset',
+                'bg-gradient-warmth',
+                'bg-gradient-ocean',
+                'bg-gradient-fire',
+                'glass-card',
+                'liquid-glass',
+                'glass-prominent',
+                'bg-card',
+                'bg-background',
+                'bg-muted'
+              ]}
+            >
+              <Card className="mt-6 border-border">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 p-4 place-items-center" aria-label="Experience logos">
+                  {experienceLogos.map((img) => {
+                    const Img = (
+                        <div className="flex h-16 md:h-16 w-full items-center justify-center opacity-80 hover:opacity-100 transition-opacity">
+                          <img
+                            key={img.id}
+                            src={img.file_url}
+                            alt={img.alt ?? img.title}
+                            className="h-10 md:h-12 w-auto object-contain"
+                            loading="lazy"
+                          />
+                        </div>
+                    );
+                    return img.link_url ? (
+                      <a key={img.id} href={img.link_url} target="_blank" rel="noopener noreferrer" aria-label={`${img.title} website`}>
+                        {Img}
+                      </a>
+                    ) : (
+                      <div key={img.id}>{Img}</div>
+                    );
+                  })}
+                </div>
+              </Card>
+            </EditableBackground>
           )}
         </header>
 
@@ -373,7 +392,25 @@ const Team = () => {
             <h2 className="text-2xl font-semibold mb-4 text-foreground">{sec}</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {(employeesBySection[sec] || []).map((m) => (
-                <article key={m.id} className={`rounded-xl border ${borderCls} ${cardBg} overflow-hidden`}>
+                <EditableBackground
+                  key={m.id}
+                  elementId={`team-member-${m.id}`}
+                  defaultBackground={cardBg}
+                  allowedBackgrounds={[
+                    'bg-gradient-hero',
+                    'bg-gradient-sunset',
+                    'bg-gradient-warmth',
+                    'bg-gradient-ocean',
+                    'bg-gradient-fire',
+                    'glass-card',
+                    'liquid-glass',
+                    'glass-prominent',
+                    'bg-card',
+                    'bg-background',
+                    'bg-muted'
+                  ]}
+                >
+                  <article className={`rounded-xl border ${borderCls} overflow-hidden`}>
 {m.image_url && (
   <img
     src={m.image_url}
@@ -382,11 +419,12 @@ const Team = () => {
     loading="lazy"
   />
 )}
-                  <div className="p-5 space-y-2">
-                    <h3 className={`text-xl font-semibold ${nameCls}`}>{m.name}</h3>
-                    <p className={`text-sm ${titleCls}`}>{m.title}</p>
-                  </div>
-                </article>
+                    <div className="p-5 space-y-2">
+                      <h3 className={`text-xl font-semibold ${nameCls}`}>{m.name}</h3>
+                      <p className={`text-sm ${titleCls}`}>{m.title}</p>
+                    </div>
+                  </article>
+                </EditableBackground>
               ))}
               {(employeesBySection[sec] || []).length === 0 && (
                 <Card className="p-6 text-center text-muted-foreground">No members in this section yet.</Card>
