@@ -27,18 +27,21 @@ export function useScrollProgress(
       const rect = section.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       
-      // Calculate how far through the section we've scrolled
-      // Start counting when section enters viewport, end when it leaves
-      const scrollStart = -rect.height + windowHeight;
-      const scrollEnd = windowHeight;
-      const scrollRange = scrollEnd - scrollStart;
-      const scrollPosition = scrollEnd - rect.top;
+      // Only animate when section is in viewport
+      if (rect.top > windowHeight || rect.bottom < 0) {
+        return;
+      }
+      
+      // Calculate scroll position relative to section top
+      const scrollStart = 0;
+      const scrollEnd = rect.height - windowHeight;
+      const scrollPosition = -rect.top;
       
       // Progress from 0 to 1
-      const progress = Math.max(0, Math.min(1, scrollPosition / scrollRange));
+      const progress = Math.max(0, Math.min(1, scrollPosition / scrollEnd));
       setSectionProgress(progress);
 
-      // Calculate active card index
+      // Calculate active card index with smoother transitions
       const cardStep = 1 / totalCards;
       const newActiveIndex = Math.min(
         Math.floor(progress / cardStep),
@@ -46,23 +49,29 @@ export function useScrollProgress(
       );
       setActiveCardIndex(newActiveIndex);
 
-      // Calculate states for all cards
+      // Calculate states for all cards with improved logic
       const newCardStates = Array.from({ length: totalCards }, (_, index) => {
         const cardStart = index * cardStep;
         const cardEnd = (index + 1) * cardStep;
+        const cardMid = cardStart + cardStep / 2;
         
-        if (progress < cardStart) {
-          // Card hasn't appeared yet - hidden below
-          return { opacity: 0, translateY: 20 };
+        if (progress < cardStart - 0.1) {
+          // Card is far in the future - hidden below
+          return { opacity: 0, translateY: 30 };
+        } else if (progress < cardStart) {
+          // Card is approaching - fade in
+          const fadeProgress = (progress - (cardStart - 0.1)) / 0.1;
+          return { opacity: fadeProgress * 0.6, translateY: 30 - fadeProgress * 22 };
         } else if (progress >= cardStart && progress < cardEnd) {
           // Card is active - fully visible
+          const activeProgress = (progress - cardStart) / cardStep;
           return { opacity: 1, translateY: 0 };
-        } else if (index === newActiveIndex + 1) {
-          // Next card after active - slightly visible
-          return { opacity: 0.585, translateY: 8.28 };
+        } else if (progress < cardEnd + 0.05) {
+          // Card just passed - slight fade
+          return { opacity: 0.6, translateY: -5 };
         } else {
           // Card has passed - hidden above
-          return { opacity: 0, translateY: 20 };
+          return { opacity: 0, translateY: -20 };
         }
       });
 
