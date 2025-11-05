@@ -68,12 +68,17 @@ export default function ProductOverview() {
                   elementId={`product-overview-card-${index}`}
                   defaultBackground="bg-card"
                   allowedBackgrounds={[
-                    'bg-card',
                     'bg-gradient-hero',
-                    'bg-gradient-warmth',
                     'bg-gradient-sunset',
+                    'bg-gradient-warmth',
                     'bg-gradient-ocean',
-                    'bg-gradient-fire'
+                    'bg-gradient-fire',
+                    'glass-card',
+                    'liquid-glass',
+                    'glass-prominent',
+                    'bg-card',
+                    'bg-background',
+                    'bg-muted'
                   ]}
                 >
                   <Card className="h-full hover-scale border-2 hover:border-primary/30 transition-all duration-300">

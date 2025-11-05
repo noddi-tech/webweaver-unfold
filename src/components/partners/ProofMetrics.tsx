@@ -68,12 +68,17 @@ export default function ProofMetrics() {
                 elementId={`partners-metric-${index}`}
                 defaultBackground="glass-card"
                 allowedBackgrounds={[
-                  'bg-card',
-                  'glass-card',
                   'bg-gradient-hero',
-                  'bg-gradient-warmth',
                   'bg-gradient-sunset',
-                  'bg-gradient-ocean'
+                  'bg-gradient-warmth',
+                  'bg-gradient-ocean',
+                  'bg-gradient-fire',
+                  'glass-card',
+                  'liquid-glass',
+                  'glass-prominent',
+                  'bg-card',
+                  'bg-background',
+                  'bg-muted'
                 ]}
               >
                 <Card className="text-center hover:shadow-lg transition-shadow">

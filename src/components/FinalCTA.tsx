@@ -18,10 +18,16 @@ export default function FinalCTA() {
           defaultBackground="bg-gradient-hero"
           allowedBackgrounds={[
             'bg-gradient-hero',
-            'bg-gradient-warmth',
             'bg-gradient-sunset',
+            'bg-gradient-warmth',
             'bg-gradient-ocean',
-            'bg-gradient-fire'
+            'bg-gradient-fire',
+            'glass-card',
+            'liquid-glass',
+            'glass-prominent',
+            'bg-card',
+            'bg-background',
+            'bg-muted'
           ]}
         >
           <div className="relative overflow-hidden rounded-2xl p-12 md:p-16 text-center">

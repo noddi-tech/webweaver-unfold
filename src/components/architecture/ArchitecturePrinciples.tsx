@@ -67,11 +67,17 @@ export default function ArchitecturePrinciples() {
                 elementId={`architecture-principle-${index}`}
                 defaultBackground="glass-card"
                 allowedBackgrounds={[
-                  'bg-card',
-                  'glass-card',
                   'bg-gradient-hero',
+                  'bg-gradient-sunset',
+                  'bg-gradient-warmth',
                   'bg-gradient-ocean',
-                  'bg-gradient-fire'
+                  'bg-gradient-fire',
+                  'glass-card',
+                  'liquid-glass',
+                  'glass-prominent',
+                  'bg-card',
+                  'bg-background',
+                  'bg-muted'
                 ]}
               >
                 <Card className="hover:shadow-lg transition-shadow">

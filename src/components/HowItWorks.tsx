@@ -71,10 +71,17 @@ export default function HowItWorks() {
                     elementId={`how-it-works-step-${index}`}
                     defaultBackground="bg-card"
                     allowedBackgrounds={[
-                      'bg-card',
+                      'bg-gradient-hero',
+                      'bg-gradient-sunset',
                       'bg-gradient-warmth',
                       'bg-gradient-ocean',
-                      'bg-gradient-hero'
+                      'bg-gradient-fire',
+                      'glass-card',
+                      'liquid-glass',
+                      'glass-prominent',
+                      'bg-card',
+                      'bg-background',
+                      'bg-muted'
                     ]}
                   >
                     <Card className="hover-scale h-full">
@@ -124,10 +131,17 @@ export default function HowItWorks() {
                   elementId={`how-it-works-step-${index}`}
                   defaultBackground="bg-card"
                   allowedBackgrounds={[
-                    'bg-card',
+                    'bg-gradient-hero',
+                    'bg-gradient-sunset',
                     'bg-gradient-warmth',
                     'bg-gradient-ocean',
-                    'bg-gradient-hero'
+                    'bg-gradient-fire',
+                    'glass-card',
+                    'liquid-glass',
+                    'glass-prominent',
+                    'bg-card',
+                    'bg-background',
+                    'bg-muted'
                   ]}
                 >
                   <Card className="hover-scale h-full">
@@ -170,9 +184,17 @@ export default function HowItWorks() {
             elementId="how-it-works-caption"
             defaultBackground="bg-primary/10"
             allowedBackgrounds={[
-              'bg-primary/10',
+              'bg-gradient-hero',
+              'bg-gradient-sunset',
               'bg-gradient-warmth',
-              'bg-card'
+              'bg-gradient-ocean',
+              'bg-gradient-fire',
+              'glass-card',
+              'liquid-glass',
+              'glass-prominent',
+              'bg-card',
+              'bg-background',
+              'bg-muted'
             ]}
           >
             <div className="inline-block px-8 py-4 border-2 border-primary/20 rounded-xl">

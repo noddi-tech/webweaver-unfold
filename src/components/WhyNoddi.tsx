@@ -48,7 +48,19 @@ export default function WhyNoddi() {
           <EditableBackground
             elementId="why-noddi-before-card"
             defaultBackground="bg-card"
-            allowedBackgrounds={['bg-card', 'bg-gradient-sunset', 'bg-destructive/10']}
+            allowedBackgrounds={[
+              'bg-gradient-hero',
+              'bg-gradient-sunset',
+              'bg-gradient-warmth',
+              'bg-gradient-ocean',
+              'bg-gradient-fire',
+              'glass-card',
+              'liquid-glass',
+              'glass-prominent',
+              'bg-card',
+              'bg-background',
+              'bg-muted'
+            ]}
           >
             <Card 
               className={`border-2 border-destructive/20 transition-all duration-700 ${
@@ -82,7 +94,19 @@ export default function WhyNoddi() {
           <EditableBackground
             elementId="why-noddi-after-card"
             defaultBackground="bg-primary/5"
-            allowedBackgrounds={['bg-primary/5', 'bg-gradient-warmth', 'bg-gradient-hero']}
+            allowedBackgrounds={[
+              'bg-gradient-hero',
+              'bg-gradient-sunset',
+              'bg-gradient-warmth',
+              'bg-gradient-ocean',
+              'bg-gradient-fire',
+              'glass-card',
+              'liquid-glass',
+              'glass-prominent',
+              'bg-card',
+              'bg-background',
+              'bg-muted'
+            ]}
           >
             <Card 
               className={`border-2 border-primary/30 transition-all duration-700 delay-200 ${

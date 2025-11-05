@@ -34,11 +34,17 @@ export default function PartnershipModel() {
             elementId="partners-benefits-card"
             defaultBackground="glass-card"
             allowedBackgrounds={[
-              'bg-card',
-              'glass-card',
               'bg-gradient-hero',
+              'bg-gradient-sunset',
               'bg-gradient-warmth',
-              'bg-gradient-ocean'
+              'bg-gradient-ocean',
+              'bg-gradient-fire',
+              'glass-card',
+              'liquid-glass',
+              'glass-prominent',
+              'bg-card',
+              'bg-background',
+              'bg-muted'
             ]}
           >
             <Card className="mb-8">

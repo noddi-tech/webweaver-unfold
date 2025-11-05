@@ -150,10 +150,22 @@ const Hero = () => {
 
             {/* Metrics Badges */}
             <div className="flex flex-wrap gap-6">
-              <EditableBackground
+            <EditableBackground
                 elementId="hero-metrics-badge"
                 defaultBackground="glass-card"
-                allowedBackgrounds={['glass-card', 'bg-card', 'bg-gradient-warmth', 'bg-gradient-hero']}
+                allowedBackgrounds={[
+                  'bg-gradient-hero',
+                  'bg-gradient-sunset',
+                  'bg-gradient-warmth',
+                  'bg-gradient-ocean',
+                  'bg-gradient-fire',
+                  'glass-card',
+                  'liquid-glass',
+                  'glass-prominent',
+                  'bg-card',
+                  'bg-background',
+                  'bg-muted'
+                ]}
               >
                 <div className="flex items-center gap-3 px-6 py-4 rounded-xl shadow-lg hover-scale">
                   <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">

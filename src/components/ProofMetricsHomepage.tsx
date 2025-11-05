@@ -68,12 +68,17 @@ export default function ProofMetricsHomepage() {
                 elementId={`proof-metric-card-${index}`}
                 defaultBackground="bg-card"
                 allowedBackgrounds={[
-                  'bg-card',
-                  'bg-gradient-warmth',
-                  'bg-gradient-sunset',
                   'bg-gradient-hero',
+                  'bg-gradient-sunset',
+                  'bg-gradient-warmth',
                   'bg-gradient-ocean',
-                  'bg-gradient-fire'
+                  'bg-gradient-fire',
+                  'glass-card',
+                  'liquid-glass',
+                  'glass-prominent',
+                  'bg-card',
+                  'bg-background',
+                  'bg-muted'
                 ]}
               >
                 <Card 
