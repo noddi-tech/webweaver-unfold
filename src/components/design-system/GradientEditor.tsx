@@ -104,7 +104,7 @@ export const GradientEditor = ({ value, onChange }: GradientEditorProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="flex-1">
+        <Button variant="outline" size="sm" className="flex-1 text-white border-white/30 hover:bg-white/10 hover:text-white hover:border-white/50">
           <Sparkles className="w-3 h-3 mr-1" />
           Gradient Editor
         </Button>
