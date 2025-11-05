@@ -1,5 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Copy, Download, Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
@@ -99,7 +101,7 @@ export function ColorPaletteTab() {
     const rgbValue = hslValue ? hslToRgb(hslValue) : '';
 
     return (
-      <Card key={color.value} className="p-4 space-y-3 hover:shadow-md transition-shadow">
+      <Card key={color.value} className="p-4 space-y-3 hover:shadow-md transition-shadow bg-background text-foreground border">
         {/* Color Preview */}
         <div className={`h-24 rounded-lg ${color.preview} border relative overflow-hidden`}>
           <div className="absolute inset-0 flex items-center justify-center">
@@ -245,11 +247,16 @@ export function ColorPaletteTab() {
   const renderTextColor = (color: TextColorOption) => {
     return (
       <Card key={color.value} className="p-4 space-y-3 hover:shadow-md transition-shadow bg-background text-foreground">
-        {/* Color Preview */}
-        <div className="h-24 rounded-lg bg-muted border relative flex items-center justify-center">
-          <span className={`text-2xl font-bold ${color.className}`}>
-            Aa
-          </span>
+        {/* Color Preview - Dual Background */}
+        <div className="h-24 rounded-lg border overflow-hidden flex">
+          {/* Dark background - shows light text */}
+          <div className="flex-1 bg-card flex items-center justify-center border-r">
+            <span className={`text-2xl font-bold ${color.className}`}>Aa</span>
+          </div>
+          {/* Light background - shows dark text */}
+          <div className="flex-1 bg-background flex items-center justify-center">
+            <span className={`text-2xl font-bold ${color.className}`}>Aa</span>
+          </div>
         </div>
 
         {/* Color Info */}
@@ -298,22 +305,29 @@ export function ColorPaletteTab() {
         </Button>
       </div>
 
-      {/* Categories */}
-      {categories.map((category) => (
-        <div key={category.title} className="space-y-3">
-          <div>
-            <h4 className="text-sm font-semibold text-foreground">{category.title}</h4>
-            <p className="text-xs text-muted-foreground">{category.description}</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {category.items.map((item) => 
-              category.type === 'background' 
-                ? renderBackgroundColor(item as ColorOption)
-                : renderTextColor(item as TextColorOption)
-            )}
-          </div>
-        </div>
-      ))}
+      {/* Collapsible Categories */}
+      <Accordion type="multiple" defaultValue={["brand-colors", "surface-colors", "text-colors"]} className="w-full">
+        {categories.map((category) => (
+          <AccordionItem key={category.title} value={category.title.toLowerCase().replace(/\s+/g, '-')}>
+            <AccordionTrigger>
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-semibold">{category.title}</h4>
+                <Badge variant="outline" className="text-xs">{category.items.length}</Badge>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <p className="text-xs text-muted-foreground mb-4">{category.description}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {category.items.map((item) => 
+                  category.type === 'background' 
+                    ? renderBackgroundColor(item as ColorOption)
+                    : renderTextColor(item as TextColorOption)
+                )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
     </div>
   );
 }
