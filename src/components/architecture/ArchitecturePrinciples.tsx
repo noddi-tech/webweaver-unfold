@@ -3,6 +3,7 @@ import { Database, Zap, Cloud, Shield, Plug, Gauge } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableBackground } from "@/components/EditableBackground";
 
 export default function ArchitecturePrinciples() {
   const { h2, body } = useTypography();
@@ -61,21 +62,34 @@ export default function ArchitecturePrinciples() {
           {principles.map((principle, index) => {
             const Icon = principle.icon;
             return (
-              <Card key={index} className="glass-card hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 mb-4">
-                    <Icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <EditableTranslation translationKey={`architecture.principles.${['unified', 'reactive', 'scalable', 'secure', 'open', 'fast'][index]}.title`}>
-                    <CardTitle className="text-xl">{principle.headline}</CardTitle>
-                  </EditableTranslation>
-                </CardHeader>
-                <CardContent>
-                  <EditableTranslation translationKey={`architecture.principles.${['unified', 'reactive', 'scalable', 'secure', 'open', 'fast'][index]}.description`}>
-                    <p className="text-muted-foreground">{principle.subtext}</p>
-                  </EditableTranslation>
-                </CardContent>
-              </Card>
+              <EditableBackground
+                key={index}
+                elementId={`architecture-principle-${index}`}
+                defaultBackground="glass-card"
+                allowedBackgrounds={[
+                  'bg-card',
+                  'glass-card',
+                  'bg-gradient-hero',
+                  'bg-gradient-ocean',
+                  'bg-gradient-fire'
+                ]}
+              >
+                <Card className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 mb-4">
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <EditableTranslation translationKey={`architecture.principles.${['unified', 'reactive', 'scalable', 'secure', 'open', 'fast'][index]}.title`}>
+                      <CardTitle className="text-xl">{principle.headline}</CardTitle>
+                    </EditableTranslation>
+                  </CardHeader>
+                  <CardContent>
+                    <EditableTranslation translationKey={`architecture.principles.${['unified', 'reactive', 'scalable', 'secure', 'open', 'fast'][index]}.description`}>
+                      <p className="text-muted-foreground">{principle.subtext}</p>
+                    </EditableTranslation>
+                  </CardContent>
+                </Card>
+              </EditableBackground>
             );
           })}
         </div>

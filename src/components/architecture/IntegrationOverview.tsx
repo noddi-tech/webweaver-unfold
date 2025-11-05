@@ -3,6 +3,7 @@ import { Database, ScanLine, CreditCard, FileText } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableBackground } from "@/components/EditableBackground";
 
 export default function IntegrationOverview() {
   const { h2, body } = useTypography();
@@ -51,23 +52,35 @@ export default function IntegrationOverview() {
           {integrations.map((integration, index) => {
             const Icon = integration.icon;
             return (
-              <Card key={index} className="glass-card text-center hover:shadow-lg transition-shadow">
-                <CardContent className="pt-8 pb-8">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                    <Icon className="w-8 h-8 text-primary" />
-                  </div>
-                  <EditableTranslation translationKey={`architecture.integrations.${['tire_databases', 'laser_scanners', 'payment_gateways', 'crm_erp'][index]}.name`}>
-                    <h3 className="text-lg font-bold mb-2 text-foreground">
-                      {integration.name}
-                    </h3>
-                  </EditableTranslation>
-                  <EditableTranslation translationKey={`architecture.integrations.${['tire_databases', 'laser_scanners', 'payment_gateways', 'crm_erp'][index]}.description`}>
-                    <p className="text-sm text-muted-foreground">
-                      {integration.description}
-                    </p>
-                  </EditableTranslation>
-                </CardContent>
-              </Card>
+              <EditableBackground
+                key={index}
+                elementId={`architecture-integration-${index}`}
+                defaultBackground="glass-card"
+                allowedBackgrounds={[
+                  'bg-card',
+                  'glass-card',
+                  'bg-gradient-ocean',
+                  'bg-gradient-warmth'
+                ]}
+              >
+                <Card className="text-center hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-8 pb-8">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                      <Icon className="w-8 h-8 text-primary" />
+                    </div>
+                    <EditableTranslation translationKey={`architecture.integrations.${['tire_databases', 'laser_scanners', 'payment_gateways', 'crm_erp'][index]}.name`}>
+                      <h3 className="text-lg font-bold mb-2 text-foreground">
+                        {integration.name}
+                      </h3>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey={`architecture.integrations.${['tire_databases', 'laser_scanners', 'payment_gateways', 'crm_erp'][index]}.description`}>
+                      <p className="text-sm text-muted-foreground">
+                        {integration.description}
+                      </p>
+                    </EditableTranslation>
+                  </CardContent>
+                </Card>
+              </EditableBackground>
             );
           })}
         </div>

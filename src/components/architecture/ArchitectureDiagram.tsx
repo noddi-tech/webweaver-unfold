@@ -3,6 +3,7 @@ import { ArrowDown } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableBackground } from "@/components/EditableBackground";
 
 export default function ArchitectureDiagram() {
   const { h2, body } = useTypography();
@@ -46,16 +47,28 @@ export default function ArchitectureDiagram() {
         <div className="max-w-3xl mx-auto space-y-4">
           {layers.map((layer, index) => (
             <div key={index} className="space-y-4">
-              <Card className="glass-card">
-                <CardContent className="py-8 text-center">
-                  <EditableTranslation translationKey={`architecture.diagram.layer_${index + 1}.title`}>
-                    <h3 className="text-2xl font-bold mb-2 text-foreground">{layer.title}</h3>
-                  </EditableTranslation>
-                  <EditableTranslation translationKey={`architecture.diagram.layer_${index + 1}.subtitle`}>
-                    <p className="text-sm text-muted-foreground">{layer.subtitle}</p>
-                  </EditableTranslation>
-                </CardContent>
-              </Card>
+              <EditableBackground
+                elementId={`architecture-diagram-layer-${index}`}
+                defaultBackground="glass-card"
+                allowedBackgrounds={[
+                  'bg-card',
+                  'glass-card',
+                  'bg-gradient-hero',
+                  'bg-gradient-ocean',
+                  'bg-gradient-warmth'
+                ]}
+              >
+                <Card>
+                  <CardContent className="py-8 text-center">
+                    <EditableTranslation translationKey={`architecture.diagram.layer_${index + 1}.title`}>
+                      <h3 className="text-2xl font-bold mb-2 text-foreground">{layer.title}</h3>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey={`architecture.diagram.layer_${index + 1}.subtitle`}>
+                      <p className="text-sm text-muted-foreground">{layer.subtitle}</p>
+                    </EditableTranslation>
+                  </CardContent>
+                </Card>
+              </EditableBackground>
               {index < layers.length - 1 && (
                 <div className="flex justify-center">
                   <ArrowDown className="w-6 h-6 text-muted-foreground" />
