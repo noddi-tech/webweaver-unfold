@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableIcon } from "@/components/EditableIcon";
+import { EditableBackground } from "@/components/EditableBackground";
 
 export default function RapidOnboarding() {
   const { t } = useAppTranslation();
@@ -42,16 +44,21 @@ export default function RapidOnboarding() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
             <EditableTranslation translationKey="rapid_onboarding.title">
-              <h2 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 {t('rapid_onboarding.title', 'Launch in Less Than 1 Day')}
               </h2>
             </EditableTranslation>
-            <Badge variant="default" className="text-lg px-4 py-2 bg-gradient-primary shadow-lg animate-pulse">
-              <Zap className="w-4 h-4 mr-1" />
-              <EditableTranslation translationKey="rapid_onboarding.badge">
-                <span>{t('rapid_onboarding.badge', '< 24h')}</span>
-              </EditableTranslation>
-            </Badge>
+            <EditableBackground 
+              elementId="rapid-onboarding-badge"
+              defaultBackground="bg-gradient-primary"
+            >
+              <Badge variant="default" className="text-lg px-4 py-2 shadow-lg animate-pulse">
+                <Zap className="w-4 h-4 mr-1" />
+                <EditableTranslation translationKey="rapid_onboarding.badge">
+                  <span>{t('rapid_onboarding.badge', '< 24h')}</span>
+                </EditableTranslation>
+              </Badge>
+            </EditableBackground>
           </div>
           <EditableTranslation translationKey="rapid_onboarding.subtitle">
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -68,12 +75,21 @@ export default function RapidOnboarding() {
               return (
                 <Card key={index} className="relative hover-scale">
                   <CardContent className="p-6 text-center">
-                    <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center shadow-lg">
-                      <span className="text-sm font-bold text-primary-foreground">{index + 1}</span>
-                    </div>
-                    <div className="w-16 h-16 mx-auto rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
-                      <Icon className="w-8 h-8 text-primary-foreground" />
-                    </div>
+                    <EditableIcon 
+                      elementId={`rapid-onboarding-step-badge-${index}`}
+                      icon={() => <span className="text-sm font-bold">{index + 1}</span>}
+                      defaultBackground="bg-gradient-primary"
+                      size="sm"
+                      className="absolute -top-3 -left-3"
+                      iconClassName="text-primary-foreground"
+                    />
+                    <EditableIcon 
+                      elementId={`rapid-onboarding-icon-${index}`}
+                      icon={Icon}
+                      defaultBackground="bg-gradient-primary"
+                      size="lg"
+                      className="mx-auto mb-4"
+                    />
                     <EditableTranslation translationKey={`rapid_onboarding.step_${index + 1}.title`}>
                       <h3 className="text-lg font-semibold mb-2 text-foreground">{step.title}</h3>
                     </EditableTranslation>

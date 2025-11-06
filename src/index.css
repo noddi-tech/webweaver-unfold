@@ -23,6 +23,9 @@ All colors MUST be HSL.
        ======================================== */
     --color-error: 0 84% 60%;                  /* Red for errors and destructive actions */
     --color-success: 142 76% 36%;              /* Green for success states */
+    --success: 142 76% 36%;                    /* Success semantic token */
+    --warning: 38 92% 50%;                     /* Warning semantic token */
+    --info: 221 83% 53%;                       /* Info semantic token */
     
     /* ========================================
        INTERACTIVE PRIMITIVES - Base interaction colors

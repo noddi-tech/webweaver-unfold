@@ -94,9 +94,9 @@ export default function EvaluationHealthDashboard() {
   function getStatusIcon(status: string) {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+        return <CheckCircle2 className="h-5 w-5 text-success" />;
       case 'in_progress':
-        return <Activity className="h-5 w-5 text-blue-500 animate-pulse" />;
+        return <Activity className="h-5 w-5 text-info animate-pulse" />;
       case 'paused':
         return <AlertCircle className="h-5 w-5 text-yellow-500" />;
       case 'error':
@@ -246,7 +246,7 @@ export default function EvaluationHealthDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-blue-500 animate-pulse" />
+              <Activity className="h-5 w-5 text-info animate-pulse" />
               Active Evaluations
             </CardTitle>
             <CardDescription>

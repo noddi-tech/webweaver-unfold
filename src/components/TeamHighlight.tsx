@@ -2,6 +2,7 @@ import { Award, Brain, TrendingUp, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableIcon } from "@/components/EditableIcon";
 
 export default function TeamHighlight() {
   const { t } = useAppTranslation();
@@ -30,7 +31,7 @@ export default function TeamHighlight() {
           <div className="inline-flex items-center justify-center gap-2 mb-4">
             <Award className="w-8 h-8 text-primary" />
             <EditableTranslation translationKey="team_highlight.title">
-              <h2 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 {t('team_highlight.title', 'Built by Route-Planning Pioneers')}
               </h2>
             </EditableTranslation>
@@ -48,9 +49,13 @@ export default function TeamHighlight() {
             return (
               <Card key={index} className="hover-scale">
                 <CardContent className="p-6 text-center">
-                  <div className="w-14 h-14 mx-auto rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
-                    <Icon className="w-7 h-7 text-primary-foreground" />
-                  </div>
+                  <EditableIcon 
+                    elementId={`team-highlight-expertise-icon-${index}`}
+                    icon={Icon}
+                    defaultBackground="bg-gradient-primary"
+                    size="default"
+                    className="mx-auto mb-4"
+                  />
                   <EditableTranslation translationKey={`team_highlight.expertise_${index + 1}.title`}>
                     <h3 className="text-lg font-semibold mb-2 text-foreground">{item.title}</h3>
                   </EditableTranslation>

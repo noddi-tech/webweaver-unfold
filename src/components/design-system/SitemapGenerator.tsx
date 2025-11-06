@@ -74,33 +74,17 @@ export default function SitemapGenerator() {
 
         {lastGenerated && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="w-4 h-4 text-green-600" />
+            <CheckCircle2 className="w-4 h-4 text-success" />
             Last generated: {lastGenerated}
           </div>
         )}
 
         <div className="flex gap-2">
-          <Button
-            onClick={handleGenerateSitemap}
-            disabled={isGenerating}
-            size="lg"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4 mr-2" />
-                Generate & Download Sitemap
-              </>
-            )}
-          </Button>
+...
         </div>
 
-        <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-md">
-          <p className="text-xs text-blue-600 dark:text-blue-400">
+        <div className="p-3 bg-info/10 border border-info/20 rounded-md">
+          <p className="text-xs text-info dark:text-info/80">
             <strong>Deployment tip:</strong> Upload the generated sitemap.xml to your domain root and submit it to Google Search Console for optimal indexing.
           </p>
         </div>

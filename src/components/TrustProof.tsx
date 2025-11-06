@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { LockedText } from "@/components/LockedText";
+import { EditableIcon } from "@/components/EditableIcon";
+import { EditableBackground } from "@/components/EditableBackground";
 
 const testimonials = [
   {
@@ -63,7 +65,7 @@ export default function TrustProof() {
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <EditableTranslation translationKey="trust_proof.title">
-            <h2 className="text-4xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               {t('trust_proof.title', 'Trusted by Service Professionals')}
             </h2>
           </EditableTranslation>
@@ -79,78 +81,97 @@ export default function TrustProof() {
           {tractionMetrics.map((metric, index) => {
             const Icon = metric.icon;
             return (
-              <Card key={index} className="bg-gradient-hero border-0 hover-scale">
-                <CardContent className="p-6 text-center">
-                  <div className="w-14 h-14 mx-auto rounded-full bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
-                    <Icon className="w-7 h-7 text-primary-foreground" />
-                  </div>
-                  <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.value`}>
-                    <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
-                      {metric.value}
-                    </div>
-                  </EditableTranslation>
-                  <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.label`}>
-                    <div className="text-sm font-semibold text-white/90 mb-2">{metric.label}</div>
-                  </EditableTranslation>
-                  <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.description`}>
-                    <div className="text-xs text-white/70">{metric.description}</div>
-                  </EditableTranslation>
-                </CardContent>
-              </Card>
+              <EditableBackground
+                key={index}
+                elementId={`trust-proof-metric-card-${index}`}
+                defaultBackground="bg-gradient-hero"
+              >
+                <Card className="border-0 hover-scale">
+                  <CardContent className="p-6 text-center">
+                    <EditableIcon 
+                      elementId={`trust-proof-metric-icon-${index}`}
+                      icon={Icon}
+                      defaultBackground="bg-gradient-primary"
+                      size="default"
+                      shape="rounded-full"
+                      className="mx-auto mb-4"
+                    />
+                    <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.value`}>
+                      <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
+                        {metric.value}
+                      </div>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.label`}>
+                      <div className="text-sm font-semibold text-white/90 mb-2">{metric.label}</div>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.description`}>
+                      <div className="text-xs text-white/70">{metric.description}</div>
+                    </EditableTranslation>
+                  </CardContent>
+                </Card>
+              </EditableBackground>
             );
           })}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* NPS Score Display */}
-          <Card className="bg-gradient-hero border-0">
-            <CardContent className="p-8">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-background/90 backdrop-blur-sm mb-4 shadow-lg">
-                  <div>
-                    <EditableTranslation translationKey="trust_proof.nps.value">
-                      <div className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                        {t('trust_proof.nps.value', '~90')}
-                      </div>
-                    </EditableTranslation>
-                    <EditableTranslation translationKey="trust_proof.nps.label">
-                      <div className="text-sm font-medium text-muted-foreground">{t('trust_proof.nps.label', 'NPS Score')}</div>
-                    </EditableTranslation>
-                  </div>
-                </div>
-                <EditableTranslation translationKey="trust_proof.nps.title">
-                  <h3 className="text-2xl font-bold mb-2 text-white">
-                    {t('trust_proof.nps.title', 'Industry-Leading Customer Satisfaction')}
-                  </h3>
-                </EditableTranslation>
-                <div className="inline-block px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg mb-6">
-                  <EditableTranslation translationKey="trust_proof.nps.callout">
-                    <p className="text-sm font-medium text-primary">{t('trust_proof.nps.callout', '3x better than industry average (20-30)')}</p>
-                  </EditableTranslation>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {npsCategories.map((category, index) => (
-                    <div key={index} className="bg-background/50 backdrop-blur-sm rounded-lg p-4">
-                      <LockedText reason="Metric value from database">
-                        <div className="text-2xl font-bold text-primary">{category.score}</div>
-                      </LockedText>
-                      <EditableTranslation translationKey={`trust_proof.nps.category_${index + 1}.label`}>
-                        <div className="text-sm text-muted-foreground">{category.label}</div>
+          <EditableBackground
+            elementId="trust-proof-nps-card"
+            defaultBackground="bg-gradient-hero"
+          >
+            <Card className="border-0">
+              <CardContent className="p-8">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-background/90 backdrop-blur-sm mb-4 shadow-lg">
+                    <div>
+                      <EditableTranslation translationKey="trust_proof.nps.value">
+                        <div className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                          {t('trust_proof.nps.value', '~90')}
+                        </div>
+                      </EditableTranslation>
+                      <EditableTranslation translationKey="trust_proof.nps.label">
+                        <div className="text-sm font-medium text-muted-foreground">{t('trust_proof.nps.label', 'NPS Score')}</div>
                       </EditableTranslation>
                     </div>
-                  ))}
+                  </div>
+                  <EditableTranslation translationKey="trust_proof.nps.title">
+                    <h3 className="text-2xl font-bold mb-2 text-white">
+                      {t('trust_proof.nps.title', 'Industry-Leading Customer Satisfaction')}
+                    </h3>
+                  </EditableTranslation>
+                  <div className="inline-block px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg mb-6">
+                    <EditableTranslation translationKey="trust_proof.nps.callout">
+                      <p className="text-sm font-medium text-primary">{t('trust_proof.nps.callout', '3x better than industry average (20-30)')}</p>
+                    </EditableTranslation>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {npsCategories.map((category, index) => (
+                      <div key={index} className="bg-background/50 backdrop-blur-sm rounded-lg p-4">
+                        <LockedText reason="Metric value from database">
+                          <div className="text-2xl font-bold text-primary">{category.score}</div>
+                        </LockedText>
+                        <EditableTranslation translationKey={`trust_proof.nps.category_${index + 1}.label`}>
+                          <div className="text-sm text-muted-foreground">{category.label}</div>
+                        </EditableTranslation>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </EditableBackground>
 
           {/* Conversion Stats */}
           <Card>
             <CardContent className="p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-primary-foreground" />
-                </div>
+                <EditableIcon 
+                  elementId="trust-proof-conversion-icon"
+                  icon={TrendingUp}
+                  defaultBackground="bg-gradient-primary"
+                  size="default"
+                />
                 <div>
                   <EditableTranslation translationKey="trust_proof.conversion.value">
                     <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
@@ -215,13 +236,14 @@ export default function TrustProof() {
                     <p className="text-foreground mb-3 italic">"{testimonial.comment}"</p>
                   </LockedText>
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
-                      <LockedText reason="Hard-coded testimonial - Update in code">
-                        <span className="text-sm font-semibold text-primary-foreground">
-                          {testimonial.name[0]}
-                        </span>
-                      </LockedText>
-                    </div>
+                    <EditableIcon 
+                      elementId={`trust-proof-testimonial-avatar-${index}`}
+                      icon={() => <span className="text-sm font-semibold">{testimonial.name[0]}</span>}
+                      defaultBackground="bg-gradient-primary"
+                      size="sm"
+                      shape="rounded-full"
+                      iconClassName="text-primary-foreground"
+                    />
                     <LockedText reason="Hard-coded testimonial - Update in code">
                       <span className="text-sm font-medium text-foreground">{testimonial.name}</span>
                     </LockedText>

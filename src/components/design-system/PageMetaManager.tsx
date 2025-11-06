@@ -549,10 +549,10 @@ export default function PageMetaManager() {
                 </div>
 
                 {missingCount > 0 && (
-                  <Card className="border-orange-500/30 bg-orange-500/5">
+                  <Card className="border-warning/30 bg-warning/5">
                     <CardContent className="py-3 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-orange-600" />
+                        <AlertTriangle className="w-4 h-4 text-warning" />
                         <span className="text-sm">
                           {missingCount} page{missingCount > 1 ? 's' : ''} missing meta entries for {lang.native_name}
                         </span>

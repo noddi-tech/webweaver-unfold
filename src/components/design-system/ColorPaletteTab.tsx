@@ -164,7 +164,7 @@ export function ColorPaletteTab() {
                 onClick={() => handleCopy(color.cssVar!, color.label, 'css')}
               >
                 {copiedValue === color.cssVar ? (
-                  <Check className="h-3 w-3 text-green-500" />
+                  <Check className="h-3 w-3 text-success" />
                 ) : (
                   <Copy className="h-3 w-3" />
                 )}
@@ -184,7 +184,7 @@ export function ColorPaletteTab() {
               onClick={() => handleCopy(color.value, color.label, 'css')}
             >
               {copiedValue === color.value ? (
-                <Check className="h-3 w-3 text-green-500" />
+                <Check className="h-3 w-3 text-success" />
               ) : (
                 <Copy className="h-3 w-3" />
               )}

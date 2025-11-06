@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 
 interface EditableIconProps {
   elementId: string;
-  icon: LucideIcon;
+  icon: LucideIcon | (() => JSX.Element);
   defaultBackground?: string;
   size?: 'sm' | 'default' | 'lg' | 'xl';
+  shape?: 'rounded-xl' | 'rounded-full' | 'rounded-lg';
   className?: string;
   iconClassName?: string;
 }
@@ -25,12 +26,15 @@ export function EditableIcon({
   icon: Icon,
   defaultBackground = 'bg-gradient-primary',
   size = 'default',
+  shape,
   className = '',
   iconClassName = ''
 }: EditableIconProps) {
   const { editMode } = useEditMode();
   const { iconStyle, isLoading } = useIconStyle(elementId, defaultBackground);
   const [isHovered, setIsHovered] = useState(false);
+  
+  const shapeClass = shape || iconStyle.shape;
 
   if (isLoading) {
     return (
@@ -56,16 +60,20 @@ export function EditableIcon({
         className={cn(
           sizeMap[size].container,
           backgroundClass,
-          iconStyle.shape,
+          shapeClass,
           'flex items-center justify-center shadow-lg',
           className
         )}
       >
-        <Icon className={cn(
-          sizeMap[size].icon,
-          `text-${iconStyle.icon_color_token}`,
-          iconClassName
-        )} />
+        {typeof Icon === 'function' && Icon.length === 0 ? (
+          <Icon />
+        ) : (
+          <Icon className={cn(
+            sizeMap[size].icon,
+            `text-${iconStyle.icon_color_token}`,
+            iconClassName
+          )} />
+        )}
       </div>
 
       {editMode && isHovered && (

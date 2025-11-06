@@ -137,6 +137,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--foreground))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--foreground))'
+				},
+				info: {
+					DEFAULT: 'hsl(var(--info))',
+					foreground: 'hsl(var(--foreground))'
 				}
 			},
 		borderRadius: {
@@ -148,6 +160,7 @@ export default {
 			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
 			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
 			// Canonical gradients - managed via CMS (color_tokens table)
+			'gradient-primary': 'linear-gradient(135deg, hsl(249 67% 24%), hsl(266 85% 58%))',
 			'gradient-hero': 'linear-gradient(135deg, hsl(249 67% 24%), hsl(266 85% 58%))',
 			'gradient-sunset': 'linear-gradient(135deg, hsl(249 67% 24%), hsl(266 85% 58%), hsl(25 95% 63%))',
 			'gradient-warmth': 'linear-gradient(135deg, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))',

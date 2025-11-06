@@ -7,10 +7,13 @@ import { ArrowRight } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableBackground } from "@/components/EditableBackground";
+import { EditableIcon } from "@/components/EditableIcon";
+import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
 
 export default function ProofMetricsHomepage() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const { t } = useAppTranslation();
+  const { allowedBackgrounds } = useAllowedBackgrounds();
 
   const metrics = [
     {
@@ -67,19 +70,7 @@ export default function ProofMetricsHomepage() {
                 key={index}
                 elementId={`proof-metric-card-${index}`}
                 defaultBackground="bg-card"
-                allowedBackgrounds={[
-                  'bg-gradient-hero',
-                  'bg-gradient-sunset',
-                  'bg-gradient-warmth',
-                  'bg-gradient-ocean',
-                  'bg-gradient-fire',
-                  'glass-card',
-                  'liquid-glass',
-                  'glass-prominent',
-                  'bg-card',
-                  'bg-background',
-                  'bg-muted'
-                ]}
+                allowedBackgrounds={allowedBackgrounds}
               >
                 <Card 
                   className={`hover-scale transition-all duration-500 ${
@@ -88,9 +79,13 @@ export default function ProofMetricsHomepage() {
                   style={{ transitionDelay: `${index * 100}ms` }}
                 >
                   <CardContent className="p-6 text-center">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center mx-auto mb-4 shadow-lg">
-                      <Icon className="w-6 h-6 text-primary-foreground" />
-                    </div>
+                    <EditableIcon 
+                      elementId={`proof-metric-icon-${index}`}
+                      icon={Icon}
+                      defaultBackground="bg-gradient-primary"
+                      size="default"
+                      className="mx-auto mb-4"
+                    />
                     <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
                       <Counter 
                         end={metric.value} 
@@ -98,7 +93,7 @@ export default function ProofMetricsHomepage() {
                         prefix={metric.prefix}
                       />
                     </div>
-                    <div className="text-sm font-semibold text-foreground mb-2">
+                    <div className="text-sm font-semibold text-foreground mb-1">
                       {metric.label}
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -113,9 +108,9 @@ export default function ProofMetricsHomepage() {
 
         <div className="text-center">
           <LanguageLink to="/partners">
-            <Button size="lg" variant="secondary" className="text-lg px-8 py-6 group">
-              {t('proof_metrics.cta', 'See Customer Stories')}
-              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            <Button size="lg" className="gap-2">
+              {t('proof_metrics.cta', 'See customer stories')}
+              <ArrowRight className="w-4 h-4" />
             </Button>
           </LanguageLink>
         </div>

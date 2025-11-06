@@ -154,28 +154,28 @@ export const ButtonShowcase = () => {
           <h3 className="text-2xl font-semibold mb-4">CTA Hierarchy Guidelines</h3>
           <div className="space-y-4 text-sm">
             <div className="flex gap-3">
-              <span className="text-green-600 font-bold">✓</span>
+              <span className="text-success font-bold">✓</span>
               <div>
                 <p className="font-medium">One primary CTA per section</p>
                 <p className="text-muted-foreground">Maintain clear visual hierarchy</p>
               </div>
             </div>
             <div className="flex gap-3">
-              <span className="text-green-600 font-bold">✓</span>
+              <span className="text-success font-bold">✓</span>
               <div>
                 <p className="font-medium">Primary for conversion goals</p>
                 <p className="text-muted-foreground">Book Demo, Get Started, Sign Up</p>
               </div>
             </div>
             <div className="flex gap-3">
-              <span className="text-green-600 font-bold">✓</span>
+              <span className="text-success font-bold">✓</span>
               <div>
                 <p className="font-medium">Secondary for exploration</p>
                 <p className="text-muted-foreground">Learn More, View Features, See Examples</p>
               </div>
             </div>
             <div className="flex gap-3">
-              <span className="text-red-600 font-bold">✗</span>
+              <span className="text-destructive font-bold">✗</span>
               <div>
                 <p className="font-medium">Multiple primary CTAs competing</p>
                 <p className="text-muted-foreground">Creates confusion and reduces conversions</p>

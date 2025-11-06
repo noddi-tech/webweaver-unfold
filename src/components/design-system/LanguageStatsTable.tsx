@@ -80,7 +80,7 @@ export default function LanguageStatsTable({
                     <td className="py-3">
                       <div className="flex items-center gap-2">
                         <span className="font-mono">{lang.total_translations}/{englishCount}</span>
-                        {translationComplete && <Check className="w-4 h-4 text-green-600" />}
+                        {translationComplete && <Check className="w-4 h-4 text-success" />}
                       </div>
                     </td>
                     <td className="py-3">
@@ -89,9 +89,9 @@ export default function LanguageStatsTable({
                       ) : (
                         <div className="flex items-center gap-2">
                           <span className="font-mono">{progress?.evaluated_keys || 0}/{englishCount}</span>
-                          {evaluationComplete && <Check className="w-4 h-4 text-green-600" />}
+                          {evaluationComplete && <Check className="w-4 h-4 text-success" />}
                           {progress?.status === 'in_progress' && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
-                          {progress?.status === 'paused' && <AlertTriangle className="w-4 h-4 text-orange-500" />}
+                          {progress?.status === 'paused' && <AlertTriangle className="w-4 h-4 text-warning" />}
                         </div>
                       )}
                     </td>
@@ -118,7 +118,7 @@ export default function LanguageStatsTable({
                         <div className="flex items-center gap-2">
                           <span>{metaStat.completed_entries}/{metaStat.total_pages}</span>
                           {metaStat.completed_entries === metaStat.total_pages && 
-                            <Check className="w-4 h-4 text-green-600" />
+                            <Check className="w-4 h-4 text-success" />
                           }
                         </div>
                       ) : (
