@@ -7,6 +7,7 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { EditableTranslation } from '@/components/EditableTranslation';
 import { EditableUniversalMedia } from '@/components/EditableUniversalMedia';
 import { EditableButton } from '@/components/EditableButton';
+import { EditableBackground } from '@/components/EditableBackground';
 import { useTypography } from '@/hooks/useTypography';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -129,27 +130,54 @@ export function ScrollingFeatureCards() {
   const { cardStates, activeCardIndex } = useScrollProgress(sectionRef, cards.length);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative py-24 bg-background"
-      style={{ minHeight: `${100 + (cards.length * 20)}vh` }}
+    <EditableBackground
+      elementId="scrolling-features-section"
+      defaultBackground="bg-background"
+      allowedBackgrounds={[
+        'bg-background',
+        'bg-card',
+        'bg-muted',
+        'bg-gradient-hero',
+        'bg-gradient-ocean',
+        'bg-gradient-warmth',
+        'bg-gradient-sunset',
+        'glass-card',
+        'liquid-glass'
+      ]}
     >
-      <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-[3fr_7fr] gap-12 lg:gap-16">
-          {/* Left Column - Sticky (30% width) */}
-          <div className="lg:sticky lg:top-24 lg:h-fit space-y-8 lg:pr-8">
-            <div className="space-y-6">
-              <h2 className={cn(headingStyles.h2, "text-foreground")}>
-                <EditableTranslation translationKey="scrolling_features.title">
-                  Functions That Talk to Each Other
-                </EditableTranslation>
-              </h2>
-              <p className={cn(headingStyles.body, "text-muted-foreground max-w-xl text-lg")}>
-                <EditableTranslation translationKey="scrolling_features.subtitle">
-                  Every module shares the same data model. No syncing. No waiting. Just one unified system.
-                </EditableTranslation>
-              </p>
-            </div>
+      <section
+        ref={sectionRef}
+        className="relative py-24"
+        style={{ minHeight: `${100 + (cards.length * 20)}vh` }}
+      >
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-[3fr_7fr] gap-12 lg:gap-16">
+            {/* Left Column - Sticky (30% width) */}
+            <EditableBackground
+              elementId="scrolling-features-sticky-column"
+              defaultBackground="bg-transparent"
+              allowedBackgrounds={[
+                'bg-transparent',
+                'bg-card/50',
+                'glass-card',
+                'liquid-glass',
+                'bg-gradient-hero/50'
+              ]}
+              className="rounded-2xl"
+            >
+              <div className="lg:sticky lg:top-24 lg:h-fit space-y-8 lg:pr-8 p-6">
+                <div className="space-y-6">
+                  <h2 className={headingStyles.h2}>
+                    <EditableTranslation translationKey="scrolling_features.title">
+                      Functions That Talk to Each Other
+                    </EditableTranslation>
+                  </h2>
+                  <p className={cn(headingStyles.body, "max-w-xl text-lg opacity-80")}>
+                    <EditableTranslation translationKey="scrolling_features.subtitle">
+                      Every module shares the same data model. No syncing. No waiting. Just one unified system.
+                    </EditableTranslation>
+                  </p>
+                </div>
             <EditableButton
               buttonText="See All Functions"
               buttonUrl={mainCtaUrl}
@@ -166,7 +194,8 @@ export function ScrollingFeatureCards() {
                 </a>
               </Button>
             </EditableButton>
-          </div>
+              </div>
+            </EditableBackground>
 
           {/* Right Column - Scrolling Cards */}
           <div className="relative space-y-12 lg:space-y-16">
@@ -186,32 +215,49 @@ export function ScrollingFeatureCards() {
                 willChange: state.opacity > 0.2 ? 'transform, opacity' : 'auto',
               }}
                 >
-              <div className="bg-gradient-hero/90 backdrop-blur-xl border border-white/10 rounded-3xl p-10 lg:p-12 shadow-2xl">
-                <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
-                      {/* Left: Content */}
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-3">
-                          <Badge 
-                            className="bg-purple-500/20 text-purple-200 border border-purple-400/30 px-3 py-1.5 text-sm font-medium hover:bg-purple-500/30"
-                          >
-                            {card.number}
-                          </Badge>
-                          <div className="p-2.5 rounded-lg bg-white/10 backdrop-blur-sm">
-                            <Icon className="h-5 w-5 text-white" />
+                  <EditableBackground
+                    elementId={`scrolling-card-bg-${index + 1}`}
+                    defaultBackground="bg-gradient-hero/90"
+                    allowedBackgrounds={[
+                      'bg-gradient-hero/90',
+                      'bg-gradient-ocean/90',
+                      'bg-gradient-warmth/90',
+                      'bg-gradient-sunset/90',
+                      'bg-gradient-fire/90',
+                      'glass-card',
+                      'liquid-glass',
+                      'glass-prominent',
+                      'bg-card',
+                      'bg-muted'
+                    ]}
+                    className="backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl"
+                  >
+                    <div className="p-10 lg:p-12">
+                      <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
+                        {/* Left: Content */}
+                        <div className="space-y-6">
+                          <div className="flex items-center gap-3">
+                            <Badge 
+                              className="bg-purple-500/20 text-purple-200 border border-purple-400/30 px-3 py-1.5 text-sm font-medium hover:bg-purple-500/30"
+                            >
+                              {card.number}
+                            </Badge>
+                            <div className="p-2.5 rounded-lg bg-white/10 backdrop-blur-sm">
+                              <Icon className="h-5 w-5" />
+                            </div>
                           </div>
-                        </div>
-                        
-                        <h3 className="text-2xl lg:text-3xl font-semibold text-white leading-tight">
-                          <EditableTranslation translationKey={card.titleKey}>
-                            {card.title}
-                          </EditableTranslation>
-                        </h3>
-                        
-                        <p className="text-white/80 text-base leading-relaxed">
-                          <EditableTranslation translationKey={card.descriptionKey}>
-                            {card.description}
-                          </EditableTranslation>
-                        </p>
+                          
+                          <h3 className="text-2xl lg:text-3xl font-semibold leading-tight">
+                            <EditableTranslation translationKey={card.titleKey}>
+                              {card.title}
+                            </EditableTranslation>
+                          </h3>
+                          
+                          <p className="text-base leading-relaxed opacity-80">
+                            <EditableTranslation translationKey={card.descriptionKey}>
+                              {card.description}
+                            </EditableTranslation>
+                          </p>
                         
                         <EditableButton
                           buttonText={card.ctaText}
@@ -220,9 +266,9 @@ export function ScrollingFeatureCards() {
                             // URL updated in state
                           }}
                         >
-                          <Button 
+                        <Button 
                             variant="ghost" 
-                            className="text-white hover:bg-white/20 border border-white/20 group mt-2"
+                            className="hover:bg-white/20 border border-white/20 group mt-2"
                             asChild
                           >
                             <a href={card.ctaUrl || '#'}>
@@ -251,8 +297,9 @@ export function ScrollingFeatureCards() {
                           />
                         </div>
                       </EditableUniversalMedia>
+                      </div>
                     </div>
-                  </div>
+                  </EditableBackground>
                 </div>
               );
             })}
@@ -260,5 +307,6 @@ export function ScrollingFeatureCards() {
         </div>
       </div>
     </section>
+    </EditableBackground>
   );
 }
