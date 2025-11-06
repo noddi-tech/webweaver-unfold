@@ -278,6 +278,80 @@ export function UniversalImageCarouselModal({
     setCarouselImages(carouselImages.filter((_, i) => i !== index));
   };
 
+  // Image picker component for carousel images
+  const CarouselImagePicker = ({ 
+    index, 
+    currentUrl 
+  }: { 
+    index: number; 
+    currentUrl: string;
+  }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    const handleSelectImage = (imageUrl: string, imageAlt: string) => {
+      updateCarouselImage(index, 'url', imageUrl);
+      updateCarouselImage(index, 'alt', imageAlt);
+      setIsOpen(false);
+    };
+    
+    return (
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsOpen(!isOpen)}
+            className="flex-1"
+          >
+            <ImageIcon className="h-4 w-4 mr-2" />
+            {currentUrl ? 'Change Image' : 'Select from Library'}
+          </Button>
+          {currentUrl && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => updateCarouselImage(index, 'url', '')}
+              title="Clear image"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+        
+        {isOpen && (
+          <div className="border rounded-lg p-4 bg-muted/30 max-h-96 overflow-y-auto">
+            <div className="grid grid-cols-3 gap-3">
+              {libraryImages.map((img) => (
+                <button
+                  key={img.id}
+                  type="button"
+                  onClick={() => handleSelectImage(img.file_url, img.alt || '')}
+                  className={`border-2 rounded-lg p-2 hover:border-primary transition ${
+                    currentUrl === img.file_url ? 'border-primary bg-primary/10' : 'border-border'
+                  }`}
+                >
+                  <img 
+                    src={img.file_url} 
+                    alt={img.alt} 
+                    className="w-full h-20 object-cover rounded mb-1" 
+                  />
+                  <p className="text-xs truncate">{img.title}</p>
+                </button>
+              ))}
+            </div>
+            
+            {libraryImages.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No images in library. Upload images in the Image Manager first.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -470,23 +544,75 @@ export function UniversalImageCarouselModal({
                   </div>
 
                   {carouselImages.map((img, index) => (
-                    <div key={index} className="border rounded-lg p-4 space-y-3">
+                    <div key={index} className="border rounded-lg p-4 space-y-3 bg-card">
                       <div className="flex items-center justify-between">
-                        <Label>Image {index + 1}</Label>
-                        <Button type="button" size="sm" variant="ghost" onClick={() => removeCarouselImage(index)}>
+                        <Label className="text-base font-semibold">Image {index + 1}</Label>
+                        <Button 
+                          type="button" 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => removeCarouselImage(index)}
+                          className="text-destructive hover:text-destructive"
+                        >
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
-                      <Input
-                        placeholder="Image URL"
-                        value={img.url}
-                        onChange={(e) => updateCarouselImage(index, 'url', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Alt text"
-                        value={img.alt}
-                        onChange={(e) => updateCarouselImage(index, 'alt', e.target.value)}
-                      />
+                      
+                      {/* Image Preview */}
+                      {img.url && (
+                        <div className="relative rounded-lg overflow-hidden border bg-muted/30">
+                          <img 
+                            src={img.url} 
+                            alt={img.alt || `Preview ${index + 1}`} 
+                            className="w-full h-32 object-cover"
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Image Picker */}
+                      <CarouselImagePicker index={index} currentUrl={img.url} />
+                      
+                      {/* Manual URL Input (collapsible) */}
+                      <details className="group">
+                        <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground transition list-none">
+                          <div className="flex items-center gap-2">
+                            <LinkIcon className="h-3 w-3" />
+                            <span>Or enter URL manually</span>
+                            <span className="ml-auto group-open:rotate-180 transition-transform">▼</span>
+                          </div>
+                        </summary>
+                        <div className="mt-2 space-y-2">
+                          <Input
+                            placeholder="https://example.com/image.jpg"
+                            value={img.url}
+                            onChange={(e) => updateCarouselImage(index, 'url', e.target.value)}
+                          />
+                        </div>
+                      </details>
+                      
+                      {/* Alt Text */}
+                      <div className="space-y-2">
+                        <Label htmlFor={`alt-${index}`} className="text-sm">Alt Text</Label>
+                        <Input
+                          id={`alt-${index}`}
+                          placeholder="Descriptive text for accessibility"
+                          value={img.alt}
+                          onChange={(e) => updateCarouselImage(index, 'alt', e.target.value)}
+                        />
+                      </div>
+                      
+                      {/* Optional Title */}
+                      <div className="space-y-2">
+                        <Label htmlFor={`title-${index}`} className="text-sm text-muted-foreground">
+                          Title (Optional)
+                        </Label>
+                        <Input
+                          id={`title-${index}`}
+                          placeholder="Image caption or title"
+                          value={img.title || ''}
+                          onChange={(e) => updateCarouselImage(index, 'title', e.target.value)}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
