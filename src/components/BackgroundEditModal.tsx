@@ -52,9 +52,18 @@ export function BackgroundEditModal({
   // Filter available options based on allowedBackgrounds prop
   const getFilteredOptions = (category: keyof typeof BACKGROUND_OPTIONS) => {
     if (!allowedBackgrounds) return BACKGROUND_OPTIONS[category];
-    return BACKGROUND_OPTIONS[category].filter(
-      bg => allowedBackgrounds.includes(bg.value)
-    );
+    
+    return BACKGROUND_OPTIONS[category].filter(bg => {
+      // Check exact match first
+      if (allowedBackgrounds.includes(bg.value)) return true;
+      
+      // Check if any allowed background is this background with opacity suffix
+      return allowedBackgrounds.some(allowed => {
+        // Strip opacity suffix from allowed background (e.g., 'bg-gradient-hero/90' -> 'bg-gradient-hero')
+        const baseAllowed = allowed.split('/')[0];
+        return baseAllowed === bg.value;
+      });
+    });
   };
 
   // Filter text color options
@@ -63,7 +72,9 @@ export function BackgroundEditModal({
     : TEXT_COLOR_OPTIONS;
 
   // Check contrast for current selection
-  const contrastCheck = meetsContrastRequirement(selectedBackground, selectedTextColor);
+  // Strip opacity suffix from background before calculating contrast
+  const baseBackground = selectedBackground.split('/')[0];
+  const contrastCheck = meetsContrastRequirement(baseBackground, selectedTextColor);
   const showContrastWarning = !contrastCheck.meets;
 
   // Determine which tab to show first based on current selection
@@ -147,65 +158,81 @@ export function BackgroundEditModal({
 
           <TabsContent value="gradients" className="space-y-4 mt-4">
             <div className="grid grid-cols-2 gap-4">
-              {getFilteredOptions('gradients').map((bg) => (
-                <Card
-                  key={bg.value}
-                  className={`p-4 cursor-pointer transition-all ${
-                    selectedBackground === bg.value
-                      ? 'ring-2 ring-primary shadow-lg'
-                      : 'hover:shadow-md'
-                  }`}
-                  onClick={() => setSelectedBackground(bg.value)}
-                >
-                  <div className={`h-32 rounded-lg ${bg.preview} mb-3 relative overflow-hidden flex items-center justify-center`}>
-                    {selectedBackground === bg.value && (
-                      <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-                        <Check className="w-4 h-4" />
-                      </div>
-                    )}
-                    <span className="text-white font-semibold text-sm">Sample Text</span>
-                  </div>
-                  <h4 className="font-semibold text-sm mb-1">{bg.label}</h4>
-                  <p className="text-xs text-muted-foreground">{bg.description}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Best with: <span className="font-medium">{bg.optimalTextColor}</span> text
-                  </p>
-                </Card>
-              ))}
+              {getFilteredOptions('gradients').map((bg) => {
+                // Find the allowed version with opacity if it exists
+                const allowedVersion = allowedBackgrounds?.find(allowed => 
+                  allowed.startsWith(bg.value)
+                ) || bg.value;
+                const isSelected = selectedBackground === allowedVersion || selectedBackground === bg.value;
+                
+                return (
+                  <Card
+                    key={bg.value}
+                    className={`p-4 cursor-pointer transition-all ${
+                      isSelected
+                        ? 'ring-2 ring-primary shadow-lg'
+                        : 'hover:shadow-md'
+                    }`}
+                    onClick={() => setSelectedBackground(allowedVersion)}
+                  >
+                    <div className={`h-32 rounded-lg ${bg.preview} mb-3 relative overflow-hidden flex items-center justify-center`}>
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
+                          <Check className="w-4 h-4" />
+                        </div>
+                      )}
+                      <span className="text-white font-semibold text-sm">Sample Text</span>
+                    </div>
+                    <h4 className="font-semibold text-sm mb-1">{bg.label}</h4>
+                    <p className="text-xs text-muted-foreground">{bg.description}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Best with: <span className="font-medium">{bg.optimalTextColor}</span> text
+                    </p>
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
 
           <TabsContent value="glass" className="space-y-4 mt-4">
             <div className="grid grid-cols-2 gap-4">
-              {getFilteredOptions('glass').map((bg) => (
-                <Card
-                  key={bg.value}
-                  className={`p-4 cursor-pointer transition-all ${
-                    selectedBackground === bg.value
-                      ? 'ring-2 ring-primary shadow-lg'
-                      : 'hover:shadow-md'
-                  }`}
-                  onClick={() => setSelectedBackground(bg.value)}
-                >
-                  {/* Preview with background pattern to show transparency */}
-                  <div className="relative h-32 rounded-lg mb-3 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-hero" />
-                    <div className={`absolute inset-0 ${bg.preview} flex items-center justify-center`}>
-                      {selectedBackground === bg.value && (
-                        <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-                          <Check className="w-4 h-4" />
-                        </div>
-                      )}
-                      <span className="text-white font-semibold text-sm">Glass Effect</span>
+              {getFilteredOptions('glass').map((bg) => {
+                // Find the allowed version with opacity if it exists
+                const allowedVersion = allowedBackgrounds?.find(allowed => 
+                  allowed.startsWith(bg.value)
+                ) || bg.value;
+                const isSelected = selectedBackground === allowedVersion || selectedBackground === bg.value;
+                
+                return (
+                  <Card
+                    key={bg.value}
+                    className={`p-4 cursor-pointer transition-all ${
+                      isSelected
+                        ? 'ring-2 ring-primary shadow-lg'
+                        : 'hover:shadow-md'
+                    }`}
+                    onClick={() => setSelectedBackground(allowedVersion)}
+                  >
+                    {/* Preview with background pattern to show transparency */}
+                    <div className="relative h-32 rounded-lg mb-3 overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-hero" />
+                      <div className={`absolute inset-0 ${bg.preview} flex items-center justify-center`}>
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
+                            <Check className="w-4 h-4" />
+                          </div>
+                        )}
+                        <span className="text-white font-semibold text-sm">Glass Effect</span>
+                      </div>
                     </div>
-                  </div>
-                  <h4 className="font-semibold text-sm mb-1">{bg.label}</h4>
-                  <p className="text-xs text-muted-foreground">{bg.description}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Text color: <span className="font-medium">{bg.optimalTextColor}</span> (context-dependent)
-                  </p>
-                </Card>
-              ))}
+                    <h4 className="font-semibold text-sm mb-1">{bg.label}</h4>
+                    <p className="text-xs text-muted-foreground">{bg.description}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Text color: <span className="font-medium">{bg.optimalTextColor}</span> (context-dependent)
+                    </p>
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
 
@@ -267,9 +294,13 @@ export function BackgroundEditModal({
                   onClick={() => setSelectedTextColor(tc.value)}
                 >
                   <div className="flex flex-col items-center gap-2">
-                    <div className={`w-12 h-12 rounded-full ${tc.preview} border-2 border-border flex items-center justify-center`}>
+                    {/* Show actual background with this text color */}
+                    <div className={`w-12 h-12 rounded-full border-2 border-border flex items-center justify-center relative ${selectedBackground}`}>
+                      <span className={`text-xs font-bold ${tc.value}`}>Aa</span>
                       {selectedTextColor === tc.value && (
-                        <Check className="w-4 h-4" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-primary/20 rounded-full">
+                          <Check className="w-4 h-4 text-primary" />
+                        </div>
                       )}
                     </div>
                     <div className="text-center">
