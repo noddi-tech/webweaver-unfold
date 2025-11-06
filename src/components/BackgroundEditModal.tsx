@@ -117,7 +117,7 @@ export function BackgroundEditModal({
         </DialogHeader>
 
         {/* LIVE PREVIEW */}
-        <Card className={`${selectedBackground} p-8 text-center mb-4`}>
+        <div className={`${selectedBackground} p-8 text-center mb-4 rounded-lg border shadow-sm`}>
           <h3 className={`text-3xl font-bold mb-2 ${selectedTextColor}`}>
             Preview Heading
           </h3>
@@ -127,7 +127,7 @@ export function BackgroundEditModal({
           <p className="text-xs mt-4 opacity-75">
             <span className={selectedTextColor}>Contrast: {contrastCheck.ratio}:1 ({contrastCheck.level})</span>
           </p>
-        </Card>
+        </div>
 
         {/* CONTRAST WARNING */}
         {showContrastWarning && (
