@@ -8,6 +8,8 @@ import { getColorClass } from "@/lib/colorUtils";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { EditableFeature } from "@/components/EditableFeature";
 import { EditableBackground } from "@/components/EditableBackground";
+import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
+import { EditableIcon } from "@/components/EditableIcon";
 
 type IconName = keyof typeof icons;
 interface DbFeature { id: string; title: string; description: string | null; icon_name: string; sort_order: number | null; }
@@ -49,6 +51,7 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
   const [dbFeatures, setDbFeatures] = useState<DbFeature[] | null>(null);
   const [settings, setSettings] = useState<FeatureSettings | null>(null);
   const [usps, setUsps] = useState<Array<{ id: string; title: string; icon_name: string; href: string | null; bg_token: string; text_token: string }>>([]);
+  const { allowedBackgrounds } = useAllowedBackgrounds();
   useEffect(() => {
     let mounted = true;
     const load = async () => {
@@ -158,24 +161,16 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
                   key={f.id}
                   elementId={`feature-card-${f.id}`}
                   defaultBackground={cardBg}
-                  allowedBackgrounds={[
-                    'bg-gradient-hero',
-                    'bg-gradient-sunset',
-                    'bg-gradient-warmth',
-                    'bg-gradient-ocean',
-                    'bg-gradient-fire',
-                    'glass-card',
-                    'liquid-glass',
-                    'glass-prominent',
-                    'bg-card',
-                    'bg-background',
-                    'bg-muted'
-                  ]}
+                  allowedBackgrounds={allowedBackgrounds}
                 >
                   <div className={`rounded-xl p-6 hover:scale-105 transition-transform duration-300 border shadow-sm`}>
-                    <div className={`${iconClr} mb-4`}>
-                      <Icon className="w-8 h-8" />
-                    </div>
+                    <EditableIcon
+                      elementId={`feature-icon-${f.id}`}
+                      icon={Icon}
+                      defaultBackground="bg-gradient-primary"
+                      size="default"
+                      className="mb-4"
+                    />
                     <h3 className={`text-xl font-semibold mb-3 ${titleClr}`}>
                       <EditableFeature featureId={f.id} field="title">
                         {f.title}

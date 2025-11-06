@@ -723,6 +723,42 @@ export type Database = {
         }
         Relationships: []
       }
+      icon_styles: {
+        Row: {
+          background_token: string
+          created_at: string | null
+          element_id: string
+          icon_color_token: string | null
+          icon_name: string | null
+          id: string
+          shape: string | null
+          size: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          background_token?: string
+          created_at?: string | null
+          element_id: string
+          icon_color_token?: string | null
+          icon_name?: string | null
+          id?: string
+          shape?: string | null
+          size?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          background_token?: string
+          created_at?: string | null
+          element_id?: string
+          icon_color_token?: string | null
+          icon_name?: string | null
+          id?: string
+          shape?: string | null
+          size?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       image_carousel_settings: {
         Row: {
           carousel_config_id: string | null

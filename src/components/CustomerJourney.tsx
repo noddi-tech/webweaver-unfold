@@ -1,6 +1,7 @@
 import { MousePointer, Calendar, CheckCircle, MapPin, Wrench, Mail } from "lucide-react";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableIcon } from "@/components/EditableIcon";
 
 export default function CustomerJourney() {
   const { t } = useAppTranslation();
@@ -62,9 +63,13 @@ export default function CustomerJourney() {
               return (
                 <div key={index} className="relative">
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center mb-4 relative z-10 shadow-lg hover-scale">
-                      <Icon className="w-8 h-8 text-primary-foreground" />
-                    </div>
+                    <EditableIcon
+                      elementId={`customer-journey-icon-${index}`}
+                      icon={Icon}
+                      defaultBackground="bg-gradient-primary"
+                      size="lg"
+                      className="mb-4 relative z-10 hover-scale"
+                    />
                     <div className="absolute top-16 left-1/2 -translate-x-1/2 w-8 h-8 bg-background rounded-full border-4 border-primary" />
                     <EditableTranslation translationKey={`customer_journey.step_${index + 1}.title`}>
                       <h3 className="font-semibold text-sm mb-2 mt-8 text-foreground">{step.title}</h3>
@@ -86,9 +91,13 @@ export default function CustomerJourney() {
             return (
               <div key={index} className="flex gap-4 items-start">
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <Icon className="w-6 h-6 text-primary-foreground" />
-                  </div>
+                  <EditableIcon
+                    elementId={`customer-journey-icon-${index}`}
+                    icon={Icon}
+                    defaultBackground="bg-gradient-primary"
+                    size="default"
+                    className="flex-shrink-0 shadow-lg"
+                  />
                   {index < journeySteps.length - 1 && (
                     <div className="absolute top-12 left-1/2 -translate-x-1/2 w-1 h-6 bg-gradient-primary opacity-20" />
                   )}

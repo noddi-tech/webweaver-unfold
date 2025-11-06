@@ -6,11 +6,14 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { EditableBackground } from "@/components/EditableBackground";
+import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
+import { EditableIcon } from "@/components/EditableIcon";
 
 export default function ProductOverview() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const { t } = useAppTranslation();
   const [refreshKey, setRefreshKey] = useState(0);
+  const { allowedBackgrounds } = useAllowedBackgrounds();
 
   const products = [
     {
@@ -67,25 +70,17 @@ export default function ProductOverview() {
                 <EditableBackground
                   elementId={`product-overview-card-${index}`}
                   defaultBackground="bg-card"
-                  allowedBackgrounds={[
-                    'bg-gradient-hero',
-                    'bg-gradient-sunset',
-                    'bg-gradient-warmth',
-                    'bg-gradient-ocean',
-                    'bg-gradient-fire',
-                    'glass-card',
-                    'liquid-glass',
-                    'glass-prominent',
-                    'bg-card',
-                    'bg-background',
-                    'bg-muted'
-                  ]}
+                  allowedBackgrounds={allowedBackgrounds}
                 >
                   <Card className="h-full hover-scale border-2 hover:border-primary/30 transition-all duration-300">
                     <CardContent className="p-8">
-                      <div className="w-16 h-16 rounded-xl bg-gradient-primary flex items-center justify-center mb-6 shadow-lg group-hover:shadow-xl transition-shadow">
-                        <Icon className="w-8 h-8 text-primary-foreground" />
-                      </div>
+                      <EditableIcon
+                        elementId={`product-overview-icon-${index}`}
+                        icon={Icon}
+                        defaultBackground="bg-gradient-primary"
+                        size="lg"
+                        className="mb-6 group-hover:shadow-xl transition-shadow"
+                      />
                         <EditableTranslation 
                         translationKey={`product_overview.${product.link.slice(1)}.title`} 
                         onSave={() => setRefreshKey(prev => prev + 1)}

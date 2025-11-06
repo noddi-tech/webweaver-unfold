@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { Calendar, Package, Users, BarChart3, Settings, ArrowRight, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,8 @@ import { EditableBackground } from '@/components/EditableBackground';
 import { UnifiedStyleModal } from '@/components/UnifiedStyleModal';
 import { useTypography } from '@/hooks/useTypography';
 import { useEditMode } from '@/contexts/EditModeContext';
+import { useColorSystem } from '@/hooks/useColorSystem';
+import { useAllowedBackgrounds } from '@/hooks/useAllowedBackgrounds';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -33,11 +35,13 @@ export function ScrollingFeatureCards() {
   const { t } = useAppTranslation();
   const headingStyles = useTypography();
   const { editMode } = useEditMode();
+  const { GRADIENT_COLORS, GLASS_EFFECTS } = useColorSystem();
+  const { allowedBackgrounds } = useAllowedBackgrounds();
   
-  // Define unique default styles for each card (matches original beautiful designs)
-  const defaultCardStyles = [
+  // Define unique default styles for each card using CMS colors
+  const defaultCardStyles = useMemo(() => [
     { 
-      background: 'glass-card',
+      background: GLASS_EFFECTS[0]?.preview || 'glass-card',
       numberColor: 'primary',
       titleColor: 'foreground',
       descriptionColor: 'muted-foreground',
@@ -45,7 +49,7 @@ export function ScrollingFeatureCards() {
       ctaTextColor: 'primary-foreground'
     },
     { 
-      background: 'bg-gradient-hero',
+      background: GRADIENT_COLORS[0]?.preview || 'bg-gradient-hero',
       numberColor: 'primary-foreground',
       titleColor: 'primary-foreground',
       descriptionColor: 'primary-foreground',
@@ -53,7 +57,7 @@ export function ScrollingFeatureCards() {
       ctaTextColor: 'primary'
     },
     { 
-      background: 'bg-gradient-sunset',
+      background: GRADIENT_COLORS[1]?.preview || 'bg-gradient-sunset',
       numberColor: 'primary-foreground',
       titleColor: 'primary-foreground',
       descriptionColor: 'primary-foreground',
@@ -61,7 +65,7 @@ export function ScrollingFeatureCards() {
       ctaTextColor: 'primary'
     },
     { 
-      background: 'bg-gradient-ocean',
+      background: GRADIENT_COLORS[3]?.preview || 'bg-gradient-ocean',
       numberColor: 'primary-foreground',
       titleColor: 'primary-foreground',
       descriptionColor: 'primary-foreground',
@@ -69,14 +73,14 @@ export function ScrollingFeatureCards() {
       ctaTextColor: 'primary'
     },
     { 
-      background: 'bg-gradient-warmth',
+      background: GRADIENT_COLORS[2]?.preview || 'bg-gradient-warmth',
       numberColor: 'primary-foreground',
       titleColor: 'primary-foreground',
       descriptionColor: 'primary-foreground',
       ctaBgColor: 'primary-foreground',
       ctaTextColor: 'primary'
     },
-  ];
+  ], [GRADIENT_COLORS, GLASS_EFFECTS]);
 
   const [imageUrls, setImageUrls] = useState<Record<number, string>>({
     0: '/src/assets/booking-hero.png',
@@ -250,17 +254,7 @@ export function ScrollingFeatureCards() {
     <EditableBackground
       elementId="scrolling-features-section"
       defaultBackground="bg-background"
-      allowedBackgrounds={[
-        'bg-background',
-        'bg-card',
-        'bg-muted',
-        'bg-gradient-hero',
-        'bg-gradient-ocean',
-        'bg-gradient-warmth',
-        'bg-gradient-sunset',
-        'glass-card',
-        'liquid-glass'
-      ]}
+      allowedBackgrounds={allowedBackgrounds}
     >
       <section
         ref={sectionRef}
@@ -273,13 +267,7 @@ export function ScrollingFeatureCards() {
             <EditableBackground
               elementId="scrolling-features-sticky-column"
               defaultBackground="bg-transparent"
-              allowedBackgrounds={[
-                'bg-transparent',
-                'bg-card/50',
-                'glass-card',
-                'liquid-glass',
-                'bg-gradient-hero/50'
-              ]}
+              allowedBackgrounds={allowedBackgrounds}
               className="rounded-2xl"
             >
               <div className="lg:sticky lg:top-24 lg:h-fit space-y-8 lg:pr-8 p-6">

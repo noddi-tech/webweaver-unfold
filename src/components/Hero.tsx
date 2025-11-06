@@ -12,6 +12,8 @@ import { EditableTranslation } from "@/components/EditableTranslation";
 import { LockedText } from "@/components/LockedText";
 import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
 import { EditableBackground } from "@/components/EditableBackground";
+import { EditableIcon } from "@/components/EditableIcon";
+import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Carousel,
@@ -31,6 +33,7 @@ const Hero = () => {
   const [count, setCount] = useState(0);
   const plugin = useRef(Autoplay({ delay: 3500, stopOnInteraction: true }));
   const [refreshKey, setRefreshKey] = useState(0);
+  const { allowedBackgrounds } = useAllowedBackgrounds();
   
   // Media settings state
   const [displayType, setDisplayType] = useState<'image' | 'carousel'>('carousel');
@@ -153,24 +156,15 @@ const Hero = () => {
             <EditableBackground
                 elementId="hero-metrics-badge"
                 defaultBackground="glass-card"
-                allowedBackgrounds={[
-                  'bg-gradient-hero',
-                  'bg-gradient-sunset',
-                  'bg-gradient-warmth',
-                  'bg-gradient-ocean',
-                  'bg-gradient-fire',
-                  'glass-card',
-                  'liquid-glass',
-                  'glass-prominent',
-                  'bg-card',
-                  'bg-background',
-                  'bg-muted'
-                ]}
+                allowedBackgrounds={allowedBackgrounds}
               >
                 <div className="flex items-center gap-3 px-6 py-4 rounded-xl shadow-lg hover-scale">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-primary flex items-center justify-center">
-                    <Award className="w-6 h-6 text-primary-foreground" />
-                  </div>
+                  <EditableIcon
+                    elementId="hero-award-icon"
+                    icon={Award}
+                    defaultBackground="bg-gradient-primary"
+                    size="sm"
+                  />
                   <div>
                     <LockedText reason="Metric value - Update in code">
                       <div className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">

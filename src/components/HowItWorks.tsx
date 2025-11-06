@@ -6,11 +6,14 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { LockedText } from "@/components/LockedText";
 import { EditableBackground } from "@/components/EditableBackground";
+import { EditableIcon } from "@/components/EditableIcon";
+import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
 
 export default function HowItWorks() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const { t } = useAppTranslation();
   const [refreshKey, setRefreshKey] = useState(0);
+  const { allowedBackgrounds } = useAllowedBackgrounds();
 
   const steps = [
     {
@@ -70,25 +73,16 @@ export default function HowItWorks() {
                   <EditableBackground
                     elementId={`how-it-works-step-${index}`}
                     defaultBackground="bg-card"
-                    allowedBackgrounds={[
-                      'bg-gradient-hero',
-                      'bg-gradient-sunset',
-                      'bg-gradient-warmth',
-                      'bg-gradient-ocean',
-                      'bg-gradient-fire',
-                      'glass-card',
-                      'liquid-glass',
-                      'glass-prominent',
-                      'bg-card',
-                      'bg-background',
-                      'bg-muted'
-                    ]}
+                    allowedBackgrounds={allowedBackgrounds}
                   >
                     <Card className="hover-scale h-full">
                       <CardContent className="p-6 h-full flex flex-col">
-                        <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 shadow-lg">
-                          <Icon className="w-7 h-7 text-primary-foreground" />
-                        </div>
+                        <EditableIcon
+                          elementId={`how-it-works-icon-${index}`}
+                          icon={Icon}
+                          defaultBackground="bg-gradient-primary"
+                          className="mb-4"
+                        />
                         <LockedText reason="Step number - Update in code">
                           <div className="text-sm font-bold text-white mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
                         </LockedText>
@@ -130,26 +124,17 @@ export default function HowItWorks() {
                 <EditableBackground
                   elementId={`how-it-works-step-${index}`}
                   defaultBackground="bg-card"
-                  allowedBackgrounds={[
-                    'bg-gradient-hero',
-                    'bg-gradient-sunset',
-                    'bg-gradient-warmth',
-                    'bg-gradient-ocean',
-                    'bg-gradient-fire',
-                    'glass-card',
-                    'liquid-glass',
-                    'glass-prominent',
-                    'bg-card',
-                    'bg-background',
-                    'bg-muted'
-                  ]}
+                  allowedBackgrounds={allowedBackgrounds}
                 >
                   <Card className="hover-scale h-full">
                     <CardContent className="p-6 h-full flex flex-col">
                       <div className="flex items-start gap-4">
-                        <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center flex-shrink-0 shadow-lg">
-                          <Icon className="w-7 h-7 text-primary-foreground" />
-                        </div>
+                        <EditableIcon
+                          elementId={`how-it-works-icon-${index}`}
+                          icon={Icon}
+                          defaultBackground="bg-gradient-primary"
+                          className="flex-shrink-0"
+                        />
                         <div className="flex-1">
                           <LockedText reason="Step number - Update in code">
                             <div className="text-sm font-bold text-white mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
@@ -183,19 +168,7 @@ export default function HowItWorks() {
           <EditableBackground
             elementId="how-it-works-caption"
             defaultBackground="bg-primary/10"
-            allowedBackgrounds={[
-              'bg-gradient-hero',
-              'bg-gradient-sunset',
-              'bg-gradient-warmth',
-              'bg-gradient-ocean',
-              'bg-gradient-fire',
-              'glass-card',
-              'liquid-glass',
-              'glass-prominent',
-              'bg-card',
-              'bg-background',
-              'bg-muted'
-            ]}
+            allowedBackgrounds={allowedBackgrounds}
           >
             <div className="inline-block px-8 py-4 border-2 border-primary/20 rounded-xl">
               <EditableTranslation translationKey="how_it_works.caption_main" onSave={() => setRefreshKey(prev => prev + 1)}>

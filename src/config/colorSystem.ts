@@ -1,16 +1,10 @@
 /**
- * @deprecated This file is being phased out in favor of database-driven colors.
+ * @deprecated - DO NOT USE OR MODIFY THIS FILE
  * 
- * All colors now load dynamically from the `color_tokens` table via the `useColorSystem` hook.
- * This file is kept only for legacy compatibility and type definitions.
+ * All colors and gradients are now managed through the CMS database (color_tokens table).
+ * Use the useColorSystem() or useAllowedBackgrounds() hooks instead.
  * 
- * To manage colors, use the CMS Design System or update the `color_tokens` table directly.
- * 
- * Migration status: In progress
- * - ✅ UnifiedStyleModal: Now uses useColorSystem hook
- * - ✅ BackgroundEditModal: Now uses useColorSystem hook
- * - ✅ EditableColorSystem: Now uses useColorSystem hook
- * - Database is the single source of truth
+ * See: docs/color-system-guide.md
  */
 
 // Centralized color system configuration (LEGACY - Use useColorSystem hook instead)

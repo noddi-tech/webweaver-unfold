@@ -5,10 +5,12 @@ import { LanguageLink } from "@/components/LanguageLink";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { EditableBackground } from "@/components/EditableBackground";
+import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
 
 export default function FinalCTA() {
   const { t } = useAppTranslation();
   const [refreshKey, setRefreshKey] = useState(0);
+  const { allowedBackgrounds } = useAllowedBackgrounds();
 
   return (
     <section className="py-section">
@@ -16,19 +18,7 @@ export default function FinalCTA() {
         <EditableBackground
           elementId="final-cta-section"
           defaultBackground="bg-gradient-hero"
-          allowedBackgrounds={[
-            'bg-gradient-hero',
-            'bg-gradient-sunset',
-            'bg-gradient-warmth',
-            'bg-gradient-ocean',
-            'bg-gradient-fire',
-            'glass-card',
-            'liquid-glass',
-            'glass-prominent',
-            'bg-card',
-            'bg-background',
-            'bg-muted'
-          ]}
+          allowedBackgrounds={allowedBackgrounds}
         >
           <div className="relative overflow-hidden rounded-2xl p-12 md:p-16 text-center">
             <div className="absolute inset-0 bg-gradient-primary opacity-10" />
