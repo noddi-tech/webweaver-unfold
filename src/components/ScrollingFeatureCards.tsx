@@ -8,6 +8,7 @@ import { EditableTranslation } from '@/components/EditableTranslation';
 import { EditableUniversalMedia } from '@/components/EditableUniversalMedia';
 import { EditableButton } from '@/components/EditableButton';
 import { EditableBackground } from '@/components/EditableBackground';
+import { EditableText } from '@/components/EditableText';
 import { useTypography } from '@/hooks/useTypography';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -238,9 +239,14 @@ export function ScrollingFeatureCards() {
                         <div className="space-y-6">
                           <div className="flex items-center gap-3">
                             <Badge 
-                              className="bg-purple-500/20 text-purple-200 border border-purple-400/30 px-3 py-1.5 text-sm font-medium hover:bg-purple-500/30"
+                              className="bg-purple-500/20 text-purple-200 border border-purple-400/30 px-3 py-1.5 text-sm font-medium"
                             >
-                              {card.number}
+                              <EditableText
+                                contentId={`scrolling-card-number-${index + 1}`}
+                                className="font-medium"
+                              >
+                                {card.number}
+                              </EditableText>
                             </Badge>
                             <div className="p-2.5 rounded-lg bg-white/10 backdrop-blur-sm">
                               <Icon className="h-5 w-5" />
