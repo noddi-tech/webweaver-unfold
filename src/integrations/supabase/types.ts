@@ -1496,6 +1496,7 @@ export type Database = {
           content: string
           content_type: string | null
           created_at: string
+          element_id: string | null
           element_type: string
           id: string
           page_location: string
@@ -1509,6 +1510,7 @@ export type Database = {
           content: string
           content_type?: string | null
           created_at?: string
+          element_id?: string | null
           element_type: string
           id?: string
           page_location: string
@@ -1522,6 +1524,7 @@ export type Database = {
           content?: string
           content_type?: string | null
           created_at?: string
+          element_id?: string | null
           element_type?: string
           id?: string
           page_location?: string
