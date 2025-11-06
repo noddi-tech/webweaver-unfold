@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertCircle, CheckCircle, Settings, Palette, Type, Image as ImageIcon, MousePointer } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { getColorTokenOptions, calculateContrastRatio, getContrastLevel } from '@/lib/colorUtils';
+import { getColorTokenOptions, calculateContrastRatio, getContrastLevel, normalizeColorToken } from '@/lib/colorUtils';
 import { cn } from '@/lib/utils';
 import { useColorSystem } from '@/hooks/useColorSystem';
 import type { ColorOption } from '@/config/colorSystem';
@@ -155,7 +155,7 @@ export function UnifiedStyleModal({
       
       // Number vs Background
       if (number && bgValue) {
-        const numValue = getComputedStyle(document.documentElement).getPropertyValue(`--${numberColor}`).trim();
+        const numValue = getComputedStyle(document.documentElement).getPropertyValue(`--${normalizeColorToken(numberColor)}`).trim();
         if (numValue) {
           const ratio = calculateContrastRatio(`hsl(${bgValue})`, `hsl(${numValue})`);
           scores.push({
@@ -169,7 +169,7 @@ export function UnifiedStyleModal({
 
       // Title vs Background
       if (title && bgValue) {
-        const titleValue = getComputedStyle(document.documentElement).getPropertyValue(`--${titleColor}`).trim();
+        const titleValue = getComputedStyle(document.documentElement).getPropertyValue(`--${normalizeColorToken(titleColor)}`).trim();
         if (titleValue) {
           const ratio = calculateContrastRatio(`hsl(${bgValue})`, `hsl(${titleValue})`);
           scores.push({
@@ -183,7 +183,7 @@ export function UnifiedStyleModal({
 
       // Description vs Background
       if (description && bgValue) {
-        const descValue = getComputedStyle(document.documentElement).getPropertyValue(`--${descriptionColor}`).trim();
+        const descValue = getComputedStyle(document.documentElement).getPropertyValue(`--${normalizeColorToken(descriptionColor)}`).trim();
         if (descValue) {
           const ratio = calculateContrastRatio(`hsl(${bgValue})`, `hsl(${descValue})`);
           scores.push({
@@ -197,8 +197,8 @@ export function UnifiedStyleModal({
 
       // CTA Button contrast
       if (ctaText) {
-        const ctaBgValue = getComputedStyle(document.documentElement).getPropertyValue(`--${ctaBgColor}`).trim();
-        const ctaTxtValue = getComputedStyle(document.documentElement).getPropertyValue(`--${ctaTextColor}`).trim();
+        const ctaBgValue = getComputedStyle(document.documentElement).getPropertyValue(`--${normalizeColorToken(ctaBgColor)}`).trim();
+        const ctaTxtValue = getComputedStyle(document.documentElement).getPropertyValue(`--${normalizeColorToken(ctaTextColor)}`).trim();
         if (ctaBgValue && ctaTxtValue) {
           const ratio = calculateContrastRatio(`hsl(${ctaBgValue})`, `hsl(${ctaTxtValue})`);
           scores.push({

@@ -15,6 +15,7 @@ import { useColorSystem } from '@/hooks/useColorSystem';
 import { useAllowedBackgrounds } from '@/hooks/useAllowedBackgrounds';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeColorToken } from '@/lib/colorUtils';
 
 interface FeatureCard {
   number: string;
@@ -351,9 +352,9 @@ export function ScrollingFeatureCards() {
                           <Badge 
                             className="border px-3 py-1.5 text-sm font-medium"
                             style={{
-                              backgroundColor: `hsl(var(--${cardData[index]?.numberColor || 'primary'}) / 0.2)`,
-                              borderColor: `hsl(var(--${cardData[index]?.numberColor || 'primary'}) / 0.3)`,
-                              color: `hsl(var(--${cardData[index]?.numberColor || 'foreground'}))`
+                              backgroundColor: `hsl(var(--${normalizeColorToken(cardData[index]?.numberColor || 'primary')}) / 0.2)`,
+                              borderColor: `hsl(var(--${normalizeColorToken(cardData[index]?.numberColor || 'primary')}) / 0.3)`,
+                              color: `hsl(var(--${normalizeColorToken(cardData[index]?.numberColor || 'foreground')}))`
                             }}
                           >
                             <span className="font-medium">
@@ -372,7 +373,7 @@ export function ScrollingFeatureCards() {
                         
                         <h3 
                           className="text-2xl lg:text-3xl font-semibold leading-tight"
-                          style={{ color: `hsl(var(--${cardData[index]?.titleColor || 'foreground'}))` }}
+                          style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.titleColor || 'foreground')}))` }}
                         >
                           <EditableTranslation translationKey={card.titleKey}>
                             {cardData[index]?.title || card.title}
@@ -381,7 +382,7 @@ export function ScrollingFeatureCards() {
                         
                         <p 
                           className="text-base leading-relaxed opacity-80"
-                          style={{ color: `hsl(var(--${cardData[index]?.descriptionColor || 'muted-foreground'}))` }}
+                          style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.descriptionColor || 'muted-foreground')}))` }}
                         >
                           <EditableTranslation translationKey={card.descriptionKey}>
                             {cardData[index]?.description || card.description}
@@ -395,7 +396,7 @@ export function ScrollingFeatureCards() {
                         >
                           <a href={card.ctaUrl || '#'}>
                             <span
-                              style={{ color: `hsl(var(--${cardData[index]?.ctaTextColor || 'primary-foreground'}))` }}
+                              style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.ctaTextColor || 'primary-foreground')}))` }}
                             >
                               <EditableTranslation translationKey={card.ctaKey}>
                                 {cardData[index]?.ctaText || card.ctaText}

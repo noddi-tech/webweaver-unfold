@@ -74,6 +74,21 @@ export const getColorTokenOptions = () => [
  */
 export const getImageColorClass = getColorClass;
 
+/**
+ * Normalizes color tokens to their actual CSS variable names
+ * Maps user-friendly names to semantic tokens used in the design system
+ * 
+ * @param token - Color token from CMS (e.g., 'white', 'black')
+ * @returns Normalized CSS variable name (e.g., 'primary-foreground', 'foreground')
+ */
+export const normalizeColorToken = (token: string): string => {
+  const tokenMap: Record<string, string> = {
+    'white': 'primary-foreground',  // White maps to primary-foreground CSS var
+    'black': 'foreground',          // Black maps to foreground CSS var
+  };
+  return tokenMap[token] || token;
+};
+
 // BACKWARD COMPATIBILITY FUNCTIONS
 // These maintain compatibility with existing components
 

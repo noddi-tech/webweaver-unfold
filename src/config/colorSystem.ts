@@ -225,6 +225,16 @@ export const ALL_BACKGROUND_OPTIONS: ColorOption[] = [
   ...SOLID_COLORS,
   ...GRADIENT_COLORS,
   ...GLASS_EFFECTS,
+  {
+    value: 'bg-transparent',
+    label: 'Transparent',
+    description: 'No background - fully transparent',
+    preview: 'bg-transparent border border-dashed border-muted-foreground/20',
+    type: 'solid',
+    category: 'surfaces',
+    optimalTextColor: 'auto',
+    contrastRatio: null as any
+  },
 ];
 
 // ============================================================================
@@ -297,7 +307,12 @@ export const TEXT_COLOR_OPTIONS: TextColorOption[] = [
 export const getOptimalTextColorForBackground = (
   backgroundValue: string
 ): string => {
-  const bg = ALL_BACKGROUND_OPTIONS.find(opt => opt.value === backgroundValue);
+  // Handle opacity variants (e.g., bg-primary/10, bg-white/20)
+  const baseBackground = backgroundValue.split('/')[0];
+  
+  const bg = ALL_BACKGROUND_OPTIONS.find(opt => 
+    opt.value === backgroundValue || opt.value === baseBackground
+  );
   
   if (!bg) {
     console.warn(`Unknown background value: ${backgroundValue}, defaulting to text-foreground`);
