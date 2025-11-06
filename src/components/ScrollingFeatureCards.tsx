@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { Calendar, Package, Users, BarChart3, Settings, ArrowRight } from 'lucide-react';
+import { Calendar, Package, Users, BarChart3, Settings, ArrowRight, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useScrollProgress } from '@/hooks/useScrollProgress';
@@ -8,8 +8,9 @@ import { EditableTranslation } from '@/components/EditableTranslation';
 import { EditableUniversalMedia } from '@/components/EditableUniversalMedia';
 import { EditableButton } from '@/components/EditableButton';
 import { EditableBackground } from '@/components/EditableBackground';
-import { EditableText } from '@/components/EditableText';
+import { UnifiedStyleModal } from '@/components/UnifiedStyleModal';
 import { useTypography } from '@/hooks/useTypography';
+import { useEditMode } from '@/contexts/EditModeContext';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -31,6 +32,7 @@ export function ScrollingFeatureCards() {
   const sectionRef = useRef<HTMLElement>(null);
   const { t } = useAppTranslation();
   const headingStyles = useTypography();
+  const { editMode } = useEditMode();
   
   const [imageUrls, setImageUrls] = useState<Record<number, string>>({
     0: '/src/assets/booking-hero.png',
@@ -40,6 +42,9 @@ export function ScrollingFeatureCards() {
     4: '/src/assets/whitelabel-demo.png',
   });
   const [mainCtaUrl, setMainCtaUrl] = useState('/functions');
+  const [editingCard, setEditingCard] = useState<number | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [cardData, setCardData] = useState<Record<number, any>>({});
 
   const loadImageSettings = async () => {
     const newImageUrls: Record<number, string> = {};
@@ -61,8 +66,72 @@ export function ScrollingFeatureCards() {
     }
   };
 
+  const loadCardData = async (index: number) => {
+    const elementPrefix = `scrolling-card-${index + 1}`;
+    
+    try {
+      // Load background
+      // @ts-ignore
+      const { data: bgData } = await supabase
+        .from('background_styles')
+        .select('background_class')
+        .eq('element_id', `${elementPrefix}-background`)
+        .maybeSingle();
+
+      // Load text elements
+      // @ts-ignore
+      const { data: numberData } = await supabase
+        .from('text_content')
+        .select('content, color_token')
+        .eq('element_id', `${elementPrefix}-number`)
+        .maybeSingle();
+
+      // @ts-ignore
+      const { data: titleData } = await supabase
+        .from('text_content')
+        .select('content, color_token')
+        .eq('element_id', `${elementPrefix}-title`)
+        .maybeSingle();
+
+      // @ts-ignore
+      const { data: descData } = await supabase
+        .from('text_content')
+        .select('content, color_token')
+        .eq('element_id', `${elementPrefix}-description`)
+        .maybeSingle();
+
+      // @ts-ignore
+      const { data: ctaData } = await supabase
+        .from('text_content')
+        .select('content, color_token')
+        .eq('element_id', `${elementPrefix}-cta`)
+        .maybeSingle();
+
+      setCardData(prev => ({
+        ...prev,
+        [index]: {
+          background: bgData?.background_class || 'bg-gradient-hero/90',
+          number: numberData?.content || cards[index].number,
+          numberColor: numberData?.color_token || 'foreground',
+          title: titleData?.content || cards[index].title,
+          titleColor: titleData?.color_token || 'foreground',
+          description: descData?.content || cards[index].description,
+          descriptionColor: descData?.color_token || 'muted-foreground',
+          ctaText: ctaData?.content || cards[index].ctaText,
+          ctaTextColor: ctaData?.color_token || 'primary-foreground',
+        }
+      }));
+    } catch (error) {
+      console.error('Error loading card data:', error);
+    }
+  };
+
   useEffect(() => {
     loadImageSettings();
+    // Load data for all cards
+    cards.forEach((_, index) => {
+      loadCardData(index);
+    });
   }, []);
 
   const cards: FeatureCard[] = [
@@ -209,82 +278,70 @@ export function ScrollingFeatureCards() {
                 <div
                   key={card.number}
                   className="relative"
-              style={{
-                opacity: state.opacity,
-                transform: `translateY(${state.translateY}px) scale(${state.scale})`,
-                transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                willChange: state.opacity > 0.2 ? 'transform, opacity' : 'auto',
-              }}
+                  style={{
+                    opacity: state.opacity,
+                    transform: `translateY(${state.translateY}px) scale(${state.scale})`,
+                    transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                    willChange: state.opacity > 0.2 ? 'transform, opacity' : 'auto',
+                  }}
+                  onMouseEnter={() => editMode && setHoveredCard(index)}
+                  onMouseLeave={() => editMode && setHoveredCard(null)}
                 >
-                  <EditableBackground
-                    elementId={`scrolling-card-bg-${index + 1}`}
-                    defaultBackground="bg-gradient-hero/90"
-                    allowedBackgrounds={[
-                      'bg-gradient-hero/90',
-                      'bg-gradient-ocean/90',
-                      'bg-gradient-warmth/90',
-                      'bg-gradient-sunset/90',
-                      'bg-gradient-fire/90',
-                      'glass-card',
-                      'liquid-glass',
-                      'glass-prominent',
-                      'bg-card',
-                      'bg-muted'
-                    ]}
-                    className="backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl"
-                  >
-                    <div className="p-10 lg:p-12">
-                      <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
-                        {/* Left: Content */}
-                        <div className="space-y-6">
-                          <div className="flex items-center gap-3">
-                            <Badge 
-                              className="bg-purple-500/20 text-purple-200 border border-purple-400/30 px-3 py-1.5 text-sm font-medium"
-                            >
-                              <EditableText
-                                contentId={`scrolling-card-number-${index + 1}`}
-                                className="font-medium"
-                              >
-                                {card.number}
-                              </EditableText>
-                            </Badge>
-                            <div className="p-2.5 rounded-lg bg-white/10 backdrop-blur-sm">
-                              <Icon className="h-5 w-5" />
-                            </div>
-                          </div>
-                          
-                          <h3 className="text-2xl lg:text-3xl font-semibold leading-tight">
-                            <EditableTranslation translationKey={card.titleKey}>
-                              {card.title}
-                            </EditableTranslation>
-                          </h3>
-                          
-                          <p className="text-base leading-relaxed opacity-80">
-                            <EditableTranslation translationKey={card.descriptionKey}>
-                              {card.description}
-                            </EditableTranslation>
-                          </p>
-                        
-                        <EditableButton
-                          buttonText={card.ctaText}
-                          buttonUrl={card.ctaUrl || '#'}
-                          onSave={(text, url) => {
-                            // URL updated in state
-                          }}
-                        >
-                        <Button 
-                            variant="ghost" 
-                            className="hover:bg-white/20 border border-white/20 group mt-2"
-                            asChild
+                  <div className={cn(
+                    "backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-10 lg:p-12 relative",
+                    cardData[index]?.background || 'bg-gradient-hero/90'
+                  )}>
+                    {/* Edit Button - Only in Edit Mode */}
+                    {editMode && hoveredCard === index && (
+                      <button
+                        className="absolute top-4 right-4 p-3 bg-primary text-primary-foreground rounded-full shadow-xl hover:scale-110 transition-transform z-10"
+                        onClick={() => setEditingCard(index)}
+                      >
+                        <Pencil className="w-5 h-5" />
+                      </button>
+                    )}
+                    <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
+                      {/* Left: Content */}
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                          <Badge 
+                            className="bg-purple-500/20 text-purple-200 border border-purple-400/30 px-3 py-1.5 text-sm font-medium"
                           >
-                            <a href={card.ctaUrl || '#'}>
+                            <span className={cn('font-medium', `text-${cardData[index]?.numberColor || 'foreground'}`)}>
+                              {cardData[index]?.number || card.number}
+                            </span>
+                          </Badge>
+                          <div className="p-2.5 rounded-lg bg-white/10 backdrop-blur-sm">
+                            <Icon className="h-5 w-5" />
+                          </div>
+                        </div>
+                        
+                        <h3 className={cn('text-2xl lg:text-3xl font-semibold leading-tight', `text-${cardData[index]?.titleColor || 'foreground'}`)}>
+                          <EditableTranslation translationKey={card.titleKey}>
+                            {cardData[index]?.title || card.title}
+                          </EditableTranslation>
+                        </h3>
+                        
+                        <p className={cn('text-base leading-relaxed opacity-80', `text-${cardData[index]?.descriptionColor || 'muted-foreground'}`)}>
+                          <EditableTranslation translationKey={card.descriptionKey}>
+                            {cardData[index]?.description || card.description}
+                          </EditableTranslation>
+                        </p>
+                      
+                        <Button 
+                          variant="ghost" 
+                          className="hover:bg-white/20 border border-white/20 group mt-2"
+                          asChild
+                        >
+                          <a href={card.ctaUrl || '#'}>
+                            <span className={cn(`text-${cardData[index]?.ctaTextColor || 'primary-foreground'}`)}>
                               <EditableTranslation translationKey={card.ctaKey}>
-                                {card.ctaText}
+                                {cardData[index]?.ctaText || card.ctaText}
                               </EditableTranslation>
-                              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                            </a>
-                          </Button>
-                        </EditableButton>
+                            </span>
+                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          </a>
+                        </Button>
                       </div>
                       
                       {/* Right: Image */}
@@ -303,9 +360,23 @@ export function ScrollingFeatureCards() {
                           />
                         </div>
                       </EditableUniversalMedia>
-                      </div>
                     </div>
-                  </EditableBackground>
+                  </div>
+
+                  {/* Unified Style Modal for this card */}
+                  <UnifiedStyleModal
+                    isOpen={editingCard === index}
+                    onClose={() => setEditingCard(null)}
+                    elementIdPrefix={`scrolling-card-${index + 1}`}
+                    initialData={cardData[index]}
+                    onSave={(data) => {
+                      setCardData(prev => ({
+                        ...prev,
+                        [index]: data
+                      }));
+                      loadCardData(index);
+                    }}
+                  />
                 </div>
               );
             })}
