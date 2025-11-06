@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2 } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 
 // Helper function to map color tokens to CSS classes
 const getColorClass = (colorToken: string): string => {
@@ -344,6 +344,20 @@ const ImageManager = () => {
     }
   };
 
+  const removeFromQueue = (index: number) => {
+    const newQueue = uploadQueue.filter((_, idx) => idx !== index);
+    setUploadQueue(newQueue);
+    
+    // Update files state to match the queue
+    if (newQueue.length === 0) {
+      setFiles(null);
+    } else {
+      const dt = new DataTransfer();
+      newQueue.forEach(item => dt.items.add(item.file));
+      setFiles(dt.files);
+    }
+  };
+
   const FileQueueDisplay = () => {
     if (uploadQueue.length === 0) return null;
     
@@ -370,43 +384,58 @@ const ImageManager = () => {
           {uploadQueue.map((item, idx) => (
             <div 
               key={idx} 
-              className="flex items-center gap-2 p-2 bg-background rounded text-sm"
+              className="flex items-center gap-2 p-2 bg-background rounded text-sm hover:bg-accent/50 transition-colors group"
             >
               {/* Status Icon */}
               {item.status === 'pending' && (
-                <div className="w-4 h-4 rounded-full border-2 border-muted-foreground" />
+                <div className="w-4 h-4 rounded-full border-2 border-muted-foreground shrink-0" />
               )}
               {item.status === 'uploading' && (
-                <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
               )}
               {item.status === 'success' && (
-                <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center shrink-0">
                   <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
               )}
               {item.status === 'error' && (
-                <div className="w-4 h-4 rounded-full bg-destructive flex items-center justify-center">
+                <div className="w-4 h-4 rounded-full bg-destructive flex items-center justify-center shrink-0">
                   <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </div>
               )}
               
-              {/* File Name */}
-              <span className="flex-1 truncate">{item.file.name}</span>
+              {/* File Name - selectable text */}
+              <span className="flex-1 truncate select-text cursor-text font-medium">
+                {item.file.name}
+              </span>
               
               {/* File Size */}
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground shrink-0">
                 {(item.file.size / 1024).toFixed(1)} KB
               </span>
               
               {/* Error Message */}
               {item.status === 'error' && item.error && (
-                <span className="text-xs text-destructive" title={item.error}>
+                <span className="text-xs text-destructive shrink-0" title={item.error}>
                   Failed
                 </span>
+              )}
+              
+              {/* Remove Button - only for pending files */}
+              {item.status === 'pending' && !uploading && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                  onClick={() => removeFromQueue(idx)}
+                  title="Remove from queue"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
               )}
             </div>
           ))}
