@@ -56,6 +56,7 @@ export function UnifiedStyleModal({
   // State for all editable elements
   const [background, setBackground] = useState(initialData.background || 'bg-card');
   const [iconCardBg, setIconCardBg] = useState('bg-white/10');
+  const [imageContainerBg, setImageContainerBg] = useState('bg-transparent');
   const [number, setNumber] = useState(initialData.number || '');
   const [numberColor, setNumberColor] = useState(initialData.numberColor || 'foreground');
   const [title, setTitle] = useState(initialData.title || '');
@@ -94,6 +95,17 @@ export function UnifiedStyleModal({
         
         if (iconBgData?.background_class) {
           setIconCardBg(iconBgData.background_class);
+        }
+
+        // Load image container background
+        const { data: imageContainerBgData } = await supabase
+          .from('background_styles')
+          .select('background_class')
+          .eq('element_id', `${elementIdPrefix}-image-container`)
+          .maybeSingle();
+        
+        if (imageContainerBgData?.background_class) {
+          setImageContainerBg(imageContainerBgData.background_class);
         }
         
         // Load text elements
@@ -276,14 +288,15 @@ export function UnifiedStyleModal({
       const updates = [
         { element_id: `${elementIdPrefix}-background`, background_class: background },
         { element_id: `${elementIdPrefix}-icon-card`, background_class: iconCardBg },
+        { element_id: `${elementIdPrefix}-image-container`, background_class: imageContainerBg },
         { element_id: `${elementIdPrefix}-number`, content: number, color_token: numberColor },
         { element_id: `${elementIdPrefix}-title`, content: title, color_token: titleColor },
         { element_id: `${elementIdPrefix}-description`, content: description, color_token: descriptionColor },
         { element_id: `${elementIdPrefix}-cta`, content: ctaText, color_token: ctaTextColor },
       ];
 
-      // Save backgrounds (main and icon card)
-      for (const bgUpdate of updates.slice(0, 2)) {
+      // Save backgrounds (main, icon card, and image container)
+      for (const bgUpdate of updates.slice(0, 3)) {
         // @ts-ignore
         const { data: existingBg } = await supabase
           .from('background_styles')
@@ -309,7 +322,7 @@ export function UnifiedStyleModal({
       }
 
       // Save text elements
-      for (const update of updates.slice(2)) {
+      for (const update of updates.slice(3)) {
         // @ts-ignore
         const { data: existing } = await supabase
           .from('text_content')
@@ -342,6 +355,7 @@ export function UnifiedStyleModal({
       onSave?.({
         background,
         iconCardBg,
+        imageContainerBg,
         number,
         numberColor,
         title,
@@ -600,6 +614,45 @@ export function UnifiedStyleModal({
                           >
                             <div className={cn('absolute inset-0', opt.value)} />
                             {iconCardBg === opt.value && (
+                              <Check className="absolute top-1 right-1 w-4 h-4 text-primary bg-white rounded-full p-0.5" />
+                            )}
+                            <span className="absolute bottom-1 left-1 text-[10px] font-medium text-foreground bg-white/90 px-1.5 py-0.5 rounded">
+                              {opt.label}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        <ImageIcon className="w-4 h-4" />
+                        Image Container Background
+                      </label>
+                      <p className="text-xs text-muted-foreground">Background color/effect behind carousel or single image</p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {[
+                          { value: 'bg-transparent', label: 'None' },
+                          { value: 'bg-white/5', label: 'White/5' },
+                          { value: 'bg-white/10', label: 'White/10' },
+                          { value: 'bg-black/5', label: 'Black/5' },
+                          { value: 'bg-gradient-to-br from-background/95 to-background/80', label: 'Gradient' },
+                          { value: 'bg-gradient-to-br from-purple-500/10 to-blue-500/10', label: 'Purple/Blue' },
+                          { value: 'bg-card', label: 'Card' },
+                          { value: 'bg-muted', label: 'Muted' },
+                        ].map((opt) => (
+                          <button
+                            key={opt.value}
+                            className={cn(
+                              'h-16 rounded-lg border-2 transition-all hover:scale-105 relative overflow-hidden',
+                              imageContainerBg === opt.value 
+                                ? 'border-primary ring-2 ring-primary/20' 
+                                : 'border-border hover:border-primary/50'
+                            )}
+                            onClick={() => setImageContainerBg(opt.value)}
+                          >
+                            <div className={cn('absolute inset-0', opt.value)} />
+                            {imageContainerBg === opt.value && (
                               <Check className="absolute top-1 right-1 w-4 h-4 text-primary bg-white rounded-full p-0.5" />
                             )}
                             <span className="absolute bottom-1 left-1 text-[10px] font-medium text-foreground bg-white/90 px-1.5 py-0.5 rounded">

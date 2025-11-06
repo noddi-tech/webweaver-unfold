@@ -285,7 +285,7 @@ export function ScrollingFeatureCards() {
                         alt={image.alt || `Slide ${imgIndex + 1}`}
                         loading="lazy"
                         decoding="async"
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                   </EditableBackground>
@@ -323,7 +323,7 @@ export function ScrollingFeatureCards() {
             alt={card.imageAlt}
             loading="lazy"
             decoding="async"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         </div>
       </EditableBackground>
