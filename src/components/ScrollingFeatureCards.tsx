@@ -268,15 +268,27 @@ export function ScrollingFeatureCards() {
             <CarouselContent className="h-[400px] lg:h-[500px]">
               {config.images.map((image, imgIndex) => (
                 <CarouselItem key={imgIndex}>
-                  <div className="relative w-full h-[400px] lg:h-[500px] bg-gradient-to-br from-background/95 to-background/80">
-                    <img
-                      src={image.url}
-                      alt={image.alt || `Slide ${imgIndex + 1}`}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
+                  <EditableBackground
+                    elementId={`scrolling-card-${index + 1}-image-container`}
+                    defaultBackground="bg-transparent"
+                    allowedBackgrounds={[
+                      'bg-transparent',
+                      'bg-gradient-to-br from-background/95 to-background/80',
+                      'bg-white/10',
+                      'bg-black/5',
+                      'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
+                    ]}
+                  >
+                    <div className="relative w-full h-[400px] lg:h-[500px]">
+                      <img
+                        src={image.url}
+                        alt={image.alt || `Slide ${imgIndex + 1}`}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  </EditableBackground>
                 </CarouselItem>
               ))}
             </CarouselContent>
@@ -294,15 +306,27 @@ export function ScrollingFeatureCards() {
     
     // Fallback to single image
     return (
-      <div className="relative min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10 bg-gradient-to-br from-background/95 to-background/80">
-        <img 
-          src={imageUrls[index] || card.imageUrl}
-          alt={card.imageAlt}
-          loading="lazy"
-          decoding="async"
-          className="w-full h-full object-contain"
-        />
-      </div>
+      <EditableBackground
+        elementId={`scrolling-card-${index + 1}-image-container`}
+        defaultBackground="bg-transparent"
+        allowedBackgrounds={[
+          'bg-transparent',
+          'bg-gradient-to-br from-background/95 to-background/80',
+          'bg-white/10',
+          'bg-black/5',
+          'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
+        ]}
+      >
+        <div className="relative min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10">
+          <img 
+            src={imageUrls[index] || card.imageUrl}
+            alt={card.imageAlt}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-contain"
+          />
+        </div>
+      </EditableBackground>
     );
   };
 
