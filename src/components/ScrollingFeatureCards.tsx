@@ -17,6 +17,13 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeColorToken } from '@/lib/colorUtils';
 
+// Import all feature card images
+import bookingHeroImg from '@/assets/booking-hero.png';
+import dashboardPreviewImg from '@/assets/dashboard-preview.jpg';
+import bookingStepTimeImg from '@/assets/booking-step-4-time.png';
+import npsDashboardImg from '@/assets/nps-dashboard.png';
+import whitelabelDemoImg from '@/assets/whitelabel-demo.png';
+
 interface FeatureCard {
   number: string;
   icon: typeof Calendar;
@@ -84,11 +91,11 @@ export function ScrollingFeatureCards() {
   ], [GRADIENT_COLORS, GLASS_EFFECTS]);
 
   const [imageUrls, setImageUrls] = useState<Record<number, string>>({
-    0: '/src/assets/booking-hero.png',
-    1: '/src/assets/dashboard-preview.jpg',
-    2: '/src/assets/booking-step-4-time.png',
-    3: '/src/assets/nps-dashboard.png',
-    4: '/src/assets/whitelabel-demo.png',
+    0: bookingHeroImg,
+    1: dashboardPreviewImg,
+    2: bookingStepTimeImg,
+    3: npsDashboardImg,
+    4: whitelabelDemoImg,
   });
   const [mainCtaUrl, setMainCtaUrl] = useState('/functions');
   const [editingCard, setEditingCard] = useState<number | null>(null);
@@ -205,7 +212,7 @@ export function ScrollingFeatureCards() {
       descriptionKey: 'function_cards.function_1.headline',
       ctaText: 'Learn More',
       ctaKey: 'function_cards.function_1.cta',
-      imageUrl: '/src/assets/booking-hero.png',
+      imageUrl: bookingHeroImg,
       imageAlt: 'Booking flow interface showing step-by-step customer journey',
     },
     {
@@ -217,7 +224,7 @@ export function ScrollingFeatureCards() {
       descriptionKey: 'function_cards.function_2.headline',
       ctaText: 'Explore Features',
       ctaKey: 'function_cards.function_2.cta',
-      imageUrl: '/src/assets/dashboard-preview.jpg',
+      imageUrl: dashboardPreviewImg,
       imageAlt: 'Inventory dashboard with real-time stock levels',
     },
     {
@@ -229,7 +236,7 @@ export function ScrollingFeatureCards() {
       descriptionKey: 'function_cards.function_3.headline',
       ctaText: 'See How',
       ctaKey: 'function_cards.function_3.cta',
-      imageUrl: '/src/assets/booking-step-4-time.png',
+      imageUrl: bookingStepTimeImg,
       imageAlt: 'Customer communication flow and notifications',
     },
     {
@@ -241,7 +248,7 @@ export function ScrollingFeatureCards() {
       descriptionKey: 'function_cards.function_4.headline',
       ctaText: 'View Analytics',
       ctaKey: 'function_cards.function_4.cta',
-      imageUrl: '/src/assets/nps-dashboard.png',
+      imageUrl: npsDashboardImg,
       imageAlt: 'Analytics dashboard showing key performance metrics',
     },
     {
@@ -253,7 +260,7 @@ export function ScrollingFeatureCards() {
       descriptionKey: 'function_cards.function_5.headline',
       ctaText: 'Discover More',
       ctaKey: 'function_cards.function_5.cta',
-      imageUrl: '/src/assets/whitelabel-demo.png',
+      imageUrl: whitelabelDemoImg,
       imageAlt: 'Workshop management interface and configuration',
     },
   ];
