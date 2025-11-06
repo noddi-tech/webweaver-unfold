@@ -78,6 +78,10 @@ export function UniversalImageCarouselModal({
   const [savedCarousels, setSavedCarousels] = useState<CarouselConfig[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  
+  // Batch selection for carousel images
+  const [batchSelectionMode, setBatchSelectionMode] = useState(false);
+  const [selectedImageIds, setSelectedImageIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (open) {
@@ -278,8 +282,151 @@ export function UniversalImageCarouselModal({
     setCarouselImages(carouselImages.filter((_, i) => i !== index));
   };
 
+  // Batch image selector component
+  const BatchImageSelector = () => {
+    const toggleImageSelection = (imageId: string) => {
+      const newSelected = new Set(selectedImageIds);
+      if (newSelected.has(imageId)) {
+        newSelected.delete(imageId);
+      } else {
+        newSelected.add(imageId);
+      }
+      setSelectedImageIds(newSelected);
+    };
+    
+    const selectAll = () => {
+      setSelectedImageIds(new Set(libraryImages.map(img => img.id)));
+    };
+    
+    const clearSelection = () => {
+      setSelectedImageIds(new Set());
+    };
+    
+    const addSelectedToCarousel = () => {
+      const selectedImages = libraryImages.filter(img => selectedImageIds.has(img.id));
+      const newCarouselImages = selectedImages.map(img => ({
+        url: img.file_url,
+        alt: img.alt || '',
+        title: img.title || ''
+      }));
+      
+      setCarouselImages([...carouselImages, ...newCarouselImages]);
+      setSelectedImageIds(new Set());
+      setBatchSelectionMode(false);
+      toast.success(`Added ${selectedImages.length} images to carousel`);
+    };
+    
+    return (
+      <div className="border rounded-lg p-4 bg-card space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-foreground">Select Multiple Images</h3>
+            <p className="text-sm text-foreground/70">
+              Choose images from your library to add to the carousel
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setBatchSelectionMode(false);
+              setSelectedImageIds(new Set());
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
+        
+        {/* Selection Controls */}
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={selectAll}
+            disabled={libraryImages.length === 0}
+          >
+            Select All ({libraryImages.length})
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={clearSelection}
+            disabled={selectedImageIds.size === 0}
+          >
+            Clear
+          </Button>
+          <div className="ml-auto text-sm font-medium text-foreground">
+            {selectedImageIds.size} selected
+          </div>
+        </div>
+        
+        {/* Image Grid with Checkboxes */}
+        <div className="border rounded-lg p-4 bg-muted/30 max-h-96 overflow-y-auto">
+          {libraryImages.length === 0 ? (
+            <p className="text-sm text-foreground/70 text-center py-8">
+              No images in library. Upload images in the Image Manager first.
+            </p>
+          ) : (
+            <div className="grid grid-cols-3 gap-3">
+              {libraryImages.map((img) => {
+                const isSelected = selectedImageIds.has(img.id);
+                return (
+                  <button
+                    key={img.id}
+                    type="button"
+                    onClick={() => toggleImageSelection(img.id)}
+                    className={`relative border-2 rounded-lg p-2 transition ${
+                      isSelected 
+                        ? 'border-primary bg-primary/10 ring-2 ring-primary/20' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    {/* Checkbox Overlay */}
+                    <div className={`absolute top-1 right-1 w-5 h-5 rounded border-2 flex items-center justify-center transition ${
+                      isSelected 
+                        ? 'bg-primary border-primary' 
+                        : 'bg-background border-border'
+                    }`}>
+                      {isSelected && (
+                        <svg className="w-3 h-3 text-primary-foreground" fill="currentColor" viewBox="0 0 12 12">
+                          <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                    
+                    <img 
+                      src={img.file_url} 
+                      alt={img.alt} 
+                      className="w-full h-20 object-cover rounded mb-1" 
+                    />
+                    <p className="text-xs truncate text-foreground">{img.title}</p>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+        
+        {/* Add Button */}
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            onClick={addSelectedToCarousel}
+            disabled={selectedImageIds.size === 0}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add {selectedImageIds.size} Image{selectedImageIds.size !== 1 ? 's' : ''} to Carousel
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   // Image picker component for carousel images
-  const CarouselImagePicker = ({ 
+  const CarouselImagePicker = ({
     index, 
     currentUrl 
   }: { 
@@ -342,7 +489,7 @@ export function UniversalImageCarouselModal({
             </div>
             
             {libraryImages.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">
+              <p className="text-sm text-foreground/70 text-center py-4">
                 No images in library. Upload images in the Image Manager first.
               </p>
             )}
@@ -537,11 +684,37 @@ export function UniversalImageCarouselModal({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <Label>Carousel Images</Label>
-                    <Button type="button" size="sm" onClick={addCarouselImage}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Image
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button type="button" size="sm" onClick={addCarouselImage}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Single Image
+                      </Button>
+                      <Button 
+                        type="button" 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setBatchSelectionMode(!batchSelectionMode)}
+                      >
+                        <ImageIcon className="h-4 w-4 mr-2" />
+                        {batchSelectionMode ? 'Hide' : 'Add Multiple from Library'}
+                      </Button>
+                    </div>
                   </div>
+
+                  {/* Batch Selection Mode */}
+                  {batchSelectionMode && <BatchImageSelector />}
+
+                  {/* Divider when both sections visible */}
+                  {batchSelectionMode && carouselImages.length > 0 && (
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-border" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">Current Images</span>
+                      </div>
+                    </div>
+                  )}
 
                   {carouselImages.map((img, index) => (
                     <div key={index} className="border rounded-lg p-4 space-y-3 bg-card">
@@ -574,7 +747,7 @@ export function UniversalImageCarouselModal({
                       
                       {/* Manual URL Input (collapsible) */}
                       <details className="group">
-                        <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground transition list-none">
+                        <summary className="cursor-pointer text-sm text-foreground hover:text-primary transition list-none">
                           <div className="flex items-center gap-2">
                             <LinkIcon className="h-3 w-3" />
                             <span>Or enter URL manually</span>
@@ -592,7 +765,7 @@ export function UniversalImageCarouselModal({
                       
                       {/* Alt Text */}
                       <div className="space-y-2">
-                        <Label htmlFor={`alt-${index}`} className="text-sm">Alt Text</Label>
+                        <Label htmlFor={`alt-${index}`} className="text-sm font-medium text-foreground">Alt Text</Label>
                         <Input
                           id={`alt-${index}`}
                           placeholder="Descriptive text for accessibility"
@@ -603,7 +776,7 @@ export function UniversalImageCarouselModal({
                       
                       {/* Optional Title */}
                       <div className="space-y-2">
-                        <Label htmlFor={`title-${index}`} className="text-sm text-muted-foreground">
+                        <Label htmlFor={`title-${index}`} className="text-sm text-foreground/80">
                           Title (Optional)
                         </Label>
                         <Input
