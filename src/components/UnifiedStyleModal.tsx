@@ -147,15 +147,46 @@ export function UnifiedStyleModal({
 
   const colorOptions = getColorTokenOptions();
 
+  // State for accessibility scores
+  const [accessibilityScores, setAccessibilityScores] = useState<any[]>([]);
+
   const calculateAccessibilityScores = () => {
     const scores = [];
     
+    // Require at least some content to calculate
+    if (!number && !title && !description && !ctaText) {
+      return scores;
+    }
+    
     try {
-      const bgValue = getComputedStyle(document.documentElement).getPropertyValue(`--card`).trim();
+      // Get background color - handle multiple sources
+      let bgValue = '';
+      if (background.includes('gradient') || background.includes('glass')) {
+        // For gradients/glass, use card color
+        bgValue = getComputedStyle(document.documentElement)
+          .getPropertyValue('--card').trim();
+      } else if (background.includes('bg-')) {
+        // Extract color from bg- class
+        const colorKey = background.replace('bg-', '').split('/')[0];
+        bgValue = getComputedStyle(document.documentElement)
+          .getPropertyValue(`--${colorKey}`).trim();
+      }
+      
+      if (!bgValue) {
+        bgValue = getComputedStyle(document.documentElement)
+          .getPropertyValue('--card').trim();
+      }
+      
+      // Only calculate if we have a valid background
+      if (!bgValue) {
+        console.warn('Could not determine background color for accessibility calculation');
+        return scores;
+      }
       
       // Number vs Background
-      if (number && bgValue) {
-        const numValue = getComputedStyle(document.documentElement).getPropertyValue(`--${normalizeColorToken(numberColor)}`).trim();
+      if (number) {
+        const numValue = getComputedStyle(document.documentElement)
+          .getPropertyValue(`--${normalizeColorToken(numberColor)}`).trim();
         if (numValue) {
           const ratio = calculateContrastRatio(`hsl(${bgValue})`, `hsl(${numValue})`);
           scores.push({
@@ -168,8 +199,9 @@ export function UnifiedStyleModal({
       }
 
       // Title vs Background
-      if (title && bgValue) {
-        const titleValue = getComputedStyle(document.documentElement).getPropertyValue(`--${normalizeColorToken(titleColor)}`).trim();
+      if (title) {
+        const titleValue = getComputedStyle(document.documentElement)
+          .getPropertyValue(`--${normalizeColorToken(titleColor)}`).trim();
         if (titleValue) {
           const ratio = calculateContrastRatio(`hsl(${bgValue})`, `hsl(${titleValue})`);
           scores.push({
@@ -182,8 +214,9 @@ export function UnifiedStyleModal({
       }
 
       // Description vs Background
-      if (description && bgValue) {
-        const descValue = getComputedStyle(document.documentElement).getPropertyValue(`--${normalizeColorToken(descriptionColor)}`).trim();
+      if (description) {
+        const descValue = getComputedStyle(document.documentElement)
+          .getPropertyValue(`--${normalizeColorToken(descriptionColor)}`).trim();
         if (descValue) {
           const ratio = calculateContrastRatio(`hsl(${bgValue})`, `hsl(${descValue})`);
           scores.push({
@@ -197,8 +230,10 @@ export function UnifiedStyleModal({
 
       // CTA Button contrast
       if (ctaText) {
-        const ctaBgValue = getComputedStyle(document.documentElement).getPropertyValue(`--${normalizeColorToken(ctaBgColor)}`).trim();
-        const ctaTxtValue = getComputedStyle(document.documentElement).getPropertyValue(`--${normalizeColorToken(ctaTextColor)}`).trim();
+        const ctaBgValue = getComputedStyle(document.documentElement)
+          .getPropertyValue(`--${normalizeColorToken(ctaBgColor)}`).trim();
+        const ctaTxtValue = getComputedStyle(document.documentElement)
+          .getPropertyValue(`--${normalizeColorToken(ctaTextColor)}`).trim();
         if (ctaBgValue && ctaTxtValue) {
           const ratio = calculateContrastRatio(`hsl(${ctaBgValue})`, `hsl(${ctaTxtValue})`);
           scores.push({
@@ -216,6 +251,12 @@ export function UnifiedStyleModal({
     return scores;
   };
 
+  // Recalculate accessibility when content or colors change
+  useEffect(() => {
+    const scores = calculateAccessibilityScores();
+    setAccessibilityScores(scores);
+  }, [background, number, numberColor, title, titleColor, description, descriptionColor, ctaText, ctaBgColor, ctaTextColor]);
+
   // Helper to normalize color token for comparison
   const normalizeColorToken = (token: string) => {
     return token.replace('text-', '').replace('--', '').trim();
@@ -225,18 +266,8 @@ export function UnifiedStyleModal({
     const normalized1 = normalizeColorToken(colorValue);
     const normalized2 = normalizeColorToken(currentValue);
     
-    // Also handle cases where white === primary-foreground, etc.
-    const colorMap: Record<string, string[]> = {
-      'white': ['white', 'primary-foreground'],
-      'primary-foreground': ['white', 'primary-foreground'],
-      'foreground': ['foreground'],
-      'muted-foreground': ['muted-foreground'],
-      'primary': ['primary'],
-      'secondary': ['secondary'],
-    };
-    
-    const matches = colorMap[normalized2] || [normalized2];
-    return matches.includes(normalized1);
+    // Exact match only - no fuzzy mapping
+    return normalized1 === normalized2;
   };
 
   const handleSave = async () => {
@@ -331,7 +362,6 @@ export function UnifiedStyleModal({
     }
   };
 
-  const accessibilityScores = calculateAccessibilityScores();
   const hasIssues = accessibilityScores.some(s => !s.pass);
 
   return (
@@ -355,19 +385,47 @@ export function UnifiedStyleModal({
           <div className="space-y-2">
             <label className="text-sm font-medium">Live Preview</label>
             <div className={cn('p-6 rounded-xl border', background)}>
+              {/* Icon card preview */}
+              {iconCardBg && (
+                <div className={cn('p-2.5 rounded-lg backdrop-blur-sm mb-4 inline-block', iconCardBg)}>
+                  <ImageIcon className="w-8 h-8 text-foreground" />
+                </div>
+              )}
+              
               {number && (
                 <div className="mb-4">
-                  <span className={cn('text-2xl font-bold', `text-${numberColor}`)}>{number}</span>
+                  <span 
+                    className="text-2xl font-bold"
+                    style={{ color: `hsl(var(--${normalizeColorToken(numberColor)}))` }}
+                  >
+                    {number}
+                  </span>
                 </div>
               )}
               {title && (
-                <h3 className={cn('text-xl font-bold mb-2', `text-${titleColor}`)}>{title}</h3>
+                <h3 
+                  className="text-xl font-bold mb-2"
+                  style={{ color: `hsl(var(--${normalizeColorToken(titleColor)}))` }}
+                >
+                  {title}
+                </h3>
               )}
               {description && (
-                <p className={cn('mb-4', `text-${descriptionColor}`)}>{description}</p>
+                <p 
+                  className="mb-4"
+                  style={{ color: `hsl(var(--${normalizeColorToken(descriptionColor)}))` }}
+                >
+                  {description}
+                </p>
               )}
               {ctaText && (
-                <button className={cn('px-4 py-2 rounded-lg', `bg-${ctaBgColor}`, `text-${ctaTextColor}`)}>
+                <button 
+                  className="px-4 py-2 rounded-lg font-medium"
+                  style={{
+                    backgroundColor: `hsl(var(--${normalizeColorToken(ctaBgColor)}))`,
+                    color: `hsl(var(--${normalizeColorToken(ctaTextColor)}))`
+                  }}
+                >
                   {ctaText}
                 </button>
               )}
