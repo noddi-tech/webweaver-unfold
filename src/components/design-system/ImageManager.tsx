@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2, X } from "lucide-react";
+import { Trash2, X, Upload } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Helper function to map color tokens to CSS classes
 const getColorClass = (colorToken: string): string => {
@@ -473,24 +474,56 @@ const ImageManager = () => {
         
         {/* Drag & Drop Zone */}
         <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            isDragging ? 'border-primary bg-primary/5' : 'border-border'
-          } ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+          className={cn(
+            "border-2 border-dashed rounded-lg p-12 text-center transition-all",
+            "bg-muted/30 hover:bg-muted/50",
+            isDragging 
+              ? "border-primary bg-primary/10 scale-[1.02]" 
+              : "border-muted-foreground/30",
+            uploading && "opacity-50 pointer-events-none"
+          )}
           onDrop={handleDrop}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
         >
-          <p className="text-muted-foreground mb-2">
-            Drag and drop images here, or click to browse
-          </p>
-          <Input 
-            type="file" 
-            multiple 
-            accept="image/*" 
-            onChange={onFileChange}
-            disabled={uploading}
-            className="max-w-xs mx-auto cursor-pointer"
-          />
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Upload className="w-8 h-8 text-primary" />
+            </div>
+            
+            <div className="space-y-1">
+              <p className="text-base font-medium text-foreground">
+                Drag and drop images here
+              </p>
+              <p className="text-sm text-muted-foreground">
+                or click the button below to browse
+              </p>
+            </div>
+            
+            <div className="flex flex-col items-center gap-2">
+              <Input 
+                id="file-upload-input"
+                type="file" 
+                multiple 
+                accept="image/*" 
+                onChange={onFileChange}
+                disabled={uploading}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                onClick={() => document.getElementById('file-upload-input')?.click()}
+                disabled={uploading}
+                className="mt-2"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Choose Files
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                PNG, JPG, GIF up to 10MB
+              </span>
+            </div>
+          </div>
         </div>
         
         {/* File Queue Display */}
