@@ -64,6 +64,16 @@ const ImageManager = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [imageToDelete, setImageToDelete] = useState<DbImage | null>(null);
 
+  // Enhanced bulk upload tracking
+  interface FileUploadStatus {
+    file: File;
+    status: 'pending' | 'uploading' | 'success' | 'error';
+    error?: string;
+    url?: string;
+  }
+  const [uploadQueue, setUploadQueue] = useState<FileUploadStatus[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+
   const previewRef = useRef<HTMLIFrameElement>(null);
   const [iframeKey, setIframeKey] = useState(0);
   const sectionToAnchor = (s: string) => {
@@ -152,41 +162,78 @@ const ImageManager = () => {
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFiles(e.target.files);
+    const selectedFiles = e.target.files;
+    if (!selectedFiles) return;
+    
+    const queue: FileUploadStatus[] = Array.from(selectedFiles).map(file => ({
+      file,
+      status: 'pending' as const,
+    }));
+    
+    setUploadQueue(queue);
+    setFiles(selectedFiles);
   };
 
   const upload = async () => {
-    if (!files || files.length === 0) return;
+    if (uploadQueue.length === 0) return;
     setUploading(true);
-    try {
-      for (const file of Array.from(files)) {
-        const ext = file.name.split(".").pop();
+    
+    const updatedQueue = [...uploadQueue];
+    
+    for (let i = 0; i < updatedQueue.length; i++) {
+      const item = updatedQueue[i];
+      if (item.status !== 'pending') continue;
+      
+      // Update status to uploading
+      updatedQueue[i] = { ...item, status: 'uploading' };
+      setUploadQueue([...updatedQueue]);
+      
+      try {
+        const file = item.file;
         const base = file.name.replace(/\.[^/.]+$/, "");
         const path = `${uploadSection}/${Date.now()}-${file.name}`;
-        const { error: upErr } = await supabase.storage.from("site-images").upload(path, file, { cacheControl: "3600", upsert: false });
+        
+        const { error: upErr } = await supabase.storage
+          .from("site-images")
+          .upload(path, file, { cacheControl: "3600", upsert: false });
+          
         if (upErr) throw upErr;
+        
         const { data: pub } = supabase.storage.from("site-images").getPublicUrl(path);
-        const title = base;
-        const { error: dbErr } = await supabase
-          .from("images")
-          .insert({
-            title,
-            alt: title,
-            caption: null,
-            section: uploadSection,
-            file_name: file.name,
-            file_url: pub.publicUrl,
-          } as any);
+        
+        const { error: dbErr } = await supabase.from("images").insert({
+          title: base,
+          alt: base,
+          caption: null,
+          section: uploadSection,
+          file_name: file.name,
+          file_url: pub.publicUrl,
+        } as any);
+        
         if (dbErr) throw dbErr;
+        
+        // Mark as success
+        updatedQueue[i] = { ...item, status: 'success', url: pub.publicUrl };
+        setUploadQueue([...updatedQueue]);
+        
+      } catch (e: any) {
+        // Mark as error but CONTINUE with other files
+        updatedQueue[i] = { ...item, status: 'error', error: e.message };
+        setUploadQueue([...updatedQueue]);
       }
-      toast({ title: "Upload complete" });
-      setFiles(null);
-      fetchImages();
-    } catch (e: any) {
-      toast({ title: "Upload failed", description: e.message, variant: "destructive" });
-    } finally {
-      setUploading(false);
     }
+    
+    const successCount = updatedQueue.filter(u => u.status === 'success').length;
+    const errorCount = updatedQueue.filter(u => u.status === 'error').length;
+    
+    toast({ 
+      title: "Upload complete",
+      description: `${successCount} succeeded, ${errorCount} failed`
+    });
+    
+    setUploading(false);
+    setFiles(null);
+    fetchImages();
   };
 
   const saveImage = async (img: DbImage) => {
@@ -275,6 +322,99 @@ const ImageManager = () => {
     }
   };
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const droppedFiles = Array.from(e.dataTransfer.files).filter(
+      file => file.type.startsWith('image/')
+    );
+    
+    if (droppedFiles.length > 0) {
+      const queue: FileUploadStatus[] = droppedFiles.map(file => ({
+        file,
+        status: 'pending' as const,
+      }));
+      setUploadQueue(queue);
+      
+      // Update files state for compatibility
+      const dt = new DataTransfer();
+      droppedFiles.forEach(f => dt.items.add(f));
+      setFiles(dt.files);
+    }
+  };
+
+  const FileQueueDisplay = () => {
+    if (uploadQueue.length === 0) return null;
+    
+    return (
+      <div className="space-y-2 p-4 bg-muted/30 rounded-lg border border-border">
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-sm font-semibold">Upload Queue ({uploadQueue.length} files)</h4>
+          {!uploading && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => {
+                setUploadQueue([]);
+                setFiles(null);
+              }}
+              className="h-7 text-xs"
+            >
+              Clear
+            </Button>
+          )}
+        </div>
+        
+        <div className="space-y-1 max-h-[300px] overflow-y-auto">
+          {uploadQueue.map((item, idx) => (
+            <div 
+              key={idx} 
+              className="flex items-center gap-2 p-2 bg-background rounded text-sm"
+            >
+              {/* Status Icon */}
+              {item.status === 'pending' && (
+                <div className="w-4 h-4 rounded-full border-2 border-muted-foreground" />
+              )}
+              {item.status === 'uploading' && (
+                <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              )}
+              {item.status === 'success' && (
+                <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+              {item.status === 'error' && (
+                <div className="w-4 h-4 rounded-full bg-destructive flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+              )}
+              
+              {/* File Name */}
+              <span className="flex-1 truncate">{item.file.name}</span>
+              
+              {/* File Size */}
+              <span className="text-xs text-muted-foreground">
+                {(item.file.size / 1024).toFixed(1)} KB
+              </span>
+              
+              {/* Error Message */}
+              {item.status === 'error' && item.error && (
+                <span className="text-xs text-destructive" title={item.error}>
+                  Failed
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <section className="space-y-8">
       <header className="space-y-2">
@@ -284,34 +424,68 @@ const ImageManager = () => {
 
       <Card className="p-6 bg-card border-border space-y-4">
         <h3 className="text-xl font-semibold">Upload Images</h3>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label>Section</Label>
-            <Select value={uploadSection} onValueChange={setUploadSection}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select section" />
-              </SelectTrigger>
-              <SelectContent>
-                {sections.map((s) => (
-                  <SelectItem key={s.id} value={s.name}>{s.display_name} ({s.name})</SelectItem>
-                ))}
-                {/* Fallback common sections */}
-                {sections.length === 0 && ["hero"].map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Files</Label>
-            <Input type="file" multiple accept="image/*" onChange={onFileChange} />
-          </div>
+        <div className="space-y-2">
+          <Label>Section</Label>
+          <Select value={uploadSection} onValueChange={setUploadSection}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select section" />
+            </SelectTrigger>
+            <SelectContent>
+              {sections.map((s) => (
+                <SelectItem key={s.id} value={s.name}>{s.display_name} ({s.name})</SelectItem>
+              ))}
+              {/* Fallback common sections */}
+              {sections.length === 0 && ["hero"].map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+        
+        {/* Drag & Drop Zone */}
+        <div
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            isDragging ? 'border-primary bg-primary/5' : 'border-border'
+          } ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+          onDrop={handleDrop}
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={() => setIsDragging(false)}
+        >
+          <p className="text-muted-foreground mb-2">
+            Drag and drop images here, or click to browse
+          </p>
+          <Input 
+            type="file" 
+            multiple 
+            accept="image/*" 
+            onChange={onFileChange}
+            disabled={uploading}
+            className="max-w-xs mx-auto cursor-pointer"
+          />
+        </div>
+        
+        {/* File Queue Display */}
+        <FileQueueDisplay />
+        
         <div className="flex gap-3">
-          <Button onClick={upload} disabled={uploading || !files}>
-            {uploading ? "Uploading..." : "Upload"}
+          <Button 
+            onClick={upload} 
+            disabled={uploading || uploadQueue.length === 0}
+          >
+            {uploading ? "Uploading..." : uploadQueue.length > 0 ? `Upload ${uploadQueue.length} file(s)` : "Upload"}
           </Button>
-          {files && <span className="text-sm text-muted-foreground self-center">{files.length} file(s) selected</span>}
+          
+          {uploadQueue.length > 0 && !uploading && (
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setUploadQueue([]);
+                setFiles(null);
+              }}
+            >
+              Clear Queue
+            </Button>
+          )}
         </div>
         <Separator className="my-4" />
         <div className="space-y-2">
