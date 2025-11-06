@@ -1,4 +1,19 @@
-// Centralized color system configuration
+/**
+ * @deprecated This file is being phased out in favor of database-driven colors.
+ * 
+ * All colors now load dynamically from the `color_tokens` table via the `useColorSystem` hook.
+ * This file is kept only for legacy compatibility and type definitions.
+ * 
+ * To manage colors, use the CMS Design System or update the `color_tokens` table directly.
+ * 
+ * Migration status: In progress
+ * - ✅ UnifiedStyleModal: Now uses useColorSystem hook
+ * - ✅ BackgroundEditModal: Now uses useColorSystem hook
+ * - ✅ EditableColorSystem: Now uses useColorSystem hook
+ * - Database is the single source of truth
+ */
+
+// Centralized color system configuration (LEGACY - Use useColorSystem hook instead)
 // Single source of truth for all colors, gradients, and glass effects
 // Used across EditableColorSystem (CMS), BackgroundEditModal, and other color-related components
 

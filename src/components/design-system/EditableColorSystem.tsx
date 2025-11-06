@@ -23,6 +23,7 @@ import {
   isValidHex 
 } from "@/lib/colorUtils";
 import { supabase } from "@/integrations/supabase/client";
+import { useColorSystem } from "@/hooks/useColorSystem";
 
 interface ColorToken {
   name: string;
@@ -35,7 +36,7 @@ interface ColorToken {
   type?: 'color' | 'gradient';
   gradientDirection?: string;
   gradientStops?: string[];
-  category?: 'surfaces' | 'text' | 'interactive' | 'feedback' | 'gradients';
+  category?: 'surfaces' | 'text' | 'interactive' | 'feedback' | 'gradients' | 'glass';
   usedIn?: string[];
   components?: string[];
 }
@@ -249,6 +250,7 @@ const defaultColors: ColorToken[] = [
 ];
 
 export const EditableColorSystem = () => {
+  const { ALL_BACKGROUND_OPTIONS, TEXT_COLOR_OPTIONS, loading: colorSystemLoading } = useColorSystem();
   const [colors, setColors] = useState<ColorToken[]>(defaultColors);
   const [colorFormat, setColorFormat] = useState<'hsl' | 'hex' | 'rgb'>('hsl');
   const [autoContrast, setAutoContrast] = useState(true);
@@ -271,50 +273,50 @@ export const EditableColorSystem = () => {
     return !isPrimitive; // Only show non-primitive tokens
   });
 
-  // Load colors from database on mount
+  // Load colors from database via useColorSystem hook
   useEffect(() => {
-    const loadColors = async () => {
+    if (!colorSystemLoading && ALL_BACKGROUND_OPTIONS.length > 0) {
       const root = document.documentElement;
       
-      // Fetch saved colors from database
-      const { data: savedTokens, error } = await supabase
-        .from('color_tokens')
-        .select('*');
+      // Transform ColorOption[] from database to ColorToken[] format
+      const dbColors: ColorToken[] = ALL_BACKGROUND_OPTIONS.map(opt => ({
+        name: opt.label,
+        cssVar: opt.cssVar || '',
+        value: opt.cssVar ? getCssVariableValue(opt.cssVar) : '',
+        className: opt.preview,
+        type: opt.type === 'gradient' ? 'gradient' : 'color',
+        category: opt.category,
+        description: opt.description,
+        isForeground: opt.cssVar?.includes('foreground') || false,
+        usedIn: [],
+        components: []
+      }));
       
-      if (error) {
-        console.error('Error loading colors:', error);
-      }
-      
-      // Merge database values with defaults
-      const initial = defaultColors.map((c) => {
-        const dbToken = savedTokens?.find(t => t.css_var === c.cssVar);
-        if (dbToken) {
-          return {
-            ...c,
-            value: dbToken.value,
-            description: dbToken.description || c.description
-          };
-        }
-        
-        // Fall back to CSS computed value
-        const computed = getComputedStyle(root);
-        return {
-          ...c,
-          value: (computed.getPropertyValue(c.cssVar) || c.value).trim(),
-        };
+      // Merge with defaultColors to maintain structure for solid colors
+      const mergedColors = defaultColors.map((defaultColor) => {
+        const dbColor = dbColors.find(db => db.cssVar === defaultColor.cssVar);
+        return dbColor || defaultColor;
       });
       
-      setColors(initial);
-      setSavedColors(initial);
+      setColors(mergedColors);
+      setSavedColors(mergedColors);
       
       // Apply loaded colors to CSS variables
-      initial.forEach(color => {
-        root.style.setProperty(color.cssVar, color.value);
+      mergedColors.forEach(color => {
+        if (color.cssVar) {
+          root.style.setProperty(color.cssVar, color.value);
+        }
       });
-    };
-    
-    loadColors();
-  }, []);
+    }
+  }, [colorSystemLoading, ALL_BACKGROUND_OPTIONS]);
+
+  // Helper to get CSS variable value
+  const getCssVariableValue = (cssVar: string): string => {
+    if (typeof window === 'undefined') return '';
+    const root = document.documentElement;
+    const value = getComputedStyle(root).getPropertyValue(cssVar).trim();
+    return value;
+  };
 
   const updateColor = (index: number, value: string, format: 'hsl' | 'hex' = 'hsl') => {
     const newColors = [...colors];

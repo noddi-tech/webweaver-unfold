@@ -147,11 +147,12 @@ export default {
 		backgroundImage: {
 			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
 			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-			'gradient-hero': 'var(--gradient-hero)',
-			'gradient-sunset': 'var(--gradient-sunset)',
-			'gradient-warmth': 'var(--gradient-warmth)',
-			'gradient-ocean': 'var(--gradient-ocean)',
-			'gradient-fire': 'var(--gradient-fire)',
+			// Canonical gradients - managed via CMS (color_tokens table)
+			'gradient-hero': 'linear-gradient(135deg, hsl(249 67% 24%), hsl(266 85% 58%))',
+			'gradient-sunset': 'linear-gradient(135deg, hsl(249 67% 24%), hsl(266 85% 58%), hsl(25 95% 63%))',
+			'gradient-warmth': 'linear-gradient(135deg, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))',
+			'gradient-ocean': 'linear-gradient(135deg, hsl(210 100% 50%), hsl(180 70% 45%), hsl(142 76% 50%))',
+			'gradient-fire': 'linear-gradient(135deg, hsl(25 95% 53%), hsl(266 85% 58%))',
 		},
 			keyframes: {
 				'accordion-down': {
