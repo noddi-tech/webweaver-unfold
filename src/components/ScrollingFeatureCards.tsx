@@ -2,6 +2,8 @@ import { useRef, useState, useEffect, useMemo } from 'react';
 import { Calendar, Package, Users, BarChart3, Settings, ArrowRight, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 import { useScrollProgress } from '@/hooks/useScrollProgress';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { EditableTranslation } from '@/components/EditableTranslation';
@@ -101,9 +103,22 @@ export function ScrollingFeatureCards() {
   const [editingCard, setEditingCard] = useState<number | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [cardData, setCardData] = useState<Record<number, any>>({});
+  const [carouselData, setCarouselData] = useState<Record<number, {
+    display_type: 'image' | 'carousel';
+    carousel_config?: {
+      id: string;
+      name: string;
+      autoplay: boolean;
+      autoplay_delay: number;
+      show_navigation: boolean;
+      show_dots: boolean;
+      images: Array<{url: string; alt: string; title?: string}>;
+    };
+  }>>({});
 
   const loadImageSettings = async () => {
     const newImageUrls: Record<number, string> = {};
+    const newCarouselData: Record<number, any> = {};
     
     for (let i = 0; i < 5; i++) {
       const { data } = await supabase
@@ -112,13 +127,44 @@ export function ScrollingFeatureCards() {
         .eq('location_id', `scrolling-card-${i + 1}`)
         .maybeSingle();
       
-      if (data?.image_url) {
-        newImageUrls[i] = data.image_url;
+      if (data) {
+        if (data.display_type === 'carousel' && data.carousel_config_id) {
+          // Load carousel configuration
+          const { data: carouselConfig } = await supabase
+            .from('carousel_configs')
+            .select('*')
+            .eq('id', data.carousel_config_id)
+            .single();
+          
+          if (carouselConfig) {
+            newCarouselData[i] = {
+              display_type: 'carousel',
+              carousel_config: {
+                id: carouselConfig.id,
+                name: carouselConfig.name,
+                autoplay: carouselConfig.autoplay,
+                autoplay_delay: carouselConfig.autoplay_delay || 3000,
+                show_navigation: carouselConfig.show_navigation,
+                show_dots: carouselConfig.show_dots,
+                images: Array.isArray(carouselConfig.images) 
+                  ? carouselConfig.images 
+                  : []
+              }
+            };
+          }
+        } else if (data.image_url) {
+          // Single image
+          newImageUrls[i] = data.image_url;
+          newCarouselData[i] = { display_type: 'image' };
+        }
       }
     }
     
     if (Object.keys(newImageUrls).length > 0) {
       setImageUrls(prev => ({ ...prev, ...newImageUrls }));
+    }
+    if (Object.keys(newCarouselData).length > 0) {
+      setCarouselData(prev => ({ ...prev, ...newCarouselData }));
     }
   };
 
@@ -201,6 +247,69 @@ export function ScrollingFeatureCards() {
       loadCardData(index);
     });
   }, []);
+
+  const renderMedia = (index: number, card: FeatureCard) => {
+    const mediaData = carouselData[index];
+    
+    // If carousel data exists and has images
+    if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
+      const config = mediaData.carousel_config;
+      const plugins = config.autoplay 
+        ? [Autoplay({ delay: config.autoplay_delay, stopOnInteraction: true })]
+        : [];
+      
+      return (
+        <div className="relative min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10">
+          <Carousel 
+            opts={{ loop: true }}
+            plugins={plugins}
+            className="w-full h-full"
+          >
+            <CarouselContent className="h-[400px] lg:h-[500px]">
+              {config.images.map((image, imgIndex) => (
+                <CarouselItem key={imgIndex}>
+                  <div className="relative w-full h-[400px] lg:h-[500px]">
+                    <img
+                      src={image.url}
+                      alt={image.alt || `Slide ${imgIndex + 1}`}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                    />
+                    {image.title && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-4">
+                        <p className="text-sm font-medium">{image.title}</p>
+                      </div>
+                    )}
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            
+            {config.show_navigation && (
+              <>
+                <CarouselPrevious className="left-4 bg-white/80 hover:bg-white" />
+                <CarouselNext className="right-4 bg-white/80 hover:bg-white" />
+              </>
+            )}
+          </Carousel>
+        </div>
+      );
+    }
+    
+    // Fallback to single image
+    return (
+      <div className="relative min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10">
+        <img 
+          src={imageUrls[index] || card.imageUrl}
+          alt={card.imageAlt}
+          loading="lazy"
+          decoding="async"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  };
 
   const cards: FeatureCard[] = [
     {
@@ -418,17 +527,9 @@ export function ScrollingFeatureCards() {
                       <EditableUniversalMedia
                         locationId={`scrolling-card-${index + 1}`}
                         onSave={() => loadImageSettings()}
-                        placeholder={`Click to set image for ${card.title}`}
+                        placeholder={`Click to set image/carousel for ${card.title}`}
                       >
-                        <div className="relative min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10">
-                          <img 
-                            src={imageUrls[index] || card.imageUrl}
-                            alt={card.imageAlt}
-                            loading="lazy"
-                            decoding="async"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
+                        {renderMedia(index, card)}
                       </EditableUniversalMedia>
                     </div>
                   </div>
