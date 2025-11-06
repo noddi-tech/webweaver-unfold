@@ -24,6 +24,7 @@ interface TranslationEditModalProps {
   translationKey?: string;
   onSave?: () => void;
   fallbackText?: string;
+  useElementId?: boolean; // When true, query by element_id instead of id
 }
 
 interface Translation {
@@ -40,6 +41,7 @@ export function TranslationEditModal({
   translationKey,
   onSave,
   fallbackText,
+  useElementId = false,
 }: TranslationEditModalProps) {
   const [content, setContent] = useState('');
   const [translations, setTranslations] = useState<Translation[]>([]);
@@ -57,12 +59,30 @@ export function TranslationEditModal({
     setLoading(true);
     try {
       if (contentTable === 'text_content') {
-        const { data, error } = await supabase
-          .from('text_content')
-          .select('content')
-          .eq('id', contentId)
-          .maybeSingle();
-
+        // Query by element_id if useElementId is true, otherwise by id
+        let data: any;
+        let error: any;
+        
+        if (useElementId) {
+          // @ts-ignore - TypeScript has issues with complex Supabase generic types
+          const res = await supabase
+            .from('text_content')
+            .select('content')
+            .eq('element_id', contentId)
+            .maybeSingle();
+          data = res.data;
+          error = res.error;
+        } else {
+          // @ts-ignore - TypeScript has issues with complex Supabase generic types
+          const res = await supabase
+            .from('text_content')
+            .select('content')
+            .eq('id', contentId)
+            .maybeSingle();
+          data = res.data;
+          error = res.error;
+        }
+        
         if (error) throw error;
         setContent(data?.content || '');
 
@@ -132,11 +152,25 @@ export function TranslationEditModal({
     setSaving(true);
     try {
       if (contentTable === 'text_content') {
-        const { error } = await supabase
-          .from('text_content')
-          .update({ content })
-          .eq('id', contentId);
-
+        // Update by element_id if useElementId is true, otherwise by id
+        let error: any;
+        
+        if (useElementId) {
+          // @ts-ignore - TypeScript has issues with complex Supabase generic types
+          const res = await supabase
+            .from('text_content')
+            .update({ content })
+            .eq('element_id', contentId);
+          error = res.error;
+        } else {
+          // @ts-ignore - TypeScript has issues with complex Supabase generic types
+          const res = await supabase
+            .from('text_content')
+            .update({ content })
+            .eq('id', contentId);
+          error = res.error;
+        }
+        
         if (error) throw error;
       } else if (contentTable === 'translations' && translationKey) {
         // Check if translation exists

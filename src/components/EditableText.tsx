@@ -54,6 +54,7 @@ export function EditableText({
         contentTable="text_content"
         translationKey={translationKey}
         onSave={onSave}
+        useElementId={true}
       />
     </>
   );
