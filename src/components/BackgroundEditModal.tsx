@@ -7,14 +7,8 @@ import { cn } from '@/lib/utils';
 import { ColorPaletteTab } from './design-system/ColorPaletteTab';
 import { calculateContrastRatio, getOptimalTextColor, getContrastLevel } from '@/lib/colorUtils';
 import { supabase } from '@/integrations/supabase/client';
-import {
-  SOLID_COLORS,
-  GRADIENT_COLORS,
-  GLASS_EFFECTS,
-  TEXT_COLOR_OPTIONS,
-  getOptimalTextColorForBackground,
-  meetsContrastRequirement,
-} from '@/config/colorSystem';
+import { useColorSystem } from '@/hooks/useColorSystem';
+import { getOptimalTextColorForBackground, meetsContrastRequirement, type ColorOption } from '@/config/colorSystem';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Check, AlertTriangle } from 'lucide-react';
@@ -52,29 +46,31 @@ export function BackgroundEditModal({
   );
   const [activeTab, setActiveTab] = useState('gradients');
 
-  // Organize options by type
-  const BACKGROUND_OPTIONS = {
-    gradients: GRADIENT_COLORS,
-    glass: GLASS_EFFECTS,
-    solids: SOLID_COLORS,
-  };
+  // Load color system from database
+  const {
+    SOLID_COLORS,
+    GRADIENT_COLORS,
+    GLASS_EFFECTS,
+    TEXT_COLOR_OPTIONS,
+    loading: colorSystemLoading,
+  } = useColorSystem();
 
   // Filter available options based on allowedBackgrounds prop
-  const getFilteredOptions = (category: keyof typeof BACKGROUND_OPTIONS) => {
-    if (!allowedBackgrounds) return BACKGROUND_OPTIONS[category];
+  const getFilteredOptions = (options: ColorOption[]) => {
+    if (!allowedBackgrounds) return options;
 
-    return BACKGROUND_OPTIONS[category].filter((bg) => {
-      // Check exact match first
+    return options.filter((bg) => {
       if (allowedBackgrounds.includes(bg.value)) return true;
-
-      // Check if any allowed background is this background with opacity suffix
       return allowedBackgrounds.some((allowed) => {
-        // Strip opacity suffix from allowed background (e.g., 'bg-gradient-hero/90' -> 'bg-gradient-hero')
         const baseAllowed = allowed.split('/')[0];
         return baseAllowed === bg.value;
       });
     });
   };
+
+  const solidOptions = getFilteredOptions(SOLID_COLORS);
+  const gradientOptions = getFilteredOptions(GRADIENT_COLORS);
+  const glassOptions = getFilteredOptions(GLASS_EFFECTS);
 
   // Filter text color options
   const filteredTextColors = allowedTextColors
@@ -189,17 +185,15 @@ export function BackgroundEditModal({
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="gradients">
-              Gradients ({getFilteredOptions('gradients').length})
-            </TabsTrigger>
-            <TabsTrigger value="glass">Glass ({getFilteredOptions('glass').length})</TabsTrigger>
-            <TabsTrigger value="solids">Solids ({getFilteredOptions('solids').length})</TabsTrigger>
+            <TabsTrigger value="gradients">Gradients ({gradientOptions.length})</TabsTrigger>
+            <TabsTrigger value="glass">Glass ({glassOptions.length})</TabsTrigger>
+            <TabsTrigger value="solids">Solids ({solidOptions.length})</TabsTrigger>
             <TabsTrigger value="palette">Palette</TabsTrigger>
           </TabsList>
 
           <TabsContent value="gradients" className="space-y-4 mt-4">
             <div className="grid grid-cols-2 gap-4">
-              {getFilteredOptions('gradients').map((bg) => {
+              {gradientOptions.map((bg) => {
                 // Find the allowed version with opacity if it exists
                 const allowedVersion =
                   allowedBackgrounds?.find((allowed) => allowed.startsWith(bg.value)) || bg.value;
@@ -237,7 +231,7 @@ export function BackgroundEditModal({
 
           <TabsContent value="glass" className="space-y-4 mt-4">
             <div className="grid grid-cols-2 gap-4">
-              {getFilteredOptions('glass').map((bg) => {
+              {glassOptions.map((bg) => {
                 const allowedVersion =
                   allowedBackgrounds?.find((allowed) => allowed.startsWith(bg.value)) || bg.value;
                 const isSelected =
@@ -278,7 +272,7 @@ export function BackgroundEditModal({
 
           <TabsContent value="solids" className="space-y-4 mt-4">
             <div className="grid grid-cols-2 gap-4">
-              {getFilteredOptions('solids').map((bg) => (
+              {solidOptions.map((bg) => (
                 <Card
                   key={bg.value}
                   className={`p-4 cursor-pointer transition-all ${

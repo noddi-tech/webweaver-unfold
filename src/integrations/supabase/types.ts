@@ -160,26 +160,47 @@ export type Database = {
       }
       color_tokens: {
         Row: {
+          active: boolean | null
+          category: string | null
+          color_type: string | null
           created_at: string
           css_var: string
           description: string | null
           id: string
+          label: string | null
+          optimal_text_color: string | null
+          preview_class: string | null
+          sort_order: number | null
           updated_at: string
           value: string
         }
         Insert: {
+          active?: boolean | null
+          category?: string | null
+          color_type?: string | null
           created_at?: string
           css_var: string
           description?: string | null
           id?: string
+          label?: string | null
+          optimal_text_color?: string | null
+          preview_class?: string | null
+          sort_order?: number | null
           updated_at?: string
           value: string
         }
         Update: {
+          active?: boolean | null
+          category?: string | null
+          color_type?: string | null
           created_at?: string
           css_var?: string
           description?: string | null
           id?: string
+          label?: string | null
+          optimal_text_color?: string | null
+          preview_class?: string | null
+          sort_order?: number | null
           updated_at?: string
           value?: string
         }

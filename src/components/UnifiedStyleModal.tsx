@@ -10,7 +10,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getColorTokenOptions, calculateContrastRatio, getContrastLevel } from '@/lib/colorUtils';
 import { cn } from '@/lib/utils';
-import { ALL_BACKGROUND_OPTIONS } from '@/config/colorSystem';
+import { useColorSystem } from '@/hooks/useColorSystem';
+import type { ColorOption } from '@/config/colorSystem';
+import { Card } from '@/components/ui/card';
+import { Check } from 'lucide-react';
 
 interface SubElement {
   id: string;
@@ -62,15 +65,16 @@ export function UnifiedStyleModal({
   const [ctaBgColor, setCtaBgColor] = useState(initialData.ctaBgColor || 'primary');
   const [ctaTextColor, setCtaTextColor] = useState(initialData.ctaTextColor || 'primary-foreground');
 
-  const colorOptions = getColorTokenOptions();
+  // Load color system from database
+  const {
+    SOLID_COLORS,
+    GRADIENT_COLORS,
+    GLASS_EFFECTS,
+    TEXT_COLOR_OPTIONS,
+    loading: colorSystemLoading,
+  } = useColorSystem();
 
-  // Use centralized color system for all background options
-  const backgroundOptions = ALL_BACKGROUND_OPTIONS.map(option => ({
-    value: option.value,
-    label: option.label,
-    description: option.description,
-    category: option.category,
-  }));
+  const colorOptions = getColorTokenOptions();
 
   const calculateAccessibilityScores = () => {
     const scores = [];
@@ -317,79 +321,143 @@ export function UnifiedStyleModal({
               </TabsList>
 
               <TabsContent value="background" className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Background Style</label>
-                  <Select value={background} onValueChange={setBackground}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {/* Group by category for better UX */}
-                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Gradients</div>
-                      {backgroundOptions.filter(o => o.category === 'gradients').map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <div className="flex flex-col">
-                            <span>{option.label}</span>
-                            <span className="text-xs text-muted-foreground">{option.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-2">Glass Effects</div>
-                      {backgroundOptions.filter(o => o.category === 'glass').map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <div className="flex flex-col">
-                            <span>{option.label}</span>
-                            <span className="text-xs text-muted-foreground">{option.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-2">Solid Colors</div>
-                      {backgroundOptions.filter(o => o.category === 'surfaces' || o.category === 'interactive' || o.category === 'feedback').map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <div className="flex flex-col">
-                            <span>{option.label}</span>
-                            <span className="text-xs text-muted-foreground">{option.description}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {colorSystemLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading color options...</p>
+                ) : (
+                  <Tabs defaultValue="gradients" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="gradients">Gradients ({GRADIENT_COLORS.length})</TabsTrigger>
+                      <TabsTrigger value="glass">Glass ({GLASS_EFFECTS.length})</TabsTrigger>
+                      <TabsTrigger value="solids">Solids ({SOLID_COLORS.length})</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="gradients" className="mt-4">
+                      <div className="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2">
+                        {GRADIENT_COLORS.map((bg) => (
+                          <Card
+                            key={bg.value}
+                            className={cn(
+                              'p-3 cursor-pointer transition-all hover:shadow-md',
+                              background === bg.value ? 'ring-2 ring-primary shadow-lg' : 'hover:ring-1 hover:ring-border'
+                            )}
+                            onClick={() => setBackground(bg.value)}
+                          >
+                            <div className={cn('h-20 rounded-lg mb-2 relative flex items-center justify-center', bg.preview)}>
+                              {background === bg.value && (
+                                <Check className="absolute top-1 right-1 w-5 h-5 text-white bg-primary rounded-full p-0.5" />
+                              )}
+                              <span className="text-xs font-medium text-white opacity-70">Preview</span>
+                            </div>
+                            <h4 className="font-semibold text-xs truncate">{bg.label}</h4>
+                            <p className="text-xs text-muted-foreground truncate">{bg.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="glass" className="mt-4">
+                      <div className="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2">
+                        {GLASS_EFFECTS.map((bg) => (
+                          <Card
+                            key={bg.value}
+                            className={cn(
+                              'p-3 cursor-pointer transition-all hover:shadow-md',
+                              background === bg.value ? 'ring-2 ring-primary shadow-lg' : 'hover:ring-1 hover:ring-border'
+                            )}
+                            onClick={() => setBackground(bg.value)}
+                          >
+                            <div className="relative h-20 rounded-lg mb-2 overflow-hidden">
+                              <div className="absolute inset-0 bg-gradient-hero" />
+                              <div className={cn('absolute inset-0 flex items-center justify-center', bg.preview)}>
+                                {background === bg.value && (
+                                  <Check className="absolute top-1 right-1 w-5 h-5 text-white bg-primary rounded-full p-0.5" />
+                                )}
+                                <span className="text-xs font-medium text-white opacity-70">Glass</span>
+                              </div>
+                            </div>
+                            <h4 className="font-semibold text-xs truncate">{bg.label}</h4>
+                            <p className="text-xs text-muted-foreground truncate">{bg.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="solids" className="mt-4">
+                      <div className="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2">
+                        {SOLID_COLORS.map((bg) => (
+                          <Card
+                            key={bg.value}
+                            className={cn(
+                              'p-3 cursor-pointer transition-all hover:shadow-md',
+                              background === bg.value ? 'ring-2 ring-primary shadow-lg' : 'hover:ring-1 hover:ring-border'
+                            )}
+                            onClick={() => setBackground(bg.value)}
+                          >
+                            <div className={cn('h-20 rounded-lg mb-2 relative flex items-center justify-center border', bg.preview)}>
+                              {background === bg.value && (
+                                <Check className="absolute top-1 right-1 w-5 h-5 text-primary bg-white rounded-full p-0.5" />
+                              )}
+                              <span className={cn('text-xs font-medium', bg.optimalTextColor === 'white' ? 'text-white' : 'text-foreground')}>
+                                Solid
+                              </span>
+                            </div>
+                            <h4 className="font-semibold text-xs truncate">{bg.label}</h4>
+                            <p className="text-xs text-muted-foreground truncate">{bg.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                )}
               </TabsContent>
 
               <TabsContent value="text" className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Card Number</label>
                   <Input value={number} onChange={(e) => setNumber(e.target.value)} placeholder="01" />
-                  <Select value={numberColor} onValueChange={setNumberColor}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {colorOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <label className="text-sm font-medium mt-2">Number Color</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {TEXT_COLOR_OPTIONS.map((colorOption) => (
+                      <button
+                        key={colorOption.value}
+                        onClick={() => setNumberColor(colorOption.value.replace('text-', ''))}
+                        className={cn(
+                          'p-3 rounded-lg border-2 transition-all hover:scale-105',
+                          numberColor === colorOption.value.replace('text-', '')
+                            ? 'border-primary ring-2 ring-primary/20'
+                            : 'border-transparent hover:border-border',
+                          background
+                        )}
+                        title={colorOption.description}
+                      >
+                        <div className={cn('text-center font-bold text-xl', colorOption.className)}>Aa</div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Title</label>
                   <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Card Title" />
-                  <Select value={titleColor} onValueChange={setTitleColor}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {colorOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <label className="text-sm font-medium mt-2">Title Color</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {TEXT_COLOR_OPTIONS.map((colorOption) => (
+                      <button
+                        key={colorOption.value}
+                        onClick={() => setTitleColor(colorOption.value.replace('text-', ''))}
+                        className={cn(
+                          'p-3 rounded-lg border-2 transition-all hover:scale-105',
+                          titleColor === colorOption.value.replace('text-', '')
+                            ? 'border-primary ring-2 ring-primary/20'
+                            : 'border-transparent hover:border-border',
+                          background
+                        )}
+                        title={colorOption.description}
+                      >
+                        <div className={cn('text-center font-bold text-xl', colorOption.className)}>Aa</div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -399,18 +467,25 @@ export function UnifiedStyleModal({
                     onChange={(e) => setDescription(e.target.value)} 
                     placeholder="Description text..." 
                   />
-                  <Select value={descriptionColor} onValueChange={setDescriptionColor}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {colorOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <label className="text-sm font-medium mt-2">Description Color</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {TEXT_COLOR_OPTIONS.map((colorOption) => (
+                      <button
+                        key={colorOption.value}
+                        onClick={() => setDescriptionColor(colorOption.value.replace('text-', ''))}
+                        className={cn(
+                          'p-3 rounded-lg border-2 transition-all hover:scale-105',
+                          descriptionColor === colorOption.value.replace('text-', '')
+                            ? 'border-primary ring-2 ring-primary/20'
+                            : 'border-transparent hover:border-border',
+                          background
+                        )}
+                        title={colorOption.description}
+                      >
+                        <div className={cn('text-center font-bold text-xl', colorOption.className)}>Aa</div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </TabsContent>
 
