@@ -119,12 +119,20 @@ export function ScrollingFeatureCards() {
     const defaults = defaultCardStyles[index];
     
     try {
-      // Load background
+      // Load main background
       // @ts-ignore
       const { data: bgData } = await supabase
         .from('background_styles')
         .select('background_class')
         .eq('element_id', `${elementPrefix}-background`)
+        .maybeSingle();
+
+      // Load icon card background
+      // @ts-ignore
+      const { data: iconCardBgData } = await supabase
+        .from('background_styles')
+        .select('background_class')
+        .eq('element_id', `${elementPrefix}-icon-card`)
         .maybeSingle();
 
       // Load text elements
@@ -161,6 +169,7 @@ export function ScrollingFeatureCards() {
         ...prev,
         [index]: {
           background: bgData?.background_class || defaults.background,
+          iconCardBg: iconCardBgData?.background_class || 'bg-white/10',
           number: numberData?.content || cards[index].number,
           numberColor: numberData?.color_token || defaults.numberColor,
           title: titleData?.content || cards[index].title,
@@ -351,7 +360,12 @@ export function ScrollingFeatureCards() {
                               {cardData[index]?.number || card.number}
                             </span>
                           </Badge>
-                          <div className="p-2.5 rounded-lg bg-white/10 backdrop-blur-sm">
+                          <div 
+                            className={cn(
+                              'p-2.5 rounded-lg backdrop-blur-sm',
+                              cardData[index]?.iconCardBg || 'bg-white/10'
+                            )}
+                          >
                             <Icon className="h-5 w-5" />
                           </div>
                         </div>

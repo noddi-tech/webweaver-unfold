@@ -51,9 +51,11 @@ export function UnifiedStyleModal({
 }: UnifiedStyleModalProps) {
   const [activeTab, setActiveTab] = useState('background');
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
   
   // State for all editable elements
   const [background, setBackground] = useState(initialData.background || 'bg-card');
+  const [iconCardBg, setIconCardBg] = useState('bg-white/10');
   const [number, setNumber] = useState(initialData.number || '');
   const [numberColor, setNumberColor] = useState(initialData.numberColor || 'foreground');
   const [title, setTitle] = useState(initialData.title || '');
@@ -64,6 +66,75 @@ export function UnifiedStyleModal({
   const [ctaUrl, setCtaUrl] = useState(initialData.ctaUrl || '');
   const [ctaBgColor, setCtaBgColor] = useState(initialData.ctaBgColor || 'primary');
   const [ctaTextColor, setCtaTextColor] = useState(initialData.ctaTextColor || 'primary-foreground');
+
+  // Load actual saved data from database when modal opens
+  useEffect(() => {
+    if (!isOpen || !elementIdPrefix) return;
+    
+    const loadSavedData = async () => {
+      setLoading(true);
+      try {
+        // Load background
+        const { data: bgData } = await supabase
+          .from('background_styles')
+          .select('background_class')
+          .eq('element_id', `${elementIdPrefix}-background`)
+          .maybeSingle();
+        
+        if (bgData?.background_class) {
+          setBackground(bgData.background_class);
+        }
+
+        // Load icon card background
+        const { data: iconBgData } = await supabase
+          .from('background_styles')
+          .select('background_class')
+          .eq('element_id', `${elementIdPrefix}-icon-card`)
+          .maybeSingle();
+        
+        if (iconBgData?.background_class) {
+          setIconCardBg(iconBgData.background_class);
+        }
+        
+        // Load text elements
+        const elements = ['number', 'title', 'description', 'cta'];
+        for (const elem of elements) {
+          const { data } = await supabase
+            .from('text_content')
+            .select('content, color_token')
+            .eq('element_id', `${elementIdPrefix}-${elem}`)
+            .maybeSingle();
+          
+          if (data) {
+            switch(elem) {
+              case 'number':
+                if (data.content) setNumber(data.content);
+                if (data.color_token) setNumberColor(data.color_token);
+                break;
+              case 'title':
+                if (data.content) setTitle(data.content);
+                if (data.color_token) setTitleColor(data.color_token);
+                break;
+              case 'description':
+                if (data.content) setDescription(data.content);
+                if (data.color_token) setDescriptionColor(data.color_token);
+                break;
+              case 'cta':
+                if (data.content) setCtaText(data.content);
+                if (data.color_token) setCtaTextColor(data.color_token);
+                break;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadSavedData();
+  }, [isOpen, elementIdPrefix]);
 
   // Load color system from database
   const {
@@ -145,44 +216,69 @@ export function UnifiedStyleModal({
     return scores;
   };
 
+  // Helper to normalize color token for comparison
+  const normalizeColorToken = (token: string) => {
+    return token.replace('text-', '').replace('--', '').trim();
+  };
+
+  const isColorSelected = (colorValue: string, currentValue: string) => {
+    const normalized1 = normalizeColorToken(colorValue);
+    const normalized2 = normalizeColorToken(currentValue);
+    
+    // Also handle cases where white === primary-foreground, etc.
+    const colorMap: Record<string, string[]> = {
+      'white': ['white', 'primary-foreground'],
+      'primary-foreground': ['white', 'primary-foreground'],
+      'foreground': ['foreground'],
+      'muted-foreground': ['muted-foreground'],
+      'primary': ['primary'],
+      'secondary': ['secondary'],
+    };
+    
+    const matches = colorMap[normalized2] || [normalized2];
+    return matches.includes(normalized1);
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
       const updates = [
         { element_id: `${elementIdPrefix}-background`, background_class: background },
+        { element_id: `${elementIdPrefix}-icon-card`, background_class: iconCardBg },
         { element_id: `${elementIdPrefix}-number`, content: number, color_token: numberColor },
         { element_id: `${elementIdPrefix}-title`, content: title, color_token: titleColor },
         { element_id: `${elementIdPrefix}-description`, content: description, color_token: descriptionColor },
         { element_id: `${elementIdPrefix}-cta`, content: ctaText, color_token: ctaTextColor },
       ];
 
-      // Save background
-      const bgData = updates[0];
-      // @ts-ignore
-      const { data: existingBg } = await supabase
-        .from('background_styles')
-        .select('id')
-        .eq('element_id', bgData.element_id)
-        .maybeSingle();
+      // Save backgrounds (main and icon card)
+      for (const bgUpdate of updates.slice(0, 2)) {
+        // @ts-ignore
+        const { data: existingBg } = await supabase
+          .from('background_styles')
+          .select('id')
+          .eq('element_id', bgUpdate.element_id)
+          .maybeSingle();
 
-      if (existingBg) {
-        // @ts-ignore
-        await supabase
-          .from('background_styles')
-          .update({ background_class: bgData.background_class })
-          .eq('element_id', bgData.element_id);
-      } else {
-        // @ts-ignore
-        await supabase
-          .from('background_styles')
-          .insert([{
-            element_id: bgData.element_id,
-            background_class: bgData.background_class,
-          }]);
+        if (existingBg) {
+          // @ts-ignore
+          await supabase
+            .from('background_styles')
+            .update({ background_class: bgUpdate.background_class })
+            .eq('element_id', bgUpdate.element_id);
+        } else {
+          // @ts-ignore
+          await supabase
+            .from('background_styles')
+            .insert([{
+              element_id: bgUpdate.element_id,
+              background_class: bgUpdate.background_class,
+            }]);
+        }
       }
 
       // Save text elements
-      for (const update of updates.slice(1)) {
+      for (const update of updates.slice(2)) {
         // @ts-ignore
         const { data: existing } = await supabase
           .from('text_content')
@@ -214,6 +310,7 @@ export function UnifiedStyleModal({
       toast.success('All changes saved successfully');
       onSave?.({
         background,
+        iconCardBg,
         number,
         numberColor,
         title,
@@ -246,6 +343,12 @@ export function UnifiedStyleModal({
             Customize all aspects of this component including background, text, and colors
           </DialogDescription>
         </DialogHeader>
+
+        {loading && (
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground">Loading saved styles...</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Live Preview */}
@@ -320,16 +423,19 @@ export function UnifiedStyleModal({
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="background" className="space-y-4">
+              <TabsContent value="background" className="space-y-6">
                 {colorSystemLoading ? (
                   <p className="text-sm text-muted-foreground">Loading color options...</p>
                 ) : (
-                  <Tabs defaultValue="gradients" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="gradients">Gradients ({GRADIENT_COLORS.length})</TabsTrigger>
-                      <TabsTrigger value="glass">Glass ({GLASS_EFFECTS.length})</TabsTrigger>
-                      <TabsTrigger value="solids">Solids ({SOLID_COLORS.length})</TabsTrigger>
-                    </TabsList>
+                  <>
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium">Main Card Background</label>
+                      <Tabs defaultValue="gradients" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3">
+                          <TabsTrigger value="gradients">Gradients ({GRADIENT_COLORS.length})</TabsTrigger>
+                          <TabsTrigger value="glass">Glass ({GLASS_EFFECTS.length})</TabsTrigger>
+                          <TabsTrigger value="solids">Solids ({SOLID_COLORS.length})</TabsTrigger>
+                        </TabsList>
 
                     <TabsContent value="gradients" className="mt-4">
                       <div className="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2">
@@ -406,8 +512,46 @@ export function UnifiedStyleModal({
                           </Card>
                         ))}
                       </div>
-                    </TabsContent>
-                  </Tabs>
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium">Inner Card Background (Icon Area)</label>
+                      <p className="text-xs text-muted-foreground">Controls the background of the card containing icons/images</p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {[
+                          { value: 'bg-white/10', label: 'White/10' },
+                          { value: 'bg-white/20', label: 'White/20' },
+                          { value: 'bg-card', label: 'Card' },
+                          { value: 'bg-background', label: 'Background' },
+                          { value: 'bg-muted', label: 'Muted' },
+                          { value: 'bg-primary/10', label: 'Primary/10' },
+                          { value: 'bg-white', label: 'White' },
+                          { value: 'bg-transparent', label: 'Transparent' },
+                        ].map((opt) => (
+                          <button
+                            key={opt.value}
+                            className={cn(
+                              'h-16 rounded-lg border-2 transition-all hover:scale-105 relative overflow-hidden',
+                              iconCardBg === opt.value 
+                                ? 'border-primary ring-2 ring-primary/20' 
+                                : 'border-border hover:border-primary/50'
+                            )}
+                            onClick={() => setIconCardBg(opt.value)}
+                          >
+                            <div className={cn('absolute inset-0', opt.value)} />
+                            {iconCardBg === opt.value && (
+                              <Check className="absolute top-1 right-1 w-4 h-4 text-primary bg-white rounded-full p-0.5" />
+                            )}
+                            <span className="absolute bottom-1 left-1 text-[10px] font-medium text-foreground bg-white/90 px-1.5 py-0.5 rounded">
+                              {opt.label}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
                 )}
               </TabsContent>
 
@@ -423,7 +567,7 @@ export function UnifiedStyleModal({
                         onClick={() => setNumberColor(colorOption.value.replace('text-', ''))}
                         className={cn(
                           'p-3 rounded-lg border-2 transition-all hover:scale-105',
-                          numberColor === colorOption.value.replace('text-', '')
+                          isColorSelected(colorOption.value, numberColor)
                             ? 'border-primary ring-2 ring-primary/20'
                             : 'border-transparent hover:border-border',
                           background
@@ -447,7 +591,7 @@ export function UnifiedStyleModal({
                         onClick={() => setTitleColor(colorOption.value.replace('text-', ''))}
                         className={cn(
                           'p-3 rounded-lg border-2 transition-all hover:scale-105',
-                          titleColor === colorOption.value.replace('text-', '')
+                          isColorSelected(colorOption.value, titleColor)
                             ? 'border-primary ring-2 ring-primary/20'
                             : 'border-transparent hover:border-border',
                           background
@@ -475,7 +619,7 @@ export function UnifiedStyleModal({
                         onClick={() => setDescriptionColor(colorOption.value.replace('text-', ''))}
                         className={cn(
                           'p-3 rounded-lg border-2 transition-all hover:scale-105',
-                          descriptionColor === colorOption.value.replace('text-', '')
+                          isColorSelected(colorOption.value, descriptionColor)
                             ? 'border-primary ring-2 ring-primary/20'
                             : 'border-transparent hover:border-border',
                           background
