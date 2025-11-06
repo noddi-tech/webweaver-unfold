@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getColorTokenOptions, calculateContrastRatio, getContrastLevel } from '@/lib/colorUtils';
 import { cn } from '@/lib/utils';
+import { ALL_BACKGROUND_OPTIONS } from '@/config/colorSystem';
 
 interface SubElement {
   id: string;
@@ -63,16 +64,13 @@ export function UnifiedStyleModal({
 
   const colorOptions = getColorTokenOptions();
 
-  const backgroundOptions = [
-    { value: 'bg-card', label: 'Card' },
-    { value: 'bg-card/50', label: 'Card (50%)' },
-    { value: 'bg-gradient-primary', label: 'Primary Gradient' },
-    { value: 'bg-gradient-secondary', label: 'Secondary Gradient' },
-    { value: 'bg-glass', label: 'Glass Effect' },
-    { value: 'bg-glass-dark', label: 'Dark Glass' },
-    { value: 'bg-primary/10', label: 'Primary Tint' },
-    { value: 'bg-secondary/10', label: 'Secondary Tint' },
-  ];
+  // Use centralized color system for all background options
+  const backgroundOptions = ALL_BACKGROUND_OPTIONS.map(option => ({
+    value: option.value,
+    label: option.label,
+    description: option.description,
+    category: option.category,
+  }));
 
   const calculateAccessibilityScores = () => {
     const scores = [];
@@ -326,9 +324,32 @@ export function UnifiedStyleModal({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {backgroundOptions.map((option) => (
+                      {/* Group by category for better UX */}
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Gradients</div>
+                      {backgroundOptions.filter(o => o.category === 'gradients').map((option) => (
                         <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                          <div className="flex flex-col">
+                            <span>{option.label}</span>
+                            <span className="text-xs text-muted-foreground">{option.description}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-2">Glass Effects</div>
+                      {backgroundOptions.filter(o => o.category === 'glass').map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex flex-col">
+                            <span>{option.label}</span>
+                            <span className="text-xs text-muted-foreground">{option.description}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                      <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-2">Solid Colors</div>
+                      {backgroundOptions.filter(o => o.category === 'surfaces' || o.category === 'interactive' || o.category === 'feedback').map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex flex-col">
+                            <span>{option.label}</span>
+                            <span className="text-xs text-muted-foreground">{option.description}</span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>

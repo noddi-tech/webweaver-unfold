@@ -34,6 +34,50 @@ export function ScrollingFeatureCards() {
   const headingStyles = useTypography();
   const { editMode } = useEditMode();
   
+  // Define unique default styles for each card (matches original beautiful designs)
+  const defaultCardStyles = [
+    { 
+      background: 'glass-card',
+      numberColor: 'primary',
+      titleColor: 'foreground',
+      descriptionColor: 'muted-foreground',
+      ctaBgColor: 'primary',
+      ctaTextColor: 'primary-foreground'
+    },
+    { 
+      background: 'bg-gradient-hero',
+      numberColor: 'primary-foreground',
+      titleColor: 'primary-foreground',
+      descriptionColor: 'primary-foreground',
+      ctaBgColor: 'primary-foreground',
+      ctaTextColor: 'primary'
+    },
+    { 
+      background: 'bg-gradient-sunset',
+      numberColor: 'primary-foreground',
+      titleColor: 'primary-foreground',
+      descriptionColor: 'primary-foreground',
+      ctaBgColor: 'primary-foreground',
+      ctaTextColor: 'primary'
+    },
+    { 
+      background: 'bg-gradient-ocean',
+      numberColor: 'primary-foreground',
+      titleColor: 'primary-foreground',
+      descriptionColor: 'primary-foreground',
+      ctaBgColor: 'primary-foreground',
+      ctaTextColor: 'primary'
+    },
+    { 
+      background: 'bg-gradient-warmth',
+      numberColor: 'primary-foreground',
+      titleColor: 'primary-foreground',
+      descriptionColor: 'primary-foreground',
+      ctaBgColor: 'primary-foreground',
+      ctaTextColor: 'primary'
+    },
+  ];
+
   const [imageUrls, setImageUrls] = useState<Record<number, string>>({
     0: '/src/assets/booking-hero.png',
     1: '/src/assets/dashboard-preview.jpg',
@@ -68,6 +112,7 @@ export function ScrollingFeatureCards() {
 
   const loadCardData = async (index: number) => {
     const elementPrefix = `scrolling-card-${index + 1}`;
+    const defaults = defaultCardStyles[index];
     
     try {
       // Load background
@@ -107,18 +152,20 @@ export function ScrollingFeatureCards() {
         .eq('element_id', `${elementPrefix}-cta`)
         .maybeSingle();
 
+      // Use per-card defaults as fallbacks for beautiful styling
       setCardData(prev => ({
         ...prev,
         [index]: {
-          background: bgData?.background_class || 'bg-gradient-hero/90',
+          background: bgData?.background_class || defaults.background,
           number: numberData?.content || cards[index].number,
-          numberColor: numberData?.color_token || 'foreground',
+          numberColor: numberData?.color_token || defaults.numberColor,
           title: titleData?.content || cards[index].title,
-          titleColor: titleData?.color_token || 'foreground',
+          titleColor: titleData?.color_token || defaults.titleColor,
           description: descData?.content || cards[index].description,
-          descriptionColor: descData?.color_token || 'muted-foreground',
+          descriptionColor: descData?.color_token || defaults.descriptionColor,
           ctaText: ctaData?.content || cards[index].ctaText,
-          ctaTextColor: ctaData?.color_token || 'primary-foreground',
+          ctaBgColor: defaults.ctaBgColor,
+          ctaTextColor: ctaData?.color_token || defaults.ctaTextColor,
         }
       }));
     } catch (error) {
@@ -305,9 +352,14 @@ export function ScrollingFeatureCards() {
                       <div className="space-y-6">
                         <div className="flex items-center gap-3">
                           <Badge 
-                            className="bg-purple-500/20 text-purple-200 border border-purple-400/30 px-3 py-1.5 text-sm font-medium"
+                            className="border px-3 py-1.5 text-sm font-medium"
+                            style={{
+                              backgroundColor: `hsl(var(--${cardData[index]?.numberColor || 'primary'}) / 0.2)`,
+                              borderColor: `hsl(var(--${cardData[index]?.numberColor || 'primary'}) / 0.3)`,
+                              color: `hsl(var(--${cardData[index]?.numberColor || 'foreground'}))`
+                            }}
                           >
-                            <span className={cn('font-medium', `text-${cardData[index]?.numberColor || 'foreground'}`)}>
+                            <span className="font-medium">
                               {cardData[index]?.number || card.number}
                             </span>
                           </Badge>
@@ -316,13 +368,19 @@ export function ScrollingFeatureCards() {
                           </div>
                         </div>
                         
-                        <h3 className={cn('text-2xl lg:text-3xl font-semibold leading-tight', `text-${cardData[index]?.titleColor || 'foreground'}`)}>
+                        <h3 
+                          className="text-2xl lg:text-3xl font-semibold leading-tight"
+                          style={{ color: `hsl(var(--${cardData[index]?.titleColor || 'foreground'}))` }}
+                        >
                           <EditableTranslation translationKey={card.titleKey}>
                             {cardData[index]?.title || card.title}
                           </EditableTranslation>
                         </h3>
                         
-                        <p className={cn('text-base leading-relaxed opacity-80', `text-${cardData[index]?.descriptionColor || 'muted-foreground'}`)}>
+                        <p 
+                          className="text-base leading-relaxed opacity-80"
+                          style={{ color: `hsl(var(--${cardData[index]?.descriptionColor || 'muted-foreground'}))` }}
+                        >
                           <EditableTranslation translationKey={card.descriptionKey}>
                             {cardData[index]?.description || card.description}
                           </EditableTranslation>
@@ -334,7 +392,9 @@ export function ScrollingFeatureCards() {
                           asChild
                         >
                           <a href={card.ctaUrl || '#'}>
-                            <span className={cn(`text-${cardData[index]?.ctaTextColor || 'primary-foreground'}`)}>
+                            <span
+                              style={{ color: `hsl(var(--${cardData[index]?.ctaTextColor || 'primary-foreground'}))` }}
+                            >
                               <EditableTranslation translationKey={card.ctaKey}>
                                 {cardData[index]?.ctaText || card.ctaText}
                               </EditableTranslation>
