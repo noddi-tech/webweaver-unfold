@@ -283,14 +283,24 @@ export function ScrollingFeatureCards() {
   };
 
 
+  const getInnerWrapperClasses = (aspectRatio: string): string => {
+    const aspectClass = getAspectRatioStyle(aspectRatio);
+    
+    if (aspectClass && aspectRatio !== 'auto') {
+      // Has a specific aspect ratio - constrain the wrapper
+      return `relative ${aspectClass} max-h-full max-w-full`;
+    } else {
+      // Auto mode - fill the entire card
+      return 'relative w-full h-full';
+    }
+  };
+
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardAspectRatio = aspectRatios[index] || 'auto';
     const containerClasses = getContainerClasses();
-    const aspectClass = getAspectRatioStyle(cardAspectRatio);
-    const imageClasses = aspectClass 
-      ? `${aspectClass} max-h-full max-w-full object-cover`
-      : 'w-full h-full object-cover';
+    const innerWrapperClasses = getInnerWrapperClasses(cardAspectRatio);
+    const imageClasses = 'w-full h-full object-cover';
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
@@ -308,7 +318,7 @@ export function ScrollingFeatureCards() {
             >
               <CarouselContent className="h-full">
               {config.images.map((image, imgIndex) => (
-                <CarouselItem key={imgIndex}>
+                <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
                   <EditableBackground
                     elementId={`scrolling-card-${index + 1}-image-${imgIndex}`}
                     defaultBackground="bg-transparent"
@@ -320,13 +330,15 @@ export function ScrollingFeatureCards() {
                       'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
                     ]}
                   >
-                    <img
-                      src={image.url}
-                      alt={image.alt || `Slide ${imgIndex + 1}`}
-                      loading="lazy"
-                      decoding="async"
-                      className={imageClasses}
-                    />
+                    <div className={innerWrapperClasses}>
+                      <img
+                        src={image.url}
+                        alt={image.alt || `Slide ${imgIndex + 1}`}
+                        loading="lazy"
+                        decoding="async"
+                        className={imageClasses}
+                      />
+                    </div>
                   </EditableBackground>
                 </CarouselItem>
               ))}
@@ -357,13 +369,15 @@ export function ScrollingFeatureCards() {
             'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
           ]}
         >
-          <img 
-            src={imageUrls[index] || card.imageUrl}
-            alt={card.imageAlt}
-            loading="lazy"
-            decoding="async"
-            className={imageClasses}
-          />
+          <div className={innerWrapperClasses}>
+            <img 
+              src={imageUrls[index] || card.imageUrl}
+              alt={card.imageAlt}
+              loading="lazy"
+              decoding="async"
+              className={imageClasses}
+            />
+          </div>
         </EditableBackground>
       </div>
     );
