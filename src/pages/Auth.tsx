@@ -82,17 +82,15 @@ const Auth = () => {
               </div>
               <Button type="submit" disabled={loading}>{loading ? "Please wait..." : mode === "signin" ? "Sign In" : "Sign Up"}</Button>
             </form>
-            {import.meta.env.DEV && (
-              <Button 
-                onClick={handleDevBypass} 
-                disabled={loading}
-                variant="outline"
-                className="w-full mt-4 border-white/30 hover:bg-white/10 text-card-foreground hover:text-white"
-              >
-                <Rocket className="mr-2 h-4 w-4" />
-                Authenticate me (Dev Mode)
-              </Button>
-            )}
+            <Button 
+              onClick={handleDevBypass} 
+              disabled={loading}
+              variant="outline"
+              className="w-full mt-4 border-white/30 hover:bg-white/10 text-card-foreground hover:text-white"
+            >
+              <Rocket className="mr-2 h-4 w-4" />
+              Quick Login (Dev/Test)
+            </Button>
             <div className="mt-4 text-sm text-card-foreground">
               {mode === "signin" ? (
                 <button className="underline hover:text-white transition-colors" onClick={() => setMode("signup")}>Need an account? Sign up</button>
