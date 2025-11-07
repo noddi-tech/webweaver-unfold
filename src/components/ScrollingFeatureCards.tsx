@@ -115,19 +115,24 @@ export function ScrollingFeatureCards() {
       images: Array<{url: string; alt: string; title?: string}>;
     };
   }>>({});
+  const [aspectRatios, setAspectRatios] = useState<Record<number, string>>({});
 
   const loadImageSettings = async () => {
     const newImageUrls: Record<number, string> = {};
     const newCarouselData: Record<number, any> = {};
+    const newAspectRatios: Record<number, string> = {};
     
     for (let i = 0; i < 5; i++) {
       const { data } = await supabase
         .from('image_carousel_settings')
-        .select('image_url, display_type, carousel_config_id')
+        .select('image_url, display_type, carousel_config_id, aspect_ratio')
         .eq('location_id', `scrolling-card-${i + 1}`)
         .maybeSingle();
       
       if (data) {
+        // Store aspect ratio
+        newAspectRatios[i] = data.aspect_ratio || 'auto';
+        
         if (data.display_type === 'carousel' && data.carousel_config_id) {
           // Load carousel configuration
           const { data: carouselConfig } = await supabase
@@ -165,6 +170,9 @@ export function ScrollingFeatureCards() {
     }
     if (Object.keys(newCarouselData).length > 0) {
       setCarouselData(prev => ({ ...prev, ...newCarouselData }));
+    }
+    if (Object.keys(newAspectRatios).length > 0) {
+      setAspectRatios(prev => ({ ...prev, ...newAspectRatios }));
     }
   };
 
@@ -248,8 +256,36 @@ export function ScrollingFeatureCards() {
     });
   }, []);
 
+  const getAspectRatioStyle = (ratio: string): string => {
+    const ratioMap: Record<string, string> = {
+      '9:16': 'aspect-[9/16]',
+      '10:16': 'aspect-[10/16]',
+      '3:4': 'aspect-[3/4]',
+      '1:1': 'aspect-square',
+      '4:3': 'aspect-[4/3]',
+      '16:10': 'aspect-[16/10]',
+      '16:9': 'aspect-video',
+      '21:9': 'aspect-[21/9]',
+      'auto': '',
+    };
+    return ratioMap[ratio] || '';
+  };
+
+  const getContainerClasses = (ratio: string): string => {
+    const aspectClass = getAspectRatioStyle(ratio);
+    
+    if (aspectClass) {
+      return `relative w-full ${aspectClass} rounded-2xl overflow-hidden shadow-xl border border-white/10`;
+    } else {
+      return 'relative w-full min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10';
+    }
+  };
+
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
+    const cardAspectRatio = aspectRatios[index] || 'auto';
+    const containerClasses = getContainerClasses(cardAspectRatio);
+    const aspectClass = getAspectRatioStyle(cardAspectRatio);
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
@@ -259,17 +295,17 @@ export function ScrollingFeatureCards() {
         : [];
       
       return (
-        <div className="relative min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10">
+        <div className={containerClasses}>
           <Carousel 
             opts={{ loop: true }}
             plugins={plugins}
             className="w-full h-full"
           >
-            <CarouselContent className="h-[400px] lg:h-[500px]">
+            <CarouselContent className={aspectClass ? 'h-full' : 'h-[400px] lg:h-[500px]'}>
               {config.images.map((image, imgIndex) => (
                 <CarouselItem key={imgIndex}>
                   <EditableBackground
-                    elementId={`scrolling-card-${index + 1}-image-container`}
+                    elementId={`scrolling-card-${index + 1}-image-${imgIndex}`}
                     defaultBackground="bg-transparent"
                     allowedBackgrounds={[
                       'bg-transparent',
@@ -279,7 +315,7 @@ export function ScrollingFeatureCards() {
                       'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
                     ]}
                   >
-                    <div className="relative w-full h-[400px] lg:h-[500px]">
+                    <div className="relative w-full h-full">
                       <img
                         src={image.url}
                         alt={image.alt || `Slide ${imgIndex + 1}`}
@@ -317,7 +353,7 @@ export function ScrollingFeatureCards() {
           'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
         ]}
       >
-        <div className="relative min-h-[400px] lg:min-h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10">
+        <div className={containerClasses}>
           <img 
             src={imageUrls[index] || card.imageUrl}
             alt={card.imageAlt}

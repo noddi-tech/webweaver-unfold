@@ -72,6 +72,7 @@ export function UniversalImageCarouselModal({
   const [carouselShowNavigation, setCarouselShowNavigation] = useState(true);
   const [carouselShowDots, setCarouselShowDots] = useState(true);
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+  const [aspectRatio, setAspectRatio] = useState<string>('auto');
   
   // Data
   const [libraryImages, setLibraryImages] = useState<any[]>([]);
@@ -101,6 +102,7 @@ export function UniversalImageCarouselModal({
 
       if (settings) {
         setDisplayType(settings.display_type as 'image' | 'carousel');
+        setAspectRatio(settings.aspect_ratio || 'auto');
         
         if (settings.display_type === 'image') {
           setImageUrl(settings.image_url || '');
@@ -243,6 +245,7 @@ export function UniversalImageCarouselModal({
       const settingsData = {
         location_id: locationId,
         display_type: displayType,
+        aspect_ratio: aspectRatio,
         image_url: displayType === 'image' ? finalImageUrl : null,
         image_alt: displayType === 'image' ? imageAlt : null,
         carousel_config_id: displayType === 'carousel' ? carouselConfigId : null,
@@ -791,6 +794,38 @@ export function UniversalImageCarouselModal({
                 </div>
               </div>
             )}
+
+            {/* Aspect Ratio Configuration */}
+            <div className="space-y-3 border-t pt-4">
+              <Label>Container Aspect Ratio</Label>
+              <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">🔍 Auto-detect from image</SelectItem>
+                  <SelectItem value="9:16">📱 Phone Portrait (9:16)</SelectItem>
+                  <SelectItem value="10:16">📱 Tablet Portrait (10:16)</SelectItem>
+                  <SelectItem value="3:4">🖼️ Portrait (3:4)</SelectItem>
+                  <SelectItem value="1:1">⬛ Square (1:1)</SelectItem>
+                  <SelectItem value="4:3">🖥️ Classic (4:3)</SelectItem>
+                  <SelectItem value="16:10">💻 Desktop (16:10)</SelectItem>
+                  <SelectItem value="16:9">🖥️ Widescreen (16:9)</SelectItem>
+                  <SelectItem value="21:9">🖥️ Ultrawide (21:9)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {aspectRatio === 'auto' 
+                  ? 'Container will adapt to the image dimensions (default: 400-500px min-height)'
+                  : `Container will use ${aspectRatio} aspect ratio - perfect for ${
+                    aspectRatio === '9:16' ? 'phone screenshots (430x932)' :
+                    aspectRatio === '10:16' ? 'tablet screenshots' :
+                    aspectRatio === '16:10' || aspectRatio === '16:9' ? 'desktop screenshots' :
+                    aspectRatio === '1:1' ? 'square images' :
+                    'various image formats'
+                  }`}
+              </p>
+            </div>
 
             <Button onClick={handleSave} disabled={saving} className="w-full">
               <Save className="mr-2 h-4 w-4" />

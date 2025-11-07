@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -761,6 +761,7 @@ export type Database = {
       }
       image_carousel_settings: {
         Row: {
+          aspect_ratio: string | null
           carousel_config_id: string | null
           created_at: string
           display_type: string
@@ -774,6 +775,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          aspect_ratio?: string | null
           carousel_config_id?: string | null
           created_at?: string
           display_type?: string
@@ -787,6 +789,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          aspect_ratio?: string | null
           carousel_config_id?: string | null
           created_at?: string
           display_type?: string
