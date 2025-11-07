@@ -73,6 +73,7 @@ export function UniversalImageCarouselModal({
   const [carouselShowDots, setCarouselShowDots] = useState(true);
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
   const [aspectRatio, setAspectRatio] = useState<string>('auto');
+  const [fitMode, setFitMode] = useState<'contain' | 'cover'>('contain');
   
   // Data
   const [libraryImages, setLibraryImages] = useState<any[]>([]);
@@ -103,6 +104,7 @@ export function UniversalImageCarouselModal({
       if (settings) {
         setDisplayType(settings.display_type as 'image' | 'carousel');
         setAspectRatio(settings.aspect_ratio || 'auto');
+        setFitMode((settings.fit_mode as 'contain' | 'cover') || 'contain');
         
         if (settings.display_type === 'image') {
           setImageUrl(settings.image_url || '');
@@ -246,6 +248,7 @@ export function UniversalImageCarouselModal({
         location_id: locationId,
         display_type: displayType,
         aspect_ratio: aspectRatio,
+        fit_mode: fitMode,
         image_url: displayType === 'image' ? finalImageUrl : null,
         image_alt: displayType === 'image' ? imageAlt : null,
         carousel_config_id: displayType === 'carousel' ? carouselConfigId : null,
@@ -824,6 +827,39 @@ export function UniversalImageCarouselModal({
                     aspectRatio === '1:1' ? 'square images' :
                     'various image formats'
                   }`}
+              </p>
+            </div>
+
+            {/* Image Fit Mode */}
+            <div className="space-y-3 border-t pt-4">
+              <Label>Image Fit Mode</Label>
+              <Select value={fitMode} onValueChange={(value: 'contain' | 'cover') => setFitMode(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="contain">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-6 border border-border rounded flex items-center justify-center">
+                        <div className="w-4 h-5 border border-primary"></div>
+                      </div>
+                      <span>Contain - Show full image</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="cover">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-6 border border-border rounded overflow-hidden bg-primary/20">
+                        <div className="w-12 h-8 border-2 border-primary -m-2"></div>
+                      </div>
+                      <span>Cover - Fill container</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {fitMode === 'contain' 
+                  ? '✨ Best for phone screenshots - shows full image without cropping'
+                  : '🖼️ Best for desktop screenshots - fills the space'}
               </p>
             </div>
 

@@ -765,6 +765,7 @@ export type Database = {
           carousel_config_id: string | null
           created_at: string
           display_type: string
+          fit_mode: string | null
           id: string
           image_alt: string | null
           image_url: string | null
@@ -779,6 +780,7 @@ export type Database = {
           carousel_config_id?: string | null
           created_at?: string
           display_type?: string
+          fit_mode?: string | null
           id?: string
           image_alt?: string | null
           image_url?: string | null
@@ -793,6 +795,7 @@ export type Database = {
           carousel_config_id?: string | null
           created_at?: string
           display_type?: string
+          fit_mode?: string | null
           id?: string
           image_alt?: string | null
           image_url?: string | null
