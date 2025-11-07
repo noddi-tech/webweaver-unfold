@@ -264,7 +264,7 @@ export function ScrollingFeatureCards() {
 
   // Uniform container size for all cards - uses flexbox to center inner content (invisible)
   const getContainerClasses = (): string => {
-    return 'relative w-full h-[400px] lg:h-[500px] flex items-center justify-center';
+    return 'relative w-full h-[400px] lg:h-[500px] flex items-center justify-center overflow-hidden';
   };
 
   const getAspectRatioStyle = (aspectRatio: string): string => {
@@ -284,15 +284,25 @@ export function ScrollingFeatureCards() {
 
 
   const getInnerWrapperClasses = (aspectRatio: string): string => {
-    const aspectClass = getAspectRatioStyle(aspectRatio);
-    
-    if (aspectClass && aspectRatio !== 'auto') {
+    if (aspectRatio && aspectRatio !== 'auto') {
       // Has a specific aspect ratio - constrain the wrapper with visible styling
-      return `relative ${aspectClass} max-h-full max-w-full rounded-2xl overflow-hidden shadow-xl border border-white/10 isolate`;
+      return `relative max-h-full max-w-full rounded-2xl overflow-hidden shadow-xl border border-white/10 isolate`;
     } else {
       // Auto mode - fill the entire card with visible styling
       return 'relative w-full h-full rounded-2xl overflow-hidden shadow-xl border border-white/10 isolate';
     }
+  };
+
+  const getAspectRatioInlineStyle = (aspectRatio: string): React.CSSProperties => {
+    if (aspectRatio && aspectRatio !== 'auto') {
+      return {
+        aspectRatio: aspectRatio.replace(':', '/'), // Convert "9:16" to "9/16"
+        width: '100%',
+        maxHeight: '100%',
+        objectFit: 'contain'
+      };
+    }
+    return {};
   };
 
   const renderMedia = (index: number, card: FeatureCard) => {
@@ -319,7 +329,7 @@ export function ScrollingFeatureCards() {
             <CarouselContent className="h-full">
               {config.images.map((image, imgIndex) => (
                 <CarouselItem key={imgIndex} className="flex items-center justify-center h-full p-0">
-                  <div className={innerWrapperClasses}>
+                  <div className={innerWrapperClasses} style={getAspectRatioInlineStyle(cardAspectRatio)}>
                     <img
                       src={image.url}
                       alt={image.alt || `Slide ${imgIndex + 1}`}
@@ -346,8 +356,8 @@ export function ScrollingFeatureCards() {
     // Fallback to single image
     return (
       <div className={containerClasses}>
-        <div className={innerWrapperClasses}>
-          <img 
+        <div className={innerWrapperClasses} style={getAspectRatioInlineStyle(cardAspectRatio)}>
+          <img
             src={imageUrls[index] || card.imageUrl}
             alt={card.imageAlt}
             loading="lazy"
