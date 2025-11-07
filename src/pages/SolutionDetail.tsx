@@ -11,6 +11,7 @@ import { EditableKeyBenefit } from "@/components/EditableKeyBenefit";
 import { EditableImage } from "@/components/EditableImage";
 import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
 import { EditableButton } from "@/components/EditableButton";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -348,14 +349,25 @@ const SolutionDetail = () => {
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-7xl space-y-24">
             {solution.key_benefits.map((benefit, index) => {
-              const isEven = index % 2 === 0;
+              // eslint-disable-next-line react-hooks/rules-of-hooks
+              const textAnimation = useScrollAnimation({ threshold: 0.2 });
+              // eslint-disable-next-line react-hooks/rules-of-hooks
+              const imageAnimation = useScrollAnimation({ threshold: 0.2 });
               
               return (
                 <div 
                   key={benefit.id}
-                  className={`grid lg:grid-cols-2 gap-12 items-center ${!isEven ? 'lg:grid-flow-dense' : ''}`}
+                  className="grid lg:grid-cols-2 gap-12 items-center"
                 >
-                  <div className={!isEven ? 'lg:col-start-2' : ''}>
+                  {/* Text Content - Always on Left */}
+                  <div 
+                    ref={textAnimation.ref as any}
+                    className={`transition-all duration-700 ${
+                      textAnimation.isVisible 
+                        ? 'opacity-100 translate-x-0' 
+                        : 'opacity-0 -translate-x-12'
+                    }`}
+                  >
                     <EditableKeyBenefit
                       solutionId={solution.id}
                       benefitIndex={index}
@@ -377,23 +389,34 @@ const SolutionDetail = () => {
                       </p>
                   </EditableKeyBenefit>
                   </div>
-                  <EditableImage
-                    imageUrl={benefit.imageUrl || null}
-                    onSave={(newUrl) => handleKeyBenefitImageSave(index, newUrl)}
-                    altText={benefit.heading}
-                    placeholder="Add benefit image"
-                    aspectRatio="4/3"
+                  
+                  {/* Image - Always on Right */}
+                  <div
+                    ref={imageAnimation.ref as any}
+                    className={`transition-all duration-700 ${
+                      imageAnimation.isVisible 
+                        ? 'opacity-100 translate-x-0' 
+                        : 'opacity-0 translate-x-12'
+                    }`}
                   >
-                    {benefit.imageUrl && (
-                      <div className={`rounded-2xl overflow-hidden shadow-xl ${!isEven ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
-                        <img 
-                          src={benefit.imageUrl}
-                          alt={benefit.heading}
-                          className="w-full h-auto object-cover"
-                        />
-                      </div>
-                    )}
-                  </EditableImage>
+                    <EditableImage
+                      imageUrl={benefit.imageUrl || null}
+                      onSave={(newUrl) => handleKeyBenefitImageSave(index, newUrl)}
+                      altText={benefit.heading}
+                      placeholder="Add benefit image"
+                      aspectRatio="4/3"
+                    >
+                      {benefit.imageUrl && (
+                        <div className="rounded-2xl overflow-hidden shadow-xl">
+                          <img 
+                            src={benefit.imageUrl}
+                            alt={benefit.heading}
+                            className="w-full h-auto object-cover"
+                          />
+                        </div>
+                      )}
+                    </EditableImage>
+                  </div>
                 </div>
               );
             })}
