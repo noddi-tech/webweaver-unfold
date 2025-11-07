@@ -262,20 +262,40 @@ export function ScrollingFeatureCards() {
     });
   }, []);
 
-  // Uniform container size for all cards - no more dynamic aspect ratios
+  // Uniform container size for all cards - uses flexbox to center inner content
   const getContainerClasses = (): string => {
-    return 'relative w-full h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10';
+    return 'relative w-full h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10 flex items-center justify-center';
   };
 
-  const getImageFitClass = (fitMode: 'contain' | 'cover'): string => {
-    return fitMode === 'contain' ? 'object-contain' : 'object-cover';
+  const getAspectRatioStyle = (aspectRatio: string): string => {
+    const ratioMap: Record<string, string> = {
+      '16/9': 'aspect-[16/9]',
+      '9/16': 'aspect-[9/16]',
+      '4/3': 'aspect-[4/3]',
+      '3/4': 'aspect-[3/4]',
+      '1/1': 'aspect-square',
+      '21/9': 'aspect-[21/9]',
+      'auto': ''
+    };
+    return ratioMap[aspectRatio] || '';
+  };
+
+  const getInnerImageContainerClasses = (aspectRatio: string): string => {
+    const aspectClass = getAspectRatioStyle(aspectRatio);
+    
+    if (aspectClass) {
+      // Fixed aspect ratio with max constraints to prevent overflow
+      return `relative ${aspectClass} max-h-full max-w-full rounded-xl overflow-hidden border border-white/20`;
+    } else {
+      // Auto mode - fill the container
+      return 'relative w-full h-full rounded-xl overflow-hidden border border-white/20';
+    }
   };
 
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
-    const cardFitMode = fitModes[index] || 'contain';
+    const cardAspectRatio = aspectRatios[index] || 'auto';
     const containerClasses = getContainerClasses();
-    const imageFitClass = getImageFitClass(cardFitMode);
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
@@ -305,13 +325,13 @@ export function ScrollingFeatureCards() {
                       'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
                     ]}
                   >
-                    <div className="relative w-full h-full">
+                    <div className={getInnerImageContainerClasses(cardAspectRatio)}>
                       <img
                         src={image.url}
                         alt={image.alt || `Slide ${imgIndex + 1}`}
                         loading="lazy"
                         decoding="async"
-                        className={`w-full h-full ${imageFitClass}`}
+                        className="w-full h-full object-cover"
                       />
                     </div>
                   </EditableBackground>
@@ -332,27 +352,29 @@ export function ScrollingFeatureCards() {
     
     // Fallback to single image
     return (
-      <EditableBackground
-        elementId={`scrolling-card-${index + 1}-image-container`}
-        defaultBackground="bg-transparent"
-        allowedBackgrounds={[
-          'bg-transparent',
-          'bg-gradient-to-br from-background/95 to-background/80',
-          'bg-white/10',
-          'bg-black/5',
-          'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
-        ]}
-      >
-        <div className={containerClasses}>
-              <img 
-                src={imageUrls[index] || card.imageUrl}
-                alt={card.imageAlt}
-                loading="lazy"
-                decoding="async"
-                className={`w-full h-full ${imageFitClass}`}
-              />
-        </div>
-      </EditableBackground>
+      <div className={containerClasses}>
+        <EditableBackground
+          elementId={`scrolling-card-${index + 1}-image-container`}
+          defaultBackground="bg-transparent"
+          allowedBackgrounds={[
+            'bg-transparent',
+            'bg-gradient-to-br from-background/95 to-background/80',
+            'bg-white/10',
+            'bg-black/5',
+            'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
+          ]}
+        >
+          <div className={getInnerImageContainerClasses(cardAspectRatio)}>
+            <img 
+              src={imageUrls[index] || card.imageUrl}
+              alt={card.imageAlt}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </EditableBackground>
+      </div>
     );
   };
 
