@@ -269,33 +269,28 @@ export function ScrollingFeatureCards() {
 
   const getAspectRatioStyle = (aspectRatio: string): string => {
     const ratioMap: Record<string, string> = {
-      '16/9': 'aspect-[16/9]',
-      '9/16': 'aspect-[9/16]',
-      '4/3': 'aspect-[4/3]',
-      '3/4': 'aspect-[3/4]',
-      '1/1': 'aspect-square',
-      '21/9': 'aspect-[21/9]',
+      '16:9': 'aspect-[16/9]',
+      '16:10': 'aspect-[16/10]',
+      '10:16': 'aspect-[10/16]',
+      '9:16': 'aspect-[9/16]',
+      '4:3': 'aspect-[4/3]',
+      '3:4': 'aspect-[3/4]',
+      '1:1': 'aspect-square',
+      '21:9': 'aspect-[21/9]',
       'auto': ''
     };
     return ratioMap[aspectRatio] || '';
   };
 
-  const getInnerImageContainerClasses = (aspectRatio: string): string => {
-    const aspectClass = getAspectRatioStyle(aspectRatio);
-    
-    if (aspectClass) {
-      // Fixed aspect ratio with max constraints to prevent overflow
-      return `relative ${aspectClass} max-h-full max-w-full rounded-xl overflow-hidden border border-white/20`;
-    } else {
-      // Auto mode - fill the container
-      return 'relative w-full h-full rounded-xl overflow-hidden border border-white/20';
-    }
-  };
 
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardAspectRatio = aspectRatios[index] || 'auto';
     const containerClasses = getContainerClasses();
+    const aspectClass = getAspectRatioStyle(cardAspectRatio);
+    const imageClasses = aspectClass 
+      ? `${aspectClass} max-h-full max-w-full object-cover`
+      : 'w-full h-full object-cover';
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
@@ -325,15 +320,13 @@ export function ScrollingFeatureCards() {
                       'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
                     ]}
                   >
-                    <div className={getInnerImageContainerClasses(cardAspectRatio)}>
-                      <img
-                        src={image.url}
-                        alt={image.alt || `Slide ${imgIndex + 1}`}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    <img
+                      src={image.url}
+                      alt={image.alt || `Slide ${imgIndex + 1}`}
+                      loading="lazy"
+                      decoding="async"
+                      className={imageClasses}
+                    />
                   </EditableBackground>
                 </CarouselItem>
               ))}
@@ -364,15 +357,13 @@ export function ScrollingFeatureCards() {
             'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
           ]}
         >
-          <div className={getInnerImageContainerClasses(cardAspectRatio)}>
-            <img 
-              src={imageUrls[index] || card.imageUrl}
-              alt={card.imageAlt}
-              loading="lazy"
-              decoding="async"
-              className="w-full h-full object-cover"
-            />
-          </div>
+          <img 
+            src={imageUrls[index] || card.imageUrl}
+            alt={card.imageAlt}
+            loading="lazy"
+            decoding="async"
+            className={imageClasses}
+          />
         </EditableBackground>
       </div>
     );
