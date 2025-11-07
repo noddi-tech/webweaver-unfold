@@ -310,76 +310,52 @@ export function ScrollingFeatureCards() {
         : [];
       
       return (
-        <EditableBackground
-          elementId={`scrolling-card-${index + 1}-carousel`}
-          defaultBackground="bg-gradient-to-br from-background/95 to-background/80"
-          allowedBackgrounds={[
-            'bg-transparent',
-            'bg-gradient-to-br from-background/95 to-background/80',
-            'bg-white/10',
-            'bg-black/5',
-            'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
-          ]}
-        >
-          <div className={containerClasses}>
-            <Carousel 
-              opts={{ loop: true }}
-              plugins={plugins}
-              className="w-full h-full"
-            >
-              <CarouselContent className="h-full">
-                {config.images.map((image, imgIndex) => (
-                  <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
-                    <div className={innerWrapperClasses}>
-                      <img
-                        src={image.url}
-                        alt={image.alt || `Slide ${imgIndex + 1}`}
-                        loading="lazy"
-                        decoding="async"
-                        className={imageClasses}
-                      />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              
-              {config.show_navigation && (
-                <>
-                  <CarouselPrevious className="left-4 bg-white/80 hover:bg-white" />
-                  <CarouselNext className="right-4 bg-white/80 hover:bg-white" />
-                </>
-              )}
-            </Carousel>
-          </div>
-        </EditableBackground>
+        <div className={containerClasses}>
+          <Carousel 
+            opts={{ loop: true }}
+            plugins={plugins}
+            className="w-full h-full"
+          >
+            <CarouselContent className="h-full">
+              {config.images.map((image, imgIndex) => (
+                <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
+                  <div className={innerWrapperClasses}>
+                    <img
+                      src={image.url}
+                      alt={image.alt || `Slide ${imgIndex + 1}`}
+                      loading="lazy"
+                      decoding="async"
+                      className={imageClasses}
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            
+            {config.show_navigation && (
+              <>
+                <CarouselPrevious className="left-4 bg-white/80 hover:bg-white" />
+                <CarouselNext className="right-4 bg-white/80 hover:bg-white" />
+              </>
+            )}
+          </Carousel>
+        </div>
       );
     }
     
     // Fallback to single image
     return (
-      <EditableBackground
-        elementId={`scrolling-card-${index + 1}-single`}
-        defaultBackground="bg-gradient-to-br from-background/95 to-background/80"
-        allowedBackgrounds={[
-          'bg-transparent',
-          'bg-gradient-to-br from-background/95 to-background/80',
-          'bg-white/10',
-          'bg-black/5',
-          'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
-        ]}
-      >
-        <div className={containerClasses}>
-          <div className={innerWrapperClasses}>
-            <img 
-              src={imageUrls[index] || card.imageUrl}
-              alt={card.imageAlt}
-              loading="lazy"
-              decoding="async"
-              className={imageClasses}
-            />
-          </div>
+      <div className={containerClasses}>
+        <div className={innerWrapperClasses}>
+          <img 
+            src={imageUrls[index] || card.imageUrl}
+            alt={card.imageAlt}
+            loading="lazy"
+            decoding="async"
+            className={imageClasses}
+          />
         </div>
-      </EditableBackground>
+      </div>
     );
   };
 
