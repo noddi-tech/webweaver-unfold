@@ -81,7 +81,7 @@ export default function WhyNoddi() {
                     <li key={index} className="flex items-start gap-3">
                       <X className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
                       <EditableTranslation translationKey={`why_noddi.before.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                        <span className="text-white/80">{item}</span>
+                        <span>{item}</span>
                       </EditableTranslation>
                     </li>
                   ))}
@@ -127,7 +127,7 @@ export default function WhyNoddi() {
                     <li key={index} className="flex items-start gap-3">
                       <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <EditableTranslation translationKey={`why_noddi.after.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                        <span className="text-foreground font-medium">{item}</span>
+                        <span className="font-medium">{item}</span>
                       </EditableTranslation>
                     </li>
                   ))}
