@@ -7,11 +7,9 @@ import { LanguageLink } from "@/components/LanguageLink";
 import { ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EditableSolutionText } from "@/components/EditableSolutionText";
-import { EditableKeyBenefit } from "@/components/EditableKeyBenefit";
-import { EditableImage } from "@/components/EditableImage";
 import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
 import { EditableButton } from "@/components/EditableButton";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { KeyBenefitItem } from "@/components/KeyBenefitItem";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -348,78 +346,16 @@ const SolutionDetail = () => {
       {solution.key_benefits && solution.key_benefits.length > 0 && (
         <section className="py-20 px-6">
           <div className="container mx-auto max-w-7xl space-y-24">
-            {solution.key_benefits.map((benefit, index) => {
-              // eslint-disable-next-line react-hooks/rules-of-hooks
-              const textAnimation = useScrollAnimation({ threshold: 0.2 });
-              // eslint-disable-next-line react-hooks/rules-of-hooks
-              const imageAnimation = useScrollAnimation({ threshold: 0.2 });
-              
-              return (
-                <div 
-                  key={benefit.id}
-                  className="grid lg:grid-cols-2 gap-12 items-center"
-                >
-                  {/* Text Content - Always on Left */}
-                  <div 
-                    ref={textAnimation.ref as any}
-                    className={`transition-all duration-700 ${
-                      textAnimation.isVisible 
-                        ? 'opacity-100 translate-x-0' 
-                        : 'opacity-0 -translate-x-12'
-                    }`}
-                  >
-                    <EditableKeyBenefit
-                      solutionId={solution.id}
-                      benefitIndex={index}
-                      field="heading"
-                      onSave={handleContentSave}
-                    >
-                      <h3 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-                        {benefit.heading}
-                      </h3>
-                    </EditableKeyBenefit>
-                    <EditableKeyBenefit
-                      solutionId={solution.id}
-                      benefitIndex={index}
-                      field="description"
-                      onSave={handleContentSave}
-                    >
-                      <p className="text-lg text-muted-foreground leading-relaxed">
-                        {benefit.description}
-                      </p>
-                  </EditableKeyBenefit>
-                  </div>
-                  
-                  {/* Image - Always on Right */}
-                  <div
-                    ref={imageAnimation.ref as any}
-                    className={`transition-all duration-700 ${
-                      imageAnimation.isVisible 
-                        ? 'opacity-100 translate-x-0' 
-                        : 'opacity-0 translate-x-12'
-                    }`}
-                  >
-                    <EditableImage
-                      imageUrl={benefit.imageUrl || null}
-                      onSave={(newUrl) => handleKeyBenefitImageSave(index, newUrl)}
-                      altText={benefit.heading}
-                      placeholder="Add benefit image"
-                      aspectRatio="4/3"
-                    >
-                      {benefit.imageUrl && (
-                        <div className="rounded-2xl overflow-hidden shadow-xl">
-                          <img 
-                            src={benefit.imageUrl}
-                            alt={benefit.heading}
-                            className="w-full h-auto object-cover"
-                          />
-                        </div>
-                      )}
-                    </EditableImage>
-                  </div>
-                </div>
-              );
-            })}
+            {solution.key_benefits.map((benefit, index) => (
+              <KeyBenefitItem
+                key={benefit.id}
+                benefit={benefit}
+                solutionId={solution.id}
+                benefitIndex={index}
+                onContentSave={handleContentSave}
+                onImageSave={handleKeyBenefitImageSave}
+              />
+            ))}
           </div>
         </section>
       )}
