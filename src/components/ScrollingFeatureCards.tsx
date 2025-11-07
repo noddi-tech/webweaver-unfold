@@ -310,26 +310,26 @@ export function ScrollingFeatureCards() {
         : [];
       
       return (
-        <div className={containerClasses}>
+        <EditableBackground
+          elementId={`scrolling-card-${index + 1}-carousel`}
+          defaultBackground="bg-gradient-to-br from-background/95 to-background/80"
+          allowedBackgrounds={[
+            'bg-transparent',
+            'bg-gradient-to-br from-background/95 to-background/80',
+            'bg-white/10',
+            'bg-black/5',
+            'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
+          ]}
+        >
+          <div className={containerClasses}>
             <Carousel 
               opts={{ loop: true }}
               plugins={plugins}
               className="w-full h-full"
             >
               <CarouselContent className="h-full">
-              {config.images.map((image, imgIndex) => (
-                <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
-                  <EditableBackground
-                    elementId={`scrolling-card-${index + 1}-image-${imgIndex}`}
-                    defaultBackground="bg-transparent"
-                    allowedBackgrounds={[
-                      'bg-transparent',
-                      'bg-gradient-to-br from-background/95 to-background/80',
-                      'bg-white/10',
-                      'bg-black/5',
-                      'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
-                    ]}
-                  >
+                {config.images.map((image, imgIndex) => (
+                  <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
                     <div className={innerWrapperClasses}>
                       <img
                         src={image.url}
@@ -339,36 +339,36 @@ export function ScrollingFeatureCards() {
                         className={imageClasses}
                       />
                     </div>
-                  </EditableBackground>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            
-            {config.show_navigation && (
-              <>
-                <CarouselPrevious className="left-4 bg-white/80 hover:bg-white" />
-                <CarouselNext className="right-4 bg-white/80 hover:bg-white" />
-              </>
-            )}
-          </Carousel>
-        </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              
+              {config.show_navigation && (
+                <>
+                  <CarouselPrevious className="left-4 bg-white/80 hover:bg-white" />
+                  <CarouselNext className="right-4 bg-white/80 hover:bg-white" />
+                </>
+              )}
+            </Carousel>
+          </div>
+        </EditableBackground>
       );
     }
     
     // Fallback to single image
     return (
-      <div className={containerClasses}>
-        <EditableBackground
-          elementId={`scrolling-card-${index + 1}-image-container`}
-          defaultBackground="bg-transparent"
-          allowedBackgrounds={[
-            'bg-transparent',
-            'bg-gradient-to-br from-background/95 to-background/80',
-            'bg-white/10',
-            'bg-black/5',
-            'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
-          ]}
-        >
+      <EditableBackground
+        elementId={`scrolling-card-${index + 1}-single`}
+        defaultBackground="bg-gradient-to-br from-background/95 to-background/80"
+        allowedBackgrounds={[
+          'bg-transparent',
+          'bg-gradient-to-br from-background/95 to-background/80',
+          'bg-white/10',
+          'bg-black/5',
+          'bg-gradient-to-br from-purple-500/10 to-blue-500/10'
+        ]}
+      >
+        <div className={containerClasses}>
           <div className={innerWrapperClasses}>
             <img 
               src={imageUrls[index] || card.imageUrl}
@@ -378,8 +378,8 @@ export function ScrollingFeatureCards() {
               className={imageClasses}
             />
           </div>
-        </EditableBackground>
-      </div>
+        </div>
+      </EditableBackground>
     );
   };
 
