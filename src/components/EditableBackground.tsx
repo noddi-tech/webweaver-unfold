@@ -20,21 +20,21 @@ export function EditableBackground({
   className = ''
 }: EditableBackgroundProps) {
   const { editMode } = useEditMode();
-  const { background, updateBackground, isLoading } = useBackgroundStyle(elementId, defaultBackground);
+  const { background, textColor, updateBackground, isLoading } = useBackgroundStyle(elementId, defaultBackground);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleSave = async (newBackground: string) => {
-    await updateBackground(newBackground);
+  const handleSave = async (newBackground: string, newTextColor?: string) => {
+    await updateBackground(newBackground, newTextColor);
   };
 
   if (isLoading) {
     return <>{children}</>;
   }
 
-  // Clone the child and merge the background className
+  // Clone the child and merge the background and text color className
   const childWithBackground = React.cloneElement(children as React.ReactElement, {
-    className: `${(children as React.ReactElement).props.className || ''} ${background}`.trim()
+    className: `${(children as React.ReactElement).props.className || ''} ${background} ${textColor}`.trim()
   });
 
   return (
