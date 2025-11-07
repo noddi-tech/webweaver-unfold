@@ -159,7 +159,6 @@ export function BackgroundEditModal({
         {/* LIVE PREVIEW */}
         <div
           className={`p-8 text-center mb-4 rounded-lg border shadow-sm ${selectedBackground}`}
-          style={{ backgroundColor: 'transparent' }}
         >
           <h3 className={`text-3xl font-bold mb-2 ${selectedTextColor}`}>Preview Heading</h3>
           <p className={`text-lg ${selectedTextColor} opacity-90`}>
