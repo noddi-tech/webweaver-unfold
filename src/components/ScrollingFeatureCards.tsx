@@ -262,9 +262,9 @@ export function ScrollingFeatureCards() {
     });
   }, []);
 
-  // Uniform container size for all cards - uses flexbox to center inner content
+  // Uniform container size for all cards - uses flexbox to center inner content (invisible)
   const getContainerClasses = (): string => {
-    return 'relative w-full h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-xl border border-white/10 flex items-center justify-center';
+    return 'relative w-full h-[400px] lg:h-[500px] flex items-center justify-center';
   };
 
   const getAspectRatioStyle = (aspectRatio: string): string => {
@@ -287,11 +287,11 @@ export function ScrollingFeatureCards() {
     const aspectClass = getAspectRatioStyle(aspectRatio);
     
     if (aspectClass && aspectRatio !== 'auto') {
-      // Has a specific aspect ratio - constrain the wrapper
-      return `relative ${aspectClass} max-h-full max-w-full`;
+      // Has a specific aspect ratio - constrain the wrapper with visible styling
+      return `relative ${aspectClass} max-h-full max-w-full rounded-2xl overflow-hidden shadow-xl border border-white/10`;
     } else {
-      // Auto mode - fill the entire card
-      return 'relative w-full h-full';
+      // Auto mode - fill the entire card with visible styling
+      return 'relative w-full h-full rounded-2xl overflow-hidden shadow-xl border border-white/10';
     }
   };
 
