@@ -1,9 +1,25 @@
 import { useState, useEffect } from 'react';
+import * as React from 'react';
 import { Pencil } from 'lucide-react';
 import { useEditMode } from '@/contexts/EditModeContext';
 import { TranslationEditModal } from './TranslationEditModal';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
+
+// Helper function to recursively extract text from React children
+const extractTextFromChildren = (children: React.ReactNode): string => {
+  let text = '';
+  
+  React.Children.forEach(children, (child) => {
+    if (typeof child === 'string' || typeof child === 'number') {
+      text += child;
+    } else if (React.isValidElement(child) && child.props.children) {
+      text += extractTextFromChildren(child.props.children);
+    }
+  });
+  
+  return text.trim();
+};
 
 interface EditableTranslationProps {
   children: React.ReactNode;
@@ -79,7 +95,7 @@ export function EditableTranslation({
         contentTable="translations"
         translationKey={translationKey}
         onSave={onSave}
-        fallbackText={fallbackText}
+        fallbackText={fallbackText || extractTextFromChildren(children)}
       />
     </>
   );
