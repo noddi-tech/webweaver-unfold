@@ -287,6 +287,33 @@ const SolutionsManager = () => {
     setEditingSolution({ ...editingSolution, key_benefits: newBenefits });
   };
 
+  const openEditDialog = async (solutionId: string) => {
+    // Fetch fresh data from database to prevent stale state issues
+    const { data, error } = await supabase
+      .from("solutions")
+      .select("*")
+      .eq("id", solutionId)
+      .single();
+    
+    if (error) {
+      toast({ title: "Failed to load solution", description: error.message, variant: "destructive" });
+      return;
+    }
+
+    if (data) {
+      setEditingSolution({
+        ...data,
+        benefits: (Array.isArray(data.benefits) ? data.benefits : []) as string[],
+        key_benefits: (Array.isArray(data.key_benefits) ? data.key_benefits.map((kb: any) => ({
+          heading: kb?.heading || "",
+          text: kb?.text || "",
+          image_url: kb?.image_url || ""
+        })) : []) as KeyBenefit[]
+      });
+      setShowEditDialog(true);
+    }
+  };
+
   const autoSaveSortOrder = async (id: string, sortOrder: number) => {
     updateLocal(id, { sort_order: sortOrder });
     const { error } = await supabase
@@ -552,7 +579,7 @@ const SolutionsManager = () => {
                       />
                     </TableCell>
                     <TableCell className="text-right space-x-2">
-                      <Button size="sm" onClick={() => { setEditingSolution(s); setShowEditDialog(true); }}>
+                      <Button size="sm" onClick={() => openEditDialog(s.id)}>
                         <Edit className="w-4 h-4 mr-1" /> Edit
                       </Button>
                       <Button variant="destructive" size="sm" onClick={() => deleteSolution(s.id)} disabled={deletingId === s.id}>
