@@ -17,8 +17,8 @@ import { Trash2, Plus, X, Edit, MoveUp, MoveDown } from "lucide-react";
 
 interface KeyBenefit {
   heading: string;
-  text: string;
-  image_url: string;
+  description: string;
+  imageUrl: string;
 }
 
 interface SolutionRow {
@@ -139,8 +139,8 @@ const SolutionsManager = () => {
       benefits: (Array.isArray(s.benefits) ? s.benefits : []) as string[],
       key_benefits: (Array.isArray(s.key_benefits) ? s.key_benefits.map((kb: any) => ({
         heading: kb?.heading || "",
-        text: kb?.text || "",
-        image_url: kb?.image_url || ""
+        description: kb?.description || "",
+        imageUrl: kb?.imageUrl || ""
       })) : []) as KeyBenefit[]
     })));
     setSettings((setts && setts[0]) || null);
@@ -258,7 +258,7 @@ const SolutionsManager = () => {
 
   const addKeyBenefit = () => {
     if (editingSolution) {
-      const newBenefits = [...editingSolution.key_benefits, { heading: "", text: "", image_url: "" }];
+      const newBenefits = [...editingSolution.key_benefits, { heading: "", description: "", imageUrl: "" }];
       setEditingSolution({ ...editingSolution, key_benefits: newBenefits });
     }
   };
@@ -306,8 +306,8 @@ const SolutionsManager = () => {
         benefits: (Array.isArray(data.benefits) ? data.benefits : []) as string[],
         key_benefits: (Array.isArray(data.key_benefits) ? data.key_benefits.map((kb: any) => ({
           heading: kb?.heading || "",
-          text: kb?.text || "",
-          image_url: kb?.image_url || ""
+          description: kb?.description || "",
+          imageUrl: kb?.imageUrl || ""
         })) : []) as KeyBenefit[]
       });
       setShowEditDialog(true);
@@ -750,11 +750,11 @@ const SolutionsManager = () => {
                             />
                           </div>
                           <div>
-                            <Label>Text</Label>
+                            <Label>Description</Label>
                             <Textarea
                               className="text-foreground"
-                              value={benefit.text}
-                              onChange={(e) => updateKeyBenefit(index, 'text', e.target.value)}
+                              value={benefit.description}
+                              onChange={(e) => updateKeyBenefit(index, 'description', e.target.value)}
                               placeholder="Benefit description..."
                               rows={3}
                             />
@@ -763,8 +763,8 @@ const SolutionsManager = () => {
                             <Label>Image URL</Label>
                             <Input
                               className="text-foreground"
-                              value={benefit.image_url}
-                              onChange={(e) => updateKeyBenefit(index, 'image_url', e.target.value)}
+                              value={benefit.imageUrl}
+                              onChange={(e) => updateKeyBenefit(index, 'imageUrl', e.target.value)}
                               placeholder="https://..."
                             />
                           </div>
