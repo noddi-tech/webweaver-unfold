@@ -614,6 +614,7 @@ const SolutionsManager = () => {
                 <div>
                   <Label>Hero Title</Label>
                   <Input
+                    className="text-foreground"
                     value={editingSolution.hero_title ?? ""}
                     onChange={(e) => updateEditing({ hero_title: e.target.value })}
                     placeholder="Main hero heading"
@@ -622,6 +623,7 @@ const SolutionsManager = () => {
                 <div>
                   <Label>Hero Subtitle</Label>
                   <Input
+                    className="text-foreground"
                     value={editingSolution.hero_subtitle ?? ""}
                     onChange={(e) => updateEditing({ hero_subtitle: e.target.value })}
                     placeholder="Supporting text"
@@ -630,6 +632,7 @@ const SolutionsManager = () => {
                 <div>
                   <Label>Hero Description</Label>
                   <Textarea
+                    className="text-foreground"
                     value={editingSolution.hero_description ?? ""}
                     onChange={(e) => updateEditing({ hero_description: e.target.value })}
                     placeholder="Additional description text"
@@ -639,6 +642,7 @@ const SolutionsManager = () => {
                 <div>
                   <Label>Hero Image URL</Label>
                   <Input
+                    className="text-foreground"
                     value={editingSolution.hero_image_url ?? ""}
                     onChange={(e) => updateEditing({ hero_image_url: e.target.value })}
                     placeholder="https://..."
@@ -648,6 +652,7 @@ const SolutionsManager = () => {
                   <div>
                     <Label>CTA Button Text</Label>
                     <Input
+                      className="text-foreground"
                       value={editingSolution.hero_cta_text ?? ""}
                       onChange={(e) => updateEditing({ hero_cta_text: e.target.value })}
                       placeholder="Get Started"
@@ -656,6 +661,7 @@ const SolutionsManager = () => {
                   <div>
                     <Label>CTA Button URL</Label>
                     <Input
+                      className="text-foreground"
                       value={editingSolution.hero_cta_url ?? ""}
                       onChange={(e) => updateEditing({ hero_cta_url: e.target.value })}
                       placeholder="/contact"
@@ -668,6 +674,7 @@ const SolutionsManager = () => {
                 <div>
                   <Label>Card Subtitle (Listing Page)</Label>
                   <Input
+                    className="text-foreground"
                     value={editingSolution.subtitle ?? ""}
                     onChange={(e) => updateEditing({ subtitle: e.target.value })}
                     placeholder="Professional tire care and maintenance"
@@ -676,6 +683,7 @@ const SolutionsManager = () => {
                 <div>
                   <Label>Description Heading (H2)</Label>
                   <Input
+                    className="text-foreground"
                     value={editingSolution.description_heading ?? ""}
                     onChange={(e) => updateEditing({ description_heading: e.target.value })}
                     placeholder="Section heading"
@@ -684,6 +692,7 @@ const SolutionsManager = () => {
                 <div>
                   <Label>Description Text</Label>
                   <Textarea
+                    className="text-foreground"
                     value={editingSolution.description_text ?? ""}
                     onChange={(e) => updateEditing({ description_text: e.target.value })}
                     placeholder="Detailed description of the solution..."
@@ -734,6 +743,7 @@ const SolutionsManager = () => {
                           <div>
                             <Label>Heading (H3)</Label>
                             <Input
+                              className="text-foreground"
                               value={benefit.heading}
                               onChange={(e) => updateKeyBenefit(index, 'heading', e.target.value)}
                               placeholder="Benefit heading"
@@ -742,6 +752,7 @@ const SolutionsManager = () => {
                           <div>
                             <Label>Text</Label>
                             <Textarea
+                              className="text-foreground"
                               value={benefit.text}
                               onChange={(e) => updateKeyBenefit(index, 'text', e.target.value)}
                               placeholder="Benefit description..."
@@ -751,6 +762,7 @@ const SolutionsManager = () => {
                           <div>
                             <Label>Image URL</Label>
                             <Input
+                              className="text-foreground"
                               value={benefit.image_url}
                               onChange={(e) => updateKeyBenefit(index, 'image_url', e.target.value)}
                               placeholder="https://..."
@@ -768,6 +780,7 @@ const SolutionsManager = () => {
                 <div>
                   <Label>Footer Heading (H3)</Label>
                   <Input
+                    className="text-foreground"
                     value={editingSolution.footer_heading ?? ""}
                     onChange={(e) => updateEditing({ footer_heading: e.target.value })}
                     placeholder="Ready to get started?"
@@ -776,6 +789,7 @@ const SolutionsManager = () => {
                 <div>
                   <Label>Footer Text</Label>
                   <Textarea
+                    className="text-foreground"
                     value={editingSolution.footer_text ?? ""}
                     onChange={(e) => updateEditing({ footer_text: e.target.value })}
                     placeholder="Call to action text..."
@@ -786,6 +800,7 @@ const SolutionsManager = () => {
                   <div>
                     <Label>CTA Button Text</Label>
                     <Input
+                      className="text-foreground"
                       value={editingSolution.footer_cta_text ?? ""}
                       onChange={(e) => updateEditing({ footer_cta_text: e.target.value })}
                       placeholder="Contact Us"
@@ -794,6 +809,7 @@ const SolutionsManager = () => {
                   <div>
                     <Label>CTA Button URL</Label>
                     <Input
+                      className="text-foreground"
                       value={editingSolution.footer_cta_url ?? ""}
                       onChange={(e) => updateEditing({ footer_cta_url: e.target.value })}
                       placeholder="/contact"
