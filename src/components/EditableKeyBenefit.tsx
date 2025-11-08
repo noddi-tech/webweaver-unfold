@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Pencil } from 'lucide-react';
 import { useEditMode } from '@/contexts/EditModeContext';
 import { KeyBenefitEditModal } from './KeyBenefitEditModal';
@@ -12,6 +12,19 @@ interface EditableKeyBenefitProps {
   onSave?: () => void;
 }
 
+// Helper to extract text from React children
+const extractTextFromChildren = (children: React.ReactNode): string => {
+  if (typeof children === 'string') return children;
+  if (typeof children === 'number') return children.toString();
+  if (Array.isArray(children)) {
+    return children.map(extractTextFromChildren).join('');
+  }
+  if (React.isValidElement(children) && children.props.children) {
+    return extractTextFromChildren(children.props.children);
+  }
+  return '';
+};
+
 export function EditableKeyBenefit({
   children,
   solutionId,
@@ -24,9 +37,9 @@ export function EditableKeyBenefit({
   const [isHovered, setIsHovered] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Check if content is empty
-  const hasContent = children && children.toString().trim().length > 0;
-  const isEmpty = !hasContent;
+  // Extract actual text content from children
+  const textContent = extractTextFromChildren(children);
+  const isEmpty = !textContent || textContent.trim().length === 0;
 
   if (!editMode) {
     return <>{children}</>;
@@ -35,14 +48,14 @@ export function EditableKeyBenefit({
   return (
     <>
       <div
-        className={`relative inline-block group min-h-[40px] ${isEmpty ? 'min-w-[200px]' : ''} ${className}`}
+        className={`relative block group min-h-[60px] w-full ${className}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {isEmpty ? (
-          <span className="text-muted-foreground/50 italic">
+          <div className="text-muted-foreground/50 italic p-4 border-2 border-dashed border-muted-foreground/20 rounded-lg">
             Click to add {field === 'heading' ? 'heading' : 'description'}
-          </span>
+          </div>
         ) : (
           children
         )}
