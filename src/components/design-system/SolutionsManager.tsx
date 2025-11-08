@@ -560,10 +560,10 @@ const SolutionsManager = () => {
                 solutions.map((s) => (
                   <TableRow key={s.id}>
                     <TableCell>
-                      <Input value={s.title} onChange={(e) => updateLocal(s.id, { title: e.target.value })} />
+                      <Input className="text-foreground" value={s.title} onChange={(e) => updateLocal(s.id, { title: e.target.value })} />
                     </TableCell>
                     <TableCell>
-                      <Input value={s.icon_name} onChange={(e) => updateLocal(s.id, { icon_name: e.target.value })} />
+                      <Input className="text-foreground" value={s.icon_name} onChange={(e) => updateLocal(s.id, { icon_name: e.target.value })} />
                     </TableCell>
                     <TableCell>
                       <Switch
@@ -573,6 +573,7 @@ const SolutionsManager = () => {
                     </TableCell>
                     <TableCell>
                       <Input
+                        className="text-foreground"
                         type="number"
                         value={s.sort_order}
                         onChange={(e) => autoSaveSortOrder(s.id, Number(e.target.value))}
