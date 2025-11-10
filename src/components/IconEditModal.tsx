@@ -67,6 +67,16 @@ export function IconEditModal({
 
   const selectedSizeConfig = sizeOptions.find(s => s.value === selectedSize) || sizeOptions[1];
 
+  // Sync modal state with current props when opened
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedSize(currentSize);
+      setSelectedIconColor(currentIconColor);
+      setSelectedShape(currentShape);
+      setSelectedBackground(currentBackground);
+    }
+  }, [isOpen, currentSize, currentIconColor, currentShape, currentBackground]);
+
   useEffect(() => {
     if (currentBackground === 'transparent' || currentBackground === 'bg-transparent') {
       setActiveTab('none');

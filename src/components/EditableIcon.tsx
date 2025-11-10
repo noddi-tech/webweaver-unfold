@@ -36,12 +36,14 @@ export function EditableIcon({
   const [isHovered, setIsHovered] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
+  // Use database size if available, otherwise fall back to prop
+  const actualSize = (iconStyle.size as 'sm' | 'default' | 'lg' | 'xl') || size;
   const shapeClass = shape || iconStyle.shape;
 
   if (isLoading) {
     return (
       <div className={cn(
-        sizeMap[size].container,
+        sizeMap[actualSize].container,
         'rounded-xl bg-muted animate-pulse',
         className
       )} />
@@ -71,7 +73,7 @@ export function EditableIcon({
       >
         <div
           className={cn(
-            sizeMap[size].container,
+            sizeMap[actualSize].container,
             backgroundClass,
             shapeClass,
             'flex items-center justify-center',
@@ -83,7 +85,7 @@ export function EditableIcon({
             <Icon />
           ) : (
             <Icon className={cn(
-              sizeMap[size].icon,
+              sizeMap[actualSize].icon,
               `text-${iconStyle.icon_color_token}`,
               iconClassName
             )} />
@@ -106,7 +108,7 @@ export function EditableIcon({
         icon={Icon}
         currentBackground={iconStyle.background_token}
         currentIconColor={iconStyle.icon_color_token}
-        currentSize={size}
+        currentSize={actualSize}
         currentShape={shapeClass}
         onSave={handleSave}
       />
