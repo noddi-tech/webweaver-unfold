@@ -62,7 +62,7 @@ export default function ProductOverview() {
               <LanguageLink 
                 key={index} 
                 to={product.link}
-                className={`group transition-all duration-500 ${
+                className={`h-full group transition-all duration-500 ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
@@ -71,6 +71,7 @@ export default function ProductOverview() {
                   elementId={`product-overview-card-${index}`}
                   defaultBackground="bg-card"
                   allowedBackgrounds={allowedBackgrounds}
+                  className="h-full"
                 >
                   <Card className="h-full hover-scale border-2 hover:border-primary/30 transition-all duration-300">
                     <CardContent className="p-8">
@@ -79,7 +80,7 @@ export default function ProductOverview() {
                         icon={Icon}
                         defaultBackground="bg-gradient-primary"
                         size="lg"
-                        className="mb-3 group-hover:shadow-xl transition-shadow"
+                        className="mb-1 group-hover:shadow-xl transition-shadow"
                       />
                         <EditableTranslation 
                         translationKey={`product_overview.${product.link.slice(1)}.title`} 

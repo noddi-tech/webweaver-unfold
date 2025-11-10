@@ -39,7 +39,7 @@ export function EditableBackground({
 
   return (
     <div
-      className={`relative inline-block w-full ${className}`}
+      className={`relative block h-full w-full ${className}`}
       onMouseEnter={() => editMode && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
