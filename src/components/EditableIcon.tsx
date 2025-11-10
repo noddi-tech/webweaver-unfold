@@ -3,6 +3,7 @@ import { Palette, type LucideIcon } from 'lucide-react';
 import { useEditMode } from '@/contexts/EditModeContext';
 import { useIconStyle } from '@/hooks/useIconStyle';
 import { cn } from '@/lib/utils';
+import { IconEditModal } from '@/components/IconEditModal';
 
 interface EditableIconProps {
   elementId: string;
@@ -31,8 +32,9 @@ export function EditableIcon({
   iconClassName = ''
 }: EditableIconProps) {
   const { editMode } = useEditMode();
-  const { iconStyle, isLoading } = useIconStyle(elementId, defaultBackground);
+  const { iconStyle, updateIconStyle, isLoading } = useIconStyle(elementId, defaultBackground);
   const [isHovered, setIsHovered] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const shapeClass = shape || iconStyle.shape;
 
@@ -46,41 +48,68 @@ export function EditableIcon({
     );
   }
 
-  const backgroundClass = iconStyle.background_token.startsWith('bg-') 
-    ? iconStyle.background_token 
-    : `bg-${iconStyle.background_token}`;
+  const backgroundClass = iconStyle.background_token === 'transparent' || iconStyle.background_token === 'bg-transparent'
+    ? 'bg-transparent'
+    : iconStyle.background_token.startsWith('bg-') 
+      ? iconStyle.background_token 
+      : `bg-${iconStyle.background_token}`;
+
+  const handleSave = async (updates: any) => {
+    try {
+      await updateIconStyle(updates);
+    } catch (error) {
+      console.error('Failed to update icon style:', error);
+    }
+  };
 
   return (
-    <div
-      className="relative inline-block"
-      onMouseEnter={() => editMode && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <>
       <div
-        className={cn(
-          sizeMap[size].container,
-          backgroundClass,
-          shapeClass,
-          'flex items-center justify-center shadow-lg',
-          className
-        )}
+        className="relative inline-block"
+        onMouseEnter={() => editMode && setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        {typeof Icon === 'function' && Icon.length === 0 ? (
-          <Icon />
-        ) : (
-          <Icon className={cn(
-            sizeMap[size].icon,
-            `text-${iconStyle.icon_color_token}`,
-            iconClassName
-          )} />
+        <div
+          className={cn(
+            sizeMap[size].container,
+            backgroundClass,
+            shapeClass,
+            'flex items-center justify-center',
+            iconStyle.background_token !== 'transparent' && iconStyle.background_token !== 'bg-transparent' ? 'shadow-lg' : '',
+            className
+          )}
+        >
+          {typeof Icon === 'function' && Icon.length === 0 ? (
+            <Icon />
+          ) : (
+            <Icon className={cn(
+              sizeMap[size].icon,
+              `text-${iconStyle.icon_color_token}`,
+              iconClassName
+            )} />
+          )}
+        </div>
+
+        {editMode && isHovered && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="absolute -top-2 -right-2 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg z-50 hover:scale-110 transition-transform"
+          >
+            <Palette className="w-3 h-3" />
+          </button>
         )}
       </div>
 
-      {editMode && isHovered && (
-        <div className="absolute -top-2 -right-2 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg z-50">
-          <Palette className="w-3 h-3" />
-        </div>
-      )}
-    </div>
+      <IconEditModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        icon={Icon}
+        currentBackground={iconStyle.background_token}
+        currentIconColor={iconStyle.icon_color_token}
+        currentSize={size}
+        currentShape={shapeClass}
+        onSave={handleSave}
+      />
+    </>
   );
 }

@@ -79,7 +79,7 @@ export default function ProductOverview() {
                         icon={Icon}
                         defaultBackground="bg-gradient-primary"
                         size="lg"
-                        className="mb-6 group-hover:shadow-xl transition-shadow"
+                        className="mb-4 group-hover:shadow-xl transition-shadow"
                       />
                         <EditableTranslation 
                         translationKey={`product_overview.${product.link.slice(1)}.title`} 
