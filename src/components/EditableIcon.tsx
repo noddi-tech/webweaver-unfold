@@ -67,7 +67,7 @@ export function EditableIcon({
   return (
     <>
       <div
-        className="relative inline-block"
+        className={cn("relative inline-block", className)}
         onMouseEnter={() => editMode && setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -77,8 +77,7 @@ export function EditableIcon({
             backgroundClass,
             shapeClass,
             'flex items-center justify-center',
-            iconStyle.background_token !== 'transparent' && iconStyle.background_token !== 'bg-transparent' ? 'shadow-lg' : '',
-            className
+            iconStyle.background_token !== 'transparent' && iconStyle.background_token !== 'bg-transparent' ? 'shadow-lg' : ''
           )}
         >
           {typeof Icon === 'function' && Icon.length === 0 ? (
