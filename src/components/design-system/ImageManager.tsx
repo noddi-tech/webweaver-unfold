@@ -502,9 +502,9 @@ const ImageManager = () => {
     if (uploadQueue.length === 0) return null;
     
     return (
-      <div className="space-y-2 p-4 bg-muted/30 rounded-lg border border-border">
+      <div className="space-y-2 p-4 bg-card/50 rounded-lg border border-border">
         <div className="flex items-center justify-between mb-2">
-          <h4 className="text-sm font-semibold">Upload Queue ({uploadQueue.length} files)</h4>
+          <h4 className="text-sm font-semibold text-foreground">Upload Queue ({uploadQueue.length} files)</h4>
           {!uploading && (
             <Button 
               variant="ghost" 
@@ -513,7 +513,7 @@ const ImageManager = () => {
                 setUploadQueue([]);
                 setFiles(null);
               }}
-              className="h-7 text-xs"
+              className="h-7 text-xs text-foreground"
             >
               Clear
             </Button>
@@ -524,7 +524,7 @@ const ImageManager = () => {
           {uploadQueue.map((item, idx) => (
             <div 
               key={idx} 
-              className="flex items-center gap-2 p-2 bg-background rounded text-sm hover:bg-accent/50 transition-colors group"
+              className="flex items-center gap-2 p-2 bg-card rounded text-sm hover:bg-accent/50 transition-colors group"
             >
               {/* Status Icon */}
               {item.status === 'pending' && (
@@ -549,12 +549,12 @@ const ImageManager = () => {
               )}
               
               {/* File Name - selectable text */}
-              <span className="flex-1 truncate select-text cursor-text font-medium">
+              <span className="flex-1 truncate select-text cursor-text font-medium text-foreground">
                 {item.file.name}
               </span>
               
               {/* File Size */}
-              <span className="text-xs text-muted-foreground shrink-0">
+              <span className="text-xs text-foreground/60 shrink-0 font-medium">
                 {(item.file.size / 1024).toFixed(1)} KB
               </span>
               
@@ -628,7 +628,7 @@ const ImageManager = () => {
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-foreground/70 font-medium">
             Leave empty to upload to Library. You can assign sections later.
           </p>
         </div>
