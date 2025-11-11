@@ -303,11 +303,9 @@ export function ScrollingFeatureCards() {
   const getAspectRatioInlineStyle = (aspectRatio: string, fitMode: 'contain' | 'cover'): React.CSSProperties => {
     if (aspectRatio && aspectRatio !== 'auto') {
       if (fitMode === 'contain') {
-        // For contain mode: constrain height, let width auto-calculate
+        // For contain mode: only set aspect ratio on wrapper, sizing on image
         return {
-          aspectRatio: aspectRatio.replace(':', '/'),
-          height: '100%',
-          width: 'auto'
+          aspectRatio: aspectRatio.replace(':', '/')
         };
       } else {
         // For cover mode: fill the space
@@ -328,7 +326,9 @@ export function ScrollingFeatureCards() {
     const cardFitMode = fitModes[index] || 'contain';
     const containerClasses = getContainerClasses();
     const innerWrapperClasses = getInnerWrapperClasses(cardAspectRatio, cardFitMode);
-    const imageClasses = `w-full h-full ${cardFitMode === 'contain' ? 'object-contain' : 'object-cover'} block`;
+    const imageClasses = cardFitMode === 'contain' 
+      ? 'h-full w-auto object-contain block' 
+      : 'w-full h-full object-cover block';
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
