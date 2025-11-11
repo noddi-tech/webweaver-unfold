@@ -289,7 +289,7 @@ export function ScrollingFeatureCards() {
     if (aspectRatio && aspectRatio !== 'auto') {
       // For contain: use flex to center the constrained image
       if (fitMode === 'contain') {
-        return `relative h-full flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+        return `relative w-full h-full flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
       } else {
         // For cover: constrain with max dimensions
         return `relative max-h-full max-w-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
@@ -331,7 +331,7 @@ export function ScrollingFeatureCards() {
     const containerClasses = getContainerClasses();
     const innerWrapperClasses = getInnerWrapperClasses(cardAspectRatio, cardFitMode);
     const imageClasses = cardFitMode === 'contain' 
-      ? 'w-full h-full object-contain block' 
+      ? 'max-w-full max-h-full object-contain block' 
       : 'w-full h-full object-cover block';
     
     // If carousel data exists and has images
