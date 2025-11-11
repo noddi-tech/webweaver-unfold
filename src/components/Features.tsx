@@ -92,8 +92,9 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
   const bg = settings && useSectionBg ? (bgClass[settings.background_token] || "") : "";
   const cardBg = settings ? (bgClass[settings.card_bg_token] || "bg-card") : "bg-card";
   const iconClr = settings ? (textClass[settings.icon_token] || "text-primary") : "text-primary";
-  const titleClr = settings ? (textClass[settings.title_token] || "text-white") : "text-white";
-  const descClr = settings ? (textClass[settings.description_token] || "text-white/90") : "text-white/90";
+  // Always use white text for card content since cards have dark backgrounds
+  const titleClr = "text-white";
+  const descClr = "text-white/90";
   const borderClr = settings ? (borderClass[settings.border_token] || "border-border") : "border-border";
 
   return (
