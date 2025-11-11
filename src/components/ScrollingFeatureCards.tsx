@@ -507,7 +507,7 @@ export function ScrollingFeatureCards() {
                   onMouseLeave={() => editMode && setHoveredCard(null)}
                 >
                   <div className={cn(
-                    "backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-10 lg:p-12 relative",
+                    "backdrop-blur-xl rounded-3xl shadow-2xl p-10 lg:p-12 relative",
                     cardData[index]?.background || 'bg-gradient-hero/90'
                   )}>
                     {/* Edit Button - Only in Edit Mode */}
