@@ -91,7 +91,7 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
   const showFeatures = dbFeatures && dbFeatures.length > 0;
   const bg = settings && useSectionBg ? (bgClass[settings.background_token] || "") : "";
   const cardBg = settings ? (bgClass[settings.card_bg_token] || "bg-card") : "bg-card";
-  const iconClr = settings ? (textClass[settings.icon_token] || "text-white") : "text-white";
+  const iconClr = settings ? (textClass[settings.icon_token] || "text-primary") : "text-primary";
   const titleClr = settings ? (textClass[settings.title_token] || "text-white") : "text-white";
   const descClr = settings ? (textClass[settings.description_token] || "text-white/90") : "text-white/90";
   const borderClr = settings ? (borderClass[settings.border_token] || "border-border") : "border-border";
@@ -111,7 +111,7 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
               const subtitleHeading = headings.find(h => h.element_type === 'subtitle');
               const subtitleClass = subtitleHeading?.color_token ? 
                 `${getTypographyClass('subtitle')} max-w-3xl mx-auto ${getColorClass(subtitleHeading.color_token)}` : 
-                `text-xl max-w-3xl mx-auto text-white/80`;
+                `text-xl max-w-3xl mx-auto text-muted-foreground`;
               
               return (
                 <>
