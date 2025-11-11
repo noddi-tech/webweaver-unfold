@@ -118,7 +118,8 @@ export function ImageEditModal({
         .from('site-images')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: file.type, // Preserve original MIME type for better quality
         });
 
       if (uploadError) {

@@ -349,7 +349,11 @@ export function ScrollingFeatureCards() {
                     loading="lazy"
                     decoding="async"
                     className={imageClasses}
-                    style={getImageInlineStyle(cardAspectRatio, cardFitMode)}
+                    style={{
+                      ...getImageInlineStyle(cardAspectRatio, cardFitMode),
+                      imageRendering: 'auto',
+                      WebkitFontSmoothing: 'antialiased',
+                    }}
                   />
                   </div>
                 </CarouselItem>
@@ -377,7 +381,11 @@ export function ScrollingFeatureCards() {
               loading="lazy"
               decoding="async"
               className={imageClasses}
-              style={getImageInlineStyle(cardAspectRatio, cardFitMode)}
+              style={{
+                ...getImageInlineStyle(cardAspectRatio, cardFitMode),
+                imageRendering: 'auto',
+                WebkitFontSmoothing: 'antialiased',
+              }}
             />
         </div>
       </div>
