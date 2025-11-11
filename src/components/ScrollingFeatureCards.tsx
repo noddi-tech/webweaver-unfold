@@ -283,23 +283,25 @@ export function ScrollingFeatureCards() {
   };
 
 
-  const getInnerWrapperClasses = (aspectRatio: string): string => {
+  const getInnerWrapperClasses = (aspectRatio: string, fitMode: 'contain' | 'cover'): string => {
+    const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
+    
     if (aspectRatio && aspectRatio !== 'auto') {
       // Has a specific aspect ratio - constrain the wrapper with visible styling
-      return `relative max-h-full max-w-full rounded-2xl overflow-hidden shadow-xl border border-white/10 isolate`;
+      return `relative max-h-full max-w-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
     } else {
       // Auto mode - fill the entire card with visible styling
-      return 'relative w-full h-full rounded-2xl overflow-hidden shadow-xl border border-white/10 isolate';
+      return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
     }
   };
 
-  const getAspectRatioInlineStyle = (aspectRatio: string): React.CSSProperties => {
+  const getAspectRatioInlineStyle = (aspectRatio: string, fitMode: 'contain' | 'cover'): React.CSSProperties => {
     if (aspectRatio && aspectRatio !== 'auto') {
       return {
         aspectRatio: aspectRatio.replace(':', '/'), // Convert "9:16" to "9/16"
         width: '100%',
         maxHeight: '100%',
-        objectFit: 'contain'
+        objectFit: fitMode
       };
     }
     return {};
@@ -308,9 +310,10 @@ export function ScrollingFeatureCards() {
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardAspectRatio = aspectRatios[index] || 'auto';
+    const cardFitMode = fitModes[index] || 'contain';
     const containerClasses = getContainerClasses();
-    const innerWrapperClasses = getInnerWrapperClasses(cardAspectRatio);
-    const imageClasses = 'w-full h-full object-cover block';
+    const innerWrapperClasses = getInnerWrapperClasses(cardAspectRatio, cardFitMode);
+    const imageClasses = `w-full h-full ${cardFitMode === 'contain' ? 'object-contain' : 'object-cover'} block`;
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
@@ -329,7 +332,7 @@ export function ScrollingFeatureCards() {
             <CarouselContent className="h-full">
               {config.images.map((image, imgIndex) => (
                 <CarouselItem key={imgIndex} className="flex items-center justify-center h-full p-0">
-                  <div className={innerWrapperClasses} style={getAspectRatioInlineStyle(cardAspectRatio)}>
+                  <div className={innerWrapperClasses} style={getAspectRatioInlineStyle(cardAspectRatio, cardFitMode)}>
                     <img
                       src={image.url}
                       alt={image.alt || `Slide ${imgIndex + 1}`}
@@ -356,7 +359,7 @@ export function ScrollingFeatureCards() {
     // Fallback to single image
     return (
       <div className={containerClasses}>
-        <div className={innerWrapperClasses} style={getAspectRatioInlineStyle(cardAspectRatio)}>
+        <div className={innerWrapperClasses} style={getAspectRatioInlineStyle(cardAspectRatio, cardFitMode)}>
           <img
             src={imageUrls[index] || card.imageUrl}
             alt={card.imageAlt}
