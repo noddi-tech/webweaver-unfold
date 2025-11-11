@@ -38,7 +38,7 @@ export const ImageFilters = ({
             placeholder="Search by title or filename..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9"
+            className="pl-9 text-foreground"
           />
         </div>
       </div>
@@ -46,7 +46,7 @@ export const ImageFilters = ({
       <div className="space-y-2">
         <Label className="text-foreground font-medium">Section</Label>
         <Select value={sectionFilter} onValueChange={onSectionFilterChange}>
-          <SelectTrigger>
+          <SelectTrigger className="text-foreground">
             <SelectValue placeholder="All sections" />
           </SelectTrigger>
           <SelectContent>
@@ -64,7 +64,7 @@ export const ImageFilters = ({
       <div className="space-y-2">
         <Label className="text-foreground font-medium">Status</Label>
         <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-          <SelectTrigger>
+          <SelectTrigger className="text-foreground">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>

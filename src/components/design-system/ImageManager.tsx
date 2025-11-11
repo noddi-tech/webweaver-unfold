@@ -718,7 +718,7 @@ const ImageManager = () => {
           <Card className="p-6 bg-card border-border space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold">Image Library</h3>
-              <Badge variant="outline" className="text-sm">
+              <Badge variant="secondary" className="text-sm">
                 {filteredImages.length} {filteredImages.length === 1 ? 'image' : 'images'}
               </Badge>
             </div>
