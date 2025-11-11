@@ -167,10 +167,6 @@ All colors MUST be HSL.
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
   html {
     background: hsl(var(--background));
     min-height: 100vh;
