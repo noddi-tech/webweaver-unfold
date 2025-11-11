@@ -67,7 +67,7 @@ const ImageManager = () => {
   const [images, setImages] = useState<DbImage[]>([]);
   const [uploading, setUploading] = useState(false);
   const [files, setFiles] = useState<FileList | null>(null);
-  const [uploadSection, setUploadSection] = useState<string>("");
+  const [uploadSection, setUploadSection] = useState<string>("Library");
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [imageToDelete, setImageToDelete] = useState<DbImage | null>(null);
   
@@ -158,10 +158,6 @@ const ImageManager = () => {
       return;
     }
     setSections(data || []);
-    // Set first section as default if none selected
-    if (!uploadSection && data && data.length > 0) {
-      setUploadSection(data[0].name);
-    }
   };
 
   const fetchImages = async () => {
@@ -208,8 +204,8 @@ const ImageManager = () => {
       try {
         const file = item.file;
         const base = file.name.replace(/\.[^/.]+$/, "");
-        // Use uploadSection if selected, otherwise default to Library
-        const sectionPath = uploadSection || "Library";
+        // Use uploadSection if selected, Library is the default
+        const sectionPath = uploadSection;
         const path = `${sectionPath}/${Date.now()}-${file.name}`;
         
         const { error: upErr } = await supabase.storage
@@ -224,7 +220,7 @@ const ImageManager = () => {
           title: base,
           alt: base,
           caption: null,
-          section: uploadSection || null, // Allow NULL for library uploads
+          section: uploadSection === "Library" ? null : uploadSection, // Convert "Library" to NULL
           file_name: file.name,
           file_url: pub.publicUrl,
         } as any);
@@ -626,7 +622,7 @@ const ImageManager = () => {
               <SelectValue placeholder="Upload to Library (unassigned)" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Library (Unassigned)</SelectItem>
+              <SelectItem value="Library">Library (Unassigned)</SelectItem>
               {sections.map((s) => (
                 <SelectItem key={s.id} value={s.name}>{s.display_name} ({s.name})</SelectItem>
               ))}
