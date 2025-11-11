@@ -16,6 +16,7 @@ interface Solution {
   title: string;
   subtitle: string | null;
   description: string | null;
+  hero_description: string | null;
   icon_name: string;
   image_url: string | null;
   cta_text: string | null;
@@ -171,9 +172,9 @@ const Solutions = () => {
                     )}
 
                     {/* Description */}
-                    {solution.description && (
+                    {solution.hero_description && (
                       <p className={`${descClr} mb-6 leading-relaxed`}>
-                        {solution.description}
+                        {solution.hero_description}
                       </p>
                     )}
 
