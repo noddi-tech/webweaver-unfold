@@ -595,8 +595,8 @@ const ImageManager = () => {
                 <div className="grid gap-6 md:grid-cols-2">
                 {imgs.map((img) => (
                   <div key={img.id} className="grid gap-3 rounded-lg border border-border p-4">
-                    <div className="space-y-3 p-4 bg-muted/30 rounded-lg">
-                      <div className="text-xs font-medium text-muted-foreground mb-2">Preview:</div>
+                    <div className="space-y-3 p-4 bg-card/50 rounded-lg border border-border/20">
+                      <div className="text-xs font-medium text-foreground/70 mb-2">Preview:</div>
                       {img.title && (
                         <h4 className={`font-semibold text-lg ${getColorClass(img.title_color_token || 'foreground')}`}>
                           {img.title}
@@ -618,7 +618,7 @@ const ImageManager = () => {
                     <div className="space-y-3">
                       {/* Replace Image */}
                       <div className="space-y-2 pt-2 border-t border-border">
-                        <Label className="text-xs font-medium">Replace Image</Label>
+                        <Label className="text-xs font-medium text-foreground">Replace Image</Label>
                         <Input 
                           type="file" 
                           accept="image/*" 
@@ -628,19 +628,19 @@ const ImageManager = () => {
                       </div>
                       
                       <div className="grid gap-2">
-                        <Label>Title</Label>
+                        <Label className="text-foreground font-medium">Title</Label>
                         <Input value={img.title} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title: e.target.value } : i))} />
                       </div>
                       <div className="grid gap-2">
-                        <Label>Alt text</Label>
+                        <Label className="text-foreground font-medium">Alt text</Label>
                         <Input value={img.alt ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, alt: e.target.value } : i))} />
                       </div>
                       <div className="grid gap-2">
-                        <Label>Caption</Label>
+                        <Label className="text-foreground font-medium">Caption</Label>
                         <Textarea value={img.caption ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption: e.target.value } : i))} />
                       </div>
                       <div className="grid gap-2">
-                        <Label>Caption Position</Label>
+                        <Label className="text-foreground font-medium">Caption Position</Label>
                         <Select value={img.caption_position || 'below'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_position: v } : i))}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
@@ -652,7 +652,7 @@ const ImageManager = () => {
                         </Select>
                       </div>
                       <div className="grid gap-2">
-                        <Label>Title Color</Label>
+                        <Label className="text-foreground font-medium">Title Color</Label>
                         <Select value={img.title_color_token || 'foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title_color_token: v } : i))}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
@@ -668,7 +668,7 @@ const ImageManager = () => {
                         </Select>
                       </div>
                       <div className="grid gap-2">
-                        <Label>Caption Color</Label>
+                        <Label className="text-foreground font-medium">Caption Color</Label>
                         <Select value={img.caption_color_token || 'muted-foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_color_token: v } : i))}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
@@ -684,7 +684,7 @@ const ImageManager = () => {
                         </Select>
                       </div>
                       <div className="grid gap-2">
-                        <Label>Link URL</Label>
+                        <Label className="text-foreground font-medium">Link URL</Label>
                         <Input
                           type="url"
                           placeholder="https://example.com"
@@ -697,7 +697,7 @@ const ImageManager = () => {
                         />
                       </div>
                       <div className="grid gap-2">
-                        <Label>Section</Label>
+                        <Label className="text-foreground font-medium">Section</Label>
                         <Select value={img.section} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, section: v } : i))}>
                           <SelectTrigger className="w-full">
                             <SelectValue />
@@ -713,13 +713,13 @@ const ImageManager = () => {
                         </Select>
                       </div>
                       <div className="grid gap-2">
-                        <Label>Sort order</Label>
+                        <Label className="text-foreground font-medium">Sort order</Label>
                         <Input type="number" value={img.sort_order ?? 0} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, sort_order: Number(e.target.value) } : i))} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Switch checked={img.active} onCheckedChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, active: v } : i))} />
-                          <span className="text-sm text-muted-foreground">Active</span>
+                          <span className="text-sm font-medium text-foreground">Active</span>
                         </div>
                         <div className="flex gap-2">
                           <Button size="sm" onClick={() => saveImage(img)}>Save</Button>
