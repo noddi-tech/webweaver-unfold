@@ -289,7 +289,7 @@ export function ScrollingFeatureCards() {
     if (aspectRatio && aspectRatio !== 'auto') {
       // For contain: use flex to center the constrained image
       if (fitMode === 'contain') {
-        return `relative w-full h-full flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+        return `relative w-full h-full max-h-full flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
       } else {
         // For cover: constrain with max dimensions
         return `relative max-h-full max-w-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
