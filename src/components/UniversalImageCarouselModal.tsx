@@ -88,6 +88,55 @@ export function UniversalImageCarouselModal({
   // Batch selection for carousel images
   const [batchSelectionMode, setBatchSelectionMode] = useState(false);
   const [selectedImageIds, setSelectedImageIds] = useState<Set<string>>(new Set());
+  
+  // Draft saving & error recovery
+  const [lastSaveAttempt, setLastSaveAttempt] = useState<Date | null>(null);
+  const [saveError, setSaveError] = useState<string>('');
+
+  // Save draft to localStorage whenever images change
+  useEffect(() => {
+    if (carouselImages.length > 0 && carouselName) {
+      const draft = {
+        name: carouselName,
+        description: carouselDescription,
+        images: carouselImages,
+        autoplay: carouselAutoplay,
+        autoplay_delay: carouselAutoplayDelay,
+        show_navigation: carouselShowNavigation,
+        show_dots: carouselShowDots,
+        timestamp: new Date().toISOString(),
+      };
+      localStorage.setItem('carousel_draft', JSON.stringify(draft));
+      console.log('💾 Draft saved to localStorage:', { name: carouselName, imageCount: carouselImages.length });
+    }
+  }, [carouselImages, carouselName, carouselDescription, carouselAutoplay, carouselAutoplayDelay, carouselShowNavigation, carouselShowDots]);
+
+  // Restore draft on mount if available
+  useEffect(() => {
+    if (open && mode === 'standalone' && !carouselId) {
+      const draftStr = localStorage.getItem('carousel_draft');
+      if (draftStr) {
+        try {
+          const draft = JSON.parse(draftStr);
+          const draftAge = Date.now() - new Date(draft.timestamp).getTime();
+          // Only restore if less than 1 hour old
+          if (draftAge < 3600000) {
+            setCarouselName(draft.name || '');
+            setCarouselDescription(draft.description || '');
+            setCarouselImages(draft.images || []);
+            setCarouselAutoplay(draft.autoplay ?? true);
+            setCarouselAutoplayDelay(draft.autoplay_delay ?? 3500);
+            setCarouselShowNavigation(draft.show_navigation ?? true);
+            setCarouselShowDots(draft.show_dots ?? true);
+            toast.info(`Restored draft with ${draft.images?.length || 0} images`);
+            console.log('📂 Draft restored from localStorage');
+          }
+        } catch (e) {
+          console.error('Failed to restore draft:', e);
+        }
+      }
+    }
+  }, [open, mode, carouselId]);
 
   useEffect(() => {
     if (open) {
@@ -210,13 +259,28 @@ export function UniversalImageCarouselModal({
   };
 
   const handleSaveCarouselConfig = async () => {
+    console.log('🔍 Pre-save validation:', { 
+      name: carouselName, 
+      imageCount: carouselImages.length,
+      mode,
+      carouselId,
+      selectedCarouselId,
+      carouselSource,
+      images: carouselImages.map(img => ({ url: img.url.substring(0, 50), alt: img.alt }))
+    });
+
     if (!carouselName.trim()) {
-      toast.error('Please enter a carousel name');
+      const error = 'Please enter a carousel name';
+      toast.error(error);
+      setSaveError(error);
       return null;
     }
 
     if (carouselImages.length === 0) {
-      toast.error('Please add at least one image to the carousel');
+      const error = 'Please add at least one image to the carousel';
+      toast.error(error);
+      setSaveError(error);
+      console.error('❌ Save failed: No images in carousel');
       return null;
     }
 
@@ -230,45 +294,74 @@ export function UniversalImageCarouselModal({
       images: JSON.parse(JSON.stringify(carouselImages)),
     };
 
-    console.log('Saving carousel config:', { mode, carouselId, selectedCarouselId, carouselSource, imageCount: carouselImages.length });
+    console.log('💾 Saving carousel config with data:', configData);
+    setLastSaveAttempt(new Date());
 
-    if (mode === 'standalone' && carouselId) {
-      // Update existing in standalone mode
-      const { data, error } = await supabase
-        .from('carousel_configs')
-        .update(configData)
-        .eq('id', carouselId)
-        .select()
-        .single();
+    try {
+      if (mode === 'standalone' && carouselId) {
+        // Update existing in standalone mode
+        console.log('📝 Updating existing carousel in standalone mode:', carouselId);
+        const { data, error } = await supabase
+          .from('carousel_configs')
+          .update(configData)
+          .eq('id', carouselId)
+          .select()
+          .single();
 
-      if (error) throw error;
-      return data.id;
-    } else if (selectedCarouselId && carouselSource === 'saved' && mode === 'location') {
-      // Update existing in location mode
-      const { data, error } = await supabase
-        .from('carousel_configs')
-        .update(configData)
-        .eq('id', selectedCarouselId)
-        .select()
-        .single();
+        if (error) {
+          console.error('❌ Update error:', error);
+          throw error;
+        }
+        console.log('✅ Carousel updated successfully:', data);
+        localStorage.removeItem('carousel_draft');
+        return data.id;
+      } else if (selectedCarouselId && carouselSource === 'saved' && mode === 'location') {
+        // Update existing in location mode
+        console.log('📝 Updating existing carousel in location mode:', selectedCarouselId);
+        const { data, error } = await supabase
+          .from('carousel_configs')
+          .update(configData)
+          .eq('id', selectedCarouselId)
+          .select()
+          .single();
 
-      if (error) throw error;
-      return data.id;
-    } else {
-      // Create new
-      const { data, error } = await supabase
-        .from('carousel_configs')
-        .insert([configData])
-        .select()
-        .single();
+        if (error) {
+          console.error('❌ Update error:', error);
+          throw error;
+        }
+        console.log('✅ Carousel updated successfully:', data);
+        localStorage.removeItem('carousel_draft');
+        return data.id;
+      } else {
+        // Create new
+        console.log('🆕 Creating new carousel');
+        const { data, error } = await supabase
+          .from('carousel_configs')
+          .insert([configData])
+          .select()
+          .single();
 
-      if (error) throw error;
-      return data.id;
+        if (error) {
+          console.error('❌ Insert error:', error);
+          throw error;
+        }
+        console.log('✅ Carousel created successfully:', data);
+        localStorage.removeItem('carousel_draft');
+        return data.id;
+      }
+    } catch (error: any) {
+      const errorMessage = `Database error: ${error?.message || 'Unknown error'}`;
+      setSaveError(errorMessage);
+      console.error('❌ Save failed with error:', error);
+      throw error;
     }
   };
 
   const handleSave = async () => {
+    console.log('💾 Save initiated');
     setSaving(true);
+    setSaveError('');
+    
     try {
       let finalImageUrl = imageUrl;
       let carouselConfigId = null;
@@ -276,7 +369,11 @@ export function UniversalImageCarouselModal({
       if (mode === 'standalone') {
         // Standalone mode: only save carousel config
         carouselConfigId = await handleSaveCarouselConfig();
-        toast.success(carouselId ? 'Carousel updated successfully' : 'Carousel created successfully');
+        if (!carouselConfigId) {
+          console.error('❌ Save aborted: handleSaveCarouselConfig returned null');
+          return;
+        }
+        toast.success(carouselId ? '✅ Carousel updated successfully' : '✅ Carousel created successfully');
         onSave();
         onOpenChange(false);
       } else {
@@ -287,6 +384,10 @@ export function UniversalImageCarouselModal({
           }
         } else {
           carouselConfigId = await handleSaveCarouselConfig();
+          if (!carouselConfigId) {
+            console.error('❌ Save aborted: handleSaveCarouselConfig returned null');
+            return;
+          }
         }
 
         // Save or update settings
@@ -307,32 +408,93 @@ export function UniversalImageCarouselModal({
           .from('image_carousel_settings')
           .upsert(settingsData, { onConflict: 'location_id' });
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Settings save error:', error);
+          throw error;
+        }
 
-        toast.success('Settings saved successfully');
+        toast.success('✅ Settings saved successfully');
         onSave();
         onOpenChange(false);
       }
-    } catch (error) {
-      console.error('Error saving:', error);
-      toast.error('Failed to save settings');
+    } catch (error: any) {
+      const errorMsg = error?.message || 'Unknown error occurred';
+      console.error('❌ Save failed:', error);
+      setSaveError(`Save failed: ${errorMsg}`);
+      toast.error(`Failed to save: ${errorMsg}. Your work is saved as a draft.`);
     } finally {
       setSaving(false);
     }
   };
 
+  // Export carousel configuration
+  const handleExportConfig = () => {
+    const exportData = {
+      name: carouselName,
+      description: carouselDescription,
+      autoplay: carouselAutoplay,
+      autoplay_delay: carouselAutoplayDelay,
+      show_navigation: carouselShowNavigation,
+      show_dots: carouselShowDots,
+      images: carouselImages,
+      exported_at: new Date().toISOString(),
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `carousel-${carouselName.replace(/\s+/g, '-')}-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('Carousel exported successfully');
+  };
+
+  // Import carousel configuration
+  const handleImportConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target?.result as string);
+        setCarouselName(imported.name || '');
+        setCarouselDescription(imported.description || '');
+        setCarouselAutoplay(imported.autoplay ?? true);
+        setCarouselAutoplayDelay(imported.autoplay_delay ?? 3500);
+        setCarouselShowNavigation(imported.show_navigation ?? true);
+        setCarouselShowDots(imported.show_dots ?? true);
+        setCarouselImages(imported.images || []);
+        toast.success(`Imported "${imported.name}" with ${imported.images?.length || 0} images`);
+        console.log('📥 Configuration imported successfully');
+      } catch (error) {
+        console.error('Import error:', error);
+        toast.error('Failed to import configuration');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const addCarouselImage = () => {
-    setCarouselImages([...carouselImages, { url: '', alt: '' }]);
+    const newImages = [...carouselImages, { url: '', alt: '' }];
+    setCarouselImages(newImages);
+    console.log('➕ Image slot added, total:', newImages.length);
   };
 
   const updateCarouselImage = (index: number, field: keyof CarouselImage, value: string) => {
     const updated = [...carouselImages];
     updated[index] = { ...updated[index], [field]: value };
     setCarouselImages(updated);
+    console.log(`✏️ Image ${index} updated (${field}):`, value.substring(0, 50));
   };
 
   const removeCarouselImage = (index: number) => {
-    setCarouselImages(carouselImages.filter((_, i) => i !== index));
+    const newImages = carouselImages.filter((_, i) => i !== index);
+    setCarouselImages(newImages);
+    console.log('🗑️ Image removed, remaining:', newImages.length);
   };
 
   // Batch image selector component
@@ -363,10 +525,12 @@ export function UniversalImageCarouselModal({
         title: img.title || ''
       }));
       
-      setCarouselImages([...carouselImages, ...newCarouselImages]);
+      const updatedImages = [...carouselImages, ...newCarouselImages];
+      setCarouselImages(updatedImages);
+      console.log(`📸 Batch add: ${selectedImages.length} images added, total now: ${updatedImages.length}`);
       setSelectedImageIds(new Set());
       setBatchSelectionMode(false);
-      toast.success(`Added ${selectedImages.length} images to carousel`);
+      toast.success(`Added ${selectedImages.length} images to carousel (Total: ${updatedImages.length})`);
     };
     
     return (
@@ -926,6 +1090,73 @@ export function UniversalImageCarouselModal({
                   </p>
                 </div>
               </>
+            )}
+
+            {/* Status & Recovery Tools */}
+            {displayType === 'carousel' && (mode === 'standalone' || carouselSource === 'new') && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Backup & Recovery</Label>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleExportConfig}
+                      disabled={carouselImages.length === 0}
+                    >
+                      <Upload className="h-3.5 w-3.5 mr-1.5" />
+                      Export
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById('import-config')?.click()}
+                    >
+                      <ImageIcon className="h-3.5 w-3.5 mr-1.5" />
+                      Import
+                    </Button>
+                    <input
+                      id="import-config"
+                      type="file"
+                      accept=".json"
+                      className="hidden"
+                      onChange={handleImportConfig}
+                    />
+                  </div>
+                </div>
+
+                {/* Status Indicators */}
+                <div className="space-y-2 text-xs">
+                  {carouselImages.length > 0 && (
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                      <div className="w-2 h-2 rounded-full bg-green-600 dark:bg-green-400" />
+                      <span className="font-medium">{carouselImages.length} images ready</span>
+                      <span className="text-muted-foreground">· Draft auto-saved</span>
+                    </div>
+                  )}
+                  
+                  {lastSaveAttempt && (
+                    <div className="text-muted-foreground">
+                      Last save attempt: {lastSaveAttempt.toLocaleTimeString()}
+                    </div>
+                  )}
+                  
+                  {saveError && (
+                    <div className="flex items-start gap-2 text-destructive bg-destructive/10 p-3 rounded-lg">
+                      <X className="h-4 w-4 mt-0.5 shrink-0" />
+                      <div className="space-y-1">
+                        <p className="font-medium">Save failed</p>
+                        <p className="text-xs">{saveError}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Your work is saved locally. Try exporting as backup.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
 
             <Button onClick={handleSave} disabled={saving} className="w-full">
