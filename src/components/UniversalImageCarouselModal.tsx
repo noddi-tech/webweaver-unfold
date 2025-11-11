@@ -215,6 +215,11 @@ export function UniversalImageCarouselModal({
       return null;
     }
 
+    if (carouselImages.length === 0) {
+      toast.error('Please add at least one image to the carousel');
+      return null;
+    }
+
     const configData = {
       name: carouselName.trim(),
       description: carouselDescription,
@@ -224,6 +229,8 @@ export function UniversalImageCarouselModal({
       show_dots: carouselShowDots,
       images: JSON.parse(JSON.stringify(carouselImages)),
     };
+
+    console.log('Saving carousel config:', { mode, carouselId, selectedCarouselId, carouselSource, imageCount: carouselImages.length });
 
     if (mode === 'standalone' && carouselId) {
       // Update existing in standalone mode

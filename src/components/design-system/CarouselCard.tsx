@@ -73,19 +73,19 @@ export function CarouselCard({
               </div>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <p className="text-sm text-muted-foreground">No images</p>
+                <p className="text-sm text-foreground/60 font-medium">No images</p>
               </div>
             )}
           </div>
 
           {/* Details */}
-          <div className="p-4 space-y-3">
+          <div className="p-4 space-y-3 bg-card">
             <div>
-              <h3 className="font-semibold text-foreground text-lg mb-1 truncate">
+              <h3 className="font-semibold text-card-foreground text-lg mb-1 truncate">
                 {carousel.name}
               </h3>
               {carousel.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2">
+                <p className="text-sm text-card-foreground/70 line-clamp-2">
                   {carousel.description}
                 </p>
               )}
@@ -93,23 +93,23 @@ export function CarouselCard({
 
             {/* Settings Indicators */}
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs text-secondary-foreground">
                 {imageCount} {imageCount === 1 ? 'image' : 'images'}
               </Badge>
               {carousel.autoplay && (
-                <Badge variant="outline" className="text-xs flex items-center gap-1 text-foreground border-foreground/20">
+                <Badge variant="outline" className="text-xs flex items-center gap-1 text-card-foreground border-border">
                   <Play className="h-3 w-3" />
                   Auto
                 </Badge>
               )}
               {carousel.show_navigation && (
-                <Badge variant="outline" className="text-xs flex items-center gap-1 text-foreground border-foreground/20">
+                <Badge variant="outline" className="text-xs flex items-center gap-1 text-card-foreground border-border">
                   <Navigation className="h-3 w-3" />
                   Nav
                 </Badge>
               )}
               {carousel.show_dots && (
-                <Badge variant="outline" className="text-xs flex items-center gap-1 text-foreground border-foreground/20">
+                <Badge variant="outline" className="text-xs flex items-center gap-1 text-card-foreground border-border">
                   <Circle className="h-3 w-3" />
                   Dots
                 </Badge>
@@ -122,7 +122,7 @@ export function CarouselCard({
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(carousel)}
-                className="flex-1 text-foreground"
+                className="flex-1 text-card-foreground border-border hover:bg-muted"
               >
                 <Edit className="h-3.5 w-3.5 mr-1.5" />
                 Edit
@@ -131,7 +131,7 @@ export function CarouselCard({
                 variant="outline"
                 size="sm"
                 onClick={() => onDuplicate(carousel)}
-                className="text-foreground"
+                className="text-card-foreground border-border hover:bg-muted"
               >
                 <Copy className="h-3.5 w-3.5" />
               </Button>
@@ -139,7 +139,7 @@ export function CarouselCard({
                 variant="outline"
                 size="sm"
                 onClick={() => setShowDeleteDialog(true)}
-                className="text-destructive hover:bg-destructive/10"
+                className="text-destructive border-border hover:bg-destructive/10"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
