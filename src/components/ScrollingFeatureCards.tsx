@@ -297,12 +297,23 @@ export function ScrollingFeatureCards() {
 
   const getAspectRatioInlineStyle = (aspectRatio: string, fitMode: 'contain' | 'cover'): React.CSSProperties => {
     if (aspectRatio && aspectRatio !== 'auto') {
-      return {
-        aspectRatio: aspectRatio.replace(':', '/'), // Convert "9:16" to "9/16"
-        width: '100%',
-        maxHeight: '100%',
-        objectFit: fitMode
-      };
+      if (fitMode === 'contain') {
+        // For contain mode: let aspect-ratio work with max constraints
+        // Browser will auto-size to fit within bounds while maintaining ratio
+        return {
+          aspectRatio: aspectRatio.replace(':', '/'),
+          maxHeight: '100%',
+          maxWidth: '100%'
+        };
+      } else {
+        // For cover mode: fill the space
+        return {
+          aspectRatio: aspectRatio.replace(':', '/'),
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover'
+        };
+      }
     }
     return {};
   };
