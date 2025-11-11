@@ -502,7 +502,7 @@ const ImageManager = () => {
     if (uploadQueue.length === 0) return null;
     
     return (
-      <div className="space-y-2 p-4 bg-card/50 rounded-lg border border-border">
+      <div className="space-y-2 p-4 bg-card rounded-lg border border-border">
         <div className="flex items-center justify-between mb-2">
           <h4 className="text-sm font-semibold text-foreground">Upload Queue ({uploadQueue.length} files)</h4>
           {!uploading && (
@@ -528,7 +528,7 @@ const ImageManager = () => {
             >
               {/* Status Icon */}
               {item.status === 'pending' && (
-                <div className="w-4 h-4 rounded-full border-2 border-muted-foreground shrink-0" />
+                <div className="w-4 h-4 rounded-full border-2 border-foreground/40 shrink-0" />
               )}
               {item.status === 'uploading' && (
                 <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0" />
@@ -656,7 +656,7 @@ const ImageManager = () => {
               <p className="text-base font-medium text-foreground">
                 Drag and drop images here
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-foreground/70">
                 or click the button below to browse
               </p>
             </div>
@@ -680,7 +680,7 @@ const ImageManager = () => {
                 <Upload className="w-4 h-4 mr-2" />
                 Choose Files
               </Button>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-foreground/60">
                 PNG, JPG, GIF up to 10MB
               </span>
             </div>
