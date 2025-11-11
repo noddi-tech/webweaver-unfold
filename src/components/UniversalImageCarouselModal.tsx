@@ -44,15 +44,19 @@ interface CarouselConfig {
 interface UniversalImageCarouselModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  locationId: string;
+  locationId?: string;
   onSave: () => void;
+  mode?: 'location' | 'standalone';
+  carouselId?: string;
 }
 
 export function UniversalImageCarouselModal({
   open,
   onOpenChange,
-  locationId,
+  locationId = '',
   onSave,
+  mode = 'location',
+  carouselId,
 }: UniversalImageCarouselModalProps) {
   const [displayType, setDisplayType] = useState<'image' | 'carousel'>('image');
   const [imageSource, setImageSource] = useState<'library' | 'upload' | 'url'>('library');
@@ -89,30 +93,45 @@ export function UniversalImageCarouselModal({
     if (open) {
       loadData();
     }
-  }, [open, locationId]);
+  }, [open, locationId, carouselId, mode]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      // Load existing settings
-      const { data: settings } = await supabase
-        .from('image_carousel_settings')
-        .select('*')
-        .eq('location_id', locationId)
-        .maybeSingle();
+      // In standalone mode, load carousel directly
+      if (mode === 'standalone' && carouselId) {
+        await loadCarouselConfig(carouselId);
+        setSelectedCarouselId(carouselId);
+        setDisplayType('carousel');
+        setCarouselSource('saved');
+      } else if (mode === 'location' && locationId) {
+        // Load existing settings for location mode
+        const { data: settings } = await supabase
+          .from('image_carousel_settings')
+          .select('*')
+          .eq('location_id', locationId)
+          .maybeSingle();
 
-      if (settings) {
-        setDisplayType(settings.display_type as 'image' | 'carousel');
-        setAspectRatio(settings.aspect_ratio || 'auto');
-        setFitMode((settings.fit_mode as 'contain' | 'cover') || 'contain');
-        
-        if (settings.display_type === 'image') {
-          setImageUrl(settings.image_url || '');
-          setImageAlt(settings.image_alt || '');
-        } else if (settings.carousel_config_id) {
-          setSelectedCarouselId(settings.carousel_config_id);
-          await loadCarouselConfig(settings.carousel_config_id);
+        if (settings) {
+          setDisplayType(settings.display_type as 'image' | 'carousel');
+          setAspectRatio(settings.aspect_ratio || 'auto');
+          setFitMode((settings.fit_mode as 'contain' | 'cover') || 'contain');
+          
+          if (settings.display_type === 'image') {
+            setImageUrl(settings.image_url || '');
+            setImageAlt(settings.image_alt || '');
+          } else if (settings.carousel_config_id) {
+            setSelectedCarouselId(settings.carousel_config_id);
+            await loadCarouselConfig(settings.carousel_config_id);
+          }
         }
+      } else if (mode === 'standalone') {
+        // New carousel in standalone mode
+        setDisplayType('carousel');
+        setCarouselSource('new');
+        setCarouselImages([]);
+        setCarouselName('');
+        setCarouselDescription('');
       }
 
       // Load image library
@@ -196,7 +215,7 @@ export function UniversalImageCarouselModal({
     }
 
     const configData = {
-      name: carouselSource === 'new' ? `${carouselName} (${Date.now()})` : carouselName,
+      name: mode === 'standalone' && !carouselId ? carouselName : carouselName,
       description: carouselDescription,
       autoplay: carouselAutoplay,
       autoplay_delay: carouselAutoplayDelay,
@@ -205,8 +224,19 @@ export function UniversalImageCarouselModal({
       images: JSON.parse(JSON.stringify(carouselImages)),
     };
 
-    if (selectedCarouselId && carouselSource === 'saved') {
-      // Update existing
+    if (mode === 'standalone' && carouselId) {
+      // Update existing in standalone mode
+      const { data, error } = await supabase
+        .from('carousel_configs')
+        .update(configData)
+        .eq('id', carouselId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data.id;
+    } else if (selectedCarouselId && carouselSource === 'saved' && mode === 'location') {
+      // Update existing in location mode
       const { data, error } = await supabase
         .from('carousel_configs')
         .update(configData)
@@ -235,37 +265,46 @@ export function UniversalImageCarouselModal({
       let finalImageUrl = imageUrl;
       let carouselConfigId = null;
 
-      if (displayType === 'image') {
-        if (imageSource === 'upload' && uploadFile) {
-          finalImageUrl = await handleImageUpload() || '';
-        }
-      } else {
+      if (mode === 'standalone') {
+        // Standalone mode: only save carousel config
         carouselConfigId = await handleSaveCarouselConfig();
+        toast.success(carouselId ? 'Carousel updated successfully' : 'Carousel created successfully');
+        onSave();
+        onOpenChange(false);
+      } else {
+        // Location mode: save both carousel and location settings
+        if (displayType === 'image') {
+          if (imageSource === 'upload' && uploadFile) {
+            finalImageUrl = await handleImageUpload() || '';
+          }
+        } else {
+          carouselConfigId = await handleSaveCarouselConfig();
+        }
+
+        // Save or update settings
+        const settingsData = {
+          location_id: locationId,
+          display_type: displayType,
+          aspect_ratio: aspectRatio,
+          fit_mode: fitMode,
+          image_url: displayType === 'image' ? finalImageUrl : null,
+          image_alt: displayType === 'image' ? imageAlt : null,
+          carousel_config_id: displayType === 'carousel' ? carouselConfigId : null,
+          saved_image_url: displayType === 'carousel' ? finalImageUrl : null,
+          saved_image_alt: displayType === 'carousel' ? imageAlt : null,
+          saved_carousel_config_id: displayType === 'image' ? carouselConfigId : null,
+        };
+
+        const { error } = await supabase
+          .from('image_carousel_settings')
+          .upsert(settingsData, { onConflict: 'location_id' });
+
+        if (error) throw error;
+
+        toast.success('Settings saved successfully');
+        onSave();
+        onOpenChange(false);
       }
-
-      // Save or update settings
-      const settingsData = {
-        location_id: locationId,
-        display_type: displayType,
-        aspect_ratio: aspectRatio,
-        fit_mode: fitMode,
-        image_url: displayType === 'image' ? finalImageUrl : null,
-        image_alt: displayType === 'image' ? imageAlt : null,
-        carousel_config_id: displayType === 'carousel' ? carouselConfigId : null,
-        saved_image_url: displayType === 'carousel' ? finalImageUrl : null,
-        saved_image_alt: displayType === 'carousel' ? imageAlt : null,
-        saved_carousel_config_id: displayType === 'image' ? carouselConfigId : null,
-      };
-
-      const { error } = await supabase
-        .from('image_carousel_settings')
-        .upsert(settingsData, { onConflict: 'location_id' });
-
-      if (error) throw error;
-
-      toast.success('Settings saved successfully');
-      onSave();
-      onOpenChange(false);
     } catch (error) {
       console.error('Error saving:', error);
       toast.error('Failed to save settings');
@@ -511,10 +550,16 @@ export function UniversalImageCarouselModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ImageIcon className="h-5 w-5" />
-            Edit Image / Carousel
+            {mode === 'standalone' 
+              ? (carouselId ? 'Edit Carousel' : 'Create Carousel')
+              : 'Edit Image / Carousel'
+            }
           </DialogTitle>
           <DialogDescription>
-            Configure a single image or a carousel for this location
+            {mode === 'standalone'
+              ? 'Configure your carousel settings and images'
+              : 'Configure a single image or a carousel for this location'
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -522,23 +567,25 @@ export function UniversalImageCarouselModal({
           <div className="py-8 text-center text-muted-foreground">Loading...</div>
         ) : (
           <div className="space-y-6">
-            {/* Display Type Selection */}
-            <div className="space-y-2">
-              <Label>Display Type</Label>
-              <RadioGroup value={displayType} onValueChange={(v) => setDisplayType(v as any)}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="image" id="image" />
-                  <Label htmlFor="image">Single Image</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="carousel" id="carousel" />
-                  <Label htmlFor="carousel">Carousel</Label>
-                </div>
-              </RadioGroup>
-            </div>
+            {/* Display Type Selection - only show in location mode */}
+            {mode === 'location' && (
+              <div className="space-y-2">
+                <Label>Display Type</Label>
+                <RadioGroup value={displayType} onValueChange={(v) => setDisplayType(v as any)}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="image" id="image" />
+                    <Label htmlFor="image">Single Image</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="carousel" id="carousel" />
+                    <Label htmlFor="carousel">Carousel</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
 
-            {/* Image Configuration */}
-            {displayType === 'image' && (
+            {/* Image Configuration - only show in location mode */}
+            {mode === 'location' && displayType === 'image' && (
               <Tabs value={imageSource} onValueChange={(v) => setImageSource(v as any)}>
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="library">Library</TabsTrigger>
@@ -604,24 +651,26 @@ export function UniversalImageCarouselModal({
               </div>
             )}
 
-            {/* Carousel Configuration */}
-            {displayType === 'carousel' && (
+            {/* Carousel Configuration - always show in standalone, only when selected in location */}
+            {(mode === 'standalone' || displayType === 'carousel') && (
               <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Carousel Source</Label>
-                  <RadioGroup value={carouselSource} onValueChange={(v) => setCarouselSource(v as any)}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="saved" id="saved" />
-                      <Label htmlFor="saved">Use Saved Carousel</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="new" id="new" />
-                      <Label htmlFor="new">Create New Carousel</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
+                {mode === 'location' && (
+                  <div className="space-y-2">
+                    <Label>Carousel Source</Label>
+                    <RadioGroup value={carouselSource} onValueChange={(v) => setCarouselSource(v as any)}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="saved" id="saved" />
+                        <Label htmlFor="saved">Use Saved Carousel</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="new" id="new" />
+                        <Label htmlFor="new">Create New Carousel</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                )}
 
-                {carouselSource === 'saved' && (
+                {mode === 'location' && carouselSource === 'saved' && (
                   <div className="space-y-2">
                     <Label htmlFor="saved-carousel">Select Carousel</Label>
                     <Select value={selectedCarouselId} onValueChange={(v) => { setSelectedCarouselId(v); loadCarouselConfig(v); }}>
@@ -637,15 +686,17 @@ export function UniversalImageCarouselModal({
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="carousel-name">Carousel Name</Label>
-                  <Input
-                    id="carousel-name"
-                    value={carouselName}
-                    onChange={(e) => setCarouselName(e.target.value)}
-                    placeholder="My Carousel"
-                  />
-                </div>
+                {(mode === 'standalone' || carouselSource === 'new') && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="carousel-name">Carousel Name</Label>
+                      <Input
+                        id="carousel-name"
+                        value={carouselName}
+                        onChange={(e) => setCarouselName(e.target.value)}
+                        placeholder="My Carousel"
+                      />
+                    </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="carousel-desc">Description (Optional)</Label>
@@ -795,13 +846,16 @@ export function UniversalImageCarouselModal({
                     </div>
                   ))}
                 </div>
+                  </>
+                )}
               </div>
             )}
 
-            {/* Aspect Ratio Configuration */}
-            <div className="space-y-3 border-t pt-4">
-              <Label>Container Aspect Ratio</Label>
-              <Select value={aspectRatio} onValueChange={setAspectRatio}>
+            {/* Aspect Ratio Configuration - only in location mode */}
+            {mode === 'location' && (
+              <div className="space-y-3 border-t pt-4">
+                <Label>Container Aspect Ratio</Label>
+                <Select value={aspectRatio} onValueChange={setAspectRatio}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -862,6 +916,7 @@ export function UniversalImageCarouselModal({
                   : '🖼️ Best for desktop screenshots - fills the space'}
               </p>
             </div>
+            )}
 
             <Button onClick={handleSave} disabled={saving} className="w-full">
               <Save className="mr-2 h-4 w-4" />

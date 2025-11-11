@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Card } from "@/components/ui/card";
 import { FileText } from "lucide-react";
+import CarouselManager from "@/components/design-system/CarouselManager";
 import VideoManager from "@/components/design-system/VideoManager";
 import FeaturesManager from "@/components/design-system/FeaturesManager";
 import { supabase } from "@/integrations/supabase/client";
@@ -142,16 +143,20 @@ const Admin = () => {
               </TabsContent>
 
               {/* Media Assets Tab */}
-              <TabsContent value="media">
+  <TabsContent value="media">
                 <Tabs defaultValue="images">
                   <TabsList className="flex flex-wrap gap-2 mb-6">
                     <TabsTrigger value="images">Images</TabsTrigger>
+                    <TabsTrigger value="carousels">Carousels</TabsTrigger>
                     <TabsTrigger value="videos">Videos</TabsTrigger>
                     <TabsTrigger value="files">Files</TabsTrigger>
                     <TabsTrigger value="favicon">Favicon</TabsTrigger>
                   </TabsList>
                   <TabsContent value="images" className="space-y-8">
                     <ImageManager />
+                  </TabsContent>
+                  <TabsContent value="carousels" className="space-y-8">
+                    <CarouselManager />
                   </TabsContent>
                   <TabsContent value="videos" className="space-y-8">
                     <VideoManager />
