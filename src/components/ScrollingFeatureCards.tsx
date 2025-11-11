@@ -292,8 +292,8 @@ export function ScrollingFeatureCards() {
     } else {
       // Auto mode - use explicit height constraints matching container
       if (fitMode === 'contain') {
-        // For contain mode: explicit max height matching container, with flex centering
-        return `relative w-full h-[400px] lg:h-[500px] flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+      // For contain mode: explicit max height matching container, with flex centering
+        return `relative w-auto max-w-full h-[400px] lg:h-[500px] flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
       } else {
         // For cover mode: fill entire space
         return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
@@ -342,52 +342,8 @@ export function ScrollingFeatureCards() {
         ? [Autoplay({ delay: config.autoplay_delay, stopOnInteraction: true })]
         : [];
       
-      // Comprehensive debug logging
-      if (typeof window !== 'undefined') {
-        setTimeout(() => {
-          console.log('🔍 COMPREHENSIVE CAROUSEL DEBUG 🔍');
-          
-          // Find all elements in the chain - using robust selectors
-          const outerContainer = document.querySelector('[data-debug-container="carousel-outer"]');
-          const carouselRoot = outerContainer?.querySelector('.w-full.h-full[role="region"]');
-          const carouselContent = carouselRoot?.querySelector('.flex.-ml-4');
-          const firstCarouselItem = carouselContent?.querySelector('[role="group"]');
-          const innerWrapper = firstCarouselItem?.querySelector('[data-debug-wrapper="true"]');
-          const img = innerWrapper?.querySelector('img');
-          
-          console.log('📦 Container Chain Heights:');
-          console.log('  Outer Container:', outerContainer?.clientHeight, 'px (should be 400px)');
-          console.log('  Carousel Root:', carouselRoot?.clientHeight, 'px');
-          console.log('  Carousel Content:', carouselContent?.clientHeight, 'px');
-          console.log('  Carousel Item:', firstCarouselItem?.clientHeight, 'px');
-          console.log('  Inner Wrapper:', innerWrapper?.clientHeight, 'px');
-          
-          console.log('\n🖼️ Image Details:');
-          console.log('  Rendered Height:', img?.clientHeight, 'px (SHOULD BE ≤400px)');
-          console.log('  Rendered Width:', img?.clientWidth, 'px');
-          console.log('  Natural Height:', (img as HTMLImageElement)?.naturalHeight, 'px');
-          console.log('  Natural Width:', (img as HTMLImageElement)?.naturalWidth, 'px');
-          console.log('  Classes:', img?.className);
-          console.log('  Computed object-fit:', img ? window.getComputedStyle(img).objectFit : 'N/A');
-          
-          console.log('\n🎯 Wrapper Details:');
-          console.log('  Classes:', innerWrapper?.className);
-          console.log('  Fit Mode:', innerWrapper?.getAttribute('data-fit-mode'));
-          console.log('  Has h-full?:', innerWrapper?.className.includes('h-full'));
-          console.log('  Has max-h-full?:', innerWrapper?.className.includes('max-h-full'));
-          
-          if (img && img.clientHeight > 400) {
-            console.error('❌ IMAGE OVERFLOW DETECTED!');
-            console.error(`   Image is ${img.clientHeight}px but container is 400px`);
-            console.error(`   Overflow: ${img.clientHeight - 400}px`);
-          } else {
-            console.log('✅ Image properly constrained!');
-          }
-        }, 1500);
-      }
-      
       return (
-        <div className={containerClasses} data-debug-container="carousel-outer">
+        <div className={containerClasses}>
           <Carousel 
             opts={{ loop: true }}
             plugins={plugins}
@@ -398,13 +354,7 @@ export function ScrollingFeatureCards() {
                 <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
                   <div 
                     className={innerWrapperClasses} 
-                    style={{
-                      ...getAspectRatioInlineStyle(cardAspectRatio, cardFitMode),
-                      outline: cardFitMode === 'contain' ? '3px solid lime' : '3px solid red',
-                      outlineOffset: '-3px'
-                    }}
-                    data-fit-mode={cardFitMode}
-                    data-debug-wrapper="true"
+                    style={getAspectRatioInlineStyle(cardAspectRatio, cardFitMode)}
                   >
                   <img
                     src={image.url}
