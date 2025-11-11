@@ -330,9 +330,9 @@ export function ScrollingFeatureCards() {
     const cardFitMode = fitModes[index] || 'contain';
     const containerClasses = getContainerClasses();
     const innerWrapperClasses = getInnerWrapperClasses(cardAspectRatio, cardFitMode);
-    const imageClasses = cardFitMode === 'contain' 
-      ? 'w-full h-full object-contain block' 
-      : 'w-full h-full object-cover block';
+        const imageClasses = cardFitMode === 'contain' 
+          ? 'w-full max-h-full object-contain block' 
+          : 'w-full h-full object-cover block';
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
