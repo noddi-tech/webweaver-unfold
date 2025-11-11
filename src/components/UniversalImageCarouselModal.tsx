@@ -122,6 +122,7 @@ export function UniversalImageCarouselModal({
             setImageAlt(settings.image_alt || '');
           } else if (settings.carousel_config_id) {
             setSelectedCarouselId(settings.carousel_config_id);
+            setCarouselSource('saved'); // Set source so updates work correctly
             await loadCarouselConfig(settings.carousel_config_id);
           }
         }
@@ -215,7 +216,7 @@ export function UniversalImageCarouselModal({
     }
 
     const configData = {
-      name: mode === 'standalone' && !carouselId ? carouselName : carouselName,
+      name: carouselName.trim(),
       description: carouselDescription,
       autoplay: carouselAutoplay,
       autoplay_delay: carouselAutoplayDelay,
