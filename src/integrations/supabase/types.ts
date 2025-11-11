@@ -858,7 +858,7 @@ export type Database = {
           file_url: string
           id: string
           link_url: string | null
-          section: string
+          section: string | null
           section_id: string | null
           sort_order: number | null
           title: string
@@ -876,7 +876,7 @@ export type Database = {
           file_url: string
           id?: string
           link_url?: string | null
-          section: string
+          section?: string | null
           section_id?: string | null
           sort_order?: number | null
           title: string
@@ -894,7 +894,7 @@ export type Database = {
           file_url?: string
           id?: string
           link_url?: string | null
-          section?: string
+          section?: string | null
           section_id?: string | null
           sort_order?: number | null
           title?: string

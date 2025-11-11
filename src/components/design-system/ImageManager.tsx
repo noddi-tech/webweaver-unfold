@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2, X, Upload } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Trash2, X, Upload, LayoutGrid, List } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ImageFilters } from "./ImageFilters";
+import { BulkActionsBar } from "./BulkActionsBar";
+import { ImageLibraryView } from "./ImageLibraryView";
+import { ImageEditModalFull } from "./ImageEditModalFull";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 // Helper function to map color tokens to CSS classes
 const getColorClass = (colorToken: string): string => {
@@ -64,6 +70,15 @@ const ImageManager = () => {
   const [uploadSection, setUploadSection] = useState<string>("");
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [imageToDelete, setImageToDelete] = useState<DbImage | null>(null);
+  
+  // Library view state
+  const [viewMode, setViewMode] = useState<'library' | 'sections'>('library');
+  const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
+  const [searchFilter, setSearchFilter] = useState("");
+  const [sectionFilter, setSectionFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [editingImage, setEditingImage] = useState<DbImage | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   // Enhanced bulk upload tracking
   interface FileUploadStatus {
@@ -192,7 +207,9 @@ const ImageManager = () => {
       try {
         const file = item.file;
         const base = file.name.replace(/\.[^/.]+$/, "");
-        const path = `${uploadSection}/${Date.now()}-${file.name}`;
+        // Use uploadSection if selected, otherwise default to Library
+        const sectionPath = uploadSection || "Library";
+        const path = `${sectionPath}/${Date.now()}-${file.name}`;
         
         const { error: upErr } = await supabase.storage
           .from("site-images")
@@ -206,7 +223,7 @@ const ImageManager = () => {
           title: base,
           alt: base,
           caption: null,
-          section: uploadSection,
+          section: uploadSection || null, // Allow NULL for library uploads
           file_name: file.name,
           file_url: pub.publicUrl,
         } as any);
@@ -281,6 +298,131 @@ const ImageManager = () => {
     fetchImages();
     closeDeleteModal();
   };
+
+  // Bulk operations for library view
+  const toggleImageSelection = (imageId: string) => {
+    const newSelected = new Set(selectedImages);
+    if (newSelected.has(imageId)) {
+      newSelected.delete(imageId);
+    } else {
+      newSelected.add(imageId);
+    }
+    setSelectedImages(newSelected);
+  };
+
+  const selectAllImages = () => {
+    const allImageIds = filteredImages.map(img => img.id);
+    setSelectedImages(new Set(allImageIds));
+  };
+
+  const clearSelection = () => {
+    setSelectedImages(new Set());
+  };
+
+  const bulkDelete = async () => {
+    if (selectedImages.size === 0) return;
+    
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${selectedImages.size} image(s)? This action cannot be undone.`
+    );
+    
+    if (!confirmed) return;
+    
+    setUploading(true);
+    let successCount = 0;
+    let errorCount = 0;
+    
+    for (const imageId of selectedImages) {
+      const img = images.find(i => i.id === imageId);
+      if (!img) continue;
+      
+      try {
+        const storagePath = extractStoragePath(img.file_url);
+        if (storagePath) {
+          await supabase.storage.from("site-images").remove([storagePath]);
+        }
+        const { error } = await supabase.from("images").delete().eq("id", imageId);
+        if (error) throw error;
+        successCount++;
+      } catch (e) {
+        errorCount++;
+      }
+    }
+    
+    toast({ 
+      title: "Bulk delete complete",
+      description: `${successCount} deleted, ${errorCount} failed`
+    });
+    
+    setUploading(false);
+    setSelectedImages(new Set());
+    fetchImages();
+  };
+
+  const bulkAssignSection = async (section: string) => {
+    if (selectedImages.size === 0) return;
+    
+    setUploading(true);
+    const sectionValue = section === 'Library' ? null : section;
+    
+    const { error } = await supabase
+      .from("images")
+      .update({ section: sectionValue })
+      .in('id', Array.from(selectedImages));
+    
+    if (error) {
+      toast({ title: "Bulk assign failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Section assigned", description: `${selectedImages.size} images updated` });
+      setSelectedImages(new Set());
+      fetchImages();
+    }
+    
+    setUploading(false);
+  };
+
+  const handleEditImage = (image: DbImage) => {
+    setEditingImage(image);
+    setEditModalOpen(true);
+  };
+
+  const handleSaveEditedImage = async (image: DbImage) => {
+    await saveImage(image);
+    setEditModalOpen(false);
+    setEditingImage(null);
+  };
+
+  // Filtered images for library view
+  const filteredImages = useMemo(() => {
+    return images.filter((img) => {
+      // Search filter
+      if (searchFilter) {
+        const searchLower = searchFilter.toLowerCase();
+        const matchesSearch = 
+          img.title.toLowerCase().includes(searchLower) ||
+          img.file_name.toLowerCase().includes(searchLower) ||
+          (img.alt && img.alt.toLowerCase().includes(searchLower));
+        if (!matchesSearch) return false;
+      }
+      
+      // Section filter
+      if (sectionFilter !== 'all') {
+        if (sectionFilter === 'library') {
+          if (img.section && img.section !== 'Library') return false;
+        } else {
+          if (img.section !== sectionFilter) return false;
+        }
+      }
+      
+      // Status filter
+      if (statusFilter !== 'all') {
+        if (statusFilter === 'active' && !img.active) return false;
+        if (statusFilter === 'inactive' && img.active) return false;
+      }
+      
+      return true;
+    });
+  }, [images, searchFilter, sectionFilter, statusFilter]);
 
   const replaceImage = async (imageId: string, file: File | null) => {
     if (!file) return;
@@ -449,27 +591,49 @@ const ImageManager = () => {
     <section className="space-y-8">
       <header className="space-y-2">
         <h2 className="text-3xl font-bold gradient-text">Images CMS</h2>
-        <p className="text-muted-foreground">Upload and manage site images by section (e.g., hero, features, testimonials).</p>
+        <p className="text-muted-foreground">Upload and manage site images with optional section assignment.</p>
       </header>
+
+      {/* View Mode Toggle */}
+      <Card className="p-4 bg-card border-border">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">View Mode</h3>
+            <p className="text-sm text-muted-foreground">Switch between library and section-based views</p>
+          </div>
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'library' | 'sections')}>
+            <TabsList>
+              <TabsTrigger value="library" className="gap-2">
+                <LayoutGrid className="h-4 w-4" />
+                Library View
+              </TabsTrigger>
+              <TabsTrigger value="sections" className="gap-2">
+                <List className="h-4 w-4" />
+                Section View
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      </Card>
 
       <Card className="p-6 bg-card border-border space-y-4">
         <h3 className="text-xl font-semibold">Upload Images</h3>
         <div className="space-y-2">
-          <Label>Section</Label>
+          <Label className="text-foreground font-medium">Section (Optional)</Label>
           <Select value={uploadSection} onValueChange={setUploadSection}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select section" />
+              <SelectValue placeholder="Upload to Library (unassigned)" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="">Library (Unassigned)</SelectItem>
               {sections.map((s) => (
                 <SelectItem key={s.id} value={s.name}>{s.display_name} ({s.name})</SelectItem>
               ))}
-              {/* Fallback common sections */}
-              {sections.length === 0 && ["hero"].map((s) => (
-                <SelectItem key={s} value={s}>{s}</SelectItem>
-              ))}
             </SelectContent>
           </Select>
+          <p className="text-xs text-muted-foreground">
+            Leave empty to upload to Library. You can assign sections later.
+          </p>
         </div>
         
         {/* Drag & Drop Zone */}
@@ -549,194 +713,239 @@ const ImageManager = () => {
             </Button>
           )}
         </div>
-        <Separator className="my-4" />
-        <div className="space-y-2">
-          <Label>Preview location</Label>
-          <div className="rounded-lg border border-border overflow-hidden bg-background">
-            <iframe
-              ref={previewRef}
-              key={iframeKey}
-              src={hasImages(uploadSection) ? `/#${sectionToAnchor(uploadSection)}` : "/"}
-              title="Section preview"
-              className="w-full h-[420px] bg-background"
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">{hasImages(uploadSection) ? `We auto-scroll and highlight the "${uploadSection}" section on the homepage preview.` : `No images in "${uploadSection}" yet — preview anchors appear only for sections with images.`}</p>
-        </div>
       </Card>
 
-      <Card className="p-6 bg-card border-border space-y-4">
-        <h3 className="text-xl font-semibold">Available Sections</h3>
-        <p className="text-sm text-muted-foreground">Sections are managed in the Sections CMS. Only active sections are shown here.</p>
-        <Separator className="my-2" />
-        <div className="flex flex-wrap gap-2">
-          {sections.map((s) => (
-            <div key={s.id} className="flex items-center gap-2 rounded-md border border-border px-3 py-1">
-              <span className="text-sm font-medium">{s.display_name}</span>
-              <span className="text-xs text-muted-foreground">({s.name})</span>
+      {/* Library View */}
+      {viewMode === 'library' && (
+        <div className="space-y-4">
+          <Card className="p-6 bg-card border-border space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold">Image Library</h3>
+              <Badge variant="outline" className="text-sm">
+                {filteredImages.length} {filteredImages.length === 1 ? 'image' : 'images'}
+              </Badge>
             </div>
-          ))}
-          {sections.length === 0 && (
-            <p className="text-sm text-muted-foreground">No active sections available. Manage sections in the Sections CMS.</p>
-          )}
-        </div>
-      </Card>
+            
+            <ImageFilters
+              search={searchFilter}
+              onSearchChange={setSearchFilter}
+              sectionFilter={sectionFilter}
+              onSectionFilterChange={setSectionFilter}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              sections={sections}
+            />
+          </Card>
 
-      <div className="space-y-6">
-        {Object.keys(groupedBySection).length === 0 && (
-          <p className="text-muted-foreground">No images uploaded yet.</p>
-        )}
-        {Object.entries(groupedBySection).map(([section, imgs]) => {
-          const sectionInfo = sections.find(s => s.name === section);
-          const sectionTitle = sectionInfo ? `${sectionInfo.display_name} (${section})` : section;
-          return (
-            <Card key={section} className="p-6 bg-card border-border space-y-4">
-              <h3 className="text-lg font-semibold">Section: {sectionTitle}</h3>
-                <div className="grid gap-6 md:grid-cols-2">
-                {imgs.map((img) => (
-                  <div key={img.id} className="grid gap-3 rounded-lg border border-border p-4">
-                    <div className="space-y-3 p-4 bg-card/50 rounded-lg border border-border/20">
-                      <div className="text-xs font-medium text-foreground/70 mb-2">Preview:</div>
-                      {img.title && (
-                        <h4 className={`font-semibold text-lg ${getColorClass(img.title_color_token || 'foreground')}`}>
-                          {img.title}
-                        </h4>
-                      )}
-                      {img.caption && img.caption_position === 'above' && (
-                        <p className={`text-sm leading-relaxed ${getColorClass(img.caption_color_token || 'muted-foreground')}`}>
-                          {img.caption}
-                        </p>
-                      )}
-                      <img src={img.file_url} alt={img.alt ?? img.title} className="w-full h-40 object-cover rounded-md" loading="lazy" />
-                      {img.caption && (!img.caption_position || img.caption_position === 'below') && (
-                        <p className={`text-sm mt-2 leading-relaxed ${getColorClass(img.caption_color_token || 'muted-foreground')}`}>
-                          {img.caption}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-3">
-                      {/* Replace Image */}
-                      <div className="space-y-2 pt-2 border-t border-border">
-                        <Label className="text-xs font-medium text-foreground">Replace Image</Label>
-                        <Input 
-                          type="file" 
-                          accept="image/*" 
-                          onChange={(e) => replaceImage(img.id, e.target.files?.[0] || null)}
-                          className="text-xs"
-                        />
-                      </div>
-                      
-                      <div className="grid gap-2">
-                        <Label className="text-foreground font-medium">Title</Label>
-                        <Input value={img.title} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title: e.target.value } : i))} />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label className="text-foreground font-medium">Alt text</Label>
-                        <Input value={img.alt ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, alt: e.target.value } : i))} />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label className="text-foreground font-medium">Caption</Label>
-                        <Textarea value={img.caption ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption: e.target.value } : i))} />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label className="text-foreground font-medium">Caption Position</Label>
-                        <Select value={img.caption_position || 'below'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_position: v } : i))}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="above">Above image (below heading)</SelectItem>
-                            <SelectItem value="below">Below image</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid gap-2">
-                        <Label className="text-foreground font-medium">Title Color</Label>
-                        <Select value={img.title_color_token || 'foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title_color_token: v } : i))}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="foreground">Default Text</SelectItem>
-                            <SelectItem value="primary">Primary</SelectItem>
-                            <SelectItem value="secondary">Secondary</SelectItem>
-                            <SelectItem value="muted-foreground">Muted</SelectItem>
-                            <SelectItem value="accent">Accent</SelectItem>
-                            <SelectItem value="gradient-text">Gradient</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid gap-2">
-                        <Label className="text-foreground font-medium">Caption Color</Label>
-                        <Select value={img.caption_color_token || 'muted-foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_color_token: v } : i))}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="foreground">Default Text</SelectItem>
-                            <SelectItem value="primary">Primary</SelectItem>
-                            <SelectItem value="secondary">Secondary</SelectItem>
-                            <SelectItem value="muted-foreground">Muted</SelectItem>
-                            <SelectItem value="accent">Accent</SelectItem>
-                            <SelectItem value="gradient-text">Gradient</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid gap-2">
-                        <Label className="text-foreground font-medium">Link URL</Label>
-                        <Input
-                          type="url"
-                          placeholder="https://example.com"
-                          value={img.link_url ?? ""}
-                          onChange={(e) =>
-                            setImages((prev) =>
-                              prev.map((i) => (i.id === img.id ? { ...i, link_url: e.target.value } : i))
-                            )
-                          }
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label className="text-foreground font-medium">Section</Label>
-                        <Select value={img.section} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, section: v } : i))}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {sections.map((s) => (
-                              <SelectItem key={s.id} value={s.name}>{s.display_name} ({s.name})</SelectItem>
-                            ))}
-                             {sections.length === 0 && ["hero"].map((s) => (
-                               <SelectItem key={s} value={s}>{s}</SelectItem>
-                             ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid gap-2">
-                        <Label className="text-foreground font-medium">Sort order</Label>
-                        <Input type="number" value={img.sort_order ?? 0} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, sort_order: Number(e.target.value) } : i))} />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Switch checked={img.active} onCheckedChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, active: v } : i))} />
-                          <span className="text-sm font-medium text-foreground">Active</span>
+          <BulkActionsBar
+            selectedCount={selectedImages.size}
+            totalCount={filteredImages.length}
+            onSelectAll={selectAllImages}
+            onClearSelection={clearSelection}
+            onBulkDelete={bulkDelete}
+            onBulkAssignSection={bulkAssignSection}
+            sections={sections}
+          />
+
+          <ImageLibraryView
+            images={filteredImages}
+            sections={sections}
+            selectedImages={selectedImages}
+            onToggleSelect={toggleImageSelection}
+            onEditImage={handleEditImage}
+            onDeleteImage={openDeleteModal}
+          />
+        </div>
+      )}
+
+      {/* Section View (Legacy) */}
+      {viewMode === 'sections' && (
+        <>
+          <Card className="p-6 bg-card border-border space-y-4">
+            <h3 className="text-xl font-semibold">Available Sections</h3>
+            <p className="text-sm text-muted-foreground">Sections are managed in the Sections CMS. Only active sections are shown here.</p>
+            <Separator className="my-2" />
+            <div className="flex flex-wrap gap-2">
+              {sections.map((s) => (
+                <div key={s.id} className="flex items-center gap-2 rounded-md border border-border px-3 py-1">
+                  <span className="text-sm font-medium">{s.display_name}</span>
+                  <span className="text-xs text-muted-foreground">({s.name})</span>
+                </div>
+              ))}
+              {sections.length === 0 && (
+                <p className="text-sm text-muted-foreground">No active sections available. Manage sections in the Sections CMS.</p>
+              )}
+            </div>
+          </Card>
+
+          <div className="space-y-6">
+            {Object.keys(groupedBySection).length === 0 && (
+              <p className="text-muted-foreground">No images uploaded yet.</p>
+            )}
+            {Object.entries(groupedBySection).map(([section, imgs]) => {
+              const sectionInfo = sections.find(s => s.name === section);
+              const sectionTitle = sectionInfo ? `${sectionInfo.display_name} (${section})` : section;
+              return (
+                <Card key={section} className="p-6 bg-card border-border space-y-4">
+                  <h3 className="text-lg font-semibold">Section: {sectionTitle}</h3>
+                  <div className="grid gap-6 md:grid-cols-2">
+                    {imgs.map((img) => (
+                      <div key={img.id} className="grid gap-3 rounded-lg border border-border p-4">
+                        <div className="space-y-3 p-4 bg-card/50 rounded-lg border border-border/20">
+                          <div className="text-xs font-medium text-foreground/70 mb-2">Preview:</div>
+                          {img.title && (
+                            <h4 className={`font-semibold text-lg ${getColorClass(img.title_color_token || 'foreground')}`}>
+                              {img.title}
+                            </h4>
+                          )}
+                          {img.caption && img.caption_position === 'above' && (
+                            <p className={`text-sm leading-relaxed ${getColorClass(img.caption_color_token || 'muted-foreground')}`}>
+                              {img.caption}
+                            </p>
+                          )}
+                          <img src={img.file_url} alt={img.alt ?? img.title} className="w-full h-40 object-cover rounded-md" loading="lazy" />
+                          {img.caption && (!img.caption_position || img.caption_position === 'below') && (
+                            <p className={`text-sm mt-2 leading-relaxed ${getColorClass(img.caption_color_token || 'muted-foreground')}`}>
+                              {img.caption}
+                            </p>
+                          )}
                         </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={() => saveImage(img)}>Save</Button>
-                          <Button variant="destructive" size="sm" onClick={() => openDeleteModal(img)}>
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Delete
-                          </Button>
+                        
+                        <div className="space-y-3">
+                          {/* Replace Image */}
+                          <div className="space-y-2 pt-2 border-t border-border">
+                            <Label className="text-xs font-medium text-foreground">Replace Image</Label>
+                            <Input 
+                              type="file" 
+                              accept="image/*" 
+                              onChange={(e) => replaceImage(img.id, e.target.files?.[0] || null)}
+                              className="text-xs"
+                            />
+                          </div>
+                          
+                          <div className="grid gap-2">
+                            <Label className="text-foreground font-medium">Title</Label>
+                            <Input value={img.title} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title: e.target.value } : i))} />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label className="text-foreground font-medium">Alt text</Label>
+                            <Input value={img.alt ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, alt: e.target.value } : i))} />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label className="text-foreground font-medium">Caption</Label>
+                            <Textarea value={img.caption ?? ""} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption: e.target.value } : i))} />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label className="text-foreground font-medium">Caption Position</Label>
+                            <Select value={img.caption_position || 'below'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_position: v } : i))}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="above">Above image (below heading)</SelectItem>
+                                <SelectItem value="below">Below image</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="grid gap-2">
+                            <Label className="text-foreground font-medium">Title Color</Label>
+                            <Select value={img.title_color_token || 'foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, title_color_token: v } : i))}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="foreground">Default Text</SelectItem>
+                                <SelectItem value="primary">Primary</SelectItem>
+                                <SelectItem value="secondary">Secondary</SelectItem>
+                                <SelectItem value="muted-foreground">Muted</SelectItem>
+                                <SelectItem value="accent">Accent</SelectItem>
+                                <SelectItem value="gradient-text">Gradient</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="grid gap-2">
+                            <Label className="text-foreground font-medium">Caption Color</Label>
+                            <Select value={img.caption_color_token || 'muted-foreground'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, caption_color_token: v } : i))}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="foreground">Default Text</SelectItem>
+                                <SelectItem value="primary">Primary</SelectItem>
+                                <SelectItem value="secondary">Secondary</SelectItem>
+                                <SelectItem value="muted-foreground">Muted</SelectItem>
+                                <SelectItem value="accent">Accent</SelectItem>
+                                <SelectItem value="gradient-text">Gradient</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="grid gap-2">
+                            <Label className="text-foreground font-medium">Link URL</Label>
+                            <Input
+                              type="url"
+                              placeholder="https://example.com"
+                              value={img.link_url ?? ""}
+                              onChange={(e) =>
+                                setImages((prev) =>
+                                  prev.map((i) => (i.id === img.id ? { ...i, link_url: e.target.value } : i))
+                                )
+                              }
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label className="text-foreground font-medium">Section</Label>
+                            <Select value={img.section || 'Library'} onValueChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, section: v === 'Library' ? null : v } : i))}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Library">Library (Unassigned)</SelectItem>
+                                {sections.map((s) => (
+                                  <SelectItem key={s.id} value={s.name}>{s.display_name} ({s.name})</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="grid gap-2">
+                            <Label className="text-foreground font-medium">Sort order</Label>
+                            <Input type="number" value={img.sort_order ?? 0} onChange={(e) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, sort_order: Number(e.target.value) } : i))} />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Switch checked={img.active} onCheckedChange={(v) => setImages((prev) => prev.map((i) => i.id === img.id ? { ...i, active: v } : i))} />
+                              <span className="text-sm font-medium text-foreground">Active</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => saveImage(img)}>Save</Button>
+                              <Button variant="destructive" size="sm" onClick={() => openDeleteModal(img)}>
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </Card>
-          );
-        })}
-      </div>
+                </Card>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {/* Image Edit Modal */}
+      <ImageEditModalFull
+        image={editingImage}
+        open={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditingImage(null);
+        }}
+        onSave={handleSaveEditedImage}
+        onReplace={replaceImage}
+        sections={sections}
+      />
 
       {/* Delete confirmation modal */}
       <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
