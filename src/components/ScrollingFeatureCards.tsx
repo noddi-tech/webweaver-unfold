@@ -302,20 +302,7 @@ export function ScrollingFeatureCards() {
   };
 
   const getAspectRatioInlineStyle = (aspectRatio: string, fitMode: 'contain' | 'cover'): React.CSSProperties => {
-    if (aspectRatio && aspectRatio !== 'auto') {
-      if (fitMode === 'contain') {
-        // For contain mode: NO styles on wrapper, all sizing on image
-        return {};
-      } else {
-        // For cover mode: fill the space
-        return {
-          aspectRatio: aspectRatio.replace(':', '/'),
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover'
-        };
-      }
-    }
+    // No inline styles needed - aspect ratio classes and object-fit handle everything
     return {};
   };
 
