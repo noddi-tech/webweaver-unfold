@@ -502,7 +502,7 @@ const ImageManager = () => {
     if (uploadQueue.length === 0) return null;
     
     return (
-      <div className="space-y-2 p-4 bg-card rounded-lg border border-border">
+      <div className="space-y-2 p-4 bg-card/90 backdrop-blur-sm rounded-lg border border-border">
         <div className="flex items-center justify-between mb-2">
           <h4 className="text-sm font-semibold text-foreground">Upload Queue ({uploadQueue.length} files)</h4>
           {!uploading && (
@@ -524,7 +524,7 @@ const ImageManager = () => {
           {uploadQueue.map((item, idx) => (
             <div 
               key={idx} 
-              className="flex items-center gap-2 p-2 bg-card rounded text-sm hover:bg-accent/50 transition-colors group"
+              className="flex items-center gap-2 p-2 bg-accent/10 rounded text-sm hover:bg-accent/20 transition-colors group"
             >
               {/* Status Icon */}
               {item.status === 'pending' && (
@@ -618,7 +618,7 @@ const ImageManager = () => {
         <div className="space-y-2">
           <Label className="text-foreground font-medium">Section (Optional)</Label>
           <Select value={uploadSection} onValueChange={setUploadSection}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full text-foreground">
               <SelectValue placeholder="Upload to Library (unassigned)" />
             </SelectTrigger>
             <SelectContent>
@@ -637,7 +637,7 @@ const ImageManager = () => {
         <div
           className={cn(
             "border-2 border-dashed rounded-lg p-12 text-center transition-all",
-            "bg-muted/30 hover:bg-muted/50",
+            "bg-muted/80 hover:bg-muted/90",
             isDragging 
               ? "border-primary bg-primary/10 scale-[1.02]" 
               : "border-muted-foreground/30",
