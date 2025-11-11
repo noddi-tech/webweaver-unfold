@@ -1,9 +1,8 @@
 import { User } from '@supabase/supabase-js';
 import { LogOut, Edit3, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useEditMode } from '@/contexts/EditModeContext';
-import { LanguageLink } from '@/components/LanguageLink';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,10 +72,10 @@ export function UserMenuDropdown({ user }: UserMenuDropdownProps) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <LanguageLink to="/cms" className="cursor-pointer">
+          <Link to="/cms" className="cursor-pointer flex items-center">
             <Settings className="mr-2 h-4 w-4" />
             <span>CMS Dashboard</span>
-          </LanguageLink>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
