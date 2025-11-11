@@ -87,7 +87,7 @@ export default function ProductOverview() {
                         onSave={() => setRefreshKey(prev => prev + 1)}
                         fallbackText={product.title}
                       >
-                        <h3 className="text-2xl font-bold mb-4 transition-colors">
+                        <h3 className="text-2xl font-bold mb-4 mt-6 transition-colors">
                           {product.title}
                         </h3>
                       </EditableTranslation>
