@@ -853,69 +853,71 @@ export function UniversalImageCarouselModal({
 
             {/* Aspect Ratio Configuration - only in location mode */}
             {mode === 'location' && (
-              <div className="space-y-3 border-t pt-4">
-                <Label>Container Aspect Ratio</Label>
-                <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="auto">🔍 Auto-detect from image</SelectItem>
-                  <SelectItem value="9:16">📱 Phone Portrait (9:16)</SelectItem>
-                  <SelectItem value="10:16">📱 Tablet Portrait (10:16)</SelectItem>
-                  <SelectItem value="3:4">🖼️ Portrait (3:4)</SelectItem>
-                  <SelectItem value="1:1">⬛ Square (1:1)</SelectItem>
-                  <SelectItem value="4:3">🖥️ Classic (4:3)</SelectItem>
-                  <SelectItem value="16:10">💻 Desktop (16:10)</SelectItem>
-                  <SelectItem value="16:9">🖥️ Widescreen (16:9)</SelectItem>
-                  <SelectItem value="21:9">🖥️ Ultrawide (21:9)</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                {aspectRatio === 'auto' 
-                  ? 'Container will adapt to the image dimensions (default: 400-500px min-height)'
-                  : `Container will use ${aspectRatio} aspect ratio - perfect for ${
-                    aspectRatio === '9:16' ? 'phone screenshots (430x932)' :
-                    aspectRatio === '10:16' ? 'tablet screenshots' :
-                    aspectRatio === '16:10' || aspectRatio === '16:9' ? 'desktop screenshots' :
-                    aspectRatio === '1:1' ? 'square images' :
-                    'various image formats'
-                  }`}
-              </p>
-            </div>
+              <>
+                <div className="space-y-3 border-t pt-4">
+                  <Label>Container Aspect Ratio</Label>
+                  <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="auto">🔍 Auto-detect from image</SelectItem>
+                      <SelectItem value="9:16">📱 Phone Portrait (9:16)</SelectItem>
+                      <SelectItem value="10:16">📱 Tablet Portrait (10:16)</SelectItem>
+                      <SelectItem value="3:4">🖼️ Portrait (3:4)</SelectItem>
+                      <SelectItem value="1:1">⬛ Square (1:1)</SelectItem>
+                      <SelectItem value="4:3">🖥️ Classic (4:3)</SelectItem>
+                      <SelectItem value="16:10">💻 Desktop (16:10)</SelectItem>
+                      <SelectItem value="16:9">🖥️ Widescreen (16:9)</SelectItem>
+                      <SelectItem value="21:9">🖥️ Ultrawide (21:9)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {aspectRatio === 'auto' 
+                      ? 'Container will adapt to the image dimensions (default: 400-500px min-height)'
+                      : `Container will use ${aspectRatio} aspect ratio - perfect for ${
+                        aspectRatio === '9:16' ? 'phone screenshots (430x932)' :
+                        aspectRatio === '10:16' ? 'tablet screenshots' :
+                        aspectRatio === '16:10' || aspectRatio === '16:9' ? 'desktop screenshots' :
+                        aspectRatio === '1:1' ? 'square images' :
+                        'various image formats'
+                      }`}
+                  </p>
+                </div>
 
-            {/* Image Fit Mode */}
-            <div className="space-y-3 border-t pt-4">
-              <Label>Image Fit Mode</Label>
-              <Select value={fitMode} onValueChange={(value: 'contain' | 'cover') => setFitMode(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="contain">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-6 border border-border rounded flex items-center justify-center">
-                        <div className="w-4 h-5 border border-primary"></div>
-                      </div>
-                      <span>Contain - Show full image</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="cover">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-6 border border-border rounded overflow-hidden bg-primary/20">
-                        <div className="w-12 h-8 border-2 border-primary -m-2"></div>
-                      </div>
-                      <span>Cover - Fill container</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                {fitMode === 'contain' 
-                  ? '✨ Best for phone screenshots - shows full image without cropping'
-                  : '🖼️ Best for desktop screenshots - fills the space'}
-              </p>
-            </div>
+                {/* Image Fit Mode */}
+                <div className="space-y-3 border-t pt-4">
+                  <Label>Image Fit Mode</Label>
+                  <Select value={fitMode} onValueChange={(value: 'contain' | 'cover') => setFitMode(value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="contain">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-6 border border-border rounded flex items-center justify-center">
+                            <div className="w-4 h-5 border border-primary"></div>
+                          </div>
+                          <span>Contain - Show full image</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="cover">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-6 border border-border rounded overflow-hidden bg-primary/20">
+                            <div className="w-12 h-8 border-2 border-primary -m-2"></div>
+                          </div>
+                          <span>Cover - Fill container</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {fitMode === 'contain' 
+                      ? '✨ Best for phone screenshots - shows full image without cropping'
+                      : '�16️ Best for desktop screenshots - fills the space'}
+                  </p>
+                </div>
+              </>
             )}
 
             <Button onClick={handleSave} disabled={saving} className="w-full">
