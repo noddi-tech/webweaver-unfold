@@ -135,7 +135,7 @@ export default function FunctionCards() {
                     'bg-gradient-fire'
                   ]}
                 >
-                  <Card className="hover:shadow-lg transition-shadow">
+                  <Card className="border-0 transition-all duration-300">
                     <CollapsibleTrigger className="w-full text-left">
                       <CardHeader>
                         <div className="flex items-start justify-between">
