@@ -28,12 +28,12 @@ export const BulkActionsBar = ({
   onBulkAssignSection,
   sections,
 }: BulkActionsBarProps) => {
-  const [assignSection, setAssignSection] = useState<string>("");
+  const [assignSection, setAssignSection] = useState<string | undefined>(undefined);
 
   const handleAssignSection = () => {
     if (assignSection) {
       onBulkAssignSection(assignSection);
-      setAssignSection("");
+      setAssignSection(undefined);
     }
   };
 
