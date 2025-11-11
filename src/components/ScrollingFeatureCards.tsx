@@ -319,12 +319,8 @@ export function ScrollingFeatureCards() {
   };
 
   const getImageInlineStyle = (aspectRatio: string, fitMode: 'contain' | 'cover'): React.CSSProperties => {
-    if (aspectRatio && aspectRatio !== 'auto' && fitMode === 'contain') {
-      // Apply aspect ratio directly to the image
-      return {
-        aspectRatio: aspectRatio.replace(':', '/')
-      };
-    }
+    // For contain mode: NO inline styles needed! object-contain handles everything
+    // For cover mode: also no inline styles needed
     return {};
   };
 
@@ -335,7 +331,7 @@ export function ScrollingFeatureCards() {
     const containerClasses = getContainerClasses();
     const innerWrapperClasses = getInnerWrapperClasses(cardAspectRatio, cardFitMode);
     const imageClasses = cardFitMode === 'contain' 
-      ? 'h-full w-auto object-contain block' 
+      ? 'w-full h-full object-contain block' 
       : 'w-full h-full object-cover block';
     
     // If carousel data exists and has images
