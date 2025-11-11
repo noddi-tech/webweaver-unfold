@@ -335,7 +335,7 @@ export function ScrollingFeatureCards() {
     const containerClasses = getContainerClasses();
     const innerWrapperClasses = getInnerWrapperClasses(cardAspectRatio, cardFitMode);
     const imageClasses = cardFitMode === 'contain' 
-      ? 'w-full h-full object-contain block' 
+      ? 'w-full max-h-full object-contain block' 
       : 'w-full h-full object-cover block';
     
     // If carousel data exists and has images
@@ -345,21 +345,47 @@ export function ScrollingFeatureCards() {
         ? [Autoplay({ delay: config.autoplay_delay, stopOnInteraction: true })]
         : [];
       
-      // Debug logging
+      // Comprehensive debug logging
       if (typeof window !== 'undefined') {
         setTimeout(() => {
-          const container = document.querySelector('[data-component-name="CarouselItem"]');
-          const wrapper = container?.querySelector('[data-component-line="371"]');
-          const img = wrapper?.querySelector('img');
+          console.log('🔍 COMPREHENSIVE CAROUSEL DEBUG 🔍');
           
-          console.log('🔍 Carousel Debug:', {
-            containerHeight: container?.clientHeight,
-            wrapperHeight: wrapper?.clientHeight,
-            imageHeight: img?.clientHeight,
-            imageNaturalHeight: img?.naturalHeight,
-            imageClasses: img?.className
-          });
-        }, 1000);
+          // Find all elements in the chain
+          const outerContainer = document.querySelector('[data-component-line="366"]'); // Container div
+          const carouselRoot = outerContainer?.querySelector('[data-component-path="src/components/ScrollingFeatureCards.tsx"]');
+          const carouselContent = carouselRoot?.querySelector('.flex.-ml-4');
+          const firstCarouselItem = carouselContent?.querySelector('[role="group"]');
+          const innerWrapper = firstCarouselItem?.querySelector('[data-component-line="375"]');
+          const img = innerWrapper?.querySelector('img');
+          
+          console.log('📦 Container Chain Heights:');
+          console.log('  Outer Container:', outerContainer?.clientHeight, 'px (should be 400px)');
+          console.log('  Carousel Root:', carouselRoot?.clientHeight, 'px');
+          console.log('  Carousel Content:', carouselContent?.clientHeight, 'px');
+          console.log('  Carousel Item:', firstCarouselItem?.clientHeight, 'px');
+          console.log('  Inner Wrapper:', innerWrapper?.clientHeight, 'px');
+          
+          console.log('\n🖼️ Image Details:');
+          console.log('  Rendered Height:', img?.clientHeight, 'px (SHOULD BE ≤400px)');
+          console.log('  Rendered Width:', img?.clientWidth, 'px');
+          console.log('  Natural Height:', (img as HTMLImageElement)?.naturalHeight, 'px');
+          console.log('  Natural Width:', (img as HTMLImageElement)?.naturalWidth, 'px');
+          console.log('  Classes:', img?.className);
+          console.log('  Computed object-fit:', img ? window.getComputedStyle(img).objectFit : 'N/A');
+          
+          console.log('\n🎯 Wrapper Details:');
+          console.log('  Classes:', innerWrapper?.className);
+          console.log('  Has h-full?:', innerWrapper?.className.includes('h-full'));
+          console.log('  Has max-h-full?:', innerWrapper?.className.includes('max-h-full'));
+          
+          if (img && img.clientHeight > 400) {
+            console.error('❌ IMAGE OVERFLOW DETECTED!');
+            console.error(`   Image is ${img.clientHeight}px but container is 400px`);
+            console.error(`   Overflow: ${img.clientHeight - 400}px`);
+          } else {
+            console.log('✅ Image properly constrained!');
+          }
+        }, 1500);
       }
       
       return (
