@@ -331,7 +331,7 @@ export function ScrollingFeatureCards() {
     const containerClasses = getContainerClasses();
     const innerWrapperClasses = getInnerWrapperClasses(cardAspectRatio, cardFitMode);
     const imageClasses = cardFitMode === 'contain' 
-      ? 'max-w-full max-h-full object-contain block' 
+      ? 'w-full h-full object-contain block' 
       : 'w-full h-full object-cover block';
     
     // If carousel data exists and has images
