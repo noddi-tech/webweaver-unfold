@@ -264,7 +264,7 @@ export function ScrollingFeatureCards() {
 
   // Uniform container size for all cards - uses flexbox to center inner content (invisible)
   const getContainerClasses = (): string => {
-    return 'relative w-full h-[500px] lg:h-[600px] xl:h-[700px] flex items-center justify-center overflow-hidden';
+    return 'relative w-full h-[400px] lg:h-[500px] flex items-center justify-center overflow-hidden';
   };
 
   const getAspectRatioStyle = (aspectRatio: string): string => {
@@ -293,7 +293,7 @@ export function ScrollingFeatureCards() {
       // Auto mode - use explicit height constraints matching container
       if (fitMode === 'contain') {
       // For contain mode: explicit max height matching container, with flex centering
-        return `relative w-auto max-w-full h-[500px] lg:h-[600px] xl:h-[700px] flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+        return `relative w-auto max-w-full h-[400px] lg:h-[500px] flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
       } else {
         // For cover mode: fill entire space
         return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
@@ -530,7 +530,7 @@ export function ScrollingFeatureCards() {
                   onMouseLeave={() => editMode && setHoveredCard(null)}
                 >
                   <div className={cn(
-                    "backdrop-blur-xl rounded-3xl shadow-2xl p-12 lg:p-14 xl:p-16 relative",
+                    "backdrop-blur-xl rounded-3xl shadow-2xl p-10 lg:p-12 relative",
                     cardData[index]?.background || 'bg-gradient-hero/90'
                   )}>
                     {/* Edit Button - Only in Edit Mode */}
@@ -542,7 +542,7 @@ export function ScrollingFeatureCards() {
                         <Pencil className="w-5 h-5" />
                       </button>
                     )}
-                    <div className="grid md:grid-cols-[45fr_55fr] gap-8 lg:gap-12 items-center">
+                    <div className="grid md:grid-cols-[35fr_65fr] gap-8 lg:gap-12 items-center">
                       {/* Left: Content */}
                       <div className="space-y-6">
                         <div className="flex items-center gap-3">
