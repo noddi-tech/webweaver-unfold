@@ -287,8 +287,13 @@ export function ScrollingFeatureCards() {
     const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
     
     if (aspectRatio && aspectRatio !== 'auto') {
-      // Has a specific aspect ratio - constrain the wrapper with visible styling
-      return `relative max-h-full max-w-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+      // For contain: use flex to center the constrained image
+      if (fitMode === 'contain') {
+        return `relative h-full flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+      } else {
+        // For cover: constrain with max dimensions
+        return `relative max-h-full max-w-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+      }
     } else {
       // Auto mode - fill the entire card with visible styling
       return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
@@ -298,12 +303,11 @@ export function ScrollingFeatureCards() {
   const getAspectRatioInlineStyle = (aspectRatio: string, fitMode: 'contain' | 'cover'): React.CSSProperties => {
     if (aspectRatio && aspectRatio !== 'auto') {
       if (fitMode === 'contain') {
-        // For contain mode: let aspect-ratio work with max constraints
-        // Browser will auto-size to fit within bounds while maintaining ratio
+        // For contain mode: constrain height, let width auto-calculate
         return {
           aspectRatio: aspectRatio.replace(':', '/'),
-          maxHeight: '100%',
-          maxWidth: '100%'
+          height: '100%',
+          width: 'auto'
         };
       } else {
         // For cover mode: fill the space
