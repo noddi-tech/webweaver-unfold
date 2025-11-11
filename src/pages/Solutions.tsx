@@ -50,6 +50,9 @@ const textClass: Record<string, string> = {
   primary: "text-primary",
   secondary: "text-secondary",
   accent: "text-accent",
+  white: "text-white",
+  "white-90": "text-white/90",
+  "white-80": "text-white/80",
 };
 
 const Solutions = () => {
@@ -96,10 +99,10 @@ const Solutions = () => {
 
   const bg = settings ? (bgClass[settings.background_token] || "bg-background") : "bg-background";
   const cardBg = settings ? (bgClass[settings.card_bg_token] || "bg-card") : "bg-card";
-  const iconClr = settings ? (textClass[settings.icon_token] || "text-primary") : "text-primary";
-  const titleClr = settings ? (textClass[settings.title_token] || "text-foreground") : "text-foreground";
-  const subtitleClr = settings ? (textClass[settings.subtitle_token] || "text-muted-foreground") : "text-muted-foreground";
-  const descClr = settings ? (textClass[settings.description_token] || "text-muted-foreground") : "text-muted-foreground";
+  const iconClr = settings ? (textClass[settings.icon_token] || "text-white") : "text-white";
+  const titleClr = settings ? (textClass[settings.title_token] || "text-white") : "text-white";
+  const subtitleClr = settings ? (textClass[settings.subtitle_token] || "text-white/90") : "text-white/90";
+  const descClr = settings ? (textClass[settings.description_token] || "text-white/80") : "text-white/80";
 
   return (
     <div className={`min-h-screen ${bg}`}>
