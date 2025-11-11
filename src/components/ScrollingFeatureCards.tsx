@@ -303,10 +303,8 @@ export function ScrollingFeatureCards() {
   const getAspectRatioInlineStyle = (aspectRatio: string, fitMode: 'contain' | 'cover'): React.CSSProperties => {
     if (aspectRatio && aspectRatio !== 'auto') {
       if (fitMode === 'contain') {
-        // For contain mode: only set aspect ratio on wrapper, sizing on image
-        return {
-          aspectRatio: aspectRatio.replace(':', '/')
-        };
+        // For contain mode: NO styles on wrapper, all sizing on image
+        return {};
       } else {
         // For cover mode: fill the space
         return {
@@ -316,6 +314,16 @@ export function ScrollingFeatureCards() {
           objectFit: 'cover'
         };
       }
+    }
+    return {};
+  };
+
+  const getImageInlineStyle = (aspectRatio: string, fitMode: 'contain' | 'cover'): React.CSSProperties => {
+    if (aspectRatio && aspectRatio !== 'auto' && fitMode === 'contain') {
+      // Apply aspect ratio directly to the image
+      return {
+        aspectRatio: aspectRatio.replace(':', '/')
+      };
     }
     return {};
   };
@@ -348,13 +356,14 @@ export function ScrollingFeatureCards() {
               {config.images.map((image, imgIndex) => (
                 <CarouselItem key={imgIndex} className="flex items-center justify-center h-full p-0">
                   <div className={innerWrapperClasses} style={getAspectRatioInlineStyle(cardAspectRatio, cardFitMode)}>
-                    <img
-                      src={image.url}
-                      alt={image.alt || `Slide ${imgIndex + 1}`}
-                      loading="lazy"
-                      decoding="async"
-                      className={imageClasses}
-                    />
+                  <img
+                    src={image.url}
+                    alt={image.alt || `Slide ${imgIndex + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    className={imageClasses}
+                    style={getImageInlineStyle(cardAspectRatio, cardFitMode)}
+                  />
                   </div>
                 </CarouselItem>
               ))}
@@ -375,13 +384,14 @@ export function ScrollingFeatureCards() {
     return (
       <div className={containerClasses}>
         <div className={innerWrapperClasses} style={getAspectRatioInlineStyle(cardAspectRatio, cardFitMode)}>
-          <img
-            src={imageUrls[index] || card.imageUrl}
-            alt={card.imageAlt}
-            loading="lazy"
-            decoding="async"
-            className={imageClasses}
-          />
+            <img
+              src={imageUrls[index] || card.imageUrl}
+              alt={card.imageAlt}
+              loading="lazy"
+              decoding="async"
+              className={imageClasses}
+              style={getImageInlineStyle(cardAspectRatio, cardFitMode)}
+            />
         </div>
       </div>
     );
