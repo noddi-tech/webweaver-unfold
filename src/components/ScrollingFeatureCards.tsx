@@ -400,7 +400,8 @@ export function ScrollingFeatureCards() {
                     className={innerWrapperClasses} 
                     style={{
                       ...getAspectRatioInlineStyle(cardAspectRatio, cardFitMode),
-                      border: cardFitMode === 'contain' ? '3px solid lime' : '3px solid red'
+                      outline: cardFitMode === 'contain' ? '3px solid lime' : '3px solid red',
+                      outlineOffset: '-3px'
                     }}
                     data-fit-mode={cardFitMode}
                     data-debug-wrapper="true"
