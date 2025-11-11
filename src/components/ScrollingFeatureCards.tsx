@@ -295,8 +295,12 @@ export function ScrollingFeatureCards() {
         return `relative max-h-full max-w-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
       }
     } else {
-      // Auto mode - fill the entire card with visible styling
-      return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+      // Auto mode - different handling for contain vs cover
+      if (fitMode === 'contain') {
+        return `relative w-full max-h-full flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+      } else {
+        return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+      }
     }
   };
 
@@ -345,7 +349,7 @@ export function ScrollingFeatureCards() {
       if (typeof window !== 'undefined') {
         setTimeout(() => {
           const container = document.querySelector('[data-component-name="CarouselItem"]');
-          const wrapper = container?.querySelector('[data-component-line="354"]');
+          const wrapper = container?.querySelector('[data-component-line="371"]');
           const img = wrapper?.querySelector('img');
           
           console.log('🔍 Carousel Debug:', {
