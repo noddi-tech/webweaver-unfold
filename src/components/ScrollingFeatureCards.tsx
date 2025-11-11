@@ -395,7 +395,7 @@ export function ScrollingFeatureCards() {
           >
             <CarouselContent className="h-full">
               {config.images.map((image, imgIndex) => (
-                <CarouselItem key={imgIndex} className="flex items-center justify-center h-full p-0">
+                <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
                   <div 
                     className={innerWrapperClasses} 
                     style={{
