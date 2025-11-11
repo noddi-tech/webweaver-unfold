@@ -73,7 +73,7 @@ export function UserMenuDropdown({ user }: UserMenuDropdownProps) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <LanguageLink to="/admin" className="cursor-pointer">
+          <LanguageLink to="/cms" className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
             <span>CMS Dashboard</span>
           </LanguageLink>
