@@ -135,8 +135,9 @@ const ImageManager = () => {
   const groupedBySection = useMemo(() => {
     const map: Record<string, DbImage[]> = {};
     for (const img of images) {
-      if (!map[img.section]) map[img.section] = [];
-      map[img.section].push(img);
+      const sectionKey = img.section || 'Library'; // Normalize null to 'Library'
+      if (!map[sectionKey]) map[sectionKey] = [];
+      map[sectionKey].push(img);
     }
     // sort by sort_order then created_at
     Object.values(map).forEach((arr) => arr.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)));
