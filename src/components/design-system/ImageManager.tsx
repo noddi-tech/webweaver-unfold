@@ -502,7 +502,7 @@ const ImageManager = () => {
     if (uploadQueue.length === 0) return null;
     
     return (
-      <div className="space-y-2 p-4 bg-card/90 backdrop-blur-sm rounded-lg border border-border">
+      <div className="space-y-2 p-4 bg-popover rounded-lg border border-border shadow-lg">
         <div className="flex items-center justify-between mb-2">
           <h4 className="text-sm font-semibold text-foreground">Upload Queue ({uploadQueue.length} files)</h4>
           {!uploading && (
@@ -524,7 +524,7 @@ const ImageManager = () => {
           {uploadQueue.map((item, idx) => (
             <div 
               key={idx} 
-              className="flex items-center gap-2 p-2 bg-accent/10 rounded text-sm hover:bg-accent/20 transition-colors group"
+              className="flex items-center gap-2 p-2 bg-background/80 rounded text-sm hover:bg-background transition-colors group"
             >
               {/* Status Icon */}
               {item.status === 'pending' && (
