@@ -289,7 +289,7 @@ export function ScrollingFeatureCards() {
     if (aspectRatio && aspectRatio !== 'auto') {
       // For contain: use flex to center the constrained image
       if (fitMode === 'contain') {
-        return `relative w-full h-full max-h-full flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+        return `relative w-full max-h-full flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
       } else {
         // For cover: constrain with max dimensions
         return `relative max-h-full max-w-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
@@ -330,9 +330,9 @@ export function ScrollingFeatureCards() {
     const cardFitMode = fitModes[index] || 'contain';
     const containerClasses = getContainerClasses();
     const innerWrapperClasses = getInnerWrapperClasses(cardAspectRatio, cardFitMode);
-        const imageClasses = cardFitMode === 'contain' 
-          ? 'w-full max-h-full object-contain block' 
-          : 'w-full h-full object-cover block';
+    const imageClasses = cardFitMode === 'contain' 
+      ? 'w-full h-full object-contain block' 
+      : 'w-full h-full object-cover block';
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
@@ -340,6 +340,23 @@ export function ScrollingFeatureCards() {
       const plugins = config.autoplay 
         ? [Autoplay({ delay: config.autoplay_delay, stopOnInteraction: true })]
         : [];
+      
+      // Debug logging
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          const container = document.querySelector('[data-component-name="CarouselItem"]');
+          const wrapper = container?.querySelector('[data-component-line="354"]');
+          const img = wrapper?.querySelector('img');
+          
+          console.log('🔍 Carousel Debug:', {
+            containerHeight: container?.clientHeight,
+            wrapperHeight: wrapper?.clientHeight,
+            imageHeight: img?.clientHeight,
+            imageNaturalHeight: img?.naturalHeight,
+            imageClasses: img?.className
+          });
+        }, 1000);
+      }
       
       return (
         <div className={containerClasses}>
