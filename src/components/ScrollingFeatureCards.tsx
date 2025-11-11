@@ -350,12 +350,12 @@ export function ScrollingFeatureCards() {
         setTimeout(() => {
           console.log('🔍 COMPREHENSIVE CAROUSEL DEBUG 🔍');
           
-          // Find all elements in the chain
-          const outerContainer = document.querySelector('[data-component-line="366"]'); // Container div
-          const carouselRoot = outerContainer?.querySelector('[data-component-path="src/components/ScrollingFeatureCards.tsx"]');
+          // Find all elements in the chain - using robust selectors
+          const outerContainer = document.querySelector('[data-debug-container="carousel-outer"]');
+          const carouselRoot = outerContainer?.querySelector('.w-full.h-full[role="region"]');
           const carouselContent = carouselRoot?.querySelector('.flex.-ml-4');
           const firstCarouselItem = carouselContent?.querySelector('[role="group"]');
-          const innerWrapper = firstCarouselItem?.querySelector('[data-component-line="375"]');
+          const innerWrapper = firstCarouselItem?.querySelector('[data-debug-wrapper="true"]');
           const img = innerWrapper?.querySelector('img');
           
           console.log('📦 Container Chain Heights:');
@@ -375,6 +375,7 @@ export function ScrollingFeatureCards() {
           
           console.log('\n🎯 Wrapper Details:');
           console.log('  Classes:', innerWrapper?.className);
+          console.log('  Fit Mode:', innerWrapper?.getAttribute('data-fit-mode'));
           console.log('  Has h-full?:', innerWrapper?.className.includes('h-full'));
           console.log('  Has max-h-full?:', innerWrapper?.className.includes('max-h-full'));
           
@@ -389,7 +390,7 @@ export function ScrollingFeatureCards() {
       }
       
       return (
-        <div className={containerClasses}>
+        <div className={containerClasses} data-debug-container="carousel-outer">
           <Carousel 
             opts={{ loop: true }}
             plugins={plugins}
@@ -398,7 +399,15 @@ export function ScrollingFeatureCards() {
             <CarouselContent className="h-full">
               {config.images.map((image, imgIndex) => (
                 <CarouselItem key={imgIndex} className="flex items-center justify-center h-full p-0">
-                  <div className={innerWrapperClasses} style={getAspectRatioInlineStyle(cardAspectRatio, cardFitMode)}>
+                  <div 
+                    className={innerWrapperClasses} 
+                    style={{
+                      ...getAspectRatioInlineStyle(cardAspectRatio, cardFitMode),
+                      border: cardFitMode === 'contain' ? '3px solid lime' : '3px solid red'
+                    }}
+                    data-fit-mode={cardFitMode}
+                    data-debug-wrapper="true"
+                  >
                   <img
                     src={image.url}
                     alt={image.alt || `Slide ${imgIndex + 1}`}
