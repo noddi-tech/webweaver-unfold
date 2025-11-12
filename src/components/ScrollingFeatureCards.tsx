@@ -267,35 +267,17 @@ export function ScrollingFeatureCards() {
     return 'relative w-full h-[400px] lg:h-[500px] overflow-hidden';
   };
 
-  // Helper to get aspect ratio class
-  const getAspectRatioClass = (aspectRatio: string): string => {
-    const aspectMap: Record<string, string> = {
-      'auto': 'w-full',
-      '16:9': 'aspect-[16/9]',
-      '9:16': 'aspect-[9/16]',
-      '4:3': 'aspect-[4/3]',
-      '3:4': 'aspect-[3/4]',
-      '21:9': 'aspect-[21/9]',
-      '1:1': 'aspect-square',
-      '16:10': 'aspect-[16/10]',
-      '10:16': 'aspect-[10/16]',
-    };
-    return aspectMap[aspectRatio] || 'w-full';
-  };
-
-  // Inner wrapper uses aspect ratio to control image dimensions
-  const getInnerWrapperClasses = (fitMode: 'contain' | 'cover', aspectRatio: string): string => {
+  // Inner wrapper fills the container completely
+  const getInnerWrapperClasses = (fitMode: 'contain' | 'cover'): string => {
     const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
-    const aspectClass = getAspectRatioClass(aspectRatio);
-    return `relative ${aspectClass} h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate flex items-center justify-center`;
+    return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate flex items-center justify-center`;
   };
 
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardFitMode = fitModes[index] || 'contain';
-    const cardAspectRatio = aspectRatios[index] || 'auto';
     const containerClasses = getContainerClasses();
-    const innerWrapperClasses = getInnerWrapperClasses(cardFitMode, cardAspectRatio);
+    const innerWrapperClasses = getInnerWrapperClasses(cardFitMode);
     const imageClasses = cardFitMode === 'contain' 
       ? 'w-full h-full object-contain block' 
       : 'w-full h-full object-cover block';
