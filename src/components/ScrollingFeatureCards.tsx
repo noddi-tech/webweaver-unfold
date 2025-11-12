@@ -116,22 +116,25 @@ export function ScrollingFeatureCards() {
     };
   }>>({});
   const [fitModes, setFitModes] = useState<Record<number, 'contain' | 'cover'>>({});
+  const [aspectRatios, setAspectRatios] = useState<Record<number, string>>({});
 
   const loadImageSettings = async () => {
     const newImageUrls: Record<number, string> = {};
     const newCarouselData: Record<number, any> = {};
     const newFitModes: Record<number, 'contain' | 'cover'> = {};
+    const newAspectRatios: Record<number, string> = {};
     
     for (let i = 0; i < 5; i++) {
       const { data } = await supabase
         .from('image_carousel_settings')
-        .select('image_url, display_type, carousel_config_id, fit_mode')
+        .select('image_url, display_type, carousel_config_id, fit_mode, aspect_ratio')
         .eq('location_id', `scrolling-card-${i + 1}`)
         .maybeSingle();
       
       if (data) {
-        // Store fit mode
+        // Store fit mode and aspect ratio
         newFitModes[i] = (data.fit_mode as 'contain' | 'cover') || 'contain';
+        newAspectRatios[i] = data.aspect_ratio || 'auto';
         
         if (data.display_type === 'carousel' && data.carousel_config_id) {
           // Load carousel configuration
@@ -173,6 +176,9 @@ export function ScrollingFeatureCards() {
     }
     if (Object.keys(newFitModes).length > 0) {
       setFitModes(prev => ({ ...prev, ...newFitModes }));
+    }
+    if (Object.keys(newAspectRatios).length > 0) {
+      setAspectRatios(prev => ({ ...prev, ...newAspectRatios }));
     }
   };
 
@@ -261,17 +267,35 @@ export function ScrollingFeatureCards() {
     return 'relative w-full h-[400px] lg:h-[500px] overflow-hidden';
   };
 
-  // Inner wrapper fills the fixed-height container
-  const getInnerWrapperClasses = (fitMode: 'contain' | 'cover'): string => {
+  // Helper to get aspect ratio class
+  const getAspectRatioClass = (aspectRatio: string): string => {
+    const aspectMap: Record<string, string> = {
+      'auto': 'w-full',
+      '16:9': 'aspect-[16/9]',
+      '9:16': 'aspect-[9/16]',
+      '4:3': 'aspect-[4/3]',
+      '3:4': 'aspect-[3/4]',
+      '21:9': 'aspect-[21/9]',
+      '1:1': 'aspect-square',
+      '16:10': 'aspect-[16/10]',
+      '10:16': 'aspect-[10/16]',
+    };
+    return aspectMap[aspectRatio] || 'w-full';
+  };
+
+  // Inner wrapper uses aspect ratio to control image dimensions
+  const getInnerWrapperClasses = (fitMode: 'contain' | 'cover', aspectRatio: string): string => {
     const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
-    return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
+    const aspectClass = getAspectRatioClass(aspectRatio);
+    return `relative ${aspectClass} h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate flex items-center justify-center`;
   };
 
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardFitMode = fitModes[index] || 'contain';
+    const cardAspectRatio = aspectRatios[index] || 'auto';
     const containerClasses = getContainerClasses();
-    const innerWrapperClasses = getInnerWrapperClasses(cardFitMode);
+    const innerWrapperClasses = getInnerWrapperClasses(cardFitMode, cardAspectRatio);
     const imageClasses = cardFitMode === 'contain' 
       ? 'w-full h-full object-contain block' 
       : 'w-full h-full object-cover block';
