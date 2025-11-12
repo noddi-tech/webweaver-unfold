@@ -1085,12 +1085,20 @@ export function UniversalImageCarouselModal({
                         {/* Contain Preview */}
                         <div className="space-y-2">
                           <div className="text-xs font-medium text-center text-foreground/80">Contain</div>
-                          <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-background/50 border border-border flex items-center justify-center">
-                            <img 
-                              src={previewImageUrl} 
-                              alt="Contain preview"
-                              className="w-full h-full object-contain"
-                            />
+                          <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-background border border-border flex items-center justify-center">
+                            {previewImageUrl ? (
+                              <img 
+                                src={previewImageUrl} 
+                                alt="Contain preview"
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                  console.error('Contain preview image failed to load:', previewImageUrl);
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="text-sm text-muted-foreground">No image selected</div>
+                            )}
                           </div>
                           <p className="text-xs text-center text-muted-foreground">
                             Shows full image, may have padding
@@ -1100,12 +1108,20 @@ export function UniversalImageCarouselModal({
                         {/* Cover Preview */}
                         <div className="space-y-2">
                           <div className="text-xs font-medium text-center text-foreground/80">Cover</div>
-                          <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-background/50 border border-border">
-                            <img 
-                              src={previewImageUrl} 
-                              alt="Cover preview"
-                              className="w-full h-full object-cover"
-                            />
+                          <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-background border border-border flex items-center justify-center">
+                            {previewImageUrl ? (
+                              <img 
+                                src={previewImageUrl} 
+                                alt="Cover preview"
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  console.error('Cover preview image failed to load:', previewImageUrl);
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="text-sm text-muted-foreground">No image selected</div>
+                            )}
                           </div>
                           <p className="text-xs text-center text-muted-foreground">
                             Fills space, may crop edges
