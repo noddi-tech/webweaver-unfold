@@ -50,7 +50,7 @@ export function OptimizedImage({
   const fallbackSrc = getOptimizedImageUrl(src, { ...transformOptions, width: 1920 });
 
   const imageStyle = {
-    imageRendering: 'high-quality' as const,
+    imageRendering: 'auto' as const,
     WebkitFontSmoothing: 'antialiased' as const,
     backfaceVisibility: 'hidden' as const,
     willChange: isLoaded ? 'auto' : 'transform',
