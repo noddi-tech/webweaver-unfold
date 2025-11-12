@@ -343,18 +343,19 @@ export function ScrollingFeatureCards() {
                     className={innerWrapperClasses} 
                     style={getAspectRatioInlineStyle(cardAspectRatio, cardFitMode)}
                   >
-                  <img
-                    src={image.url}
-                    alt={image.alt || `Slide ${imgIndex + 1}`}
-                    loading="lazy"
-                    decoding="async"
-                    className={imageClasses}
-                    style={{
-                      ...getImageInlineStyle(cardAspectRatio, cardFitMode),
-                      imageRendering: 'auto',
-                      WebkitFontSmoothing: 'antialiased',
-                    }}
-                  />
+                   <img
+                     src={image.url}
+                     alt={image.alt || `Slide ${imgIndex + 1}`}
+                     loading="lazy"
+                     decoding="async"
+                     className={imageClasses}
+                     style={{
+                       ...getImageInlineStyle(cardAspectRatio, cardFitMode),
+                       imageRendering: 'auto',
+                       backfaceVisibility: 'hidden',
+                       willChange: 'transform',
+                     }}
+                   />
                   </div>
                 </CarouselItem>
               ))}
@@ -384,7 +385,8 @@ export function ScrollingFeatureCards() {
               style={{
                 ...getImageInlineStyle(cardAspectRatio, cardFitMode),
                 imageRendering: 'auto',
-                WebkitFontSmoothing: 'antialiased',
+                backfaceVisibility: 'hidden',
+                willChange: 'transform',
               }}
             />
         </div>
