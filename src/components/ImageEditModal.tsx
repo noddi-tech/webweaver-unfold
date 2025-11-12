@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Image as ImageIcon, Upload, Link as LinkIcon, Save, Loader2 } from 'lucide-react';
+import { Image as ImageIcon, Upload, Link as LinkIcon, Save, Loader2, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import imageCompression from 'browser-image-compression';
 import {
   Dialog,
   DialogContent,
@@ -42,6 +43,12 @@ export function ImageEditModal({
   const [libraryImages, setLibraryImages] = useState<ImageLibraryItem[]>([]);
   const [loadingLibrary, setLoadingLibrary] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageInfo, setImageInfo] = useState<{
+    width: number;
+    height: number;
+    originalSize: number;
+    compressedSize?: number;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -80,14 +87,44 @@ export function ImageEditModal({
       return;
     }
 
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
-      return;
-    }
-
     setUploading(true);
     try {
+      // Get image dimensions
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.src = objectUrl;
+      
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+
+      const originalSize = file.size;
+      setImageInfo({
+        width: img.width,
+        height: img.height,
+        originalSize,
+      });
+
+      URL.revokeObjectURL(objectUrl);
+
+      // Compress image for optimal quality/size balance
+      const options = {
+        maxSizeMB: 2,
+        maxWidthOrHeight: 2560, // 2x for Retina displays
+        useWebWorker: true,
+        quality: img.width > 1920 ? 0.85 : 0.90, // Lower quality for very large images
+      };
+
+      toast.info('Optimizing image...');
+      const compressedFile = await imageCompression(file, options);
+      
+      const compressionRatio = ((1 - compressedFile.size / originalSize) * 100).toFixed(0);
+      setImageInfo(prev => prev ? { ...prev, compressedSize: compressedFile.size } : null);
+
+      if (compressionRatio !== '0') {
+        toast.success(`Image optimized: ${compressionRatio}% smaller`);
+      }
+
       // Check authentication
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
@@ -104,37 +141,26 @@ export function ImageEditModal({
         return;
       }
 
-      console.log('User authenticated:', user.id);
-
       // Generate unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `solutions/${fileName}`;
 
-      console.log('Attempting upload to:', filePath);
-
-      // Upload to storage
+      // Upload compressed file to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('site-images')
-        .upload(filePath, file, {
+        .upload(filePath, compressedFile, {
           cacheControl: '3600',
           upsert: false,
-          contentType: file.type, // Preserve original MIME type for better quality
+          contentType: compressedFile.type,
         });
 
       if (uploadError) {
-        console.error('Upload error details:', {
-          message: uploadError.message,
-          name: uploadError.name,
-          statusCode: (uploadError as any).statusCode,
-          error: uploadError
-        });
+        console.error('Upload error details:', uploadError);
         toast.error(`Upload failed: ${uploadError.message || 'Unknown error'}`);
         setUploading(false);
         return;
       }
-
-      console.log('Upload successful:', uploadData);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -240,9 +266,39 @@ export function ImageEditModal({
                 )}
               </Button>
               <p className="text-sm text-muted-foreground mt-2">
-                Maximum file size: 5MB
+                Images will be automatically optimized for web delivery
               </p>
             </div>
+
+            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+              <div className="flex items-start gap-2">
+                <Info className="h-4 w-4 text-primary mt-0.5" />
+                <div className="space-y-1 text-sm">
+                  <p className="font-medium text-foreground">Image Quality Recommendations</p>
+                  <ul className="text-muted-foreground space-y-1">
+                    <li>• <strong>Full-width images:</strong> 2560px wide (Retina-ready)</li>
+                    <li>• <strong>Cards/thumbnails:</strong> 1024px wide</li>
+                    <li>• <strong>Format:</strong> PNG for screenshots, JPEG for photos</li>
+                    <li>• <strong>Quality:</strong> Auto-optimized for best size/quality balance</li>
+                  </ul>
+                </div>
+              </div>
+              
+              {imageInfo && (
+                <div className="pt-2 border-t border-border">
+                  <p className="text-xs text-muted-foreground">
+                    <strong>Detected:</strong> {imageInfo.width} × {imageInfo.height}px
+                    {imageInfo.compressedSize && (
+                      <span className="ml-2">
+                        | <strong>Optimized:</strong> {(imageInfo.compressedSize / 1024).toFixed(0)}KB 
+                        (was {(imageInfo.originalSize / 1024).toFixed(0)}KB)
+                      </span>
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+            
             
             {currentUrl && (
               <div className="space-y-2">
