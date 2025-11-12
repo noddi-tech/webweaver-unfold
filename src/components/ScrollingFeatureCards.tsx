@@ -115,25 +115,22 @@ export function ScrollingFeatureCards() {
       images: Array<{url: string; alt: string; title?: string}>;
     };
   }>>({});
-  const [aspectRatios, setAspectRatios] = useState<Record<number, string>>({});
   const [fitModes, setFitModes] = useState<Record<number, 'contain' | 'cover'>>({});
 
   const loadImageSettings = async () => {
     const newImageUrls: Record<number, string> = {};
     const newCarouselData: Record<number, any> = {};
-    const newAspectRatios: Record<number, string> = {};
     const newFitModes: Record<number, 'contain' | 'cover'> = {};
     
     for (let i = 0; i < 5; i++) {
       const { data } = await supabase
         .from('image_carousel_settings')
-        .select('image_url, display_type, carousel_config_id, aspect_ratio, fit_mode')
+        .select('image_url, display_type, carousel_config_id, fit_mode')
         .eq('location_id', `scrolling-card-${i + 1}`)
         .maybeSingle();
       
       if (data) {
-        // Store aspect ratio and fit mode
-        newAspectRatios[i] = data.aspect_ratio || 'auto';
+        // Store fit mode
         newFitModes[i] = (data.fit_mode as 'contain' | 'cover') || 'contain';
         
         if (data.display_type === 'carousel' && data.carousel_config_id) {
@@ -173,9 +170,6 @@ export function ScrollingFeatureCards() {
     }
     if (Object.keys(newCarouselData).length > 0) {
       setCarouselData(prev => ({ ...prev, ...newCarouselData }));
-    }
-    if (Object.keys(newAspectRatios).length > 0) {
-      setAspectRatios(prev => ({ ...prev, ...newAspectRatios }));
     }
     if (Object.keys(newFitModes).length > 0) {
       setFitModes(prev => ({ ...prev, ...newFitModes }));
@@ -262,62 +256,22 @@ export function ScrollingFeatureCards() {
     });
   }, []);
 
-  // Uniform container size for all cards - uses flexbox to center inner content (invisible)
+  // Uniform container size for all cards
   const getContainerClasses = (): string => {
-    return 'relative w-full h-[400px] lg:h-[500px] flex items-center justify-center overflow-hidden';
+    return 'relative w-full h-[400px] lg:h-[500px] overflow-hidden';
   };
 
-  const getAspectRatioStyle = (aspectRatio: string): string => {
-    const ratioMap: Record<string, string> = {
-      '16:9': 'aspect-[16/9]',
-      '16:10': 'aspect-[16/10]',
-      '10:16': 'aspect-[10/16]',
-      '9:16': 'aspect-[9/16]',
-      '4:3': 'aspect-[4/3]',
-      '3:4': 'aspect-[3/4]',
-      '1:1': 'aspect-square',
-      '21:9': 'aspect-[21/9]',
-      'auto': ''
-    };
-    return ratioMap[aspectRatio] || '';
-  };
-
-
-  const getInnerWrapperClasses = (aspectRatio: string, fitMode: 'contain' | 'cover'): string => {
+  // Inner wrapper fills the fixed-height container
+  const getInnerWrapperClasses = (fitMode: 'contain' | 'cover'): string => {
     const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
-    
-    if (aspectRatio && aspectRatio !== 'auto') {
-      // With specific aspect ratio - let aspect ratio control dimensions
-      return `relative w-full aspect-[${aspectRatio.replace(':', '/')}] rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
-    } else {
-      // Auto mode - use explicit height constraints matching container
-      if (fitMode === 'contain') {
-      // For contain mode: explicit max height matching container, with flex centering
-        return `relative w-auto max-w-full h-[400px] lg:h-[500px] flex items-center justify-center rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
-      } else {
-        // For cover mode: fill entire space
-        return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
-      }
-    }
-  };
-
-  const getAspectRatioInlineStyle = (aspectRatio: string, fitMode: 'contain' | 'cover'): React.CSSProperties => {
-    // No inline styles needed - aspect ratio classes and object-fit handle everything
-    return {};
-  };
-
-  const getImageInlineStyle = (aspectRatio: string, fitMode: 'contain' | 'cover'): React.CSSProperties => {
-    // For contain mode: NO inline styles needed! object-contain handles everything
-    // For cover mode: also no inline styles needed
-    return {};
+    return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate`;
   };
 
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
-    const cardAspectRatio = aspectRatios[index] || 'auto';
     const cardFitMode = fitModes[index] || 'contain';
     const containerClasses = getContainerClasses();
-    const innerWrapperClasses = getInnerWrapperClasses(cardAspectRatio, cardFitMode);
+    const innerWrapperClasses = getInnerWrapperClasses(cardFitMode);
     const imageClasses = cardFitMode === 'contain' 
       ? 'w-full h-full object-contain block' 
       : 'w-full h-full object-cover block';
@@ -339,10 +293,7 @@ export function ScrollingFeatureCards() {
             <CarouselContent className="h-full">
               {config.images.map((image, imgIndex) => (
                 <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
-                  <div 
-                    className={innerWrapperClasses} 
-                    style={getAspectRatioInlineStyle(cardAspectRatio, cardFitMode)}
-                  >
+                  <div className={innerWrapperClasses}>
                    <img
                      src={image.url}
                      alt={image.alt || `Slide ${imgIndex + 1}`}
@@ -350,7 +301,6 @@ export function ScrollingFeatureCards() {
                      decoding="async"
                      className={imageClasses}
                      style={{
-                       ...getImageInlineStyle(cardAspectRatio, cardFitMode),
                        imageRendering: 'auto',
                        backfaceVisibility: 'hidden',
                        willChange: 'transform',
@@ -375,7 +325,7 @@ export function ScrollingFeatureCards() {
     // Fallback to single image
     return (
       <div className={containerClasses}>
-        <div className={innerWrapperClasses} style={getAspectRatioInlineStyle(cardAspectRatio, cardFitMode)}>
+        <div className={innerWrapperClasses}>
             <img
               src={imageUrls[index] || card.imageUrl}
               alt={card.imageAlt}
@@ -383,7 +333,6 @@ export function ScrollingFeatureCards() {
               decoding="async"
               className={imageClasses}
               style={{
-                ...getImageInlineStyle(cardAspectRatio, cardFitMode),
                 imageRendering: 'auto',
                 backfaceVisibility: 'hidden',
                 willChange: 'transform',
