@@ -266,9 +266,39 @@ export function ImageEditModal({
                 )}
               </Button>
               <p className="text-sm text-muted-foreground mt-2">
-                Maximum file size: 5MB
+                Images will be automatically optimized for web delivery
               </p>
             </div>
+
+            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+              <div className="flex items-start gap-2">
+                <Info className="h-4 w-4 text-primary mt-0.5" />
+                <div className="space-y-1 text-sm">
+                  <p className="font-medium text-foreground">Image Quality Recommendations</p>
+                  <ul className="text-muted-foreground space-y-1">
+                    <li>• <strong>Full-width images:</strong> 2560px wide (Retina-ready)</li>
+                    <li>• <strong>Cards/thumbnails:</strong> 1024px wide</li>
+                    <li>• <strong>Format:</strong> PNG for screenshots, JPEG for photos</li>
+                    <li>• <strong>Quality:</strong> Auto-optimized for best size/quality balance</li>
+                  </ul>
+                </div>
+              </div>
+              
+              {imageInfo && (
+                <div className="pt-2 border-t border-border">
+                  <p className="text-xs text-muted-foreground">
+                    <strong>Detected:</strong> {imageInfo.width} × {imageInfo.height}px
+                    {imageInfo.compressedSize && (
+                      <span className="ml-2">
+                        | <strong>Optimized:</strong> {(imageInfo.compressedSize / 1024).toFixed(0)}KB 
+                        (was {(imageInfo.originalSize / 1024).toFixed(0)}KB)
+                      </span>
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+            
             
             {currentUrl && (
               <div className="space-y-2">
