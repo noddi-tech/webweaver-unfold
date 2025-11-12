@@ -119,6 +119,11 @@ export function ScrollingFeatureCards() {
   const [aspectRatios, setAspectRatios] = useState<Record<number, string>>({});
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Force re-render when fitModes changes
+  useEffect(() => {
+    setRefreshKey(prev => prev + 1);
+  }, [fitModes]);
+
   const loadImageSettings = async () => {
     const newImageUrls: Record<number, string> = {};
     const newCarouselData: Record<number, any> = {};
@@ -181,9 +186,6 @@ export function ScrollingFeatureCards() {
     if (Object.keys(newAspectRatios).length > 0) {
       setAspectRatios(prev => ({ ...prev, ...newAspectRatios }));
     }
-    
-    // Trigger re-render after loading settings
-    setRefreshKey(prev => prev + 1);
   };
 
   const loadCardData = async (index: number) => {
@@ -294,9 +296,8 @@ export function ScrollingFeatureCards() {
         : [];
       
       return (
-        <div className={containerClasses}>
+        <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}`}>
           <Carousel 
-            key={`carousel-${index}-${refreshKey}-${cardFitMode}`}
             opts={{ loop: true }}
             plugins={plugins}
             className="w-full h-full"
@@ -335,10 +336,9 @@ export function ScrollingFeatureCards() {
     
     // Fallback to single image
     return (
-      <div className={containerClasses}>
+      <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}`}>
         <div className={innerWrapperClasses}>
             <img
-              key={`image-${index}-${refreshKey}-${cardFitMode}`}
               src={imageUrls[index] || card.imageUrl}
               alt={card.imageAlt}
               loading="lazy"

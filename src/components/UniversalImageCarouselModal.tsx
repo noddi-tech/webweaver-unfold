@@ -1081,11 +1081,21 @@ export function UniversalImageCarouselModal({
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4">
-                        {/* Contain Preview */}
-                        <div className="space-y-2">
-                          <div className="text-xs font-medium text-center text-foreground/80">Contain</div>
-                          <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-background border border-border flex items-center justify-center">
+                      {/* Helper function for dynamic preview styling */}
+                      {(() => {
+                        const getPreviewStyle = () => {
+                          if (aspectRatio === 'auto' || aspectRatio === '1:1') {
+                            return { aspectRatio: '1 / 1', height: 'auto', width: '100%' };
+                          }
+                          return { aspectRatio: aspectRatio.replace(':', ' / '), height: 'auto', width: '100%' };
+                        };
+                        
+                        return (
+                          <div className="grid grid-cols-2 gap-4">
+                            {/* Contain Preview */}
+                            <div className="space-y-2">
+                              <div className="text-xs font-medium text-center text-foreground/80">Contain</div>
+                              <div className="relative w-full rounded-lg overflow-hidden bg-background border border-border flex items-center justify-center" style={getPreviewStyle()}>
                             {previewImageUrl ? (
                               <img 
                                 src={previewImageUrl} 
@@ -1105,10 +1115,10 @@ export function UniversalImageCarouselModal({
                           </p>
                         </div>
 
-                        {/* Cover Preview */}
-                        <div className="space-y-2">
-                          <div className="text-xs font-medium text-center text-foreground/80">Cover</div>
-                          <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-background border border-border flex items-center justify-center">
+                            {/* Cover Preview */}
+                            <div className="space-y-2">
+                              <div className="text-xs font-medium text-center text-foreground/80">Cover</div>
+                              <div className="relative w-full rounded-lg overflow-hidden bg-background border border-border flex items-center justify-center" style={getPreviewStyle()}>
                             {previewImageUrl ? (
                               <img 
                                 src={previewImageUrl} 
@@ -1125,9 +1135,11 @@ export function UniversalImageCarouselModal({
                           </div>
                           <p className="text-xs text-center text-muted-foreground">
                             Fills space, may crop edges
-                          </p>
-                        </div>
-                      </div>
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                       {/* Selected indicator */}
                       <div className="flex items-center justify-center gap-2 pt-2">
