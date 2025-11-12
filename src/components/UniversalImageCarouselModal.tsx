@@ -1058,59 +1058,71 @@ export function UniversalImageCarouselModal({
                 </div>
 
                 {/* Fit Mode Preview */}
-                {imageUrl && (
-                  <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border">
-                    <div className="flex items-start gap-2">
-                      <Info className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                      <div className="space-y-1">
-                        <Label className="text-sm font-medium">Fit Mode Preview</Label>
-                        <p className="text-xs text-muted-foreground">
-                          See how your image will appear with each fit mode
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Contain Preview */}
-                      <div className="space-y-2">
-                        <div className="text-xs font-medium text-center text-foreground/80">Contain</div>
-                        <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-background/50 border border-border flex items-center justify-center">
-                          <img 
-                            src={imageUrl} 
-                            alt="Contain preview"
-                            className="w-full h-full object-contain"
-                          />
+                {(() => {
+                  // Determine which image to show in preview
+                  const previewImageUrl = displayType === 'image' 
+                    ? imageUrl 
+                    : (carouselImages.length > 0 ? carouselImages[0].url : '');
+                  
+                  return previewImageUrl && (
+                    <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border">
+                      <div className="flex items-start gap-2">
+                        <Info className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                        <div className="space-y-1">
+                          <Label className="text-sm font-medium">Fit Mode Preview</Label>
+                          <p className="text-xs text-muted-foreground">
+                            See how your image will appear with each fit mode
+                          </p>
+                          {displayType === 'carousel' && carouselImages.length > 1 && (
+                            <p className="text-xs text-muted-foreground italic">
+                              Showing first image from carousel ({carouselImages.length} total images)
+                            </p>
+                          )}
                         </div>
-                        <p className="text-xs text-center text-muted-foreground">
-                          Shows full image, may have padding
-                        </p>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Contain Preview */}
+                        <div className="space-y-2">
+                          <div className="text-xs font-medium text-center text-foreground/80">Contain</div>
+                          <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-background/50 border border-border flex items-center justify-center">
+                            <img 
+                              src={previewImageUrl} 
+                              alt="Contain preview"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <p className="text-xs text-center text-muted-foreground">
+                            Shows full image, may have padding
+                          </p>
+                        </div>
+
+                        {/* Cover Preview */}
+                        <div className="space-y-2">
+                          <div className="text-xs font-medium text-center text-foreground/80">Cover</div>
+                          <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-background/50 border border-border">
+                            <img 
+                              src={previewImageUrl} 
+                              alt="Cover preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <p className="text-xs text-center text-muted-foreground">
+                            Fills space, may crop edges
+                          </p>
+                        </div>
                       </div>
 
-                      {/* Cover Preview */}
-                      <div className="space-y-2">
-                        <div className="text-xs font-medium text-center text-foreground/80">Cover</div>
-                        <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-background/50 border border-border">
-                          <img 
-                            src={imageUrl} 
-                            alt="Cover preview"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <p className="text-xs text-center text-muted-foreground">
-                          Fills space, may crop edges
-                        </p>
+                      {/* Selected indicator */}
+                      <div className="flex items-center justify-center gap-2 pt-2">
+                        <span className="text-xs text-muted-foreground">Currently selected:</span>
+                        <span className="text-xs font-medium px-2 py-1 rounded bg-primary/10 text-primary">
+                          {fitMode.charAt(0).toUpperCase() + fitMode.slice(1)}
+                        </span>
                       </div>
                     </div>
-
-                    {/* Selected indicator */}
-                    <div className="flex items-center justify-center gap-2 pt-2">
-                      <span className="text-xs text-muted-foreground">Currently selected:</span>
-                      <span className="text-xs font-medium px-2 py-1 rounded bg-primary/10 text-primary">
-                        {fitMode.charAt(0).toUpperCase() + fitMode.slice(1)}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Image Fit Mode */}
                 <div className="space-y-3 border-t pt-4">
