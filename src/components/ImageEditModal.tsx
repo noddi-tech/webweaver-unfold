@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Image as ImageIcon, Upload, Link as LinkIcon, Save, Loader2 } from 'lucide-react';
+import { Image as ImageIcon, Upload, Link as LinkIcon, Save, Loader2, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import imageCompression from 'browser-image-compression';
 import {
   Dialog,
   DialogContent,
@@ -42,6 +43,12 @@ export function ImageEditModal({
   const [libraryImages, setLibraryImages] = useState<ImageLibraryItem[]>([]);
   const [loadingLibrary, setLoadingLibrary] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageInfo, setImageInfo] = useState<{
+    width: number;
+    height: number;
+    originalSize: number;
+    compressedSize?: number;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -80,14 +87,44 @@ export function ImageEditModal({
       return;
     }
 
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
-      return;
-    }
-
     setUploading(true);
     try {
+      // Get image dimensions
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.src = objectUrl;
+      
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+
+      const originalSize = file.size;
+      setImageInfo({
+        width: img.width,
+        height: img.height,
+        originalSize,
+      });
+
+      URL.revokeObjectURL(objectUrl);
+
+      // Compress image for optimal quality/size balance
+      const options = {
+        maxSizeMB: 2,
+        maxWidthOrHeight: 2560, // 2x for Retina displays
+        useWebWorker: true,
+        quality: img.width > 1920 ? 0.85 : 0.90, // Lower quality for very large images
+      };
+
+      toast.info('Optimizing image...');
+      const compressedFile = await imageCompression(file, options);
+      
+      const compressionRatio = ((1 - compressedFile.size / originalSize) * 100).toFixed(0);
+      setImageInfo(prev => prev ? { ...prev, compressedSize: compressedFile.size } : null);
+
+      if (compressionRatio !== '0') {
+        toast.success(`Image optimized: ${compressionRatio}% smaller`);
+      }
+
       // Check authentication
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
@@ -104,37 +141,26 @@ export function ImageEditModal({
         return;
       }
 
-      console.log('User authenticated:', user.id);
-
       // Generate unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `solutions/${fileName}`;
 
-      console.log('Attempting upload to:', filePath);
-
-      // Upload to storage
+      // Upload compressed file to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('site-images')
-        .upload(filePath, file, {
+        .upload(filePath, compressedFile, {
           cacheControl: '3600',
           upsert: false,
-          contentType: file.type, // Preserve original MIME type for better quality
+          contentType: compressedFile.type,
         });
 
       if (uploadError) {
-        console.error('Upload error details:', {
-          message: uploadError.message,
-          name: uploadError.name,
-          statusCode: (uploadError as any).statusCode,
-          error: uploadError
-        });
+        console.error('Upload error details:', uploadError);
         toast.error(`Upload failed: ${uploadError.message || 'Unknown error'}`);
         setUploading(false);
         return;
       }
-
-      console.log('Upload successful:', uploadData);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
