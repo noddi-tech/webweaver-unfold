@@ -95,7 +95,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
       <div className="space-y-6">
         {/* Currency Selector */}
         <div className="space-y-3">
-          <Label className="text-sm text-muted-foreground text-center block">
+          <Label className="text-sm text-primary-foreground/80 text-center block">
             {getCMSContent('label_currency', 'View pricing in:')}
           </Label>
           <Select value={currency} onValueChange={onCurrencyChange}>
@@ -163,10 +163,10 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
         {/* Revenue Display */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 flex-wrap">
-            <h3 className="text-3xl md:text-4xl font-bold text-foreground">
+            <h3 className="text-3xl md:text-4xl font-bold text-primary-foreground">
               {getCMSContent('label_revenue', 'Revenue')}:
             </h3>
-            <div className="text-3xl md:text-4xl font-bold text-foreground">
+            <div className="text-3xl md:text-4xl font-bold text-primary-foreground">
               {formatCompactCurrency(revenue, currency)}
             </div>
           </div>
@@ -183,7 +183,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
             className="cursor-pointer touch-none h-3 md:h-2"
             aria-label="Select revenue range"
           />
-          <div className="flex justify-between text-xs text-muted-foreground mt-2">
+          <div className="flex justify-between text-xs text-primary-foreground/70 mt-2">
             <span>{formatCompactCurrency(convertFromEUR(PRESETS_EUR[0], currency), currency)}</span>
             <span>{formatCompactCurrency(convertFromEUR(PRESETS_EUR[PRESETS_EUR.length - 1], currency), currency)}+</span>
           </div>
@@ -191,7 +191,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
 
         {/* Contract Type Selector */}
         <div className="space-y-3">
-          <Label className="text-sm text-foreground">{getCMSContent('label_contract', 'Lock-in-period')}</Label>
+          <Label className="text-sm text-primary-foreground">{getCMSContent('label_contract', 'Lock-in-period')}</Label>
           <ToggleGroup
             type="single"
             value={contractType}
@@ -226,11 +226,11 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
 
         {/* Cost Preview */}
         <div className="bg-card/50 border border-border rounded-lg p-4 text-center">
-          <div className="text-sm text-muted-foreground mb-1 glass-text-high-contrast">
+          <div className="text-sm text-primary-foreground/80 mb-1">
             {getCMSContent('preview_label', 'Estimated annual cost:')}
           </div>
           <div className="grid gap-2 justify-items-center">
-            <div className="text-2xl md:text-3xl font-bold text-foreground glass-text-large">
+            <div className="text-2xl md:text-3xl font-bold text-primary-foreground">
               {formatCurrency(result.total, currency)}
             </div>
             {contractType !== 'none' && savings > 0 && (
@@ -239,7 +239,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
               </Badge>
             )}
           </div>
-          <div className="text-sm text-muted-foreground mt-1">
+          <div className="text-sm text-primary-foreground/70 mt-1">
             ≈ {result.effectiveRate.toFixed(2)}% effective rate
           </div>
         </div>
@@ -248,7 +248,7 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
         <div className="text-center">
           <Button 
             variant="ghost" 
-            className="accessible-focus group"
+            className="accessible-focus group text-primary-foreground hover:text-primary-foreground/90"
             onClick={onOpenCalculator}
             aria-label="Open advanced pricing calculator"
           >
@@ -259,8 +259,8 @@ export function PricingSlider({ currency, onCurrencyChange, contractType, onCont
 
         {/* Clarifier Message */}
         <div className="bg-card/50 border border-border rounded-lg p-4 flex items-start gap-3">
-          <Info className="w-5 h-5 text-foreground shrink-0 mt-0.5" />
-          <p className="text-sm text-foreground">
+          <Info className="w-5 h-5 text-primary-foreground shrink-0 mt-0.5" />
+          <p className="text-sm text-primary-foreground/90">
             {getCMSContent('clarifier', 'Your cost is a small percentage of your processed revenue — this calculator shows what that means for your business.')}
           </p>
         </div>
