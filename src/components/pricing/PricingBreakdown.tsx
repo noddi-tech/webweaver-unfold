@@ -55,8 +55,8 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
       <div className="space-y-2">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold text-foreground">Annual Cost Breakdown</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="text-lg font-semibold text-primary-foreground">Annual Cost Breakdown</h3>
+            <p className="text-sm text-primary-foreground/80">
               Revenue-based pricing that scales with your business
             </p>
           </div>
@@ -73,7 +73,7 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
         {/* Usage Costs */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-foreground">Annual Usage Cost</h4>
+            <h4 className="text-sm font-medium text-primary-foreground">Annual Usage Cost</h4>
             <span className="text-sm font-semibold text-primary">
               {formatCurrency(totalUsage, currency)}
             </span>
@@ -81,17 +81,17 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
           <div className="space-y-2 pl-4 border-l-2 border-primary/20">
             {services.filter(s => s.show).map((service) => (
               <div key={service.name} className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">
+                <span className="text-primary-foreground/80">
                   <span className="font-medium">{service.name}</span>
                   <span className="text-xs ml-1.5 opacity-70">
                     ({formatPercentage(service.rate)})
                   </span>
                 </span>
-                <span className="font-medium text-foreground">{formatCurrency(service.usage, currency)}</span>
+                <span className="font-medium text-primary-foreground">{formatCurrency(service.usage, currency)}</span>
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground pl-4 pt-2">
+          <p className="text-xs text-primary-foreground/70 pl-4 pt-2">
             Revenue-based pricing with no separate SaaS licence fee
           </p>
         </div>
@@ -102,12 +102,12 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
         <div className="space-y-3">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
             <div className="space-y-2">
-              <h4 className="text-lg font-bold text-foreground">Total Annual Cost</h4>
+              <h4 className="text-lg font-bold text-primary-foreground">Total Annual Cost</h4>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className={`text-xs font-semibold ${getTierColor(currentTier)} transition-all duration-300`}>
                   Tier {currentTier}
                 </Badge>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-primary-foreground/70">
                   {tierLabel}
                 </span>
               </div>
@@ -118,12 +118,12 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
           </div>
           <div className="grid sm:grid-cols-2 gap-3 pt-2">
             <div className="flex items-center justify-between sm:justify-start sm:gap-2 text-sm p-3 rounded-lg bg-muted/30">
-              <span className="text-muted-foreground">Monthly avg:</span>
-              <span className="font-semibold text-foreground">{formatCurrency(result.total / 12, currency)}</span>
+              <span className="text-primary-foreground/80">Monthly avg:</span>
+              <span className="font-semibold text-primary-foreground">{formatCurrency(result.total / 12, currency)}</span>
             </div>
             <div className="flex items-center justify-between sm:justify-start sm:gap-2 text-sm p-3 rounded-lg bg-muted/30">
-              <span className="text-muted-foreground">Effective rate:</span>
-              <span className="font-semibold text-foreground">{formatPercentage(result.effectiveRate / 100)}</span>
+              <span className="text-primary-foreground/80">Effective rate:</span>
+              <span className="font-semibold text-primary-foreground">{formatPercentage(result.effectiveRate / 100)}</span>
             </div>
           </div>
         </div>
@@ -132,7 +132,7 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
 
         {/* Contract Type Selector */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium text-foreground">Contract Type</Label>
+          <Label className="text-sm font-medium text-primary-foreground">Contract Type</Label>
           <ToggleGroup
             type="single"
             value={contractType}
@@ -175,7 +175,7 @@ export function PricingBreakdown({ result, currency, contractType, onContractTyp
 
       {contractType !== 'none' && result.discount > 0 && (
         <div className="bg-[hsl(var(--tier-low))]/10 rounded-lg p-4 border border-[hsl(var(--tier-low))]/20">
-          <p className="text-sm font-medium text-foreground">
+          <p className="text-sm font-medium text-primary-foreground">
             💰 You're saving {formatCurrency(result.discount, currency)} per year with your {contractType} contract!
           </p>
         </div>
