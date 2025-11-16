@@ -298,6 +298,7 @@ export function ScrollingFeatureCards() {
       return (
         <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}`}>
           <Carousel 
+            key={`carousel-${index}-${refreshKey}-${cardFitMode}`}
             opts={{ loop: true }}
             plugins={plugins}
             className="w-full h-full"
@@ -307,6 +308,7 @@ export function ScrollingFeatureCards() {
                 <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
                   <div className={innerWrapperClasses}>
                    <img
+                     key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}`}
                      src={image.url}
                      alt={image.alt || `Slide ${imgIndex + 1}`}
                      loading="lazy"
@@ -339,6 +341,7 @@ export function ScrollingFeatureCards() {
       <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}`}>
         <div className={innerWrapperClasses}>
             <img
+              key={`single-img-${index}-${refreshKey}-${cardFitMode}`}
               src={imageUrls[index] || card.imageUrl}
               alt={card.imageAlt}
               loading="lazy"
