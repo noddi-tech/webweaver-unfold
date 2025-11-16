@@ -119,10 +119,10 @@ export function ScrollingFeatureCards() {
   const [aspectRatios, setAspectRatios] = useState<Record<number, string>>({});
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Force re-render when fitModes changes
+  // Force re-render when fitModes or aspectRatios change
   useEffect(() => {
     setRefreshKey(prev => prev + 1);
-  }, [fitModes]);
+  }, [fitModes, aspectRatios]);
 
   const loadImageSettings = async () => {
     const newImageUrls: Record<number, string> = {};
@@ -269,7 +269,11 @@ export function ScrollingFeatureCards() {
   }, []);
 
   // Uniform container size for all cards
-  const getContainerClasses = (): string => {
+  const getContainerClasses = (aspectRatio: string = 'auto'): string => {
+    // If aspect ratio is specified, use it. Otherwise fall back to fixed heights
+    if (aspectRatio && aspectRatio !== 'auto') {
+      return `relative w-full overflow-hidden ${aspectRatio}`;
+    }
     return 'relative w-full h-[400px] lg:h-[500px] overflow-hidden';
   };
 
@@ -282,7 +286,8 @@ export function ScrollingFeatureCards() {
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardFitMode = fitModes[index] || 'contain';
-    const containerClasses = getContainerClasses();
+    const cardAspectRatio = aspectRatios[index] || 'auto';
+    const containerClasses = getContainerClasses(cardAspectRatio);
     const innerWrapperClasses = getInnerWrapperClasses(cardFitMode);
     const imageClasses = cardFitMode === 'contain' 
       ? 'w-full h-full object-contain block' 
@@ -296,9 +301,9 @@ export function ScrollingFeatureCards() {
         : [];
       
       return (
-        <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}`}>
+        <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardAspectRatio}`}>
           <Carousel 
-            key={`carousel-${index}-${refreshKey}-${cardFitMode}`}
+            key={`carousel-${index}-${refreshKey}-${cardFitMode}-${cardAspectRatio}`}
             opts={{ loop: true }}
             plugins={plugins}
             className="w-full h-full"
@@ -306,9 +311,9 @@ export function ScrollingFeatureCards() {
             <CarouselContent className="h-full">
               {config.images.map((image, imgIndex) => (
                 <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
-                  <div className={innerWrapperClasses}>
+                   <div className={innerWrapperClasses}>
                    <img
-                     key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}`}
+                     key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}-${cardAspectRatio}`}
                      src={image.url}
                      alt={image.alt || `Slide ${imgIndex + 1}`}
                      loading="lazy"
@@ -338,10 +343,10 @@ export function ScrollingFeatureCards() {
     
     // Fallback to single image
     return (
-      <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}`}>
+      <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardAspectRatio}`}>
         <div className={innerWrapperClasses}>
             <img
-              key={`single-img-${index}-${refreshKey}-${cardFitMode}`}
+              key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardAspectRatio}`}
               src={imageUrls[index] || card.imageUrl}
               alt={card.imageAlt}
               loading="lazy"
