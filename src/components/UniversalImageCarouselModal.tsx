@@ -76,7 +76,6 @@ export function UniversalImageCarouselModal({
   const [carouselShowNavigation, setCarouselShowNavigation] = useState(true);
   const [carouselShowDots, setCarouselShowDots] = useState(true);
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
-  const [aspectRatio, setAspectRatio] = useState<string>('auto');
   const [fitMode, setFitMode] = useState<'contain' | 'cover'>('contain');
   
   // Data
@@ -163,7 +162,6 @@ export function UniversalImageCarouselModal({
 
         if (settings) {
           setDisplayType(settings.display_type as 'image' | 'carousel');
-          setAspectRatio(settings.aspect_ratio || 'auto');
           setFitMode((settings.fit_mode as 'contain' | 'cover') || 'contain');
           
           if (settings.display_type === 'image') {
@@ -394,7 +392,6 @@ export function UniversalImageCarouselModal({
         const settingsData = {
           location_id: locationId,
           display_type: displayType,
-          aspect_ratio: aspectRatio,
           fit_mode: fitMode,
           image_url: displayType === 'image' ? finalImageUrl : null,
           image_alt: displayType === 'image' ? imageAlt : null,
@@ -1023,60 +1020,7 @@ export function UniversalImageCarouselModal({
               </div>
             )}
 
-            {/* Card Height Configuration - only in location mode */}
-            {mode === 'location' && (
-              <>
-                <div className="space-y-3 border-t pt-4">
-                  <Label>Card Height</Label>
-                  <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="h-[400px]">Small (400px)</SelectItem>
-                      <SelectItem value="h-[500px]">Medium (500px)</SelectItem>
-                      <SelectItem value="h-[600px]">Large (600px)</SelectItem>
-                      <SelectItem value="h-[700px]">Extra Large (700px)</SelectItem>
-                      <SelectItem value="h-[800px]">Huge (800px)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Card height determines the container size. Images will scale to fit inside using the selected fit mode.
-                  </p>
-                </div>
-
-                {/* Fit Mode Preview */}
-                {(() => {
-                  // Determine which image to show in preview
-                  const previewImageUrl = displayType === 'image' 
-                    ? imageUrl 
-                    : (carouselImages.length > 0 ? carouselImages[0].url : '');
-                  
-                  return previewImageUrl && (
-                    <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border">
-                      <div className="flex items-start gap-2">
-                        <Info className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                        <div className="space-y-1">
-                          <Label className="text-sm font-medium">Fit Mode Preview</Label>
-                          <p className="text-xs text-muted-foreground">
-                            See how your image will appear with each fit mode
-                          </p>
-                          {displayType === 'carousel' && carouselImages.length > 1 && (
-                            <p className="text-xs text-muted-foreground italic">
-                              Showing first image from carousel ({carouselImages.length} total images)
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Helper function for dynamic preview styling */}
-                      {(() => {
-                        const getPreviewStyle = () => {
-                          // Extract height from aspectRatio (e.g., 'h-[500px]' -> '500px')
-                          const heightMatch = aspectRatio.match(/h-\[(\d+)px\]/);
-                          const height = heightMatch ? heightMatch[1] + 'px' : '500px';
-                          return { height, width: '100%' };
-                        };
+            {/* Card Height/Width/Border moved to UnifiedStyleModal - removed */}
                         
                         return (
                           <div className="grid grid-cols-2 gap-4">

@@ -762,6 +762,10 @@ export type Database = {
       image_carousel_settings: {
         Row: {
           aspect_ratio: string | null
+          card_border_radius: string | null
+          card_gap: string | null
+          card_height: string | null
+          card_width: string | null
           carousel_config_id: string | null
           created_at: string
           display_type: string
@@ -777,6 +781,10 @@ export type Database = {
         }
         Insert: {
           aspect_ratio?: string | null
+          card_border_radius?: string | null
+          card_gap?: string | null
+          card_height?: string | null
+          card_width?: string | null
           carousel_config_id?: string | null
           created_at?: string
           display_type?: string
@@ -792,6 +800,10 @@ export type Database = {
         }
         Update: {
           aspect_ratio?: string | null
+          card_border_radius?: string | null
+          card_gap?: string | null
+          card_height?: string | null
+          card_width?: string | null
           carousel_config_id?: string | null
           created_at?: string
           display_type?: string
