@@ -77,6 +77,7 @@ export function UniversalImageCarouselModal({
   const [carouselShowDots, setCarouselShowDots] = useState(true);
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
   const [fitMode, setFitMode] = useState<'contain' | 'cover'>('contain');
+  const [aspectRatio, setAspectRatio] = useState<string>('auto');
   
   // Data
   const [libraryImages, setLibraryImages] = useState<any[]>([]);
@@ -163,6 +164,7 @@ export function UniversalImageCarouselModal({
         if (settings) {
           setDisplayType(settings.display_type as 'image' | 'carousel');
           setFitMode((settings.fit_mode as 'contain' | 'cover') || 'contain');
+          setAspectRatio(settings.aspect_ratio || 'auto');
           
           if (settings.display_type === 'image') {
             setImageUrl(settings.image_url || '');
@@ -393,6 +395,7 @@ export function UniversalImageCarouselModal({
           location_id: locationId,
           display_type: displayType,
           fit_mode: fitMode,
+          aspect_ratio: aspectRatio,
           image_url: displayType === 'image' ? finalImageUrl : null,
           image_alt: displayType === 'image' ? imageAlt : null,
           carousel_config_id: displayType === 'carousel' ? carouselConfigId : null,
@@ -1037,6 +1040,93 @@ export function UniversalImageCarouselModal({
                 Contain: Shows the entire image. Cover: Fills the container (may crop image).
               </p>
             </div>
+
+            {/* Aspect Ratio Selection */}
+            <div className="space-y-3 border-t pt-4">
+              <Label>Image Aspect Ratio</Label>
+              <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">Auto (Original)</SelectItem>
+                  <SelectItem value="1:1">1:1 (Square)</SelectItem>
+                  <SelectItem value="4:3">4:3 (Standard)</SelectItem>
+                  <SelectItem value="16:9">16:9 (Widescreen)</SelectItem>
+                  <SelectItem value="16:10">16:10 (Monitor)</SelectItem>
+                  <SelectItem value="21:9">21:9 (Ultrawide)</SelectItem>
+                  <SelectItem value="3:4">3:4 (Portrait)</SelectItem>
+                  <SelectItem value="9:16">9:16 (Vertical)</SelectItem>
+                  <SelectItem value="10:16">10:16 (Tall)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Controls the proportions of the image content. 'Auto' maintains original aspect ratio.
+              </p>
+            </div>
+
+            {/* Preview Section */}
+            {imageUrl && (
+              <div className="space-y-3 border-t pt-4">
+                <Label>Preview</Label>
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    Preview how your image will appear with current settings
+                  </p>
+                  
+                  {/* Preview Container */}
+                  <div className="border border-border rounded-lg p-4 bg-muted/30">
+                    <div className="flex gap-4">
+                      {/* Contain Preview */}
+                      <div className="flex-1">
+                        <p className="text-xs font-medium mb-2 text-foreground">Contain Mode</p>
+                        <div 
+                          className="relative w-full bg-background border border-border rounded overflow-hidden"
+                          style={{
+                            aspectRatio: aspectRatio === 'auto' ? 'auto' : aspectRatio.replace(':', '/'),
+                            height: '150px'
+                          }}
+                        >
+                          <img
+                            src={imageUrl}
+                            alt="Preview"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Cover Preview */}
+                      <div className="flex-1">
+                        <p className="text-xs font-medium mb-2 text-foreground">Cover Mode</p>
+                        <div 
+                          className="relative w-full bg-background border border-border rounded overflow-hidden"
+                          style={{
+                            aspectRatio: aspectRatio === 'auto' ? 'auto' : aspectRatio.replace(':', '/'),
+                            height: '150px'
+                          }}
+                        >
+                          <img
+                            src={imageUrl}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Info */}
+                    <div className="mt-3 text-xs text-muted-foreground">
+                      <p className="font-medium mb-1">Current: {fitMode === 'contain' ? 'Contain' : 'Cover'} mode, {aspectRatio === 'auto' ? 'Auto' : aspectRatio} ratio</p>
+                      <p>
+                        {fitMode === 'contain' 
+                          ? 'Full image visible with possible padding' 
+                          : 'Image fills container, may crop edges'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Status & Recovery Tools */}
             {displayType === 'carousel' && (mode === 'standalone' || carouselSource === 'new') && (

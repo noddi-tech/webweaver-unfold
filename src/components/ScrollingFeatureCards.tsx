@@ -104,6 +104,7 @@ export function ScrollingFeatureCards() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [cardData, setCardData] = useState<Record<number, any>>({});
   const [fitModes, setFitModes] = useState<Record<number, 'contain' | 'cover'>>({});
+  const [aspectRatios, setAspectRatios] = useState<Record<number, string>>({});
   const [cardHeights, setCardHeights] = useState<Record<number, string>>({});
   const [cardWidths, setCardWidths] = useState<Record<number, string>>({});
   const [cardBorderRadii, setCardBorderRadii] = useState<Record<number, string>>({});
@@ -131,6 +132,7 @@ export function ScrollingFeatureCards() {
     const newImageUrls: Record<number, string> = {};
     const newCarouselData: Record<number, any> = {};
     const newFitModes: Record<number, 'contain' | 'cover'> = {};
+    const newAspectRatios: Record<number, string> = {};
     const newCardHeights: Record<number, string> = {};
     const newCardWidths: Record<number, string> = {};
     const newCardBorderRadii: Record<number, string> = {};
@@ -139,13 +141,14 @@ export function ScrollingFeatureCards() {
     for (let i = 0; i < 5; i++) {
       const { data } = await supabase
         .from('image_carousel_settings')
-        .select('image_url, display_type, carousel_config_id, fit_mode, card_height, card_width, card_border_radius, card_gap')
+        .select('image_url, display_type, carousel_config_id, fit_mode, aspect_ratio, card_height, card_width, card_border_radius, card_gap')
         .eq('location_id', `scrolling-card-${i + 1}`)
         .maybeSingle();
       
       if (data) {
-        // Store fit mode and card layout
+        // Store fit mode, aspect ratio and card layout
         newFitModes[i] = (data.fit_mode as 'contain' | 'cover') || 'contain';
+        newAspectRatios[i] = data.aspect_ratio || 'auto';
         newCardHeights[i] = data.card_height || 'h-[500px]';
         newCardWidths[i] = data.card_width || 'w-full';
         newCardBorderRadii[i] = data.card_border_radius || 'rounded-2xl';
@@ -302,6 +305,7 @@ export function ScrollingFeatureCards() {
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardFitMode = fitModes[index] || 'contain';
+    const aspectRatio = aspectRatios[index] || 'auto';
     const cardHeight = cardHeights[index] || 'h-[500px]';
     const cardWidth = cardWidths[index] || 'w-full';
     const cardBorderRadius = cardBorderRadii[index] || 'rounded-2xl';
@@ -310,6 +314,7 @@ export function ScrollingFeatureCards() {
     const imageClasses = cardFitMode === 'contain' 
       ? 'w-full h-full object-contain block' 
       : 'w-full h-full object-cover block';
+    const aspectRatioStyle = aspectRatio === 'auto' ? {} : { aspectRatio: aspectRatio.replace(':', '/') };
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
@@ -329,7 +334,7 @@ export function ScrollingFeatureCards() {
             <CarouselContent className="h-full">
               {config.images.map((image, imgIndex) => (
                 <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
-                   <div className={innerWrapperClasses}>
+                   <div className={innerWrapperClasses} style={aspectRatioStyle}>
                     <img
                      key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
                      src={image.url}
@@ -363,7 +368,7 @@ export function ScrollingFeatureCards() {
     const imageUrl = imageUrls[index] || card.imageUrl;
     return (
       <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
-        <div className={innerWrapperClasses}>
+        <div className={innerWrapperClasses} style={aspectRatioStyle}>
             <img
               key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
               src={imageUrl}
