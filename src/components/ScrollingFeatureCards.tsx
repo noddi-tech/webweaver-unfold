@@ -300,10 +300,10 @@ export function ScrollingFeatureCards() {
     return `relative ${width} ${height}`;
   };
 
-  // Mask: rounded corners + overflow-hidden + shadow + flex centering
-  const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): string => {
+  // Mask: overflow-hidden + shadow + flex centering (border radius now on image)
+  const getMaskClasses = (fitMode: 'contain' | 'cover'): string => {
     const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
-    return `relative w-full h-full ${borderRadius} overflow-hidden shadow-xl isolate ${borderClasses} flex items-center justify-center`;
+    return `relative w-full h-full overflow-hidden shadow-xl isolate ${borderClasses} flex items-center justify-center`;
   };
 
   const renderMedia = (index: number, card: FeatureCard) => {
@@ -314,13 +314,14 @@ export function ScrollingFeatureCards() {
     const cardWidth = cardWidths[index] || 'w-full';
     const cardBorderRadius = cardBorderRadii[index] || 'rounded-2xl';
     const containerClasses = getContainerClasses(cardHeight, cardWidth);
-    const maskClasses = getMaskClasses(cardFitMode, cardBorderRadius);
+    const maskClasses = getMaskClasses(cardFitMode);
     
     // Contain mode: fill viewport with w-full h-full, object-fit scales image to fit entirely within
     // Cover mode: fill container completely, allowing cropping
+    // Border radius is applied to the image element itself
     const imageClasses = cardFitMode === 'contain'
-      ? 'w-full h-full object-contain block'
-      : 'w-full h-full object-cover block';
+      ? `w-full h-full object-contain block ${cardBorderRadius}`
+      : `w-full h-full object-cover block ${cardBorderRadius}`;
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
