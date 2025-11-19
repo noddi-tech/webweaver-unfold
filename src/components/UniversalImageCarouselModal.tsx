@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Image as ImageIcon, Upload, Link as LinkIcon, Save, Plus, X, Settings, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -1088,13 +1089,16 @@ export function UniversalImageCarouselModal({
                         <div className="flex-1">
                           <p className="text-xs font-medium mb-2 text-foreground">Contain Mode</p>
                           <div 
-                            className="relative w-full bg-background border border-border rounded overflow-hidden"
+                            className={cn(
+                              "relative w-full bg-background border border-border rounded overflow-hidden",
+                              aspectRatio === 'auto' ? 'h-64' : ''
+                            )}
                             style={{
                               aspectRatio: aspectRatio === 'auto' ? 'auto' : aspectRatio.replace(':', '/'),
-                              height: '150px'
                             }}
                           >
                             <img
+                              key={`contain-${aspectRatio}`}
                               src={previewImage}
                               alt="Preview"
                               className="w-full h-full object-contain"
@@ -1106,13 +1110,16 @@ export function UniversalImageCarouselModal({
                         <div className="flex-1">
                           <p className="text-xs font-medium mb-2 text-foreground">Cover Mode</p>
                           <div 
-                            className="relative w-full bg-background border border-border rounded overflow-hidden"
+                            className={cn(
+                              "relative w-full bg-background border border-border rounded overflow-hidden",
+                              aspectRatio === 'auto' ? 'h-64' : ''
+                            )}
                             style={{
                               aspectRatio: aspectRatio === 'auto' ? 'auto' : aspectRatio.replace(':', '/'),
-                              height: '150px'
                             }}
                           >
                             <img
+                              key={`cover-${aspectRatio}`}
                               src={previewImage}
                               alt="Preview"
                               className="w-full h-full object-cover"
