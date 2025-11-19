@@ -338,7 +338,13 @@ export function ScrollingFeatureCards() {
           >
             <CarouselContent className="h-full">
               {config.images.map((image, imgIndex) => (
-                <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
+                <CarouselItem 
+                  key={imgIndex} 
+                  className={cn(
+                    "flex items-center justify-center",
+                    hasAspectRatio ? '' : 'h-full'
+                  )}
+                >
                    <div className={innerWrapperClasses} style={aspectRatioStyle}>
                     <img
                      key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
@@ -373,21 +379,28 @@ export function ScrollingFeatureCards() {
     const imageUrl = imageUrls[index] || card.imageUrl;
     return (
       <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
-        <div className={innerWrapperClasses} style={aspectRatioStyle}>
-            <img
-              key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
-              src={imageUrl}
-              alt={card.imageAlt}
-              loading="lazy"
-              decoding="async"
-              className={imageClasses}
-              style={{
-                imageRendering: 'auto',
-                backfaceVisibility: 'hidden',
-                willChange: 'transform',
-              }}
-            />
-          </div>
+        <div 
+          className={cn(
+            "flex items-center justify-center",
+            hasAspectRatio ? '' : 'h-full'
+          )}
+        >
+          <div className={innerWrapperClasses} style={aspectRatioStyle}>
+              <img
+                key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
+                src={imageUrl}
+                alt={card.imageAlt}
+                loading="lazy"
+                decoding="async"
+                className={imageClasses}
+                style={{
+                  imageRendering: 'auto',
+                  backfaceVisibility: 'hidden',
+                  willChange: 'transform',
+                }}
+              />
+            </div>
+        </div>
       </div>
     );
   };
