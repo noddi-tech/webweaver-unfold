@@ -1023,37 +1023,25 @@ export function UniversalImageCarouselModal({
               </div>
             )}
 
-            {/* Aspect Ratio Configuration - only in location mode */}
+            {/* Card Height Configuration - only in location mode */}
             {mode === 'location' && (
               <>
                 <div className="space-y-3 border-t pt-4">
-                  <Label>Container Aspect Ratio</Label>
+                  <Label>Card Height</Label>
                   <Select value={aspectRatio} onValueChange={setAspectRatio}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="auto">🔍 Auto-detect from image</SelectItem>
-                      <SelectItem value="9:16">📱 Phone Portrait (9:16)</SelectItem>
-                      <SelectItem value="10:16">📱 Tablet Portrait (10:16)</SelectItem>
-                      <SelectItem value="3:4">🖼️ Portrait (3:4)</SelectItem>
-                      <SelectItem value="1:1">⬛ Square (1:1)</SelectItem>
-                      <SelectItem value="4:3">🖥️ Classic (4:3)</SelectItem>
-                      <SelectItem value="16:10">💻 Desktop (16:10)</SelectItem>
-                      <SelectItem value="16:9">🖥️ Widescreen (16:9)</SelectItem>
-                      <SelectItem value="21:9">🖥️ Ultrawide (21:9)</SelectItem>
+                      <SelectItem value="h-[400px]">Small (400px)</SelectItem>
+                      <SelectItem value="h-[500px]">Medium (500px)</SelectItem>
+                      <SelectItem value="h-[600px]">Large (600px)</SelectItem>
+                      <SelectItem value="h-[700px]">Extra Large (700px)</SelectItem>
+                      <SelectItem value="h-[800px]">Huge (800px)</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    {aspectRatio === 'auto' 
-                      ? 'Container will adapt to the image dimensions (default: 400-500px min-height)'
-                      : `Container will use ${aspectRatio} aspect ratio - perfect for ${
-                        aspectRatio === '9:16' ? 'phone screenshots (430x932)' :
-                        aspectRatio === '10:16' ? 'tablet screenshots' :
-                        aspectRatio === '16:10' || aspectRatio === '16:9' ? 'desktop screenshots' :
-                        aspectRatio === '1:1' ? 'square images' :
-                        'various image formats'
-                      }`}
+                    Card height determines the container size. Images will scale to fit inside using the selected fit mode.
                   </p>
                 </div>
 
@@ -1084,10 +1072,10 @@ export function UniversalImageCarouselModal({
                       {/* Helper function for dynamic preview styling */}
                       {(() => {
                         const getPreviewStyle = () => {
-                          if (aspectRatio === 'auto' || aspectRatio === '1:1') {
-                            return { aspectRatio: '1 / 1', height: 'auto', width: '100%' };
-                          }
-                          return { aspectRatio: aspectRatio.replace(':', ' / '), height: 'auto', width: '100%' };
+                          // Extract height from aspectRatio (e.g., 'h-[500px]' -> '500px')
+                          const heightMatch = aspectRatio.match(/h-\[(\d+)px\]/);
+                          const height = heightMatch ? heightMatch[1] + 'px' : '500px';
+                          return { height, width: '100%' };
                         };
                         
                         return (
