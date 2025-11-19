@@ -320,10 +320,10 @@ export function ScrollingFeatureCards() {
     const containerClasses = getContainerClasses(cardHeight, cardWidth);
     const maskClasses = getMaskClasses(cardFitMode, cardBorderRadius);
     
-    // Contain mode: use max-w/max-h to prevent cropping while maintaining aspect ratio
+    // Contain mode: fill viewport with w-full h-full, object-fit scales image to fit entirely within
     // Cover mode: fill container completely, allowing cropping
     const imageClasses = cardFitMode === 'contain'
-      ? 'max-w-full max-h-full object-contain block'
+      ? 'w-full h-full object-contain block'
       : 'w-full h-full object-cover block';
     
     // If carousel data exists and has images
