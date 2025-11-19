@@ -14,6 +14,7 @@ import { useColorSystem } from '@/hooks/useColorSystem';
 import type { ColorOption } from '@/config/colorSystem';
 import { Card } from '@/components/ui/card';
 import { Check } from 'lucide-react';
+import { UnifiedStyleModalLayoutTab } from './UnifiedStyleModalLayoutTab';
 
 interface SubElement {
   id: string;
@@ -67,6 +68,12 @@ export function UnifiedStyleModal({
   const [ctaUrl, setCtaUrl] = useState(initialData.ctaUrl || '');
   const [ctaBgColor, setCtaBgColor] = useState(initialData.ctaBgColor || 'primary');
   const [ctaTextColor, setCtaTextColor] = useState(initialData.ctaTextColor || 'primary-foreground');
+  
+  // Card layout settings
+  const [cardHeight, setCardHeight] = useState('h-[500px]');
+  const [cardWidth, setCardWidth] = useState('w-full');
+  const [cardBorderRadius, setCardBorderRadius] = useState('rounded-2xl');
+  const [cardGap, setCardGap] = useState('gap-8');
 
   // Load actual saved data from database when modal opens
   useEffect(() => {
@@ -137,6 +144,20 @@ export function UnifiedStyleModal({
                 break;
             }
           }
+        }
+
+        // Load card layout settings
+        const { data: layoutData } = await supabase
+          .from('image_carousel_settings')
+          .select('card_height, card_width, card_border_radius, card_gap')
+          .eq('location_id', elementIdPrefix)
+          .maybeSingle();
+
+        if (layoutData) {
+          setCardHeight(layoutData.card_height || 'h-[500px]');
+          setCardWidth(layoutData.card_width || 'w-full');
+          setCardBorderRadius(layoutData.card_border_radius || 'rounded-2xl');
+          setCardGap(layoutData.card_gap || 'gap-8');
         }
       } catch (error) {
         console.error('Error loading saved data:', error);
@@ -366,7 +387,29 @@ export function UnifiedStyleModal({
         ctaUrl,
         ctaBgColor,
         ctaTextColor,
+        cardHeight,
+        cardWidth,
+        cardBorderRadius,
+        cardGap,
       });
+
+      // Save card layout settings
+      const { error: layoutError } = await supabase
+        .from('image_carousel_settings')
+        .upsert({
+          location_id: elementIdPrefix,
+          card_height: cardHeight,
+          card_width: cardWidth,
+          card_border_radius: cardBorderRadius,
+          card_gap: cardGap,
+          display_type: 'image',
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'location_id'
+        });
+
+      if (layoutError) console.error('Layout save error:', layoutError);
+
       onClose();
     } catch (error) {
       console.error('Error saving:', error);
@@ -480,20 +523,24 @@ export function UnifiedStyleModal({
           {/* Edit Tabs */}
           <div>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="background">
-                  <Palette className="w-4 h-4 mr-1" />
-                  Background
-                </TabsTrigger>
-                <TabsTrigger value="text">
-                  <Type className="w-4 h-4 mr-1" />
-                  Text
-                </TabsTrigger>
-                <TabsTrigger value="cta">
-                  <MousePointer className="w-4 h-4 mr-1" />
-                  CTA
-                </TabsTrigger>
-              </TabsList>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="background">
+                <Palette className="w-4 h-4 mr-1" />
+                Background
+              </TabsTrigger>
+              <TabsTrigger value="text">
+                <Type className="w-4 h-4 mr-1" />
+                Text
+              </TabsTrigger>
+              <TabsTrigger value="cta">
+                <MousePointer className="w-4 h-4 mr-1" />
+                CTA
+              </TabsTrigger>
+              <TabsTrigger value="layout">
+                <Settings className="w-4 h-4 mr-1" />
+                Layout
+              </TabsTrigger>
+            </TabsList>
 
               <TabsContent value="background" className="space-y-6">
                 {colorSystemLoading ? (
@@ -786,6 +833,19 @@ export function UnifiedStyleModal({
                     </SelectContent>
                   </Select>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="layout" className="space-y-4">
+                <UnifiedStyleModalLayoutTab
+                  cardHeight={cardHeight}
+                  setCardHeight={setCardHeight}
+                  cardWidth={cardWidth}
+                  setCardWidth={setCardWidth}
+                  cardBorderRadius={cardBorderRadius}
+                  setCardBorderRadius={setCardBorderRadius}
+                  cardGap={cardGap}
+                  setCardGap={setCardGap}
+                />
               </TabsContent>
             </Tabs>
           </div>

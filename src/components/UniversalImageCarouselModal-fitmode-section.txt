@@ -1,0 +1,19 @@
+            {/* Fit Mode Selection */}
+            <div className="space-y-3 border-t pt-4">
+              <Label>Image Fit Mode</Label>
+              <RadioGroup value={fitMode} onValueChange={(value: 'contain' | 'cover') => setFitMode(value)}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="contain" id="contain" />
+                  <Label htmlFor="contain" className="font-normal">Contain (fit entire image)</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="cover" id="cover" />
+                  <Label htmlFor="cover" className="font-normal">Cover (fill container)</Label>
+                </div>
+              </RadioGroup>
+              <p className="text-xs text-muted-foreground">
+                Contain: Shows the entire image. Cover: Fills the container (may crop image).
+              </p>
+            </div>
+          </div>
+        </TabsContent>

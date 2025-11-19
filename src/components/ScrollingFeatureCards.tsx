@@ -103,6 +103,12 @@ export function ScrollingFeatureCards() {
   const [editingCard, setEditingCard] = useState<number | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [cardData, setCardData] = useState<Record<number, any>>({});
+  const [fitModes, setFitModes] = useState<Record<number, string>>({});
+  const [cardHeights, setCardHeights] = useState<Record<number, string>>({});
+  const [cardWidths, setCardWidths] = useState<Record<number, string>>({});
+  const [cardBorderRadii, setCardBorderRadii] = useState<Record<number, string>>({});
+  const [cardGap, setCardGap] = useState<string>('gap-8');
+  const [refreshKey, setRefreshKey] = useState(0);
   const [carouselData, setCarouselData] = useState<Record<number, {
     display_type: 'image' | 'carousel';
     carousel_config?: {
@@ -122,25 +128,35 @@ export function ScrollingFeatureCards() {
   // Force re-render when fitModes or aspectRatios change
   useEffect(() => {
     setRefreshKey(prev => prev + 1);
-  }, [fitModes, aspectRatios]);
+  }, [fitModes, cardHeights, cardWidths, cardBorderRadii, cardGap]);
 
   const loadImageSettings = async () => {
     const newImageUrls: Record<number, string> = {};
     const newCarouselData: Record<number, any> = {};
     const newFitModes: Record<number, 'contain' | 'cover'> = {};
-    const newAspectRatios: Record<number, string> = {};
+    const newCardHeights: Record<number, string> = {};
+    const newCardWidths: Record<number, string> = {};
+    const newCardBorderRadii: Record<number, string> = {};
+    let newCardGap = 'gap-8';
     
     for (let i = 0; i < 5; i++) {
       const { data } = await supabase
         .from('image_carousel_settings')
-        .select('image_url, display_type, carousel_config_id, fit_mode, aspect_ratio')
+        .select('image_url, display_type, carousel_config_id, fit_mode, card_height, card_width, card_border_radius, card_gap')
         .eq('location_id', `scrolling-card-${i + 1}`)
         .maybeSingle();
       
       if (data) {
-        // Store fit mode and aspect ratio
+        // Store fit mode and card layout
         newFitModes[i] = (data.fit_mode as 'contain' | 'cover') || 'contain';
-        newAspectRatios[i] = data.aspect_ratio || 'auto';
+        newCardHeights[i] = data.card_height || 'h-[500px]';
+        newCardWidths[i] = data.card_width || 'w-full';
+        newCardBorderRadii[i] = data.card_border_radius || 'rounded-2xl';
+        
+        // Gap is global (use first card's gap)
+        if (i === 0 && data.card_gap) {
+          newCardGap = data.card_gap;
+        }
         
         if (data.display_type === 'carousel' && data.carousel_config_id) {
           // Load carousel configuration
@@ -183,9 +199,16 @@ export function ScrollingFeatureCards() {
     if (Object.keys(newFitModes).length > 0) {
       setFitModes(prev => ({ ...prev, ...newFitModes }));
     }
-    if (Object.keys(newAspectRatios).length > 0) {
-      setAspectRatios(prev => ({ ...prev, ...newAspectRatios }));
+    if (Object.keys(newCardHeights).length > 0) {
+      setCardHeights(prev => ({ ...prev, ...newCardHeights }));
     }
+    if (Object.keys(newCardWidths).length > 0) {
+      setCardWidths(prev => ({ ...prev, ...newCardWidths }));
+    }
+    if (Object.keys(newCardBorderRadii).length > 0) {
+      setCardBorderRadii(prev => ({ ...prev, ...newCardBorderRadii }));
+    }
+    setCardGap(newCardGap);
   };
 
   const loadCardData = async (index: number) => {
@@ -268,9 +291,9 @@ export function ScrollingFeatureCards() {
     });
   }, []);
 
-  // Fixed-size cards with adjustable height
-  const getContainerClasses = (cardHeight: string = 'h-[500px]'): string => {
-    return `relative w-full overflow-hidden ${cardHeight}`;
+  // Fixed-size cards with adjustable height, width, and border radius
+  const getContainerClasses = (height: string, width: string, borderRadius: string): string => {
+    return `relative overflow-hidden ${width} ${height} ${borderRadius}`;
   };
 
   // Inner wrapper fills the container completely
@@ -282,8 +305,10 @@ export function ScrollingFeatureCards() {
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardFitMode = fitModes[index] || 'contain';
-    const cardHeight = aspectRatios[index] || 'h-[500px]';
-    const containerClasses = getContainerClasses(cardHeight);
+    const cardHeight = cardHeights[index] || 'h-[500px]';
+    const cardWidth = cardWidths[index] || 'w-full';
+    const cardBorderRadius = cardBorderRadii[index] || 'rounded-2xl';
+    const containerClasses = getContainerClasses(cardHeight, cardWidth, cardBorderRadius);
     const innerWrapperClasses = getInnerWrapperClasses(cardFitMode);
     const imageClasses = cardFitMode === 'contain' 
       ? 'w-full h-full object-contain block' 
@@ -297,9 +322,9 @@ export function ScrollingFeatureCards() {
         : [];
       
       return (
-        <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}`}>
+        <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
           <Carousel 
-            key={`carousel-${index}-${refreshKey}-${cardFitMode}-${cardHeight}`}
+            key={`carousel-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
             opts={{ loop: true }}
             plugins={plugins}
             className="w-full h-full"
@@ -309,7 +334,7 @@ export function ScrollingFeatureCards() {
                 <CarouselItem key={imgIndex} className="flex items-center justify-center h-full">
                    <div className={innerWrapperClasses}>
                     <img
-                     key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}-${cardHeight}`}
+                     key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
                      src={image.url}
                      alt={image.alt || `Slide ${imgIndex + 1}`}
                      loading="lazy"
@@ -338,12 +363,13 @@ export function ScrollingFeatureCards() {
     }
     
     // Fallback to single image
+    const imageUrl = imageUrls[index] || card.imageUrl;
     return (
-      <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}`}>
+      <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
         <div className={innerWrapperClasses}>
             <img
-              key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}`}
-              src={imageUrls[index] || card.imageUrl}
+              key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
+              src={imageUrl}
               alt={card.imageAlt}
               loading="lazy"
               decoding="async"
@@ -354,7 +380,7 @@ export function ScrollingFeatureCards() {
                 willChange: 'transform',
               }}
             />
-        </div>
+          </div>
       </div>
     );
   };
