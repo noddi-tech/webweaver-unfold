@@ -123,10 +123,10 @@ export function ScrollingFeatureCards() {
     };
   }>>({});
 
-  // Force re-render when fitModes, cardHeights, cardWidths, cardBorderRadii, or cardGap change
+  // Force re-render when fitModes, aspectRatios, cardHeights, cardWidths, cardBorderRadii, or cardGap change
   useEffect(() => {
     setRefreshKey(prev => prev + 1);
-  }, [fitModes, cardHeights, cardWidths, cardBorderRadii, cardGap]);
+  }, [fitModes, aspectRatios, cardHeights, cardWidths, cardBorderRadii, cardGap]);
 
   const loadImageSettings = async () => {
     const newImageUrls: Record<number, string> = {};
@@ -198,6 +198,9 @@ export function ScrollingFeatureCards() {
     }
     if (Object.keys(newFitModes).length > 0) {
       setFitModes(prev => ({ ...prev, ...newFitModes }));
+    }
+    if (Object.keys(newAspectRatios).length > 0) {
+      setAspectRatios(prev => ({ ...prev, ...newAspectRatios }));
     }
     if (Object.keys(newCardHeights).length > 0) {
       setCardHeights(prev => ({ ...prev, ...newCardHeights }));

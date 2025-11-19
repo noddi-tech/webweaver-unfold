@@ -1070,8 +1070,11 @@ export function UniversalImageCarouselModal({
               const previewImage = displayType === 'image' 
                 ? imageUrl 
                 : (carouselImages.length > 0 ? carouselImages[0].url : '');
-              return previewImage ? (
-                <div className="space-y-3 border-t pt-4">
+              
+              if (!previewImage) return null;
+              
+              return (
+                <div className="space-y-3 border-t pt-4" key={aspectRatio}>
                   <Label>Preview</Label>
                   <div className="space-y-2">
                     <p className="text-xs text-muted-foreground">
@@ -1130,7 +1133,7 @@ export function UniversalImageCarouselModal({
                     </div>
                   </div>
                 </div>
-              ) : null;
+              );
             })()}
 
             {/* Status & Recovery Tools */}
