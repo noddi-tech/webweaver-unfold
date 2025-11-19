@@ -1020,104 +1020,23 @@ export function UniversalImageCarouselModal({
               </div>
             )}
 
-            {/* Card Height/Width/Border moved to UnifiedStyleModal - removed */}
-                        
-                        return (
-                          <div className="grid grid-cols-2 gap-4">
-                            {/* Contain Preview */}
-                            <div className="space-y-2">
-                              <div className="text-xs font-medium text-center text-foreground/80">Contain</div>
-                              <div className="relative w-full rounded-lg overflow-hidden bg-background border border-border flex items-center justify-center" style={getPreviewStyle()}>
-                            {previewImageUrl ? (
-                              <img 
-                                src={previewImageUrl} 
-                                alt="Contain preview"
-                                className="w-full h-full object-contain"
-                                onError={(e) => {
-                                  console.error('Contain preview image failed to load:', previewImageUrl);
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            ) : (
-                              <div className="text-sm text-muted-foreground">No image selected</div>
-                            )}
-                          </div>
-                          <p className="text-xs text-center text-muted-foreground">
-                            Shows full image, may have padding
-                          </p>
-                        </div>
-
-                            {/* Cover Preview */}
-                            <div className="space-y-2">
-                              <div className="text-xs font-medium text-center text-foreground/80">Cover</div>
-                              <div className="relative w-full rounded-lg overflow-hidden bg-background border border-border flex items-center justify-center" style={getPreviewStyle()}>
-                            {previewImageUrl ? (
-                              <img 
-                                src={previewImageUrl} 
-                                alt="Cover preview"
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  console.error('Cover preview image failed to load:', previewImageUrl);
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            ) : (
-                              <div className="text-sm text-muted-foreground">No image selected</div>
-                            )}
-                          </div>
-                          <p className="text-xs text-center text-muted-foreground">
-                            Fills space, may crop edges
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Selected indicator */}
-                      <div className="flex items-center justify-center gap-2 pt-2">
-                        <span className="text-xs text-muted-foreground">Currently selected:</span>
-                        <span className="text-xs font-medium px-2 py-1 rounded bg-primary/10 text-primary">
-                          {fitMode.charAt(0).toUpperCase() + fitMode.slice(1)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {/* Image Fit Mode */}
-                <div className="space-y-3 border-t pt-4">
-                  <Label>Image Fit Mode</Label>
-                  <Select value={fitMode} onValueChange={(value: 'contain' | 'cover') => setFitMode(value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="contain">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-6 border border-border rounded flex items-center justify-center">
-                            <div className="w-4 h-5 border border-primary"></div>
-                          </div>
-                          <span>Contain - Show full image</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="cover">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-6 border border-border rounded overflow-hidden bg-primary/20">
-                            <div className="w-12 h-8 border-2 border-primary -m-2"></div>
-                          </div>
-                          <span>Cover - Fill container</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    {fitMode === 'contain' 
-                      ? '✨ Best for phone screenshots - shows full image without cropping'
-                      : '�16️ Best for desktop screenshots - fills the space'}
-                  </p>
+            {/* Fit Mode Selection */}
+            <div className="space-y-3 border-t pt-4">
+              <Label>Image Fit Mode</Label>
+              <RadioGroup value={fitMode} onValueChange={(value: 'contain' | 'cover') => setFitMode(value)}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="contain" id="contain" />
+                  <Label htmlFor="contain" className="font-normal">Contain (fit entire image)</Label>
                 </div>
-              </>
-            )}
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="cover" id="cover" />
+                  <Label htmlFor="cover" className="font-normal">Cover (fill container)</Label>
+                </div>
+              </RadioGroup>
+              <p className="text-xs text-muted-foreground">
+                Contain: Shows the entire image. Cover: Fills the container (may crop image).
+              </p>
+            </div>
 
             {/* Status & Recovery Tools */}
             {displayType === 'carousel' && (mode === 'standalone' || carouselSource === 'new') && (

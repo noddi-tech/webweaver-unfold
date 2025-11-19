@@ -103,7 +103,7 @@ export function ScrollingFeatureCards() {
   const [editingCard, setEditingCard] = useState<number | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [cardData, setCardData] = useState<Record<number, any>>({});
-  const [fitModes, setFitModes] = useState<Record<number, string>>({});
+  const [fitModes, setFitModes] = useState<Record<number, 'contain' | 'cover'>>({});
   const [cardHeights, setCardHeights] = useState<Record<number, string>>({});
   const [cardWidths, setCardWidths] = useState<Record<number, string>>({});
   const [cardBorderRadii, setCardBorderRadii] = useState<Record<number, string>>({});
@@ -121,11 +121,8 @@ export function ScrollingFeatureCards() {
       images: Array<{url: string; alt: string; title?: string}>;
     };
   }>>({});
-  const [fitModes, setFitModes] = useState<Record<number, 'contain' | 'cover'>>({});
-  const [aspectRatios, setAspectRatios] = useState<Record<number, string>>({});
-  const [refreshKey, setRefreshKey] = useState(0);
 
-  // Force re-render when fitModes or aspectRatios change
+  // Force re-render when fitModes, cardHeights, cardWidths, cardBorderRadii, or cardGap change
   useEffect(() => {
     setRefreshKey(prev => prev + 1);
   }, [fitModes, cardHeights, cardWidths, cardBorderRadii, cardGap]);
