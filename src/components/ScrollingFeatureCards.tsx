@@ -297,20 +297,22 @@ export function ScrollingFeatureCards() {
   };
 
   // Inner wrapper fills the container completely
-  const getInnerWrapperClasses = (fitMode: 'contain' | 'cover'): string => {
+  const getInnerWrapperClasses = (fitMode: 'contain' | 'cover', hasAspectRatio: boolean): string => {
     const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
-    return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate flex items-center justify-center`;
+    const heightClass = hasAspectRatio ? '' : 'h-full';
+    return `relative w-full ${heightClass} rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate flex items-center justify-center`;
   };
 
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardFitMode = fitModes[index] || 'contain';
     const aspectRatio = aspectRatios[index] || 'auto';
+    const hasAspectRatio = aspectRatio !== 'auto';
     const cardHeight = cardHeights[index] || 'h-[500px]';
     const cardWidth = cardWidths[index] || 'w-full';
     const cardBorderRadius = cardBorderRadii[index] || 'rounded-2xl';
     const containerClasses = getContainerClasses(cardHeight, cardWidth, cardBorderRadius);
-    const innerWrapperClasses = getInnerWrapperClasses(cardFitMode);
+    const innerWrapperClasses = getInnerWrapperClasses(cardFitMode, hasAspectRatio);
     const imageClasses = cardFitMode === 'contain' 
       ? 'w-full h-full object-contain block' 
       : 'w-full h-full object-cover block';

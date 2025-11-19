@@ -1066,67 +1066,72 @@ export function UniversalImageCarouselModal({
             </div>
 
             {/* Preview Section */}
-            {imageUrl && (
-              <div className="space-y-3 border-t pt-4">
-                <Label>Preview</Label>
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground">
-                    Preview how your image will appear with current settings
-                  </p>
-                  
-                  {/* Preview Container */}
-                  <div className="border border-border rounded-lg p-4 bg-muted/30">
-                    <div className="flex gap-4">
-                      {/* Contain Preview */}
-                      <div className="flex-1">
-                        <p className="text-xs font-medium mb-2 text-foreground">Contain Mode</p>
-                        <div 
-                          className="relative w-full bg-background border border-border rounded overflow-hidden"
-                          style={{
-                            aspectRatio: aspectRatio === 'auto' ? 'auto' : aspectRatio.replace(':', '/'),
-                            height: '150px'
-                          }}
-                        >
-                          <img
-                            src={imageUrl}
-                            alt="Preview"
-                            className="w-full h-full object-contain"
-                          />
+            {(() => {
+              const previewImage = displayType === 'image' 
+                ? imageUrl 
+                : (carouselImages.length > 0 ? carouselImages[0].url : '');
+              return previewImage ? (
+                <div className="space-y-3 border-t pt-4">
+                  <Label>Preview</Label>
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      Preview how your image will appear with current settings
+                    </p>
+                    
+                    {/* Preview Container */}
+                    <div className="border border-border rounded-lg p-4 bg-muted/30">
+                      <div className="flex gap-4">
+                        {/* Contain Preview */}
+                        <div className="flex-1">
+                          <p className="text-xs font-medium mb-2 text-foreground">Contain Mode</p>
+                          <div 
+                            className="relative w-full bg-background border border-border rounded overflow-hidden"
+                            style={{
+                              aspectRatio: aspectRatio === 'auto' ? 'auto' : aspectRatio.replace(':', '/'),
+                              height: '150px'
+                            }}
+                          >
+                            <img
+                              src={previewImage}
+                              alt="Preview"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* Cover Preview */}
+                        <div className="flex-1">
+                          <p className="text-xs font-medium mb-2 text-foreground">Cover Mode</p>
+                          <div 
+                            className="relative w-full bg-background border border-border rounded overflow-hidden"
+                            style={{
+                              aspectRatio: aspectRatio === 'auto' ? 'auto' : aspectRatio.replace(':', '/'),
+                              height: '150px'
+                            }}
+                          >
+                            <img
+                              src={previewImage}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
                         </div>
                       </div>
                       
-                      {/* Cover Preview */}
-                      <div className="flex-1">
-                        <p className="text-xs font-medium mb-2 text-foreground">Cover Mode</p>
-                        <div 
-                          className="relative w-full bg-background border border-border rounded overflow-hidden"
-                          style={{
-                            aspectRatio: aspectRatio === 'auto' ? 'auto' : aspectRatio.replace(':', '/'),
-                            height: '150px'
-                          }}
-                        >
-                          <img
-                            src={imageUrl}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
+                      {/* Info */}
+                      <div className="mt-3 text-xs text-muted-foreground">
+                        <p className="font-medium mb-1">Current: {fitMode === 'contain' ? 'Contain' : 'Cover'} mode, {aspectRatio === 'auto' ? 'Auto' : aspectRatio} ratio</p>
+                        <p>
+                          {fitMode === 'contain' 
+                            ? 'Full image visible with possible padding' 
+                            : 'Image fills container, may crop edges'}
+                        </p>
                       </div>
-                    </div>
-                    
-                    {/* Info */}
-                    <div className="mt-3 text-xs text-muted-foreground">
-                      <p className="font-medium mb-1">Current: {fitMode === 'contain' ? 'Contain' : 'Cover'} mode, {aspectRatio === 'auto' ? 'Auto' : aspectRatio} ratio</p>
-                      <p>
-                        {fitMode === 'contain' 
-                          ? 'Full image visible with possible padding' 
-                          : 'Image fills container, may crop edges'}
-                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              ) : null;
+            })()}
 
             {/* Status & Recovery Tools */}
             {displayType === 'carousel' && (mode === 'standalone' || carouselSource === 'new') && (
