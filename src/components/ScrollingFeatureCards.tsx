@@ -295,35 +295,31 @@ export function ScrollingFeatureCards() {
   }, []);
 
   // Fixed-size cards with adjustable height, width, and border radius
-  const getContainerClasses = (height: string, width: string, borderRadius: string, hasAspectRatio: boolean): string => {
-    // When aspect ratio is set, don't apply fixed height to outer container
-    const heightClass = hasAspectRatio ? '' : height;
-    return `relative overflow-hidden ${width} ${heightClass} ${borderRadius}`;
+  const getContainerClasses = (height: string, width: string, borderRadius: string): string => {
+    return `relative overflow-hidden ${width} ${height} ${borderRadius}`;
   };
 
-  // Inner wrapper fills the container completely
-  const getInnerWrapperClasses = (fitMode: 'contain' | 'cover', hasAspectRatio: boolean): string => {
+  // Inner wrapper fills the container completely - always uses h-full for stable viewport
+  const getInnerWrapperClasses = (fitMode: 'contain' | 'cover'): string => {
     const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
-    const heightClass = hasAspectRatio ? '' : 'h-full';
-    return `relative w-full ${heightClass} rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate flex items-center justify-center`;
+    return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate flex items-center justify-center`;
   };
 
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardFitMode = fitModes[index] || 'contain';
-    const aspectRatio = aspectRatios[index] || 'auto';
-    const hasAspectRatio = aspectRatio !== 'auto';
+    const aspectRatio = aspectRatios[index] || 'auto'; // Keep for metadata/preview only
     const cardHeight = cardHeights[index] || 'h-[500px]';
     const cardWidth = cardWidths[index] || 'w-full';
     const cardBorderRadius = cardBorderRadii[index] || 'rounded-2xl';
-    const containerClasses = getContainerClasses(cardHeight, cardWidth, cardBorderRadius, hasAspectRatio);
-    const innerWrapperClasses = getInnerWrapperClasses(cardFitMode, hasAspectRatio);
-  const imageClasses = cardFitMode === 'contain'
-    ? hasAspectRatio 
-      ? 'w-full object-contain block'  // No h-full when aspect ratio is set
-      : 'w-full h-full object-contain block'  // h-full only for auto aspect ratio
-    : 'w-full h-full object-cover block';  // cover always uses h-full
-    const aspectRatioStyle = aspectRatio === 'auto' ? {} : { aspectRatio: aspectRatio.replace(':', '/') };
+    const containerClasses = getContainerClasses(cardHeight, cardWidth, cardBorderRadius);
+    const innerWrapperClasses = getInnerWrapperClasses(cardFitMode);
+    
+    // Contain mode: use max-w/max-h to prevent cropping while maintaining aspect ratio
+    // Cover mode: fill container completely, allowing cropping
+    const imageClasses = cardFitMode === 'contain'
+      ? 'max-w-full max-h-full object-contain block'
+      : 'w-full h-full object-cover block';
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
@@ -333,21 +329,18 @@ export function ScrollingFeatureCards() {
         : [];
       
       return (
-        <div className={containerClasses} style={aspectRatioStyle} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
+        <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
           <Carousel 
             key={`carousel-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
             opts={{ loop: true }}
             plugins={plugins}
             className="w-full h-full"
           >
-            <CarouselContent className={hasAspectRatio ? '' : 'h-full'}>
+            <CarouselContent className="h-full">
               {config.images.map((image, imgIndex) => (
                 <CarouselItem 
                   key={imgIndex} 
-                  className={cn(
-                    "flex items-center justify-center",
-                    hasAspectRatio ? '' : 'h-full'
-                  )}
+                  className="flex items-center justify-center h-full"
                 >
                    <div className={innerWrapperClasses}>
                     <img
@@ -382,13 +375,8 @@ export function ScrollingFeatureCards() {
     // Fallback to single image
     const imageUrl = imageUrls[index] || card.imageUrl;
     return (
-      <div className={containerClasses} style={aspectRatioStyle} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
-        <div 
-          className={cn(
-            "flex items-center justify-center",
-            hasAspectRatio ? '' : 'h-full'
-          )}
-        >
+      <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
+        <div className="flex items-center justify-center h-full">
           <div className={innerWrapperClasses}>
               <img
                 key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
