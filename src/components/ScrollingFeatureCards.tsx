@@ -300,14 +300,10 @@ export function ScrollingFeatureCards() {
     return `relative ${width} ${height}`;
   };
 
-  // Inner wrapper fills the container completely - always uses h-full for stable viewport
-  // Pure viewport: fills container, centers content, NO overflow clipping
-  const viewportClasses = 'relative w-full h-full flex items-center justify-center';
-
-  // Mask: rounded corners + overflow-hidden + shadow
+  // Mask: rounded corners + overflow-hidden + shadow + flex centering
   const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): string => {
     const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
-    return `relative w-full h-full ${borderRadius} overflow-hidden shadow-xl isolate ${borderClasses}`;
+    return `relative w-full h-full ${borderRadius} overflow-hidden shadow-xl isolate ${borderClasses} flex items-center justify-center`;
   };
 
   const renderMedia = (index: number, card: FeatureCard) => {
@@ -345,7 +341,7 @@ export function ScrollingFeatureCards() {
               {config.images.map((image, imgIndex) => (
                 <CarouselItem 
                   key={imgIndex} 
-                  className={viewportClasses}
+                  className="h-full"
                 >
                   <div className={maskClasses}>
                     <img
@@ -379,9 +375,8 @@ export function ScrollingFeatureCards() {
     
     // Fallback to single image
     const imageUrl = imageUrls[index] || card.imageUrl;
-    return (
-      <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
-        <div className={viewportClasses}>
+      return (
+        <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
           <div className={maskClasses}>
             <img
               key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
@@ -398,8 +393,7 @@ export function ScrollingFeatureCards() {
             />
           </div>
         </div>
-      </div>
-    );
+      );
   };
 
   const cards: FeatureCard[] = [
