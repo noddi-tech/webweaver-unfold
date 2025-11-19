@@ -18,6 +18,7 @@ import { useAllowedBackgrounds } from '@/hooks/useAllowedBackgrounds';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeColorToken } from '@/lib/colorUtils';
+import { getOptimizedImageUrl } from '@/utils/imageTransform';
 
 // Import all feature card images
 import bookingHeroImg from '@/assets/booking-hero.png';
@@ -306,6 +307,16 @@ export function ScrollingFeatureCards() {
     return `relative w-full h-full overflow-hidden shadow-xl isolate ${borderClasses} flex items-center justify-center`;
   };
 
+  // Helper to get optimized image URL for high-quality display
+  const getCardImageUrl = (originalUrl: string, fitMode: 'contain' | 'cover'): string => {
+    return getOptimizedImageUrl(originalUrl, {
+      width: 1920,      // High resolution for 2x/3x DPI screens
+      quality: 95,      // Maximum quality
+      format: 'webp',   // Modern format with better compression
+      fit: fitMode,     // Match the card's fit mode
+    });
+  };
+
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardFitMode = fitModes[index] || 'contain';
@@ -347,15 +358,16 @@ export function ScrollingFeatureCards() {
                   <div className={maskClasses}>
                     <img
                       key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
-                      src={image.url}
+                      src={getCardImageUrl(image.url, cardFitMode)}
                       alt={image.alt || `Slide ${imgIndex + 1}`}
                       loading="lazy"
                       decoding="async"
                       className={imageClasses}
                       style={{
-                        imageRendering: 'auto',
+                        imageRendering: 'crisp-edges',
+                        WebkitFontSmoothing: 'antialiased',
                         backfaceVisibility: 'hidden',
-                        willChange: 'transform',
+                        transform: 'translateZ(0)',
                       }}
                     />
                   </div>
@@ -381,15 +393,16 @@ export function ScrollingFeatureCards() {
           <div className={maskClasses}>
             <img
               key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
-              src={imageUrl}
+              src={getCardImageUrl(imageUrl, cardFitMode)}
               alt={card.imageAlt}
               loading="lazy"
               decoding="async"
               className={imageClasses}
               style={{
-                imageRendering: 'auto',
+                imageRendering: 'crisp-edges',
+                WebkitFontSmoothing: 'antialiased',
                 backfaceVisibility: 'hidden',
-                willChange: 'transform',
+                transform: 'translateZ(0)',
               }}
             />
           </div>
