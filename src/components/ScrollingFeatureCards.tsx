@@ -295,14 +295,19 @@ export function ScrollingFeatureCards() {
   }, []);
 
   // Fixed-size cards with adjustable height, width, and border radius
-  const getContainerClasses = (height: string, width: string, borderRadius: string): string => {
-    return `relative overflow-hidden ${width} ${height} ${borderRadius}`;
+  const getContainerClasses = (height: string, width: string): string => {
+    // Fixed-size media container, NO clipping or border radius
+    return `relative ${width} ${height}`;
   };
 
   // Inner wrapper fills the container completely - always uses h-full for stable viewport
-  const getInnerWrapperClasses = (fitMode: 'contain' | 'cover'): string => {
+  // Pure viewport: fills container, centers content, NO overflow clipping
+  const viewportClasses = 'relative w-full h-full flex items-center justify-center';
+
+  // Mask: rounded corners + overflow-hidden + shadow
+  const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): string => {
     const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
-    return `relative w-full h-full rounded-2xl overflow-hidden shadow-xl ${borderClasses} isolate flex items-center justify-center`;
+    return `relative w-full h-full ${borderRadius} overflow-hidden shadow-xl isolate ${borderClasses}`;
   };
 
   const renderMedia = (index: number, card: FeatureCard) => {
@@ -312,8 +317,8 @@ export function ScrollingFeatureCards() {
     const cardHeight = cardHeights[index] || 'h-[500px]';
     const cardWidth = cardWidths[index] || 'w-full';
     const cardBorderRadius = cardBorderRadii[index] || 'rounded-2xl';
-    const containerClasses = getContainerClasses(cardHeight, cardWidth, cardBorderRadius);
-    const innerWrapperClasses = getInnerWrapperClasses(cardFitMode);
+    const containerClasses = getContainerClasses(cardHeight, cardWidth);
+    const maskClasses = getMaskClasses(cardFitMode, cardBorderRadius);
     
     // Contain mode: use max-w/max-h to prevent cropping while maintaining aspect ratio
     // Cover mode: fill container completely, allowing cropping
@@ -340,22 +345,22 @@ export function ScrollingFeatureCards() {
               {config.images.map((image, imgIndex) => (
                 <CarouselItem 
                   key={imgIndex} 
-                  className="flex items-center justify-center h-full"
+                  className={viewportClasses}
                 >
-                   <div className={innerWrapperClasses}>
+                  <div className={maskClasses}>
                     <img
-                     key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
-                     src={image.url}
-                     alt={image.alt || `Slide ${imgIndex + 1}`}
-                     loading="lazy"
-                     decoding="async"
-                     className={imageClasses}
-                     style={{
-                       imageRendering: 'auto',
-                       backfaceVisibility: 'hidden',
-                       willChange: 'transform',
-                     }}
-                   />
+                      key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
+                      src={image.url}
+                      alt={image.alt || `Slide ${imgIndex + 1}`}
+                      loading="lazy"
+                      decoding="async"
+                      className={imageClasses}
+                      style={{
+                        imageRendering: 'auto',
+                        backfaceVisibility: 'hidden',
+                        willChange: 'transform',
+                      }}
+                    />
                   </div>
                 </CarouselItem>
               ))}
@@ -376,22 +381,22 @@ export function ScrollingFeatureCards() {
     const imageUrl = imageUrls[index] || card.imageUrl;
     return (
       <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
-        <div className="flex items-center justify-center h-full">
-          <div className={innerWrapperClasses}>
-              <img
-                key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
-                src={imageUrl}
-                alt={card.imageAlt}
-                loading="lazy"
-                decoding="async"
-                className={imageClasses}
-                style={{
-                  imageRendering: 'auto',
-                  backfaceVisibility: 'hidden',
-                  willChange: 'transform',
-                }}
-              />
-            </div>
+        <div className={viewportClasses}>
+          <div className={maskClasses}>
+            <img
+              key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
+              src={imageUrl}
+              alt={card.imageAlt}
+              loading="lazy"
+              decoding="async"
+              className={imageClasses}
+              style={{
+                imageRendering: 'auto',
+                backfaceVisibility: 'hidden',
+                willChange: 'transform',
+              }}
+            />
+          </div>
         </div>
       </div>
     );
