@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Image as ImageIcon, Upload, Link as LinkIcon, Save, Plus, X, Settings, Info } from 'lucide-react';
+import { Image as ImageIcon, Upload, Link as LinkIcon, Save, Plus, X, Settings, Info, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { detectImageAspectRatio } from '@/utils/imageAspectRatio';
 import {
   Dialog,
   DialogContent,
@@ -1044,7 +1045,28 @@ export function UniversalImageCarouselModal({
 
             {/* Aspect Ratio Selection */}
             <div className="space-y-3 border-t pt-4">
-              <Label>Image Aspect Ratio</Label>
+              <div className="flex items-center justify-between">
+                <Label>Image Aspect Ratio</Label>
+                {imageUrl && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const detected = await detectImageAspectRatio(imageUrl);
+                        setAspectRatio(detected);
+                        toast.success(`Detected: ${detected} aspect ratio`);
+                      } catch (error) {
+                        toast.error('Failed to detect aspect ratio');
+                      }
+                    }}
+                  >
+                    <Wand2 className="w-4 h-4 mr-1" />
+                    Auto-detect
+                  </Button>
+                )}
+              </div>
               <Select value={aspectRatio} onValueChange={setAspectRatio}>
                 <SelectTrigger>
                   <SelectValue />

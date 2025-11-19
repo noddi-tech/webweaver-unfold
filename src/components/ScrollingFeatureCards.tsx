@@ -316,9 +316,11 @@ export function ScrollingFeatureCards() {
     const cardBorderRadius = cardBorderRadii[index] || 'rounded-2xl';
     const containerClasses = getContainerClasses(cardHeight, cardWidth, cardBorderRadius);
     const innerWrapperClasses = getInnerWrapperClasses(cardFitMode, hasAspectRatio);
-    const imageClasses = cardFitMode === 'contain' 
-      ? 'w-full h-full object-contain block' 
-      : 'w-full h-full object-cover block';
+  const imageClasses = cardFitMode === 'contain'
+    ? hasAspectRatio 
+      ? 'w-full object-contain block'  // No h-full when aspect ratio is set
+      : 'w-full h-full object-contain block'  // h-full only for auto aspect ratio
+    : 'w-full h-full object-cover block';  // cover always uses h-full
     const aspectRatioStyle = aspectRatio === 'auto' ? {} : { aspectRatio: aspectRatio.replace(':', '/') };
     
     // If carousel data exists and has images
@@ -336,7 +338,7 @@ export function ScrollingFeatureCards() {
             plugins={plugins}
             className="w-full h-full"
           >
-            <CarouselContent className="h-full">
+            <CarouselContent className={hasAspectRatio ? '' : 'h-full'}>
               {config.images.map((image, imgIndex) => (
                 <CarouselItem 
                   key={imgIndex} 
