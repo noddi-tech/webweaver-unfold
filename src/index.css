@@ -565,6 +565,31 @@ All colors MUST be HSL.
     background-image: var(--gradient-subtle);
   }
 
+  /* Experimental Mesh Gradient Utilities */
+  .bg-gradient-mesh-aurora {
+    background-image: var(--gradient-mesh-aurora);
+  }
+
+  .bg-gradient-mesh-sunset {
+    background-image: var(--gradient-mesh-sunset);
+  }
+
+  .bg-gradient-mesh-ocean {
+    background-image: var(--gradient-mesh-ocean);
+  }
+
+  .bg-gradient-mesh-dream {
+    background-image: var(--gradient-mesh-dream);
+  }
+
+  .bg-gradient-mesh-cosmic {
+    background-image: var(--gradient-mesh-cosmic);
+  }
+
+  .bg-gradient-mesh-velvet {
+    background-image: var(--gradient-mesh-velvet);
+  }
+
   /* Hover scale animation */
   .hover-scale {
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
