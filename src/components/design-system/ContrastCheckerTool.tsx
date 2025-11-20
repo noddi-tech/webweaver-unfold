@@ -91,7 +91,7 @@ export function ContrastCheckerTool() {
   const meetsAA = meetsContrastStandard(contrastRatio, 'AA');
 
   return (
-    <Card className="p-6 bg-card border-border">
+    <Card className="p-6 bg-background text-foreground">
       <div className="space-y-6">
         {/* Header */}
         <div>
