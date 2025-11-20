@@ -9,7 +9,6 @@ import VideoManager from "@/components/design-system/VideoManager";
 import FeaturesManager from "@/components/design-system/FeaturesManager";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { EditableColorSystem } from "@/components/design-system/EditableColorSystem";
 import { EditableTypographySystem } from "@/components/design-system/EditableTypographySystem";
 import { ColorPaletteTab } from "@/components/design-system/ColorPaletteTab";
 import { EditableComponentLibrary } from "@/components/design-system/EditableComponentLibrary";
@@ -243,15 +242,11 @@ const Admin = () => {
 
               <TabsContent value="colors" className="space-y-8">
                 <div>
-                  <h2 className="text-3xl font-bold mb-4">Color Palette Reference</h2>
+                  <h2 className="text-3xl font-bold mb-4">Colors & Design System</h2>
                   <p className="text-muted-foreground mb-6">
-                    Complete color system with copyable values for sharing with designers and developers.
+                    Single source of truth for all brand colors. All colors are managed in the database and instantly available across the entire website.
                   </p>
                   <ColorPaletteTab />
-                </div>
-                
-                <div className="mt-12">
-                  <EditableColorSystem />
                 </div>
               </TabsContent>
 
