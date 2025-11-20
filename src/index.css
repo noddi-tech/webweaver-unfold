@@ -9,14 +9,20 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* ========================================
-       CORE BRAND COLORS - Foundation primitives
+       NAVIO BRAND COLORS - Foundation primitives
        All colors in HSL format for consistency
        ======================================== */
     
-    --color-brand-dark: 249 67% 24%;           /* Federal blue - Primary brand color */
-    --color-brand-gradient-start: 249 67% 24%; /* Gradient start point */
-    --color-brand-gradient-end: 266 85% 58%;   /* Vibrant purple - Gradient end point */
-    --color-brand-orange: 25 95% 53%;          /* Vibrant orange accent */
+    /* Core Brand Colors */
+    --color-brand-dark: 249 67% 24%;           /* Federal Blue - Primary brand color */
+    --primary: 249 67% 24%;                    /* Federal Blue - Primary brand */
+    --vibrant-purple: 266 85% 58%;             /* Vibrant Purple - Brand gradient */
+    --brand-orange: 25 95% 63%;                /* Brand Orange - Accent */
+    --brand-pink: 321 59% 85%;                 /* Brand Pink - Soft accent */
+    --brand-peach: 25 95% 70%;                 /* Brand Peach - Warm accent */
+    --brand-blue: 210 100% 50%;                /* Brand Blue - Ocean accent */
+    --brand-teal: 180 70% 45%;                 /* Brand Teal - Ocean accent */
+    --brand-green: 142 76% 50%;                /* Brand Green - Success accent */
 
     /* ========================================
        FEEDBACK COLORS - System states
@@ -30,11 +36,11 @@ All colors MUST be HSL.
     /* ========================================
        INTERACTIVE PRIMITIVES - Base interaction colors
        ======================================== */
-    --interactive-primary: var(--color-brand-dark);      /* Primary action color (buttons, CTAs) */
+    --interactive-primary: 249 67% 24%;                  /* Primary action color (buttons, CTAs) */
     --interactive-primary-hover: 249 67% 20%;            /* Darker on hover/active */
     --interactive-secondary: 0 0% 100%;                  /* Secondary action backgrounds */
     --interactive-secondary-hover: 0 0% 96%;             /* Light gray on hover */
-    --text-primary: var(--color-brand-dark);             /* Primary text color */
+    --text-primary: 249 67% 24%;                         /* Primary text color */
 
     /* ========================================
        SEMANTIC TOKENS - Application layer
@@ -43,7 +49,7 @@ All colors MUST be HSL.
 
     /* Surface Colors - Backgrounds and containers */
     --background: 0 0% 100%;                   /* Pure white page background | Used in: All pages, sections */
-    --card: var(--color-brand-gradient-start); /* Federal blue cards | Used in: Feature cards, Hero, Metrics */
+    --card: 249 67% 24%;                       /* Federal Blue cards | Used in: Feature cards, Hero, Metrics */
     --card-foreground: 0 0% 100%;              /* White text on cards | Used in: Card content, Hero text */
     --muted: 0 0% 96%;                         /* Light gray surfaces | Used in: Disabled states, secondary sections */
     --muted-foreground: 0 0% 45%;              /* Gray text | Used in: Descriptions, labels, helper text */
@@ -52,13 +58,13 @@ All colors MUST be HSL.
     --border: 0 0% 90%;                        /* Light gray borders | Used in: Inputs, cards, dividers */
     
     /* Interactive Colors - Buttons, links, actions */
-    --primary: var(--color-brand-dark);        /* Primary actions | Used in: Default buttons, active states */
+    --primary: 249 67% 24%;                    /* Primary actions | Used in: Default buttons, active states */
     --primary-foreground: 0 0% 100%;           /* Text on primary | Used in: Button text, CTA text */
     
     /* Text Colors - Foreground colors for content */
-    --foreground: var(--color-brand-dark);     /* Federal blue text | Used in: Body text, headings on white */
+    --foreground: 249 67% 24%;                 /* Federal blue text | Used in: Body text, headings on white */
     --popover: 0 0% 100%;                      /* Popover background | Used in: Dropdowns, tooltips */
-    --popover-foreground: var(--color-brand-dark); /* Popover text | Used in: Dropdown text */
+    --popover-foreground: 249 67% 24%;         /* Popover text | Used in: Dropdown text */
     
     /* Feedback States */
     --destructive: var(--color-error);         /* Error/delete color | Used in: Error messages, delete buttons */
@@ -94,27 +100,26 @@ All colors MUST be HSL.
     --sidebar-ring: 217.2 91.2% 59.8%;
 
     /* ========================================
-       GRADIENT SYSTEM - Multi-color combinations
+       NAVIO GRADIENT SYSTEM - Brand gradients
        ======================================== */
-    --gradient-hero: linear-gradient(135deg, 
-      hsl(249 67% 24%), 
-      hsl(266 85% 58%));
-    --gradient-sunset: linear-gradient(135deg,
-      hsl(249 67% 24%),
-      hsl(266 85% 58%),
-      hsl(25 95% 63%));
-    --gradient-warmth: linear-gradient(135deg,
-      hsl(266 85% 58%),
-      hsl(321 59% 85%),
-      hsl(25 95% 70%));
-    --gradient-ocean: linear-gradient(135deg,
-      hsl(210 100% 50%),
-      hsl(180 70% 45%),
-      hsl(142 76% 50%));
-    --gradient-fire: linear-gradient(135deg,
-      hsl(25 95% 53%),
-      hsl(266 85% 58%));
-    --gradient-primary: var(--gradient-hero);
+    
+    /* Standard Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(249 67% 24%) 0%, hsl(266 85% 58%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(249 67% 24%) 0%, hsl(266 85% 58%) 100%);
+    --gradient-sunset: linear-gradient(135deg, hsl(249 67% 24%) 0%, hsl(266 85% 58%) 50%, hsl(25 95% 63%) 100%);
+    --gradient-warmth: linear-gradient(135deg, hsl(266 85% 58%) 0%, hsl(321 59% 85%) 50%, hsl(25 95% 70%) 100%);
+    --gradient-ocean: linear-gradient(135deg, hsl(210 100% 50%) 0%, hsl(180 70% 45%) 50%, hsl(142 76% 50%) 100%);
+    --gradient-fire: linear-gradient(135deg, hsl(25 95% 63%) 0%, hsl(266 85% 58%) 100%);
+    
+    /* Experimental Mesh Gradients - Modern multi-point radial gradients */
+    --gradient-mesh-aurora: radial-gradient(at 0% 0%, hsl(210 100% 70%) 0px, transparent 50%), radial-gradient(at 80% 20%, hsl(266 85% 58%) 0px, transparent 50%), radial-gradient(at 40% 100%, hsl(180 70% 60%) 0px, transparent 50%), radial-gradient(at 100% 100%, hsl(321 59% 85%) 0px, transparent 50%);
+    --gradient-mesh-sunset: radial-gradient(at 20% 30%, hsl(25 95% 63%) 0px, transparent 50%), radial-gradient(at 80% 0%, hsl(321 59% 85%) 0px, transparent 50%), radial-gradient(at 60% 80%, hsl(266 85% 58%) 0px, transparent 50%), radial-gradient(at 0% 100%, hsl(249 67% 24%) 0px, transparent 50%);
+    --gradient-mesh-ocean: radial-gradient(at 10% 20%, hsl(180 70% 55%) 0px, transparent 60%), radial-gradient(at 70% 10%, hsl(210 100% 60%) 0px, transparent 55%), radial-gradient(at 90% 70%, hsl(266 85% 58%) 0px, transparent 50%), radial-gradient(at 30% 90%, hsl(142 76% 60%) 0px, transparent 55%);
+    --gradient-mesh-dream: radial-gradient(at 50% 0%, hsl(266 85% 65%) 0px, transparent 50%), radial-gradient(at 0% 50%, hsl(210 100% 70%) 0px, transparent 50%), radial-gradient(at 100% 50%, hsl(25 95% 70%) 0px, transparent 50%), radial-gradient(at 50% 100%, hsl(321 59% 85%) 0px, transparent 50%);
+    --gradient-mesh-cosmic: radial-gradient(at 30% 20%, hsl(249 67% 35%) 0px, transparent 45%), radial-gradient(at 70% 60%, hsl(266 85% 58%) 0px, transparent 55%), radial-gradient(at 10% 80%, hsl(210 100% 65%) 0px, transparent 50%), radial-gradient(at 90% 10%, hsl(321 59% 75%) 0px, transparent 50%), radial-gradient(at 50% 50%, hsl(180 70% 55%) 0px, transparent 60%);
+    --gradient-mesh-velvet: radial-gradient(at 15% 30%, hsl(321 59% 85%) 0px, transparent 50%), radial-gradient(at 85% 30%, hsl(266 85% 70%) 0px, transparent 55%), radial-gradient(at 50% 80%, hsl(25 95% 75%) 0px, transparent 50%);
+    
+    /* Legacy gradients for backward compatibility */
     --gradient-background: var(--gradient-hero);
   }
 
