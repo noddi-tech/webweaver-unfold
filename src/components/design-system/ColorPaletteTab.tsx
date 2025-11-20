@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Copy, Download, Check, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ALL_BACKGROUND_OPTIONS,
   TEXT_COLOR_OPTIONS,
@@ -77,9 +78,96 @@ export function ColorPaletteTab() {
     linkElement.click();
     
     toast({
-      title: "Palette Exported",
+      title: "Palette Exported (Legacy)",
       description: "Color palette downloaded as JSON file",
     });
+  };
+
+  const handleDatabaseExport = async () => {
+    try {
+      // Fetch all active color tokens from database
+      const { data: colorTokens, error } = await supabase
+        .from('color_tokens')
+        .select('*')
+        .eq('active', true)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+
+      if (!colorTokens || colorTokens.length === 0) {
+        toast({
+          title: "No Colors Found",
+          description: "No active color tokens in database",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Organize colors by category
+      const organizedColors: Record<string, any> = {};
+      
+      colorTokens.forEach((token) => {
+        const category = token.category || 'other';
+        
+        if (!organizedColors[category]) {
+          organizedColors[category] = {};
+        }
+
+        // Build color entry with all formats
+        const colorEntry: any = {
+          label: token.label || token.css_var,
+          description: token.description || '',
+          cssVar: token.css_var,
+          value: token.value,
+          type: token.color_type || 'solid',
+          optimalTextColor: token.optimal_text_color || 'auto',
+          previewClass: token.preview_class || ''
+        };
+
+        // Add format conversions for solid colors
+        if (token.color_type === 'solid' && token.value) {
+          colorEntry.hsl = token.value;
+          colorEntry.hex = hslToHex(token.value);
+          colorEntry.rgb = hslToRgb(token.value);
+        }
+
+        organizedColors[category][token.css_var] = colorEntry;
+      });
+
+      // Build export data with metadata
+      const exportData = {
+        metadata: {
+          exportDate: new Date().toISOString(),
+          version: "2.0",
+          source: "Navio Design System - Live Database",
+          totalColors: colorTokens.length,
+          format: "Figma Tokens Studio compatible"
+        },
+        colors: organizedColors
+      };
+
+      // Generate download
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+      const exportFileDefaultName = `navio-colors-${new Date().toISOString().split('T')[0]}.json`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+      
+      toast({
+        title: "Navio Colors Exported",
+        description: `${colorTokens.length} colors exported from database`,
+      });
+    } catch (error) {
+      console.error('Database export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "Could not export colors from database",
+        variant: "destructive",
+      });
+    }
   };
 
   // Organize colors by category
@@ -378,10 +466,16 @@ export function ColorPaletteTab() {
             Reference guide for all available colors with copyable values
           </p>
         </div>
-        <Button onClick={handleExport} variant="outline" size="sm">
-          <Download className="h-4 w-4 mr-2" />
-          Export JSON
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleDatabaseExport} variant="default" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export Navio Colors (Database)
+          </Button>
+          <Button onClick={handleExport} variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export (Legacy)
+          </Button>
+        </div>
       </div>
 
       {/* Collapsible Categories */}
