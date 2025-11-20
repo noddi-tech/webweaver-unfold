@@ -177,7 +177,7 @@ export function ColorPaletteTab() {
           <AccordionItem key={`category-${index}`} value={`category-${index}`}>
             <AccordionTrigger className="text-lg font-semibold"><div className="flex items-center gap-3"><span>{category.title}</span><Badge variant="secondary">{category.colors.length}</Badge></div></AccordionTrigger>
             <AccordionContent><p className="text-sm text-muted-foreground mb-4">{category.description}</p><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{category.colors.map((color) => (
-              <Card key={color.value} className="overflow-hidden">
+              <Card key={color.value} className="overflow-hidden bg-background text-foreground">
                 <div className={`${color.preview} h-32 flex items-center justify-center`}>
                   <span className={`text-sm font-medium ${
                     color.hslValue 
@@ -223,7 +223,7 @@ export function ColorPaletteTab() {
           </AccordionItem>
         ))}
       </Accordion>
-      {textColors.length > 0 && (<div><h3 className="text-xl font-bold text-foreground mb-4">Text Colors</h3><div className="grid grid-cols-1 md:grid-cols-2 gap-6">{textColors.map((color) => (<Card key={color.value} className="overflow-hidden"><div className="p-6 bg-background border-b"><p className={`${color.className} text-2xl font-semibold mb-2`}>The quick brown fox jumps over the lazy dog</p><p className={`${color.className} text-sm`}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p></div><div className="p-4 space-y-3"><div><h3 className="font-semibold text-foreground mb-1">{color.label}</h3><p className="text-sm text-muted-foreground">{color.description}</p></div><div className="space-y-2"><div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs text-foreground">{color.className}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(color.className, `${color.label} Class`)} className="h-6 w-6 p-0">{copiedValue === color.className ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div></div></div></Card>))}</div></div>)}
+      {textColors.length > 0 && (<div><h3 className="text-xl font-bold text-foreground mb-4">Text Colors</h3><div className="grid grid-cols-1 md:grid-cols-2 gap-6">{textColors.map((color) => (<Card key={color.value} className="overflow-hidden bg-background text-foreground"><div className="p-6 bg-background border-b"><p className={`${color.className} text-2xl font-semibold mb-2`}>The quick brown fox jumps over the lazy dog</p><p className={`${color.className} text-sm`}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p></div><div className="p-4 space-y-3"><div><h3 className="font-semibold text-foreground mb-1">{color.label}</h3><p className="text-sm text-muted-foreground">{color.description}</p></div><div className="space-y-2"><div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs text-foreground">{color.className}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(color.className, `${color.label} Class`)} className="h-6 w-6 p-0">{copiedValue === color.className ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div></div></div></Card>))}</div></div>)}
     </div>
   );
 }
