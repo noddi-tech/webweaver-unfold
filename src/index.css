@@ -52,7 +52,7 @@ All colors MUST be HSL.
     --card: 249 67% 24%;                       /* Federal Blue cards | Used in: Feature cards, Hero, Metrics */
     --card-foreground: 0 0% 100%;              /* White text on cards | Used in: Card content, Hero text */
     --muted: 0 0% 96%;                         /* Light gray surfaces | Used in: Disabled states, secondary sections */
-    --muted-foreground: 0 0% 45%;              /* Gray text | Used in: Descriptions, labels, helper text */
+    --muted-foreground: 0 0% 35%;              /* Darker gray for AAA contrast (7:1) | Used in: Descriptions, labels, helper text */
     
     /* Borders and dividers */
     --border: 0 0% 90%;                        /* Light gray borders | Used in: Inputs, cards, dividers */
