@@ -2,10 +2,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Copy, Download, Check, Loader2 } from "lucide-react";
+import { Copy, Download, Check, Loader2, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { getOptimalTextColor, getContrastRatio, getContrastBadge } from "@/lib/contrastUtils";
 
 interface ColorOption {
   value: string;
@@ -173,14 +174,44 @@ export function ColorPaletteTab() {
             <AccordionTrigger className="text-lg font-semibold"><div className="flex items-center gap-3"><span>{category.title}</span><Badge variant="secondary">{category.colors.length}</Badge></div></AccordionTrigger>
             <AccordionContent><p className="text-sm text-muted-foreground mb-4">{category.description}</p><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{category.colors.map((color) => (
               <Card key={color.value} className="overflow-hidden">
-                <div className={`${color.preview} h-32 flex items-center justify-center`}><span className={`text-sm font-medium ${color.optimalTextColor === 'white' ? 'text-white' : color.optimalTextColor === 'dark' ? 'text-foreground' : 'text-white'}`}>{color.type === 'gradient' ? 'Gradient' : color.type === 'glass' ? 'Glass' : 'Solid'}</span></div>
-                <div className="p-4 space-y-3"><div><div className="flex items-start justify-between mb-1"><h3 className="font-semibold text-foreground">{color.label}</h3><Badge variant="secondary" className="text-xs">{color.type}</Badge></div><p className="text-sm text-muted-foreground">{color.description}</p></div>
+                <div className={`${color.preview} h-32 flex items-center justify-center`}>
+                  <span className={`text-sm font-medium ${
+                    color.hslValue 
+                      ? getOptimalTextColor(color.hslValue) === 'white' ? 'text-white' : 'text-foreground'
+                      : 'text-white'
+                  }`}>
+                    {color.type === 'gradient' ? 'Gradient' : color.type === 'glass' ? 'Glass' : 'Solid'}
+                  </span>
+                </div>
+                <div className="p-4 space-y-3">
+                  <div>
+                    <div className="flex items-start justify-between mb-1">
+                      <h3 className="font-semibold text-foreground">{color.label}</h3>
+                      <Badge variant="secondary" className="text-xs">{color.type}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{color.description}</p>
+                    
+                    {/* Contrast badge and warning */}
+                    {color.hslValue && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <Badge variant="outline" className={`text-xs ${getContrastBadge(getContrastRatio(color.hslValue, '0 0% 100%')).color}`}>
+                          {getContrastBadge(getContrastRatio(color.hslValue, '0 0% 100%')).label} Contrast
+                        </Badge>
+                        {getContrastRatio(color.hslValue, '0 0% 100%') < 4.5 && (
+                          <div className="flex items-center gap-1 text-xs text-yellow-700">
+                            <AlertCircle className="h-3 w-3" />
+                            <span>Low contrast on light backgrounds</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <div className="space-y-2">
-                    {color.cssVar && (<div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs text-foreground">{color.cssVar}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(color.cssVar!, `${color.label} CSS Variable`)} className="h-6 w-6 p-0">{copiedValue === color.cssVar ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div>)}
-                    <div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs text-foreground">{color.value}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(color.value, `${color.label} Class`)} className="h-6 w-6 p-0">{copiedValue === color.value ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div>
-                    {color.type === 'solid' && color.hslValue && (<><div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs text-foreground">hsl({color.hslValue})</code><Button size="sm" variant="ghost" onClick={() => handleCopy(`hsl(${color.hslValue})`, `${color.label} HSL`)} className="h-6 w-6 p-0">{copiedValue === `hsl(${color.hslValue})` ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div>
-                    <div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs text-foreground">{hslToHex(color.hslValue)}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(hslToHex(color.hslValue), `${color.label} HEX`)} className="h-6 w-6 p-0">{copiedValue === hslToHex(color.hslValue) ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div>
-                    <div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs text-foreground">{hslToRgb(color.hslValue)}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(hslToRgb(color.hslValue), `${color.label} RGB`)} className="h-6 w-6 p-0">{copiedValue === hslToRgb(color.hslValue) ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div></>)}
+                    {color.cssVar && (<div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs font-mono text-foreground">{color.cssVar}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(color.cssVar!, `${color.label} CSS Variable`)} className="h-6 w-6 p-0">{copiedValue === color.cssVar ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div>)}
+                    <div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs font-mono text-foreground">{color.value}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(color.value, `${color.label} Class`)} className="h-6 w-6 p-0">{copiedValue === color.value ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div>
+                    {color.type === 'solid' && color.hslValue && (<><div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs font-mono text-foreground">hsl({color.hslValue})</code><Button size="sm" variant="ghost" onClick={() => handleCopy(`hsl(${color.hslValue})`, `${color.label} HSL`)} className="h-6 w-6 p-0">{copiedValue === `hsl(${color.hslValue})` ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div>
+                    <div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs font-mono text-foreground">{hslToHex(color.hslValue)}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(hslToHex(color.hslValue), `${color.label} HEX`)} className="h-6 w-6 p-0">{copiedValue === hslToHex(color.hslValue) ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div>
+                    <div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs font-mono text-foreground">{hslToRgb(color.hslValue)}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(hslToRgb(color.hslValue), `${color.label} RGB`)} className="h-6 w-6 p-0">{copiedValue === hslToRgb(color.hslValue) ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div></>)}
                   </div>
                 </div>
               </Card>
