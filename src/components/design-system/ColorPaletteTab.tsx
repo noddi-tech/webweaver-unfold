@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getOptimalTextColor, getContrastRatio, getContrastBadge } from "@/lib/contrastUtils";
+import { ContrastCheckerTool } from "./ContrastCheckerTool";
 
 interface ColorOption {
   value: string;
@@ -164,6 +165,9 @@ export function ColorPaletteTab() {
 
   return (
     <div className="space-y-8">
+      {/* Contrast Checker Tool */}
+      <ContrastCheckerTool />
+      
       <div className="flex items-center justify-between">
         <div><h2 className="text-2xl font-bold text-foreground">Navio Color System</h2><p className="text-muted-foreground mt-1">Database-driven color palette - single source of truth for all brand colors</p></div>
         <Button onClick={handleDatabaseExport} variant="default" size="sm"><Download className="h-4 w-4 mr-2" />Export Navio Colors</Button>
