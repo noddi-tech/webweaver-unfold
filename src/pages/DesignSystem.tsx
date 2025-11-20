@@ -1,6 +1,5 @@
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EditableDesignTokens } from "@/components/design-system/EditableDesignTokens";
 import { EditableTypographySystem } from "@/components/design-system/EditableTypographySystem";
 import { EditableComponentLibrary } from "@/components/design-system/EditableComponentLibrary";
 import { EditableSpacingSystem } from "@/components/design-system/EditableSpacingSystem";
@@ -21,7 +20,7 @@ const DesignSystem = () => {
       <main className="container mx-auto px-6 py-12 pt-32">
         <div className="text-center mb-16 pt-8">
           <h1 className="text-6xl font-bold gradient-text mb-6">
-            Noddi Tech Design System
+            Navio Design System
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             The single source of truth for all design tokens, components, and patterns.
@@ -31,7 +30,7 @@ const DesignSystem = () => {
 
         <Tabs defaultValue="colors" className="w-full">
           <TabsList className="grid w-full grid-cols-11 mb-12">
-            <TabsTrigger value="colors">Colors & Tokens</TabsTrigger>
+            <TabsTrigger value="colors">Colors</TabsTrigger>
             <TabsTrigger value="typography">Typography</TabsTrigger>
             <TabsTrigger value="spacing">Spacing</TabsTrigger>
             <TabsTrigger value="buttons">Buttons/CTAs</TabsTrigger>
