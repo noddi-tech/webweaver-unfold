@@ -178,7 +178,16 @@ export function ColorPaletteTab() {
             <AccordionTrigger className="text-lg font-semibold"><div className="flex items-center gap-3"><span>{category.title}</span><Badge variant="secondary">{category.colors.length}</Badge></div></AccordionTrigger>
             <AccordionContent><p className="text-sm text-muted-foreground mb-4">{category.description}</p><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{category.colors.map((color) => (
               <Card key={color.value} className="overflow-hidden bg-background text-foreground">
-                <div className={`${color.preview} h-32 flex items-center justify-center`}>
+                <div
+                  className={`h-32 flex items-center justify-center ${
+                    color.type === 'solid' ? color.preview : ''
+                  }`}
+                  style={
+                    (color.type === 'gradient' || color.type === 'glass' || color.category === 'experimental') && color.cssVar
+                      ? { backgroundImage: `var(${color.cssVar})` }
+                      : undefined
+                  }
+                >
                   <span className={`text-sm font-medium ${
                     color.hslValue 
                       ? getOptimalTextColor(color.hslValue) === 'white' ? 'text-white' : 'text-foreground'
