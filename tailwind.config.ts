@@ -47,7 +47,17 @@ export default {
 			'container': '1440px',
 		},
 			colors: {
-				// B2B Color Scales
+				// Navio Brand Color Scale
+				'navio-blue': 'hsl(var(--primary))',
+				'navio-purple': 'hsl(var(--vibrant-purple))',
+				'navio-orange': 'hsl(var(--brand-orange))',
+				'navio-pink': 'hsl(var(--brand-pink))',
+				'navio-peach': 'hsl(var(--brand-peach))',
+				'navio-ocean-blue': 'hsl(var(--brand-blue))',
+				'navio-teal': 'hsl(var(--brand-teal))',
+				'navio-green': 'hsl(var(--brand-green))',
+				
+				// Legacy B2B Color Scales (kept for backward compatibility)
 				darkpurple: {
 					30: 'hsl(var(--color-darkpurple-30))',
 					40: 'hsl(var(--color-darkpurple-40))',
@@ -159,13 +169,22 @@ export default {
 		backgroundImage: {
 			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
 			'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-			// Canonical gradients - managed via CMS (color_tokens table)
-			'gradient-primary': 'linear-gradient(135deg, hsl(249 67% 24%), hsl(266 85% 58%))',
-			'gradient-hero': 'linear-gradient(135deg, hsl(249 67% 24%), hsl(266 85% 58%))',
-			'gradient-sunset': 'linear-gradient(135deg, hsl(249 67% 24%), hsl(266 85% 58%), hsl(25 95% 63%))',
-			'gradient-warmth': 'linear-gradient(135deg, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))',
-			'gradient-ocean': 'linear-gradient(135deg, hsl(210 100% 50%), hsl(180 70% 45%), hsl(142 76% 50%))',
-			'gradient-fire': 'linear-gradient(135deg, hsl(25 95% 53%), hsl(266 85% 58%))',
+			
+			// Navio Standard Gradients
+			'gradient-primary': 'var(--gradient-primary)',
+			'gradient-hero': 'var(--gradient-hero)',
+			'gradient-sunset': 'var(--gradient-sunset)',
+			'gradient-warmth': 'var(--gradient-warmth)',
+			'gradient-ocean': 'var(--gradient-ocean)',
+			'gradient-fire': 'var(--gradient-fire)',
+			
+			// Navio Experimental Mesh Gradients
+			'gradient-mesh-aurora': 'var(--gradient-mesh-aurora)',
+			'gradient-mesh-sunset': 'var(--gradient-mesh-sunset)',
+			'gradient-mesh-ocean': 'var(--gradient-mesh-ocean)',
+			'gradient-mesh-dream': 'var(--gradient-mesh-dream)',
+			'gradient-mesh-cosmic': 'var(--gradient-mesh-cosmic)',
+			'gradient-mesh-velvet': 'var(--gradient-mesh-velvet)',
 		},
 			keyframes: {
 				'accordion-down': {
