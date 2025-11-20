@@ -1,7 +1,6 @@
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditableDesignTokens } from "@/components/design-system/EditableDesignTokens";
-import { EditableColorSystem } from "@/components/design-system/EditableColorSystem";
 import { EditableTypographySystem } from "@/components/design-system/EditableTypographySystem";
 import { EditableComponentLibrary } from "@/components/design-system/EditableComponentLibrary";
 import { EditableSpacingSystem } from "@/components/design-system/EditableSpacingSystem";
@@ -46,17 +45,7 @@ const DesignSystem = () => {
           </TabsList>
 
           <TabsContent value="colors" className="space-y-8">
-            <div>
-              <h2 className="text-3xl font-bold mb-4">Color Palette Reference</h2>
-              <p className="text-muted-foreground mb-6">
-                Complete color system with copyable values for sharing with designers and developers.
-              </p>
-              <ColorPaletteTab />
-            </div>
-            
-            <div className="mt-12">
-              <EditableColorSystem />
-            </div>
+            <ColorPaletteTab />
           </TabsContent>
 
           <TabsContent value="typography" className="space-y-8">

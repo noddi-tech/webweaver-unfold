@@ -2,22 +2,153 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Copy, Download, Check, AlertCircle, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { Copy, Download, Check, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  ALL_BACKGROUND_OPTIONS,
-  TEXT_COLOR_OPTIONS,
-  ColorOption,
-  TextColorOption,
-  exportColorPalette,
-  hslToHex,
-  hslToRgb,
-  copyToClipboard,
-  getCssVariableValue,
-  meetsContrastRequirement
-} from "@/config/colorSystem";
+
+// Type definitions
+interface ColorOption {
+  value: string;
+  label: string;
+  description: string;
+  preview: string;
+  cssVar?: string;
+  type: 'solid' | 'gradient' | 'glass';
+  category: string;
+  optimalTextColor?: 'white' | 'dark' | 'auto';
+  hslValue?: string;
+}
+
+interface TextColorOption {
+  value: string;
+  label: string;
+  description: string;
+  preview: string;
+  className: string;
+}
+
+interface ColorCategory {
+  title: string;
+  description: string;
+  colors: ColorOption[];
+}
+
+// Category metadata for dynamic grouping
+const CATEGORY_METADATA: Record<string, { title: string; description: string }> = {
+  surfaces: {
+    title: "Surface Colors",
+    description: "Background and surface colors for layouts, cards, and containers"
+  },
+  interactive: {
+    title: "Interactive Colors",
+    description: "Brand and action colors for buttons, links, and interactive elements"
+  },
+  feedback: {
+    title: "Feedback Colors",
+    description: "Status colors for success, warning, and error states"
+  },
+  gradients: {
+    title: "Standard Gradients",
+    description: "Multi-color gradient backgrounds for heroes and accents"
+  },
+  experimental: {
+    title: "Experimental Gradients",
+    description: "Advanced mesh gradients inspired by OpenAI & Mixpanel"
+  },
+  glass: {
+    title: "Glass Effects",
+    description: "Frosted glass and translucent overlay effects"
+  },
+  text: {
+    title: "Text Colors",
+    description: "Foreground text colors for various contexts"
+  }
+};
+
+// Helper function to convert HSL to HEX
+const hslToHex = (hsl: string): string => {
+  const match = hsl.match(/(\d+\.?\d*)\s+(\d+\.?\d*)%\s+(\d+\.?\d*)%/);
+  if (!match) return '#000000';
+  
+  const h = parseFloat(match[1]) / 360;
+  const s = parseFloat(match[2]) / 100;
+  const l = parseFloat(match[3]) / 100;
+  
+  let r, g, b;
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const hue2rgb = (p: number, q: number, t: number) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+  
+  const toHex = (x: number) => {
+    const hex = Math.round(x * 255).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
+// Helper function to convert HSL to RGB
+const hslToRgb = (hsl: string): string => {
+  const match = hsl.match(/(\d+\.?\d*)\s+(\d+\.?\d*)%\s+(\d+\.?\d*)%/);
+  if (!match) return 'rgb(0, 0, 0)';
+  
+  const h = parseFloat(match[1]) / 360;
+  const s = parseFloat(match[2]) / 100;
+  const l = parseFloat(match[3]) / 100;
+  
+  let r, g, b;
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const hue2rgb = (p: number, q: number, t: number) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+  
+  return `rgb(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)})`;
+};
+
+// Helper function to copy to clipboard
+const copyToClipboard = async (value: string, label: string) => {
+  try {
+    await navigator.clipboard.writeText(value);
+    toast({
+      title: "Copied!",
+      description: `${label} copied to clipboard`,
+    });
+  } catch (err) {
+    toast({
+      title: "Copy Failed",
+      description: "Could not copy to clipboard",
+      variant: "destructive",
+    });
+  }
+};
 
 // Map text colors to their intended backgrounds for accurate preview and contrast checking
 const TEXT_COLOR_BACKGROUND_MAP: Record<string, Array<{ bg: string; label: string }>> = {
