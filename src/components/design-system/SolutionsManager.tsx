@@ -340,6 +340,43 @@ const SolutionsManager = () => {
     }
   };
 
+  const autoSaveTitle = async (id: string, title: string) => {
+    if (!title.trim()) {
+      toast({ title: "Title cannot be empty", variant: "destructive" });
+      fetchSolutions(); // Reset to previous value
+      return;
+    }
+    
+    const { error } = await supabase
+      .from("solutions")
+      .update({ 
+        title: title.trim(),
+        slug: generateSlug(title.trim())
+      })
+      .eq("id", id);
+    
+    if (error) {
+      toast({ title: "Failed to update title", description: error.message, variant: "destructive" });
+      fetchSolutions(); // Reset on error
+    } else {
+      toast({ title: "Title updated" });
+    }
+  };
+
+  const autoSaveIcon = async (id: string, iconName: string) => {
+    const { error } = await supabase
+      .from("solutions")
+      .update({ icon_name: iconName.trim() || "Sparkles" })
+      .eq("id", id);
+    
+    if (error) {
+      toast({ title: "Failed to update icon", description: error.message, variant: "destructive" });
+      fetchSolutions(); // Reset on error
+    } else {
+      toast({ title: "Icon updated" });
+    }
+  };
+
   const saveSettings = async () => {
     if (!settings) return;
     setSavingSettings(true);
@@ -560,10 +597,20 @@ const SolutionsManager = () => {
                 solutions.map((s) => (
                   <TableRow key={s.id}>
                     <TableCell>
-                      <Input className="text-foreground" value={s.title} onChange={(e) => updateLocal(s.id, { title: e.target.value })} />
+                      <Input 
+                        className="text-foreground" 
+                        value={s.title} 
+                        onChange={(e) => updateLocal(s.id, { title: e.target.value })}
+                        onBlur={(e) => autoSaveTitle(s.id, e.target.value)}
+                      />
                     </TableCell>
                     <TableCell>
-                      <Input className="text-foreground" value={s.icon_name} onChange={(e) => updateLocal(s.id, { icon_name: e.target.value })} />
+                      <Input 
+                        className="text-foreground" 
+                        value={s.icon_name} 
+                        onChange={(e) => updateLocal(s.id, { icon_name: e.target.value })}
+                        onBlur={(e) => autoSaveIcon(s.id, e.target.value)}
+                      />
                     </TableCell>
                     <TableCell>
                       <Switch
