@@ -159,7 +159,19 @@ export default {
 				info: {
 					DEFAULT: 'hsl(var(--info))',
 					foreground: 'hsl(var(--foreground))'
-				}
+				},
+				// Comprehensive Text Color System
+				'text-success': 'hsl(var(--text-success))',
+				'text-error': 'hsl(var(--text-error))',
+				'text-warning': 'hsl(var(--text-warning))',
+				'text-info': 'hsl(var(--text-info))',
+				'text-disabled': 'hsl(var(--text-disabled))',
+				'text-placeholder': 'hsl(var(--text-placeholder))',
+				'text-caption': 'hsl(var(--text-caption))',
+				'text-link': 'hsl(var(--text-link))',
+				'text-link-hover': 'hsl(var(--text-link-hover))',
+				'text-code': 'hsl(var(--text-code))',
+				'text-quote': 'hsl(var(--text-quote))'
 			},
 		borderRadius: {
 			lg: 'var(--radius)',

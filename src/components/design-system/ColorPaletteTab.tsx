@@ -96,7 +96,7 @@ export function ColorPaletteTab() {
   const [fixDialogData, setFixDialogData] = useState<any>(null);
   const [editingTextColor, setEditingTextColor] = useState<TextColorOption | null>(null);
   const [duplicates, setDuplicates] = useState<Array<{ color1: string; color2: string; value: string }>>([]);
-  const [similarColors, setSimilarColors] = useState<Array<{ color1: string; color2: string; lightnessDiff: number }>>([]);
+  const [similarColors, setSimilarColors] = useState<Array<{ color1: string; color2: string; lightnessDiff: number; category: string }>>([]);
 
   useEffect(() => { loadColorsFromDatabase(); }, []);
 
@@ -174,27 +174,38 @@ export function ColorPaletteTab() {
   };
 
   const detectSimilarColors = (colors: any[]) => {
-    const similar: Array<{ color1: string; color2: string; lightnessDiff: number }> = [];
-    const textAndSurfaceColors = colors.filter(c => c.category === 'text' || c.category === 'surfaces' || c.category === 'interactive');
+    const similar: Array<{ color1: string; color2: string; lightnessDiff: number; category: string }> = [];
     
-    for (let i = 0; i < textAndSurfaceColors.length; i++) {
-      for (let j = i + 1; j < textAndSurfaceColors.length; j++) {
-        const color1 = textAndSurfaceColors[i];
-        const color2 = textAndSurfaceColors[j];
-        
-        const lightness1 = getLightness(color1.value);
-        const lightness2 = getLightness(color2.value);
-        const diff = Math.abs(lightness1 - lightness2);
-        
-        if (diff < 10 && color1.value !== color2.value) {
-          similar.push({
-            color1: color1.label || color1.css_var,
-            color2: color2.label || color2.css_var,
-            lightnessDiff: diff
-          });
+    // Group colors by category for comparison
+    const byCategory = {
+      text: colors.filter(c => c.category === 'text'),
+      surfaces: colors.filter(c => c.category === 'surfaces'),
+      interactive: colors.filter(c => c.category === 'interactive')
+    };
+    
+    // Compare within each category separately
+    Object.entries(byCategory).forEach(([category, categoryColors]) => {
+      for (let i = 0; i < categoryColors.length; i++) {
+        for (let j = i + 1; j < categoryColors.length; j++) {
+          const color1 = categoryColors[i];
+          const color2 = categoryColors[j];
+          
+          const lightness1 = getLightness(color1.value);
+          const lightness2 = getLightness(color2.value);
+          const diff = Math.abs(lightness1 - lightness2);
+          
+          // Only flag if similar AND not duplicates (duplicates handled separately)
+          if (diff < 10 && diff > 0 && color1.value !== color2.value) {
+            similar.push({
+              color1: color1.label || color1.css_var,
+              color2: color2.label || color2.css_var,
+              lightnessDiff: diff,
+              category
+            });
+          }
         }
       }
-    }
+    });
     
     setSimilarColors(similar);
   };
@@ -476,6 +487,10 @@ export function ColorPaletteTab() {
                             <AlertCircle className="h-3 w-3 text-yellow-600 mt-0.5 shrink-0" />
                             <p className="text-xs text-yellow-700">
                               ⚠️ Similar to {similarTo.color1 === color.label ? similarTo.color2 : similarTo.color1} ({similarTo.lightnessDiff.toFixed(1)}% difference)
+                              <br />
+                              <span className="text-muted-foreground">
+                                Both are {similarTo.category} colors - consider adjusting hue or lightness
+                              </span>
                             </p>
                           </div>
                         )}

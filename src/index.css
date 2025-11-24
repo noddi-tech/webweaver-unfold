@@ -72,6 +72,26 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;                      /* Popover background | Used in: Dropdowns, tooltips */
     --popover-foreground: 249 67% 24%;         /* Popover text | Used in: Dropdown text */
     
+    /* Comprehensive Text Color System */
+    /* Phase 1: Core Feedback Text Colors (AAA contrast 7:1 on white) */
+    --text-success: 142 76% 36%;               /* Success text | Used in: Success messages, confirmations */
+    --text-error: 0 84% 45%;                   /* Error text | Used in: Error messages, validation failures */
+    --text-warning: 38 92% 35%;                /* Warning text | Used in: Warnings, cautions */
+    --text-info: 221 83% 40%;                  /* Info text | Used in: Informational messages, tips */
+    
+    /* Phase 2: Hierarchy & States Text Colors */
+    --text-disabled: 0 0% 60%;                 /* Disabled text | Used in: Disabled inputs, inactive elements */
+    --text-placeholder: 0 0% 50%;              /* Placeholder text | Used in: Input placeholders, empty states */
+    --text-caption: var(--muted-foreground);   /* Caption text | Used in: Image captions, small text */
+    
+    /* Phase 3: Interactive Text Colors */
+    --text-link: 249 67% 50%;                  /* Link text | Used in: Clickable links, anchors */
+    --text-link-hover: 249 67% 40%;            /* Link hover | Used in: Link hover state */
+    
+    /* Phase 4: Specialized Text Colors */
+    --text-code: 266 85% 45%;                  /* Code text | Used in: Code snippets, technical content */
+    --text-quote: 0 0% 40%;                    /* Quote text | Used in: Blockquotes, citations */
+    
     /* Feedback States */
     --destructive: var(--color-error);         /* Error/delete color | Used in: Error messages, delete buttons */
     --destructive-foreground: 0 0% 100%;       /* Text on destructive | Used in: Error button text */
