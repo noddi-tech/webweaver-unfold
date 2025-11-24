@@ -108,7 +108,11 @@ export function ColorPaletteTab() {
 
       colorTokens.forEach((token) => {
         if (token.category === 'text') {
-          textColorOptions.push({ value: token.preview_class || `text-[hsl(${token.value})]`, label: token.label || token.css_var, description: token.description || '', preview: token.preview_class || `text-[hsl(${token.value})]`, className: token.preview_class || `text-[hsl(${token.value})]` });
+          // Fix text colors: convert bg-* to text-* if needed
+          const textClass = token.preview_class?.startsWith('bg-') 
+            ? token.preview_class.replace('bg-', 'text-')
+            : token.preview_class || `text-[hsl(${token.value})]`;
+          textColorOptions.push({ value: textClass, label: token.label || token.css_var, description: token.description || '', preview: textClass, className: textClass });
         } else {
           const category = token.category || 'other';
           if (!colorsByCategory[category]) colorsByCategory[category] = [];
@@ -182,7 +186,9 @@ export function ColorPaletteTab() {
             <AccordionContent><p className="text-sm text-muted-foreground mb-4">{category.description}</p><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{category.colors.map((color) => (
               <Card key={color.value} className="overflow-hidden bg-background text-foreground">
                 <div
-                  className="h-32 flex items-center justify-center"
+                  className={`h-32 flex items-center justify-center relative ${
+                    color.type === 'glass' ? 'overflow-hidden' : ''
+                  }`}
                   style={{
                     ...(color.type === 'solid' && color.hslValue
                       ? { backgroundColor: `hsl(${color.hslValue})` }
@@ -190,12 +196,24 @@ export function ColorPaletteTab() {
                     ...(color.type === 'gradient' && color.cssVar
                       ? { backgroundImage: `var(${color.cssVar})` }
                       : {}),
-                    ...(color.type === 'glass' && color.cssVar
-                      ? { backgroundImage: `var(${color.cssVar})` }
+                    ...(color.type === 'glass' 
+                      ? { 
+                          backgroundImage: 'linear-gradient(135deg, hsl(266 85% 58%) 0%, hsl(210 100% 70%) 50%, hsl(25 95% 63%) 100%)',
+                        } 
                       : {}),
                   }}
                 >
-                  <span className={`text-sm font-medium ${
+                  {/* Glass effect overlay for glass types */}
+                  {color.type === 'glass' && color.cssVar && (
+                    <div 
+                      className="absolute inset-0 backdrop-blur-md border"
+                      style={{ 
+                        backgroundImage: `var(${color.cssVar})`,
+                        borderColor: 'rgba(255, 255, 255, 0.2)'
+                      }}
+                    />
+                  )}
+                  <span className={`text-sm font-medium relative z-10 ${
                     color.hslValue 
                       ? getOptimalTextColor(color.hslValue) === 'white' ? 'text-white' : 'text-foreground'
                       : 'text-white'
