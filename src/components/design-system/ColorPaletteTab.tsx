@@ -2,12 +2,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Copy, Download, Check, Loader2, AlertCircle } from "lucide-react";
+import { Copy, Download, Check, Loader2, AlertCircle, Wand2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { getOptimalTextColor, getContrastRatio, getContrastBadge } from "@/lib/contrastUtils";
+import { getOptimalTextColor, getContrastRatio, getContrastBadge, evaluateColorContrast, getContrastFixSuggestions } from "@/lib/contrastUtils";
 import { ContrastCheckerTool } from "./ContrastCheckerTool";
+import { ContrastFixDialog } from "./ContrastFixDialog";
 
 interface ColorOption {
   value: string;
@@ -86,6 +87,8 @@ export function ColorPaletteTab() {
   const [categories, setCategories] = useState<ColorCategory[]>([]);
   const [textColors, setTextColors] = useState<TextColorOption[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFixDialog, setShowFixDialog] = useState(false);
+  const [fixDialogData, setFixDialogData] = useState<any>(null);
 
   useEffect(() => { loadColorsFromDatabase(); }, []);
 
@@ -179,14 +182,18 @@ export function ColorPaletteTab() {
             <AccordionContent><p className="text-sm text-muted-foreground mb-4">{category.description}</p><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{category.colors.map((color) => (
               <Card key={color.value} className="overflow-hidden bg-background text-foreground">
                 <div
-                  className={`h-32 flex items-center justify-center ${
-                    color.type === 'solid' ? color.preview : ''
-                  }`}
-                  style={
-                    (color.type === 'gradient' || color.type === 'glass' || color.category === 'experimental') && color.cssVar
+                  className="h-32 flex items-center justify-center"
+                  style={{
+                    ...(color.type === 'solid' && color.hslValue
+                      ? { backgroundColor: `hsl(${color.hslValue})` }
+                      : {}),
+                    ...(color.type === 'gradient' && color.cssVar
                       ? { backgroundImage: `var(${color.cssVar})` }
-                      : undefined
-                  }
+                      : {}),
+                    ...(color.type === 'glass' && color.cssVar
+                      ? { backgroundImage: `var(${color.cssVar})` }
+                      : {}),
+                  }}
                 >
                   <span className={`text-sm font-medium ${
                     color.hslValue 
@@ -204,19 +211,81 @@ export function ColorPaletteTab() {
                     </div>
                     <p className="text-sm text-muted-foreground">{color.description}</p>
                     
-                    {/* Contrast badge and warning */}
+                    {/* Contrast badge and warning - CONTEXT AWARE */}
                     {color.hslValue && (
-                      <div className="mt-2 flex items-center gap-2">
-                        <Badge variant="outline" className={`text-xs ${getContrastBadge(getContrastRatio(color.hslValue, '0 0% 100%')).color}`}>
-                          {getContrastBadge(getContrastRatio(color.hslValue, '0 0% 100%')).label} Contrast
-                        </Badge>
-                        {getContrastRatio(color.hslValue, '0 0% 100%') < 4.5 && (
-                          <div className="flex items-center gap-1 text-xs text-yellow-700">
-                            <AlertCircle className="h-3 w-3" />
-                            <span>Low contrast on light backgrounds</span>
+                      (() => {
+                        const evaluation = evaluateColorContrast(
+                          color.hslValue,
+                          color.category,
+                          color.type,
+                          color.label
+                        );
+
+                        if (evaluation.badge.label === 'N/A') {
+                          return (
+                            <div className="mt-2">
+                              <Badge variant="outline" className="text-xs text-gray-500">
+                                {evaluation.badge.label}
+                              </Badge>
+                              {evaluation.warning && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  ℹ️ {evaluation.warning}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="mt-2 space-y-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge
+                                variant="outline"
+                                className={`text-xs ${evaluation.badge.color}`}
+                              >
+                                {evaluation.badge.label} Contrast
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                vs {evaluation.against}
+                              </span>
+                            </div>
+
+                            {evaluation.warning && (
+                              <div className="flex items-center gap-1 text-xs text-yellow-700">
+                                <AlertCircle className="h-3 w-3" />
+                                <span>{evaluation.warning}</span>
+                              </div>
+                            )}
+
+                            {evaluation.canFix && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs"
+                                onClick={() => {
+                                  const fixes = getContrastFixSuggestions(
+                                    color.hslValue!,
+                                    color.category,
+                                    color.type
+                                  );
+                                  setFixDialogData({
+                                    colorId: (color as any).id,
+                                    colorName: color.label,
+                                    cssVar: color.cssVar,
+                                    original: color.hslValue!,
+                                    fixes,
+                                    evaluation
+                                  });
+                                  setShowFixDialog(true);
+                                }}
+                              >
+                                <Wand2 className="h-3 w-3 mr-1" />
+                                Fix Contrast
+                              </Button>
+                            )}
                           </div>
-                        )}
-                      </div>
+                        );
+                      })()
                     )}
                   </div>
                   <div className="space-y-2">
@@ -233,6 +302,16 @@ export function ColorPaletteTab() {
         ))}
       </Accordion>
       {textColors.length > 0 && (<div><h3 className="text-xl font-bold text-foreground mb-4">Text Colors</h3><div className="grid grid-cols-1 md:grid-cols-2 gap-6">{textColors.map((color) => (<Card key={color.value} className="overflow-hidden bg-background text-foreground"><div className="p-6 bg-background border-b"><p className={`${color.className} text-2xl font-semibold mb-2`}>The quick brown fox jumps over the lazy dog</p><p className={`${color.className} text-sm`}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p></div><div className="p-4 space-y-3"><div><h3 className="font-semibold text-foreground mb-1">{color.label}</h3><p className="text-sm text-muted-foreground">{color.description}</p></div><div className="space-y-2"><div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs text-foreground">{color.className}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(color.className, `${color.label} Class`)} className="h-6 w-6 p-0">{copiedValue === color.className ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div></div></div></Card>))}</div></div>)}
+
+      {/* Fix Contrast Dialog */}
+      {showFixDialog && (
+        <ContrastFixDialog
+          open={showFixDialog}
+          onOpenChange={setShowFixDialog}
+          data={fixDialogData}
+          onRefresh={loadColorsFromDatabase}
+        />
+      )}
     </div>
   );
 }

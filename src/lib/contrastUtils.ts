@@ -69,6 +69,151 @@ export const getOptimalTextColor = (backgroundColor: string): 'white' | 'dark' =
 };
 
 /**
+ * Evaluate color contrast based on its category and intended use
+ * Returns: { ratio, against, badge, warning, canFix, suggestions }
+ */
+export const evaluateColorContrast = (
+  hslValue: string,
+  category: string,
+  type: 'solid' | 'gradient' | 'glass',
+  colorName: string
+): {
+  ratio: number;
+  against: string;
+  badge: { label: string; color: string };
+  warning: string | null;
+  canFix: boolean;
+  suggestions: string[];
+} => {
+  // Glass effects: Skip contrast evaluation (translucent overlays)
+  if (type === 'glass' || category === 'glass') {
+    return {
+      ratio: 0,
+      against: 'N/A',
+      badge: { label: 'N/A', color: 'text-gray-500' },
+      warning: 'Glass effects are translucent overlays - contrast depends on content beneath',
+      canFix: false,
+      suggestions: []
+    };
+  }
+
+  // Gradients: Skip contrast evaluation (varying colors)
+  if (type === 'gradient') {
+    return {
+      ratio: 0,
+      against: 'N/A',
+      badge: { label: 'N/A', color: 'text-gray-500' },
+      warning: 'Gradients have varying colors - ensure text readability across entire gradient',
+      canFix: false,
+      suggestions: []
+    };
+  }
+
+  // Text colors: Evaluate against common backgrounds
+  if (category === 'text') {
+    const lightBgRatio = getContrastRatio(hslValue, '0 0% 100%'); // white
+    const darkBgRatio = getContrastRatio(hslValue, '249 67% 24%'); // federal blue
+    
+    const bestRatio = Math.max(lightBgRatio, darkBgRatio);
+    const against = lightBgRatio > darkBgRatio ? 'light backgrounds' : 'dark backgrounds';
+    
+    return {
+      ratio: bestRatio,
+      against,
+      badge: getContrastBadge(bestRatio),
+      warning: bestRatio < 4.5 ? `Low contrast on ${against}` : null,
+      canFix: bestRatio < 7,
+      suggestions: [
+        `Use on ${lightBgRatio >= 7 ? 'light' : 'dark'} backgrounds`,
+        bestRatio < 7 ? 'Adjust lightness for AAA compliance' : ''
+      ].filter(Boolean)
+    };
+  }
+
+  // Surface/Interactive colors: Evaluate as backgrounds
+  const whiteTextRatio = getContrastRatio(hslValue, '0 0% 100%');
+  const darkTextRatio = getContrastRatio(hslValue, '249 67% 24%');
+  
+  const bestRatio = Math.max(whiteTextRatio, darkTextRatio);
+  const optimalText = whiteTextRatio >= 7 ? 'white text' : 'dark text';
+  
+  return {
+    ratio: bestRatio,
+    against: optimalText,
+    badge: getContrastBadge(bestRatio),
+    warning: bestRatio < 4.5 ? 'Low contrast with both light and dark text' : null,
+    canFix: bestRatio < 7,
+    suggestions: [
+      `Best with ${optimalText}`,
+      bestRatio < 7 ? 'Darken or lighten to improve contrast' : ''
+    ].filter(Boolean)
+  };
+};
+
+/**
+ * Generate actionable contrast fix suggestions
+ */
+export const getContrastFixSuggestions = (
+  hslValue: string,
+  category: string,
+  type: 'solid' | 'gradient' | 'glass'
+): {
+  fixedWhiteText: string | null;
+  fixedDarkText: string | null;
+  recommendation: string;
+} => {
+  if (type === 'glass' || type === 'gradient') {
+    return {
+      fixedWhiteText: null,
+      fixedDarkText: null,
+      recommendation: 'N/A for translucent/gradient colors'
+    };
+  }
+
+  const whiteTextRatio = getContrastRatio(hslValue, '0 0% 100%');
+  const darkTextRatio = getContrastRatio(hslValue, '249 67% 24%');
+
+  // Text colors
+  if (category === 'text') {
+    const lightBgFixed = fixTextForAAA(hslValue, '0 0% 100%');
+    const darkBgFixed = fixTextForAAA(hslValue, '249 67% 24%');
+    
+    return {
+      fixedWhiteText: lightBgFixed,
+      fixedDarkText: darkBgFixed,
+      recommendation: `Use ${lightBgFixed} on light backgrounds or ${darkBgFixed} on dark backgrounds`
+    };
+  }
+
+  // Surface/Interactive colors - already AAA compliant?
+  if (whiteTextRatio >= 7) {
+    return {
+      fixedWhiteText: null,
+      fixedDarkText: null,
+      recommendation: 'Already AAA compliant with white text ✓'
+    };
+  }
+
+  if (darkTextRatio >= 7) {
+    return {
+      fixedWhiteText: null,
+      fixedDarkText: null,
+      recommendation: 'Already AAA compliant with dark text ✓'
+    };
+  }
+
+  // Generate fixes
+  const fixedForWhite = fixBackgroundForAAA(hslValue, '0 0% 100%');
+  const fixedForDark = fixBackgroundForAAA(hslValue, '249 67% 24%');
+
+  return {
+    fixedWhiteText: fixedForWhite,
+    fixedDarkText: fixedForDark,
+    recommendation: `Adjust to ${fixedForWhite} for white text, or ${fixedForDark} for dark text`
+  };
+};
+
+/**
  * Check if contrast meets accessibility standard
  */
 export const meetsContrastStandard = (
