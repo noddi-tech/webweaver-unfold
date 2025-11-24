@@ -241,17 +241,13 @@ const Hero = () => {
                   <div className="w-full h-[600px] rounded-xl bg-muted/20 animate-pulse" />
                 </div>
               ) : displayType === 'carousel' ? (
-                <div className="relative">
-                  {/* Gradient border frame */}
-                  <div 
-                    className="absolute inset-0 -inset-1 rounded-2xl pointer-events-none"
-                    style={{
-                      background: 'linear-gradient(135deg, hsl(266 85% 58% / 0.5), hsl(25 95% 63% / 0.5), hsl(321 59% 85% / 0.5))',
-                      filter: 'blur(2px)',
-                    }}
-                  />
-                  
-                  <div className="relative aspect-video rounded-xl overflow-hidden">
+                <div 
+                  className="p-5 rounded-2xl"
+                  style={{
+                    background: 'linear-gradient(to top, hsl(266 85% 58% / 0.3) 0%, hsl(25 95% 63% / 0.2) 30%, hsl(0 0% 100% / 0.1) 60%, transparent 100%)'
+                  }}
+                >
+                  <div className="aspect-video rounded-xl overflow-hidden">
                     <Carousel
                       setApi={setApi}
                       plugins={carouselSettings.autoplay ? [plugin.current] : []}
@@ -300,22 +296,15 @@ const Hero = () => {
                       ))}
                     </div>
                   )}
-
-                  {/* Bottom fade for seamless blend */}
-                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
                 </div>
               ) : (
-                <div className="relative">
-                  {/* Gradient border frame */}
-                  <div 
-                    className="absolute inset-0 -inset-1 rounded-2xl pointer-events-none"
-                    style={{
-                      background: 'linear-gradient(135deg, hsl(266 85% 58% / 0.5), hsl(25 95% 63% / 0.5), hsl(321 59% 85% / 0.5))',
-                      filter: 'blur(2px)',
-                    }}
-                  />
-                  
-                  <div className="relative aspect-video rounded-xl overflow-hidden">
+                <div 
+                  className="p-5 rounded-2xl"
+                  style={{
+                    background: 'linear-gradient(to top, hsl(266 85% 58% / 0.3) 0%, hsl(25 95% 63% / 0.2) 30%, hsl(0 0% 100% / 0.1) 60%, transparent 100%)'
+                  }}
+                >
+                  <div className="aspect-video rounded-xl overflow-hidden">
                     <img
                       src={imageUrl}
                       alt={imageAlt}
@@ -325,9 +314,6 @@ const Hero = () => {
                       }}
                     />
                   </div>
-                  
-                  {/* Bottom fade for seamless blend */}
-                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
                 </div>
               )}
             </EditableUniversalMedia>
