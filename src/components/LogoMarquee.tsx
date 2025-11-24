@@ -1,0 +1,67 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Logo {
+  src: string;
+  alt: string;
+}
+
+export function LogoMarquee() {
+  const [logos, setLogos] = useState<Logo[]>([]);
+
+  useEffect(() => {
+    loadLogos();
+  }, []);
+
+  const loadLogos = async () => {
+    // Try to load from images table with section 'logo-marquee'
+    const { data: imageData } = await supabase
+      .from('images')
+      .select('file_url, alt, title')
+      .eq('section', 'logo-marquee')
+      .eq('active', true)
+      .order('sort_order', { ascending: true });
+
+    if (imageData && imageData.length > 0) {
+      setLogos(imageData.map(img => ({
+        src: img.file_url,
+        alt: img.alt || img.title
+      })));
+    } else {
+      // Fallback placeholder logos
+      setLogos([
+        { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+1', alt: 'Partner 1' },
+        { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+2', alt: 'Partner 2' },
+        { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+3', alt: 'Partner 3' },
+        { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+4', alt: 'Partner 4' },
+        { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+5', alt: 'Partner 5' },
+        { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+6', alt: 'Partner 6' },
+      ]);
+    }
+  };
+
+  // Duplicate logos for seamless infinite scroll
+  const duplicatedLogos = [...logos, ...logos];
+
+  return (
+    <section 
+      className="w-full overflow-hidden py-8"
+      style={{
+        maskImage: 'linear-gradient(to right, transparent 0%, black 12.5%, black 87.5%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 12.5%, black 87.5%, transparent 100%)'
+      }}
+    >
+      <div className="flex gap-14 animate-marquee will-change-transform">
+        {duplicatedLogos.map((logo, i) => (
+          <div key={i} className="flex-shrink-0">
+            <img 
+              src={logo.src} 
+              alt={logo.alt} 
+              className="h-6 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" 
+            />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}

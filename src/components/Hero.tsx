@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Award } from "lucide-react";
+import { ArrowRight, Award, Sparkles, Target, Users } from "lucide-react";
 import { LanguageLink } from "@/components/LanguageLink";
 import noddiLocationScreen from "@/assets/noddi-location-screen.png";
 import tiamatLocationScreen from "@/assets/tiamat-location-screen.png";
@@ -15,6 +15,7 @@ import { EditableBackground } from "@/components/EditableBackground";
 import { EditableIcon } from "@/components/EditableIcon";
 import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
 import { supabase } from "@/integrations/supabase/client";
+import { LogoMarquee } from "@/components/LogoMarquee";
 import {
   Carousel,
   CarouselContent,
@@ -39,34 +40,38 @@ const Hero = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [mediaKey, setMediaKey] = useState(0);
   const [displayType, setDisplayType] = useState<'image' | 'carousel'>('carousel');
-  const [imageUrl, setImageUrl] = useState('');
-  const [imageAlt, setImageAlt] = useState('');
-  const [carouselImages, setCarouselImages] = useState<any[]>([]);
-  const [carouselSettings, setCarouselSettings] = useState({
+  const [imageSettings, setImageSettings] = useState({
+    image_url: '',
+    image_alt: '',
+  });
+  const [carouselSettings, setCarouselSettings] = useState<any>({
     autoplay: true,
-    autoplay_delay: 3500,
+    autoplay_delay: 3.5,
     show_navigation: true,
     show_dots: true,
+    images: [],
   });
 
   // Fallback images
   const fallbackImages = [
     {
-      image: noddiLocationScreen,
+      url: noddiLocationScreen,
       alt: "Noddi location selection screen showing saved addresses and search functionality",
       title: "Noddi",
     },
     {
-      image: tiamatLocationScreen,
+      url: tiamatLocationScreen,
       alt: "Tiamat Dekk location selection screen with address delivery confirmation",
       title: "Tiamat Dekk",
     },
     {
-      image: hurtigrutaLocationScreen,
+      url: hurtigrutaLocationScreen,
       alt: "Hurtigruta Carglass location selection screen with address delivery options",
       title: "Hurtigruta Carglass",
     },
   ];
+
+  const fallbackImage = noddiLocationScreen;
 
   useEffect(() => {
     loadMediaSettings();
@@ -100,8 +105,10 @@ const Hero = () => {
         setDisplayType(settings.display_type as 'image' | 'carousel');
         
         if (settings.display_type === 'image') {
-          setImageUrl(settings.image_url || '');
-          setImageAlt(settings.image_alt || '');
+          setImageSettings({
+            image_url: settings.image_url || '',
+            image_alt: settings.image_alt || '',
+          });
           console.log('🖼️ Single image mode:', settings.image_url);
         } else if (settings.carousel_config_id) {
           // Step 2: Fetch carousel config separately if needed
@@ -114,31 +121,23 @@ const Hero = () => {
           if (carouselError) {
             console.error('❌ Carousel config error:', carouselError);
           } else if (carouselConfig) {
+            // Parse carousel images
+            const images = Array.isArray(carouselConfig.images) ? carouselConfig.images : [];
+            
             setCarouselSettings({
               autoplay: carouselConfig.autoplay,
               autoplay_delay: carouselConfig.autoplay_delay,
               show_navigation: carouselConfig.show_navigation,
               show_dots: carouselConfig.show_dots,
+              images: images.length > 0 ? images : fallbackImages,
             });
-            
-            // Parse carousel images
-            const images = Array.isArray(carouselConfig.images) ? carouselConfig.images : [];
-            setCarouselImages(images.map((img: any) => ({
-              // Convert /src/assets paths to actual imports
-              image: img.url.includes('noddi-location-screen') ? noddiLocationScreen :
-                     img.url.includes('tiamat-location-screen') ? tiamatLocationScreen :
-                     img.url.includes('hurtigruta-location-screen') ? hurtigrutaLocationScreen :
-                     img.url,
-              alt: img.alt || '',
-              title: img.title || '',
-            })));
             
             console.log('🎠 Carousel mode:', images.length, 'images');
             
             // Update autoplay plugin delay
             if (plugin.current) {
               plugin.current = Autoplay({ 
-                delay: carouselConfig.autoplay_delay,
+                delay: carouselConfig.autoplay_delay * 1000,
                 stopOnInteraction: true 
               });
             }
@@ -157,8 +156,6 @@ const Hero = () => {
     }
   };
 
-  const bookingSteps = carouselImages.length > 0 ? carouselImages : fallbackImages;
-
   useEffect(() => {
     if (!api) {
       return;
@@ -172,8 +169,13 @@ const Hero = () => {
     });
   }, [api]);
 
+  const shouldShowNavigation = carouselSettings.show_navigation && carouselSettings.images.length > 1;
+  const shouldShowDots = carouselSettings.show_dots && carouselSettings.images.length > 1;
+  const totalSlides = carouselSettings.images.length;
+  const currentSlide = current - 1;
+
   return (
-    <section className="pt-32 pb-0 relative overflow-visible">
+    <section className="pt-32 pb-0 relative overflow-visible bg-background">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Centered single column layout */}
         <div className="flex flex-col items-center text-center gap-12">
@@ -229,7 +231,7 @@ const Hero = () => {
           </div>
 
           {/* Full-width Image - 16:9 Aspect Ratio */}
-          <div className="relative w-full mt-12">
+          <div className="relative w-full max-w-5xl mt-12">
             <EditableUniversalMedia
               key={mediaKey}
               locationId="homepage-hero"
@@ -241,84 +243,225 @@ const Hero = () => {
                   <div className="w-full h-[600px] rounded-xl bg-muted/20 animate-pulse" />
                 </div>
               ) : displayType === 'carousel' ? (
-                <div 
-                  className="p-32 rounded-2xl"
-                  style={{
-                    background: 'linear-gradient(to top, hsl(266 85% 58% / 0.3) 0%, hsl(25 95% 63% / 0.2) 30%, hsl(0 0% 100% / 0.1) 60%, transparent 100%)'
-                  }}
-                >
-                  <div className="aspect-video rounded-xl overflow-hidden">
+                <div className="relative">
+                  <div 
+                    className="p-32 rounded-2xl relative overflow-visible"
+                    style={{
+                      background: 'linear-gradient(to top, hsl(220 15% 15% / 0.95) 0%, hsl(220 15% 25% / 0.7) 40%, hsl(0 0% 100% / 0.3) 70%, transparent 100%)'
+                    }}
+                  >
                     <Carousel
+                      key={mediaKey}
                       setApi={setApi}
-                      plugins={carouselSettings.autoplay ? [plugin.current] : []}
-                      className="w-full h-full"
-                      onMouseEnter={plugin.current.stop}
-                      onMouseLeave={plugin.current.reset}
+                      opts={{
+                        align: 'center',
+                        loop: carouselSettings.autoplay,
+                      }}
+                      plugins={carouselSettings.autoplay ? [
+                        Autoplay({
+                          delay: carouselSettings.autoplay_delay * 1000,
+                          stopOnInteraction: false,
+                        })
+                      ] : []}
+                      className="w-full"
                     >
-                      <CarouselContent className="h-full">
-                        {bookingSteps.map((step, index) => (
-                          <CarouselItem key={`hero-slide-${index}`} className="h-full">
-                            <div className="relative h-full">
+                      <CarouselContent>
+                        {carouselSettings.images.map((image: any, index: number) => (
+                          <CarouselItem key={`hero-slide-${index}`}>
+                            <div className="aspect-video rounded-xl overflow-hidden shadow-2xl">
                               <img
-                                src={step.image}
-                                alt={step.alt}
-                                className="w-full h-full object-cover rounded-xl shadow-2xl"
-                                style={{
-                                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)'
-                                }}
-                                loading={index === 0 ? "eager" : "lazy"}
+                                src={image.url}
+                                alt={image.alt || `Slide ${index + 1}`}
+                                className="w-full h-full object-cover"
                               />
                             </div>
                           </CarouselItem>
                         ))}
                       </CarouselContent>
-                      {carouselSettings.show_navigation && (
+                      
+                      {shouldShowNavigation && (
                         <>
-                          <CarouselPrevious className="-left-12" />
-                          <CarouselNext className="-right-12" />
+                          <CarouselPrevious className="left-4" />
+                          <CarouselNext className="right-4" />
                         </>
                       )}
                     </Carousel>
+
+                    {shouldShowDots && totalSlides > 0 && (
+                      <div className="flex justify-center gap-2 mt-8">
+                        {Array.from({ length: totalSlides }).map((_, index) => (
+                          <button
+                            key={`hero-dot-${index}`}
+                            onClick={() => api?.scrollTo(index)}
+                            className={`h-2 rounded-full transition-all ${
+                              index === currentSlide
+                                ? 'w-8 bg-primary'
+                                : 'w-2 bg-primary/30 hover:bg-primary/50'
+                            }`}
+                            aria-label={`Go to slide ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  {/* Navigation Dots */}
-                  {carouselSettings.show_dots && (
-                    <div className="flex justify-center gap-2 mt-6">
-                      {Array.from({ length: count }).map((_, index) => (
-                        <button
-                          key={`hero-dot-${index}`}
-                          onClick={() => api?.scrollTo(index)}
-                          className={`h-2 rounded-full transition-all ${
-                            index === current - 1 ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                          }`}
-                          aria-label={`Go to step ${index + 1}`}
-                        />
-                      ))}
-                    </div>
-                  )}
+                  {/* Floating Callouts */}
+                  <div 
+                    className="absolute -left-[10%] top-1/3 w-[14%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                    style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
+                  >
+                    <img 
+                      src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=600&fit=crop" 
+                      alt="Dashboard callout" 
+                      className="w-full"
+                    />
+                  </div>
+                  <div 
+                    className="absolute -right-[8%] top-[15%] w-[30%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                    style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
+                  >
+                    <img 
+                      src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" 
+                      alt="Analytics callout" 
+                      className="w-full"
+                    />
+                  </div>
+                  <div 
+                    className="absolute -right-[5%] bottom-[10%] w-[18%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                    style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}
+                  >
+                    <img 
+                      src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop" 
+                      alt="Metrics callout" 
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               ) : (
-                <div 
-                  className="p-32 rounded-2xl"
-                  style={{
-                    background: 'linear-gradient(to top, hsl(266 85% 58% / 0.3) 0%, hsl(25 95% 63% / 0.2) 30%, hsl(0 0% 100% / 0.1) 60%, transparent 100%)'
-                  }}
-                >
-                  <div className="aspect-video rounded-xl overflow-hidden">
-                    <img
-                      src={imageUrl}
-                      alt={imageAlt}
-                      className="w-full h-full object-cover rounded-xl shadow-2xl"
-                      style={{
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)'
-                      }}
+                <div className="relative">
+                  <div 
+                    className="p-32 rounded-2xl relative overflow-visible"
+                    style={{
+                      background: 'linear-gradient(to top, hsl(220 15% 15% / 0.95) 0%, hsl(220 15% 25% / 0.7) 40%, hsl(0 0% 100% / 0.3) 70%, transparent 100%)'
+                    }}
+                  >
+                    <div className="aspect-video rounded-xl overflow-hidden shadow-2xl">
+                      <img
+                        key={mediaKey}
+                        src={imageSettings.image_url || fallbackImage}
+                        alt={imageSettings.image_alt || 'Hero image'}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Floating Callouts */}
+                  <div 
+                    className="absolute -left-[10%] top-1/3 w-[14%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                    style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
+                  >
+                    <img 
+                      src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=600&fit=crop" 
+                      alt="Dashboard callout" 
+                      className="w-full"
+                    />
+                  </div>
+                  <div 
+                    className="absolute -right-[8%] top-[15%] w-[30%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                    style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
+                  >
+                    <img 
+                      src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" 
+                      alt="Analytics callout" 
+                      className="w-full"
+                    />
+                  </div>
+                  <div 
+                    className="absolute -right-[5%] bottom-[10%] w-[18%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                    style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}
+                  >
+                    <img 
+                      src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop" 
+                      alt="Metrics callout" 
+                      className="w-full"
                     />
                   </div>
                 </div>
               )}
             </EditableUniversalMedia>
           </div>
+
+          {/* Logo Marquee */}
+          <div className="w-full mt-16">
+            <LogoMarquee />
+          </div>
         </div>
+      </div>
+
+      {/* Feature Highlights - Full Width Dark Section */}
+      <div className="relative w-full mt-16">
+        <div 
+          className="absolute inset-0" 
+          style={{
+            background: 'linear-gradient(to bottom, hsl(220 15% 15%) 0%, hsl(220 15% 8%) 100%)'
+          }}
+        />
+        <div className="relative container mx-auto px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-16">
+            {/* Feature 1 */}
+            <div className="text-center opacity-0 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
+              <div className="flex justify-center mb-4">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <EditableTranslation translationKey="hero.feature1.title">
+                <h3 className="font-semibold text-white mb-2">Discover freely</h3>
+              </EditableTranslation>
+              <EditableTranslation translationKey="hero.feature1.description">
+                <p className="text-sm text-white/70">Answer product questions in seconds without bottlenecks.</p>
+              </EditableTranslation>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="text-center opacity-0 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
+              <div className="flex justify-center mb-4">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                  <Users className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <EditableTranslation translationKey="hero.feature2.title">
+                <h3 className="font-semibold text-white mb-2">Understand behavior</h3>
+              </EditableTranslation>
+              <EditableTranslation translationKey="hero.feature2.description">
+                <p className="text-sm text-white/70">See how users engage, convert, and return, all in one unified view.</p>
+              </EditableTranslation>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="text-center opacity-0 animate-fade-in" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+              <div className="flex justify-center mb-4">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                  <Target className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <EditableTranslation translationKey="hero.feature3.title">
+                <h3 className="font-semibold text-white mb-2">Act with confidence</h3>
+              </EditableTranslation>
+              <EditableTranslation translationKey="hero.feature3.description">
+                <p className="text-sm text-white/70">Back every decision with insights you can trust. Then share, test, and improve together.</p>
+              </EditableTranslation>
+            </div>
+          </div>
+        </div>
+
+        {/* Ellipse Glow */}
+        <div 
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-32 blur-3xl pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, hsl(var(--primary) / 0.2) 0%, transparent 70%)'
+          }}
+        />
       </div>
     </section>
   );
