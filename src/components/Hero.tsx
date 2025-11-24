@@ -174,9 +174,9 @@ const Hero = () => {
 
   return (
     <section className="pt-20 pb-0 relative overflow-visible">
-      <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
+      <div className="container max-w-container px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Centered single column layout */}
-        <div className="flex flex-col items-center text-center gap-12 max-w-4xl mx-auto">
+        <div className="flex flex-col items-center text-center gap-12">
           {/* Text Content - Centered */}
           <div className="space-y-8" key={refreshKey}>
             <EditableTranslation translationKey="hero.title" onSave={() => setRefreshKey(prev => prev + 1)}>
@@ -228,8 +228,8 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Full-width Image with Warm Gradient Glow */}
-          <div className="relative w-full max-w-5xl mx-auto mt-12">
+          {/* Full-width Image - 16:9 Aspect Ratio */}
+          <div className="relative w-full mt-12">
             <EditableUniversalMedia
               key={mediaKey}
               locationId="homepage-hero"
@@ -241,36 +241,23 @@ const Hero = () => {
                   <div className="w-full h-[600px] rounded-xl bg-muted/20 animate-pulse" />
                 </div>
               ) : displayType === 'carousel' ? (
-                <>
-                  {/* Warm gradient glow behind carousel */}
-                  <div 
-                    className="absolute inset-0 -inset-x-20 -inset-y-20 blur-3xl opacity-50 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(
-                        ellipse 80% 60% at 50% 50%,
-                        hsl(25 95% 63% / 0.4),
-                        hsl(25 95% 70% / 0.3),
-                        hsl(321 59% 85% / 0.2),
-                        transparent 70%
-                      )`
-                    }}
-                  />
-                  <div className="relative">
+                <div className="relative">
+                  <div className="aspect-video">
                     <Carousel
                       setApi={setApi}
                       plugins={carouselSettings.autoplay ? [plugin.current] : []}
-                      className="w-full"
+                      className="w-full h-full"
                       onMouseEnter={plugin.current.stop}
                       onMouseLeave={plugin.current.reset}
                     >
-                      <CarouselContent>
+                      <CarouselContent className="h-full">
                         {bookingSteps.map((step, index) => (
-                          <CarouselItem key={`hero-slide-${index}`}>
-                            <div className="flex items-center justify-center">
+                          <CarouselItem key={`hero-slide-${index}`} className="h-full">
+                            <div className="relative h-full">
                               <img
                                 src={step.image}
                                 alt={step.alt}
-                                className="w-full h-auto rounded-xl shadow-2xl"
+                                className="w-full h-full object-cover rounded-xl shadow-2xl"
                                 style={{
                                   boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)'
                                 }}
@@ -287,55 +274,43 @@ const Hero = () => {
                         </>
                       )}
                     </Carousel>
-
-                    {/* Navigation Dots */}
-                    {carouselSettings.show_dots && (
-                      <div className="flex justify-center gap-2 mt-6">
-                        {Array.from({ length: count }).map((_, index) => (
-                          <button
-                            key={`hero-dot-${index}`}
-                            onClick={() => api?.scrollTo(index)}
-                            className={`h-2 rounded-full transition-all ${
-                              index === current - 1 ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                            }`}
-                            aria-label={`Go to step ${index + 1}`}
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Bottom fade for seamless blend */}
-                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
                   </div>
-                </>
+
+                  {/* Navigation Dots */}
+                  {carouselSettings.show_dots && (
+                    <div className="flex justify-center gap-2 mt-6">
+                      {Array.from({ length: count }).map((_, index) => (
+                        <button
+                          key={`hero-dot-${index}`}
+                          onClick={() => api?.scrollTo(index)}
+                          className={`h-2 rounded-full transition-all ${
+                            index === current - 1 ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                          }`}
+                          aria-label={`Go to step ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Bottom fade for seamless blend */}
+                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+                </div>
               ) : (
-                <>
-                  {/* Warm gradient glow behind single image */}
-                  <div 
-                    className="absolute inset-0 -inset-x-20 -inset-y-20 blur-3xl opacity-50 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(
-                        ellipse 80% 60% at 50% 50%,
-                        hsl(25 95% 63% / 0.4),
-                        hsl(25 95% 70% / 0.3),
-                        hsl(321 59% 85% / 0.2),
-                        transparent 70%
-                      )`
-                    }}
-                  />
-                  <div className="relative">
+                <div className="relative">
+                  <div className="aspect-video">
                     <img
                       src={imageUrl}
                       alt={imageAlt}
-                      className="w-full h-auto rounded-xl shadow-2xl"
+                      className="w-full h-full object-cover rounded-xl shadow-2xl"
                       style={{
                         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)'
                       }}
                     />
-                    {/* Bottom fade for seamless blend */}
-                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
                   </div>
-                </>
+                  
+                  {/* Bottom fade for seamless blend */}
+                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+                </div>
               )}
             </EditableUniversalMedia>
           </div>
