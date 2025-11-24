@@ -2,13 +2,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Copy, Download, Check, Loader2, AlertCircle, Wand2 } from "lucide-react";
+import { Copy, Download, Check, Loader2, AlertCircle, Wand2, Edit } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getOptimalTextColor, getContrastRatio, getContrastBadge, evaluateColorContrast, getContrastFixSuggestions } from "@/lib/contrastUtils";
 import { ContrastCheckerTool } from "./ContrastCheckerTool";
 import { ContrastFixDialog } from "./ContrastFixDialog";
+import { TextColorEditModal } from "./TextColorEditModal";
 
 interface ColorOption {
   value: string;
@@ -28,6 +29,9 @@ interface TextColorOption {
   description: string;
   preview: string;
   className: string;
+  hslValue?: string;
+  colorId?: string;
+  cssVar?: string;
 }
 
 interface ColorCategory {
@@ -89,6 +93,7 @@ export function ColorPaletteTab() {
   const [loading, setLoading] = useState(true);
   const [showFixDialog, setShowFixDialog] = useState(false);
   const [fixDialogData, setFixDialogData] = useState<any>(null);
+  const [editingTextColor, setEditingTextColor] = useState<TextColorOption | null>(null);
 
   useEffect(() => { loadColorsFromDatabase(); }, []);
 
@@ -112,7 +117,16 @@ export function ColorPaletteTab() {
           const textClass = token.preview_class?.startsWith('bg-') 
             ? token.preview_class.replace('bg-', 'text-')
             : token.preview_class || `text-[hsl(${token.value})]`;
-          textColorOptions.push({ value: textClass, label: token.label || token.css_var, description: token.description || '', preview: textClass, className: textClass });
+          textColorOptions.push({ 
+            value: textClass, 
+            label: token.label || token.css_var, 
+            description: token.description || '', 
+            preview: textClass, 
+            className: textClass,
+            hslValue: token.value,
+            colorId: token.id,
+            cssVar: token.css_var
+          });
         } else {
           const category = token.category || 'other';
           if (!colorsByCategory[category]) colorsByCategory[category] = [];
@@ -168,6 +182,14 @@ export function ColorPaletteTab() {
     }
   };
 
+  // Helper function to determine if text is light (lightness > 50%)
+  const isLightText = (hslValue: string): boolean => {
+    const match = hslValue?.match(/(\d+\.?\d*)\s+(\d+\.?\d*)%\s+(\d+\.?\d*)%/);
+    if (!match) return false;
+    const lightness = parseFloat(match[3]);
+    return lightness > 50;
+  };
+
   if (loading) return (<div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /><span className="ml-3 text-muted-foreground">Loading color system from database...</span></div>);
 
   return (
@@ -203,15 +225,9 @@ export function ColorPaletteTab() {
                       : {}),
                   }}
                 >
-                  {/* Glass effect overlay for glass types */}
-                  {color.type === 'glass' && color.cssVar && (
-                    <div 
-                      className="absolute inset-0 backdrop-blur-md border"
-                      style={{ 
-                        backgroundImage: `var(${color.cssVar})`,
-                        borderColor: 'rgba(255, 255, 255, 0.2)'
-                      }}
-                    />
+                  {/* Glass effect overlay - use className for proper CSS application */}
+                  {color.type === 'glass' && color.preview && (
+                    <div className={`absolute inset-0 ${color.preview}`} />
                   )}
                   <span className={`text-sm font-medium relative z-10 ${
                     color.hslValue 
@@ -319,7 +335,85 @@ export function ColorPaletteTab() {
           </AccordionItem>
         ))}
       </Accordion>
-      {textColors.length > 0 && (<div><h3 className="text-xl font-bold text-foreground mb-4">Text Colors</h3><div className="grid grid-cols-1 md:grid-cols-2 gap-6">{textColors.map((color) => (<Card key={color.value} className="overflow-hidden bg-background text-foreground"><div className="p-6 bg-background border-b"><p className={`${color.className} text-2xl font-semibold mb-2`}>The quick brown fox jumps over the lazy dog</p><p className={`${color.className} text-sm`}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p></div><div className="p-4 space-y-3"><div><h3 className="font-semibold text-foreground mb-1">{color.label}</h3><p className="text-sm text-muted-foreground">{color.description}</p></div><div className="space-y-2"><div className="flex items-center justify-between gap-2 p-2 bg-muted rounded"><code className="text-xs text-foreground">{color.className}</code><Button size="sm" variant="ghost" onClick={() => handleCopy(color.className, `${color.label} Class`)} className="h-6 w-6 p-0">{copiedValue === color.className ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}</Button></div></div></div></Card>))}</div></div>)}
+      {textColors.length > 0 && (
+        <div>
+          <h3 className="text-xl font-bold text-foreground mb-4">Text Colors</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {textColors.map((color) => {
+              // Smart background selection based on text lightness
+              const isLight = color.hslValue ? isLightText(color.hslValue) : false;
+              const previewBg = isLight ? 'bg-card' : 'bg-background';
+              const previewText = isLight ? 'text-card-foreground' : 'text-foreground';
+              
+              return (
+                <Card key={color.value} className="overflow-hidden bg-background text-foreground">
+                  <div className={`p-6 border-b ${previewBg}`}>
+                    <p className={`${color.className} text-2xl font-semibold mb-2`}>
+                      The quick brown fox jumps over the lazy dog
+                    </p>
+                    <p className={`${color.className} text-sm`}>
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </p>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold text-foreground mb-1">{color.label}</h3>
+                        <p className="text-sm text-muted-foreground">{color.description}</p>
+                      </div>
+                      {color.colorId && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingTextColor(color)}
+                          className="shrink-0"
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2 p-2 bg-muted rounded">
+                        <code className="text-xs text-foreground">{color.className}</code>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleCopy(color.className, `${color.label} Class`)}
+                          className="h-6 w-6 p-0"
+                        >
+                          {copiedValue === color.className ? (
+                            <Check className="h-3 w-3 text-green-500" />
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                      {color.hslValue && (
+                        <div className="flex items-center justify-between gap-2 p-2 bg-muted rounded">
+                          <code className="text-xs text-foreground">hsl({color.hslValue})</code>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleCopy(`hsl(${color.hslValue})`, `${color.label} HSL`)}
+                            className="h-6 w-6 p-0"
+                          >
+                            {copiedValue === `hsl(${color.hslValue})` ? (
+                              <Check className="h-3 w-3 text-green-500" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Fix Contrast Dialog */}
       {showFixDialog && (
@@ -328,6 +422,19 @@ export function ColorPaletteTab() {
           onOpenChange={setShowFixDialog}
           data={fixDialogData}
           onRefresh={loadColorsFromDatabase}
+        />
+      )}
+
+      {/* Text Color Edit Modal */}
+      {editingTextColor && (
+        <TextColorEditModal
+          open={!!editingTextColor}
+          onOpenChange={(open) => !open && setEditingTextColor(null)}
+          colorId={editingTextColor.colorId!}
+          colorName={editingTextColor.label}
+          cssVar={editingTextColor.cssVar!}
+          currentValue={editingTextColor.hslValue!}
+          onSave={loadColorsFromDatabase}
         />
       )}
     </div>
