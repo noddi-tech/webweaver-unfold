@@ -54,6 +54,12 @@ All colors MUST be HSL.
     --muted: 0 0% 96%;                         /* Light gray surfaces | Used in: Disabled states, secondary sections */
     --muted-foreground: 0 0% 35%;              /* Darker gray for AAA contrast (7:1) | Used in: Descriptions, labels, helper text */
     
+    /* Secondary & Accent - Distinct surface colors */
+    --secondary: 210 40% 96.1%;                /* Light blue-gray surface */
+    --secondary-foreground: 222.2 47.4% 11.2%; /* Dark blue-gray text */
+    --accent: 270 20% 95%;                     /* Light lavender surface */
+    --accent-foreground: 249 50% 20%;          /* Dark purple-blue text */
+    
     /* Borders and dividers */
     --border: 0 0% 90%;                        /* Light gray borders | Used in: Inputs, cards, dividers */
     

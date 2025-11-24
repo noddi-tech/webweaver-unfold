@@ -1,8 +1,9 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Copy, Download, Check, Loader2, AlertCircle, Wand2, Edit } from "lucide-react";
+import { Copy, Download, Check, Loader2, AlertCircle, Wand2, Edit, AlertTriangle, Palette } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -94,6 +95,8 @@ export function ColorPaletteTab() {
   const [showFixDialog, setShowFixDialog] = useState(false);
   const [fixDialogData, setFixDialogData] = useState<any>(null);
   const [editingTextColor, setEditingTextColor] = useState<TextColorOption | null>(null);
+  const [duplicates, setDuplicates] = useState<Array<{ color1: string; color2: string; value: string }>>([]);
+  const [similarColors, setSimilarColors] = useState<Array<{ color1: string; color2: string; lightnessDiff: number }>>([]);
 
   useEffect(() => { loadColorsFromDatabase(); }, []);
 
@@ -138,12 +141,68 @@ export function ColorPaletteTab() {
       const categoriesArray: ColorCategory[] = categoryOrder.filter(key => colorsByCategory[key]?.length > 0).map(key => ({ title: CATEGORY_METADATA[key]?.title || key, description: CATEGORY_METADATA[key]?.description || '', colors: colorsByCategory[key] }));
       setCategories(categoriesArray);
       setTextColors(textColorOptions);
+      
+      // Detect duplicates and similar colors
+      detectDuplicates(colorTokens);
+      detectSimilarColors(colorTokens);
+      
       setLoading(false);
     } catch (error) {
       console.error('Error loading colors:', error);
       toast({ title: "Error Loading Colors", description: "Could not load colors from database", variant: "destructive" });
       setLoading(false);
     }
+  };
+
+  const detectDuplicates = (colors: any[]) => {
+    const seen = new Map<string, string>();
+    const dupes: Array<{ color1: string; color2: string; value: string }> = [];
+    
+    colors.forEach(color => {
+      if (seen.has(color.value)) {
+        dupes.push({
+          color1: seen.get(color.value)!,
+          color2: color.label || color.css_var,
+          value: color.value
+        });
+      } else {
+        seen.set(color.value, color.label || color.css_var);
+      }
+    });
+    
+    setDuplicates(dupes);
+  };
+
+  const detectSimilarColors = (colors: any[]) => {
+    const similar: Array<{ color1: string; color2: string; lightnessDiff: number }> = [];
+    const textAndSurfaceColors = colors.filter(c => c.category === 'text' || c.category === 'surfaces' || c.category === 'interactive');
+    
+    for (let i = 0; i < textAndSurfaceColors.length; i++) {
+      for (let j = i + 1; j < textAndSurfaceColors.length; j++) {
+        const color1 = textAndSurfaceColors[i];
+        const color2 = textAndSurfaceColors[j];
+        
+        const lightness1 = getLightness(color1.value);
+        const lightness2 = getLightness(color2.value);
+        const diff = Math.abs(lightness1 - lightness2);
+        
+        if (diff < 10 && color1.value !== color2.value) {
+          similar.push({
+            color1: color1.label || color1.css_var,
+            color2: color2.label || color2.css_var,
+            lightnessDiff: diff
+          });
+        }
+      }
+    }
+    
+    setSimilarColors(similar);
+  };
+
+  const getLightness = (hslValue: string): number => {
+    const match = hslValue?.match(/(\d+\.?\d*)\s+(\d+\.?\d*)%\s+(\d+\.?\d*)%/);
+    if (!match) return 0;
+    return parseFloat(match[3]);
   };
 
   const handleCopy = async (value: string, label: string) => {
@@ -196,6 +255,39 @@ export function ColorPaletteTab() {
     <div className="space-y-8">
       {/* Contrast Checker Tool */}
       <ContrastCheckerTool />
+      
+      {/* Duplicate Colors Warning */}
+      {duplicates.length > 0 && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Duplicate Colors Detected</AlertTitle>
+          <AlertDescription>
+            The following colors have identical values:
+            <ul className="list-disc list-inside mt-2">
+              {duplicates.map((d, i) => (
+                <li key={i}><strong>{d.color1}</strong> and <strong>{d.color2}</strong> ({d.value})</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Similar Colors Info */}
+      {similarColors.length > 0 && (
+        <Alert>
+          <Palette className="h-4 w-4" />
+          <AlertTitle>Similar Colors Found</AlertTitle>
+          <AlertDescription>
+            These colors have very similar lightness values (might be hard to distinguish):
+            <ul className="list-disc list-inside mt-2">
+              {similarColors.slice(0, 5).map((s, i) => (
+                <li key={i}><strong>{s.color1}</strong> and <strong>{s.color2}</strong> ({s.lightnessDiff.toFixed(1)}% difference)</li>
+              ))}
+            </ul>
+            {similarColors.length > 5 && <p className="mt-2 text-xs">...and {similarColors.length - 5} more</p>}
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="flex items-center justify-between">
         <div><h2 className="text-2xl font-bold text-foreground">Navio Color System</h2><p className="text-muted-foreground mt-1">Database-driven color palette - single source of truth for all brand colors</p></div>
@@ -343,10 +435,19 @@ export function ColorPaletteTab() {
               // Smart background selection based on text lightness
               const isLight = color.hslValue ? isLightText(color.hslValue) : false;
               const previewBg = isLight ? 'bg-card' : 'bg-background';
-              const previewText = isLight ? 'text-card-foreground' : 'text-foreground';
+              const alternativePreviewBg = isLight ? 'bg-background' : 'bg-card';
+              
+              // Check if this color is similar to another
+              const isSimilar = similarColors.some(s => 
+                s.color1 === color.label || s.color2 === color.label
+              );
+              const similarTo = similarColors.find(s => 
+                s.color1 === color.label || s.color2 === color.label
+              );
               
               return (
                 <Card key={color.value} className="overflow-hidden bg-background text-foreground">
+                  {/* Primary Preview */}
                   <div className={`p-6 border-b ${previewBg}`}>
                     <p className={`${color.className} text-2xl font-semibold mb-2`}>
                       The quick brown fox jumps over the lazy dog
@@ -355,11 +456,29 @@ export function ColorPaletteTab() {
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     </p>
                   </div>
+
+                  {/* Alternative Preview - Show on opposite background */}
+                  <div className={`p-3 border-b ${alternativePreviewBg}`}>
+                    <p className={`${color.className} text-xs`}>
+                      Alternative: {isLight ? 'On light background' : 'On dark background'}
+                    </p>
+                  </div>
+
                   <div className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-semibold text-foreground mb-1">{color.label}</h3>
                         <p className="text-sm text-muted-foreground">{color.description}</p>
+                        
+                        {/* Similar Color Warning */}
+                        {isSimilar && similarTo && (
+                          <div className="mt-2 flex items-start gap-1">
+                            <AlertCircle className="h-3 w-3 text-yellow-600 mt-0.5 shrink-0" />
+                            <p className="text-xs text-yellow-700">
+                              ⚠️ Similar to {similarTo.color1 === color.label ? similarTo.color2 : similarTo.color1} ({similarTo.lightnessDiff.toFixed(1)}% difference)
+                            </p>
+                          </div>
+                        )}
                       </div>
                       {color.colorId && (
                         <Button
