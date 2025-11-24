@@ -116,10 +116,11 @@ export function ColorPaletteTab() {
 
       colorTokens.forEach((token) => {
         if (token.category === 'text') {
-          // Fix text colors: convert bg-* to text-* if needed
-          const textClass = token.preview_class?.startsWith('bg-') 
-            ? token.preview_class.replace('bg-', 'text-')
-            : token.preview_class || `text-[hsl(${token.value})]`;
+          // Priority order: preview_class → generate from css_var → fallback to CSS variable
+          const textClass = token.preview_class || 
+                            token.css_var.replace('--text-', 'text-') ||
+                            `text-[color:var(${token.css_var})]`;
+          
           textColorOptions.push({ 
             value: textClass, 
             label: token.label || token.css_var, 
