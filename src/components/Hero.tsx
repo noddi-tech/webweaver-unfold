@@ -75,14 +75,18 @@ const Hero = () => {
   const loadMediaSettings = async () => {
     setIsLoading(true);
     try {
-      const { data: settings } = await supabase
+      // Step 1: Get settings without JOIN
+      const { data: settings, error } = await supabase
         .from('image_carousel_settings')
-        .select(`
-          *,
-          carousel_config:carousel_configs(*)
-        `)
+        .select('*')
         .eq('location_id', 'homepage-hero')
         .maybeSingle();
+
+      if (error) {
+        console.error('❌ Query error:', error);
+        setIsLoading(false);
+        return;
+      }
 
       console.log('📊 Hero settings loaded:', settings);
 
@@ -99,35 +103,45 @@ const Hero = () => {
           setImageUrl(settings.image_url || '');
           setImageAlt(settings.image_alt || '');
           console.log('🖼️ Single image mode:', settings.image_url);
-        } else if (settings.carousel_config) {
-          const config = settings.carousel_config as any;
-          setCarouselSettings({
-            autoplay: config.autoplay,
-            autoplay_delay: config.autoplay_delay,
-            show_navigation: config.show_navigation,
-            show_dots: config.show_dots,
-          });
-          
-          // Parse carousel images
-          const images = Array.isArray(config.images) ? config.images : [];
-          setCarouselImages(images.map((img: any) => ({
-            // Convert /src/assets paths to actual imports
-            image: img.url.includes('noddi-location-screen') ? noddiLocationScreen :
-                   img.url.includes('tiamat-location-screen') ? tiamatLocationScreen :
-                   img.url.includes('hurtigruta-location-screen') ? hurtigrutaLocationScreen :
-                   img.url,
-            alt: img.alt || '',
-            title: img.title || '',
-          })));
-          
-          console.log('🎠 Carousel mode:', images.length, 'images');
-          
-          // Update autoplay plugin delay
-          if (plugin.current) {
-            plugin.current = Autoplay({ 
-              delay: config.autoplay_delay,
-              stopOnInteraction: true 
+        } else if (settings.carousel_config_id) {
+          // Step 2: Fetch carousel config separately if needed
+          const { data: carouselConfig, error: carouselError } = await supabase
+            .from('carousel_configs')
+            .select('*')
+            .eq('id', settings.carousel_config_id)
+            .single();
+            
+          if (carouselError) {
+            console.error('❌ Carousel config error:', carouselError);
+          } else if (carouselConfig) {
+            setCarouselSettings({
+              autoplay: carouselConfig.autoplay,
+              autoplay_delay: carouselConfig.autoplay_delay,
+              show_navigation: carouselConfig.show_navigation,
+              show_dots: carouselConfig.show_dots,
             });
+            
+            // Parse carousel images
+            const images = Array.isArray(carouselConfig.images) ? carouselConfig.images : [];
+            setCarouselImages(images.map((img: any) => ({
+              // Convert /src/assets paths to actual imports
+              image: img.url.includes('noddi-location-screen') ? noddiLocationScreen :
+                     img.url.includes('tiamat-location-screen') ? tiamatLocationScreen :
+                     img.url.includes('hurtigruta-location-screen') ? hurtigrutaLocationScreen :
+                     img.url,
+              alt: img.alt || '',
+              title: img.title || '',
+            })));
+            
+            console.log('🎠 Carousel mode:', images.length, 'images');
+            
+            // Update autoplay plugin delay
+            if (plugin.current) {
+              plugin.current = Autoplay({ 
+                delay: carouselConfig.autoplay_delay,
+                stopOnInteraction: true 
+              });
+            }
           }
         }
         
@@ -235,7 +249,7 @@ const Hero = () => {
                 >
                   <CarouselContent>
                     {bookingSteps.map((step, index) => (
-                      <CarouselItem key={index}>
+                      <CarouselItem key={`hero-slide-${index}`}>
                         <div className="flex items-center">
                           <img
                             src={step.image}
@@ -260,7 +274,7 @@ const Hero = () => {
                   <div className="flex justify-center gap-2 mt-6">
                     {Array.from({ length: count }).map((_, index) => (
                       <button
-                        key={index}
+                        key={`hero-dot-${index}`}
                         onClick={() => api?.scrollTo(index)}
                         className={`h-2 rounded-full transition-all ${
                           index === current - 1 ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
