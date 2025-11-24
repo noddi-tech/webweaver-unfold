@@ -119,6 +119,11 @@ All colors MUST be HSL.
     --gradient-mesh-cosmic: radial-gradient(at 30% 20%, hsl(249 67% 35%) 0px, transparent 45%), radial-gradient(at 70% 60%, hsl(266 85% 58%) 0px, transparent 55%), radial-gradient(at 10% 80%, hsl(210 100% 65%) 0px, transparent 50%), radial-gradient(at 90% 10%, hsl(321 59% 75%) 0px, transparent 50%), radial-gradient(at 50% 50%, hsl(180 70% 55%) 0px, transparent 60%);
     --gradient-mesh-velvet: radial-gradient(at 15% 30%, hsl(321 59% 85%) 0px, transparent 50%), radial-gradient(at 85% 30%, hsl(266 85% 70%) 0px, transparent 55%), radial-gradient(at 50% 80%, hsl(25 95% 75%) 0px, transparent 50%);
     
+    /* Glass Effects - CSS Variables */
+    --glass-solid: hsl(var(--card));
+    --glass-card: hsl(var(--card) / 0.95);
+    --glass-prominent: hsl(var(--card) / 0.98);
+    
     /* Legacy gradients for backward compatibility */
     --gradient-background: var(--gradient-hero);
   }
