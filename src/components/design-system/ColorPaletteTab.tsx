@@ -461,17 +461,17 @@ export function ColorPaletteTab() {
                 <Card key={color.value} className="overflow-hidden bg-background text-foreground">
                   {/* Primary Preview */}
                   <div className={`p-6 border-b ${previewBg}`}>
-                    <p className={`${color.className} text-2xl font-semibold mb-2`}>
+                    <p className="text-2xl font-semibold mb-2" style={{ color: `hsl(${color.hslValue})` }}>
                       The quick brown fox jumps over the lazy dog
                     </p>
-                    <p className={`${color.className} text-sm`}>
+                    <p className="text-sm" style={{ color: `hsl(${color.hslValue})` }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     </p>
                   </div>
 
                   {/* Alternative Preview - Show on opposite background */}
                   <div className={`p-3 border-b ${alternativePreviewBg}`}>
-                    <p className={`${color.className} text-xs`}>
+                    <p className="text-xs" style={{ color: `hsl(${color.hslValue})` }}>
                       Alternative: {isLight ? 'On light background' : 'On dark background'}
                     </p>
                   </div>
