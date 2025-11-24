@@ -36,6 +36,8 @@ const Hero = () => {
   const { allowedBackgrounds } = useAllowedBackgrounds();
   
   // Media settings state
+  const [isLoading, setIsLoading] = useState(true);
+  const [mediaKey, setMediaKey] = useState(0);
   const [displayType, setDisplayType] = useState<'image' | 'carousel'>('carousel');
   const [imageUrl, setImageUrl] = useState('');
   const [imageAlt, setImageAlt] = useState('');
@@ -71,6 +73,7 @@ const Hero = () => {
   }, []);
 
   const loadMediaSettings = async () => {
+    setIsLoading(true);
     try {
       const { data: settings } = await supabase
         .from('image_carousel_settings')
@@ -81,12 +84,21 @@ const Hero = () => {
         .eq('location_id', 'homepage-hero')
         .maybeSingle();
 
+      console.log('📊 Hero settings loaded:', settings);
+
       if (settings) {
+        console.log('✅ Settings received:', { 
+          displayType: settings.display_type, 
+          imageUrl: settings.image_url,
+          carouselConfigId: settings.carousel_config_id
+        });
+        
         setDisplayType(settings.display_type as 'image' | 'carousel');
         
         if (settings.display_type === 'image') {
           setImageUrl(settings.image_url || '');
           setImageAlt(settings.image_alt || '');
+          console.log('🖼️ Single image mode:', settings.image_url);
         } else if (settings.carousel_config) {
           const config = settings.carousel_config as any;
           setCarouselSettings({
@@ -108,6 +120,8 @@ const Hero = () => {
             title: img.title || '',
           })));
           
+          console.log('🎠 Carousel mode:', images.length, 'images');
+          
           // Update autoplay plugin delay
           if (plugin.current) {
             plugin.current = Autoplay({ 
@@ -116,9 +130,16 @@ const Hero = () => {
             });
           }
         }
+        
+        // Force re-render after loading
+        setMediaKey(prev => prev + 1);
+      } else {
+        console.warn('⚠️ No settings found for homepage-hero');
       }
     } catch (error) {
-      console.error('Error loading media settings:', error);
+      console.error('❌ Error loading media settings:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -194,11 +215,16 @@ const Hero = () => {
 
           {/* Right Column - Booking Flow Carousel or Image */}
           <EditableUniversalMedia
+            key={mediaKey}
             locationId="homepage-hero"
             onSave={loadMediaSettings}
             placeholder="Click to configure hero image/carousel"
           >
-            {displayType === 'carousel' ? (
+            {isLoading ? (
+              <div className="relative max-w-[280px] mx-auto">
+                <div className="w-full h-[500px] rounded-2xl bg-muted/20 animate-pulse" />
+              </div>
+            ) : displayType === 'carousel' ? (
               <div className="relative max-w-[280px] mx-auto">
                 <Carousel
                   setApi={setApi}
