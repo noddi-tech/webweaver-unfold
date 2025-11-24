@@ -172,7 +172,7 @@ const iconPx = useMemo(() => iconSizeMap[iconSize] ?? 24, [iconSize]);
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 mt-8">
-        <Card>
+        <Card className="bg-background text-foreground">
           <CardHeader>
             <CardTitle>Settings</CardTitle>
           </CardHeader>
@@ -285,7 +285,7 @@ const iconPx = useMemo(() => iconSizeMap[iconSize] ?? 24, [iconSize]);
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-background text-foreground">
           <CardHeader>
             <CardTitle>Preview</CardTitle>
           </CardHeader>
