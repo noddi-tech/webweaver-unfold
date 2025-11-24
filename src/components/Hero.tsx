@@ -173,7 +173,7 @@ const Hero = () => {
   }, [api]);
 
   return (
-    <section className="pt-20 pb-0 relative overflow-visible">
+    <section className="pt-32 pb-0 relative overflow-visible">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Centered single column layout */}
         <div className="flex flex-col items-center text-center gap-12">
@@ -242,7 +242,16 @@ const Hero = () => {
                 </div>
               ) : displayType === 'carousel' ? (
                 <div className="relative">
-                  <div className="aspect-video">
+                  {/* Gradient border frame */}
+                  <div 
+                    className="absolute inset-0 -inset-1 rounded-2xl pointer-events-none"
+                    style={{
+                      background: 'linear-gradient(135deg, hsl(266 85% 58% / 0.5), hsl(25 95% 63% / 0.5), hsl(321 59% 85% / 0.5))',
+                      filter: 'blur(2px)',
+                    }}
+                  />
+                  
+                  <div className="relative aspect-video rounded-xl overflow-hidden">
                     <Carousel
                       setApi={setApi}
                       plugins={carouselSettings.autoplay ? [plugin.current] : []}
@@ -297,7 +306,16 @@ const Hero = () => {
                 </div>
               ) : (
                 <div className="relative">
-                  <div className="aspect-video">
+                  {/* Gradient border frame */}
+                  <div 
+                    className="absolute inset-0 -inset-1 rounded-2xl pointer-events-none"
+                    style={{
+                      background: 'linear-gradient(135deg, hsl(266 85% 58% / 0.5), hsl(25 95% 63% / 0.5), hsl(321 59% 85% / 0.5))',
+                      filter: 'blur(2px)',
+                    }}
+                  />
+                  
+                  <div className="relative aspect-video rounded-xl overflow-hidden">
                     <img
                       src={imageUrl}
                       alt={imageAlt}
