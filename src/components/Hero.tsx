@@ -242,7 +242,7 @@ const Hero = () => {
                 </div>
               ) : displayType === 'carousel' ? (
                 <div 
-                  className="p-16 rounded-2xl"
+                  className="p-32 rounded-2xl"
                   style={{
                     background: 'linear-gradient(to top, hsl(266 85% 58% / 0.3) 0%, hsl(25 95% 63% / 0.2) 30%, hsl(0 0% 100% / 0.1) 60%, transparent 100%)'
                   }}
@@ -299,7 +299,7 @@ const Hero = () => {
                 </div>
               ) : (
                 <div 
-                  className="p-16 rounded-2xl"
+                  className="p-32 rounded-2xl"
                   style={{
                     background: 'linear-gradient(to top, hsl(266 85% 58% / 0.3) 0%, hsl(25 95% 63% / 0.2) 30%, hsl(0 0% 100% / 0.1) 60%, transparent 100%)'
                   }}
