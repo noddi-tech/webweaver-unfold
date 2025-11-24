@@ -173,6 +173,22 @@ export default {
 				'text-code': 'hsl(var(--text-code))',
 				'text-quote': 'hsl(var(--text-quote))'
 			},
+			textColor: {
+				'success': 'hsl(var(--text-success))',
+				'error': 'hsl(var(--text-error))',
+				'warning': 'hsl(var(--text-warning))',
+				'info': 'hsl(var(--text-info))',
+				'disabled': 'hsl(var(--text-disabled))',
+				'placeholder': 'hsl(var(--text-placeholder))',
+				'link': 'hsl(var(--text-link))',
+				'link-hover': 'hsl(var(--text-link-hover))',
+				'code': 'hsl(var(--text-code))',
+				'quote': 'hsl(var(--text-quote))',
+				'destructive': 'hsl(var(--text-destructive))',
+				'vibrant-purple': 'hsl(var(--text-vibrant-purple))',
+				'brand-orange': 'hsl(var(--text-brand-orange))',
+				'brand-teal': 'hsl(var(--text-brand-teal))',
+			},
 		borderRadius: {
 			lg: 'var(--radius)',
 			md: 'calc(var(--radius) - 2px)',

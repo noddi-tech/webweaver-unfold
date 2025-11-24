@@ -92,6 +92,12 @@ All colors MUST be HSL.
     --text-code: 266 85% 45%;                  /* Code text | Used in: Code snippets, technical content */
     --text-quote: 0 0% 40%;                    /* Quote text | Used in: Blockquotes, citations */
     
+    /* Additional Text Variants - Brand Colors */
+    --text-destructive: 0 84% 40%;             /* Destructive text | Used in: Destructive actions, delete confirmations */
+    --text-vibrant-purple: 266 85% 45%;        /* Vibrant purple text | Used in: Interactive purple text */
+    --text-brand-orange: 25 95% 45%;           /* Brand orange text | Used in: Orange accent text */
+    --text-brand-teal: 180 70% 35%;            /* Brand teal text | Used in: Teal accent text */
+    
     /* Feedback States */
     --destructive: var(--color-error);         /* Error/delete color | Used in: Error messages, delete buttons */
     --destructive-foreground: 0 0% 100%;       /* Text on destructive | Used in: Error button text */
