@@ -173,21 +173,22 @@ const Hero = () => {
   }, [api]);
 
   return (
-    <section className="py-section relative overflow-hidden">
+    <section className="pt-20 pb-0 relative overflow-visible">
       <div className="container px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
-        <div className="grid lg:grid-cols-[40%_60%] gap-8 items-center">
-          {/* Left Column - Text Content */}
+        {/* Centered single column layout */}
+        <div className="flex flex-col items-center text-center gap-12 max-w-4xl mx-auto">
+          {/* Text Content - Centered */}
           <div className="space-y-8" key={refreshKey}>
             <EditableTranslation translationKey="hero.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-              <h1 className={`${h1} text-foreground`}>{t('hero.title', 'One platform. Every function.')}</h1>
+              <h1 className={`${h1} text-foreground text-center`}>{t('hero.title', 'One platform. Every function.')}</h1>
             </EditableTranslation>
 
             <EditableTranslation translationKey="hero.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
-              <p className={`${body} text-muted-foreground`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
+              <p className={`${body} text-muted-foreground text-center`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
             </EditableTranslation>
 
-            {/* Metrics Badges */}
-            <div className="flex flex-wrap gap-6">
+            {/* Metrics Badges - Centered */}
+            <div className="flex flex-wrap gap-6 justify-center">
             <EditableBackground
                 elementId="hero-metrics-badge"
                 defaultBackground="glass-card"
@@ -214,8 +215,8 @@ const Hero = () => {
               </EditableBackground>
             </div>
 
-            {/* CTA Button */}
-            <div>
+            {/* CTA Button - Centered */}
+            <div className="flex justify-center">
               <LanguageLink to="/contact">
                 <EditableTranslation translationKey="hero.cta" onSave={() => setRefreshKey(prev => prev + 1)}>
                   <Button size="lg" className="text-lg px-8 py-4 group shadow-lg">
@@ -227,74 +228,117 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Right Column - Booking Flow Carousel or Image */}
-          <EditableUniversalMedia
-            key={mediaKey}
-            locationId="homepage-hero"
-            onSave={loadMediaSettings}
-            placeholder="Click to configure hero image/carousel"
-          >
-            {isLoading ? (
-              <div className="relative max-w-[280px] mx-auto">
-                <div className="w-full h-[500px] rounded-2xl bg-muted/20 animate-pulse" />
-              </div>
-            ) : displayType === 'carousel' ? (
-              <div className="relative max-w-[280px] mx-auto">
-                <Carousel
-                  setApi={setApi}
-                  plugins={carouselSettings.autoplay ? [plugin.current] : []}
-                  className="w-full"
-                  onMouseEnter={plugin.current.stop}
-                  onMouseLeave={plugin.current.reset}
-                >
-                  <CarouselContent>
-                    {bookingSteps.map((step, index) => (
-                      <CarouselItem key={`hero-slide-${index}`}>
-                        <div className="flex items-center">
-                          <img
-                            src={step.image}
-                            alt={step.alt}
-                            className="w-full h-auto object-contain transition-opacity duration-500"
-                            loading={index === 0 ? "eager" : "lazy"}
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  {carouselSettings.show_navigation && (
-                    <>
-                      <CarouselPrevious className="-left-12" />
-                      <CarouselNext className="-right-12" />
-                    </>
-                  )}
-                </Carousel>
+          {/* Full-width Image with Warm Gradient Glow */}
+          <div className="relative w-full max-w-5xl mx-auto mt-12">
+            <EditableUniversalMedia
+              key={mediaKey}
+              locationId="homepage-hero"
+              onSave={loadMediaSettings}
+              placeholder="Click to configure hero image/carousel"
+            >
+              {isLoading ? (
+                <div className="relative">
+                  <div className="w-full h-[600px] rounded-xl bg-muted/20 animate-pulse" />
+                </div>
+              ) : displayType === 'carousel' ? (
+                <>
+                  {/* Warm gradient glow behind carousel */}
+                  <div 
+                    className="absolute inset-0 -inset-x-20 -inset-y-20 blur-3xl opacity-50 pointer-events-none"
+                    style={{
+                      background: `radial-gradient(
+                        ellipse 80% 60% at 50% 50%,
+                        hsl(25 95% 63% / 0.4),
+                        hsl(25 95% 70% / 0.3),
+                        hsl(321 59% 85% / 0.2),
+                        transparent 70%
+                      )`
+                    }}
+                  />
+                  <div className="relative">
+                    <Carousel
+                      setApi={setApi}
+                      plugins={carouselSettings.autoplay ? [plugin.current] : []}
+                      className="w-full"
+                      onMouseEnter={plugin.current.stop}
+                      onMouseLeave={plugin.current.reset}
+                    >
+                      <CarouselContent>
+                        {bookingSteps.map((step, index) => (
+                          <CarouselItem key={`hero-slide-${index}`}>
+                            <div className="flex items-center justify-center">
+                              <img
+                                src={step.image}
+                                alt={step.alt}
+                                className="w-full h-auto rounded-xl shadow-2xl"
+                                style={{
+                                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)'
+                                }}
+                                loading={index === 0 ? "eager" : "lazy"}
+                              />
+                            </div>
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      {carouselSettings.show_navigation && (
+                        <>
+                          <CarouselPrevious className="-left-12" />
+                          <CarouselNext className="-right-12" />
+                        </>
+                      )}
+                    </Carousel>
 
-                {/* Navigation Dots */}
-                {carouselSettings.show_dots && (
-                  <div className="flex justify-center gap-2 mt-6">
-                    {Array.from({ length: count }).map((_, index) => (
-                      <button
-                        key={`hero-dot-${index}`}
-                        onClick={() => api?.scrollTo(index)}
-                        className={`h-2 rounded-full transition-all ${
-                          index === current - 1 ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                        }`}
-                        aria-label={`Go to step ${index + 1}`}
-                      />
-                    ))}
+                    {/* Navigation Dots */}
+                    {carouselSettings.show_dots && (
+                      <div className="flex justify-center gap-2 mt-6">
+                        {Array.from({ length: count }).map((_, index) => (
+                          <button
+                            key={`hero-dot-${index}`}
+                            onClick={() => api?.scrollTo(index)}
+                            className={`h-2 rounded-full transition-all ${
+                              index === current - 1 ? "w-8 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                            }`}
+                            aria-label={`Go to step ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Bottom fade for seamless blend */}
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="relative max-w-[280px] mx-auto">
-                <img
-                  src={imageUrl}
-                  alt={imageAlt}
-                  className="w-full h-auto object-contain rounded-2xl shadow-xl"
-                />
-              </div>
-            )}
-          </EditableUniversalMedia>
+                </>
+              ) : (
+                <>
+                  {/* Warm gradient glow behind single image */}
+                  <div 
+                    className="absolute inset-0 -inset-x-20 -inset-y-20 blur-3xl opacity-50 pointer-events-none"
+                    style={{
+                      background: `radial-gradient(
+                        ellipse 80% 60% at 50% 50%,
+                        hsl(25 95% 63% / 0.4),
+                        hsl(25 95% 70% / 0.3),
+                        hsl(321 59% 85% / 0.2),
+                        transparent 70%
+                      )`
+                    }}
+                  />
+                  <div className="relative">
+                    <img
+                      src={imageUrl}
+                      alt={imageAlt}
+                      className="w-full h-auto rounded-xl shadow-2xl"
+                      style={{
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)'
+                      }}
+                    />
+                    {/* Bottom fade for seamless blend */}
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+                  </div>
+                </>
+              )}
+            </EditableUniversalMedia>
+          </div>
         </div>
       </div>
     </section>
