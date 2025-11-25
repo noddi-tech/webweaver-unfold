@@ -249,155 +249,315 @@ const Hero = () => {
                 </div>
               ) : displayType === 'carousel' ? (
                 <div className="relative">
-                  <div 
-                    className="p-32 rounded-2xl relative overflow-visible"
-                    style={{
-                      background: `linear-gradient(to top, 
-                        hsl(var(--vibrant-purple) / 0.25) 0%, 
-                        hsl(var(--brand-pink) / 0.15) 40%, 
-                        hsl(var(--brand-peach) / 0.1) 70%, 
-                        transparent 100%)`
-                    }}
-                  >
-                    <Carousel
-                      key={mediaKey}
-                      setApi={setApi}
-                      opts={{
-                        align: 'center',
-                        loop: carouselSettings.autoplay,
+                  {/* Unified container - light gradient top + dark section bottom */}
+                  <div className="relative overflow-visible rounded-2xl">
+                    {/* Light gradient section - image/carousel */}
+                    <div 
+                      className="pt-32 px-32 pb-8 rounded-t-2xl"
+                      style={{
+                        background: `linear-gradient(to top, 
+                          hsl(var(--vibrant-purple) / 0.25) 0%, 
+                          hsl(var(--brand-pink) / 0.15) 40%, 
+                          hsl(var(--brand-peach) / 0.1) 70%, 
+                          transparent 100%)`
                       }}
-                      plugins={carouselSettings.autoplay ? [
-                        Autoplay({
-                          delay: carouselSettings.autoplay_delay * 1000,
-                          stopOnInteraction: false,
-                        })
-                      ] : []}
-                      className="w-full"
                     >
-                      <CarouselContent>
-                        {carouselSettings.images.map((image: any, index: number) => (
-                          <CarouselItem key={`hero-slide-${index}`}>
-                            <div className="aspect-video rounded-xl overflow-hidden shadow-2xl">
-                              <img
-                                src={image.url}
-                                alt={image.alt || `Slide ${index + 1}`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          </CarouselItem>
-                        ))}
-                      </CarouselContent>
-                      
-                      {shouldShowNavigation && (
-                        <>
-                          <CarouselPrevious className="left-4" />
-                          <CarouselNext className="right-4" />
-                        </>
+                      <Carousel
+                        key={mediaKey}
+                        setApi={setApi}
+                        opts={{
+                          align: 'center',
+                          loop: carouselSettings.autoplay,
+                        }}
+                        plugins={carouselSettings.autoplay ? [
+                          Autoplay({
+                            delay: carouselSettings.autoplay_delay * 1000,
+                            stopOnInteraction: false,
+                          })
+                        ] : []}
+                        className="w-full"
+                      >
+                        <CarouselContent>
+                          {carouselSettings.images.map((image: any, index: number) => (
+                            <CarouselItem key={`hero-slide-${index}`}>
+                              <div className="aspect-video rounded-xl overflow-hidden shadow-2xl">
+                                <img
+                                  src={image.url}
+                                  alt={image.alt || `Slide ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        
+                        {shouldShowNavigation && (
+                          <>
+                            <CarouselPrevious className="left-4" />
+                            <CarouselNext className="right-4" />
+                          </>
+                        )}
+                      </Carousel>
+
+                      {shouldShowDots && totalSlides > 0 && (
+                        <div className="flex justify-center gap-2 mt-8">
+                          {Array.from({ length: totalSlides }).map((_, index) => (
+                            <button
+                              key={`hero-dot-${index}`}
+                              onClick={() => api?.scrollTo(index)}
+                              className={`h-2 rounded-full transition-all ${
+                                index === currentSlide
+                                  ? 'w-8 bg-primary'
+                                  : 'w-2 bg-primary/30 hover:bg-primary/50'
+                              }`}
+                              aria-label={`Go to slide ${index + 1}`}
+                            />
+                          ))}
+                        </div>
                       )}
-                    </Carousel>
+                    </div>
 
-                    {shouldShowDots && totalSlides > 0 && (
-                      <div className="flex justify-center gap-2 mt-8">
-                        {Array.from({ length: totalSlides }).map((_, index) => (
-                          <button
-                            key={`hero-dot-${index}`}
-                            onClick={() => api?.scrollTo(index)}
-                            className={`h-2 rounded-full transition-all ${
-                              index === currentSlide
-                                ? 'w-8 bg-primary'
-                                : 'w-2 bg-primary/30 hover:bg-primary/50'
-                            }`}
-                            aria-label={`Go to slide ${index + 1}`}
-                          />
-                        ))}
+                    {/* Dark section - flows seamlessly from image */}
+                    <div 
+                      className="relative rounded-b-2xl"
+                      style={{
+                        background: `linear-gradient(to bottom, 
+                          hsl(var(--primary)) 0%, 
+                          hsl(var(--primary) / 0.95) 100%)`
+                      }}
+                    >
+                      <div className="relative z-10 px-8 py-16">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                          {/* Feature 1 */}
+                          <div className="text-center">
+                            <div className="flex justify-center mb-4">
+                              <div 
+                                className="w-12 h-12 rounded-full flex items-center justify-center"
+                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
+                              >
+                                <Sparkles className="w-6 h-6 text-primary-foreground" />
+                              </div>
+                            </div>
+                            <EditableTranslation translationKey="hero.feature1.title">
+                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Discover freely</h3>
+                            </EditableTranslation>
+                            <EditableTranslation translationKey="hero.feature1.description">
+                              <p className="text-sm text-primary-foreground/70">Answer product questions in seconds without bottlenecks.</p>
+                            </EditableTranslation>
+                          </div>
+
+                          {/* Feature 2 */}
+                          <div className="text-center">
+                            <div className="flex justify-center mb-4">
+                              <div 
+                                className="w-12 h-12 rounded-full flex items-center justify-center"
+                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
+                              >
+                                <Users className="w-6 h-6 text-primary-foreground" />
+                              </div>
+                            </div>
+                            <EditableTranslation translationKey="hero.feature2.title">
+                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Understand behavior</h3>
+                            </EditableTranslation>
+                            <EditableTranslation translationKey="hero.feature2.description">
+                              <p className="text-sm text-primary-foreground/70">See how users engage, convert, and return, all in one unified view.</p>
+                            </EditableTranslation>
+                          </div>
+
+                          {/* Feature 3 */}
+                          <div className="text-center">
+                            <div className="flex justify-center mb-4">
+                              <div 
+                                className="w-12 h-12 rounded-full flex items-center justify-center"
+                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
+                              >
+                                <Target className="h-6 w-6 text-primary-foreground" />
+                              </div>
+                            </div>
+                            <EditableTranslation translationKey="hero.feature3.title">
+                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Act with confidence</h3>
+                            </EditableTranslation>
+                            <EditableTranslation translationKey="hero.feature3.description">
+                              <p className="text-sm text-primary-foreground/70">Back every decision with insights you can trust. Then share, test, and improve together.</p>
+                            </EditableTranslation>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
 
-                  {/* Floating Callouts */}
-                  <div 
-                    className="absolute -left-[10%] top-1/3 w-[14%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                    style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
-                  >
-                    <img 
-                      src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=600&fit=crop" 
-                      alt="Dashboard callout" 
-                      className="w-full"
-                    />
-                  </div>
-                  <div 
-                    className="absolute -right-[8%] top-[15%] w-[30%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                    style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
-                  >
-                    <img 
-                      src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" 
-                      alt="Analytics callout" 
-                      className="w-full"
-                    />
-                  </div>
-                  <div 
-                    className="absolute -right-[5%] bottom-[10%] w-[18%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                    style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}
-                  >
-                    <img 
-                      src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop" 
-                      alt="Metrics callout" 
-                      className="w-full"
-                    />
+                      {/* Ellipse Glow */}
+                      <div 
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-32 blur-3xl pointer-events-none"
+                        style={{
+                          background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
+                        }}
+                      />
+                    </div>
+
+                    {/* Floating Callouts */}
+                    <div 
+                      className="absolute -left-[10%] top-1/3 w-[14%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                      style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
+                    >
+                      <img 
+                        src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=600&fit=crop" 
+                        alt="Dashboard callout" 
+                        className="w-full"
+                      />
+                    </div>
+                    <div 
+                      className="absolute -right-[8%] top-[15%] w-[30%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                      style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
+                    >
+                      <img 
+                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" 
+                        alt="Analytics callout" 
+                        className="w-full"
+                      />
+                    </div>
+                    <div 
+                      className="absolute -right-[5%] bottom-[10%] w-[18%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                      style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}
+                    >
+                      <img 
+                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop" 
+                        alt="Metrics callout" 
+                        className="w-full"
+                      />
+                    </div>
                   </div>
                 </div>
               ) : (
                 <div className="relative">
-                  <div 
-                    className="p-32 rounded-2xl relative overflow-visible"
-                    style={{
-                      background: `linear-gradient(to top, 
-                        hsl(var(--vibrant-purple) / 0.25) 0%, 
-                        hsl(var(--brand-pink) / 0.15) 40%, 
-                        hsl(var(--brand-peach) / 0.1) 70%, 
-                        transparent 100%)`
-                    }}
-                  >
-                    <div className="aspect-video rounded-xl overflow-hidden shadow-2xl">
-                      <img
-                        key={mediaKey}
-                        src={imageSettings.image_url || fallbackImage}
-                        alt={imageSettings.image_alt || 'Hero image'}
-                        className="w-full h-full object-cover"
+                  {/* Unified container - light gradient top + dark section bottom */}
+                  <div className="relative overflow-visible rounded-2xl">
+                    {/* Light gradient section - single image */}
+                    <div 
+                      className="pt-32 px-32 pb-8 rounded-t-2xl"
+                      style={{
+                        background: `linear-gradient(to top, 
+                          hsl(var(--vibrant-purple) / 0.25) 0%, 
+                          hsl(var(--brand-pink) / 0.15) 40%, 
+                          hsl(var(--brand-peach) / 0.1) 70%, 
+                          transparent 100%)`
+                      }}
+                    >
+                      <div className="aspect-video rounded-xl overflow-hidden shadow-2xl">
+                        <img
+                          key={mediaKey}
+                          src={imageSettings.image_url || fallbackImage}
+                          alt={imageSettings.image_alt || 'Hero image'}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Dark section - flows seamlessly from image */}
+                    <div 
+                      className="relative rounded-b-2xl"
+                      style={{
+                        background: `linear-gradient(to bottom, 
+                          hsl(var(--primary)) 0%, 
+                          hsl(var(--primary) / 0.95) 100%)`
+                      }}
+                    >
+                      <div className="relative z-10 px-8 py-16">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                          {/* Feature 1 */}
+                          <div className="text-center">
+                            <div className="flex justify-center mb-4">
+                              <div 
+                                className="w-12 h-12 rounded-full flex items-center justify-center"
+                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
+                              >
+                                <Sparkles className="w-6 h-6 text-primary-foreground" />
+                              </div>
+                            </div>
+                            <EditableTranslation translationKey="hero.feature1.title">
+                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Discover freely</h3>
+                            </EditableTranslation>
+                            <EditableTranslation translationKey="hero.feature1.description">
+                              <p className="text-sm text-primary-foreground/70">Answer product questions in seconds without bottlenecks.</p>
+                            </EditableTranslation>
+                          </div>
+
+                          {/* Feature 2 */}
+                          <div className="text-center">
+                            <div className="flex justify-center mb-4">
+                              <div 
+                                className="w-12 h-12 rounded-full flex items-center justify-center"
+                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
+                              >
+                                <Users className="w-6 h-6 text-primary-foreground" />
+                              </div>
+                            </div>
+                            <EditableTranslation translationKey="hero.feature2.title">
+                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Understand behavior</h3>
+                            </EditableTranslation>
+                            <EditableTranslation translationKey="hero.feature2.description">
+                              <p className="text-sm text-primary-foreground/70">See how users engage, convert, and return, all in one unified view.</p>
+                            </EditableTranslation>
+                          </div>
+
+                          {/* Feature 3 */}
+                          <div className="text-center">
+                            <div className="flex justify-center mb-4">
+                              <div 
+                                className="w-12 h-12 rounded-full flex items-center justify-center"
+                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
+                              >
+                                <Target className="h-6 w-6 text-primary-foreground" />
+                              </div>
+                            </div>
+                            <EditableTranslation translationKey="hero.feature3.title">
+                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Act with confidence</h3>
+                            </EditableTranslation>
+                            <EditableTranslation translationKey="hero.feature3.description">
+                              <p className="text-sm text-primary-foreground/70">Back every decision with insights you can trust. Then share, test, and improve together.</p>
+                            </EditableTranslation>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Ellipse Glow */}
+                      <div 
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-32 blur-3xl pointer-events-none"
+                        style={{
+                          background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
+                        }}
                       />
                     </div>
-                  </div>
 
-                  {/* Floating Callouts */}
-                  <div 
-                    className="absolute -left-[10%] top-1/3 w-[14%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                    style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
-                  >
-                    <img 
-                      src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=600&fit=crop" 
-                      alt="Dashboard callout" 
-                      className="w-full"
-                    />
-                  </div>
-                  <div 
-                    className="absolute -right-[8%] top-[15%] w-[30%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                    style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
-                  >
-                    <img 
-                      src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" 
-                      alt="Analytics callout" 
-                      className="w-full"
-                    />
-                  </div>
-                  <div 
-                    className="absolute -right-[5%] bottom-[10%] w-[18%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                    style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}
-                  >
-                    <img 
-                      src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop" 
-                      alt="Metrics callout" 
-                      className="w-full"
-                    />
+                    {/* Floating Callouts */}
+                    <div 
+                      className="absolute -left-[10%] top-1/3 w-[14%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                      style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
+                    >
+                      <img 
+                        src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=600&fit=crop" 
+                        alt="Dashboard callout" 
+                        className="w-full"
+                      />
+                    </div>
+                    <div 
+                      className="absolute -right-[8%] top-[15%] w-[30%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                      style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
+                    >
+                      <img 
+                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" 
+                        alt="Analytics callout" 
+                        className="w-full"
+                      />
+                    </div>
+                    <div 
+                      className="absolute -right-[5%] bottom-[10%] w-[18%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
+                      style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}
+                    >
+                      <img 
+                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop" 
+                        alt="Metrics callout" 
+                        className="w-full"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -406,82 +566,6 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Feature Highlights - Full Width Dark Section */}
-      <div className="relative w-full mt-16">
-        <div 
-          className="absolute inset-0" 
-          style={{
-            background: `linear-gradient(to bottom, 
-              hsl(var(--primary)) 0%, 
-              hsl(var(--primary) / 0.95) 100%)`
-          }}
-        />
-        <div className="relative container mx-auto px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-16">
-            {/* Feature 1 */}
-            <div className="text-center opacity-0 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
-              <div className="flex justify-center mb-4">
-                <div 
-                  className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
-                >
-                  <Sparkles className="w-6 h-6 text-primary-foreground" />
-                </div>
-              </div>
-              <EditableTranslation translationKey="hero.feature1.title">
-                <h3 className="text-lg font-semibold text-primary-foreground mb-2">Discover freely</h3>
-              </EditableTranslation>
-              <EditableTranslation translationKey="hero.feature1.description">
-                <p className="text-sm text-primary-foreground/70">Answer product questions in seconds without bottlenecks.</p>
-              </EditableTranslation>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="text-center opacity-0 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
-              <div className="flex justify-center mb-4">
-                <div 
-                  className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
-                >
-                  <Users className="w-6 h-6 text-primary-foreground" />
-                </div>
-              </div>
-              <EditableTranslation translationKey="hero.feature2.title">
-                <h3 className="text-lg font-semibold text-primary-foreground mb-2">Understand behavior</h3>
-              </EditableTranslation>
-              <EditableTranslation translationKey="hero.feature2.description">
-                <p className="text-sm text-primary-foreground/70">See how users engage, convert, and return, all in one unified view.</p>
-              </EditableTranslation>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="text-center opacity-0 animate-fade-in" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-              <div className="flex justify-center mb-4">
-                <div 
-                  className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
-                >
-                  <Target className="h-6 w-6 text-primary-foreground" />
-                </div>
-              </div>
-              <EditableTranslation translationKey="hero.feature3.title">
-                <h3 className="text-lg font-semibold text-primary-foreground mb-2">Act with confidence</h3>
-              </EditableTranslation>
-              <EditableTranslation translationKey="hero.feature3.description">
-                <p className="text-sm text-primary-foreground/70">Back every decision with insights you can trust. Then share, test, and improve together.</p>
-              </EditableTranslation>
-            </div>
-          </div>
-        </div>
-
-        {/* Ellipse Glow */}
-        <div 
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-32 blur-3xl pointer-events-none"
-          style={{
-            background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
-          }}
-        />
-      </div>
     </section>
   );
 };
