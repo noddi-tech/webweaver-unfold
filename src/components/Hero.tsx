@@ -230,6 +230,11 @@ const Hero = () => {
             </div>
           </div>
 
+          {/* Logo Marquee - Before Image */}
+          <div className="w-full mt-16">
+            <LogoMarquee />
+          </div>
+
           {/* Full-width Image - 16:9 Aspect Ratio */}
           <div className="relative w-full max-w-5xl mt-12">
             <EditableUniversalMedia
@@ -247,7 +252,11 @@ const Hero = () => {
                   <div 
                     className="p-32 rounded-2xl relative overflow-visible"
                     style={{
-                      background: 'linear-gradient(to top, hsl(220 15% 15% / 0.95) 0%, hsl(220 15% 25% / 0.7) 40%, hsl(0 0% 100% / 0.3) 70%, transparent 100%)'
+                      background: `linear-gradient(to top, 
+                        hsl(var(--vibrant-purple) / 0.25) 0%, 
+                        hsl(var(--brand-pink) / 0.15) 40%, 
+                        hsl(var(--brand-peach) / 0.1) 70%, 
+                        transparent 100%)`
                     }}
                   >
                     <Carousel
@@ -342,7 +351,11 @@ const Hero = () => {
                   <div 
                     className="p-32 rounded-2xl relative overflow-visible"
                     style={{
-                      background: 'linear-gradient(to top, hsl(220 15% 15% / 0.95) 0%, hsl(220 15% 25% / 0.7) 40%, hsl(0 0% 100% / 0.3) 70%, transparent 100%)'
+                      background: `linear-gradient(to top, 
+                        hsl(var(--vibrant-purple) / 0.25) 0%, 
+                        hsl(var(--brand-pink) / 0.15) 40%, 
+                        hsl(var(--brand-peach) / 0.1) 70%, 
+                        transparent 100%)`
                     }}
                   >
                     <div className="aspect-video rounded-xl overflow-hidden shadow-2xl">
@@ -390,11 +403,6 @@ const Hero = () => {
               )}
             </EditableUniversalMedia>
           </div>
-
-          {/* Logo Marquee */}
-          <div className="w-full mt-16">
-            <LogoMarquee />
-          </div>
         </div>
       </div>
 
@@ -403,7 +411,9 @@ const Hero = () => {
         <div 
           className="absolute inset-0" 
           style={{
-            background: 'linear-gradient(to bottom, hsl(220 15% 15%) 0%, hsl(220 15% 8%) 100%)'
+            background: `linear-gradient(to bottom, 
+              hsl(var(--primary)) 0%, 
+              hsl(var(--primary) / 0.95) 100%)`
           }}
         />
         <div className="relative container mx-auto px-8">
@@ -411,45 +421,54 @@ const Hero = () => {
             {/* Feature 1 */}
             <div className="text-center opacity-0 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
               <div className="flex justify-center mb-4">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-white" />
+                <div 
+                  className="w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
+                >
+                  <Sparkles className="w-6 h-6 text-primary-foreground" />
                 </div>
               </div>
               <EditableTranslation translationKey="hero.feature1.title">
-                <h3 className="font-semibold text-white mb-2">Discover freely</h3>
+                <h3 className="text-lg font-semibold text-primary-foreground mb-2">Discover freely</h3>
               </EditableTranslation>
               <EditableTranslation translationKey="hero.feature1.description">
-                <p className="text-sm text-white/70">Answer product questions in seconds without bottlenecks.</p>
+                <p className="text-sm text-primary-foreground/70">Answer product questions in seconds without bottlenecks.</p>
               </EditableTranslation>
             </div>
 
             {/* Feature 2 */}
             <div className="text-center opacity-0 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
               <div className="flex justify-center mb-4">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <Users className="w-4 h-4 text-white" />
+                <div 
+                  className="w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
+                >
+                  <Users className="w-6 h-6 text-primary-foreground" />
                 </div>
               </div>
               <EditableTranslation translationKey="hero.feature2.title">
-                <h3 className="font-semibold text-white mb-2">Understand behavior</h3>
+                <h3 className="text-lg font-semibold text-primary-foreground mb-2">Understand behavior</h3>
               </EditableTranslation>
               <EditableTranslation translationKey="hero.feature2.description">
-                <p className="text-sm text-white/70">See how users engage, convert, and return, all in one unified view.</p>
+                <p className="text-sm text-primary-foreground/70">See how users engage, convert, and return, all in one unified view.</p>
               </EditableTranslation>
             </div>
 
             {/* Feature 3 */}
             <div className="text-center opacity-0 animate-fade-in" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
               <div className="flex justify-center mb-4">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                  <Target className="w-4 h-4 text-white" />
+                <div 
+                  className="w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
+                >
+                  <Target className="h-6 w-6 text-primary-foreground" />
                 </div>
               </div>
               <EditableTranslation translationKey="hero.feature3.title">
-                <h3 className="font-semibold text-white mb-2">Act with confidence</h3>
+                <h3 className="text-lg font-semibold text-primary-foreground mb-2">Act with confidence</h3>
               </EditableTranslation>
               <EditableTranslation translationKey="hero.feature3.description">
-                <p className="text-sm text-white/70">Back every decision with insights you can trust. Then share, test, and improve together.</p>
+                <p className="text-sm text-primary-foreground/70">Back every decision with insights you can trust. Then share, test, and improve together.</p>
               </EditableTranslation>
             </div>
           </div>
@@ -459,7 +478,7 @@ const Hero = () => {
         <div 
           className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-32 blur-3xl pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, hsl(var(--primary) / 0.2) 0%, transparent 70%)'
+            background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
           }}
         />
       </div>
