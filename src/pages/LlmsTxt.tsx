@@ -19,7 +19,7 @@ const LlmsTxt = () => {
 
         // Clear the body and serve the file content as plain text
         document.body.innerHTML = `<pre>${data.content}</pre>`;
-        document.body.style.fontFamily = "var(--font-mono)";
+        document.body.style.fontFamily = "monospace";
         document.body.style.margin = "0";
         document.body.style.padding = "16px";
         document.body.style.whiteSpace = "pre-wrap";
