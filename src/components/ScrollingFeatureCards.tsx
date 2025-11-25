@@ -483,7 +483,7 @@ export function ScrollingFeatureCards() {
     >
       <section
         ref={sectionRef}
-        className="relative pt-8 pb-24"
+        className="relative pt-12 pb-24"
         style={{ minHeight: `${100 + (cards.length * 20)}vh` }}
       >
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
