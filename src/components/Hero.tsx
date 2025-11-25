@@ -172,7 +172,7 @@ const Hero = () => {
                         <CarouselContent>
                           {carouselImages.map((image, index) => (
                             <CarouselItem key={`hero-slide-${index}`}>
-                              <div className="w-full aspect-video">
+                  <div className="w-full aspect-[2/1] max-h-[500px]">
                                 <OptimizedImage
                                   src={image.url}
                                   alt={image.alt || `Hero slide ${index + 1}`}
@@ -193,7 +193,7 @@ const Hero = () => {
                         )}
                       </Carousel>
                     ) : (
-                      <div className="w-full aspect-video">
+                      <div className="w-full aspect-[2/1] max-h-[500px]">
                         <OptimizedImage
                           src={mediaSettings.imageUrl || ''}
                           alt={mediaSettings.imageAlt || 'Hero image'}
