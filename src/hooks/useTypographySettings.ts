@@ -68,6 +68,13 @@ export const useTypographySettings = () => {
     const primaryFont = `${data.font_family_name}, ${data.fallback_fonts.join(', ')}`;
     const monoFont = `${data.mono_font_family_name}, ${data.mono_fallback_fonts.join(', ')}`;
     
+    console.log('🔤 Applying Typography Settings:', {
+      primaryFont,
+      monoFont,
+      primarySource: data.font_source,
+      primaryGoogleUrl: data.font_google_url,
+    });
+    
     root.style.setProperty('--font-primary', primaryFont);
     root.style.setProperty('--font-mono', monoFont);
 
@@ -125,12 +132,16 @@ export const useTypographySettings = () => {
 
   const injectGoogleFont = (url: string) => {
     const existingLink = document.querySelector(`link[href="${url}"]`);
-    if (existingLink) return;
+    if (existingLink) {
+      console.log('✓ Google Font already loaded:', url);
+      return;
+    }
 
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = url;
     document.head.appendChild(link);
+    console.log('✓ Google Font injected dynamically:', url);
   };
 
   return { settings, loading, loadSettings };
