@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, RotateCcw, Save } from "lucide-react";
+import { Copy, RotateCcw, Save, Type } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 interface TypographyToken {
   name: string;
@@ -33,14 +36,53 @@ const defaultTypography: TypographyToken[] = [
 
 export const EditableTypographySystem = () => {
   const [typography, setTypography] = useState<TypographyToken[]>(defaultTypography);
+  const [currentFontFamily, setCurrentFontFamily] = useState<string>('Loading...');
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    const saved = localStorage.getItem('noddi-typography-system');
-    if (saved) {
-      setTypography(JSON.parse(saved));
-    }
+    loadTypography();
+    loadCurrentFont();
   }, []);
+
+  const loadTypography = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('typography_settings')
+        .select('typography_scale')
+        .eq('is_active', true)
+        .single();
+
+      if (error) throw error;
+
+      if (data?.typography_scale && Array.isArray(data.typography_scale) && data.typography_scale.length > 0) {
+        setTypography(data.typography_scale as unknown as TypographyToken[]);
+      } else {
+        setTypography(defaultTypography);
+      }
+    } catch (error) {
+      console.error('Error loading typography:', error);
+      setTypography(defaultTypography);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadCurrentFont = async () => {
+    try {
+      const { data } = await supabase
+        .from('typography_settings')
+        .select('font_family_name')
+        .eq('is_active', true)
+        .single();
+
+      if (data) {
+        setCurrentFontFamily(data.font_family_name);
+      }
+    } catch (error) {
+      console.error('Error loading font:', error);
+    }
+  };
 
   const updateTypography = (index: number, field: keyof TypographyToken, value: any) => {
     const newTypography = [...typography];
@@ -53,29 +95,64 @@ export const EditableTypographySystem = () => {
 
   const applyTypographyStyles = () => {
     const root = document.documentElement;
-    typography.forEach((typo, index) => {
-      root.style.setProperty(`--font-size-${index}`, `${typo.fontSize}px`);
-      root.style.setProperty(`--line-height-${index}`, typo.lineHeight.toString());
-      root.style.setProperty(`--font-weight-${index}`, typo.fontWeight.toString());
-      root.style.setProperty(`--letter-spacing-${index}`, `${typo.letterSpacing}em`);
+    typography.forEach((typo) => {
+      const varPrefix = `--typography-${typo.name.toLowerCase().replace(/\s+/g, '-')}`;
+      root.style.setProperty(`${varPrefix}-size`, `${typo.fontSize}px`);
+      root.style.setProperty(`${varPrefix}-line-height`, typo.lineHeight.toString());
+      root.style.setProperty(`${varPrefix}-weight`, typo.fontWeight.toString());
+      root.style.setProperty(`${varPrefix}-spacing`, `${typo.letterSpacing}em`);
     });
   };
 
-  const saveTypography = () => {
-    localStorage.setItem('noddi-typography-system', JSON.stringify(typography));
-    toast({
-      title: "Typography saved",
-      description: "Your typography changes have been saved locally.",
-    });
+  const saveTypography = async () => {
+    try {
+      const { error } = await supabase
+        .from('typography_settings')
+        .update({ typography_scale: typography as unknown as Json })
+        .eq('is_active', true);
+
+      if (error) throw error;
+
+      toast({
+        title: "Typography saved",
+        description: "Your typography changes have been saved to the database.",
+      });
+
+      applyTypographyStyles();
+    } catch (error) {
+      console.error('Error saving typography:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save typography changes.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const resetTypography = () => {
-    setTypography(defaultTypography);
-    localStorage.removeItem('noddi-typography-system');
-    toast({
-      title: "Typography reset",
-      description: "All typography has been reset to defaults.",
-    });
+  const resetTypography = async () => {
+    try {
+      const { error } = await supabase
+        .from('typography_settings')
+        .update({ typography_scale: defaultTypography as unknown as Json })
+        .eq('is_active', true);
+
+      if (error) throw error;
+
+      setTypography(defaultTypography);
+      applyTypographyStyles();
+      
+      toast({
+        title: "Typography reset",
+        description: "All typography has been reset to defaults.",
+      });
+    } catch (error) {
+      console.error('Error resetting typography:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reset typography.",
+        variant: "destructive",
+      });
+    }
   };
 
   const copyTypography = (typo: TypographyToken) => {
@@ -108,6 +185,10 @@ export const EditableTypographySystem = () => {
     return weights[weight] || weight.toString();
   };
 
+  if (loading) {
+    return <div className="text-muted-foreground">Loading typography settings...</div>;
+  }
+
   return (
     <section>
       <div className="flex items-center justify-between mb-8">
@@ -126,6 +207,19 @@ export const EditableTypographySystem = () => {
             <Save className="w-4 h-4 mr-2" />
             Save
           </Button>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4 mb-8 p-4 bg-muted rounded-lg">
+        <Type className="w-6 h-6 text-primary" />
+        <div>
+          <p className="font-semibold text-foreground">Current Font: {currentFontFamily}</p>
+          <p className="text-sm text-muted-foreground">
+            Change fonts in the{' '}
+            <Link to="/design-system?tab=fonts" className="text-primary hover:underline">
+              Font Manager
+            </Link>
+          </p>
         </div>
       </div>
       
