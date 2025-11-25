@@ -131,17 +131,21 @@ export const useTypographySettings = () => {
   };
 
   const injectGoogleFont = (url: string) => {
+    // Check if this exact font link already exists
     const existingLink = document.querySelector(`link[href="${url}"]`);
     if (existingLink) {
-      console.log('✓ Google Font already loaded:', url);
+      console.log('✓ Google Font already loaded from HTML:', url);
       return;
     }
 
+    // Only inject if not already in HTML
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = url;
+    link.onload = () => console.log('✓ Google Font loaded successfully:', url);
+    link.onerror = () => console.error('✗ Google Font failed to load:', url);
     document.head.appendChild(link);
-    console.log('✓ Google Font injected dynamically:', url);
+    console.log('⟳ Google Font injection attempted:', url);
   };
 
   return { settings, loading, loadSettings };
