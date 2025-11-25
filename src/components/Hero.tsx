@@ -111,9 +111,8 @@ const Hero = () => {
     api.on("select", () => setCurrent(api.selectedScrollSnap()));
   }, [api]);
 
-  // Container is always fixed at 2:1 aspect ratio
-  const containerClasses = 'w-full aspect-[2/1] max-h-[500px]';
-  // Only fitMode is dynamic based on database settings
+  // Container fills parent, fitMode is dynamic based on database settings
+  const containerClasses = 'w-full h-full';
   const fitModeClass = mediaSettings.fitMode === 'cover' ? 'object-cover' : 'object-contain';
 
   return (
@@ -171,14 +170,14 @@ const Hero = () => {
                (mediaSettings.displayType === 'image' && mediaSettings.imageUrl) ? (
                 <div className="w-full space-y-12">
                   {/* Image/Carousel section with shadow for depth */}
-                  <div className="w-full bg-background rounded-xl overflow-hidden shadow-2xl">
+                  <div className="w-full bg-background rounded-xl overflow-hidden shadow-2xl aspect-[2/1] max-h-[500px]">
                     {mediaSettings.displayType === 'carousel' && carouselImages.length > 0 ? (
                       <Carousel
                         key={`hero-carousel-${mediaKey}`}
                         setApi={setApi}
                         opts={{ align: "center", loop: true }}
                         plugins={[Autoplay({ delay: mediaSettings.autoplayDelay || 5000, stopOnInteraction: false })]}
-                        className="w-full"
+                        className="w-full h-full"
                       >
                         <CarouselContent>
                           {carouselImages.map((image, index) => (
