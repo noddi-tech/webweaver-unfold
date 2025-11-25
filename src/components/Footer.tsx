@@ -30,7 +30,7 @@ const Footer = () => {
   return (
     <footer className="py-16 px-4 sm:px-8 lg:px-12">
       {/* Card-encapsulated gradient section */}
-      <div className="rounded-3xl overflow-hidden relative shadow-2xl">
+      <div className="rounded-3xl overflow-hidden relative shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)]">
         {/* Gradient background inside card - reversed (gradient to white at top) */}
         <div 
           className="absolute inset-0 pointer-events-none"
