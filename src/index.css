@@ -215,6 +215,11 @@ All colors MUST be HSL.
 }
 
 @layer base {
+  /* Global font inheritance for ALL elements */
+  *, *::before, *::after {
+    font-family: inherit;
+  }
+
   html {
     background: hsl(var(--background));
     min-height: 100vh;
@@ -232,6 +237,17 @@ All colors MUST be HSL.
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-primary);
     font-weight: 700;
+  }
+
+  /* Explicit font for form elements that don't always inherit */
+  input, textarea, select, button,
+  input::placeholder, textarea::placeholder {
+    font-family: var(--font-primary);
+  }
+
+  /* Code elements use mono font */
+  code, pre, kbd, samp, .font-mono {
+    font-family: var(--font-mono);
   }
 }
 
