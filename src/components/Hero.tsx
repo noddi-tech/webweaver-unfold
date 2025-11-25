@@ -121,24 +121,6 @@ const Hero = () => {
               <p className={`${body} text-muted-foreground text-center`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
             </EditableTranslation>
 
-            {/* Metrics Badge */}
-            <div className="flex flex-wrap gap-6 justify-center">
-              <EditableBackground elementId="hero-metrics-badge" defaultBackground="glass-card" allowedBackgrounds={allowedBackgrounds}>
-                <div className="flex items-center gap-3 px-6 py-4 rounded-xl shadow-lg hover-scale">
-                  <EditableIcon elementId="hero-award-icon" icon={Award} defaultBackground="bg-gradient-primary" size="sm" />
-                  <div>
-                    <LockedText reason="Metric value">
-                      <div className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                        Net Promoter Score <Counter end={90} prefix="~" />
-                      </div>
-                    </LockedText>
-                    <EditableTranslation translationKey="hero.metrics.nps">
-                      <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'from end customers')}</div>
-                    </EditableTranslation>
-                  </div>
-                </div>
-              </EditableBackground>
-            </div>
 
             {/* CTA Button */}
             <div className="flex justify-center">
@@ -233,7 +215,29 @@ const Hero = () => {
 
                   {/* USP section - same gradient continues */}
                   <div className="px-8 md:px-16 py-12 relative">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* Glow effect */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-64 h-64 rounded-full" style={{ 
+                        background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
+                      }} />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+                      {/* NPS Badge - First USP Item */}
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
+                          <Award className="h-8 w-8 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg text-white mb-2">
+                            Net Promoter Score <Counter end={90} prefix="~" />
+                          </h3>
+                          <EditableTranslation translationKey="hero.metrics.nps" fallbackText="from end customers">
+                            <p className="text-sm text-white/80">from end customers</p>
+                          </EditableTranslation>
+                        </div>
+                      </div>
+
                       <div className="flex flex-col items-center text-center space-y-4">
                         <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
                           <Sparkles className="h-8 w-8 text-white" />
@@ -273,10 +277,22 @@ const Hero = () => {
                           <EditableTranslation translationKey="hero.feature3.description" fallbackText="Make data-driven decisions that drive growth">
                             <p className="text-sm text-white/80">Make data-driven decisions that drive growth</p>
                           </EditableTranslation>
-                        </div>
                       </div>
                     </div>
+
+                    {/* CTA Button inside gradient card */}
+                    <div className="flex justify-center mt-12">
+                      <LanguageLink to="/contact">
+                        <Button size="lg" className="text-lg px-8 py-4 group shadow-lg bg-white text-primary hover:bg-white/90">
+                          <EditableTranslation translationKey="hero.cta" fallbackText="Get a Demo">
+                            <span>Get a Demo</span>
+                          </EditableTranslation>
+                          <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </LanguageLink>
+                    </div>
                   </div>
+                </div>
                 </div>
               ) : null}
             </EditableUniversalMedia>
