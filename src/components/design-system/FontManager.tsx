@@ -8,6 +8,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Save, Type, Code } from 'lucide-react';
+import { FontPreviewPanel } from './FontPreviewPanel';
+import { FontUploader } from './FontUploader';
+import type { Json } from '@/integrations/supabase/types';
+
+interface FontFileData {
+  weight: number;
+  style: string;
+  url: string;
+  format: string;
+}
 
 interface FontSettings {
   id: string;
@@ -19,6 +29,8 @@ interface FontSettings {
   mono_font_source: string;
   mono_font_google_url: string | null;
   mono_fallback_fonts: string[];
+  font_files: Json;
+  mono_font_files: Json;
 }
 
 const FontManager = () => {
@@ -67,6 +79,8 @@ const FontManager = () => {
           mono_font_source: settings.mono_font_source,
           mono_font_google_url: settings.mono_font_google_url,
           mono_fallback_fonts: settings.mono_fallback_fonts,
+          font_files: settings.font_files,
+          mono_font_files: settings.mono_font_files,
         })
         .eq('id', settings.id);
 
@@ -77,7 +91,6 @@ const FontManager = () => {
         description: 'Font settings saved. Refresh the page to see changes.',
       });
 
-      // Reload page to apply font changes
       setTimeout(() => window.location.reload(), 1500);
     } catch (error) {
       console.error('Error saving font settings:', error);
@@ -87,6 +100,24 @@ const FontManager = () => {
         variant: 'destructive',
       });
     }
+  };
+
+  const handleFontUploadComplete = (fontFiles: FontFileData[]) => {
+    if (!settings) return;
+    setSettings({
+      ...settings,
+      font_files: fontFiles as unknown as Json,
+      font_source: 'self-hosted',
+    });
+  };
+
+  const handleMonoFontUploadComplete = (fontFiles: FontFileData[]) => {
+    if (!settings) return;
+    setSettings({
+      ...settings,
+      mono_font_files: fontFiles as unknown as Json,
+      mono_font_source: 'self-hosted',
+    });
   };
 
   if (loading) {
@@ -111,6 +142,13 @@ const FontManager = () => {
           Save Font Settings
         </Button>
       </div>
+
+      <FontPreviewPanel
+        fontFamily={settings.font_family_name}
+        fallbacks={settings.fallback_fonts}
+        monoFamily={settings.mono_font_family_name}
+        monoFallbacks={settings.mono_fallback_fonts}
+      />
 
       <Tabs defaultValue="primary" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8">
@@ -141,7 +179,7 @@ const FontManager = () => {
                   <SelectContent>
                     <SelectItem value="google">Google Fonts</SelectItem>
                     <SelectItem value="system">System Fonts</SelectItem>
-                    <SelectItem value="self-hosted">Self-Hosted (Future)</SelectItem>
+                    <SelectItem value="self-hosted">Self-Hosted</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -168,6 +206,30 @@ const FontManager = () => {
                 </div>
               )}
 
+              {settings.font_source === 'self-hosted' && (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="mb-2 block">Upload Font Files</Label>
+                    <FontUploader
+                      fontFamilyName={settings.font_family_name}
+                      onUploadComplete={handleFontUploadComplete}
+                    />
+                  </div>
+                  {settings.font_files && Array.isArray(settings.font_files) && settings.font_files.length > 0 && (
+                    <div className="p-4 bg-muted rounded-lg">
+                      <p className="text-sm font-semibold mb-2">Uploaded Fonts:</p>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        {(settings.font_files as unknown as FontFileData[]).map((file, i) => (
+                          <li key={i}>
+                            {file.weight} {file.style} - {file.format}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="fallback">Fallback Fonts (comma-separated)</Label>
                 <Input
@@ -180,18 +242,6 @@ const FontManager = () => {
                   placeholder="system-ui, -apple-system, sans-serif"
                 />
               </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-background text-foreground">
-            <h3 className="text-xl font-semibold mb-4">Preview</h3>
-            <div style={{ fontFamily: `${settings.font_family_name}, ${settings.fallback_fonts.join(', ')}` }}>
-              <p className="text-4xl font-bold mb-4">The quick brown fox jumps over the lazy dog</p>
-              <p className="text-2xl mb-4">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz</p>
-              <p className="text-lg mb-4">0123456789 !@#$%^&*()_+-=[]{}|;':",./&lt;&gt;?</p>
-              <p className="text-base text-muted-foreground">
-                This is how regular body text will appear on the website. The font is designed for maximum readability.
-              </p>
             </div>
           </Card>
         </TabsContent>
@@ -213,7 +263,7 @@ const FontManager = () => {
                   <SelectContent>
                     <SelectItem value="google">Google Fonts</SelectItem>
                     <SelectItem value="system">System Fonts</SelectItem>
-                    <SelectItem value="self-hosted">Self-Hosted (Future)</SelectItem>
+                    <SelectItem value="self-hosted">Self-Hosted</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -240,6 +290,30 @@ const FontManager = () => {
                 </div>
               )}
 
+              {settings.mono_font_source === 'self-hosted' && (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="mb-2 block">Upload Font Files</Label>
+                    <FontUploader
+                      fontFamilyName={settings.mono_font_family_name}
+                      onUploadComplete={handleMonoFontUploadComplete}
+                    />
+                  </div>
+                  {settings.mono_font_files && Array.isArray(settings.mono_font_files) && settings.mono_font_files.length > 0 && (
+                    <div className="p-4 bg-muted rounded-lg">
+                      <p className="text-sm font-semibold mb-2">Uploaded Fonts:</p>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        {(settings.mono_font_files as unknown as FontFileData[]).map((file, i) => (
+                          <li key={i}>
+                            {file.weight} {file.style} - {file.format}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="mono-fallback">Fallback Fonts (comma-separated)</Label>
                 <Input
@@ -252,25 +326,6 @@ const FontManager = () => {
                   placeholder="ui-monospace, SFMono-Regular, monospace"
                 />
               </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 bg-background text-foreground">
-            <h3 className="text-xl font-semibold mb-4">Preview</h3>
-            <div style={{ fontFamily: `${settings.mono_font_family_name}, ${settings.mono_fallback_fonts.join(', ')}` }}>
-              <pre className="text-sm bg-muted p-4 rounded-lg overflow-x-auto">
-{`function calculateTotal(items) {
-  return items.reduce((sum, item) => {
-    return sum + (item.price * item.quantity);
-  }, 0);
-}
-
-const API_KEY = "abc123xyz789";
-const result = calculateTotal([
-  { name: "Widget", price: 10.50, quantity: 2 },
-  { name: "Gadget", price: 25.00, quantity: 1 }
-]);`}
-              </pre>
             </div>
           </Card>
         </TabsContent>
