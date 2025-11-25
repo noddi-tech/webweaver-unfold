@@ -43,6 +43,8 @@ const Hero = () => {
     autoplayDelay: 5000,
     showNavigation: true,
     showDots: true,
+    fitMode: 'contain' as 'contain' | 'cover',
+    aspectRatio: 'auto',
   });
   const [carouselImages, setCarouselImages] = useState<any[]>([]);
 
@@ -73,6 +75,8 @@ const Hero = () => {
           autoplayDelay: 5000,
           showNavigation: true,
           showDots: true,
+          fitMode: (settings.fit_mode as 'contain' | 'cover') || 'contain',
+          aspectRatio: settings.aspect_ratio || 'auto',
         });
 
         if (settings.display_type === 'carousel' && settings.carousel_config_id) {
@@ -106,6 +110,26 @@ const Hero = () => {
     setCurrent(api.selectedScrollSnap());
     api.on("select", () => setCurrent(api.selectedScrollSnap()));
   }, [api]);
+
+  // Map aspect ratio to Tailwind classes
+  const getAspectRatioClass = (ratio: string) => {
+    const ratioMap: Record<string, string> = {
+      '1:1': 'aspect-square',
+      '16:9': 'aspect-video',
+      '9:16': 'aspect-[9/16]',
+      '4:3': 'aspect-[4/3]',
+      '3:2': 'aspect-[3/2]',
+      '21:9': 'aspect-[21/9]',
+      'auto': 'aspect-auto',
+    };
+    return ratioMap[ratio] || 'aspect-auto';
+  };
+
+  const aspectRatioClass = getAspectRatioClass(mediaSettings.aspectRatio);
+  const fitModeClass = mediaSettings.fitMode === 'cover' ? 'object-cover' : 'object-contain';
+  const containerClasses = mediaSettings.aspectRatio === 'auto' 
+    ? `w-full ${aspectRatioClass} max-h-[500px]` 
+    : `w-full ${aspectRatioClass}`;
 
   return (
     <section className="pt-32 pb-12 px-4 sm:px-8 lg:px-12">
@@ -174,11 +198,11 @@ const Hero = () => {
                         <CarouselContent>
                           {carouselImages.map((image, index) => (
                             <CarouselItem key={`hero-slide-${index}`}>
-                  <div className="w-full aspect-[2/1] max-h-[500px]">
+                  <div className={containerClasses}>
                                 <OptimizedImage
                                   src={image.url}
                                   alt={image.alt || `Hero slide ${index + 1}`}
-                                  className="w-full h-full object-contain"
+                                  className={`w-full h-full ${fitModeClass}`}
                                   width={1920}
                                   height={1080}
                                   quality={95}
@@ -195,11 +219,11 @@ const Hero = () => {
                         )}
                       </Carousel>
                     ) : (
-                      <div className="w-full aspect-[2/1] max-h-[500px]">
+                      <div className={containerClasses}>
                         <OptimizedImage
                           src={mediaSettings.imageUrl || ''}
                           alt={mediaSettings.imageAlt || 'Hero image'}
-                          className="w-full h-full object-contain"
+                          className={`w-full h-full ${fitModeClass}`}
                           width={1920}
                           height={1080}
                           quality={95}
