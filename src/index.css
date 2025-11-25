@@ -212,9 +212,7 @@ All colors MUST be HSL.
       hsl(25 95% 43%),
       hsl(266 85% 48%));
   }
-}
 
-@layer base {
   /* Global font inheritance for ALL elements */
   *, *::before, *::after {
     font-family: inherit;
