@@ -173,7 +173,7 @@ const SocialMetaManager = () => {
 
   if (loading) {
     return (
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6 bg-background text-foreground border-border">
         <p className="text-muted-foreground">Loading social media settings...</p>
       </Card>
     );
@@ -188,7 +188,7 @@ const SocialMetaManager = () => {
         </p>
       </header>
 
-      <Card className="p-6 bg-card border-border space-y-6">
+      <Card className="p-6 bg-background text-foreground border-border space-y-6">
         <div className="space-y-4">
           <h3 className="text-xl font-semibold">Open Graph Settings</h3>
           <p className="text-sm text-muted-foreground">

@@ -325,7 +325,7 @@ const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
       </div>
 
       {/* Upload Section */}
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6 bg-background text-foreground border-border">
         <div className="text-center">
           <h3 className="text-xl font-semibold mb-4 text-foreground">Upload New Videos</h3>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -370,7 +370,7 @@ const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
       </Card>
 
       {/* Manage Sections */}
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6 bg-background text-foreground border-border">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-foreground">Sections</h3>
@@ -424,7 +424,7 @@ const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
       </Card>
 
       {/* Existing Videos (with editing) */}
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6 bg-background text-foreground border-border">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-semibold text-foreground">Current Demo Videos</h3>
         </div>

@@ -196,7 +196,7 @@ const HeaderManager = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-background text-foreground">
         <CardHeader>
           <CardTitle>Header Configuration</CardTitle>
           <CardDescription>
@@ -215,7 +215,7 @@ const HeaderManager = () => {
             </div>
             
             {settings.navigation_links.map((link, index) => (
-              <Card key={index}>
+              <Card key={index} className="bg-background text-foreground">
                 <CardContent className="pt-4 space-y-4">
                   <div className="flex items-center gap-4">
                     <div className="flex flex-col gap-2 cursor-grab">
