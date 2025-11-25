@@ -206,7 +206,7 @@ const PricingManager = () => {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-background text-foreground">
         <CardContent className="p-6">
           <p className="text-center text-muted-foreground">Loading pricing plans...</p>
         </CardContent>
@@ -215,7 +215,7 @@ const PricingManager = () => {
   }
 
   return (
-    <Card>
+    <Card className="bg-background text-foreground">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           Pricing Plans Manager
@@ -227,7 +227,7 @@ const PricingManager = () => {
       </CardHeader>
       <CardContent className="space-y-6">
         {plans.map((plan, planIndex) => (
-          <Card key={plan.id || planIndex} className="p-4">
+          <Card key={plan.id || planIndex} className="p-4 bg-background text-foreground">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-lg">{plan.name}</h3>

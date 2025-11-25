@@ -154,7 +154,7 @@ const FaviconManager = () => {
 
   if (loading) {
     return (
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6 bg-background text-foreground border-border">
         <p className="text-muted-foreground">Loading favicon settings...</p>
       </Card>
     );
@@ -169,7 +169,7 @@ const FaviconManager = () => {
         </p>
       </header>
 
-      <Card className="p-6 bg-card border-border space-y-6">
+      <Card className="p-6 bg-background text-foreground border-border space-y-6">
         <div className="space-y-4">
           <h3 className="text-xl font-semibold">Current Favicon</h3>
           

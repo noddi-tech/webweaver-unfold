@@ -208,7 +208,7 @@ const FileManager = () => {
     <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* File List */}
-        <Card>
+        <Card className="bg-background text-foreground">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5" />
@@ -281,7 +281,7 @@ const FileManager = () => {
         </Card>
 
         {/* File Editor */}
-        <Card>
+        <Card className="bg-background text-foreground">
           <CardHeader>
             <CardTitle>
               {selectedFile ? `Edit ${selectedFile.file_path}` : "Select a file to edit"}
@@ -371,7 +371,7 @@ const FileManager = () => {
       <Separator />
 
       {/* Create New File */}
-      <Card>
+      <Card className="bg-background text-foreground">
         <CardHeader>
           <CardTitle>Create New File</CardTitle>
           <CardDescription>

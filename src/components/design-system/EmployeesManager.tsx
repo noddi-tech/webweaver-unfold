@@ -286,7 +286,7 @@ const sectionOptions = useMemo(() => {
       </header>
 
       {/* Design Settings */}
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6 bg-background text-foreground border-border">
         <h3 className="text-xl font-semibold mb-4">Design Settings</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
@@ -349,7 +349,7 @@ const sectionOptions = useMemo(() => {
       </Card>
 
       {/* Sections Management */}
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6 bg-background text-foreground border-border">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-foreground">Sections</h3>
@@ -420,7 +420,7 @@ const sectionOptions = useMemo(() => {
 
 
       {/* Create Employee */}
-      <Card className="p-6 bg-card border-border space-y-4">
+      <Card className="p-6 bg-background text-foreground border-border space-y-4">
         <h3 className="text-xl font-semibold">Add Employee</h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div className="grid gap-2">
@@ -481,7 +481,7 @@ const sectionOptions = useMemo(() => {
       </Card>
 
       {/* Manage Employees */}
-      <Card className="p-6 bg-card border-border space-y-4">
+      <Card className="p-6 bg-background text-foreground border-border space-y-4">
         <h3 className="text-xl font-semibold">Team Members ({employees.length})</h3>
         <Separator />
         {loading ? (

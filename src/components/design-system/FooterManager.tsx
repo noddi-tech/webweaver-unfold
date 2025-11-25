@@ -197,7 +197,7 @@ const FooterManager = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-background text-foreground">
         <CardHeader>
           <CardTitle>Footer Configuration</CardTitle>
           <CardDescription>
@@ -269,7 +269,7 @@ const FooterManager = () => {
             </p>
             
             {settings.contact_info.map((contact, index) => (
-              <Card key={index}>
+              <Card key={index} className="bg-background text-foreground">
                 <CardContent className="pt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
@@ -339,7 +339,7 @@ const FooterManager = () => {
             </p>
             
             {settings.quick_links.map((link, index) => (
-              <Card key={index}>
+              <Card key={index} className="bg-background text-foreground">
                 <CardContent className="pt-4">
                   <div className="flex items-center gap-4">
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -399,7 +399,7 @@ const FooterManager = () => {
             </p>
             
             {settings.legal_links.map((link, index) => (
-              <Card key={index}>
+              <Card key={index} className="bg-background text-foreground">
                 <CardContent className="pt-4">
                   <div className="flex items-center gap-4">
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
