@@ -239,12 +239,12 @@ const Hero = () => {
                           <Sparkles className="h-8 w-8 text-white" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-lg text-white mb-2">
-                            <EditableTranslation translationKey="hero.feature1.title" defaultText="Discover freely" element="span" />
-                          </h3>
-                          <p className="text-sm text-white/80">
-                            <EditableTranslation translationKey="hero.feature1.description" defaultText="Get instant notifications for every interaction" element="span" />
-                          </p>
+                          <EditableTranslation translationKey="hero.feature1.title" fallbackText="Discover freely">
+                            <h3 className="font-semibold text-lg text-white mb-2">Discover freely</h3>
+                          </EditableTranslation>
+                          <EditableTranslation translationKey="hero.feature1.description" fallbackText="Get instant notifications for every interaction">
+                            <p className="text-sm text-white/80">Get instant notifications for every interaction</p>
+                          </EditableTranslation>
                         </div>
                       </div>
 
@@ -253,12 +253,12 @@ const Hero = () => {
                           <Users className="h-8 w-8 text-white" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-lg text-white mb-2">
-                            <EditableTranslation translationKey="hero.feature2.title" defaultText="Understand behavior" element="span" />
-                          </h3>
-                          <p className="text-sm text-white/80">
-                            <EditableTranslation translationKey="hero.feature2.description" defaultText="Track user journeys and engagement patterns" element="span" />
-                          </p>
+                          <EditableTranslation translationKey="hero.feature2.title" fallbackText="Understand behavior">
+                            <h3 className="font-semibold text-lg text-white mb-2">Understand behavior</h3>
+                          </EditableTranslation>
+                          <EditableTranslation translationKey="hero.feature2.description" fallbackText="Track user journeys and engagement patterns">
+                            <p className="text-sm text-white/80">Track user journeys and engagement patterns</p>
+                          </EditableTranslation>
                         </div>
                       </div>
 
@@ -267,12 +267,12 @@ const Hero = () => {
                           <Target className="h-8 w-8 text-white" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-lg text-white mb-2">
-                            <EditableTranslation translationKey="hero.feature3.title" defaultText="Act with confidence" element="span" />
-                          </h3>
-                          <p className="text-sm text-white/80">
-                            <EditableTranslation translationKey="hero.feature3.description" defaultText="Make data-driven decisions that drive growth" element="span" />
-                          </p>
+                          <EditableTranslation translationKey="hero.feature3.title" fallbackText="Act with confidence">
+                            <h3 className="font-semibold text-lg text-white mb-2">Act with confidence</h3>
+                          </EditableTranslation>
+                          <EditableTranslation translationKey="hero.feature3.description" fallbackText="Make data-driven decisions that drive growth">
+                            <p className="text-sm text-white/80">Make data-driven decisions that drive growth</p>
+                          </EditableTranslation>
                         </div>
                       </div>
                     </div>
