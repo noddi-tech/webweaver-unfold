@@ -108,7 +108,16 @@ const Hero = () => {
   }, [api]);
 
   return (
-    <section className="pt-32 pb-0 relative overflow-visible bg-background">
+    <section className="pt-32 pb-0 relative overflow-hidden">
+      {/* Full-width gradient background */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to bottom, white 0%, white 10%, hsl(266 85% 58% / 0.15) 30%, hsl(321 59% 85% / 0.5) 55%, hsl(266 85% 58% / 0.85) 100%)'
+        }}
+      />
+
+      {/* Content constrained to container */}
       <div className="container max-w-container px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col items-center text-center gap-12">
           {/* Text Content */}
@@ -149,58 +158,42 @@ const Hero = () => {
             >
               {(mediaSettings.displayType === 'carousel' && carouselImages.length > 0) || 
                (mediaSettings.displayType === 'image' && mediaSettings.imageUrl) ? (
-                <div className="bg-gradient-warmth rounded-2xl overflow-hidden">
-                  {/* Image/Carousel section */}
-                  <div className="pt-16 px-8 md:px-16 lg:px-24 pb-8">
+                <div className="w-full space-y-12">
+                  {/* Image/Carousel section with shadow for depth */}
+                  <div className="w-full bg-background rounded-xl overflow-hidden shadow-2xl">
                     {mediaSettings.displayType === 'carousel' && carouselImages.length > 0 ? (
-                      <>
-                        <Carousel
-                          key={`hero-carousel-${mediaKey}`}
-                          setApi={setApi}
-                          opts={{ align: "center", loop: true }}
-                          plugins={[Autoplay({ delay: mediaSettings.autoplayDelay || 5000, stopOnInteraction: false })]}
-                          className="w-full"
-                        >
-                          <CarouselContent>
-                            {carouselImages.map((image, index) => (
-                              <CarouselItem key={`hero-slide-${index}`}>
-                                <div className="w-full aspect-video rounded-xl overflow-hidden bg-background/10">
-                                  <OptimizedImage
-                                    src={image.url}
-                                    alt={image.alt || `Hero slide ${index + 1}`}
-                                    className="w-full h-full object-contain"
-                                    width={1920}
-                                    height={1080}
-                                    quality={95}
-                                  />
-                                </div>
-                              </CarouselItem>
-                            ))}
-                          </CarouselContent>
-                          {mediaSettings.showNavigation && (
-                            <>
-                              <CarouselPrevious className="left-4" />
-                              <CarouselNext className="right-4" />
-                            </>
-                          )}
-                        </Carousel>
-                        {mediaSettings.showDots && (
-                          <div className="flex justify-center gap-2 mt-6">
-                            {carouselImages.map((_, index) => (
-                              <button
-                                key={`hero-dot-${index}`}
-                                onClick={() => api?.scrollTo(index)}
-                                className={`w-2 h-2 rounded-full transition-all ${
-                                  current === index ? "bg-white w-8" : "bg-white/50 hover:bg-white/75"
-                                }`}
-                                aria-label={`Go to slide ${index + 1}`}
-                              />
-                            ))}
-                          </div>
+                      <Carousel
+                        key={`hero-carousel-${mediaKey}`}
+                        setApi={setApi}
+                        opts={{ align: "center", loop: true }}
+                        plugins={[Autoplay({ delay: mediaSettings.autoplayDelay || 5000, stopOnInteraction: false })]}
+                        className="w-full"
+                      >
+                        <CarouselContent>
+                          {carouselImages.map((image, index) => (
+                            <CarouselItem key={`hero-slide-${index}`}>
+                              <div className="w-full aspect-video">
+                                <OptimizedImage
+                                  src={image.url}
+                                  alt={image.alt || `Hero slide ${index + 1}`}
+                                  className="w-full h-full object-contain"
+                                  width={1920}
+                                  height={1080}
+                                  quality={95}
+                                />
+                              </div>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        {mediaSettings.showNavigation && (
+                          <>
+                            <CarouselPrevious className="left-4" />
+                            <CarouselNext className="right-4" />
+                          </>
                         )}
-                      </>
+                      </Carousel>
                     ) : (
-                      <div className="w-full aspect-video rounded-xl overflow-hidden bg-background/10">
+                      <div className="w-full aspect-video">
                         <OptimizedImage
                           src={mediaSettings.imageUrl || ''}
                           alt={mediaSettings.imageAlt || 'Hero image'}
@@ -211,10 +204,24 @@ const Hero = () => {
                         />
                       </div>
                     )}
+                    {mediaSettings.showDots && mediaSettings.displayType === 'carousel' && carouselImages.length > 1 && (
+                      <div className="flex justify-center gap-2 mt-6 pb-4">
+                        {carouselImages.map((_, index) => (
+                          <button
+                            key={`hero-dot-${index}`}
+                            onClick={() => api?.scrollTo(index)}
+                            className={`w-2 h-2 rounded-full transition-all ${
+                              current === index ? "bg-primary w-8" : "bg-primary/30 hover:bg-primary/50"
+                            }`}
+                            aria-label={`Go to slide ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  {/* USP section - same gradient continues */}
-                  <div className="px-8 md:px-16 py-12 relative">
+                  {/* USP section - directly on page gradient */}
+                  <div className="py-12 px-4 md:px-8 relative">
                     {/* Glow effect */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="w-64 h-64 rounded-full" style={{ 
@@ -277,10 +284,11 @@ const Hero = () => {
                           <EditableTranslation translationKey="hero.feature3.description" fallbackText="Make data-driven decisions that drive growth">
                             <p className="text-sm text-white/80">Make data-driven decisions that drive growth</p>
                           </EditableTranslation>
+                        </div>
                       </div>
                     </div>
 
-                    {/* CTA Button inside gradient card */}
+                    {/* CTA Button */}
                     <div className="flex justify-center mt-12">
                       <LanguageLink to="/contact">
                         <Button size="lg" className="text-lg px-8 py-4 group shadow-lg bg-white text-primary hover:bg-white/90">
@@ -292,7 +300,6 @@ const Hero = () => {
                       </LanguageLink>
                     </div>
                   </div>
-                </div>
                 </div>
               ) : null}
             </EditableUniversalMedia>
