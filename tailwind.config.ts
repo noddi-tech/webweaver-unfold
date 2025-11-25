@@ -17,8 +17,12 @@ export default {
 				'2xl': '1400px'
 			}
 		},
-		extend: {
-	spacing: {
+    extend: {
+      fontFamily: {
+        sans: ['Atkinson Hyperlegible Next', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['Atkinson Hyperlegible Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+      },
+      spacing: {
 		px: '1px',
 		0: '0',
 		1: '4px',
