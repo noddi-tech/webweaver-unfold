@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageRedirect } from "./components/LanguageRedirect";
 import { LanguageSync } from "./components/LanguageSync";
 import { EditModeProvider } from "@/contexts/EditModeContext";
+import { useTypographySettings } from "@/hooks/useTypographySettings";
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
 import FeaturesPage from "./pages/Features";
@@ -25,8 +26,12 @@ import SolutionDetail from "./pages/SolutionDetail";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => {
+  // Load and apply typography settings from database
+  useTypographySettings();
+  
+  return (
+    <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <EditModeProvider>
         <Toaster />
@@ -77,6 +82,7 @@ const App = () => (
       </EditModeProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
