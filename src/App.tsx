@@ -7,7 +7,6 @@ import { LanguageRedirect } from "./components/LanguageRedirect";
 import { LanguageSync } from "./components/LanguageSync";
 import { EditModeProvider } from "@/contexts/EditModeContext";
 import { useTypographySettings } from "@/hooks/useTypographySettings";
-import { FontTestBanner } from "@/components/FontTestBanner";
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
 import FeaturesPage from "./pages/Features";
@@ -35,7 +34,6 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <EditModeProvider>
-        <FontTestBanner />
         <Toaster />
         <Sonner />
         <BrowserRouter>
