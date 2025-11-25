@@ -25,53 +25,32 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { OptimizedImage } from "@/components/OptimizedImage";
 
 const Hero = () => {
   const { t } = useAppTranslation();
   const { h1, body } = useTypography();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
-  const [count, setCount] = useState(0);
-  const plugin = useRef(Autoplay({ delay: 3500, stopOnInteraction: true }));
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [mediaKey, setMediaKey] = useState(0);
   const { allowedBackgrounds } = useAllowedBackgrounds();
   
-  // Media settings state
   const [isLoading, setIsLoading] = useState(true);
-  const [mediaKey, setMediaKey] = useState(0);
-  const [displayType, setDisplayType] = useState<'image' | 'carousel'>('carousel');
-  const [imageSettings, setImageSettings] = useState({
-    image_url: '',
-    image_alt: '',
+  const [mediaSettings, setMediaSettings] = useState({
+    displayType: 'carousel' as 'image' | 'carousel',
+    imageUrl: '',
+    imageAlt: '',
+    autoplayDelay: 5000,
+    showNavigation: true,
+    showDots: true,
   });
-  const [carouselSettings, setCarouselSettings] = useState<any>({
-    autoplay: true,
-    autoplay_delay: 3.5,
-    show_navigation: true,
-    show_dots: true,
-    images: [],
-  });
+  const [carouselImages, setCarouselImages] = useState<any[]>([]);
 
-  // Fallback images
   const fallbackImages = [
-    {
-      url: noddiLocationScreen,
-      alt: "Noddi location selection screen showing saved addresses and search functionality",
-      title: "Noddi",
-    },
-    {
-      url: tiamatLocationScreen,
-      alt: "Tiamat Dekk location selection screen with address delivery confirmation",
-      title: "Tiamat Dekk",
-    },
-    {
-      url: hurtigrutaLocationScreen,
-      alt: "Hurtigruta Carglass location selection screen with address delivery options",
-      title: "Hurtigruta Carglass",
-    },
+    { url: noddiLocationScreen, alt: "Noddi location screen" },
+    { url: tiamatLocationScreen, alt: "Tiamat location screen" },
+    { url: hurtigrutaLocationScreen, alt: "Hurtigruta location screen" },
   ];
-
-  const fallbackImage = noddiLocationScreen;
 
   useEffect(() => {
     loadMediaSettings();
@@ -80,147 +59,91 @@ const Hero = () => {
   const loadMediaSettings = async () => {
     setIsLoading(true);
     try {
-      // Step 1: Get settings without JOIN
       const { data: settings, error } = await supabase
         .from('image_carousel_settings')
         .select('*')
         .eq('location_id', 'homepage-hero')
         .maybeSingle();
 
-      if (error) {
-        console.error('❌ Query error:', error);
-        setIsLoading(false);
-        return;
-      }
-
-      console.log('📊 Hero settings loaded:', settings);
-
-      if (settings) {
-        console.log('✅ Settings received:', { 
-          displayType: settings.display_type, 
-          imageUrl: settings.image_url,
-          carouselConfigId: settings.carousel_config_id
+      if (!error && settings) {
+        setMediaSettings({
+          displayType: settings.display_type as 'image' | 'carousel',
+          imageUrl: settings.image_url || '',
+          imageAlt: settings.image_alt || '',
+          autoplayDelay: 5000,
+          showNavigation: true,
+          showDots: true,
         });
-        
-        setDisplayType(settings.display_type as 'image' | 'carousel');
-        
-        if (settings.display_type === 'image') {
-          setImageSettings({
-            image_url: settings.image_url || '',
-            image_alt: settings.image_alt || '',
-          });
-          console.log('🖼️ Single image mode:', settings.image_url);
-        } else if (settings.carousel_config_id) {
-          // Step 2: Fetch carousel config separately if needed
-          const { data: carouselConfig, error: carouselError } = await supabase
+
+        if (settings.display_type === 'carousel' && settings.carousel_config_id) {
+          const { data: carouselConfig } = await supabase
             .from('carousel_configs')
             .select('*')
             .eq('id', settings.carousel_config_id)
             .single();
-            
-          if (carouselError) {
-            console.error('❌ Carousel config error:', carouselError);
-          } else if (carouselConfig) {
-            // Parse carousel images
+
+          if (carouselConfig?.images) {
             const images = Array.isArray(carouselConfig.images) ? carouselConfig.images : [];
-            
-            setCarouselSettings({
-              autoplay: carouselConfig.autoplay,
-              autoplay_delay: carouselConfig.autoplay_delay,
-              show_navigation: carouselConfig.show_navigation,
-              show_dots: carouselConfig.show_dots,
-              images: images.length > 0 ? images : fallbackImages,
-            });
-            
-            console.log('🎠 Carousel mode:', images.length, 'images');
-            
-            // Update autoplay plugin delay
-            if (plugin.current) {
-              plugin.current = Autoplay({ 
-                delay: carouselConfig.autoplay_delay * 1000,
-                stopOnInteraction: true 
-              });
-            }
+            setCarouselImages(images.length > 0 ? images : fallbackImages);
           }
         }
         
-        // Force re-render after loading
         setMediaKey(prev => prev + 1);
-      } else {
-        console.warn('⚠️ No settings found for homepage-hero');
       }
     } catch (error) {
-      console.error('❌ Error loading media settings:', error);
+      console.error('Error loading media:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleMediaSave = () => {
+    loadMediaSettings();
+  };
+
   useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap() + 1);
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap() + 1);
-    });
+    if (!api) return;
+    setCurrent(api.selectedScrollSnap());
+    api.on("select", () => setCurrent(api.selectedScrollSnap()));
   }, [api]);
-
-  const shouldShowNavigation = carouselSettings.show_navigation && carouselSettings.images.length > 1;
-  const shouldShowDots = carouselSettings.show_dots && carouselSettings.images.length > 1;
-  const totalSlides = carouselSettings.images.length;
-  const currentSlide = current - 1;
 
   return (
     <section className="pt-32 pb-0 relative overflow-visible bg-background">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Centered single column layout */}
         <div className="flex flex-col items-center text-center gap-12">
-          {/* Text Content - Centered */}
-          <div className="space-y-8" key={refreshKey}>
-            <EditableTranslation translationKey="hero.title" onSave={() => setRefreshKey(prev => prev + 1)}>
+          {/* Text Content */}
+          <div className="space-y-8">
+            <EditableTranslation translationKey="hero.title">
               <h1 className={`${h1} text-foreground text-center`}>{t('hero.title', 'One platform. Every function.')}</h1>
             </EditableTranslation>
 
-            <EditableTranslation translationKey="hero.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
+            <EditableTranslation translationKey="hero.subtitle">
               <p className={`${body} text-muted-foreground text-center`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
             </EditableTranslation>
 
-            {/* Metrics Badges - Centered */}
+            {/* Metrics Badge */}
             <div className="flex flex-wrap gap-6 justify-center">
-            <EditableBackground
-                elementId="hero-metrics-badge"
-                defaultBackground="glass-card"
-                allowedBackgrounds={allowedBackgrounds}
-              >
+              <EditableBackground elementId="hero-metrics-badge" defaultBackground="glass-card" allowedBackgrounds={allowedBackgrounds}>
                 <div className="flex items-center gap-3 px-6 py-4 rounded-xl shadow-lg hover-scale">
-                  <EditableIcon
-                    elementId="hero-award-icon"
-                    icon={Award}
-                    defaultBackground="bg-gradient-primary"
-                    size="sm"
-                  />
+                  <EditableIcon elementId="hero-award-icon" icon={Award} defaultBackground="bg-gradient-primary" size="sm" />
                   <div>
-                    <LockedText reason="Metric value - Update in code">
+                    <LockedText reason="Metric value">
                       <div className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
                         Net Promoter Score <Counter end={90} prefix="~" />
                       </div>
                     </LockedText>
-                    <EditableTranslation translationKey="hero.metrics.nps" onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'from end customers. Like no one else in the industry')}</div>
+                    <EditableTranslation translationKey="hero.metrics.nps">
+                      <div className="text-xs text-muted-foreground">{t('hero.metrics.nps', 'from end customers')}</div>
                     </EditableTranslation>
                   </div>
                 </div>
               </EditableBackground>
             </div>
 
-            {/* CTA Button - Centered */}
+            {/* CTA Button */}
             <div className="flex justify-center">
               <LanguageLink to="/contact">
-                <EditableTranslation translationKey="hero.cta" onSave={() => setRefreshKey(prev => prev + 1)}>
+                <EditableTranslation translationKey="hero.cta">
                   <Button size="lg" className="text-lg px-8 py-4 group shadow-lg">
                     {t('hero.cta', 'Get a Demo')}
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -230,342 +153,136 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Logo Marquee - Before Image */}
+          {/* Logo Marquee */}
           <div className="w-full mt-16">
             <LogoMarquee />
           </div>
 
-          {/* Full-width Image - 16:9 Aspect Ratio */}
-          <div className="relative w-full max-w-5xl mt-12">
+          {/* Product Image with USP Section */}
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <EditableUniversalMedia
-              key={mediaKey}
               locationId="homepage-hero"
-              onSave={loadMediaSettings}
-              placeholder="Click to configure hero image/carousel"
+              onSave={handleMediaSave}
+              placeholder="Add hero image or carousel"
             >
-              {isLoading ? (
-                <div className="relative">
-                  <div className="w-full h-[600px] rounded-xl bg-muted/20 animate-pulse" />
-                </div>
-              ) : displayType === 'carousel' ? (
-                <div className="relative">
-                  {/* Unified container - light gradient top + dark section bottom */}
-                  <div className="relative overflow-visible rounded-2xl">
-                    {/* Light gradient section - image/carousel */}
-                    <div 
-                      className="pt-32 px-32 pb-8 rounded-t-2xl"
-                      style={{
-                        background: `linear-gradient(to top, 
-                          hsl(var(--vibrant-purple) / 0.25) 0%, 
-                          hsl(var(--brand-pink) / 0.15) 40%, 
-                          hsl(var(--brand-peach) / 0.1) 70%, 
-                          transparent 100%)`
-                      }}
-                    >
-                      <Carousel
-                        key={mediaKey}
-                        setApi={setApi}
-                        opts={{
-                          align: 'center',
-                          loop: carouselSettings.autoplay,
-                        }}
-                        plugins={carouselSettings.autoplay ? [
-                          Autoplay({
-                            delay: carouselSettings.autoplay_delay * 1000,
-                            stopOnInteraction: false,
-                          })
-                        ] : []}
-                        className="w-full"
-                      >
-                        <CarouselContent>
-                          {carouselSettings.images.map((image: any, index: number) => (
-                            <CarouselItem key={`hero-slide-${index}`}>
-                              <div className="aspect-video rounded-xl overflow-hidden shadow-2xl">
-                                <img
-                                  src={image.url}
-                                  alt={image.alt || `Slide ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                        
-                        {shouldShowNavigation && (
-                          <>
-                            <CarouselPrevious className="left-4" />
-                            <CarouselNext className="right-4" />
-                          </>
+              {(mediaSettings.displayType === 'carousel' && carouselImages.length > 0) || 
+               (mediaSettings.displayType === 'image' && mediaSettings.imageUrl) ? (
+                <div className="bg-gradient-warmth rounded-2xl overflow-hidden">
+                  {/* Image/Carousel section */}
+                  <div className="pt-16 px-8 md:px-16 lg:px-24 pb-8">
+                    {mediaSettings.displayType === 'carousel' && carouselImages.length > 0 ? (
+                      <>
+                        <Carousel
+                          key={`hero-carousel-${mediaKey}`}
+                          setApi={setApi}
+                          opts={{ align: "center", loop: true }}
+                          plugins={[Autoplay({ delay: mediaSettings.autoplayDelay || 5000, stopOnInteraction: false })]}
+                          className="w-full"
+                        >
+                          <CarouselContent>
+                            {carouselImages.map((image, index) => (
+                              <CarouselItem key={`hero-slide-${index}`}>
+                                <div className="w-full aspect-video rounded-xl overflow-hidden bg-background/10">
+                                  <OptimizedImage
+                                    src={image.url}
+                                    alt={image.alt || `Hero slide ${index + 1}`}
+                                    className="w-full h-full object-contain"
+                                    width={1920}
+                                    height={1080}
+                                    quality={95}
+                                  />
+                                </div>
+                              </CarouselItem>
+                            ))}
+                          </CarouselContent>
+                          {mediaSettings.showNavigation && (
+                            <>
+                              <CarouselPrevious className="left-4" />
+                              <CarouselNext className="right-4" />
+                            </>
+                          )}
+                        </Carousel>
+                        {mediaSettings.showDots && (
+                          <div className="flex justify-center gap-2 mt-6">
+                            {carouselImages.map((_, index) => (
+                              <button
+                                key={`hero-dot-${index}`}
+                                onClick={() => api?.scrollTo(index)}
+                                className={`w-2 h-2 rounded-full transition-all ${
+                                  current === index ? "bg-white w-8" : "bg-white/50 hover:bg-white/75"
+                                }`}
+                                aria-label={`Go to slide ${index + 1}`}
+                              />
+                            ))}
+                          </div>
                         )}
-                      </Carousel>
-
-                      {shouldShowDots && totalSlides > 0 && (
-                        <div className="flex justify-center gap-2 mt-8">
-                          {Array.from({ length: totalSlides }).map((_, index) => (
-                            <button
-                              key={`hero-dot-${index}`}
-                              onClick={() => api?.scrollTo(index)}
-                              className={`h-2 rounded-full transition-all ${
-                                index === currentSlide
-                                  ? 'w-8 bg-primary'
-                                  : 'w-2 bg-primary/30 hover:bg-primary/50'
-                              }`}
-                              aria-label={`Go to slide ${index + 1}`}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Dark section - flows seamlessly from image */}
-                    <div 
-                      className="relative rounded-b-2xl"
-                      style={{
-                        background: `linear-gradient(to bottom, 
-                          hsl(var(--primary)) 0%, 
-                          hsl(var(--primary) / 0.95) 100%)`
-                      }}
-                    >
-                      <div className="relative z-10 px-8 py-16">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                          {/* Feature 1 */}
-                          <div className="text-center">
-                            <div className="flex justify-center mb-4">
-                              <div 
-                                className="w-12 h-12 rounded-full flex items-center justify-center"
-                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
-                              >
-                                <Sparkles className="w-6 h-6 text-primary-foreground" />
-                              </div>
-                            </div>
-                            <EditableTranslation translationKey="hero.feature1.title">
-                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Discover freely</h3>
-                            </EditableTranslation>
-                            <EditableTranslation translationKey="hero.feature1.description">
-                              <p className="text-sm text-primary-foreground/70">Answer product questions in seconds without bottlenecks.</p>
-                            </EditableTranslation>
-                          </div>
-
-                          {/* Feature 2 */}
-                          <div className="text-center">
-                            <div className="flex justify-center mb-4">
-                              <div 
-                                className="w-12 h-12 rounded-full flex items-center justify-center"
-                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
-                              >
-                                <Users className="w-6 h-6 text-primary-foreground" />
-                              </div>
-                            </div>
-                            <EditableTranslation translationKey="hero.feature2.title">
-                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Understand behavior</h3>
-                            </EditableTranslation>
-                            <EditableTranslation translationKey="hero.feature2.description">
-                              <p className="text-sm text-primary-foreground/70">See how users engage, convert, and return, all in one unified view.</p>
-                            </EditableTranslation>
-                          </div>
-
-                          {/* Feature 3 */}
-                          <div className="text-center">
-                            <div className="flex justify-center mb-4">
-                              <div 
-                                className="w-12 h-12 rounded-full flex items-center justify-center"
-                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
-                              >
-                                <Target className="h-6 w-6 text-primary-foreground" />
-                              </div>
-                            </div>
-                            <EditableTranslation translationKey="hero.feature3.title">
-                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Act with confidence</h3>
-                            </EditableTranslation>
-                            <EditableTranslation translationKey="hero.feature3.description">
-                              <p className="text-sm text-primary-foreground/70">Back every decision with insights you can trust. Then share, test, and improve together.</p>
-                            </EditableTranslation>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Ellipse Glow */}
-                      <div 
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-32 blur-3xl pointer-events-none"
-                        style={{
-                          background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
-                        }}
-                      />
-                    </div>
-
-                    {/* Floating Callouts */}
-                    <div 
-                      className="absolute -left-[10%] top-1/3 w-[14%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                      style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
-                    >
-                      <img 
-                        src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=600&fit=crop" 
-                        alt="Dashboard callout" 
-                        className="w-full"
-                      />
-                    </div>
-                    <div 
-                      className="absolute -right-[8%] top-[15%] w-[30%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                      style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
-                    >
-                      <img 
-                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" 
-                        alt="Analytics callout" 
-                        className="w-full"
-                      />
-                    </div>
-                    <div 
-                      className="absolute -right-[5%] bottom-[10%] w-[18%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                      style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}
-                    >
-                      <img 
-                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop" 
-                        alt="Metrics callout" 
-                        className="w-full"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="relative">
-                  {/* Unified container - light gradient top + dark section bottom */}
-                  <div className="relative overflow-visible rounded-2xl">
-                    {/* Light gradient section - single image */}
-                    <div 
-                      className="pt-32 px-32 pb-8 rounded-t-2xl"
-                      style={{
-                        background: `linear-gradient(to top, 
-                          hsl(var(--vibrant-purple) / 0.25) 0%, 
-                          hsl(var(--brand-pink) / 0.15) 40%, 
-                          hsl(var(--brand-peach) / 0.1) 70%, 
-                          transparent 100%)`
-                      }}
-                    >
-                      <div className="aspect-video rounded-xl overflow-hidden shadow-2xl">
-                        <img
-                          key={mediaKey}
-                          src={imageSettings.image_url || fallbackImage}
-                          alt={imageSettings.image_alt || 'Hero image'}
-                          className="w-full h-full object-cover"
+                      </>
+                    ) : (
+                      <div className="w-full aspect-video rounded-xl overflow-hidden bg-background/10">
+                        <OptimizedImage
+                          src={mediaSettings.imageUrl || ''}
+                          alt={mediaSettings.imageAlt || 'Hero image'}
+                          className="w-full h-full object-contain"
+                          width={1920}
+                          height={1080}
+                          quality={95}
                         />
                       </div>
-                    </div>
+                    )}
+                  </div>
 
-                    {/* Dark section - flows seamlessly from image */}
-                    <div 
-                      className="relative rounded-b-2xl"
-                      style={{
-                        background: `linear-gradient(to bottom, 
-                          hsl(var(--primary)) 0%, 
-                          hsl(var(--primary) / 0.95) 100%)`
-                      }}
-                    >
-                      <div className="relative z-10 px-8 py-16">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                          {/* Feature 1 */}
-                          <div className="text-center">
-                            <div className="flex justify-center mb-4">
-                              <div 
-                                className="w-12 h-12 rounded-full flex items-center justify-center"
-                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
-                              >
-                                <Sparkles className="w-6 h-6 text-primary-foreground" />
-                              </div>
-                            </div>
-                            <EditableTranslation translationKey="hero.feature1.title">
-                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Discover freely</h3>
-                            </EditableTranslation>
-                            <EditableTranslation translationKey="hero.feature1.description">
-                              <p className="text-sm text-primary-foreground/70">Answer product questions in seconds without bottlenecks.</p>
-                            </EditableTranslation>
-                          </div>
-
-                          {/* Feature 2 */}
-                          <div className="text-center">
-                            <div className="flex justify-center mb-4">
-                              <div 
-                                className="w-12 h-12 rounded-full flex items-center justify-center"
-                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
-                              >
-                                <Users className="w-6 h-6 text-primary-foreground" />
-                              </div>
-                            </div>
-                            <EditableTranslation translationKey="hero.feature2.title">
-                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Understand behavior</h3>
-                            </EditableTranslation>
-                            <EditableTranslation translationKey="hero.feature2.description">
-                              <p className="text-sm text-primary-foreground/70">See how users engage, convert, and return, all in one unified view.</p>
-                            </EditableTranslation>
-                          </div>
-
-                          {/* Feature 3 */}
-                          <div className="text-center">
-                            <div className="flex justify-center mb-4">
-                              <div 
-                                className="w-12 h-12 rounded-full flex items-center justify-center"
-                                style={{ backgroundColor: 'hsl(var(--vibrant-purple) / 0.2)' }}
-                              >
-                                <Target className="h-6 w-6 text-primary-foreground" />
-                              </div>
-                            </div>
-                            <EditableTranslation translationKey="hero.feature3.title">
-                              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Act with confidence</h3>
-                            </EditableTranslation>
-                            <EditableTranslation translationKey="hero.feature3.description">
-                              <p className="text-sm text-primary-foreground/70">Back every decision with insights you can trust. Then share, test, and improve together.</p>
-                            </EditableTranslation>
-                          </div>
+                  {/* USP section - same gradient continues */}
+                  <div className="px-8 md:px-16 py-12 relative">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
+                          <Sparkles className="h-8 w-8 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg text-white mb-2">
+                            <EditableTranslation translationKey="hero.feature1.title" defaultText="Discover freely" element="span" />
+                          </h3>
+                          <p className="text-sm text-white/80">
+                            <EditableTranslation translationKey="hero.feature1.description" defaultText="Get instant notifications for every interaction" element="span" />
+                          </p>
                         </div>
                       </div>
 
-                      {/* Ellipse Glow */}
-                      <div 
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-32 blur-3xl pointer-events-none"
-                        style={{
-                          background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
-                        }}
-                      />
-                    </div>
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
+                          <Users className="h-8 w-8 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg text-white mb-2">
+                            <EditableTranslation translationKey="hero.feature2.title" defaultText="Understand behavior" element="span" />
+                          </h3>
+                          <p className="text-sm text-white/80">
+                            <EditableTranslation translationKey="hero.feature2.description" defaultText="Track user journeys and engagement patterns" element="span" />
+                          </p>
+                        </div>
+                      </div>
 
-                    {/* Floating Callouts */}
-                    <div 
-                      className="absolute -left-[10%] top-1/3 w-[14%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                      style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
-                    >
-                      <img 
-                        src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=600&fit=crop" 
-                        alt="Dashboard callout" 
-                        className="w-full"
-                      />
-                    </div>
-                    <div 
-                      className="absolute -right-[8%] top-[15%] w-[30%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                      style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
-                    >
-                      <img 
-                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop" 
-                        alt="Analytics callout" 
-                        className="w-full"
-                      />
-                    </div>
-                    <div 
-                      className="absolute -right-[5%] bottom-[10%] w-[18%] rounded-lg shadow-2xl overflow-hidden opacity-0 animate-fade-in hidden lg:block"
-                      style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}
-                    >
-                      <img 
-                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=400&fit=crop" 
-                        alt="Metrics callout" 
-                        className="w-full"
-                      />
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
+                          <Target className="h-8 w-8 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg text-white mb-2">
+                            <EditableTranslation translationKey="hero.feature3.title" defaultText="Act with confidence" element="span" />
+                          </h3>
+                          <p className="text-sm text-white/80">
+                            <EditableTranslation translationKey="hero.feature3.description" defaultText="Make data-driven decisions that drive growth" element="span" />
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              )}
+              ) : null}
             </EditableUniversalMedia>
           </div>
         </div>
       </div>
-
     </section>
   );
 };
