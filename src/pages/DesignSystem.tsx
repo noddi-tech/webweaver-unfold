@@ -11,6 +11,7 @@ import USPCms from "@/components/design-system/USPCms";
 import PatternsShowcase from "@/components/design-system/PatternsShowcase";
 import SectionsManager from "@/components/design-system/SectionsManager";
 import { ColorPaletteTab } from "@/components/design-system/ColorPaletteTab";
+import FontManager from "@/components/design-system/FontManager";
 
 const DesignSystem = () => {
   return (
@@ -29,8 +30,9 @@ const DesignSystem = () => {
         </div>
 
         <Tabs defaultValue="colors" className="w-full">
-          <TabsList className="grid w-full grid-cols-11 mb-12">
+          <TabsList className="grid w-full grid-cols-12 mb-12">
             <TabsTrigger value="colors">Colors</TabsTrigger>
+            <TabsTrigger value="fonts">Fonts</TabsTrigger>
             <TabsTrigger value="typography">Typography</TabsTrigger>
             <TabsTrigger value="spacing">Spacing</TabsTrigger>
             <TabsTrigger value="buttons">Buttons/CTAs</TabsTrigger>
@@ -45,6 +47,10 @@ const DesignSystem = () => {
 
           <TabsContent value="colors" className="space-y-8">
             <ColorPaletteTab />
+          </TabsContent>
+
+          <TabsContent value="fonts" className="space-y-8">
+            <FontManager />
           </TabsContent>
 
           <TabsContent value="typography" className="space-y-8">

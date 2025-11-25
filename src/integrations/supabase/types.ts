@@ -1635,6 +1635,60 @@ export type Database = {
           },
         ]
       }
+      typography_settings: {
+        Row: {
+          created_at: string | null
+          fallback_fonts: string[] | null
+          font_family_name: string
+          font_files: Json | null
+          font_google_url: string | null
+          font_source: string
+          id: string
+          is_active: boolean | null
+          mono_fallback_fonts: string[] | null
+          mono_font_family_name: string | null
+          mono_font_files: Json | null
+          mono_font_google_url: string | null
+          mono_font_source: string | null
+          typography_scale: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          fallback_fonts?: string[] | null
+          font_family_name?: string
+          font_files?: Json | null
+          font_google_url?: string | null
+          font_source?: string
+          id?: string
+          is_active?: boolean | null
+          mono_fallback_fonts?: string[] | null
+          mono_font_family_name?: string | null
+          mono_font_files?: Json | null
+          mono_font_google_url?: string | null
+          mono_font_source?: string | null
+          typography_scale?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          fallback_fonts?: string[] | null
+          font_family_name?: string
+          font_files?: Json | null
+          font_google_url?: string | null
+          font_source?: string
+          id?: string
+          is_active?: boolean | null
+          mono_fallback_fonts?: string[] | null
+          mono_font_family_name?: string | null
+          mono_font_files?: Json | null
+          mono_font_google_url?: string | null
+          mono_font_source?: string | null
+          typography_scale?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       usps: {
         Row: {
           active: boolean
