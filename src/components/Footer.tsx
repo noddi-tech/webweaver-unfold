@@ -28,16 +28,18 @@ const Footer = () => {
   if (!footerSettings) return null;
 
   return (
-    <footer className="py-16 px-6 relative">
-      {/* Full-width gradient background - reversed (gradient to white at top) */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'linear-gradient(to top, hsl(266 85% 58% / 0.85) 0%, hsl(321 59% 85% / 0.5) 45%, white 100%)'
-        }}
-      />
-      
-      <div className="container mx-auto relative z-10">
+    <footer className="py-16 px-4 sm:px-8 lg:px-12">
+      {/* Card-encapsulated gradient section */}
+      <div className="rounded-3xl overflow-hidden relative shadow-2xl">
+        {/* Gradient background inside card - reversed (gradient to white at top) */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(to top, hsl(266 85% 58% / 0.85) 0%, hsl(321 59% 85% / 0.5) 45%, white 100%)'
+          }}
+        />
+        
+        <div className="container mx-auto relative z-10 py-16 px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
@@ -115,6 +117,7 @@ const Footer = () => {
             <p>{t('footer.copyright', footerSettings.copyright_text)}</p>
           </div>
         )}
+      </div>
       </div>
     </footer>
   );
