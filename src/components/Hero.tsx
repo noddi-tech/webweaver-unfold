@@ -108,17 +108,19 @@ const Hero = () => {
   }, [api]);
 
   return (
-    <section className="pt-32 pb-0 relative overflow-hidden">
-      {/* Full-width gradient background */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'linear-gradient(to bottom, white 0%, white 10%, hsl(266 85% 58% / 0.15) 30%, hsl(321 59% 85% / 0.5) 55%, hsl(266 85% 58% / 0.85) 100%)'
-        }}
-      />
+    <section className="pt-32 pb-16 px-4 sm:px-8 lg:px-12">
+      {/* Card-encapsulated gradient section */}
+      <div className="rounded-3xl overflow-hidden relative shadow-2xl">
+        {/* Gradient background inside card */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(to bottom, white 0%, white 10%, hsl(266 85% 58% / 0.15) 30%, hsl(321 59% 85% / 0.5) 55%, hsl(266 85% 58% / 0.85) 100%)'
+          }}
+        />
 
-      {/* Content constrained to container */}
-      <div className="container max-w-container px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Content constrained to container */}
+        <div className="container max-w-container px-4 sm:px-6 lg:px-8 relative z-10 py-16">
         <div className="flex flex-col items-center text-center gap-12">
           {/* Text Content */}
           <div className="space-y-8">
@@ -305,6 +307,7 @@ const Hero = () => {
             </EditableUniversalMedia>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );
