@@ -213,14 +213,10 @@ All colors MUST be HSL.
       hsl(266 85% 48%));
   }
 
-  /* Global font inheritance for ALL elements */
-  *, *::before, *::after {
-    font-family: inherit;
-  }
-
   html {
     background: hsl(var(--background));
     min-height: 100vh;
+    font-family: var(--font-primary);
   }
 
   body {
