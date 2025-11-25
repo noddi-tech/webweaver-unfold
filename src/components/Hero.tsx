@@ -111,25 +111,10 @@ const Hero = () => {
     api.on("select", () => setCurrent(api.selectedScrollSnap()));
   }, [api]);
 
-  // Map aspect ratio to Tailwind classes
-  const getAspectRatioClass = (ratio: string) => {
-    const ratioMap: Record<string, string> = {
-      '1:1': 'aspect-square',
-      '16:9': 'aspect-video',
-      '9:16': 'aspect-[9/16]',
-      '4:3': 'aspect-[4/3]',
-      '3:2': 'aspect-[3/2]',
-      '21:9': 'aspect-[21/9]',
-      'auto': 'aspect-auto',
-    };
-    return ratioMap[ratio] || 'aspect-auto';
-  };
-
-  const aspectRatioClass = getAspectRatioClass(mediaSettings.aspectRatio);
+  // Container is always fixed at 2:1 aspect ratio
+  const containerClasses = 'w-full aspect-[2/1] max-h-[500px]';
+  // Only fitMode is dynamic based on database settings
   const fitModeClass = mediaSettings.fitMode === 'cover' ? 'object-cover' : 'object-contain';
-  const containerClasses = mediaSettings.aspectRatio === 'auto' 
-    ? `w-full ${aspectRatioClass} max-h-[500px]` 
-    : `w-full ${aspectRatioClass}`;
 
   return (
     <section className="pt-32 pb-12 px-4 sm:px-8 lg:px-12">
