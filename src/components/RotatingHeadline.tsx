@@ -83,14 +83,14 @@ export function RotatingHeadline({
     <div className={`${className} relative`}>
       <h1 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl whitespace-nowrap">
         {/* Rotating Term - INLINE with the rest */}
-        <span 
-          className={`text-foreground transition-opacity duration-300 ${
-            isFading ? 'opacity-0' : 'opacity-100'
-          }`}
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {termText}
+        <span className="inline-flex overflow-hidden" aria-live="polite" aria-atomic="true">
+          <span 
+            className={`text-foreground inline-block ${
+              isFading ? 'animate-slideOutUp' : 'animate-slideInUp'
+            }`}
+          >
+            {termText}
+          </span>
         </span>
         {/* Static suffix - same line */}
         <EditableTranslation 
@@ -118,12 +118,14 @@ export function RotatingHeadline({
         <span className="text-muted-foreground text-xl">↳</span>
         
         {/* Rotating descriptor */}
-        <span 
-          className={`text-muted-foreground text-lg max-w-2xl transition-opacity duration-300 ${
-            isFading ? 'opacity-0' : 'opacity-100'
-          }`}
-        >
-          {descText}
+        <span className="inline-flex overflow-hidden max-w-2xl">
+          <span 
+            className={`text-muted-foreground text-lg inline-block ${
+              isFading ? 'animate-slideOutUp' : 'animate-slideInUp'
+            }`}
+          >
+            {descText}
+          </span>
         </span>
       </div>
     </div>
