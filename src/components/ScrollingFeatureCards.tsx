@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useMemo } from 'react';
+import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { Calendar, Package, Users, BarChart3, Settings, ArrowRight, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,114 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeColorToken } from '@/lib/colorUtils';
 import { getOptimizedImageUrl, generateSrcSet } from '@/utils/imageTransform';
+
+// Helper function to calculate rendered image bounds for object-contain
+const calculateContainedImageBounds = (
+  containerWidth: number,
+  containerHeight: number,
+  naturalWidth: number,
+  naturalHeight: number
+): { left: number; top: number; width: number; height: number } => {
+  const containerAspect = containerWidth / containerHeight;
+  const imageAspect = naturalWidth / naturalHeight;
+  
+  let renderedWidth: number;
+  let renderedHeight: number;
+  
+  if (imageAspect > containerAspect) {
+    // Image is wider - constrained by width
+    renderedWidth = containerWidth;
+    renderedHeight = containerWidth / imageAspect;
+  } else {
+    // Image is taller - constrained by height
+    renderedHeight = containerHeight;
+    renderedWidth = containerHeight * imageAspect;
+  }
+  
+  return {
+    left: (containerWidth - renderedWidth) / 2,
+    top: (containerHeight - renderedHeight) / 2,
+    width: renderedWidth,
+    height: renderedHeight
+  };
+};
+
+// Component for images with rounded corners that works with both contain and cover
+const ImageWithRoundedCorners: React.FC<{
+  src: string;
+  srcSet?: string;
+  sizes?: string;
+  alt: string;
+  fitMode: 'contain' | 'cover';
+  objectPosition?: string;
+  borderRadius: number; // in pixels (e.g., 16)
+}> = ({ src, srcSet, sizes, alt, fitMode, objectPosition, borderRadius }) => {
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [clipPath, setClipPath] = useState<string>('');
+  
+  const updateClipPath = useCallback(() => {
+    const img = imgRef.current;
+    if (!img || fitMode !== 'contain') return;
+    
+    const containerWidth = img.clientWidth;
+    const containerHeight = img.clientHeight;
+    const naturalWidth = img.naturalWidth;
+    const naturalHeight = img.naturalHeight;
+    
+    if (!naturalWidth || !naturalHeight) return;
+    
+    const bounds = calculateContainedImageBounds(
+      containerWidth, containerHeight, naturalWidth, naturalHeight
+    );
+    
+    // Convert pixel bounds to inset clip-path with rounded corners
+    setClipPath(`inset(${bounds.top}px ${containerWidth - bounds.left - bounds.width}px ${containerHeight - bounds.top - bounds.height}px ${bounds.left}px round ${borderRadius}px)`);
+  }, [fitMode, borderRadius]);
+  
+  useEffect(() => {
+    const img = imgRef.current;
+    if (!img) return;
+    
+    img.addEventListener('load', updateClipPath);
+    window.addEventListener('resize', updateClipPath);
+    
+    // Initial calculation if already loaded
+    if (img.complete) updateClipPath();
+    
+    return () => {
+      img.removeEventListener('load', updateClipPath);
+      window.removeEventListener('resize', updateClipPath);
+    };
+  }, [updateClipPath]);
+  
+  const baseClasses = fitMode === 'contain' 
+    ? 'w-full h-full object-contain block'
+    : cn(
+        'w-full h-full object-cover block',
+        objectPosition === 'top' && 'object-top',
+        objectPosition === 'center' && 'object-center', 
+        objectPosition === 'bottom' && 'object-bottom'
+      );
+  
+  return (
+    <img
+      ref={imgRef}
+      src={src}
+      srcSet={srcSet}
+      sizes={sizes}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      className={baseClasses}
+      style={{
+        clipPath: fitMode === 'contain' ? clipPath : `inset(0 round ${borderRadius}px)`,
+        imageRendering: 'auto',
+        WebkitFontSmoothing: 'antialiased',
+        backfaceVisibility: 'hidden',
+      }}
+    />
+  );
+};
 
 // Import all feature card images
 import bookingHeroImg from '@/assets/booking-hero.png';
@@ -347,34 +455,23 @@ export function ScrollingFeatureCards() {
     const containerClasses = getContainerClasses();
     const maskClasses = getMaskClasses(cardFitMode, cardBorderRadius);
     
-    // Contain mode: fill viewport with w-full h-full, object-fit scales image to fit entirely within
-    // Cover mode: fill container completely, allowing cropping with configurable positioning (top/center/bottom)
-    // Border radius: applied to image for contain, applied to mask for cover
-  const imageClasses = cardFitMode === 'contain'
-    ? 'w-full h-full object-contain block'
-    : cn(
-        'w-full h-full object-cover block',
-        cardObjectPosition === 'top' && 'object-top',
-        cardObjectPosition === 'center' && 'object-center',
-        cardObjectPosition === 'bottom' && 'object-bottom'
-      );
-
-  const getClipPathRadius = (radiusClass: string): string => {
-    const radiusMap: Record<string, string> = {
-      'rounded-none': '0',
-      'rounded-sm': '2px',
-      rounded: '4px',
-      'rounded-md': '6px',
-      'rounded-lg': '8px',
-      'rounded-xl': '12px',
-      'rounded-2xl': '16px',
-      'rounded-3xl': '24px',
-      'rounded-full': '9999px',
+    // Convert border radius class to pixel value for ImageWithRoundedCorners
+  const getRadiusInPixels = (radiusClass: string): number => {
+    const radiusMap: Record<string, number> = {
+      'rounded-none': 0,
+      'rounded-sm': 2,
+      rounded: 4,
+      'rounded-md': 6,
+      'rounded-lg': 8,
+      'rounded-xl': 12,
+      'rounded-2xl': 16,
+      'rounded-3xl': 24,
+      'rounded-full': 9999,
     };
-    return radiusMap[radiusClass] ?? radiusMap['rounded-2xl'];
+    return radiusMap[radiusClass] ?? 16;
   };
 
-  const clipRadius = getClipPathRadius(cardBorderRadius);
+  const borderRadiusPixels = getRadiusInPixels(cardBorderRadius);
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
@@ -398,23 +495,15 @@ export function ScrollingFeatureCards() {
                   className="h-full pl-0"
                 >
                   <div className={maskClasses}>
-                    <img
+                    <ImageWithRoundedCorners
                       key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
                       src={getCardImageUrl(image.url, cardFitMode)}
                       srcSet={generateSrcSet(image.url, [640, 1280, 1920, 2560, 3840], { quality: 100, format: 'origin', fit: cardFitMode })}
                       sizes="(max-width: 768px) 100vw, 72vw"
                       alt={image.alt || `Slide ${imgIndex + 1}`}
-                      loading="lazy"
-                      decoding="async"
-                      className={imageClasses}
-                      style={{
-                        clipPath: `inset(0 round ${clipRadius})`,
-                        imageRendering: 'auto',
-                        WebkitFontSmoothing: 'antialiased',
-                        backfaceVisibility: 'hidden',
-                        transform: 'translateZ(0)',
-                        willChange: 'transform',
-                      }}
+                      fitMode={cardFitMode}
+                      objectPosition={cardObjectPosition}
+                      borderRadius={borderRadiusPixels}
                     />
                   </div>
                 </CarouselItem>
@@ -437,23 +526,15 @@ export function ScrollingFeatureCards() {
       return (
         <div className={containerClasses} key={`media-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}>
           <div className={maskClasses}>
-            <img
+            <ImageWithRoundedCorners
               key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
               src={getCardImageUrl(imageUrl, cardFitMode)}
               srcSet={generateSrcSet(imageUrl, [640, 1280, 1920, 2560, 3840], { quality: 100, format: 'origin', fit: cardFitMode })}
               sizes="(max-width: 768px) 100vw, 72vw"
               alt={card.imageAlt}
-              loading="lazy"
-              decoding="async"
-              className={imageClasses}
-              style={{
-                clipPath: `inset(0 round ${clipRadius})`,
-                imageRendering: 'auto',
-                WebkitFontSmoothing: 'antialiased',
-                backfaceVisibility: 'hidden',
-                transform: 'translateZ(0)',
-                willChange: 'transform',
-              }}
+              fitMode={cardFitMode}
+              objectPosition={cardObjectPosition}
+              borderRadius={borderRadiusPixels}
             />
           </div>
         </div>
