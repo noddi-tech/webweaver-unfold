@@ -56,17 +56,16 @@ export const useColorSystem = (): ColorSystemState => {
           optimalTextColor: token.optimal_text_color as 'white' | 'dark' | 'auto',
         }));
 
-        // Separate backgrounds from text colors (text colors have cssVar starting with foreground/muted-foreground/etc)
-        const textColorVars = ['foreground', 'card-foreground', 'primary-foreground', 'secondary-foreground', 'accent-foreground', 'muted-foreground', 'destructive-foreground'];
-        const backgrounds = allColors.filter(c => !textColorVars.some(v => c.cssVar.includes(v)));
+        // Separate backgrounds from text colors using the database category field
+        const backgrounds = allColors.filter(c => c.category !== 'text');
         const textColors = allColors
-          .filter(c => textColorVars.some(v => c.cssVar.includes(v)))
+          .filter(c => c.category === 'text')
           .map(c => ({
-            value: `text-${c.cssVar.replace('--', '')}`,
+            value: c.preview || `text-${c.cssVar.replace('--', '')}`,
             label: c.label,
             description: c.description,
-            preview: c.preview,
-            className: `text-${c.cssVar.replace('--', '')}`,
+            preview: c.preview || `text-${c.cssVar.replace('--', '')}`,
+            className: c.preview || `text-${c.cssVar.replace('--', '')}`,
           }));
 
         // Add white text color if not present
