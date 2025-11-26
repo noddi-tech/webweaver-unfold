@@ -125,7 +125,7 @@ const Hero = () => {
   const fitModeClass = mediaSettings.fitMode === 'cover' ? 'object-cover' : 'object-contain';
 
   return (
-    <section className="pt-32 pb-12 px-2.5">
+    <section className="pt-20 sm:pt-24 lg:pt-32 pb-8 sm:pb-12 px-2.5">
       {/* Card-encapsulated gradient section */}
       <div className="rounded-3xl overflow-hidden relative">
         {/* Gradient background inside card */}
@@ -137,10 +137,10 @@ const Hero = () => {
         />
 
         {/* Content constrained to container */}
-        <div className="container max-w-container px-4 sm:px-6 lg:px-8 relative z-10 py-16">
-        <div className="flex flex-col items-center text-center gap-12">
+        <div className="container max-w-container px-4 sm:px-6 lg:px-8 relative z-10 py-8 sm:py-12 lg:py-16">
+        <div className="flex flex-col items-center text-center gap-6 sm:gap-8 lg:gap-12">
           {/* Text Content */}
-          <div className="space-y-8">
+          <div className="space-y-4 sm:space-y-6 lg:space-y-8">
             <RotatingHeadline 
               className={`${h1} text-foreground text-center`}
               rotationInterval={4000}
@@ -164,10 +164,10 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Logo Marquee */}
-          <div className="w-full mt-6">
-            <LogoMarquee />
-          </div>
+            {/* Logo Marquee */}
+            <div className="w-full mt-4 sm:mt-6">
+              <LogoMarquee />
+            </div>
 
           {/* Product Image with USP Section */}
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
@@ -243,7 +243,7 @@ const Hero = () => {
                   </div>
 
                   {/* USP section - directly on page gradient */}
-                  <div className="py-8 px-4 md:px-8 relative">
+                  <div className="py-4 sm:py-6 lg:py-8 px-4 md:px-8 relative">
                     {/* Glow effect */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="w-64 h-64 rounded-full" style={{ 
@@ -251,7 +251,7 @@ const Hero = () => {
                       }} />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
                       {/* Capacity USP */}
                       <div className="flex flex-col items-center text-center space-y-2">
                         <CheckCircle2 className="w-5 h-5 text-white/80" />

@@ -3,7 +3,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import WhyNoddi from "@/components/WhyNoddi";
-import ProductOverview from "@/components/ProductOverview";
 import HowItWorks from "@/components/HowItWorks";
 import FinalCTA from "@/components/FinalCTA";
 import { HreflangTags } from "@/components/HreflangTags";
@@ -148,7 +147,6 @@ const Index = () => {
         <Hero />
         <WhyNoddi />
         <ScrollingFeatureCards />
-        <ProductOverview />
         <HowItWorks />
         <FinalCTA />
       </main>
