@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import * as React from 'react';
 import { Pencil } from 'lucide-react';
 import { useEditMode } from '@/contexts/EditModeContext';
-import { TranslationEditModal } from './TranslationEditModal';
+import { RichTextEditModal } from './RichTextEditModal';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -43,13 +43,14 @@ export function EditableTranslation({
   const [contentId, setContentId] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [displayText, setDisplayText] = useState<string | null>(null);
+  const [styleSettings, setStyleSettings] = useState<any>(null);
 
   useEffect(() => {
     // Fetch the actual translation from the database
     const fetchTranslation = async () => {
       const { data } = await supabase
         .from('translations')
-        .select('id, translated_text')
+        .select('id, translated_text, color_token, font_size, font_weight, is_italic, is_underline')
         .eq('translation_key', translationKey)
         .eq('language_code', currentLanguage)
         .maybeSingle();
@@ -57,8 +58,16 @@ export function EditableTranslation({
       if (data) {
         setContentId(data.id);
         setDisplayText(data.translated_text);
+        setStyleSettings({
+          colorToken: data.color_token,
+          fontSize: data.font_size,
+          fontWeight: data.font_weight,
+          isItalic: data.is_italic,
+          isUnderline: data.is_underline,
+        });
       } else {
         setDisplayText(null);
+        setStyleSettings(null);
       }
     };
 
@@ -71,20 +80,35 @@ export function EditableTranslation({
     onSave?.();
   };
 
-  // Preserve element structure (h1, p, etc.) while injecting translated text
+  // Preserve element structure (h1, p, etc.) while injecting translated text with styling
   const renderContent = () => {
     // If no displayText, render children as-is
     if (!displayText) {
       return children;
     }
     
-    // If displayText exists and children is a valid element, clone it with new text
+    // Apply styling if available
+    const styledContent = styleSettings ? (
+      <span
+        style={{
+          color: styleSettings.colorToken ? `hsl(var(--${styleSettings.colorToken}))` : undefined,
+          fontSize: styleSettings.fontSize ? `var(--font-size-${styleSettings.fontSize})` : undefined,
+          fontWeight: styleSettings.fontWeight ? styleSettings.fontWeight : undefined,
+          fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
+          textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
+        }}
+      >
+        {displayText}
+      </span>
+    ) : displayText;
+    
+    // If displayText exists and children is a valid element, clone it with styled text
     if (React.isValidElement(children)) {
-      return React.cloneElement(children, {}, displayText);
+      return React.cloneElement(children, {}, styledContent);
     }
     
-    // Fallback: just return displayText as string
-    return displayText;
+    // Fallback: just return styled text
+    return styledContent;
   };
 
   return (
@@ -115,7 +139,7 @@ export function EditableTranslation({
       )}
 
       {editMode && (
-        <TranslationEditModal
+        <RichTextEditModal
           open={modalOpen}
           onOpenChange={setModalOpen}
           contentId={contentId || ''}

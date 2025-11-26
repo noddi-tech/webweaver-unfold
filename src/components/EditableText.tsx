@@ -2,7 +2,7 @@ import { useState } from 'react';
 import * as React from 'react';
 import { Pencil } from 'lucide-react';
 import { useEditMode } from '@/contexts/EditModeContext';
-import { TranslationEditModal } from './TranslationEditModal';
+import { RichTextEditModal } from './RichTextEditModal';
 
 // Helper function to recursively extract text from React children
 const extractTextFromChildren = (children: React.ReactNode): string => {
@@ -63,7 +63,7 @@ export function EditableText({
         )}
       </div>
 
-      <TranslationEditModal
+      <RichTextEditModal
         open={modalOpen}
         onOpenChange={setModalOpen}
         contentId={contentId}
