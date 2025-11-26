@@ -585,7 +585,7 @@ export function ScrollingFeatureCards() {
                         </button>
                       )}
                       <div className="w-full h-full">
-                        <div className="grid md:grid-cols-[28fr_72fr] gap-4 md:gap-6 lg:gap-8 items-center h-full">
+                        <div className="grid md:grid-cols-[28fr_72fr] gap-4 md:gap-6 lg:gap-8 items-center h-full min-h-0">
                           {/* Left: Content */}
                           <div className="flex flex-col justify-center gap-6">
                             <div className="flex items-center gap-3">
@@ -651,7 +651,7 @@ export function ScrollingFeatureCards() {
                           </div>
                           
                           {/* Right: Image (72% width = ~1000px+) */}
-                          <div className="-my-2 -mr-2 md:-my-3 md:-mr-4 lg:-my-4 lg:-mr-6">
+                          <div className="relative w-full h-full overflow-hidden min-h-0">
                             <EditableUniversalMedia
                               locationId={`scrolling-card-${index + 1}`}
                               onSave={() => loadImageSettings()}
