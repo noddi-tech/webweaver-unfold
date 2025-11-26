@@ -304,15 +304,21 @@ export function ScrollingFeatureCards() {
   }, []);
 
   // Fixed-size cards with adjustable height, width, and border radius
-  const getContainerClasses = (height: string, width: string): string => {
-    // Fixed-size media container, NO clipping or border radius
+  const getContainerClasses = (height: string, width: string, aspectRatio: string): string => {
+    // If aspect ratio is set (not 'auto'), use it instead of fixed height
+    if (aspectRatio !== 'auto') {
+      const aspectClass = `aspect-[${aspectRatio.replace(':', '/')}]`;
+      return `relative ${width} ${aspectClass}`;
+    }
+    // Fall back to fixed height for 'auto' aspect ratio
     return `relative ${width} ${height}`;
   };
 
-  // Mask: overflow-hidden + shadow + flex centering (border radius now on image)
-  const getMaskClasses = (fitMode: 'contain' | 'cover'): string => {
+  // Mask: overflow-hidden + shadow + flex centering (border radius on mask for cover, on image for contain)
+  const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): string => {
     const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
-    return `relative w-full h-full overflow-hidden shadow-xl isolate ${borderClasses} flex items-center justify-center`;
+    const radiusClasses = fitMode === 'cover' ? borderRadius : '';
+    return `relative w-full h-full overflow-hidden shadow-xl isolate ${borderClasses} ${radiusClasses} flex items-center justify-center`;
   };
 
   // Helper to get optimized image URL for high-quality display
@@ -332,15 +338,15 @@ export function ScrollingFeatureCards() {
     const cardHeight = cardHeights[index] || 'h-[500px]';
     const cardWidth = cardWidths[index] || 'w-full';
     const cardBorderRadius = cardBorderRadii[index] || 'rounded-2xl';
-    const containerClasses = getContainerClasses(cardHeight, cardWidth);
-    const maskClasses = getMaskClasses(cardFitMode);
+    const containerClasses = getContainerClasses(cardHeight, cardWidth, aspectRatio);
+    const maskClasses = getMaskClasses(cardFitMode, cardBorderRadius);
     
     // Contain mode: fill viewport with w-full h-full, object-fit scales image to fit entirely within
-    // Cover mode: fill container completely, allowing cropping
-    // Border radius is applied to the image element itself
+    // Cover mode: fill container completely, allowing cropping with centered positioning
+    // Border radius: applied to image for contain, applied to mask for cover
     const imageClasses = cardFitMode === 'contain'
       ? `w-full h-full object-contain block ${cardBorderRadius}`
-      : `w-full h-full object-cover block ${cardBorderRadius}`;
+      : `w-full h-full object-cover object-center block`;
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
