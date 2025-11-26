@@ -193,11 +193,11 @@ const Hero = () => {
                         <CarouselContent>
                           {carouselImages.map((image, index) => (
                             <CarouselItem key={`hero-slide-${index}`} className="h-full">
-                  <div className={containerClasses}>
+                  <div className={`${containerClasses} rounded-xl overflow-hidden`}>
                                 <OptimizedImage
                                   src={image.url}
                                   alt={image.alt || `Hero slide ${index + 1}`}
-                                  className={`w-full h-full ${fitModeClass}`}
+                                  className={`w-full h-full ${fitModeClass} rounded-xl`}
                                   containerClassName="h-full"
                                   width={1920}
                                   height={1080}
@@ -215,11 +215,11 @@ const Hero = () => {
                         )}
                       </Carousel>
                     ) : (
-                      <div className={containerClasses}>
+                      <div className={`${containerClasses} rounded-xl overflow-hidden`}>
                         <OptimizedImage
                           src={mediaSettings.imageUrl || ''}
                           alt={mediaSettings.imageAlt || 'Hero image'}
-                          className={`w-full h-full ${fitModeClass}`}
+                          className={`w-full h-full ${fitModeClass} rounded-xl`}
                           containerClassName="h-full"
                           width={1920}
                           height={1080}
