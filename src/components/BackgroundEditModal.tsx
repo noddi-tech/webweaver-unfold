@@ -208,7 +208,12 @@ export function BackgroundEditModal({
                     onClick={() => setSelectedBackground(allowedVersion)}
                   >
                     <div
-                      className={`h-32 rounded-lg ${bg.preview} mb-3 relative overflow-hidden flex items-center justify-center`}
+                      className="h-32 rounded-lg mb-3 relative overflow-hidden flex items-center justify-center"
+                      style={{
+                        ...(bg.type === 'gradient' && bg.cssVar
+                          ? { backgroundImage: `var(${bg.cssVar})` }
+                          : {}),
+                      }}
                     >
                       {isSelected && (
                         <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
@@ -247,7 +252,12 @@ export function BackgroundEditModal({
                     <div className="relative h-32 rounded-lg mb-3 overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-hero" />
                       <div
-                        className={`absolute inset-0 ${bg.preview} flex items-center justify-center`}
+                        className="absolute inset-0 flex items-center justify-center"
+                        style={{
+                          ...(bg.type === 'glass' && bg.cssVar
+                            ? { backgroundImage: `var(${bg.cssVar})` }
+                            : {}),
+                        }}
                       >
                         {isSelected && (
                           <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
@@ -282,7 +292,12 @@ export function BackgroundEditModal({
                   onClick={() => setSelectedBackground(bg.value)}
                 >
                   <div
-                    className={`h-32 rounded-lg ${bg.preview} mb-3 relative flex items-center justify-center border`}
+                    className="h-32 rounded-lg mb-3 relative flex items-center justify-center border"
+                    style={{
+                      ...(bg.type === 'solid' && bg.hslValue
+                        ? { backgroundColor: `hsl(${bg.hslValue})` }
+                        : {}),
+                    }}
                   >
                     {selectedBackground === bg.value && (
                       <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">

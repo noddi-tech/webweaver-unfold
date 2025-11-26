@@ -581,7 +581,14 @@ export function UnifiedStyleModal({
                             )}
                             onClick={() => setBackground(bg.value)}
                           >
-                            <div className={cn('h-20 rounded-lg mb-2 relative flex items-center justify-center', bg.preview)}>
+                            <div 
+                              className="h-20 rounded-lg mb-2 relative flex items-center justify-center"
+                              style={{
+                                ...(bg.type === 'gradient' && bg.cssVar
+                                  ? { backgroundImage: `var(${bg.cssVar})` }
+                                  : {}),
+                              }}
+                            >
                               {background === bg.value && (
                                 <Check className="absolute top-1 right-1 w-5 h-5 text-white bg-primary rounded-full p-0.5" />
                               )}
@@ -607,7 +614,14 @@ export function UnifiedStyleModal({
                           >
                             <div className="relative h-20 rounded-lg mb-2 overflow-hidden">
                               <div className="absolute inset-0 bg-gradient-hero" />
-                              <div className={cn('absolute inset-0 flex items-center justify-center', bg.preview)}>
+                              <div 
+                                className="absolute inset-0 flex items-center justify-center"
+                                style={{
+                                  ...(bg.type === 'glass' && bg.cssVar
+                                    ? { backgroundImage: `var(${bg.cssVar})` }
+                                    : {}),
+                                }}
+                              >
                                 {background === bg.value && (
                                   <Check className="absolute top-1 right-1 w-5 h-5 text-white bg-primary rounded-full p-0.5" />
                                 )}
@@ -632,7 +646,14 @@ export function UnifiedStyleModal({
                             )}
                             onClick={() => setBackground(bg.value)}
                           >
-                            <div className={cn('h-20 rounded-lg mb-2 relative flex items-center justify-center border', bg.preview)}>
+                            <div 
+                              className="h-20 rounded-lg mb-2 relative flex items-center justify-center border"
+                              style={{
+                                ...(bg.type === 'solid' && bg.hslValue
+                                  ? { backgroundColor: `hsl(${bg.hslValue})` }
+                                  : {}),
+                              }}
+                            >
                               {background === bg.value && (
                                 <Check className="absolute top-1 right-1 w-5 h-5 text-primary bg-white rounded-full p-0.5" />
                               )}
