@@ -110,12 +110,20 @@ export function EditableTranslation({
     }
     
     // Apply styling if available
+    // Only apply fontSize/fontWeight if they're NOT the default values
+    // 'base' and 'normal' mean "inherit from element" not "override"
     const styledContent = styleSettings ? (
       <span
         style={{
-          color: styleSettings.colorToken ? `hsl(var(--${styleSettings.colorToken}))` : undefined,
-          fontSize: styleSettings.fontSize ? FONT_SIZE_MAP[styleSettings.fontSize] : undefined,
-          fontWeight: styleSettings.fontWeight ? FONT_WEIGHT_MAP[styleSettings.fontWeight] : undefined,
+          color: styleSettings.colorToken && styleSettings.colorToken !== 'foreground' 
+            ? `hsl(var(--${styleSettings.colorToken}))` 
+            : undefined,
+          fontSize: styleSettings.fontSize && styleSettings.fontSize !== 'base' 
+            ? FONT_SIZE_MAP[styleSettings.fontSize] 
+            : undefined,
+          fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
+            ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
+            : undefined,
           fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
           textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
         }}
