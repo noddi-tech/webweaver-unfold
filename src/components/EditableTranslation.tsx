@@ -76,8 +76,21 @@ export function EditableTranslation({
     return <>{children}</>;
   }
 
-  // Display the translation if available, otherwise fallback to children
-  const contentToDisplay = displayText || children;
+  // Preserve element structure (h1, p, etc.) while injecting translated text
+  const renderContent = () => {
+    // If no displayText, render children as-is
+    if (!displayText) {
+      return children;
+    }
+    
+    // If displayText exists and children is a valid element, clone it with new text
+    if (React.isValidElement(children)) {
+      return React.cloneElement(children, {}, displayText);
+    }
+    
+    // Fallback: just return displayText as string
+    return displayText;
+  };
 
   return (
     <>
@@ -87,7 +100,7 @@ export function EditableTranslation({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {contentToDisplay}
+        {renderContent()}
         {isHovered && (
           <button
             className="absolute -top-2 -right-2 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer z-10"
