@@ -218,6 +218,11 @@ export function TranslationEditModal({
       // Force language change event to trigger React re-renders
       await i18n.changeLanguage(currentLanguage);
       
+      // Dispatch custom event for components to listen to
+      window.dispatchEvent(new CustomEvent('translation-updated', { 
+        detail: { key: translationKey, language: currentLanguage } 
+      }));
+      
       // Call optional callback for additional refresh logic
       if (onSave) {
         onSave();
@@ -277,6 +282,11 @@ export function TranslationEditModal({
       await i18n.reloadResources(currentLanguage);
       // Force language change event to trigger React re-renders
       await i18n.changeLanguage(currentLanguage);
+      
+      // Dispatch custom event for components to listen to
+      window.dispatchEvent(new CustomEvent('translation-updated', { 
+        detail: { key: translationKey, language: languageCode } 
+      }));
       
       // Reload content to show the new translation
       await loadContent();
