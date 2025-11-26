@@ -28,7 +28,7 @@ const Footer = () => {
   if (!footerSettings) return null;
 
   return (
-    <footer className="py-16 px-2.5">
+    <footer className="pt-16 pb-2.5 px-2.5">
       {/* Card-encapsulated gradient section */}
       <div className="rounded-3xl overflow-hidden relative">
         {/* Gradient background inside card - reversed (gradient to white at top) */}
