@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Award, Sparkles, Target, Users } from "lucide-react";
+import { ArrowRight, Award, Wrench, Calendar, Star } from "lucide-react";
 import { LanguageLink } from "@/components/LanguageLink";
 import noddiLocationScreen from "@/assets/noddi-location-screen.png";
 import tiamatLocationScreen from "@/assets/tiamat-location-screen.png";
@@ -252,7 +252,7 @@ const Hero = () => {
                       }} />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
                       {/* NPS Badge - First USP Item */}
                       <div className="flex flex-col items-center text-center space-y-4">
                         <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
@@ -270,57 +270,45 @@ const Hero = () => {
 
                       <div className="flex flex-col items-center text-center space-y-4">
                         <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
-                          <Sparkles className="h-8 w-8 text-white" />
+                          <Wrench className="h-8 w-8 text-white" />
                         </div>
                         <div>
-                          <EditableTranslation translationKey="hero.feature1.title" fallbackText="Discover freely">
-                            <h3 className="font-semibold text-lg text-white mb-2">Discover freely</h3>
+                          <EditableTranslation translationKey="hero.usp1.title" fallbackText="Capacity opens itself. Teams stay in flow.">
+                            <h3 className="font-semibold text-lg text-white mb-2">Capacity opens itself. Teams stay in flow.</h3>
                           </EditableTranslation>
-                          <EditableTranslation translationKey="hero.feature1.description" fallbackText="Get instant notifications for every interaction">
-                            <p className="text-sm text-white/80">Get instant notifications for every interaction</p>
+                          <EditableTranslation translationKey="hero.usp1.description" fallbackText="Automatic slotting and crew scheduling — no more bottlenecks.">
+                            <p className="text-sm text-white/80">Automatic slotting and crew scheduling — no more bottlenecks.</p>
                           </EditableTranslation>
                         </div>
                       </div>
 
                       <div className="flex flex-col items-center text-center space-y-4">
                         <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
-                          <Users className="h-8 w-8 text-white" />
+                          <Calendar className="h-8 w-8 text-white" />
                         </div>
                         <div>
-                          <EditableTranslation translationKey="hero.feature2.title" fallbackText="Understand behavior">
-                            <h3 className="font-semibold text-lg text-white mb-2">Understand behavior</h3>
+                          <EditableTranslation translationKey="hero.usp2.title" fallbackText="Schedules adapt. Every job starts on time.">
+                            <h3 className="font-semibold text-lg text-white mb-2">Schedules adapt. Every job starts on time.</h3>
                           </EditableTranslation>
-                          <EditableTranslation translationKey="hero.feature2.description" fallbackText="Track user journeys and engagement patterns">
-                            <p className="text-sm text-white/80">Track user journeys and engagement patterns</p>
+                          <EditableTranslation translationKey="hero.usp2.description" fallbackText="Intelligent planning and live re-sequencing for mobile and garage services.">
+                            <p className="text-sm text-white/80">Intelligent planning and live re-sequencing for mobile and garage services.</p>
                           </EditableTranslation>
                         </div>
                       </div>
 
                       <div className="flex flex-col items-center text-center space-y-4">
                         <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
-                          <Target className="h-8 w-8 text-white" />
+                          <Star className="h-8 w-8 text-white" />
                         </div>
                         <div>
-                          <EditableTranslation translationKey="hero.feature3.title" fallbackText="Act with confidence">
-                            <h3 className="font-semibold text-lg text-white mb-2">Act with confidence</h3>
+                          <EditableTranslation translationKey="hero.usp3.title" fallbackText="Customers in control. Loved by end users.">
+                            <h3 className="font-semibold text-lg text-white mb-2">Customers in control. Loved by end users.</h3>
                           </EditableTranslation>
-                          <EditableTranslation translationKey="hero.feature3.description" fallbackText="Make data-driven decisions that drive growth">
-                            <p className="text-sm text-white/80">Make data-driven decisions that drive growth</p>
+                          <EditableTranslation translationKey="hero.usp3.description" fallbackText="Self-service booking, inspection, payment transparency — NPS ≈ 90.">
+                            <p className="text-sm text-white/80">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
                           </EditableTranslation>
                         </div>
                       </div>
-                    </div>
-
-                    {/* CTA Button */}
-                    <div className="flex justify-center mt-12">
-                      <LanguageLink to="/contact">
-                        <Button size="lg" className="text-lg px-8 py-4 group shadow-lg bg-white text-primary hover:bg-white/90">
-                          <EditableTranslation translationKey="hero.cta" fallbackText="Get a Demo">
-                            <span>Get a Demo</span>
-                          </EditableTranslation>
-                          <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                        </Button>
-                      </LanguageLink>
                     </div>
                   </div>
                 </div>
