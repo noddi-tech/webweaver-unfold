@@ -6,6 +6,28 @@ import { RichTextEditModal } from './RichTextEditModal';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
 
+// Font size and weight mapping to actual CSS values
+const FONT_SIZE_MAP: Record<string, string> = {
+  'xs': '0.75rem',
+  'sm': '0.875rem',
+  'base': '1rem',
+  'lg': '1.125rem',
+  'xl': '1.25rem',
+  '2xl': '1.5rem',
+  '3xl': '1.875rem',
+  '4xl': '2.25rem',
+  '5xl': '3rem',
+};
+
+const FONT_WEIGHT_MAP: Record<string, number> = {
+  'light': 300,
+  'normal': 400,
+  'medium': 500,
+  'semibold': 600,
+  'bold': 700,
+  'extrabold': 800,
+};
+
 // Helper function to recursively extract text from React children
 const extractTextFromChildren = (children: React.ReactNode): string => {
   let text = '';
@@ -92,8 +114,8 @@ export function EditableTranslation({
       <span
         style={{
           color: styleSettings.colorToken ? `hsl(var(--${styleSettings.colorToken}))` : undefined,
-          fontSize: styleSettings.fontSize ? `var(--font-size-${styleSettings.fontSize})` : undefined,
-          fontWeight: styleSettings.fontWeight ? styleSettings.fontWeight : undefined,
+          fontSize: styleSettings.fontSize ? FONT_SIZE_MAP[styleSettings.fontSize] : undefined,
+          fontWeight: styleSettings.fontWeight ? FONT_WEIGHT_MAP[styleSettings.fontWeight] : undefined,
           fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
           textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
         }}

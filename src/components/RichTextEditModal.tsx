@@ -45,6 +45,28 @@ interface StyleSettings {
   isUnderline: boolean;
 }
 
+// Font size and weight mapping to actual CSS values
+const FONT_SIZE_MAP: Record<string, string> = {
+  'xs': '0.75rem',
+  'sm': '0.875rem',
+  'base': '1rem',
+  'lg': '1.125rem',
+  'xl': '1.25rem',
+  '2xl': '1.5rem',
+  '3xl': '1.875rem',
+  '4xl': '2.25rem',
+  '5xl': '3rem',
+};
+
+const FONT_WEIGHT_MAP: Record<string, number> = {
+  'light': 300,
+  'normal': 400,
+  'medium': 500,
+  'semibold': 600,
+  'bold': 700,
+  'extrabold': 800,
+};
+
 const FONT_SIZES = [
   { value: 'xs', label: 'Extra Small', className: 'text-xs' },
   { value: 'sm', label: 'Small', className: 'text-sm' },
@@ -421,30 +443,40 @@ export function RichTextEditModal({
               <div className="space-y-2">
                 <Label>Text Color</Label>
                 <div className="grid grid-cols-4 gap-2">
-                  {TEXT_COLOR_OPTIONS.map((colorOption) => (
-                    <button
-                      key={colorOption.value}
-                      onClick={() => setStyleSettings(prev => ({
-                        ...prev,
-                        colorToken: colorOption.value.replace('text-', ''),
-                      }))}
-                      className={cn(
-                        'p-3 rounded-lg border-2 transition-all hover:scale-105',
-                        styleSettings.colorToken === colorOption.value.replace('text-', '')
-                          ? 'border-primary ring-2 ring-primary/20'
-                          : 'border-transparent hover:border-border',
-                        'bg-background'
-                      )}
-                      title={colorOption.description}
-                    >
-                      <div className={cn('text-center font-bold text-xl', colorOption.className)}>
-                        Aa
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1 truncate">
-                        {colorOption.label}
-                      </div>
-                    </button>
-                  ))}
+                  {TEXT_COLOR_OPTIONS.map((colorOption) => {
+                    const tokenName = colorOption.value.replace('text-', '');
+                    const isWhite = tokenName === 'white';
+                    
+                    return (
+                      <button
+                        key={colorOption.value}
+                        onClick={() => setStyleSettings(prev => ({
+                          ...prev,
+                          colorToken: tokenName,
+                        }))}
+                        className={cn(
+                          'p-3 rounded-lg border-2 transition-all hover:scale-105',
+                          styleSettings.colorToken === tokenName
+                            ? 'border-primary ring-2 ring-primary/20'
+                            : 'border-transparent hover:border-border',
+                          isWhite ? 'bg-slate-800' : 'bg-background'
+                        )}
+                        title={colorOption.description}
+                      >
+                        <div 
+                          className="text-center font-bold text-xl"
+                          style={{ 
+                            color: `hsl(var(--${tokenName}))` 
+                          }}
+                        >
+                          Aa
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1 truncate">
+                          {colorOption.label}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -538,8 +570,8 @@ export function RichTextEditModal({
                     <p
                       style={{
                         color: `hsl(var(--${styleSettings.colorToken}))`,
-                        fontSize: FONT_SIZES.find(s => s.value === styleSettings.fontSize)?.className.replace('text-', '') || '1rem',
-                        fontWeight: FONT_WEIGHTS.find(w => w.value === styleSettings.fontWeight)?.className.replace('font-', '') || 'normal',
+                        fontSize: FONT_SIZE_MAP[styleSettings.fontSize] || '1rem',
+                        fontWeight: FONT_WEIGHT_MAP[styleSettings.fontWeight] || 400,
                         fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
                         textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
                       }}
