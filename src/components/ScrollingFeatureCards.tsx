@@ -559,7 +559,7 @@ export function ScrollingFeatureCards() {
                           <Pencil className="w-5 h-5" />
                         </button>
                       )}
-                      <div className="container max-w-container mx-auto">
+                      <div className="w-full">
                         <div className="grid md:grid-cols-[28fr_72fr] gap-8 lg:gap-16 items-center">
                           {/* Left: Content */}
                           <div className="space-y-6">
