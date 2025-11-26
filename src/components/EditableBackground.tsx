@@ -20,7 +20,7 @@ export function EditableBackground({
   className = ''
 }: EditableBackgroundProps) {
   const { editMode } = useEditMode();
-  const { background, textColor, updateBackground, isLoading } = useBackgroundStyle(elementId, defaultBackground);
+  const { background, backgroundStyle, textColor, updateBackground, isLoading } = useBackgroundStyle(elementId, defaultBackground);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -32,9 +32,13 @@ export function EditableBackground({
     return <>{children}</>;
   }
 
-  // Clone the child and merge the background and text color className
+  // Clone the child and apply background via inline style, text color via className
   const childWithBackground = React.cloneElement(children as React.ReactElement, {
-    className: `${(children as React.ReactElement).props.className || ''} ${background} ${textColor}`.trim()
+    className: `${(children as React.ReactElement).props.className || ''} ${textColor}`.trim(),
+    style: {
+      ...((children as React.ReactElement).props.style || {}),
+      ...backgroundStyle
+    }
   });
 
   return (
