@@ -40,9 +40,6 @@ export function LogoMarquee() {
     }
   };
 
-  // Triple logos for seamless infinite scroll
-  const triplicatedLogos = [...logos, ...logos, ...logos];
-
   return (
     <section 
       className="w-full overflow-hidden py-8"
@@ -51,16 +48,31 @@ export function LogoMarquee() {
         WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 12.5%, black 87.5%, transparent 100%)'
       }}
     >
-      <div className="flex gap-14 animate-marquee will-change-transform w-max">
-        {triplicatedLogos.map((logo, i) => (
-          <div key={i} className="flex-shrink-0">
-            <img 
-              src={logo.src} 
-              alt={logo.alt} 
-              className="h-6 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" 
-            />
-          </div>
-        ))}
+      <div className="flex animate-marquee will-change-transform">
+        {/* First strip */}
+        <div className="flex gap-14 flex-shrink-0">
+          {logos.map((logo, i) => (
+            <div key={`a-${i}`} className="flex-shrink-0">
+              <img 
+                src={logo.src} 
+                alt={logo.alt} 
+                className="h-6 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" 
+              />
+            </div>
+          ))}
+        </div>
+        {/* Duplicate strip for seamless loop */}
+        <div className="flex gap-14 flex-shrink-0">
+          {logos.map((logo, i) => (
+            <div key={`b-${i}`} className="flex-shrink-0">
+              <img 
+                src={logo.src} 
+                alt={logo.alt} 
+                className="h-6 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" 
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
