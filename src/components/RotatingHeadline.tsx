@@ -58,7 +58,7 @@ export function RotatingHeadline({
   if (loading || terms.length === 0) {
     return (
       <div className={className}>
-        <h1 className="flex items-center justify-center gap-2 text-3xl md:text-4xl lg:text-5xl xl:text-6xl whitespace-nowrap">
+        <h1 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl whitespace-nowrap">
           <span>ERP</span>
           <EditableTranslation 
             translationKey="hero.rotating.suffix"
@@ -81,7 +81,7 @@ export function RotatingHeadline({
 
   return (
     <div className={`${className} relative`}>
-      <h1 className="flex items-center justify-center gap-2 text-3xl md:text-4xl lg:text-5xl xl:text-6xl whitespace-nowrap">
+      <h1 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl whitespace-nowrap">
         {/* Rotating Term - INLINE with the rest */}
         <span 
           className={`text-foreground transition-opacity duration-300 ${
