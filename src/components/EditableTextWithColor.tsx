@@ -26,12 +26,13 @@ export function EditableTextWithColor({
   const [isHovered, setIsHovered] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [colorToken, setColorToken] = useState<string>('foreground');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (editMode) {
       loadColorToken();
     }
-  }, [editMode, elementId]);
+  }, [editMode, elementId, refreshKey]);
 
   const loadColorToken = async () => {
     try {
@@ -51,6 +52,7 @@ export function EditableTextWithColor({
   };
 
   const handleSave = () => {
+    setRefreshKey(prev => prev + 1);
     loadColorToken();
     onSave?.();
   };

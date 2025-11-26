@@ -83,11 +83,10 @@ export function EditableIcon({
           {typeof Icon === 'function' && Icon.length === 0 ? (
             <Icon />
           ) : (
-            <Icon className={cn(
-              sizeMap[actualSize].icon,
-              `text-${iconStyle.icon_color_token}`,
-              iconClassName
-            )} />
+            <Icon 
+              className={cn(sizeMap[actualSize].icon, iconClassName)} 
+              style={{ color: `hsl(var(--${iconStyle.icon_color_token}))` }}
+            />
           )}
         </div>
 

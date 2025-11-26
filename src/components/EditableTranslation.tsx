@@ -41,6 +41,7 @@ export function EditableTranslation({
   const [isHovered, setIsHovered] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [contentId, setContentId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     // Get the content ID for this translation key
@@ -62,6 +63,11 @@ export function EditableTranslation({
     }
   }, [editMode, translationKey, currentLanguage]);
 
+  const handleSave = () => {
+    setRefreshKey(prev => prev + 1);
+    onSave?.();
+  };
+
   if (!editMode) {
     return <>{children}</>;
   }
@@ -69,6 +75,7 @@ export function EditableTranslation({
   return (
     <>
       <span
+        key={refreshKey}
         className={`relative inline-block group ${className}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -94,7 +101,7 @@ export function EditableTranslation({
         contentId={contentId || ''}
         contentTable="translations"
         translationKey={translationKey}
-        onSave={onSave}
+        onSave={handleSave}
         fallbackText={fallbackText || extractTextFromChildren(children)}
       />
     </>

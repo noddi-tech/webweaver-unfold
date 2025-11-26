@@ -34,6 +34,7 @@ const Hero = () => {
   const [current, setCurrent] = useState(0);
   const [mediaKey, setMediaKey] = useState(0);
   const { allowedBackgrounds } = useAllowedBackgrounds();
+  const [translationKey, setTranslationKey] = useState(0);
   
   const [isLoading, setIsLoading] = useState(true);
   const [mediaSettings, setMediaSettings] = useState({
@@ -56,6 +57,14 @@ const Hero = () => {
 
   useEffect(() => {
     loadMediaSettings();
+  }, []);
+
+  useEffect(() => {
+    const handleTranslationUpdate = () => {
+      setTranslationKey(prev => prev + 1);
+    };
+    window.addEventListener('translation-updated', handleTranslationUpdate);
+    return () => window.removeEventListener('translation-updated', handleTranslationUpdate);
   }, []);
 
   const loadMediaSettings = async () => {
