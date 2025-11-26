@@ -644,7 +644,6 @@ export function ScrollingFeatureCards() {
                         ...prev,
                         [index]: data
                       }));
-                      loadCardData(index);
                     }}
                   />
                 </div>
