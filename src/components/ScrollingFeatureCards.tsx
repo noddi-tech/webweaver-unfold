@@ -694,7 +694,7 @@ export function ScrollingFeatureCards() {
                       <div className="w-full h-full">
                         <div className="grid gap-4 sm:gap-6 lg:gap-8 items-center h-full min-h-0 grid-cols-1 sm:grid-cols-[40fr_60fr] lg:grid-cols-[28fr_72fr] 2xl:grid-cols-[35fr_65fr]">
                           {/* Left: Content */}
-                          <div className="flex flex-col justify-center gap-6 overflow-hidden min-w-0">
+                          <div className="flex flex-col justify-center gap-6 min-w-0">
                             <div className="flex items-center gap-3">
                               <Badge 
                                 className="border px-3 py-1.5 text-sm font-medium"
@@ -722,7 +722,7 @@ export function ScrollingFeatureCards() {
                             </div>
                             
                             <h3 
-                              className="text-2xl lg:text-4xl font-bold leading-tight"
+                              className="text-2xl lg:text-3xl font-bold leading-tight break-words hyphens-auto"
                               style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.titleColor || 'foreground')}))` }}
                             >
                               <EditableTranslation translationKey={card.titleKey}>
@@ -731,7 +731,7 @@ export function ScrollingFeatureCards() {
                             </h3>
                             
                             <p 
-                              className="text-base lg:text-lg leading-relaxed opacity-80"
+                              className="text-base lg:text-lg leading-relaxed opacity-80 break-words"
                               style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.descriptionColor || 'muted-foreground')}))` }}
                             >
                               <EditableTranslation translationKey={card.descriptionKey}>
