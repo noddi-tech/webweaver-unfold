@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import { Card } from "@/components/ui/card";
-import { FileText } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileText, AlertCircle } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
 import CarouselManager from "@/components/design-system/CarouselManager";
 import VideoManager from "@/components/design-system/VideoManager";
 import FeaturesManager from "@/components/design-system/FeaturesManager";
@@ -41,6 +42,7 @@ import { RotatingTermsManager } from "@/components/design-system/RotatingTermsMa
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const { isAdmin, loading: roleLoading } = useUserRole();
 
   useEffect(() => {
     document.title = "Admin";
@@ -60,7 +62,7 @@ const Admin = () => {
     }
   };
 
-  if (authenticated === null) {
+  if (authenticated === null || roleLoading) {
     return (
       <div className="min-h-screen">
         <Header />
@@ -76,6 +78,36 @@ const Admin = () => {
   if (!authenticated) {
     window.location.href = "/auth";
     return null;
+  }
+
+  // Check if user has admin role
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <Card className="max-w-md mx-4">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-6 w-6 text-destructive" />
+                <CardTitle>Access Denied</CardTitle>
+              </div>
+              <CardDescription>
+                You don't have permission to access the admin panel.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Only users with admin privileges can access this area. If you believe you should have access, please contact your administrator.
+              </p>
+              <Button onClick={() => window.location.href = "/"} className="w-full">
+                Return to Home
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   return (
