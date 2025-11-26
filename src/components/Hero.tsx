@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Award, Wrench, Calendar, Star } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { LanguageLink } from "@/components/LanguageLink";
 import noddiLocationScreen from "@/assets/noddi-location-screen.png";
 import tiamatLocationScreen from "@/assets/tiamat-location-screen.png";
 import hurtigrutaLocationScreen from "@/assets/hurtigruta-location-screen.png";
 import { useState, useEffect, useRef } from "react";
-import { Counter } from "@/components/ui/counter";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
@@ -244,7 +243,7 @@ const Hero = () => {
                   </div>
 
                   {/* USP section - directly on page gradient */}
-                  <div className="py-12 px-4 md:px-8 relative">
+                  <div className="py-8 px-4 md:px-8 relative">
                     {/* Glow effect */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="w-64 h-64 rounded-full" style={{ 
@@ -252,60 +251,42 @@ const Hero = () => {
                       }} />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
-                      {/* NPS Badge - First USP Item */}
-                      <div className="flex flex-col items-center text-center space-y-4">
-                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
-                          <Award className="h-8 w-8 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg text-white mb-2">
-                            Net Promoter Score <Counter end={90} prefix="~" />
-                          </h3>
-                          <EditableTranslation translationKey="hero.metrics.nps" fallbackText="from end customers">
-                            <p className="text-sm text-white/80">from end customers</p>
-                          </EditableTranslation>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-center text-center space-y-4">
-                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
-                          <Wrench className="h-8 w-8 text-white" />
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+                      {/* Capacity USP */}
+                      <div className="flex flex-col items-center text-center space-y-2">
+                        <CheckCircle2 className="w-5 h-5 text-white/80" />
                         <div>
                           <EditableTranslation translationKey="hero.usp1.title" fallbackText="Capacity opens itself. Teams stay in flow.">
-                            <h3 className="font-semibold text-lg text-white mb-2">Capacity opens itself. Teams stay in flow.</h3>
+                            <h3 className="font-semibold text-white mb-1">Capacity opens itself. Teams stay in flow.</h3>
                           </EditableTranslation>
                           <EditableTranslation translationKey="hero.usp1.description" fallbackText="Automatic slotting and crew scheduling — no more bottlenecks.">
-                            <p className="text-sm text-white/80">Automatic slotting and crew scheduling — no more bottlenecks.</p>
+                            <p className="text-sm text-white/70">Automatic slotting and crew scheduling — no more bottlenecks.</p>
                           </EditableTranslation>
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-center text-center space-y-4">
-                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
-                          <Calendar className="h-8 w-8 text-white" />
-                        </div>
+                      {/* Schedules USP */}
+                      <div className="flex flex-col items-center text-center space-y-2">
+                        <CheckCircle2 className="w-5 h-5 text-white/80" />
                         <div>
                           <EditableTranslation translationKey="hero.usp2.title" fallbackText="Schedules adapt. Every job starts on time.">
-                            <h3 className="font-semibold text-lg text-white mb-2">Schedules adapt. Every job starts on time.</h3>
+                            <h3 className="font-semibold text-white mb-1">Schedules adapt. Every job starts on time.</h3>
                           </EditableTranslation>
                           <EditableTranslation translationKey="hero.usp2.description" fallbackText="Intelligent planning and live re-sequencing for mobile and garage services.">
-                            <p className="text-sm text-white/80">Intelligent planning and live re-sequencing for mobile and garage services.</p>
+                            <p className="text-sm text-white/70">Intelligent planning and live re-sequencing for mobile and garage services.</p>
                           </EditableTranslation>
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-center text-center space-y-4">
-                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'hsl(var(--background) / 0.2)' }}>
-                          <Star className="h-8 w-8 text-white" />
-                        </div>
+                      {/* Customers USP */}
+                      <div className="flex flex-col items-center text-center space-y-2">
+                        <CheckCircle2 className="w-5 h-5 text-white/80" />
                         <div>
                           <EditableTranslation translationKey="hero.usp3.title" fallbackText="Customers in control. Loved by end users.">
-                            <h3 className="font-semibold text-lg text-white mb-2">Customers in control. Loved by end users.</h3>
+                            <h3 className="font-semibold text-white mb-1">Customers in control. Loved by end users.</h3>
                           </EditableTranslation>
                           <EditableTranslation translationKey="hero.usp3.description" fallbackText="Self-service booking, inspection, payment transparency — NPS ≈ 90.">
-                            <p className="text-sm text-white/80">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
+                            <p className="text-sm text-white/70">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
                           </EditableTranslation>
                         </div>
                       </div>
