@@ -8,6 +8,7 @@ export function useBackgroundStyle(
   defaultTextColor?: string
 ) {
   const [background, setBackground] = useState(defaultBackground);
+  const [backgroundStyle, setBackgroundStyle] = useState<React.CSSProperties>({});
   const [textColor, setTextColor] = useState(
     defaultTextColor || getOptimalTextColorForBackground(defaultBackground)
   );
@@ -28,6 +29,25 @@ export function useBackgroundStyle(
 
         if (data) {
           setBackground(data.background_class);
+          
+          // Fetch color token data to convert to inline style
+          const { data: colorToken } = await supabase
+            .from('color_tokens')
+            .select('css_var, color_type, value')
+            .eq('preview_class', data.background_class)
+            .maybeSingle();
+
+          if (colorToken) {
+            if (colorToken.color_type === 'gradient' || colorToken.color_type === 'glass') {
+              setBackgroundStyle({ backgroundImage: `var(${colorToken.css_var})` });
+            } else if (colorToken.color_type === 'solid' && colorToken.value) {
+              setBackgroundStyle({ backgroundColor: `hsl(${colorToken.value})` });
+            }
+          } else {
+            // Standard Tailwind class, no inline style needed
+            setBackgroundStyle({});
+          }
+          
           if (data.text_color_class) {
             setTextColor(data.text_color_class);
           } else {
@@ -55,6 +75,23 @@ export function useBackgroundStyle(
     // Update local state immediately for responsive UI
     setBackground(newBackground);
     setTextColor(optimalTextColor);
+
+    // Fetch color token data for inline style
+    const { data: colorToken } = await supabase
+      .from('color_tokens')
+      .select('css_var, color_type, value')
+      .eq('preview_class', newBackground)
+      .maybeSingle();
+
+    if (colorToken) {
+      if (colorToken.color_type === 'gradient' || colorToken.color_type === 'glass') {
+        setBackgroundStyle({ backgroundImage: `var(${colorToken.css_var})` });
+      } else if (colorToken.color_type === 'solid' && colorToken.value) {
+        setBackgroundStyle({ backgroundColor: `hsl(${colorToken.value})` });
+      }
+    } else {
+      setBackgroundStyle({});
+    }
 
     try {
       const { error } = await supabase
@@ -84,6 +121,7 @@ export function useBackgroundStyle(
 
   return { 
     background, 
+    backgroundStyle,
     textColor,
     isLoading,
     updateBackground: updateBackgroundAndTextColor, // Keep same method name for backward compat
