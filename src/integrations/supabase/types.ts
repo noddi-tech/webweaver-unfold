@@ -774,6 +774,7 @@ export type Database = {
           image_alt: string | null
           image_url: string | null
           location_id: string
+          object_position: string | null
           saved_carousel_config_id: string | null
           saved_image_alt: string | null
           saved_image_url: string | null
@@ -793,6 +794,7 @@ export type Database = {
           image_alt?: string | null
           image_url?: string | null
           location_id: string
+          object_position?: string | null
           saved_carousel_config_id?: string | null
           saved_image_alt?: string | null
           saved_image_url?: string | null
@@ -812,6 +814,7 @@ export type Database = {
           image_alt?: string | null
           image_url?: string | null
           location_id?: string
+          object_position?: string | null
           saved_carousel_config_id?: string | null
           saved_image_alt?: string | null
           saved_image_url?: string | null

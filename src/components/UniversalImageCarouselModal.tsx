@@ -80,6 +80,7 @@ export function UniversalImageCarouselModal({
   const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
   const [fitMode, setFitMode] = useState<'contain' | 'cover'>('contain');
   const [aspectRatio, setAspectRatio] = useState<string>('auto');
+  const [objectPosition, setObjectPosition] = useState<'top' | 'center' | 'bottom'>('center');
   
   // Data
   const [libraryImages, setLibraryImages] = useState<any[]>([]);
@@ -167,6 +168,7 @@ export function UniversalImageCarouselModal({
           setDisplayType(settings.display_type as 'image' | 'carousel');
           setFitMode((settings.fit_mode as 'contain' | 'cover') || 'contain');
           setAspectRatio(settings.aspect_ratio || 'auto');
+          setObjectPosition((settings.object_position as 'top' | 'center' | 'bottom') || 'center');
           
           if (settings.display_type === 'image') {
             setImageUrl(settings.image_url || '');
@@ -398,6 +400,7 @@ export function UniversalImageCarouselModal({
           display_type: displayType,
           fit_mode: fitMode,
           aspect_ratio: aspectRatio,
+          object_position: objectPosition,
           image_url: displayType === 'image' ? finalImageUrl : null,
           image_alt: displayType === 'image' ? imageAlt : null,
           carousel_config_id: displayType === 'carousel' ? carouselConfigId : null,
@@ -1043,6 +1046,30 @@ export function UniversalImageCarouselModal({
               </p>
             </div>
 
+            {/* Object Position Selection - Only for Cover Mode */}
+            {fitMode === 'cover' && (
+              <div className="space-y-3 border-t pt-4">
+                <Label>Focal Point (Cover Mode)</Label>
+                <RadioGroup value={objectPosition} onValueChange={(value: 'top' | 'center' | 'bottom') => setObjectPosition(value)}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="top" id="top" />
+                    <Label htmlFor="top" className="font-normal">Top</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="center" id="center" />
+                    <Label htmlFor="center" className="font-normal">Center</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="bottom" id="bottom" />
+                    <Label htmlFor="bottom" className="font-normal">Bottom</Label>
+                  </div>
+                </RadioGroup>
+                <p className="text-xs text-muted-foreground">
+                  Controls which part of the image stays visible when cropped in cover mode.
+                </p>
+              </div>
+            )}
+
             {/* Aspect Ratio Selection */}
             <div className="space-y-3 border-t pt-4">
               <div className="flex items-center justify-between">
@@ -1140,11 +1167,16 @@ export function UniversalImageCarouselModal({
                               aspectRatio: aspectRatio === 'auto' ? 'auto' : aspectRatio.replace(':', '/'),
                             }}
                           >
-                            <img
-                              key={`cover-${aspectRatio}`}
+                             <img
+                              key={`cover-${aspectRatio}-${objectPosition}`}
                               src={previewImage}
                               alt="Preview"
-                              className="w-full h-full object-cover"
+                              className={cn(
+                                "w-full h-full object-cover",
+                                objectPosition === 'top' && 'object-top',
+                                objectPosition === 'center' && 'object-center',
+                                objectPosition === 'bottom' && 'object-bottom'
+                              )}
                             />
                           </div>
                         </div>

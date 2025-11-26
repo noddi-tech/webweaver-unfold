@@ -106,6 +106,7 @@ export function ScrollingFeatureCards() {
   const [cardData, setCardData] = useState<Record<number, any>>({});
   const [fitModes, setFitModes] = useState<Record<number, 'contain' | 'cover'>>({});
   const [aspectRatios, setAspectRatios] = useState<Record<number, string>>({});
+  const [objectPositions, setObjectPositions] = useState<Record<number, 'top' | 'center' | 'bottom'>>({});
   const [cardHeights, setCardHeights] = useState<Record<number, string>>({});
   const [cardWidths, setCardWidths] = useState<Record<number, string>>({});
   const [cardBorderRadii, setCardBorderRadii] = useState<Record<number, string>>({});
@@ -134,6 +135,7 @@ export function ScrollingFeatureCards() {
     const newCarouselData: Record<number, any> = {};
     const newFitModes: Record<number, 'contain' | 'cover'> = {};
     const newAspectRatios: Record<number, string> = {};
+    const newObjectPositions: Record<number, 'top' | 'center' | 'bottom'> = {};
     const newCardHeights: Record<number, string> = {};
     const newCardWidths: Record<number, string> = {};
     const newCardBorderRadii: Record<number, string> = {};
@@ -142,14 +144,15 @@ export function ScrollingFeatureCards() {
     for (let i = 0; i < 5; i++) {
       const { data } = await supabase
         .from('image_carousel_settings')
-        .select('image_url, display_type, carousel_config_id, fit_mode, aspect_ratio, card_height, card_width, card_border_radius, card_gap')
+        .select('image_url, display_type, carousel_config_id, fit_mode, aspect_ratio, object_position, card_height, card_width, card_border_radius, card_gap')
         .eq('location_id', `scrolling-card-${i + 1}`)
         .maybeSingle();
       
       if (data) {
-        // Store fit mode, aspect ratio and card layout
+        // Store fit mode, aspect ratio, object position and card layout
         newFitModes[i] = (data.fit_mode as 'contain' | 'cover') || 'contain';
         newAspectRatios[i] = data.aspect_ratio || 'auto';
+        newObjectPositions[i] = (data.object_position as 'top' | 'center' | 'bottom') || 'center';
         newCardHeights[i] = data.card_height || 'h-[500px]';
         newCardWidths[i] = data.card_width || 'w-full';
         newCardBorderRadii[i] = data.card_border_radius || 'rounded-2xl';
@@ -202,6 +205,9 @@ export function ScrollingFeatureCards() {
     }
     if (Object.keys(newAspectRatios).length > 0) {
       setAspectRatios(prev => ({ ...prev, ...newAspectRatios }));
+    }
+    if (Object.keys(newObjectPositions).length > 0) {
+      setObjectPositions(prev => ({ ...prev, ...newObjectPositions }));
     }
     if (Object.keys(newCardHeights).length > 0) {
       setCardHeights(prev => ({ ...prev, ...newCardHeights }));
@@ -334,6 +340,7 @@ export function ScrollingFeatureCards() {
   const renderMedia = (index: number, card: FeatureCard) => {
     const mediaData = carouselData[index];
     const cardFitMode = fitModes[index] || 'contain';
+    const cardObjectPosition = objectPositions[index] || 'center';
     const aspectRatio = aspectRatios[index] || 'auto'; // Keep for metadata/preview only
     const cardHeight = cardHeights[index] || 'h-[500px]';
     const cardWidth = cardWidths[index] || 'w-full';
@@ -342,11 +349,16 @@ export function ScrollingFeatureCards() {
     const maskClasses = getMaskClasses(cardFitMode, cardBorderRadius);
     
     // Contain mode: fill viewport with w-full h-full, object-fit scales image to fit entirely within
-    // Cover mode: fill container completely, allowing cropping with centered positioning
+    // Cover mode: fill container completely, allowing cropping with configurable positioning (top/center/bottom)
     // Border radius: applied to image for contain, applied to mask for cover
     const imageClasses = cardFitMode === 'contain'
       ? `w-full h-full object-contain block ${cardBorderRadius}`
-      : `w-full h-full object-cover object-center block`;
+      : cn(
+          'w-full h-full object-cover block',
+          cardObjectPosition === 'top' && 'object-top',
+          cardObjectPosition === 'center' && 'object-center',
+          cardObjectPosition === 'bottom' && 'object-bottom'
+        );
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
