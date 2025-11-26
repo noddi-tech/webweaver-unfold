@@ -351,13 +351,30 @@ export function ScrollingFeatureCards() {
     // Cover mode: fill container completely, allowing cropping with configurable positioning (top/center/bottom)
     // Border radius: applied to image for contain, applied to mask for cover
   const imageClasses = cardFitMode === 'contain'
-    ? `w-full h-full object-contain block ${cardBorderRadius}`
+    ? 'w-full h-full object-contain block'
     : cn(
-        `w-full h-full object-cover block ${cardBorderRadius}`,
+        'w-full h-full object-cover block',
         cardObjectPosition === 'top' && 'object-top',
         cardObjectPosition === 'center' && 'object-center',
         cardObjectPosition === 'bottom' && 'object-bottom'
       );
+
+  const getClipPathRadius = (radiusClass: string): string => {
+    const radiusMap: Record<string, string> = {
+      'rounded-none': '0',
+      'rounded-sm': '2px',
+      rounded: '4px',
+      'rounded-md': '6px',
+      'rounded-lg': '8px',
+      'rounded-xl': '12px',
+      'rounded-2xl': '16px',
+      'rounded-3xl': '24px',
+      'rounded-full': '9999px',
+    };
+    return radiusMap[radiusClass] ?? radiusMap['rounded-2xl'];
+  };
+
+  const clipRadius = getClipPathRadius(cardBorderRadius);
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
@@ -391,6 +408,7 @@ export function ScrollingFeatureCards() {
                       decoding="async"
                       className={imageClasses}
                       style={{
+                        clipPath: `inset(0 round ${clipRadius})`,
                         imageRendering: 'auto',
                         WebkitFontSmoothing: 'antialiased',
                         backfaceVisibility: 'hidden',
@@ -429,6 +447,7 @@ export function ScrollingFeatureCards() {
               decoding="async"
               className={imageClasses}
               style={{
+                clipPath: `inset(0 round ${clipRadius})`,
                 imageRendering: 'auto',
                 WebkitFontSmoothing: 'antialiased',
                 backfaceVisibility: 'hidden',
