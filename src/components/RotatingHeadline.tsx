@@ -80,12 +80,11 @@ export function RotatingHeadline({
   const descText = t(currentTerm.descriptor_key, currentTerm.descriptor_fallback);
 
   return (
-    <div className={`${className} relative`}>
-      <h1 className="flex items-baseline justify-center gap-2 flex-wrap text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl">
-        {/* Rotating Term - Fixed width, right-aligned */}
-        <span 
-          className="inline-flex justify-end overflow-hidden pb-2" 
-          style={{ minWidth: '20ch' }}
+    <div className={`${className} relative text-center`}>
+      {/* Line 1: Rotating Term - Large, prominent */}
+      <div className="overflow-hidden" style={{ minHeight: '1.2em' }}>
+        <h1 
+          className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold"
           aria-live="polite" 
           aria-atomic="true"
         >
@@ -96,36 +95,39 @@ export function RotatingHeadline({
           >
             {termText}
           </span>
-        </span>
-        {/* Static suffix - same line */}
+        </h1>
+      </div>
+      
+      {/* Line 2: Static suffix */}
+      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold flex items-center justify-center gap-2">
         <EditableTranslation 
           translationKey="hero.rotating.suffix"
           fallbackText="for mobile & workshop car services."
         >
-          <span className="text-foreground inline-block pb-2">for mobile & workshop car services.</span>
+          <span className="text-foreground">for mobile & workshop car services.</span>
         </EditableTranslation>
         
-        {/* Pause button inline */}
+        {/* Pause button inline with suffix */}
         <Button
           variant="ghost"
           size="icon"
           onClick={togglePlayPause}
           aria-label={isPlaying ? 'Pause rotation' : 'Resume rotation'}
-          className="opacity-60 hover:opacity-100 transition-opacity ml-2"
+          className="opacity-60 hover:opacity-100 transition-opacity"
         >
           {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
         </Button>
       </h1>
       
-      {/* Descriptor with elbow arrow */}
-      <div className="flex items-start justify-center gap-2 mt-4">
-        {/* Constant elbow arrow */}
+      {/* Line 3: Descriptor with fixed height for 2 lines */}
+      <div 
+        className="flex items-start justify-center gap-2 mt-4"
+        style={{ minHeight: '3.5em' }}
+      >
         <span className="text-muted-foreground text-xl">↳</span>
-        
-        {/* Rotating descriptor */}
-        <span className="inline-flex overflow-hidden max-w-2xl pb-1">
+        <span className="inline-flex overflow-hidden max-w-2xl">
           <span 
-            className={`text-muted-foreground text-lg inline-block ${
+            className={`text-muted-foreground text-lg inline-block text-left ${
               isFading ? 'animate-slideOutUp' : 'animate-slideInUp'
             }`}
           >
