@@ -1604,6 +1604,9 @@ export type Database = {
           context: string | null
           created_at: string
           font_size: string | null
+          font_size_desktop: string | null
+          font_size_mobile: string | null
+          font_size_tablet: string | null
           font_weight: string | null
           id: string
           is_italic: boolean | null
@@ -1626,6 +1629,9 @@ export type Database = {
           context?: string | null
           created_at?: string
           font_size?: string | null
+          font_size_desktop?: string | null
+          font_size_mobile?: string | null
+          font_size_tablet?: string | null
           font_weight?: string | null
           id?: string
           is_italic?: boolean | null
@@ -1648,6 +1654,9 @@ export type Database = {
           context?: string | null
           created_at?: string
           font_size?: string | null
+          font_size_desktop?: string | null
+          font_size_mobile?: string | null
+          font_size_tablet?: string | null
           font_weight?: string | null
           id?: string
           is_italic?: boolean | null

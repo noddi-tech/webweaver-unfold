@@ -41,6 +41,9 @@ interface Translation {
 interface StyleSettings {
   colorToken: string;
   fontSize: string;
+  fontSizeMobile: string;
+  fontSizeTablet: string;
+  fontSizeDesktop: string;
   fontWeight: string;
   isItalic: boolean;
   isUnderline: boolean;
@@ -48,15 +51,18 @@ interface StyleSettings {
 
 // Font size and weight mapping to actual CSS values
 const FONT_SIZE_MAP: Record<string, string> = {
-  'xs': '0.75rem',
-  'sm': '0.875rem',
-  'base': '1rem',
-  'lg': '1.125rem',
-  'xl': '1.25rem',
-  '2xl': '1.5rem',
-  '3xl': '1.875rem',
-  '4xl': '2.25rem',
-  '5xl': '3rem',
+  'xs': '0.75rem',     // 12px
+  'sm': '0.875rem',    // 14px
+  'base': '1rem',      // 16px
+  'lg': '1.125rem',    // 18px
+  'xl': '1.25rem',     // 20px
+  '2xl': '1.5rem',     // 24px
+  '3xl': '1.875rem',   // 30px
+  '4xl': '2.25rem',    // 36px
+  '5xl': '3rem',       // 48px
+  '6xl': '3.75rem',    // 60px
+  '7xl': '4.5rem',     // 72px
+  '8xl': '6rem',       // 96px
 };
 
 const FONT_WEIGHT_MAP: Record<string, number> = {
@@ -69,15 +75,18 @@ const FONT_WEIGHT_MAP: Record<string, number> = {
 };
 
 const FONT_SIZES = [
-  { value: 'xs', label: 'Extra Small', className: 'text-xs' },
-  { value: 'sm', label: 'Small', className: 'text-sm' },
+  { value: 'xs', label: 'XS', className: 'text-xs' },
+  { value: 'sm', label: 'SM', className: 'text-sm' },
   { value: 'base', label: 'Base', className: 'text-base' },
-  { value: 'lg', label: 'Large', className: 'text-lg' },
-  { value: 'xl', label: 'Extra Large', className: 'text-xl' },
+  { value: 'lg', label: 'LG', className: 'text-lg' },
+  { value: 'xl', label: 'XL', className: 'text-xl' },
   { value: '2xl', label: '2XL', className: 'text-2xl' },
   { value: '3xl', label: '3XL', className: 'text-3xl' },
   { value: '4xl', label: '4XL', className: 'text-4xl' },
   { value: '5xl', label: '5XL', className: 'text-5xl' },
+  { value: '6xl', label: '6XL', className: 'text-6xl' },
+  { value: '7xl', label: '7XL', className: 'text-7xl' },
+  { value: '8xl', label: '8XL', className: 'text-8xl' },
 ];
 
 const FONT_WEIGHTS = [
@@ -111,6 +120,9 @@ export function RichTextEditModal({
   const [styleSettings, setStyleSettings] = useState<StyleSettings>({
     colorToken: 'foreground',
     fontSize: 'base',
+    fontSizeMobile: 'base',
+    fontSizeTablet: 'base',
+    fontSizeDesktop: 'base',
     fontWeight: 'normal',
     isItalic: false,
     isUnderline: false,
@@ -191,7 +203,7 @@ export function RichTextEditModal({
 
         const { data: transData } = await supabase
           .from('translations')
-          .select('language_code, translated_text, color_token, font_size, font_weight, is_italic, is_underline')
+          .select('language_code, translated_text, color_token, font_size, font_size_mobile, font_size_tablet, font_size_desktop, font_weight, is_italic, is_underline')
           .eq('translation_key', translationKey);
 
         const translationsMap = new Map(
@@ -207,6 +219,9 @@ export function RichTextEditModal({
           setStyleSettings({
             colorToken: englishData.color_token || 'foreground',
             fontSize: englishData.font_size || 'base',
+            fontSizeMobile: englishData.font_size_mobile || 'base',
+            fontSizeTablet: englishData.font_size_tablet || 'base',
+            fontSizeDesktop: englishData.font_size_desktop || 'base',
             fontWeight: englishData.font_weight || 'normal',
             isItalic: englishData.is_italic || false,
             isUnderline: englishData.is_underline || false,
@@ -271,6 +286,9 @@ export function RichTextEditModal({
               translated_text: content,
               color_token: styleSettings.colorToken,
               font_size: styleSettings.fontSize,
+              font_size_mobile: styleSettings.fontSizeMobile,
+              font_size_tablet: styleSettings.fontSizeTablet,
+              font_size_desktop: styleSettings.fontSizeDesktop,
               font_weight: styleSettings.fontWeight,
               is_italic: styleSettings.isItalic,
               is_underline: styleSettings.isUnderline,
@@ -290,6 +308,9 @@ export function RichTextEditModal({
               translated_text: content,
               color_token: styleSettings.colorToken,
               font_size: styleSettings.fontSize,
+              font_size_mobile: styleSettings.fontSizeMobile,
+              font_size_tablet: styleSettings.fontSizeTablet,
+              font_size_desktop: styleSettings.fontSizeDesktop,
               font_weight: styleSettings.fontWeight,
               is_italic: styleSettings.isItalic,
               is_underline: styleSettings.isUnderline,
@@ -414,9 +435,10 @@ export function RichTextEditModal({
           <div className="py-8 text-center text-muted-foreground">Loading...</div>
         ) : (
           <Tabs defaultValue="main" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="main">Main Content</TabsTrigger>
               <TabsTrigger value="styling">Styling</TabsTrigger>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="translations" disabled={!translationKey}>
                 Translations {translationKey ? `(${translations.length})` : ''}
               </TabsTrigger>
@@ -484,8 +506,8 @@ export function RichTextEditModal({
 
               {/* Font Size */}
               <div className="space-y-2">
-                <Label>Font Size</Label>
-                <div className="grid grid-cols-5 gap-2">
+                <Label>Font Size (All Screens)</Label>
+                <div className="grid grid-cols-6 gap-2">
                   {FONT_SIZES.map((size) => (
                     <button
                       key={size.value}
@@ -502,6 +524,73 @@ export function RichTextEditModal({
                       <div className="text-xs text-muted-foreground mt-1">{size.label}</div>
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Responsive Font Sizes */}
+              <div className="space-y-4 p-4 rounded-lg border bg-muted/30">
+                <Label className="text-base font-semibold">Responsive Font Sizes (Optional)</Label>
+                <p className="text-sm text-muted-foreground">Set different sizes for specific screen sizes. Leave at "Base" to inherit from above.</p>
+                
+                <div className="space-y-3">
+                  {/* Mobile */}
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 w-32">
+                      <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                      </svg>
+                      <span className="text-sm font-medium">Mobile</span>
+                    </div>
+                    <select
+                      value={styleSettings.fontSizeMobile}
+                      onChange={(e) => setStyleSettings(prev => ({ ...prev, fontSizeMobile: e.target.value }))}
+                      className="flex-1 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                      {FONT_SIZES.map(size => (
+                        <option key={size.value} value={size.value}>{size.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Tablet */}
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 w-32">
+                      <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
+                      </svg>
+                      <span className="text-sm font-medium">Tablet</span>
+                    </div>
+                    <select
+                      value={styleSettings.fontSizeTablet}
+                      onChange={(e) => setStyleSettings(prev => ({ ...prev, fontSizeTablet: e.target.value }))}
+                      className="flex-1 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                      {FONT_SIZES.map(size => (
+                        <option key={size.value} value={size.value}>{size.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Desktop */}
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 w-32">
+                      <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                        <line x1="8" y1="21" x2="16" y2="21" />
+                        <line x1="12" y1="17" x2="12" y2="21" />
+                      </svg>
+                      <span className="text-sm font-medium">Desktop</span>
+                    </div>
+                    <select
+                      value={styleSettings.fontSizeDesktop}
+                      onChange={(e) => setStyleSettings(prev => ({ ...prev, fontSizeDesktop: e.target.value }))}
+                      className="flex-1 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                      {FONT_SIZES.map(size => (
+                        <option key={size.value} value={size.value}>{size.label}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -618,6 +707,118 @@ export function RichTextEditModal({
                 <Save className="mr-2 h-4 w-4" />
                 {saving ? 'Saving...' : 'Save Styling'}
               </Button>
+            </TabsContent>
+
+            <TabsContent value="preview" className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-base font-semibold">Typography Preview</Label>
+                <p className="text-sm text-muted-foreground">
+                  See how your text will appear across different device sizes
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Mobile Preview */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-sm">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                    </svg>
+                    Mobile <span className="text-muted-foreground">(&lt;640px)</span>
+                  </Label>
+                  <div 
+                    className="border rounded-lg p-4 bg-background overflow-hidden min-h-[120px] flex items-center justify-center"
+                    style={{ maxWidth: '200px', margin: '0 auto' }}
+                  >
+                    <p
+                      className="text-center"
+                      data-responsive-font
+                      style={{
+                        color: styleSettings.colorToken
+                          ? resolveTextColor(styleSettings.colorToken)
+                          : undefined,
+                        fontSize: FONT_SIZE_MAP[styleSettings.fontSizeMobile] || FONT_SIZE_MAP[styleSettings.fontSize],
+                        fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
+                          ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
+                          : undefined,
+                        fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
+                        textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
+                      }}
+                    >
+                      {content || 'Preview text'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tablet Preview */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-sm">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
+                    </svg>
+                    Tablet <span className="text-muted-foreground">(640px-1024px)</span>
+                  </Label>
+                  <div 
+                    className="border rounded-lg p-4 bg-background overflow-hidden min-h-[120px] flex items-center justify-center"
+                    style={{ maxWidth: '280px', margin: '0 auto' }}
+                  >
+                    <p
+                      className="text-center"
+                      data-responsive-font
+                      style={{
+                        color: styleSettings.colorToken
+                          ? resolveTextColor(styleSettings.colorToken)
+                          : undefined,
+                        fontSize: FONT_SIZE_MAP[styleSettings.fontSizeTablet] || FONT_SIZE_MAP[styleSettings.fontSize],
+                        fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
+                          ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
+                          : undefined,
+                        fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
+                        textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
+                      }}
+                    >
+                      {content || 'Preview text'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Desktop Preview */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-sm">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                      <line x1="8" y1="21" x2="16" y2="21" />
+                      <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                    Desktop <span className="text-muted-foreground">(&gt;1024px)</span>
+                  </Label>
+                  <div 
+                    className="border rounded-lg p-4 bg-background overflow-hidden min-h-[120px] flex items-center justify-center"
+                  >
+                    <p
+                      className="text-center"
+                      data-responsive-font
+                      style={{
+                        color: styleSettings.colorToken
+                          ? resolveTextColor(styleSettings.colorToken)
+                          : undefined,
+                        fontSize: FONT_SIZE_MAP[styleSettings.fontSizeDesktop] || FONT_SIZE_MAP[styleSettings.fontSize],
+                        fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
+                          ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
+                          : undefined,
+                        fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
+                        textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
+                      }}
+                    >
+                      {content || 'Preview text'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 rounded-lg bg-muted/30 text-sm text-muted-foreground">
+                💡 Tip: Use responsive sizing to make headings smaller on mobile and larger on desktop for better readability.
+              </div>
             </TabsContent>
 
             <TabsContent value="translations" className="space-y-4">
