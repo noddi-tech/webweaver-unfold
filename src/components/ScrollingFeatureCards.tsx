@@ -577,7 +577,7 @@ export function ScrollingFeatureCards() {
                     onMouseLeave={() => editMode && setHoveredCard(null)}
                   >
                     <div className={cn(
-                      "backdrop-blur-xl relative p-6 lg:p-10",
+                      "backdrop-blur-xl relative p-4 md:p-6 lg:p-8",
                       cardData[index]?.background || 'bg-gradient-hero/90'
                     )}>
                       {/* Edit Button - Only in Edit Mode */}
@@ -590,7 +590,7 @@ export function ScrollingFeatureCards() {
                         </button>
                       )}
                       <div className="w-full">
-                        <div className="grid md:grid-cols-[28fr_72fr] gap-6 lg:gap-10 items-center">
+                        <div className="grid md:grid-cols-[28fr_72fr] gap-4 md:gap-6 lg:gap-8 items-center">
                           {/* Left: Content */}
                           <div className="space-y-6">
                             <div className="flex items-center gap-3">
@@ -656,7 +656,7 @@ export function ScrollingFeatureCards() {
                           </div>
                           
                           {/* Right: Image (72% width = ~1000px+) */}
-                          <div className="lg:-my-4 lg:-mr-6">
+                          <div className="-my-2 -mr-2 md:-my-3 md:-mr-4 lg:-my-4 lg:-mr-6">
                             <EditableUniversalMedia
                               locationId={`scrolling-card-${index + 1}`}
                               onSave={() => loadImageSettings()}
