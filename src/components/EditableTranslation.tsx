@@ -42,26 +42,30 @@ export function EditableTranslation({
   const [modalOpen, setModalOpen] = useState(false);
   const [contentId, setContentId] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [displayText, setDisplayText] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get the content ID for this translation key
-    const fetchContentId = async () => {
+    // Fetch the actual translation from the database
+    const fetchTranslation = async () => {
       const { data } = await supabase
         .from('translations')
-        .select('id')
+        .select('id, translated_text')
         .eq('translation_key', translationKey)
         .eq('language_code', currentLanguage)
         .maybeSingle();
       
       if (data) {
         setContentId(data.id);
+        setDisplayText(data.translated_text);
+      } else {
+        setDisplayText(null);
       }
     };
 
     if (editMode) {
-      fetchContentId();
+      fetchTranslation();
     }
-  }, [editMode, translationKey, currentLanguage]);
+  }, [editMode, translationKey, currentLanguage, refreshKey]);
 
   const handleSave = () => {
     setRefreshKey(prev => prev + 1);
@@ -72,6 +76,9 @@ export function EditableTranslation({
     return <>{children}</>;
   }
 
+  // Display the translation if available, otherwise fallback to children
+  const contentToDisplay = displayText || children;
+
   return (
     <>
       <span
@@ -80,7 +87,7 @@ export function EditableTranslation({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {children}
+        {contentToDisplay}
         {isHovered && (
           <button
             className="absolute -top-2 -right-2 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer z-10"
