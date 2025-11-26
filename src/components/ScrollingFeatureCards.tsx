@@ -93,13 +93,8 @@ export function ScrollingFeatureCards() {
     },
   ], [GRADIENT_COLORS, GLASS_EFFECTS]);
 
-  const [imageUrls, setImageUrls] = useState<Record<number, string>>({
-    0: bookingHeroImg,
-    1: dashboardPreviewImg,
-    2: bookingStepTimeImg,
-    3: npsDashboardImg,
-    4: whitelabelDemoImg,
-  });
+  // Remove hardcoded fallback images - let smart fallback chain handle empty states
+  const [imageUrls, setImageUrls] = useState<Record<number, string>>({});
   const [mainCtaUrl, setMainCtaUrl] = useState('/functions');
   const [editingCard, setEditingCard] = useState<number | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
@@ -190,6 +185,18 @@ export function ScrollingFeatureCards() {
           // Single image
           newImageUrls[i] = data.image_url;
           newCarouselData[i] = { display_type: 'image' };
+        } else if (!data.image_url && data.carousel_config_id) {
+          // Smart fallback: If image_url is empty but carousel exists, use carousel's first image
+          const { data: carouselConfig } = await supabase
+            .from('carousel_configs')
+            .select('images')
+            .eq('id', data.carousel_config_id)
+            .single();
+          
+          if (carouselConfig?.images?.[0]?.url) {
+            newImageUrls[i] = carouselConfig.images[0].url;
+            newCarouselData[i] = { display_type: 'image' };
+          }
         }
       }
     }

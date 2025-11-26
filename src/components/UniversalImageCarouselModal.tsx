@@ -394,16 +394,25 @@ export function UniversalImageCarouselModal({
           }
         }
 
-        // Save or update settings
+        // Fetch existing settings to preserve data when switching modes
+        const { data: existingSettings } = await supabase
+          .from('image_carousel_settings')
+          .select('carousel_config_id, image_url, image_alt')
+          .eq('location_id', locationId)
+          .maybeSingle();
+
+        // Save or update settings, preserving data for the "other" mode
         const settingsData = {
           location_id: locationId,
           display_type: displayType,
           fit_mode: fitMode,
           aspect_ratio: aspectRatio,
           object_position: objectPosition,
-          image_url: displayType === 'image' ? finalImageUrl : null,
-          image_alt: displayType === 'image' ? imageAlt : null,
-          carousel_config_id: displayType === 'carousel' ? carouselConfigId : null,
+          // Preserve image data even when in carousel mode
+          image_url: displayType === 'image' ? finalImageUrl : (existingSettings?.image_url || null),
+          image_alt: displayType === 'image' ? imageAlt : (existingSettings?.image_alt || null),
+          // Preserve carousel connection even when in image mode
+          carousel_config_id: displayType === 'carousel' ? carouselConfigId : (existingSettings?.carousel_config_id || null),
           saved_image_url: displayType === 'carousel' ? finalImageUrl : null,
           saved_image_alt: displayType === 'carousel' ? imageAlt : null,
           saved_carousel_config_id: displayType === 'image' ? carouselConfigId : null,
