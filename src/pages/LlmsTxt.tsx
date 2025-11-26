@@ -13,16 +13,21 @@ const LlmsTxt = () => {
 
         if (error || !data) {
           // If file not found, serve a 404 response
-          document.body.innerHTML = "File not found";
+          document.body.innerHTML = '';
+          const errorText = document.createTextNode("File not found");
+          document.body.appendChild(errorText);
           return;
         }
 
         // Clear the body and serve the file content as plain text
-        document.body.innerHTML = `<pre>${data.content}</pre>`;
-        document.body.style.fontFamily = "var(--font-mono)";
+        document.body.innerHTML = '';
+        const pre = document.createElement('pre');
+        pre.textContent = data.content; // textContent auto-escapes HTML
+        pre.style.fontFamily = "var(--font-mono)";
+        pre.style.whiteSpace = "pre-wrap";
+        pre.style.padding = "16px";
         document.body.style.margin = "0";
-        document.body.style.padding = "16px";
-        document.body.style.whiteSpace = "pre-wrap";
+        document.body.appendChild(pre);
         
         // Set the content type in the document
         const meta = document.createElement('meta');
@@ -32,7 +37,9 @@ const LlmsTxt = () => {
 
       } catch (error) {
         console.error("Error fetching llms.txt:", error);
-        document.body.innerHTML = "Error loading file";
+        document.body.innerHTML = '';
+        const errorText = document.createTextNode("Error loading file");
+        document.body.appendChild(errorText);
       }
     };
 

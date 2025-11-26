@@ -1,7 +1,18 @@
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+// Input validation schema
+const ContactSchema = z.object({
+  firstName: z.string().min(1, 'First name is required').max(100, 'First name too long').trim(),
+  lastName: z.string().max(100, 'Last name too long').trim(),
+  email: z.string().email('Invalid email address').max(255, 'Email too long'),
+  subject: z.string().max(200, 'Subject too long').trim(),
+  message: z.string().min(10, 'Message must be at least 10 characters').max(5000, 'Message too long').trim(),
+});
 
 interface ContactFormData {
   firstName: string;
@@ -41,18 +52,25 @@ Deno.serve(async (req) => {
       );
     }
 
-    const formData: ContactFormData = await req.json();
+    const body = await req.json();
     
-    // Validate required fields
-    if (!formData.firstName || !formData.email || !formData.message) {
+    // Validate input with Zod
+    const validation = ContactSchema.safeParse(body);
+    if (!validation.success) {
+      console.error('Validation failed:', validation.error.flatten());
       return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
+        JSON.stringify({ 
+          error: 'Invalid input', 
+          details: validation.error.flatten().fieldErrors 
+        }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
+
+    const formData: ContactFormData = validation.data;
 
     // Create Slack message payload
     const slackMessage = {
