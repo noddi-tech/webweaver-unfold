@@ -1238,6 +1238,45 @@ export type Database = {
         }
         Relationships: []
       }
+      rotating_headline_terms: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          descriptor_fallback: string
+          descriptor_key: string
+          icon_name: string | null
+          id: string
+          sort_order: number | null
+          term_fallback: string
+          term_key: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          descriptor_fallback: string
+          descriptor_key: string
+          icon_name?: string | null
+          id?: string
+          sort_order?: number | null
+          term_fallback: string
+          term_key: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          descriptor_fallback?: string
+          descriptor_key?: string
+          icon_name?: string | null
+          id?: string
+          sort_order?: number | null
+          term_fallback?: string
+          term_key?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       sections: {
         Row: {
           active: boolean
