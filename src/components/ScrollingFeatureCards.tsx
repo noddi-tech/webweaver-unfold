@@ -694,7 +694,7 @@ export function ScrollingFeatureCards() {
                       <div className="w-full h-full">
                         <div className="grid gap-4 sm:gap-6 lg:gap-8 items-center h-full min-h-0 grid-cols-1 sm:grid-cols-[40fr_60fr] lg:grid-cols-[28fr_72fr] 2xl:grid-cols-[35fr_65fr]">
                           {/* Left: Content */}
-                          <div className="flex flex-col justify-center gap-6 max-w-sm lg:max-w-md">
+                          <div className="flex flex-col justify-center gap-6 overflow-hidden min-w-0">
                             <div className="flex items-center gap-3">
                               <Badge 
                                 className="border px-3 py-1.5 text-sm font-medium"
@@ -758,8 +758,8 @@ export function ScrollingFeatureCards() {
                           </div>
                           
                           {/* Right: Image (72% width = ~1000px+) */}
-                          <div className="relative w-full h-full overflow-hidden min-h-0 flex items-center justify-center">
-                            <div className="w-full aspect-[16/10] max-h-full overflow-hidden rounded-2xl">
+                          <div className="relative w-full h-full overflow-hidden min-h-0 min-w-0 flex items-center justify-center">
+                            <div className="w-full aspect-[16/10] overflow-hidden rounded-2xl">
                               <EditableUniversalMedia
                                 locationId={`scrolling-card-${index + 1}`}
                                 onSave={() => loadImageSettings()}
