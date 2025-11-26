@@ -17,6 +17,7 @@ export interface ColorOption {
   description: string;     // Short description for tooltips/help text
   preview: string;         // CSS class for preview rendering
   cssVar?: string;         // CSS variable name (e.g., '--card')
+  hslValue?: string;       // HSL value from database for luminance calculation
   type: 'solid' | 'gradient' | 'glass';
   category: 'surfaces' | 'interactive' | 'feedback' | 'gradients' | 'glass' | 'text';
   optimalTextColor?: 'white' | 'dark' | 'auto'; // Suggested text color for accessibility

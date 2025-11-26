@@ -51,6 +51,7 @@ export const useColorSystem = (): ColorSystemState => {
           description: token.description || '',
           preview: token.preview_class || `bg-${token.css_var.replace('--', '')}`,
           cssVar: token.css_var,
+          hslValue: token.value,  // Include actual HSL value from database
           type: token.color_type as 'solid' | 'gradient' | 'glass',
           category: token.category as ColorOption['category'],
           optimalTextColor: token.optimal_text_color as 'white' | 'dark' | 'auto',
