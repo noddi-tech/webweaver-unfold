@@ -395,8 +395,8 @@ const SolutionsManager = () => {
   return (
     <div className="space-y-8">
       {/* Design Settings */}
-      <Card className="p-6 bg-card border-border">
-        <h3 className="text-xl font-semibold mb-4">Design Settings</h3>
+      <Card className="p-6 bg-background border-border">
+        <h3 className="text-xl font-semibold text-foreground mb-4">Design Settings</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label className="text-sm text-muted-foreground">Section Title</label>
@@ -481,7 +481,7 @@ const SolutionsManager = () => {
       </Card>
 
       {/* Add Solution */}
-      <Card className="p-6 bg-card border-border">
+      <Card className="p-6 bg-background border-border">
         <h3 className="text-xl font-semibold mb-4">Add Solution</h3>
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -571,8 +571,8 @@ const SolutionsManager = () => {
       </Card>
 
       {/* Solutions Table */}
-      <Card className="p-6 bg-card border-border">
-        <h3 className="text-xl font-semibold mb-4">Solutions ({solutions.length})</h3>
+      <Card className="p-6 bg-background border-border">
+        <h3 className="text-xl font-semibold text-foreground mb-4">Solutions ({solutions.length})</h3>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>

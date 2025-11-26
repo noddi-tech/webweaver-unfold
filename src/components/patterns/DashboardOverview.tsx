@@ -1,9 +1,9 @@
 import React from "react";
 
 const StatCard: React.FC<{ label: string; value: string; trend?: string }> = ({ label, value, trend }) => (
-  <div className="rounded-xl border border-border p-5 bg-card">
+  <div className="rounded-xl border border-border p-5 bg-card text-card-foreground">
     <div className="text-sm text-muted-foreground">{label}</div>
-    <div className="mt-1 text-2xl font-bold text-foreground">{value}</div>
+    <div className="mt-1 text-2xl font-bold">{value}</div>
     {trend ? <div className="mt-1 text-xs text-muted-foreground">{trend}</div> : null}
   </div>
 );

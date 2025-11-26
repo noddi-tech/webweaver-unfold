@@ -592,7 +592,7 @@ const ImageManager = () => {
       </header>
 
       {/* View Mode Toggle */}
-      <Card className="p-4 bg-card border-border">
+      <Card className="p-4 bg-background border-border">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-foreground">View Mode</h3>
@@ -613,8 +613,8 @@ const ImageManager = () => {
         </div>
       </Card>
 
-      <Card className="p-6 bg-card border-border space-y-4">
-        <h3 className="text-xl font-semibold">Upload Images</h3>
+      <Card className="p-6 bg-background border-border space-y-4">
+        <h3 className="text-xl font-semibold text-foreground">Upload Images</h3>
         <div className="space-y-2">
           <Label className="text-foreground font-medium">Section (Optional)</Label>
           <Select value={uploadSection} onValueChange={setUploadSection}>
@@ -715,9 +715,9 @@ const ImageManager = () => {
       {/* Library View */}
       {viewMode === 'library' && (
         <div className="space-y-4">
-          <Card className="p-6 bg-card border-border space-y-4">
+          <Card className="p-6 bg-background border-border space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold">Image Library</h3>
+              <h3 className="text-xl font-semibold text-foreground">Image Library</h3>
               <Badge variant="secondary" className="text-sm">
                 {filteredImages.length} {filteredImages.length === 1 ? 'image' : 'images'}
               </Badge>
@@ -758,8 +758,8 @@ const ImageManager = () => {
       {/* Section View (Legacy) */}
       {viewMode === 'sections' && (
         <>
-          <Card className="p-6 bg-card border-border space-y-4">
-            <h3 className="text-xl font-semibold">Available Sections</h3>
+          <Card className="p-6 bg-background border-border space-y-4">
+            <h3 className="text-xl font-semibold text-foreground">Available Sections</h3>
             <p className="text-sm text-muted-foreground">Sections are managed in the Sections CMS. Only active sections are shown here.</p>
             <Separator className="my-2" />
             <div className="flex flex-wrap gap-2">
@@ -783,8 +783,8 @@ const ImageManager = () => {
               const sectionInfo = sections.find(s => s.name === section);
               const sectionTitle = sectionInfo ? `${sectionInfo.display_name} (${section})` : section;
               return (
-                <Card key={section} className="p-6 bg-card border-border space-y-4">
-                  <h3 className="text-lg font-semibold">Section: {sectionTitle}</h3>
+                <Card key={section} className="p-6 bg-background border-border space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground">Section: {sectionTitle}</h3>
                   <div className="grid gap-6 md:grid-cols-2">
                     {imgs.map((img) => (
                       <div key={img.id} className="grid gap-3 rounded-lg border border-border p-4">

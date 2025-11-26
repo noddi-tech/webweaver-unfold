@@ -233,7 +233,7 @@ export default function CarouselManager() {
           ))}
         </div>
       ) : (
-        <Card className="p-12 text-center bg-card border-border">
+        <Card className="p-12 text-center bg-background border-border">
           <ImagesIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">
             {searchQuery ? 'No carousels found' : 'No carousels yet'}

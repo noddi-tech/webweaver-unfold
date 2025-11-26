@@ -140,7 +140,7 @@ export function IconEditModal({
         </DialogHeader>
 
         {/* LIVE PREVIEW */}
-        <div className="p-8 text-center mb-4 rounded-lg border bg-card">
+        <div className="p-8 text-center mb-4 rounded-lg border bg-card text-card-foreground">
           <div className="flex justify-center mb-4">
             {renderIconPreview()}
           </div>

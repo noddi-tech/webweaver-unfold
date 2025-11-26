@@ -302,7 +302,7 @@ const TextContentManager = () => {
 
         {Object.entries(contentTypeConfigs).map(([contentType, config]) => (
           <TabsContent key={contentType} value={contentType === 'heading' ? 'headings' : contentType === 'button' ? 'buttons' : contentType === 'paragraph' ? 'paragraphs' : contentType === 'label' ? 'labels' : 'other'} className="space-y-6">
-            <Card className="bg-card border-border">
+            <Card className="bg-background border-border">
               <CardHeader>
                 <CardTitle className="text-foreground">{config.label}</CardTitle>
                 <CardDescription>{config.description}</CardDescription>
