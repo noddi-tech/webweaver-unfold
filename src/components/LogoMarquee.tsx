@@ -40,8 +40,29 @@ export function LogoMarquee() {
     }
   };
 
-  // Create an extended strip so logos fill the entire width and loop seamlessly
-  const extendedLogos = logos.length > 0 ? [...logos, ...logos, ...logos] : logos;
+  // Ensure we have enough logos to fill a full viewport-wide strip
+  const baseLogos = logos.length > 0 ? logos : [];
+  const stripLogos = baseLogos.length >= 6
+    ? baseLogos
+    : baseLogos.length > 0
+      ? Array.from({ length: Math.ceil(6 / baseLogos.length) }, () => baseLogos)
+          .flat()
+          .slice(0, 6)
+      : baseLogos;
+
+  const Strip = ({ prefix }: { prefix: string }) => (
+    <div className="flex flex-none min-w-full items-center justify-around gap-14">
+      {stripLogos.map((logo, i) => (
+        <div key={`${prefix}-${i}`} className="flex-shrink-0">
+          <img
+            src={logo.src}
+            alt={logo.alt}
+            className="h-6 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
+          />
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <section 
@@ -53,29 +74,9 @@ export function LogoMarquee() {
     >
       <div className="flex animate-marquee will-change-transform">
         {/* First strip */}
-        <div className="flex gap-14 flex-shrink-0">
-          {extendedLogos.map((logo, i) => (
-            <div key={`a-${i}`} className="flex-shrink-0">
-              <img 
-                src={logo.src} 
-                alt={logo.alt} 
-                className="h-6 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" 
-              />
-            </div>
-          ))}
-        </div>
+        <Strip prefix="a" />
         {/* Duplicate strip for seamless loop */}
-        <div className="flex gap-14 flex-shrink-0">
-          {extendedLogos.map((logo, i) => (
-            <div key={`b-${i}`} className="flex-shrink-0">
-              <img 
-                src={logo.src} 
-                alt={logo.alt} 
-                className="h-6 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0" 
-              />
-            </div>
-          ))}
-        </div>
+        <Strip prefix="b" />
       </div>
     </section>
   );
