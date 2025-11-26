@@ -3,6 +3,7 @@ import { Play, Pause } from 'lucide-react';
 import { useRotatingTerms } from '@/hooks/useRotatingTerms';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { Button } from '@/components/ui/button';
+import { EditableTranslation } from '@/components/EditableTranslation';
 
 interface RotatingHeadlineProps {
   className?: string;
@@ -57,9 +58,14 @@ export function RotatingHeadline({
   if (loading || terms.length === 0) {
     return (
       <div className={className}>
-        <h1 className="flex items-center justify-center gap-2 flex-wrap">
+        <h1 className="flex items-center justify-center gap-2 text-3xl md:text-4xl lg:text-5xl xl:text-6xl whitespace-nowrap">
           <span>ERP</span>
-          <span>for mobile & workshop car services.</span>
+          <EditableTranslation 
+            translationKey="hero.rotating.suffix"
+            fallbackText="for mobile & workshop car services."
+          >
+            <span>for mobile & workshop car services.</span>
+          </EditableTranslation>
         </h1>
         <div className="flex items-start justify-center gap-2 mt-4">
           <span className="text-muted-foreground text-xl">↳</span>
@@ -75,7 +81,7 @@ export function RotatingHeadline({
 
   return (
     <div className={`${className} relative`}>
-      <h1 className="flex items-center justify-center gap-2 flex-wrap">
+      <h1 className="flex items-center justify-center gap-2 text-3xl md:text-4xl lg:text-5xl xl:text-6xl whitespace-nowrap">
         {/* Rotating Term - INLINE with the rest */}
         <span 
           className={`text-foreground transition-opacity duration-300 ${
@@ -87,7 +93,12 @@ export function RotatingHeadline({
           {termText}
         </span>
         {/* Static suffix - same line */}
-        <span className="text-foreground">for mobile & workshop car services.</span>
+        <EditableTranslation 
+          translationKey="hero.rotating.suffix"
+          fallbackText="for mobile & workshop car services."
+        >
+          <span className="text-foreground">for mobile & workshop car services.</span>
+        </EditableTranslation>
         
         {/* Pause button inline */}
         <Button
