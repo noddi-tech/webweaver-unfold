@@ -466,7 +466,9 @@ export function RichTextEditModal({
                         <div 
                           className="text-center font-bold text-xl"
                           style={{ 
-                            color: `hsl(var(--${tokenName}))` 
+                            color: tokenName === 'white' 
+                              ? 'hsl(0 0% 100%)' 
+                              : `hsl(var(--${tokenName}))` 
                           }}
                         >
                           Aa
@@ -569,9 +571,15 @@ export function RichTextEditModal({
                   >
                     <p
                       style={{
-                        color: `hsl(var(--${styleSettings.colorToken}))`,
-                        fontSize: FONT_SIZE_MAP[styleSettings.fontSize] || '1rem',
-                        fontWeight: FONT_WEIGHT_MAP[styleSettings.fontWeight] || 400,
+                        color: styleSettings.colorToken && styleSettings.colorToken !== 'foreground'
+                          ? `hsl(var(--${styleSettings.colorToken}))`
+                          : undefined,
+                        fontSize: styleSettings.fontSize && styleSettings.fontSize !== 'base' 
+                          ? FONT_SIZE_MAP[styleSettings.fontSize] 
+                          : undefined,
+                        fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
+                          ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
+                          : undefined,
                         fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
                         textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
                       }}
