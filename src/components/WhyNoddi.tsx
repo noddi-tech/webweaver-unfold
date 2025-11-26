@@ -7,6 +7,7 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { EditableBackground } from "@/components/EditableBackground";
+import { EditableIcon } from "@/components/EditableIcon";
 
 export default function WhyNoddi() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -56,9 +57,13 @@ export default function WhyNoddi() {
             >
               <CardContent className="p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center">
-                    <X className="w-6 h-6" />
-                  </div>
+                  <EditableIcon 
+                    elementId="why-noddi-before-icon" 
+                    icon={X} 
+                    defaultBackground="bg-destructive/10"
+                    size="default"
+                    shape="rounded-lg"
+                  />
                   <EditableTranslation translationKey="why_noddi.before.title" onSave={() => setRefreshKey(prev => prev + 1)}>
                     <h3 className="text-2xl font-bold">{t('why_noddi.before.title', 'Before Noddi')}</h3>
                   </EditableTranslation>
@@ -66,7 +71,14 @@ export default function WhyNoddi() {
                 <ul className="space-y-4">
                   {beforeItems.map((item, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <X className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                      <EditableIcon 
+                        elementId={`why-noddi-before-item-${index}-icon`}
+                        icon={X}
+                        defaultBackground="transparent"
+                        size="sm"
+                        shape="rounded-lg"
+                        className="mt-0.5"
+                      />
                       <EditableTranslation translationKey={`why_noddi.before.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
                         <span>{item}</span>
                       </EditableTranslation>
@@ -89,9 +101,13 @@ export default function WhyNoddi() {
             >
               <CardContent className="p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center">
-                    <Check className="w-6 h-6" />
-                  </div>
+                  <EditableIcon 
+                    elementId="why-noddi-after-icon" 
+                    icon={Check} 
+                    defaultBackground="bg-gradient-primary"
+                    size="default"
+                    shape="rounded-lg"
+                  />
                   <EditableTranslation translationKey="why_noddi.after.title" onSave={() => setRefreshKey(prev => prev + 1)}>
                     <h3 className="text-2xl font-bold">{t('why_noddi.after.title', 'With Noddi')}</h3>
                   </EditableTranslation>
@@ -99,7 +115,14 @@ export default function WhyNoddi() {
                 <ul className="space-y-4">
                   {afterItems.map((item, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                      <EditableIcon 
+                        elementId={`why-noddi-after-item-${index}-icon`}
+                        icon={Check}
+                        defaultBackground="transparent"
+                        size="sm"
+                        shape="rounded-lg"
+                        className="mt-0.5"
+                      />
                       <EditableTranslation translationKey={`why_noddi.after.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
                         <span className="font-medium">{item}</span>
                       </EditableTranslation>
