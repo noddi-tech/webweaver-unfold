@@ -181,7 +181,7 @@ const Hero = () => {
                       >
                         <CarouselContent>
                           {carouselImages.map((image, index) => (
-                            <CarouselItem key={`hero-slide-${index}`}>
+                            <CarouselItem key={`hero-slide-${index}`} className="h-full">
                   <div className={containerClasses}>
                                 <OptimizedImage
                                   src={image.url}
