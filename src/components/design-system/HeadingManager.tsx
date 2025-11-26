@@ -252,7 +252,7 @@ const HeadingManager = () => {
         </TabsList>
 
         <TabsContent value="manage" className="space-y-6">
-          <Card className="bg-card border-border">
+          <Card className="bg-background border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Filter by Page</CardTitle>
               <CardDescription>Select a page to view its headings</CardDescription>
@@ -274,7 +274,7 @@ const HeadingManager = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-background border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Headings</CardTitle>
               <CardDescription>Edit existing headings and subheadings</CardDescription>
@@ -450,7 +450,7 @@ const HeadingManager = () => {
         </TabsContent>
 
         <TabsContent value="create" className="space-y-6">
-          <Card className="bg-card border-border">
+          <Card className="bg-background border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Create New Heading</CardTitle>
               <CardDescription>Add a new heading or subheading</CardDescription>

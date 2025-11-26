@@ -536,11 +536,11 @@ export function UniversalImageCarouselModal({
     };
     
     return (
-      <div className="border rounded-lg p-4 bg-card space-y-4">
+      <div className="border rounded-lg p-4 bg-background space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h3 className="text-base font-semibold text-foreground">Select Multiple Images</h3>
-            <p className="text-sm text-foreground/70">
+            <p className="text-sm text-muted-foreground">
               Choose images from your library to add to the carousel
             </p>
           </div>
@@ -948,9 +948,9 @@ export function UniversalImageCarouselModal({
                   )}
 
                   {carouselImages.map((img, index) => (
-                    <div key={index} className="border rounded-lg p-4 space-y-3 bg-card">
+                    <div key={index} className="border rounded-lg p-4 space-y-3 bg-background">
                       <div className="flex items-center justify-between">
-                        <Label className="text-base font-semibold">Image {index + 1}</Label>
+                        <Label className="text-base font-semibold text-foreground">Image {index + 1}</Label>
                         <Button 
                           type="button" 
                           size="sm" 

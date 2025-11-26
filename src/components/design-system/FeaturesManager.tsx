@@ -171,8 +171,8 @@ const FeaturesManager = () => {
 
   return (
     <div className="space-y-8">
-      <Card className="p-6 bg-card border-border">
-        <h3 className="text-xl font-semibold mb-4">Design Settings</h3>
+      <Card className="p-6 bg-background border-border">
+        <h3 className="text-xl font-semibold text-foreground mb-4">Design Settings</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label className="text-sm text-muted-foreground">Section Title</label>
@@ -283,8 +283,8 @@ const FeaturesManager = () => {
         </p>
       </Card>
  
-      <Card className="p-6 bg-card border-border">
-        <h3 className="text-xl font-semibold mb-4">Add Feature</h3>
+      <Card className="p-6 bg-background border-border">
+        <h3 className="text-xl font-semibold text-foreground mb-4">Add Feature</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Input
             placeholder="Title"
@@ -328,8 +328,8 @@ const FeaturesManager = () => {
         </p>
       </Card>
 
-      <Card className="p-6 bg-card border-border">
-        <h3 className="text-xl font-semibold mb-4">Features ({features.length})</h3>
+      <Card className="p-6 bg-background border-border">
+        <h3 className="text-xl font-semibold text-foreground mb-4">Features ({features.length})</h3>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>

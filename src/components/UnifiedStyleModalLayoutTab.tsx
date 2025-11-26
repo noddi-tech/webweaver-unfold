@@ -106,11 +106,11 @@ export function UnifiedStyleModalLayoutTab({
           <div className={cn(
             cardWidth,
             cardHeight,
-            cardBorderRadius,
-            'bg-card border border-border flex items-center justify-center text-sm text-foreground'
-          )}>
-            Card Preview
-          </div>
+          cardBorderRadius,
+          'bg-card text-card-foreground border border-border flex items-center justify-center text-sm'
+        )}>
+          Card Preview
+        </div>
         </div>
       </div>
     </div>
