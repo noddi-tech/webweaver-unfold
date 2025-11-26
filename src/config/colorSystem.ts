@@ -29,6 +29,8 @@ export interface TextColorOption {
   description: string;     // Usage description
   preview: string;         // CSS class for preview
   className: string;       // Actual class to apply
+  hslValue?: string;       // HSL value from database for luminance calculation
+  cssVar?: string;         // CSS variable name (e.g., '--foreground')
 }
 
 // ============================================================================

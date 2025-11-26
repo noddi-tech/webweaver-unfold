@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useColorSystem } from '@/hooks/useColorSystem';
 import { getContrastRatio, getLuminanceFromHSL, getContrastBadge } from '@/lib/contrastUtils';
+import { needsDarkSwatchBackground, resolveTextColor } from '@/lib/textColorUtils';
 import { cn } from '@/lib/utils';
 
 interface RichTextEditModalProps {
@@ -445,7 +446,7 @@ export function RichTextEditModal({
                 <div className="grid grid-cols-4 gap-2">
                   {TEXT_COLOR_OPTIONS.map((colorOption) => {
                     const tokenName = colorOption.value.replace('text-', '');
-                    const isWhite = tokenName === 'white';
+                    const needsDarkBg = needsDarkSwatchBackground(tokenName, colorOption.hslValue);
                     
                     return (
                       <button
@@ -459,21 +460,20 @@ export function RichTextEditModal({
                           styleSettings.colorToken === tokenName
                             ? 'border-primary ring-2 ring-primary/20'
                             : 'border-transparent hover:border-border',
-                          isWhite ? 'bg-slate-800' : 'bg-background'
+                          needsDarkBg ? 'bg-slate-800' : 'bg-background'
                         )}
                         title={colorOption.description}
                       >
                         <div 
                           className="text-center font-bold text-xl"
-                          style={{ 
-                            color: tokenName === 'white' 
-                              ? 'hsl(0 0% 100%)' 
-                              : `hsl(var(--${tokenName}))` 
-                          }}
+                          style={{ color: resolveTextColor(tokenName, colorOption.hslValue) }}
                         >
                           Aa
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1 truncate">
+                        <div className={cn(
+                          "text-xs mt-1 truncate",
+                          needsDarkBg ? "text-slate-300" : "text-muted-foreground"
+                        )}>
                           {colorOption.label}
                         </div>
                       </button>
@@ -571,8 +571,8 @@ export function RichTextEditModal({
                   >
                     <p
                       style={{
-                        color: styleSettings.colorToken && styleSettings.colorToken !== 'foreground'
-                          ? `hsl(var(--${styleSettings.colorToken}))`
+                        color: styleSettings.colorToken
+                          ? resolveTextColor(styleSettings.colorToken)
                           : undefined,
                         fontSize: styleSettings.fontSize && styleSettings.fontSize !== 'base' 
                           ? FONT_SIZE_MAP[styleSettings.fontSize] 

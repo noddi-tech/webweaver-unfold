@@ -60,13 +60,19 @@ export const useColorSystem = (): ColorSystemState => {
         const backgrounds = allColors.filter(c => c.category !== 'text');
         const textColors = allColors
           .filter(c => c.category === 'text')
-          .map(c => ({
-            value: c.preview || `text-${c.cssVar.replace('--', '')}`,
-            label: c.label,
-            description: c.description,
-            preview: c.preview || `text-${c.cssVar.replace('--', '')}`,
-            className: c.preview || `text-${c.cssVar.replace('--', '')}`,
-          }));
+          .map(c => {
+            // Get the original database record to extract HSL value
+            const dbRecord = data.find(d => d.css_var === c.cssVar);
+            return {
+              value: c.preview || `text-${c.cssVar.replace('--', '')}`,
+              label: c.label,
+              description: c.description,
+              preview: c.preview || `text-${c.cssVar.replace('--', '')}`,
+              className: c.preview || `text-${c.cssVar.replace('--', '')}`,
+              hslValue: dbRecord?.value, // Include actual HSL value for luminance calculation
+              cssVar: c.cssVar,          // Include CSS variable name
+            };
+          });
 
         // Add white text color if not present
         if (!textColors.some(t => t.value === 'text-white')) {
@@ -76,6 +82,8 @@ export const useColorSystem = (): ColorSystemState => {
             description: 'Pure white text for dark backgrounds',
             preview: 'text-white',
             className: 'text-white',
+            hslValue: '0 0% 100%',  // Pure white HSL value
+            cssVar: '--white',       // Logical CSS var name (even if not in CSS)
           });
         }
 
