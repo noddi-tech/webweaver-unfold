@@ -129,13 +129,13 @@ export function EditableTranslation({
           fontSize: styleSettings.fontSize && styleSettings.fontSize !== 'base' 
             ? FONT_SIZE_MAP[styleSettings.fontSize] 
             : undefined,
-          '--font-size-mobile': styleSettings.fontSizeMobile && styleSettings.fontSizeMobile !== 'base'
+          '--font-size-mobile': styleSettings.fontSizeMobile && styleSettings.fontSizeMobile !== 'inherit' && styleSettings.fontSizeMobile !== 'base'
             ? FONT_SIZE_MAP[styleSettings.fontSizeMobile]
             : undefined,
-          '--font-size-tablet': styleSettings.fontSizeTablet && styleSettings.fontSizeTablet !== 'base'
+          '--font-size-tablet': styleSettings.fontSizeTablet && styleSettings.fontSizeTablet !== 'inherit' && styleSettings.fontSizeTablet !== 'base'
             ? FONT_SIZE_MAP[styleSettings.fontSizeTablet]
             : undefined,
-          '--font-size-desktop': styleSettings.fontSizeDesktop && styleSettings.fontSizeDesktop !== 'base'
+          '--font-size-desktop': styleSettings.fontSizeDesktop && styleSettings.fontSizeDesktop !== 'inherit' && styleSettings.fontSizeDesktop !== 'base'
             ? FONT_SIZE_MAP[styleSettings.fontSizeDesktop]
             : undefined,
           fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 

@@ -89,6 +89,12 @@ const FONT_SIZES = [
   { value: '8xl', label: '8XL', className: 'text-8xl' },
 ];
 
+// Responsive font sizes include "Inherit" option
+const RESPONSIVE_FONT_SIZES = [
+  { value: 'inherit', label: 'Inherit', className: '' },
+  ...FONT_SIZES
+];
+
 const FONT_WEIGHTS = [
   { value: 'light', label: 'Light', className: 'font-light' },
   { value: 'normal', label: 'Normal', className: 'font-normal' },
@@ -120,9 +126,9 @@ export function RichTextEditModal({
   const [styleSettings, setStyleSettings] = useState<StyleSettings>({
     colorToken: 'foreground',
     fontSize: 'base',
-    fontSizeMobile: 'base',
-    fontSizeTablet: 'base',
-    fontSizeDesktop: 'base',
+    fontSizeMobile: 'inherit',
+    fontSizeTablet: 'inherit',
+    fontSizeDesktop: 'inherit',
     fontWeight: 'normal',
     isItalic: false,
     isUnderline: false,
@@ -219,9 +225,9 @@ export function RichTextEditModal({
           setStyleSettings({
             colorToken: englishData.color_token || 'foreground',
             fontSize: englishData.font_size || 'base',
-            fontSizeMobile: englishData.font_size_mobile || 'base',
-            fontSizeTablet: englishData.font_size_tablet || 'base',
-            fontSizeDesktop: englishData.font_size_desktop || 'base',
+            fontSizeMobile: englishData.font_size_mobile || 'inherit',
+            fontSizeTablet: englishData.font_size_tablet || 'inherit',
+            fontSizeDesktop: englishData.font_size_desktop || 'inherit',
             fontWeight: englishData.font_weight || 'normal',
             isItalic: englishData.is_italic || false,
             isUnderline: englishData.is_underline || false,
@@ -530,7 +536,7 @@ export function RichTextEditModal({
               {/* Responsive Font Sizes */}
               <div className="space-y-4 p-4 rounded-lg border bg-muted/30">
                 <Label className="text-base font-semibold">Responsive Font Sizes (Optional)</Label>
-                <p className="text-sm text-muted-foreground">Set different sizes for specific screen sizes. Leave at "Base" to inherit from above.</p>
+                <p className="text-sm text-muted-foreground">Set different sizes for specific screen sizes. Leave at "Inherit" to use the main font size.</p>
                 
                 <div className="space-y-3">
                   {/* Mobile */}
@@ -546,6 +552,9 @@ export function RichTextEditModal({
                       onChange={(e) => setStyleSettings(prev => ({ ...prev, fontSizeMobile: e.target.value }))}
                       className="flex-1 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
                     >
+                      <option value="inherit">
+                        Inherit ({FONT_SIZES.find(s => s.value === styleSettings.fontSize)?.label || 'Base'})
+                      </option>
                       {FONT_SIZES.map(size => (
                         <option key={size.value} value={size.value}>{size.label}</option>
                       ))}
@@ -565,6 +574,9 @@ export function RichTextEditModal({
                       onChange={(e) => setStyleSettings(prev => ({ ...prev, fontSizeTablet: e.target.value }))}
                       className="flex-1 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
                     >
+                      <option value="inherit">
+                        Inherit ({FONT_SIZES.find(s => s.value === styleSettings.fontSize)?.label || 'Base'})
+                      </option>
                       {FONT_SIZES.map(size => (
                         <option key={size.value} value={size.value}>{size.label}</option>
                       ))}
@@ -586,6 +598,9 @@ export function RichTextEditModal({
                       onChange={(e) => setStyleSettings(prev => ({ ...prev, fontSizeDesktop: e.target.value }))}
                       className="flex-1 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
                     >
+                      <option value="inherit">
+                        Inherit ({FONT_SIZES.find(s => s.value === styleSettings.fontSize)?.label || 'Base'})
+                      </option>
                       {FONT_SIZES.map(size => (
                         <option key={size.value} value={size.value}>{size.label}</option>
                       ))}
@@ -737,7 +752,9 @@ export function RichTextEditModal({
                         color: styleSettings.colorToken
                           ? resolveTextColor(styleSettings.colorToken)
                           : undefined,
-                        fontSize: FONT_SIZE_MAP[styleSettings.fontSizeMobile] || FONT_SIZE_MAP[styleSettings.fontSize],
+                        fontSize: styleSettings.fontSizeMobile && styleSettings.fontSizeMobile !== 'inherit' && styleSettings.fontSizeMobile !== 'base'
+                          ? FONT_SIZE_MAP[styleSettings.fontSizeMobile]
+                          : FONT_SIZE_MAP[styleSettings.fontSize] || FONT_SIZE_MAP['base'],
                         fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
                           ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
                           : undefined,
@@ -769,7 +786,9 @@ export function RichTextEditModal({
                         color: styleSettings.colorToken
                           ? resolveTextColor(styleSettings.colorToken)
                           : undefined,
-                        fontSize: FONT_SIZE_MAP[styleSettings.fontSizeTablet] || FONT_SIZE_MAP[styleSettings.fontSize],
+                        fontSize: styleSettings.fontSizeTablet && styleSettings.fontSizeTablet !== 'inherit' && styleSettings.fontSizeTablet !== 'base'
+                          ? FONT_SIZE_MAP[styleSettings.fontSizeTablet]
+                          : FONT_SIZE_MAP[styleSettings.fontSize] || FONT_SIZE_MAP['base'],
                         fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
                           ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
                           : undefined,
@@ -802,7 +821,9 @@ export function RichTextEditModal({
                         color: styleSettings.colorToken
                           ? resolveTextColor(styleSettings.colorToken)
                           : undefined,
-                        fontSize: FONT_SIZE_MAP[styleSettings.fontSizeDesktop] || FONT_SIZE_MAP[styleSettings.fontSize],
+                        fontSize: styleSettings.fontSizeDesktop && styleSettings.fontSizeDesktop !== 'inherit' && styleSettings.fontSizeDesktop !== 'base'
+                          ? FONT_SIZE_MAP[styleSettings.fontSizeDesktop]
+                          : FONT_SIZE_MAP[styleSettings.fontSize] || FONT_SIZE_MAP['base'],
                         fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
                           ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
                           : undefined,
