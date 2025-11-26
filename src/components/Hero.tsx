@@ -116,7 +116,7 @@ const Hero = () => {
   const fitModeClass = mediaSettings.fitMode === 'cover' ? 'object-cover' : 'object-contain';
 
   return (
-    <section className="pt-32 pb-12 px-4 sm:px-8 lg:px-12">
+    <section className="pt-32 pb-12 px-2.5">
       {/* Card-encapsulated gradient section */}
       <div className="rounded-3xl overflow-hidden relative">
         {/* Gradient background inside card */}
