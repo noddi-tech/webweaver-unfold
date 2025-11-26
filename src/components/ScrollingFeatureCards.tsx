@@ -349,11 +349,11 @@ export function ScrollingFeatureCards() {
             plugins={plugins}
             className="w-full h-full"
           >
-            <CarouselContent className="h-full">
+            <CarouselContent className="h-full -ml-0">
               {config.images.map((image, imgIndex) => (
                 <CarouselItem 
                   key={imgIndex} 
-                  className="h-full"
+                  className="h-full pl-0"
                 >
                   <div className={maskClasses}>
                     <img
