@@ -5,6 +5,7 @@ import { useEditMode } from '@/contexts/EditModeContext';
 import { RichTextEditModal } from './RichTextEditModal';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
+import { resolveTextColor } from '@/lib/textColorUtils';
 
 // Font size and weight mapping to actual CSS values
 const FONT_SIZE_MAP: Record<string, string> = {
@@ -115,10 +116,8 @@ export function EditableTranslation({
     const styledContent = styleSettings ? (
       <span
         style={{
-          color: styleSettings.colorToken && styleSettings.colorToken !== 'foreground' 
-            ? (styleSettings.colorToken === 'white' 
-                ? 'hsl(0 0% 100%)' 
-                : `hsl(var(--${styleSettings.colorToken}))`)
+          color: styleSettings.colorToken
+            ? resolveTextColor(styleSettings.colorToken)
             : undefined,
           fontSize: styleSettings.fontSize && styleSettings.fontSize !== 'base' 
             ? FONT_SIZE_MAP[styleSettings.fontSize] 
