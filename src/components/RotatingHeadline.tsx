@@ -84,7 +84,7 @@ export function RotatingHeadline({
       <h1 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl whitespace-nowrap">
         {/* Rotating Term - Fixed width, right-aligned */}
         <span 
-          className="inline-flex justify-end overflow-hidden min-w-[120px] sm:min-w-[180px] md:min-w-[220px] lg:min-w-[280px]" 
+          className="inline-flex justify-end overflow-hidden min-w-[140px] sm:min-w-[220px] md:min-w-[300px] lg:min-w-[380px] pb-2" 
           aria-live="polite" 
           aria-atomic="true"
         >
@@ -122,7 +122,7 @@ export function RotatingHeadline({
         <span className="text-muted-foreground text-xl">↳</span>
         
         {/* Rotating descriptor */}
-        <span className="inline-flex overflow-hidden max-w-2xl">
+        <span className="inline-flex overflow-hidden max-w-2xl pb-1">
           <span 
             className={`text-muted-foreground text-lg inline-block ${
               isFading ? 'animate-slideOutUp' : 'animate-slideInUp'
