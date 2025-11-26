@@ -40,6 +40,9 @@ export function LogoMarquee() {
     }
   };
 
+  // Create an extended strip so logos fill the entire width and loop seamlessly
+  const extendedLogos = logos.length > 0 ? [...logos, ...logos, ...logos] : logos;
+
   return (
     <section 
       className="w-full overflow-hidden py-8"
@@ -51,7 +54,7 @@ export function LogoMarquee() {
       <div className="flex animate-marquee will-change-transform">
         {/* First strip */}
         <div className="flex gap-14 flex-shrink-0">
-          {logos.map((logo, i) => (
+          {extendedLogos.map((logo, i) => (
             <div key={`a-${i}`} className="flex-shrink-0">
               <img 
                 src={logo.src} 
@@ -63,7 +66,7 @@ export function LogoMarquee() {
         </div>
         {/* Duplicate strip for seamless loop */}
         <div className="flex gap-14 flex-shrink-0">
-          {logos.map((logo, i) => (
+          {extendedLogos.map((logo, i) => (
             <div key={`b-${i}`} className="flex-shrink-0">
               <img 
                 src={logo.src} 
