@@ -86,11 +86,7 @@ export function useBackgroundStyle(
   ) => {
     const optimalTextColor = newTextColor || getOptimalTextColorForBackground(newBackground);
     
-    // Update local state immediately for responsive UI
-    setBackground(newBackground);
-    setTextColor(optimalTextColor);
-
-    // Fetch color token data for inline style
+    // Step 1: Fetch color token FIRST (before any state updates)
     const colorToken = await (async () => {
       try {
         const baseClass = newBackground.split('/')[0];
@@ -110,15 +106,20 @@ export function useBackgroundStyle(
       }
     })();
 
+    // Step 2: Prepare background style
+    let newBackgroundStyle: React.CSSProperties = {};
     if (colorToken) {
       if (colorToken.color_type === 'gradient' || colorToken.color_type === 'glass') {
-        setBackgroundStyle({ backgroundImage: `var(${colorToken.css_var})` });
+        newBackgroundStyle = { backgroundImage: `var(${colorToken.css_var})` };
       } else if (colorToken.color_type === 'solid' && colorToken.value) {
-        setBackgroundStyle({ backgroundColor: `hsl(${colorToken.value})` });
+        newBackgroundStyle = { backgroundColor: `hsl(${colorToken.value})` };
       }
-    } else {
-      setBackgroundStyle({});
     }
+
+    // Step 3: Set ALL state together (prevents intermediate renders)
+    setBackground(newBackground);
+    setTextColor(optimalTextColor);
+    setBackgroundStyle(newBackgroundStyle);
 
     try {
       const { error } = await supabase
