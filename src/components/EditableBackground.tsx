@@ -29,7 +29,15 @@ export function EditableBackground({
   };
 
   if (isLoading) {
-    return <>{children}</>;
+    // Apply defaultBackground during loading to prevent flash
+    const childWithDefault = React.cloneElement(children as React.ReactElement, {
+      className: `${(children as React.ReactElement).props.className || ''} ${defaultBackground}`.trim(),
+    });
+    return (
+      <div className={`relative block h-full w-full ${className}`}>
+        {childWithDefault}
+      </div>
+    );
   }
 
   // Clone the child and apply background via inline style, plus background class for fallback
