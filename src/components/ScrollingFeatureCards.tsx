@@ -486,28 +486,24 @@ export function ScrollingFeatureCards() {
         className="relative pt-12 pb-24"
         style={{ minHeight: `${100 + (cards.length * 20)}vh` }}
       >
-        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-[3fr_7fr] gap-12 lg:gap-16">
-            {/* Left Column - Sticky (30% width) */}
-            <EditableBackground
-              elementId="scrolling-features-sticky-column"
-              defaultBackground="bg-transparent"
-              allowedBackgrounds={allowedBackgrounds}
-              className="rounded-2xl"
-            >
-              <div className="lg:sticky lg:top-24 lg:h-fit space-y-8 lg:pr-8 p-6">
-                <div className="space-y-6">
-                  <h2 className={headingStyles.h2}>
-                    <EditableTranslation translationKey="scrolling_features.title">
-                      Functions That Talk to Each Other
-                    </EditableTranslation>
-                  </h2>
-                  <p className={cn(headingStyles.body, "max-w-xl text-lg opacity-80")}>
-                    <EditableTranslation translationKey="scrolling_features.subtitle">
-                      Every module shares the same data model. No syncing. No waiting. Just one unified system.
-                    </EditableTranslation>
-                  </p>
-                </div>
+        {/* Fixed Left Navigation Sidebar */}
+        <EditableBackground
+          elementId="scrolling-features-sticky-column"
+          defaultBackground="bg-transparent"
+          allowedBackgrounds={allowedBackgrounds}
+          className="rounded-2xl"
+        >
+          <div className="hidden xl:block fixed left-8 top-1/3 z-20 max-w-sm space-y-6 p-6">
+            <h2 className={headingStyles.h2}>
+              <EditableTranslation translationKey="scrolling_features.title">
+                Functions That Talk to Each Other
+              </EditableTranslation>
+            </h2>
+            <p className={cn(headingStyles.body, "text-base opacity-80")}>
+              <EditableTranslation translationKey="scrolling_features.subtitle">
+                Every module shares the same data model. No syncing. No waiting. Just one unified system.
+              </EditableTranslation>
+            </p>
             <EditableButton
               buttonText="See All Functions"
               buttonUrl={mainCtaUrl}
@@ -524,11 +520,12 @@ export function ScrollingFeatureCards() {
                 </a>
               </Button>
             </EditableButton>
-              </div>
-            </EditableBackground>
+          </div>
+        </EditableBackground>
 
-          {/* Right Column - Scrolling Cards */}
-          <div className="relative space-y-12 lg:space-y-16">
+        {/* Full-Width Edge-Hugging Cards */}
+        <div className="px-2.5">
+          <div className="relative space-y-16">
             {cards.map((card, index) => {
               const state = cardStates[index] || { opacity: 0, translateY: 20, scale: 1 };
               const Icon = card.icon;
@@ -537,7 +534,7 @@ export function ScrollingFeatureCards() {
               return (
                 <div
                   key={card.number}
-                  className="relative"
+                  className="relative rounded-3xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)]"
                   style={{
                     opacity: state.opacity,
                     transform: `translateY(${state.translateY}px) scale(${state.scale})`,
@@ -548,7 +545,7 @@ export function ScrollingFeatureCards() {
                   onMouseLeave={() => editMode && setHoveredCard(null)}
                 >
                   <div className={cn(
-                    "backdrop-blur-xl rounded-3xl shadow-2xl p-10 lg:p-12 relative",
+                    "backdrop-blur-xl relative p-10 lg:p-16",
                     cardData[index]?.background || 'bg-gradient-hero/90'
                   )}>
                     {/* Edit Button - Only in Edit Mode */}
@@ -560,76 +557,78 @@ export function ScrollingFeatureCards() {
                         <Pencil className="w-5 h-5" />
                       </button>
                     )}
-                    <div className="grid md:grid-cols-[35fr_65fr] gap-8 lg:gap-12 items-center">
-                      {/* Left: Content */}
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-3">
-                          <Badge 
-                            className="border px-3 py-1.5 text-sm font-medium"
-                            style={{
-                              backgroundColor: `hsl(var(--${normalizeColorToken(cardData[index]?.numberColor || 'primary')}) / 0.2)`,
-                              borderColor: `hsl(var(--${normalizeColorToken(cardData[index]?.numberColor || 'primary')}) / 0.3)`,
-                              color: `hsl(var(--${normalizeColorToken(cardData[index]?.numberColor || 'foreground')}))`
-                            }}
-                          >
-                            <span className="font-medium">
-                              {cardData[index]?.number || card.number}
-                            </span>
-                          </Badge>
-                          <div 
-                            className={cn(
-                              'p-2.5 rounded-lg backdrop-blur-sm',
-                              cardData[index]?.iconCardBg || 'bg-white/10'
-                            )}
-                          >
-                            <Icon className="h-5 w-5" />
+                    <div className="container max-w-container mx-auto">
+                      <div className="grid md:grid-cols-[28fr_72fr] gap-8 lg:gap-16 items-center">
+                        {/* Left: Content */}
+                        <div className="space-y-6">
+                          <div className="flex items-center gap-3">
+                            <Badge 
+                              className="border px-3 py-1.5 text-sm font-medium"
+                              style={{
+                                backgroundColor: `hsl(var(--${normalizeColorToken(cardData[index]?.numberColor || 'primary')}) / 0.2)`,
+                                borderColor: `hsl(var(--${normalizeColorToken(cardData[index]?.numberColor || 'primary')}) / 0.3)`,
+                                color: `hsl(var(--${normalizeColorToken(cardData[index]?.numberColor || 'foreground')}))`
+                              }}
+                            >
+                              <span className="font-medium">
+                                {cardData[index]?.number || card.number}
+                              </span>
+                            </Badge>
+                            <div 
+                              className={cn(
+                                'p-2.5 rounded-lg backdrop-blur-sm',
+                                cardData[index]?.iconCardBg || 'bg-white/10'
+                              )}
+                            >
+                              <Icon className="h-5 w-5" />
+                            </div>
                           </div>
+                          
+                          <h3 
+                            className="text-2xl lg:text-4xl font-bold leading-tight"
+                            style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.titleColor || 'foreground')}))` }}
+                          >
+                            <EditableTranslation translationKey={card.titleKey}>
+                              {cardData[index]?.title || card.title}
+                            </EditableTranslation>
+                          </h3>
+                          
+                          <p 
+                            className="text-base lg:text-lg leading-relaxed opacity-80"
+                            style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.descriptionColor || 'muted-foreground')}))` }}
+                          >
+                            <EditableTranslation translationKey={card.descriptionKey}>
+                              {cardData[index]?.description || card.description}
+                            </EditableTranslation>
+                          </p>
+                        
+                          <Button 
+                            variant="ghost" 
+                            className="hover:bg-white/20 border border-white/20 group mt-2"
+                            asChild
+                          >
+                            <a href={card.ctaUrl || '#'}>
+                              <span
+                                style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.ctaTextColor || 'primary-foreground')}))` }}
+                              >
+                                <EditableTranslation translationKey={card.ctaKey}>
+                                  {cardData[index]?.ctaText || card.ctaText}
+                                </EditableTranslation>
+                              </span>
+                              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            </a>
+                          </Button>
                         </div>
                         
-                        <h3 
-                          className="text-2xl lg:text-3xl font-semibold leading-tight"
-                          style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.titleColor || 'foreground')}))` }}
+                        {/* Right: Image (72% width = ~1000px+) */}
+                        <EditableUniversalMedia
+                          locationId={`scrolling-card-${index + 1}`}
+                          onSave={() => loadImageSettings()}
+                          placeholder={`Click to set image/carousel for ${card.title}`}
                         >
-                          <EditableTranslation translationKey={card.titleKey}>
-                            {cardData[index]?.title || card.title}
-                          </EditableTranslation>
-                        </h3>
-                        
-                        <p 
-                          className="text-base leading-relaxed opacity-80"
-                          style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.descriptionColor || 'muted-foreground')}))` }}
-                        >
-                          <EditableTranslation translationKey={card.descriptionKey}>
-                            {cardData[index]?.description || card.description}
-                          </EditableTranslation>
-                        </p>
-                      
-                        <Button 
-                          variant="ghost" 
-                          className="hover:bg-white/20 border border-white/20 group mt-2"
-                          asChild
-                        >
-                          <a href={card.ctaUrl || '#'}>
-                            <span
-                              style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.ctaTextColor || 'primary-foreground')}))` }}
-                            >
-                              <EditableTranslation translationKey={card.ctaKey}>
-                                {cardData[index]?.ctaText || card.ctaText}
-                              </EditableTranslation>
-                            </span>
-                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                          </a>
-                        </Button>
+                          {renderMedia(index, card)}
+                        </EditableUniversalMedia>
                       </div>
-                      
-                      {/* Right: Image */}
-                      <EditableUniversalMedia
-                        locationId={`scrolling-card-${index + 1}`}
-                        onSave={() => loadImageSettings()}
-                        placeholder={`Click to set image/carousel for ${card.title}`}
-                      >
-                        {renderMedia(index, card)}
-                      </EditableUniversalMedia>
                     </div>
                   </div>
 
@@ -651,8 +650,7 @@ export function ScrollingFeatureCards() {
             })}
           </div>
         </div>
-      </div>
-    </section>
+      </section>
     </EditableBackground>
   );
 }
