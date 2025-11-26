@@ -350,14 +350,14 @@ export function ScrollingFeatureCards() {
     // Contain mode: fill viewport with w-full h-full, object-fit scales image to fit entirely within
     // Cover mode: fill container completely, allowing cropping with configurable positioning (top/center/bottom)
     // Border radius: applied to image for contain, applied to mask for cover
-    const imageClasses = cardFitMode === 'contain'
-      ? `w-full h-full object-contain block ${cardBorderRadius}`
-      : cn(
-          'w-full h-full object-cover block',
-          cardObjectPosition === 'top' && 'object-top',
-          cardObjectPosition === 'center' && 'object-center',
-          cardObjectPosition === 'bottom' && 'object-bottom'
-        );
+  const imageClasses = cardFitMode === 'contain'
+    ? `w-full h-full object-contain block ${cardBorderRadius}`
+    : cn(
+        `w-full h-full object-cover block ${cardBorderRadius}`,
+        cardObjectPosition === 'top' && 'object-top',
+        cardObjectPosition === 'center' && 'object-center',
+        cardObjectPosition === 'bottom' && 'object-bottom'
+      );
     
     // If carousel data exists and has images
     if (mediaData?.display_type === 'carousel' && mediaData.carousel_config?.images?.length > 0) {
