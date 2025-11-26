@@ -1558,9 +1558,14 @@ export type Database = {
           approved: boolean
           approved_at: string | null
           approved_by: string | null
+          color_token: string | null
           context: string | null
           created_at: string
+          font_size: string | null
+          font_weight: string | null
           id: string
+          is_italic: boolean | null
+          is_underline: boolean | null
           language_code: string
           page_location: string | null
           quality_metrics: Json | null
@@ -1575,9 +1580,14 @@ export type Database = {
           approved?: boolean
           approved_at?: string | null
           approved_by?: string | null
+          color_token?: string | null
           context?: string | null
           created_at?: string
+          font_size?: string | null
+          font_weight?: string | null
           id?: string
+          is_italic?: boolean | null
+          is_underline?: boolean | null
           language_code: string
           page_location?: string | null
           quality_metrics?: Json | null
@@ -1592,9 +1602,14 @@ export type Database = {
           approved?: boolean
           approved_at?: string | null
           approved_by?: string | null
+          color_token?: string | null
           context?: string | null
           created_at?: string
+          font_size?: string | null
+          font_weight?: string | null
           id?: string
+          is_italic?: boolean | null
+          is_underline?: boolean | null
           language_code?: string
           page_location?: string | null
           quality_metrics?: Json | null
