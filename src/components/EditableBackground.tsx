@@ -32,13 +32,13 @@ export function EditableBackground({
     return <>{children}</>;
   }
 
-  // Clone the child and apply background via inline style, text color via className
+  // Clone the child and apply background via inline style, plus background class for fallback
   const childWithBackground = React.cloneElement(children as React.ReactElement, {
-    className: `${(children as React.ReactElement).props.className || ''} ${textColor}`.trim(),
+    className: `${(children as React.ReactElement).props.className || ''} ${background} ${textColor}`.trim(),
     style: {
       ...((children as React.ReactElement).props.style || {}),
-      ...backgroundStyle
-    }
+      ...backgroundStyle,
+    },
   });
 
   return (
