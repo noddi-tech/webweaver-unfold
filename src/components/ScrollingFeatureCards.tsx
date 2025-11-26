@@ -324,8 +324,8 @@ export function ScrollingFeatureCards() {
   // Mask: overflow-hidden + shadow + flex centering (border radius on mask for cover, on image for contain)
   const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): string => {
     const borderClasses = fitMode === 'cover' ? 'border border-white/10' : '';
-    const radiusClasses = fitMode === 'cover' ? borderRadius : '';
-    return `relative w-full h-full overflow-hidden shadow-xl isolate ${borderClasses} ${radiusClasses} flex items-center justify-center`;
+    // Apply border radius to mask for BOTH modes - overflow-hidden clips the entire area
+    return `relative w-full h-full overflow-hidden shadow-xl isolate ${borderClasses} ${borderRadius} flex items-center justify-center`;
   };
 
   // Helper to get optimized image URL for high-quality display
