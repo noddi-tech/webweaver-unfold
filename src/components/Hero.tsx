@@ -170,7 +170,7 @@ const Hero = () => {
                (mediaSettings.displayType === 'image' && mediaSettings.imageUrl) ? (
                 <div className="w-full space-y-12">
                   {/* Image/Carousel section with shadow for depth */}
-                  <div className="w-full bg-background rounded-xl overflow-hidden shadow-2xl aspect-[2/1] max-h-[500px]">
+                  <div className="w-full bg-transparent rounded-xl overflow-hidden shadow-2xl aspect-[2/1] max-h-[500px]">
                     {mediaSettings.displayType === 'carousel' && carouselImages.length > 0 ? (
                       <Carousel
                         key={`hero-carousel-${mediaKey}`}
