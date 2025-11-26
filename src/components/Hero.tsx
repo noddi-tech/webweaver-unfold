@@ -187,6 +187,7 @@ const Hero = () => {
                                   src={image.url}
                                   alt={image.alt || `Hero slide ${index + 1}`}
                                   className={`w-full h-full ${fitModeClass}`}
+                                  containerClassName="h-full"
                                   width={1920}
                                   height={1080}
                                   quality={95}
@@ -208,6 +209,7 @@ const Hero = () => {
                           src={mediaSettings.imageUrl || ''}
                           alt={mediaSettings.imageAlt || 'Hero image'}
                           className={`w-full h-full ${fitModeClass}`}
+                          containerClassName="h-full"
                           width={1920}
                           height={1080}
                           quality={95}
