@@ -153,7 +153,7 @@ export function ScrollingFeatureCards() {
         newFitModes[i] = (data.fit_mode as 'contain' | 'cover') || 'contain';
         newAspectRatios[i] = data.aspect_ratio || 'auto';
         newObjectPositions[i] = (data.object_position as 'top' | 'center' | 'bottom') || 'center';
-        newCardHeights[i] = data.card_height || 'h-[500px]';
+        newCardHeights[i] = data.card_height || 'h-auto min-h-[400px] sm:h-[450px] lg:h-[480px] xl:h-[520px]';
         newCardWidths[i] = data.card_width || 'w-full';
         newCardBorderRadii[i] = data.card_border_radius || 'rounded-2xl';
         
@@ -310,8 +310,9 @@ export function ScrollingFeatureCards() {
   }, []);
 
   // Image container always fills available space - card wrapper controls size
+  // Now with max-width constraint to prevent overflow on wide screens
   const getContainerClasses = (): string => {
-    return 'relative w-full h-full';
+    return 'relative w-full h-full max-w-[900px] mx-auto';
   };
 
   // Mask: overflow-hidden + shadow + flex centering (border radius on mask for cover, on image for contain)
@@ -511,7 +512,7 @@ export function ScrollingFeatureCards() {
         style={{ minHeight: `${100 + (cards.length * 20)}vh` }}
       >
         {/* Edge-hugging container with grid layout */}
-        <div className="px-16">
+        <div className="px-4 sm:px-8 lg:px-12 xl:px-16">
           <div className="grid lg:grid-cols-[3fr_7fr] gap-12 lg:gap-16">
             {/* Left Column: Sticky Navigation */}
             <EditableBackground
@@ -551,7 +552,7 @@ export function ScrollingFeatureCards() {
             </EditableBackground>
 
             {/* Right Column: Feature Cards */}
-            <div className={cn("relative flex flex-col", cardGap)}>
+            <div className={cn("relative flex flex-col max-w-5xl mx-auto", cardGap)}>
               {cards.map((card, index) => {
                 const state = cardStates[index] || { opacity: 0, translateY: 20, scale: 1 };
                 const Icon = card.icon;
@@ -562,7 +563,7 @@ export function ScrollingFeatureCards() {
                     key={card.number}
                     className={cn(
                       "relative rounded-3xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)]",
-                      cardHeights[index] || 'h-[500px]'
+                      cardHeights[index] || 'h-auto min-h-[400px] sm:h-[450px] lg:h-[480px] xl:h-[520px]'
                     )}
               style={{
                 opacity: 1,
@@ -585,7 +586,7 @@ export function ScrollingFeatureCards() {
                         </button>
                       )}
                       <div className="w-full h-full">
-                        <div className="grid md:grid-cols-[28fr_72fr] gap-4 md:gap-6 lg:gap-8 items-center h-full min-h-0">
+                        <div className="grid gap-4 sm:gap-6 lg:gap-8 items-center h-full min-h-0 grid-cols-1 sm:grid-cols-[40fr_60fr] lg:grid-cols-[28fr_72fr] 2xl:grid-cols-[35fr_65fr]">
                           {/* Left: Content */}
                           <div className="flex flex-col justify-center gap-6">
                             <div className="flex items-center gap-3">
