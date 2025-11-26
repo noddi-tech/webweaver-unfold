@@ -487,7 +487,7 @@ export function ScrollingFeatureCards() {
         style={{ minHeight: `${100 + (cards.length * 20)}vh` }}
       >
         {/* Edge-hugging container with grid layout */}
-        <div className="px-[30px]">
+        <div className="px-16">
           <div className="grid lg:grid-cols-[3fr_7fr] gap-12 lg:gap-16">
             {/* Left Column: Sticky Navigation */}
             <EditableBackground
@@ -537,12 +537,10 @@ export function ScrollingFeatureCards() {
                   <div
                     key={card.number}
                     className="relative rounded-3xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)]"
-                    style={{
-                      opacity: state.opacity,
-                      transform: `translateY(${state.translateY}px) scale(${state.scale})`,
-                      transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                      willChange: state.opacity > 0.2 ? 'transform, opacity' : 'auto',
-                    }}
+              style={{
+                opacity: 1,
+                transform: 'translateY(0) scale(1)',
+              }}
                     onMouseEnter={() => editMode && setHoveredCard(index)}
                     onMouseLeave={() => editMode && setHoveredCard(null)}
                   >
