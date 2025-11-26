@@ -62,19 +62,14 @@ export function EditableTranslation({
       }
     };
 
-    if (editMode) {
-      fetchTranslation();
-    }
-  }, [editMode, translationKey, currentLanguage, refreshKey]);
+    // Always fetch translation, regardless of edit mode
+    fetchTranslation();
+  }, [translationKey, currentLanguage, refreshKey]);
 
   const handleSave = () => {
     setRefreshKey(prev => prev + 1);
     onSave?.();
   };
-
-  if (!editMode) {
-    return <>{children}</>;
-  }
 
   // Preserve element structure (h1, p, etc.) while injecting translated text
   const renderContent = () => {
@@ -94,36 +89,42 @@ export function EditableTranslation({
 
   return (
     <>
-      <span
-        key={refreshKey}
-        className={`relative inline-block group ${className}`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {renderContent()}
-        {isHovered && (
-          <button
-            className="absolute -top-2 -right-2 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer z-10"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              setModalOpen(true);
-            }}
-          >
-            <Pencil className="h-3 w-3" />
-          </button>
-        )}
-      </span>
+      {editMode ? (
+        <span
+          key={refreshKey}
+          className={`relative inline-block group ${className}`}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {renderContent()}
+          {isHovered && (
+            <button
+              className="absolute -top-2 -right-2 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setModalOpen(true);
+              }}
+            >
+              <Pencil className="h-3 w-3" />
+            </button>
+          )}
+        </span>
+      ) : (
+        renderContent()
+      )}
 
-      <TranslationEditModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        contentId={contentId || ''}
-        contentTable="translations"
-        translationKey={translationKey}
-        onSave={handleSave}
-        fallbackText={fallbackText || extractTextFromChildren(children)}
-      />
+      {editMode && (
+        <TranslationEditModal
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          contentId={contentId || ''}
+          contentTable="translations"
+          translationKey={translationKey}
+          onSave={handleSave}
+          fallbackText={fallbackText || extractTextFromChildren(children)}
+        />
+      )}
     </>
   );
 }
