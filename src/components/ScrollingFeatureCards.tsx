@@ -309,15 +309,9 @@ export function ScrollingFeatureCards() {
     });
   }, []);
 
-  // Fixed-size cards with adjustable height, width, and border radius
-  const getContainerClasses = (height: string, width: string, aspectRatio: string): string => {
-    // If aspect ratio is set (not 'auto'), use it instead of fixed height
-    if (aspectRatio !== 'auto') {
-      const aspectClass = `aspect-[${aspectRatio.replace(':', '/')}]`;
-      return `relative ${width} ${aspectClass}`;
-    }
-    // Fall back to fixed height for 'auto' aspect ratio
-    return `relative ${width} ${height}`;
+  // Image container always fills available space - card wrapper controls size
+  const getContainerClasses = (): string => {
+    return 'relative w-full h-full';
   };
 
   // Mask: overflow-hidden + shadow + flex centering (border radius on mask for cover, on image for contain)
@@ -341,11 +335,9 @@ export function ScrollingFeatureCards() {
     const mediaData = carouselData[index];
     const cardFitMode = fitModes[index] || 'contain';
     const cardObjectPosition = objectPositions[index] || 'center';
-    const aspectRatio = aspectRatios[index] || 'auto'; // Keep for metadata/preview only
-    const cardHeight = cardHeights[index] || 'h-[500px]';
-    const cardWidth = cardWidths[index] || 'w-full';
+    const cardHeight = cardHeights[index] || 'h-[500px]'; // For key generation only
     const cardBorderRadius = cardBorderRadii[index] || 'rounded-2xl';
-    const containerClasses = getContainerClasses(cardHeight, cardWidth, aspectRatio);
+    const containerClasses = getContainerClasses();
     const maskClasses = getMaskClasses(cardFitMode, cardBorderRadius);
     
     // Contain mode: fill viewport with w-full h-full, object-fit scales image to fit entirely within
@@ -568,7 +560,10 @@ export function ScrollingFeatureCards() {
                 return (
                   <div
                     key={card.number}
-                    className="relative rounded-3xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)]"
+                    className={cn(
+                      "relative rounded-3xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)]",
+                      cardHeights[index] || 'h-[500px]'
+                    )}
               style={{
                 opacity: 1,
                 transform: 'translateY(0) scale(1)',
