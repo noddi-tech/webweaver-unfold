@@ -47,9 +47,11 @@ export default {
 		'xl': 'var(--spacing-xl)',
 		'section': 'var(--spacing-section)',
 	},
-		maxWidth: {
-			'container': '1440px',
-		},
+	maxWidth: {
+		'container': '1440px',  // Full-bleed visuals (Hero images, feature cards)
+		'content': '1152px',    // Default content width (most sections)
+		'reading': '768px',     // Text-heavy content (paragraphs, descriptions)
+	},
 			colors: {
 				// Navio Brand Color Scale
 				'navio-blue': 'hsl(var(--primary))',

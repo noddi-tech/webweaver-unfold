@@ -41,7 +41,7 @@ export default function ProductOverview() {
 
   return (
     <section ref={ref as any} className="py-section">
-      <div className="container max-w-7xl px-4 sm:px-6 lg:px-8" key={refreshKey}>
+      <div className="container max-w-6xl px-4 sm:px-6 lg:px-8" key={refreshKey}>
         <div className="text-center mb-16">
           <EditableTranslation translationKey="product_overview.title" onSave={() => setRefreshKey(prev => prev + 1)}>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
