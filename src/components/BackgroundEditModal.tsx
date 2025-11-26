@@ -96,11 +96,24 @@ export function BackgroundEditModal({
     }
   }, [currentBackground, isOpen]);
 
-  // Auto-suggest text color when background changes
+  // Auto-suggest text color when background changes - use database optimalTextColor
   useEffect(() => {
-    const optimal = getOptimalTextColorForBackground(selectedBackground);
-    setSelectedTextColor(optimal);
-  }, [selectedBackground]);
+    const allColors = [...GRADIENT_COLORS, ...GLASS_EFFECTS, ...SOLID_COLORS];
+    const bgOption = allColors.find(c => 
+      c.value === selectedBackground || 
+      c.value === selectedBackground.split('/')[0]
+    );
+    
+    if (bgOption?.optimalTextColor === 'white') {
+      setSelectedTextColor('text-white');
+    } else if (bgOption?.optimalTextColor === 'dark') {
+      setSelectedTextColor('text-foreground');
+    } else {
+      // Fallback to static function for unknown backgrounds
+      const optimal = getOptimalTextColorForBackground(selectedBackground);
+      setSelectedTextColor(optimal);
+    }
+  }, [selectedBackground, GRADIENT_COLORS, GLASS_EFFECTS, SOLID_COLORS]);
 
   const handleSave = async () => {
     // If textColorPersistence is enabled and elementId provided, save to database
@@ -158,7 +171,25 @@ export function BackgroundEditModal({
 
         {/* LIVE PREVIEW */}
         <div
-          className={`p-8 text-center mb-4 rounded-lg border shadow-sm ${selectedBackground}`}
+          className="p-8 text-center mb-4 rounded-lg border shadow-sm"
+          style={{
+            ...(() => {
+              const allColors = [...GRADIENT_COLORS, ...GLASS_EFFECTS, ...SOLID_COLORS];
+              const bgOption = allColors.find(c => 
+                c.value === selectedBackground || 
+                c.value === selectedBackground.split('/')[0]
+              );
+              
+              if (bgOption?.type === 'gradient' && bgOption.cssVar) {
+                return { backgroundImage: `var(${bgOption.cssVar})` };
+              } else if (bgOption?.type === 'glass' && bgOption.cssVar) {
+                return { backgroundImage: `var(${bgOption.cssVar})` };
+              } else if (bgOption?.hslValue) {
+                return { backgroundColor: `hsl(${bgOption.hslValue})` };
+              }
+              return {};
+            })()
+          }}
         >
           <h3 className={`text-3xl font-bold mb-2 ${selectedTextColor}`}>Preview Heading</h3>
           <p className={`text-lg ${selectedTextColor} opacity-90`}>
@@ -338,22 +369,37 @@ export function BackgroundEditModal({
                 </span>
               </div>
               <div className="grid grid-cols-4 gap-2">
-                {filteredTextColors.map((colorClass) => (
-                  <button
-                    key={colorClass.value}
-                    onClick={() => setSelectedTextColor(colorClass.value)}
-                    className={cn(
-                      'p-4 rounded-lg border-2 transition-all hover:scale-105',
-                      selectedTextColor === colorClass.value
-                        ? 'border-primary ring-2 ring-primary/20'
-                        : 'border-transparent hover:border-border',
-                      selectedBackground,
-                      colorClass.value
-                    )}
-                  >
-                    <div className={cn('text-center font-medium', colorClass.value)}>Aa</div>
-                  </button>
-                ))}
+                {filteredTextColors.map((colorClass) => {
+                  const allColors = [...GRADIENT_COLORS, ...GLASS_EFFECTS, ...SOLID_COLORS];
+                  const bgOption = allColors.find(c => 
+                    c.value === selectedBackground || 
+                    c.value === selectedBackground.split('/')[0]
+                  );
+                  
+                  return (
+                    <button
+                      key={colorClass.value}
+                      onClick={() => setSelectedTextColor(colorClass.value)}
+                      className={cn(
+                        'p-4 rounded-lg border-2 transition-all hover:scale-105',
+                        selectedTextColor === colorClass.value
+                          ? 'border-primary ring-2 ring-primary/20'
+                          : 'border-transparent hover:border-border'
+                      )}
+                      style={{
+                        ...(bgOption?.type === 'gradient' && bgOption.cssVar
+                          ? { backgroundImage: `var(${bgOption.cssVar})` }
+                          : bgOption?.type === 'glass' && bgOption.cssVar
+                          ? { backgroundImage: `var(${bgOption.cssVar})` }
+                          : bgOption?.hslValue
+                          ? { backgroundColor: `hsl(${bgOption.hslValue})` }
+                          : {})
+                      }}
+                    >
+                      <div className={cn('text-center font-medium', colorClass.value)}>Aa</div>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Affected Elements Section */}
