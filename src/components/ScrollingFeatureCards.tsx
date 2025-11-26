@@ -627,7 +627,7 @@ export function ScrollingFeatureCards() {
               allowedBackgrounds={allowedBackgrounds}
               className="rounded-2xl"
             >
-              <div className="hidden lg:block lg:sticky lg:top-32 lg:self-start space-y-6">
+              <div className="lg:sticky lg:top-32 lg:self-start space-y-4 sm:space-y-6 mb-8 lg:mb-0">
                 <h2 className={headingStyles.h2}>
                   <EditableTranslation translationKey="scrolling_features.title">
                     Functions That Talk to Each Other
