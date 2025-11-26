@@ -116,7 +116,9 @@ export function EditableTranslation({
       <span
         style={{
           color: styleSettings.colorToken && styleSettings.colorToken !== 'foreground' 
-            ? `hsl(var(--${styleSettings.colorToken}))` 
+            ? (styleSettings.colorToken === 'white' 
+                ? 'hsl(0 0% 100%)' 
+                : `hsl(var(--${styleSettings.colorToken}))`)
             : undefined,
           fontSize: styleSettings.fontSize && styleSettings.fontSize !== 'base' 
             ? FONT_SIZE_MAP[styleSettings.fontSize] 
