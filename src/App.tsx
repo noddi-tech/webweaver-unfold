@@ -15,6 +15,7 @@ import Pricing from "./pages/Pricing";
 import PricingDetailed from "./pages/PricingDetailed";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
 import Team from "./pages/Team";
 import LlmsTxt from "./pages/LlmsTxt";
@@ -54,6 +55,7 @@ const App = () => {
           
           {/* CMS and special routes (no language prefix) */}
           <Route path="/cms-login" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/cms" element={<Admin />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/cms/translations" element={<Navigate to="/cms" replace />} />
