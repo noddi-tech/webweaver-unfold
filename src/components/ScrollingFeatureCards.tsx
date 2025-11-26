@@ -18,7 +18,7 @@ import { useAllowedBackgrounds } from '@/hooks/useAllowedBackgrounds';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeColorToken } from '@/lib/colorUtils';
-import { getOptimizedImageUrl } from '@/utils/imageTransform';
+import { getOptimizedImageUrl, generateSrcSet } from '@/utils/imageTransform';
 
 // Import all feature card images
 import bookingHeroImg from '@/assets/booking-hero.png';
@@ -265,6 +265,13 @@ export function ScrollingFeatureCards() {
         .eq('element_id', `${elementPrefix}-cta`)
         .maybeSingle();
 
+      // @ts-ignore
+      const { data: iconColorData } = await supabase
+        .from('text_content')
+        .select('color_token')
+        .eq('element_id', `${elementPrefix}-icon-color`)
+        .maybeSingle();
+
       // Use per-card defaults as fallbacks for beautiful styling
       setCardData(prev => ({
         ...prev,
@@ -280,6 +287,7 @@ export function ScrollingFeatureCards() {
           ctaText: ctaData?.content || cards[index].ctaText,
           ctaBgColor: defaults.ctaBgColor,
           ctaTextColor: ctaData?.color_token || defaults.ctaTextColor,
+          iconColor: iconColorData?.color_token || 'foreground',
         }
       }));
     } catch (error) {
@@ -310,9 +318,9 @@ export function ScrollingFeatureCards() {
   // Helper to get optimized image URL for high-quality display
   const getCardImageUrl = (originalUrl: string, fitMode: 'contain' | 'cover'): string => {
     return getOptimizedImageUrl(originalUrl, {
-      width: 1920,      // High resolution for 2x/3x DPI screens
-      quality: 95,      // Maximum quality
-      format: 'webp',   // Modern format with better compression
+      width: 2560,      // Increased resolution for retina displays
+      quality: 100,     // Maximum quality
+      format: 'origin', // Keep original format for best quality
       fit: fitMode,     // Match the card's fit mode
     });
   };
@@ -359,15 +367,18 @@ export function ScrollingFeatureCards() {
                     <img
                       key={`carousel-img-${imgIndex}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
                       src={getCardImageUrl(image.url, cardFitMode)}
+                      srcSet={generateSrcSet(image.url, [640, 1280, 1920, 2560, 3840], { quality: 100, format: 'origin', fit: cardFitMode })}
+                      sizes="(max-width: 768px) 100vw, 72vw"
                       alt={image.alt || `Slide ${imgIndex + 1}`}
                       loading="lazy"
                       decoding="async"
                       className={imageClasses}
                       style={{
-                        imageRendering: 'crisp-edges',
+                        imageRendering: 'auto',
                         WebkitFontSmoothing: 'antialiased',
                         backfaceVisibility: 'hidden',
                         transform: 'translateZ(0)',
+                        willChange: 'transform',
                       }}
                     />
                   </div>
@@ -394,15 +405,18 @@ export function ScrollingFeatureCards() {
             <img
               key={`single-img-${index}-${refreshKey}-${cardFitMode}-${cardHeight}-${cardBorderRadius}`}
               src={getCardImageUrl(imageUrl, cardFitMode)}
+              srcSet={generateSrcSet(imageUrl, [640, 1280, 1920, 2560, 3840], { quality: 100, format: 'origin', fit: cardFitMode })}
+              sizes="(max-width: 768px) 100vw, 72vw"
               alt={card.imageAlt}
               loading="lazy"
               decoding="async"
               className={imageClasses}
               style={{
-                imageRendering: 'crisp-edges',
+                imageRendering: 'auto',
                 WebkitFontSmoothing: 'antialiased',
                 backfaceVisibility: 'hidden',
                 transform: 'translateZ(0)',
+                willChange: 'transform',
               }}
             />
           </div>
@@ -580,7 +594,10 @@ export function ScrollingFeatureCards() {
                                   cardData[index]?.iconCardBg || 'bg-white/10'
                                 )}
                               >
-                                <Icon className="h-5 w-5" />
+                                <Icon 
+                                  className="h-5 w-5" 
+                                  style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.iconColor || 'foreground')}))` }}
+                                />
                               </div>
                             </div>
                             

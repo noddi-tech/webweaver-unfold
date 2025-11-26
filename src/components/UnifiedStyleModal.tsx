@@ -39,6 +39,7 @@ interface UnifiedStyleModalProps {
     ctaUrl?: string;
     ctaBgColor?: string;
     ctaTextColor?: string;
+    iconColor?: string;
   };
   onSave?: (data: any) => void;
 }
@@ -68,6 +69,7 @@ export function UnifiedStyleModal({
   const [ctaUrl, setCtaUrl] = useState(initialData.ctaUrl || '');
   const [ctaBgColor, setCtaBgColor] = useState(initialData.ctaBgColor || 'primary');
   const [ctaTextColor, setCtaTextColor] = useState(initialData.ctaTextColor || 'primary-foreground');
+  const [iconColor, setIconColor] = useState(initialData.iconColor || 'foreground');
   
   // Card layout settings
   const [cardHeight, setCardHeight] = useState('h-[500px]');
@@ -87,6 +89,13 @@ export function UnifiedStyleModal({
           .from('background_styles')
           .select('background_class')
           .eq('element_id', `${elementIdPrefix}-background`)
+          .maybeSingle();
+
+        // Load icon color
+        const { data: iconColorData } = await supabase
+          .from('text_content')
+          .select('color_token')
+          .eq('element_id', `${elementIdPrefix}-icon-color`)
           .maybeSingle();
         
         if (bgData?.background_class) {
@@ -314,6 +323,7 @@ export function UnifiedStyleModal({
         { element_id: `${elementIdPrefix}-title`, content: title, color_token: titleColor },
         { element_id: `${elementIdPrefix}-description`, content: description, color_token: descriptionColor },
         { element_id: `${elementIdPrefix}-cta`, content: ctaText, color_token: ctaTextColor },
+        { element_id: `${elementIdPrefix}-icon-color`, content: '', color_token: iconColor },
       ];
 
       // Save backgrounds (main, icon card, and image container)
@@ -387,6 +397,7 @@ export function UnifiedStyleModal({
         ctaUrl,
         ctaBgColor,
         ctaTextColor,
+        iconColor,
         cardHeight,
         cardWidth,
         cardBorderRadius,
@@ -445,7 +456,10 @@ export function UnifiedStyleModal({
               {/* Icon card preview */}
               {iconCardBg && (
                 <div className={cn('p-2.5 rounded-lg backdrop-blur-sm mb-4 inline-block', iconCardBg)}>
-                  <ImageIcon className="w-8 h-8 text-foreground" />
+                  <ImageIcon 
+                    className="w-8 h-8" 
+                    style={{ color: `hsl(var(--${normalizeColorToken(iconColor)}))` }}
+                  />
                 </div>
               )}
               
@@ -733,6 +747,31 @@ export function UnifiedStyleModal({
                         title={colorOption.description}
                       >
                         <div className={cn('text-center font-bold text-xl', colorOption.className)}>Aa</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Icon Color Section */}
+                <div className="space-y-2 border-b pb-4 mb-4">
+                  <label className="text-sm font-medium">Icon Color</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {TEXT_COLOR_OPTIONS.map((colorOption) => (
+                      <button
+                        key={`icon-${colorOption.value}`}
+                        onClick={() => setIconColor(colorOption.value.replace('text-', ''))}
+                        className={cn(
+                          'p-3 rounded-lg border-2 transition-all hover:scale-105',
+                          isColorSelected(colorOption.value, iconColor)
+                            ? 'border-primary ring-2 ring-primary/20'
+                            : 'border-transparent hover:border-border',
+                          background
+                        )}
+                        title={colorOption.description}
+                      >
+                        <div className="text-center">
+                          <Settings className={cn('w-6 h-6 mx-auto', colorOption.className)} />
+                        </div>
                       </button>
                     ))}
                   </div>
