@@ -36,6 +36,7 @@ import SitemapGenerator from "@/components/design-system/SitemapGenerator";
 import UnifiedDashboard from "@/components/design-system/UnifiedDashboard";
 import SEOSetupWizard from "@/components/design-system/SEOSetupWizard";
 import EvaluationHealthDashboard from "@/components/design-system/EvaluationHealthDashboard";
+import { RotatingTermsManager } from "@/components/design-system/RotatingTermsManager";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -108,6 +109,7 @@ const Admin = () => {
                     <TabsTrigger value="pages">Pages</TabsTrigger>
                     <TabsTrigger value="sections">Sections</TabsTrigger>
                     <TabsTrigger value="text">Text Content</TabsTrigger>
+                    <TabsTrigger value="rotating">Rotating Headlines</TabsTrigger>
                     <TabsTrigger value="features">Features</TabsTrigger>
                     <TabsTrigger value="solutions">Solutions</TabsTrigger>
                     <TabsTrigger value="usps">USPs</TabsTrigger>
@@ -122,6 +124,9 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="text" className="space-y-8">
                     <TextContentManager />
+                  </TabsContent>
+                  <TabsContent value="rotating" className="space-y-8">
+                    <RotatingTermsManager />
                   </TabsContent>
                   <TabsContent value="features" className="space-y-8">
                     <FeaturesManager />

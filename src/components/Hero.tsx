@@ -16,6 +16,7 @@ import { EditableIcon } from "@/components/EditableIcon";
 import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
 import { supabase } from "@/integrations/supabase/client";
 import { LogoMarquee } from "@/components/LogoMarquee";
+import { RotatingHeadline } from "@/components/RotatingHeadline";
 import {
   Carousel,
   CarouselContent,
@@ -141,9 +142,10 @@ const Hero = () => {
         <div className="flex flex-col items-center text-center gap-12">
           {/* Text Content */}
           <div className="space-y-8">
-            <EditableTranslation translationKey="hero.title">
-              <h1 className={`${h1} text-foreground text-center`}>{t('hero.title', 'One platform. Every function.')}</h1>
-            </EditableTranslation>
+            <RotatingHeadline 
+              className={`${h1} text-foreground text-center`}
+              rotationInterval={4000}
+            />
 
             <EditableTranslation translationKey="hero.subtitle">
               <p className={`${body} text-muted-foreground text-center`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
