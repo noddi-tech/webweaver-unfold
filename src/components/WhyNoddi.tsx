@@ -29,7 +29,7 @@ export default function WhyNoddi() {
 
   return (
     <section ref={ref as any} className="pt-24 pb-24">
-      <div className="container max-w-7xl px-4 sm:px-6 lg:px-8" key={refreshKey}>
+      <div className="container max-w-5xl px-4 sm:px-6 lg:px-8" key={refreshKey}>
         <div className="text-center mb-16">
           <EditableTranslation translationKey="why_noddi.title" onSave={() => setRefreshKey(prev => prev + 1)}>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
