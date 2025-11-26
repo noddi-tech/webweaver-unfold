@@ -40,8 +40,8 @@ export function LogoMarquee() {
     }
   };
 
-  // Duplicate logos for seamless infinite scroll
-  const duplicatedLogos = [...logos, ...logos];
+  // Triple logos for seamless infinite scroll
+  const triplicatedLogos = [...logos, ...logos, ...logos];
 
   return (
     <section 
@@ -51,8 +51,8 @@ export function LogoMarquee() {
         WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 12.5%, black 87.5%, transparent 100%)'
       }}
     >
-      <div className="flex gap-14 animate-marquee will-change-transform">
-        {duplicatedLogos.map((logo, i) => (
+      <div className="flex gap-14 animate-marquee will-change-transform w-max">
+        {triplicatedLogos.map((logo, i) => (
           <div key={i} className="flex-shrink-0">
             <img 
               src={logo.src} 

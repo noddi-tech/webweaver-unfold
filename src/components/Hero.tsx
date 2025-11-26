@@ -166,7 +166,7 @@ const Hero = () => {
           </div>
 
           {/* Logo Marquee */}
-          <div className="w-full mt-16">
+          <div className="w-full mt-6">
             <LogoMarquee />
           </div>
 
