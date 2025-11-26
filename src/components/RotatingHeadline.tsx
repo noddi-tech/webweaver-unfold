@@ -57,9 +57,13 @@ export function RotatingHeadline({
 
   if (loading || terms.length === 0) {
     return (
-      <div className={className}>
-        <h1 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl whitespace-nowrap">
-          <span>ERP</span>
+      <div className={`${className} text-center`}>
+        <div className="overflow-hidden" style={{ minHeight: '1.2em' }}>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold">
+            <span>ERP</span>
+          </h1>
+        </div>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold">
           <EditableTranslation 
             translationKey="hero.rotating.suffix"
             fallbackText="for mobile & workshop car services."
@@ -67,17 +71,12 @@ export function RotatingHeadline({
             <span>for mobile & workshop car services.</span>
           </EditableTranslation>
         </h1>
-        <div className="flex items-start justify-center gap-2 mt-4">
-          <span className="text-muted-foreground text-xl">↳</span>
-          <span className="text-muted-foreground text-lg">One platform. Every function.</span>
-        </div>
       </div>
     );
   }
 
   const currentTerm = terms[currentIndex];
   const termText = t(currentTerm.term_key, currentTerm.term_fallback);
-  const descText = t(currentTerm.descriptor_key, currentTerm.descriptor_fallback);
 
   return (
     <div className={`${className} relative text-center`}>
@@ -99,7 +98,7 @@ export function RotatingHeadline({
       </div>
       
       {/* Line 2: Static suffix */}
-      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold flex items-center justify-center gap-2">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold">
         <EditableTranslation 
           translationKey="hero.rotating.suffix"
           fallbackText="for mobile & workshop car services."
@@ -107,33 +106,29 @@ export function RotatingHeadline({
           <span className="text-foreground">for mobile & workshop car services.</span>
         </EditableTranslation>
         
-        {/* Pause button inline with suffix */}
+        {/* Pause button - hidden on mobile, inline on desktop */}
         <Button
           variant="ghost"
           size="icon"
           onClick={togglePlayPause}
           aria-label={isPlaying ? 'Pause rotation' : 'Resume rotation'}
-          className="opacity-60 hover:opacity-100 transition-opacity"
+          className="opacity-60 hover:opacity-100 transition-opacity hidden sm:inline-flex ml-2"
         >
           {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
         </Button>
       </h1>
       
-      {/* Line 3: Descriptor with fixed height for 2 lines */}
-      <div 
-        className="flex items-start justify-center gap-2 mt-4"
-        style={{ minHeight: '3.5em' }}
-      >
-        <span className="text-muted-foreground text-xl">↳</span>
-        <span className="inline-flex overflow-hidden max-w-2xl">
-          <span 
-            className={`text-muted-foreground text-lg inline-block text-left ${
-              isFading ? 'animate-slideOutUp' : 'animate-slideInUp'
-            }`}
-          >
-            {descText}
-          </span>
-        </span>
+      {/* Pause button for mobile - shown below text */}
+      <div className="sm:hidden mt-3 flex justify-center">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={togglePlayPause}
+          aria-label={isPlaying ? 'Pause rotation' : 'Resume rotation'}
+          className="opacity-60 hover:opacity-100 transition-opacity"
+        >
+          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+        </Button>
       </div>
     </div>
   );
