@@ -587,7 +587,7 @@ export function ScrollingFeatureCards() {
                       <div className="w-full h-full">
                         <div className="grid md:grid-cols-[28fr_72fr] gap-4 md:gap-6 lg:gap-8 items-center h-full">
                           {/* Left: Content */}
-                          <div className="flex flex-col justify-center gap-6 h-full">
+                          <div className="flex flex-col justify-center gap-6">
                             <div className="flex items-center gap-3">
                               <Badge 
                                 className="border px-3 py-1.5 text-sm font-medium"
