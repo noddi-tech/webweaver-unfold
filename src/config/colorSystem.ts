@@ -18,7 +18,7 @@ export interface ColorOption {
   preview: string;         // CSS class for preview rendering
   cssVar?: string;         // CSS variable name (e.g., '--card')
   type: 'solid' | 'gradient' | 'glass';
-  category: 'surfaces' | 'interactive' | 'feedback' | 'gradients' | 'glass';
+  category: 'surfaces' | 'interactive' | 'feedback' | 'gradients' | 'glass' | 'text';
   optimalTextColor?: 'white' | 'dark' | 'auto'; // Suggested text color for accessibility
   contrastRatio?: number;  // Approximate contrast ratio with optimal text color
 }
