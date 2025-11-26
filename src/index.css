@@ -166,6 +166,26 @@ All colors MUST be HSL.
     --gradient-background: var(--gradient-hero);
   }
 
+  /* ========================================
+     RESPONSIVE TYPOGRAPHY - Media queries
+     Applied to elements with [data-responsive-font] attribute
+     ======================================== */
+  [data-responsive-font] {
+    font-size: var(--font-size-mobile, inherit);
+  }
+  
+  @media (min-width: 640px) {
+    [data-responsive-font] {
+      font-size: var(--font-size-tablet, var(--font-size-mobile, inherit));
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    [data-responsive-font] {
+      font-size: var(--font-size-desktop, var(--font-size-tablet, var(--font-size-mobile, inherit)));
+    }
+  }
+
   .dark {
     /* Dark mode - inverted color scheme */
     --background: var(--color-brand-dark);

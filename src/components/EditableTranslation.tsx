@@ -9,15 +9,18 @@ import { resolveTextColor } from '@/lib/textColorUtils';
 
 // Font size and weight mapping to actual CSS values
 const FONT_SIZE_MAP: Record<string, string> = {
-  'xs': '0.75rem',
-  'sm': '0.875rem',
-  'base': '1rem',
-  'lg': '1.125rem',
-  'xl': '1.25rem',
-  '2xl': '1.5rem',
-  '3xl': '1.875rem',
-  '4xl': '2.25rem',
-  '5xl': '3rem',
+  'xs': '0.75rem',     // 12px
+  'sm': '0.875rem',    // 14px
+  'base': '1rem',      // 16px
+  'lg': '1.125rem',    // 18px
+  'xl': '1.25rem',     // 20px
+  '2xl': '1.5rem',     // 24px
+  '3xl': '1.875rem',   // 30px
+  '4xl': '2.25rem',    // 36px
+  '5xl': '3rem',       // 48px
+  '6xl': '3.75rem',    // 60px
+  '7xl': '4.5rem',     // 72px
+  '8xl': '6rem',       // 96px
 };
 
 const FONT_WEIGHT_MAP: Record<string, number> = {
@@ -73,7 +76,7 @@ export function EditableTranslation({
     const fetchTranslation = async () => {
       const { data } = await supabase
         .from('translations')
-        .select('id, translated_text, color_token, font_size, font_weight, is_italic, is_underline')
+        .select('id, translated_text, color_token, font_size, font_size_mobile, font_size_tablet, font_size_desktop, font_weight, is_italic, is_underline')
         .eq('translation_key', translationKey)
         .eq('language_code', currentLanguage)
         .maybeSingle();
@@ -84,6 +87,9 @@ export function EditableTranslation({
         setStyleSettings({
           colorToken: data.color_token,
           fontSize: data.font_size,
+          fontSizeMobile: data.font_size_mobile,
+          fontSizeTablet: data.font_size_tablet,
+          fontSizeDesktop: data.font_size_desktop,
           fontWeight: data.font_weight,
           isItalic: data.is_italic,
           isUnderline: data.is_underline,
@@ -115,6 +121,7 @@ export function EditableTranslation({
     // 'base' and 'normal' mean "inherit from element" not "override"
     const styledContent = styleSettings ? (
       <span
+        data-responsive-font
         style={{
           color: styleSettings.colorToken
             ? resolveTextColor(styleSettings.colorToken)
@@ -122,12 +129,21 @@ export function EditableTranslation({
           fontSize: styleSettings.fontSize && styleSettings.fontSize !== 'base' 
             ? FONT_SIZE_MAP[styleSettings.fontSize] 
             : undefined,
+          '--font-size-mobile': styleSettings.fontSizeMobile && styleSettings.fontSizeMobile !== 'base'
+            ? FONT_SIZE_MAP[styleSettings.fontSizeMobile]
+            : undefined,
+          '--font-size-tablet': styleSettings.fontSizeTablet && styleSettings.fontSizeTablet !== 'base'
+            ? FONT_SIZE_MAP[styleSettings.fontSizeTablet]
+            : undefined,
+          '--font-size-desktop': styleSettings.fontSizeDesktop && styleSettings.fontSizeDesktop !== 'base'
+            ? FONT_SIZE_MAP[styleSettings.fontSizeDesktop]
+            : undefined,
           fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
             ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
             : undefined,
           fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
           textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
-        }}
+        } as React.CSSProperties}
       >
         {displayText}
       </span>
