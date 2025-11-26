@@ -15,6 +15,25 @@ export function useBackgroundStyle(
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const fetchColorToken = async (backgroundClass: string) => {
+      try {
+        const baseClass = backgroundClass.split('/')[0];
+        if (!baseClass.startsWith('bg-')) return null;
+
+        const cssVar = `--${baseClass.replace('bg-', '')}`;
+        const { data: colorToken } = await supabase
+          .from('color_tokens')
+          .select('css_var, color_type, value')
+          .eq('css_var', cssVar)
+          .maybeSingle();
+
+        return colorToken;
+      } catch (error) {
+        console.error('Error fetching color token for background:', error);
+        return null;
+      }
+    };
+
     const fetchBackgroundStyle = async () => {
       try {
         const { data, error } = await supabase
@@ -29,13 +48,8 @@ export function useBackgroundStyle(
 
         if (data) {
           setBackground(data.background_class);
-          
-          // Fetch color token data to convert to inline style
-          const { data: colorToken } = await supabase
-            .from('color_tokens')
-            .select('css_var, color_type, value')
-            .eq('preview_class', data.background_class)
-            .maybeSingle();
+
+          const colorToken = await fetchColorToken(data.background_class);
 
           if (colorToken) {
             if (colorToken.color_type === 'gradient' || colorToken.color_type === 'glass') {
@@ -44,10 +58,10 @@ export function useBackgroundStyle(
               setBackgroundStyle({ backgroundColor: `hsl(${colorToken.value})` });
             }
           } else {
-            // Standard Tailwind class, no inline style needed
+            // Fallback: no matching token, rely on Tailwind class
             setBackgroundStyle({});
           }
-          
+
           if (data.text_color_class) {
             setTextColor(data.text_color_class);
           } else {
@@ -77,11 +91,24 @@ export function useBackgroundStyle(
     setTextColor(optimalTextColor);
 
     // Fetch color token data for inline style
-    const { data: colorToken } = await supabase
-      .from('color_tokens')
-      .select('css_var, color_type, value')
-      .eq('preview_class', newBackground)
-      .maybeSingle();
+    const colorToken = await (async () => {
+      try {
+        const baseClass = newBackground.split('/')[0];
+        if (!baseClass.startsWith('bg-')) return null;
+
+        const cssVar = `--${baseClass.replace('bg-', '')}`;
+        const { data } = await supabase
+          .from('color_tokens')
+          .select('css_var, color_type, value')
+          .eq('css_var', cssVar)
+          .maybeSingle();
+
+        return data;
+      } catch (error) {
+        console.error('Error fetching color token for new background:', error);
+        return null;
+      }
+    })();
 
     if (colorToken) {
       if (colorToken.color_type === 'gradient' || colorToken.color_type === 'glass') {
