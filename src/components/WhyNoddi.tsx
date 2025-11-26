@@ -71,14 +71,7 @@ export default function WhyNoddi() {
                 <ul className="space-y-4">
                   {beforeItems.map((item, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <EditableIcon 
-                        elementId={`why-noddi-before-item-${index}-icon`}
-                        icon={X}
-                        defaultBackground="transparent"
-                        size="sm"
-                        shape="rounded-lg"
-                        className="mt-0.5"
-                      />
+                      <X className="w-5 h-5 flex-shrink-0 mt-0.5 text-destructive" />
                       <EditableTranslation translationKey={`why_noddi.before.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
                         <span>{item}</span>
                       </EditableTranslation>
@@ -115,14 +108,7 @@ export default function WhyNoddi() {
                 <ul className="space-y-4">
                   {afterItems.map((item, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <EditableIcon 
-                        elementId={`why-noddi-after-item-${index}-icon`}
-                        icon={Check}
-                        defaultBackground="transparent"
-                        size="sm"
-                        shape="rounded-lg"
-                        className="mt-0.5"
-                      />
+                      <Check className="w-5 h-5 flex-shrink-0 mt-0.5 text-primary" />
                       <EditableTranslation translationKey={`why_noddi.after.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
                         <span className="font-medium">{item}</span>
                       </EditableTranslation>
