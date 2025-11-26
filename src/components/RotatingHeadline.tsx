@@ -56,12 +56,16 @@ export function RotatingHeadline({
 
   if (loading || terms.length === 0) {
     return (
-      <h1 className={className}>
-        <span className="block text-muted-foreground text-lg mb-2">
-          for mobile & workshop car services.
-        </span>
-        <span className="block">One platform. Every function.</span>
-      </h1>
+      <div className={className}>
+        <h1 className="flex items-center justify-center gap-2 flex-wrap">
+          <span>ERP</span>
+          <span>for mobile & workshop car services.</span>
+        </h1>
+        <div className="flex items-start justify-center gap-2 mt-4">
+          <span className="text-muted-foreground text-xl">↳</span>
+          <span className="text-muted-foreground text-lg">One platform. Every function.</span>
+        </div>
+      </div>
     );
   }
 
@@ -71,40 +75,46 @@ export function RotatingHeadline({
 
   return (
     <div className={`${className} relative`}>
-      <h1>
-        <span className="block text-muted-foreground text-lg mb-2">
-          for mobile & workshop car services.
-        </span>
+      <h1 className="flex items-center justify-center gap-2 flex-wrap">
+        {/* Rotating Term - INLINE with the rest */}
         <span 
-          className="rotating-container block min-h-[8rem] relative"
+          className={`text-foreground transition-opacity duration-300 ${
+            isFading ? 'opacity-0' : 'opacity-100'
+          }`}
           aria-live="polite"
           aria-atomic="true"
         >
-          <span 
-            className={`term block text-foreground transition-opacity duration-300 ${
-              isFading ? 'opacity-0' : 'opacity-100'
-            }`}
-          >
-            {termText}
-          </span>
-          <span 
-            className={`descriptor block text-muted-foreground text-lg mt-4 transition-opacity duration-300 ${
-              isFading ? 'opacity-0' : 'opacity-100'
-            }`}
-          >
-            {descText}
-          </span>
+          {termText}
         </span>
+        {/* Static suffix - same line */}
+        <span className="text-foreground">for mobile & workshop car services.</span>
+        
+        {/* Pause button inline */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={togglePlayPause}
+          aria-label={isPlaying ? 'Pause rotation' : 'Resume rotation'}
+          className="opacity-60 hover:opacity-100 transition-opacity ml-2"
+        >
+          {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+        </Button>
       </h1>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={togglePlayPause}
-        aria-label={isPlaying ? 'Pause rotation' : 'Resume rotation'}
-        className="absolute top-4 right-4 opacity-60 hover:opacity-100 transition-opacity"
-      >
-        {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-      </Button>
+      
+      {/* Descriptor with elbow arrow */}
+      <div className="flex items-start justify-center gap-2 mt-4">
+        {/* Constant elbow arrow */}
+        <span className="text-muted-foreground text-xl">↳</span>
+        
+        {/* Rotating descriptor */}
+        <span 
+          className={`text-muted-foreground text-lg max-w-2xl transition-opacity duration-300 ${
+            isFading ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
+          {descText}
+        </span>
+      </div>
     </div>
   );
 }
