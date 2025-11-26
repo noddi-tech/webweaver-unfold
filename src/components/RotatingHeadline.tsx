@@ -81,10 +81,11 @@ export function RotatingHeadline({
 
   return (
     <div className={`${className} relative`}>
-      <h1 className="flex items-center justify-center gap-2 text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl whitespace-nowrap">
+      <h1 className="flex items-baseline justify-center gap-2 flex-wrap text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl">
         {/* Rotating Term - Fixed width, right-aligned */}
         <span 
-          className="inline-flex justify-end overflow-hidden min-w-[140px] sm:min-w-[220px] md:min-w-[300px] lg:min-w-[380px] pb-2" 
+          className="inline-flex justify-end overflow-hidden pb-2" 
+          style={{ minWidth: '20ch' }}
           aria-live="polite" 
           aria-atomic="true"
         >
@@ -101,7 +102,7 @@ export function RotatingHeadline({
           translationKey="hero.rotating.suffix"
           fallbackText="for mobile & workshop car services."
         >
-          <span className="text-foreground">for mobile & workshop car services.</span>
+          <span className="text-foreground inline-block pb-2">for mobile & workshop car services.</span>
         </EditableTranslation>
         
         {/* Pause button inline */}
