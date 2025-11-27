@@ -254,7 +254,7 @@ const Hero = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
                       {/* Capacity USP */}
                       <div className="flex flex-col items-center text-center space-y-2">
-                        <CheckCircle2 className="w-5 h-5 text-white/80" />
+                        <CheckCircle2 className="w-5 h-5 text-foreground" />
                         <div>
                           <EditableTranslation translationKey="hero.usp1.title" fallbackText="Capacity opens itself. Teams stay in flow.">
                             <h3 className="font-semibold text-white mb-1">Capacity opens itself. Teams stay in flow.</h3>
@@ -267,7 +267,7 @@ const Hero = () => {
 
                       {/* Schedules USP */}
                       <div className="flex flex-col items-center text-center space-y-2">
-                        <CheckCircle2 className="w-5 h-5 text-white/80" />
+                        <CheckCircle2 className="w-5 h-5 text-foreground" />
                         <div>
                           <EditableTranslation translationKey="hero.usp2.title" fallbackText="Schedules adapt. Every job starts on time.">
                             <h3 className="font-semibold text-white mb-1">Schedules adapt. Every job starts on time.</h3>
@@ -280,7 +280,7 @@ const Hero = () => {
 
                       {/* Customers USP */}
                       <div className="flex flex-col items-center text-center space-y-2">
-                        <CheckCircle2 className="w-5 h-5 text-white/80" />
+                        <CheckCircle2 className="w-5 h-5 text-foreground" />
                         <div>
                           <EditableTranslation translationKey="hero.usp3.title" fallbackText="Customers in control. Loved by end users.">
                             <h3 className="font-semibold text-white mb-1">Customers in control. Loved by end users.</h3>
