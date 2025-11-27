@@ -243,7 +243,7 @@ const Hero = () => {
                   </div>
 
                   {/* USP section - directly on page gradient */}
-                  <div className="py-4 sm:py-6 lg:py-8 px-4 md:px-8 relative">
+                  <div className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4 md:px-6 relative">
                     {/* Glow effect */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="w-64 h-64 rounded-full" style={{ 
@@ -251,13 +251,13 @@ const Hero = () => {
                       }} />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
                       {/* Capacity USP */}
                       <div className="flex flex-col items-center text-center space-y-2">
                         <CheckCircle2 className="w-5 h-5 text-foreground" />
                         <div>
                           <EditableTranslation translationKey="hero.usp1.title" fallbackText="Capacity opens itself. Teams stay in flow.">
-                            <h3 className="font-semibold text-white mb-1">Capacity opens itself. Teams stay in flow.</h3>
+                            <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Capacity opens itself. Teams stay in flow.</h3>
                           </EditableTranslation>
                           <EditableTranslation translationKey="hero.usp1.description" fallbackText="Automatic slotting and crew scheduling — no more bottlenecks.">
                             <p className="text-sm text-white/70">Automatic slotting and crew scheduling — no more bottlenecks.</p>
@@ -270,7 +270,7 @@ const Hero = () => {
                         <CheckCircle2 className="w-5 h-5 text-foreground" />
                         <div>
                           <EditableTranslation translationKey="hero.usp2.title" fallbackText="Schedules adapt. Every job starts on time.">
-                            <h3 className="font-semibold text-white mb-1">Schedules adapt. Every job starts on time.</h3>
+                            <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Schedules adapt. Every job starts on time.</h3>
                           </EditableTranslation>
                           <EditableTranslation translationKey="hero.usp2.description" fallbackText="Intelligent planning and live re-sequencing for mobile and garage services.">
                             <p className="text-sm text-white/70">Intelligent planning and live re-sequencing for mobile and garage services.</p>
@@ -283,7 +283,7 @@ const Hero = () => {
                         <CheckCircle2 className="w-5 h-5 text-foreground" />
                         <div>
                           <EditableTranslation translationKey="hero.usp3.title" fallbackText="Customers in control. Loved by end users.">
-                            <h3 className="font-semibold text-white mb-1">Customers in control. Loved by end users.</h3>
+                            <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Customers in control. Loved by end users.</h3>
                           </EditableTranslation>
                           <EditableTranslation translationKey="hero.usp3.description" fallbackText="Self-service booking, inspection, payment transparency — NPS ≈ 90.">
                             <p className="text-sm text-white/70">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
