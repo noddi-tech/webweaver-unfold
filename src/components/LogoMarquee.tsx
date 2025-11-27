@@ -57,7 +57,7 @@ export function LogoMarquee() {
           <img
             src={logo.src}
             alt={logo.alt}
-            className="h-6 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
+            className="h-6 opacity-100 transition-opacity"
           />
         </div>
       ))}
