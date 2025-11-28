@@ -763,12 +763,12 @@ export function ScrollingFeatureCards() {
                         <div 
                           className="relative rounded-3xl overflow-hidden h-full min-h-[300px] lg:min-h-[400px]"
                           style={{
-                            background: 'linear-gradient(135deg, rgba(255, 220, 200, 0.6) 0%, rgba(255, 200, 180, 0.5) 50%, rgba(255, 210, 190, 0.6) 100%)'
+                            backgroundImage: 'var(--gradient-warmth)'
                           }}
                         >
-                          {/* Image wrapper with padding - creates the "hugging" effect */}
-                          <div className="absolute inset-0 p-4 lg:p-6 flex items-center justify-center">
-                            <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-lg bg-white">
+                          {/* Image wrapper with asymmetric padding - gradient hugs top and right only */}
+                          <div className="absolute inset-0 pt-8 pr-8 pb-2.5 pl-0 lg:pt-12 lg:pr-12 lg:pb-2.5 lg:pl-0 flex items-start justify-end">
+                            <div className="relative w-full h-full rounded-2xl rounded-bl-none overflow-hidden shadow-lg bg-white">
                               <EditableUniversalMedia
                                 locationId={`scrolling-card-${index + 1}`}
                                 onSave={() => loadImageSettings()}
