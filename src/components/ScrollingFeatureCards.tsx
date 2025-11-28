@@ -758,12 +758,18 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                             variant="secondary"
                             className="self-start rounded-full px-6 py-3 group"
                             style={{
-                              backgroundColor: 'rgba(0, 0, 0, 0.07)',
-                              color: 'rgb(31, 32, 35)',
+                              ...(cardData[index]?.ctaBgColor && cardData[index].ctaBgColor.includes('gradient')
+                                ? { backgroundImage: `var(--${cardData[index].ctaBgColor})` }
+                                : { backgroundColor: cardData[index]?.ctaBgColor 
+                                    ? `hsl(var(--${cardData[index].ctaBgColor}))` 
+                                    : 'rgba(0, 0, 0, 0.07)' }),
+                              color: cardData[index]?.ctaTextColor 
+                                ? `hsl(var(--${cardData[index].ctaTextColor}))` 
+                                : 'rgb(31, 32, 35)',
                             }}
                             asChild
                           >
-                            <a href={card.ctaUrl || '#'}>
+                            <a href={cardData[index]?.ctaUrl || card.ctaUrl || '#'}>
                               <EditableTranslation translationKey={card.ctaKey}>
                                 {cardData[index]?.ctaText || card.ctaText}
                               </EditableTranslation>
@@ -774,7 +780,7 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                         
                         {/* Right: Image with gradient background */}
                         <div 
-                          className="relative rounded-2xl md:rounded-3xl overflow-hidden aspect-square"
+                          className="relative rounded-tl-2xl rounded-tr-2xl md:rounded-tl-3xl md:rounded-tr-3xl rounded-bl-none rounded-br-none overflow-hidden aspect-square"
                           style={{
                             backgroundImage: 'var(--gradient-warmth)'
                           }}
