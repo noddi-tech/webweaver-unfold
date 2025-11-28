@@ -1,10 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const EvaluationRequestSchema = z.object({
+  targetLanguage: z.string().min(2).max(10).regex(/^[a-z]{2}(-[A-Z]{2})?$/),
+  sourceLanguage: z.string().min(2).max(10).regex(/^[a-z]{2}(-[A-Z]{2})?$/).optional(),
+  startFromKey: z.string().max(500).nullable().optional()
+});
 
 const BATCH_SIZE = 20; // Reduced from 100 to avoid timeouts
 const MAX_EXECUTION_TIME = 90000; // 90 seconds - more safety margin before 120s timeout
@@ -20,7 +28,22 @@ serve(async (req) => {
   console.log('=== Quality Evaluation Function Started ===');
 
   try {
-    const { targetLanguage, sourceLanguage = 'en', startFromKey = null } = await req.json();
+    const body = await req.json();
+    
+    // Validate input
+    const validation = EvaluationRequestSchema.safeParse(body);
+    if (!validation.success) {
+      console.error('Validation failed:', validation.error.format());
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid request parameters',
+          details: validation.error.format()
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { targetLanguage, sourceLanguage = 'en', startFromKey = null } = validation.data;
     
     console.log('Request payload:', {
       targetLanguage,

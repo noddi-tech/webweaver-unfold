@@ -1,9 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const MetaDescriptionRequestSchema = z.object({
+  pageSlug: z.string().min(1).max(200).regex(/^[a-z0-9\-\/]+$/),
+  metaTitle: z.string().min(1).max(500).trim(),
+  language: z.string().min(2).max(10).regex(/^[a-z]{2}(-[A-Z]{2})?$/)
+});
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -14,7 +22,22 @@ serve(async (req) => {
   console.log('=== Generate Meta Description Function Started ===');
 
   try {
-    const { pageSlug, metaTitle, language } = await req.json();
+    const body = await req.json();
+    
+    // Validate input
+    const validation = MetaDescriptionRequestSchema.safeParse(body);
+    if (!validation.success) {
+      console.error('Validation failed:', validation.error.format());
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid request parameters',
+          details: validation.error.format()
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { pageSlug, metaTitle, language } = validation.data;
     
     console.log('Request payload:', {
       pageSlug,
