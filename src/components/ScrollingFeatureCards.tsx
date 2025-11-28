@@ -619,48 +619,51 @@ export function ScrollingFeatureCards() {
       >
         {/* Edge-hugging container */}
         <div className="px-6 sm:px-12 lg:px-24 max-w-[1600px] mx-auto">
-          {/* Centered Header */}
-          <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-24">
-            <h2 className={headingStyles.h2}>
-              <EditableTranslation translationKey="scrolling_features.title">
-                Turn insights into action — at every stage
-              </EditableTranslation>
-            </h2>
+          {/* Two-column grid: sticky left, scrolling cards right */}
+          <div className="grid grid-cols-1 lg:grid-cols-[35fr_65fr] gap-8 lg:gap-16">
             
-            <p className={cn(headingStyles.body, "text-base opacity-90 mt-6 mb-8")}>
-              <EditableTranslation translationKey="scrolling_features.subtitle">
-                Mixpanel helps improve product and web experiences by understanding user behavior, spotting patterns, and making informed decisions.
-              </EditableTranslation>
-            </p>
+            {/* LEFT COLUMN - Sticky Header */}
+            <div className="lg:sticky lg:top-32 lg:self-start">
+              <h2 className={headingStyles.h2}>
+                <EditableTranslation translationKey="scrolling_features.title">
+                  Turn insights into action — at every stage
+                </EditableTranslation>
+              </h2>
+              
+              <p className={cn(headingStyles.body, "text-base opacity-90 mt-6 mb-8")}>
+                <EditableTranslation translationKey="scrolling_features.subtitle">
+                  Mixpanel helps improve product and web experiences by understanding user behavior, spotting patterns, and making informed decisions.
+                </EditableTranslation>
+              </p>
 
-            <EditableButton
-              buttonText="Book a Demo"
-              buttonUrl={mainCtaUrl}
-              onSave={(text, url) => {
-                setMainCtaUrl(url);
-              }}
-            >
-              <Button 
-                size="lg"
-                className="rounded-full px-8 py-4 group"
-                style={{
-                  backgroundColor: 'rgb(31, 32, 35)',
-                  color: 'rgb(255, 255, 255)',
+              <EditableButton
+                buttonText="Book a Demo"
+                buttonUrl={mainCtaUrl}
+                onSave={(text, url) => {
+                  setMainCtaUrl(url);
                 }}
-                asChild
               >
-                <a href={mainCtaUrl}>
-                  <EditableTranslation translationKey="scrolling_features.cta">
-                    Book a Demo
-                  </EditableTranslation>
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </a>
-              </Button>
-            </EditableButton>
-          </div>
+                <Button 
+                  size="lg"
+                  className="rounded-full px-8 py-4 group self-start"
+                  style={{
+                    backgroundColor: 'rgb(31, 32, 35)',
+                    color: 'rgb(255, 255, 255)',
+                  }}
+                  asChild
+                >
+                  <a href={mainCtaUrl}>
+                    <EditableTranslation translationKey="scrolling_features.cta">
+                      Book a Demo
+                    </EditableTranslation>
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </a>
+                </Button>
+              </EditableButton>
+            </div>
 
-          {/* Feature Cards */}
-          <div className={cn("relative flex flex-col max-w-6xl mx-auto", cardGap)}>
+            {/* RIGHT COLUMN - Scrolling Cards */}
+            <div className={cn("relative flex flex-col", cardGap)}>
             {cards.map((card, index) => {
               const state = cardStates[index] || { opacity: 0, translateY: 20, scale: 1 };
               const Icon = card.icon;
@@ -794,7 +797,8 @@ export function ScrollingFeatureCards() {
                 </div>
               );
             })}
-          </div>
+            </div> {/* End RIGHT COLUMN */}
+          </div> {/* End grid */}
         </div>
       </section>
     </EditableBackground>
