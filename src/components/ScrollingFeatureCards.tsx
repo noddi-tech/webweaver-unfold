@@ -618,7 +618,7 @@ export function ScrollingFeatureCards() {
         style={{ minHeight: `${100 + (cards.length * 20)}vh` }}
       >
         {/* Edge-hugging container with grid layout */}
-        <div className="px-12 sm:px-24 lg:px-36 xl:px-48">
+        <div className="px-12 sm:px-24 lg:px-36 xl:px-48 max-w-[1600px] mx-auto">
           <div className="grid lg:grid-cols-[3fr_7fr] gap-12 lg:gap-16">
             {/* Left Column: Sticky Navigation */}
             <EditableBackground
@@ -692,7 +692,7 @@ export function ScrollingFeatureCards() {
                         </button>
                       )}
                       <div className="w-full h-full">
-                        <div className="grid gap-4 sm:gap-6 lg:gap-8 items-center h-full min-h-0 grid-cols-1 sm:grid-cols-[40fr_60fr] lg:grid-cols-[28fr_72fr] 2xl:grid-cols-[35fr_65fr]">
+                        <div className="grid gap-4 sm:gap-6 lg:gap-8 items-center h-full min-h-0 grid-cols-1 lg:grid-cols-[28fr_72fr] 2xl:grid-cols-[35fr_65fr]">
                           {/* Left: Content */}
                           <div className="flex flex-col justify-center gap-6 min-w-0">
                             <div className="flex items-center gap-3">
