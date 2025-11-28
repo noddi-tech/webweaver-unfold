@@ -1,6 +1,14 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+
+const EvaluateSingleSchema = z.object({
+  translationKey: z.string().min(1).max(500),
+  languageCode: z.string().min(2).max(10),
+  originalText: z.string().min(1).max(10000),
+  translatedText: z.string().min(1).max(10000)
+});
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +21,17 @@ serve(async (req) => {
   }
 
   try {
-    const { translationKey, languageCode, originalText, translatedText } = await req.json();
+    const body = await req.json();
+    const validation = EvaluateSingleSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid request parameters', details: validation.error.format() }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    const { translationKey, languageCode, originalText, translatedText } = validation.data;
 
     console.log(`Evaluating single translation: ${translationKey} (${languageCode})`);
 

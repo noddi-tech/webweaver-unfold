@@ -1,5 +1,16 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+
+const RefineTranslationSchema = z.object({
+  englishText: z.string().min(1).max(10000),
+  currentTranslation: z.string().min(1).max(10000),
+  targetLanguage: z.string().min(2).max(10),
+  targetLanguageName: z.string().min(1).max(100),
+  context: z.string().max(500).optional(),
+  pageLocation: z.string().max(200).optional(),
+  tovContent: z.string().max(10000).optional()
+});
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,6 +23,16 @@ serve(async (req) => {
   }
 
   try {
+    const body = await req.json();
+    const validation = RefineTranslationSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid request parameters', details: validation.error.format() }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     const { 
       englishText, 
       currentTranslation, 
@@ -20,7 +41,7 @@ serve(async (req) => {
       context, 
       pageLocation,
       tovContent 
-    } = await req.json();
+    } = validation.data;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
