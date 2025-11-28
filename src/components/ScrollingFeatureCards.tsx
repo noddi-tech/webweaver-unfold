@@ -695,7 +695,7 @@ export function ScrollingFeatureCards() {
                       </button>
                     )}
                     <div className="w-full h-full">
-                      <div className="grid gap-6 lg:gap-8 items-center h-full min-h-0 grid-cols-1 lg:grid-cols-[40fr_60fr]">
+                      <div className="grid gap-6 lg:gap-8 items-center h-full min-h-0 grid-cols-1 lg:grid-cols-[35fr_65fr]">
                         {/* Left: Content */}
                         <div className="flex flex-col justify-center gap-6 min-w-0">
                           <div className="flex items-center gap-3">
@@ -763,11 +763,11 @@ export function ScrollingFeatureCards() {
                         <div 
                           className="relative rounded-3xl overflow-hidden h-full min-h-[300px] lg:min-h-[400px]"
                           style={{
-                            background: 'linear-gradient(135deg, rgba(240, 220, 255, 0.5) 0%, rgba(255, 230, 220, 0.4) 50%, rgba(230, 210, 255, 0.5) 100%)'
+                            background: 'linear-gradient(135deg, rgba(255, 220, 200, 0.6) 0%, rgba(255, 200, 180, 0.5) 50%, rgba(255, 210, 190, 0.6) 100%)'
                           }}
                         >
                           {/* Image wrapper with padding - creates the "hugging" effect */}
-                          <div className="absolute inset-0 p-6 lg:p-10 flex items-center justify-center">
+                          <div className="absolute inset-0 p-4 lg:p-6 flex items-center justify-center">
                             <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-lg bg-white">
                               <EditableUniversalMedia
                                 locationId={`scrolling-card-${index + 1}`}
