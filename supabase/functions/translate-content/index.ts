@@ -1,10 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const TranslateRequestSchema = z.object({
+  translationKeys: z.array(z.string().min(1).max(500)).min(1).max(500),
+  targetLanguage: z.string().min(2).max(10).regex(/^[a-z]{2}(-[A-Z]{2})?$/),
+  sourceLanguage: z.string().min(2).max(10).regex(/^[a-z]{2}(-[A-Z]{2})?$/).optional()
+});
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -15,10 +23,25 @@ serve(async (req) => {
   console.log('=== Translation Function Started ===');
 
   try {
-    const { translationKeys, targetLanguage, sourceLanguage = 'en' } = await req.json();
+    const body = await req.json();
+    
+    // Validate input
+    const validation = TranslateRequestSchema.safeParse(body);
+    if (!validation.success) {
+      console.error('Validation failed:', validation.error.format());
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid request parameters',
+          details: validation.error.format()
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { translationKeys, targetLanguage, sourceLanguage = 'en' } = validation.data;
     
     console.log('Request payload:', {
-      keysCount: translationKeys?.length,
+      keysCount: translationKeys.length,
       targetLanguage,
       sourceLanguage
     });
