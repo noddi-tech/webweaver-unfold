@@ -129,7 +129,7 @@ export function UnifiedStyleModal({
         for (const elem of elements) {
           const { data } = await supabase
             .from('text_content')
-            .select('content, color_token')
+            .select('content, color_token, button_url, button_bg_color')
             .eq('element_id', `${elementIdPrefix}-${elem}`)
             .maybeSingle();
           
@@ -150,6 +150,8 @@ export function UnifiedStyleModal({
               case 'cta':
                 if (data.content) setCtaText(data.content);
                 if (data.color_token) setCtaTextColor(data.color_token);
+                if (data.button_url) setCtaUrl(data.button_url);
+                if (data.button_bg_color) setCtaBgColor(data.button_bg_color);
                 break;
             }
           }
@@ -322,7 +324,7 @@ export function UnifiedStyleModal({
         { element_id: `${elementIdPrefix}-number`, content: number, color_token: numberColor },
         { element_id: `${elementIdPrefix}-title`, content: title, color_token: titleColor },
         { element_id: `${elementIdPrefix}-description`, content: description, color_token: descriptionColor },
-        { element_id: `${elementIdPrefix}-cta`, content: ctaText, color_token: ctaTextColor },
+        { element_id: `${elementIdPrefix}-cta`, content: ctaText, color_token: ctaTextColor, button_url: ctaUrl, button_bg_color: ctaBgColor },
         { element_id: `${elementIdPrefix}-icon-color`, content: '', color_token: iconColor },
       ];
 
@@ -365,7 +367,12 @@ export function UnifiedStyleModal({
           // @ts-ignore
           await supabase
             .from('text_content')
-            .update({ content: update.content, color_token: update.color_token })
+            .update({ 
+              content: update.content, 
+              color_token: update.color_token,
+              button_url: update.button_url,
+              button_bg_color: update.button_bg_color
+            })
             .eq('element_id', update.element_id);
         } else {
           // @ts-ignore
@@ -375,6 +382,8 @@ export function UnifiedStyleModal({
               element_id: update.element_id,
               content: update.content,
               color_token: update.color_token,
+              button_url: update.button_url,
+              button_bg_color: update.button_bg_color,
               element_type: 'text',
               page_location: 'unknown',
               section: 'unknown',
@@ -859,7 +868,22 @@ export function UnifiedStyleModal({
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Button URL</label>
-                  <Input value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} placeholder="/link" />
+                  <Input value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} placeholder="/demo" />
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <p className="text-xs text-muted-foreground w-full">Quick links:</p>
+                    {['/demo', '/contact', '/functions', '/architecture', '/pricing', '/solutions'].map((path) => (
+                      <Button
+                        key={path}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-7"
+                        onClick={() => setCtaUrl(path)}
+                      >
+                        {path}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -869,9 +893,15 @@ export function UnifiedStyleModal({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {colorOptions.map((option) => (
+                      {TEXT_COLOR_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-4 h-4 rounded border" 
+                              style={{ backgroundColor: `hsl(${option.hslValue})` }}
+                            />
+                            {option.label}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -885,9 +915,15 @@ export function UnifiedStyleModal({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {colorOptions.map((option) => (
+                      {TEXT_COLOR_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-4 h-4 rounded border" 
+                              style={{ backgroundColor: `hsl(${option.hslValue})` }}
+                            />
+                            {option.label}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>

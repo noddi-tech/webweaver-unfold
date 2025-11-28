@@ -382,7 +382,7 @@ export function ScrollingFeatureCards() {
       // @ts-ignore
       const { data: ctaData } = await supabase
         .from('text_content')
-        .select('content, color_token')
+        .select('content, color_token, button_url, button_bg_color')
         .eq('element_id', `${elementPrefix}-cta`)
         .maybeSingle();
 
@@ -406,7 +406,7 @@ export function ScrollingFeatureCards() {
           description: descData?.content || cards[index].description,
           descriptionColor: descData?.color_token || defaults.descriptionColor,
           ctaText: ctaData?.content || cards[index].ctaText,
-          ctaBgColor: defaults.ctaBgColor,
+          ctaBgColor: ctaData?.button_bg_color || defaults.ctaBgColor,
           ctaTextColor: ctaData?.color_token || defaults.ctaTextColor,
           iconColor: iconColorData?.color_token || 'foreground',
         }
