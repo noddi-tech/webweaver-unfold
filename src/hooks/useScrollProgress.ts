@@ -86,7 +86,7 @@ export function useScrollProgress(
 
     // Check for reduced motion preference and mobile
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isMobile = window.innerWidth < 1024;
+    const isMobile = window.innerWidth < 1280; // Match xl: breakpoint for sticky sidebar layout
     
     if (prefersReducedMotion || isMobile) {
       // If reduced motion or mobile, show all cards without animation
