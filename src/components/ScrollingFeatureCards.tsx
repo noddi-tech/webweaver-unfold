@@ -620,10 +620,10 @@ export function ScrollingFeatureCards() {
         {/* Edge-hugging container */}
         <div className="px-6 sm:px-12 lg:px-24 max-w-[1600px] mx-auto">
           {/* Two-column grid: sticky left, scrolling cards right */}
-          <div className="grid grid-cols-1 lg:grid-cols-[35fr_65fr] gap-8 lg:gap-16">
+          <div className="grid grid-cols-1 xl:grid-cols-[35fr_65fr] gap-8 xl:gap-16">
             
-            {/* LEFT COLUMN - Sticky Header */}
-            <div className="lg:sticky lg:top-32 lg:self-start">
+            {/* LEFT COLUMN - Sticky Header - Hidden below xl */}
+            <div className="hidden xl:block xl:sticky xl:top-32 xl:self-start">
               <h2 className={headingStyles.h2}>
                 <EditableTranslation translationKey="scrolling_features.title">
                   Turn insights into action — at every stage
@@ -662,8 +662,8 @@ export function ScrollingFeatureCards() {
               </EditableButton>
             </div>
 
-            {/* RIGHT COLUMN - Scrolling Cards */}
-            <div className={cn("relative flex flex-col", cardGap)}>
+        {/* RIGHT COLUMN - Scrolling Cards Grid */}
+        <div className={cn("relative grid gap-6", "grid-cols-1 md:grid-cols-2 xl:grid-cols-1")}>
             {cards.map((card, index) => {
               const state = cardStates[index] || { opacity: 0, translateY: 20, scale: 1 };
               const Icon = card.icon;
@@ -695,7 +695,7 @@ export function ScrollingFeatureCards() {
                       </button>
                     )}
                     <div className="w-full h-full">
-                      <div className="grid gap-6 md:gap-8 items-center h-full min-h-0 grid-cols-1 md:grid-cols-[45fr_55fr]">
+                      <div className="grid gap-4 xl:gap-8 items-center h-full min-h-0 grid-cols-1 xl:grid-cols-[45fr_55fr]">
                         {/* Left: Content */}
                         <div className="flex flex-col justify-center gap-6 min-w-0">
                           <div className="flex items-center gap-3">
@@ -724,7 +724,7 @@ export function ScrollingFeatureCards() {
                           </div>
                           
                           <h3 
-                            className="text-xl md:text-2xl lg:text-3xl font-bold leading-tight break-words hyphens-auto"
+                            className="text-lg md:text-xl xl:text-2xl font-bold leading-tight break-words hyphens-auto"
                             style={{ color: 'rgb(31, 32, 35)' }}
                           >
                             <EditableTranslation translationKey={card.titleKey}>
@@ -733,7 +733,7 @@ export function ScrollingFeatureCards() {
                           </h3>
                           
                           <p 
-                            className="text-sm md:text-base lg:text-lg leading-relaxed opacity-80 break-words"
+                            className="text-sm xl:text-base leading-relaxed opacity-80 break-words"
                             style={{ color: 'rgba(0, 0, 0, 0.7)' }}
                           >
                             <EditableTranslation translationKey={card.descriptionKey}>
@@ -761,13 +761,13 @@ export function ScrollingFeatureCards() {
                         
                         {/* Right: Image with gradient background */}
                         <div 
-                          className="relative rounded-3xl overflow-hidden aspect-square md:aspect-auto md:h-full"
+                          className="relative rounded-3xl overflow-hidden aspect-square xl:aspect-[16/10]"
                           style={{
                             backgroundImage: 'var(--gradient-warmth)'
                           }}
                         >
                           {/* Image wrapper with asymmetric padding - gradient hugs top and right only */}
-                          <div className="absolute inset-0 pt-3 pr-3 pb-0 pl-0 md:pt-4 md:pr-4 lg:pt-5 lg:pr-5 lg:pb-0 lg:pl-0 flex items-start justify-end">
+                          <div className="absolute inset-0 pt-3 pr-3 pb-0 pl-0 xl:pt-5 xl:pr-5 flex items-start justify-end">
                             <div className="relative w-full h-full rounded-r-2xl overflow-hidden shadow-lg bg-white">
                               <EditableUniversalMedia
                                 locationId={`scrolling-card-${index + 1}`}
