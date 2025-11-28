@@ -673,7 +673,7 @@ export function ScrollingFeatureCards() {
                 <div
                   key={card.number}
                   className={cn(
-                    "relative rounded-3xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)]",
+                    "relative rounded-3xl overflow-hidden bg-white shadow-lg",
                     cardHeights[index] || 'h-auto'
                   )}
                   style={{
@@ -684,10 +684,7 @@ export function ScrollingFeatureCards() {
                     onMouseEnter={() => editMode && setHoveredCard(index)}
                     onMouseLeave={() => editMode && setHoveredCard(null)}
                   >
-                  <div className={cn(
-                    "backdrop-blur-xl relative p-6 lg:p-10 h-full",
-                    cardData[index]?.background || 'bg-gradient-hero/90'
-                  )}>
+                  <div className="relative p-6 lg:p-10 h-full bg-white">
                     {/* Edit Button - Only in Edit Mode */}
                     {editMode && hoveredCard === index && (
                       <button
@@ -728,7 +725,7 @@ export function ScrollingFeatureCards() {
                           
                           <h3 
                             className="text-2xl lg:text-3xl font-bold leading-tight break-words hyphens-auto"
-                            style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.titleColor || 'foreground')}))` }}
+                            style={{ color: 'rgb(31, 32, 35)' }}
                           >
                             <EditableTranslation translationKey={card.titleKey}>
                               {cardData[index]?.title || card.title}
@@ -737,7 +734,7 @@ export function ScrollingFeatureCards() {
                           
                           <p 
                             className="text-base lg:text-lg leading-relaxed opacity-80 break-words"
-                            style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.descriptionColor || 'muted-foreground')}))` }}
+                            style={{ color: 'rgba(0, 0, 0, 0.7)' }}
                           >
                             <EditableTranslation translationKey={card.descriptionKey}>
                               {cardData[index]?.description || card.description}
@@ -763,12 +760,12 @@ export function ScrollingFeatureCards() {
                         </div>
                         
                         {/* Right: Image with gradient background */}
-                        <div 
-                          className="relative aspect-square rounded-2xl overflow-hidden"
-                          style={{
-                            background: 'linear-gradient(135deg, rgba(120, 86, 255, 0.2) 0%, rgba(120, 86, 255, 0.05) 100%)'
-                          }}
-                        >
+                    <div 
+                      className="relative aspect-square rounded-2xl overflow-hidden"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255, 200, 180, 0.6) 0%, rgba(200, 180, 255, 0.4) 50%, rgba(255, 220, 200, 0.5) 100%)'
+                      }}
+                    >
                           <EditableUniversalMedia
                             locationId={`scrolling-card-${index + 1}`}
                             onSave={() => loadImageSettings()}
