@@ -80,7 +80,7 @@ const ImageWithRoundedCorners: React.FC<{
     );
     
     // Convert pixel bounds to inset clip-path with rounded corners
-    setClipPath(`inset(${bounds.top}px ${containerWidth - bounds.left - bounds.width}px ${containerHeight - bounds.top - bounds.height}px ${bounds.left}px round ${borderRadius}px)`);
+    setClipPath(`inset(${bounds.top}px ${containerWidth - bounds.left - bounds.width}px ${containerHeight - bounds.top - bounds.height}px ${bounds.left}px round 0 ${borderRadius}px 0 0)`);
   }, [fitMode, borderRadius]);
   
   useEffect(() => {
@@ -119,7 +119,7 @@ const ImageWithRoundedCorners: React.FC<{
       decoding="async"
       className={baseClasses}
       style={{
-        clipPath: fitMode === 'contain' ? clipPath : `inset(0 round ${borderRadius}px)`,
+        clipPath: fitMode === 'contain' ? clipPath : `inset(0 round 0 ${borderRadius}px 0 0)`,
         imageRendering: 'auto',
         WebkitFontSmoothing: 'antialiased',
         backfaceVisibility: 'hidden',
