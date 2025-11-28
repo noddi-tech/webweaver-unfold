@@ -795,8 +795,8 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                           }}
                         >
                           {/* Image wrapper with asymmetric padding - gradient hugs top and right only */}
-                <div className="absolute inset-0 pt-2 pr-2 pb-0 pl-0 md:pt-3 md:pr-3 md:pb-0 xl:pt-4 xl:pr-4 xl:pb-0 flex items-start justify-end">
-                  <div className="relative w-full h-full rounded-tr-xl md:rounded-tr-2xl rounded-tl-none rounded-bl-none rounded-br-none overflow-hidden bg-white" style={{ boxShadow: '-3px 3px 0 0 white, 0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
+                 <div className="absolute inset-0 pt-2 pr-2 pb-0 pl-0 md:pt-3 md:pr-3 md:pb-0 xl:pt-4 xl:pr-4 xl:pb-0 flex items-start justify-end">
+                  <div className="relative w-full h-full rounded-tr-xl md:rounded-tr-2xl rounded-tl-none rounded-bl-none rounded-br-none overflow-hidden bg-white -left-[3px] -bottom-[3px]" style={{ width: 'calc(100% + 3px)', height: 'calc(100% + 3px)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
                               <EditableUniversalMedia
                                 locationId={`scrolling-card-${index + 1}`}
                                 onSave={() => loadImageSettings()}
