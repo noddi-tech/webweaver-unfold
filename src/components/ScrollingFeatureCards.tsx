@@ -695,7 +695,7 @@ export function ScrollingFeatureCards() {
                       </button>
                     )}
                     <div className="w-full h-full">
-                      <div className="grid gap-6 md:gap-8 items-center h-full min-h-0 grid-cols-1 sm:grid-cols-[45fr_55fr] lg:grid-cols-[35fr_65fr]">
+                      <div className="grid gap-6 md:gap-8 items-center h-full min-h-0 grid-cols-1 md:grid-cols-[45fr_55fr]">
                         {/* Left: Content */}
                         <div className="flex flex-col justify-center gap-6 min-w-0">
                           <div className="flex items-center gap-3">
@@ -724,7 +724,7 @@ export function ScrollingFeatureCards() {
                           </div>
                           
                           <h3 
-                            className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight break-words hyphens-auto"
+                            className="text-xl md:text-2xl lg:text-3xl font-bold leading-tight break-words hyphens-auto"
                             style={{ color: 'rgb(31, 32, 35)' }}
                           >
                             <EditableTranslation translationKey={card.titleKey}>
@@ -733,7 +733,7 @@ export function ScrollingFeatureCards() {
                           </h3>
                           
                           <p 
-                            className="text-sm sm:text-base lg:text-lg leading-relaxed opacity-80 break-words"
+                            className="text-sm md:text-base lg:text-lg leading-relaxed opacity-80 break-words"
                             style={{ color: 'rgba(0, 0, 0, 0.7)' }}
                           >
                             <EditableTranslation translationKey={card.descriptionKey}>
@@ -761,13 +761,13 @@ export function ScrollingFeatureCards() {
                         
                         {/* Right: Image with gradient background */}
                         <div 
-                          className="relative rounded-3xl overflow-hidden aspect-square sm:aspect-auto sm:h-full min-h-[280px] sm:min-h-[300px] lg:min-h-[400px]"
+                          className="relative rounded-3xl overflow-hidden aspect-square md:aspect-auto md:h-full"
                           style={{
                             backgroundImage: 'var(--gradient-warmth)'
                           }}
                         >
                           {/* Image wrapper with asymmetric padding - gradient hugs top and right only */}
-                          <div className="absolute inset-0 pt-3 pr-3 pb-0 pl-0 sm:pt-4 sm:pr-4 lg:pt-5 lg:pr-5 lg:pb-0 lg:pl-0 flex items-start justify-end">
+                          <div className="absolute inset-0 pt-3 pr-3 pb-0 pl-0 md:pt-4 md:pr-4 lg:pt-5 lg:pr-5 lg:pb-0 lg:pl-0 flex items-start justify-end">
                             <div className="relative w-full h-full rounded-r-2xl overflow-hidden shadow-lg bg-white">
                               <EditableUniversalMedia
                                 locationId={`scrolling-card-${index + 1}`}
