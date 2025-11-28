@@ -51,6 +51,15 @@ const calculateContainedImageBounds = (
   };
 };
 
+// Convert Tailwind class to CSS variable name
+const toCssVar = (value: string): string => {
+  if (!value) return '';
+  // Strip 'bg-' or 'text-' prefix and return clean CSS var name
+  return value
+    .replace(/^bg-/, '')      // bg-gradient-warmth → gradient-warmth
+    .replace(/^text-/, '');   // text-foreground → foreground
+};
+
 // Component for images with rounded corners that works with both contain and cover
 const ImageWithRoundedCorners: React.FC<{
   src: string;
@@ -759,12 +768,12 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                             className="self-start rounded-full px-6 py-3 group"
                             style={{
                               ...(cardData[index]?.ctaBgColor && cardData[index].ctaBgColor.includes('gradient')
-                                ? { backgroundImage: `var(--${cardData[index].ctaBgColor})` }
+                                ? { backgroundImage: `var(--${toCssVar(cardData[index].ctaBgColor)})` }
                                 : { backgroundColor: cardData[index]?.ctaBgColor 
-                                    ? `hsl(var(--${cardData[index].ctaBgColor}))` 
+                                    ? `hsl(var(--${toCssVar(cardData[index].ctaBgColor)}))` 
                                     : 'rgba(0, 0, 0, 0.07)' }),
                               color: cardData[index]?.ctaTextColor 
-                                ? `hsl(var(--${cardData[index].ctaTextColor}))` 
+                                ? `hsl(var(--${toCssVar(cardData[index].ctaTextColor)}))` 
                                 : 'rgb(31, 32, 35)',
                             }}
                             asChild
