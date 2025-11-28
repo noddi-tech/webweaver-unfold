@@ -17,7 +17,9 @@ export function useScrollProgress(
   totalCards: number
 ): ScrollProgressReturn {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
-  const [cardStates, setCardStates] = useState<CardState[]>([]);
+  const [cardStates, setCardStates] = useState<CardState[]>(
+    Array(totalCards).fill({ opacity: 1, translateY: 0, scale: 1 })
+  );
   const [sectionProgress, setSectionProgress] = useState(0);
 
   useEffect(() => {
