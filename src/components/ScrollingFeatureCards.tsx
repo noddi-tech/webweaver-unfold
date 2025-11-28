@@ -618,7 +618,7 @@ export function ScrollingFeatureCards() {
         style={{ minHeight: `${100 + (cards.length * 20)}vh` }}
       >
         {/* Edge-hugging container with grid layout */}
-        <div className="px-4 sm:px-8 lg:px-12 xl:px-16">
+        <div className="px-12 sm:px-24 lg:px-36 xl:px-48">
           <div className="grid lg:grid-cols-[3fr_7fr] gap-12 lg:gap-16">
             {/* Left Column: Sticky Navigation */}
             <EditableBackground
