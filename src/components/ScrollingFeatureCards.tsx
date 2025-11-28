@@ -778,8 +778,8 @@ export function ScrollingFeatureCards() {
                           }}
                         >
                           {/* Image wrapper with asymmetric padding - gradient hugs top and right only */}
-                <div className="absolute -left-[3px] -bottom-[3px] top-0 right-0 pt-2 pr-2 pb-0 pl-0 md:pt-3 md:pr-3 md:pb-0 xl:pt-4 xl:pr-4 xl:pb-0 flex items-start justify-end">
-                  <div className="relative w-full h-full rounded-tr-xl md:rounded-tr-2xl rounded-tl-none rounded-bl-none rounded-br-none overflow-hidden shadow-lg bg-white">
+                <div className="absolute inset-0 pt-2 pr-2 pb-0 pl-0 md:pt-3 md:pr-3 md:pb-0 xl:pt-4 xl:pr-4 xl:pb-0 flex items-start justify-end">
+                  <div className="relative w-full h-full rounded-tr-xl md:rounded-tr-2xl rounded-tl-none rounded-bl-none rounded-br-none overflow-hidden shadow-lg bg-white border-l-[3px] border-b-[3px] border-white">
                               <EditableUniversalMedia
                                 locationId={`scrolling-card-${index + 1}`}
                                 onSave={() => loadImageSettings()}
