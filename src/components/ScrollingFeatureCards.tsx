@@ -662,8 +662,22 @@ export function ScrollingFeatureCards() {
               </EditableButton>
             </div>
 
-        {/* RIGHT COLUMN - Scrolling Cards Grid */}
-        <div className={cn("relative grid gap-6", "grid-cols-1 md:grid-cols-2 xl:grid-cols-1")}>
+            {/* Section heading for tablet/phone - hidden on desktop where sidebar shows */}
+            <div className="xl:hidden mb-8 md:mb-10 text-center px-4">
+              <h2 className={headingStyles.h2}>
+                <EditableTranslation translationKey="scrolling_features.title">
+                  Turn insights into action — at every stage
+                </EditableTranslation>
+              </h2>
+              <p className={cn(headingStyles.body, "text-base md:text-lg opacity-90 mt-4 max-w-2xl mx-auto")}>
+                <EditableTranslation translationKey="scrolling_features.subtitle">
+                  Mixpanel helps you improve your product and web experiences by enabling you to analyze how users interact.
+                </EditableTranslation>
+              </p>
+            </div>
+
+            {/* RIGHT COLUMN - Scrolling Cards Grid */}
+            <div className={cn("relative grid gap-6", "grid-cols-1 md:grid-cols-2 xl:grid-cols-1")}>
             {cards.map((card, index) => {
               const state = cardStates[index] || { opacity: 0, translateY: 20, scale: 1 };
               const Icon = card.icon;
@@ -672,10 +686,7 @@ export function ScrollingFeatureCards() {
               return (
                 <div
                   key={card.number}
-                  className={cn(
-                    "relative rounded-3xl overflow-hidden bg-white shadow-lg",
-                    cardHeights[index] || 'h-auto'
-                  )}
+                  className="relative rounded-3xl overflow-hidden bg-white shadow-lg"
                   style={{
                     opacity: state.opacity,
                     transform: `translateY(${state.translateY}px) scale(${state.scale})`,
@@ -684,7 +695,7 @@ export function ScrollingFeatureCards() {
                     onMouseEnter={() => editMode && setHoveredCard(index)}
                     onMouseLeave={() => editMode && setHoveredCard(null)}
                   >
-                  <div className="relative p-6 lg:p-10 h-full bg-white">
+                  <div className="relative p-4 md:p-6 xl:p-8 bg-white">
                     {/* Edit Button - Only in Edit Mode */}
                     {editMode && hoveredCard === index && (
                       <button
@@ -694,10 +705,10 @@ export function ScrollingFeatureCards() {
                         <Pencil className="w-5 h-5" />
                       </button>
                     )}
-                    <div className="w-full h-full">
-                      <div className="grid gap-4 xl:gap-8 items-center h-full min-h-0 grid-cols-1 xl:grid-cols-[45fr_55fr]">
+                    <div className="w-full">
+                      <div className="flex flex-col xl:grid xl:grid-cols-[45fr_55fr] gap-4 md:gap-5 xl:gap-6">
                         {/* Left: Content */}
-                        <div className="flex flex-col justify-center gap-6 min-w-0">
+                        <div className="flex flex-col gap-3 md:gap-4 xl:gap-5 min-w-0">
                           <div className="flex items-center gap-3">
                             <Badge 
                               className="px-2 py-1 text-xs font-normal tracking-wide"
@@ -724,7 +735,7 @@ export function ScrollingFeatureCards() {
                           </div>
                           
                           <h3 
-                            className="text-lg md:text-xl xl:text-2xl font-bold leading-tight break-words hyphens-auto"
+                            className="text-base md:text-lg xl:text-xl font-bold leading-tight break-words hyphens-auto"
                             style={{ color: 'rgb(31, 32, 35)' }}
                           >
                             <EditableTranslation translationKey={card.titleKey}>
@@ -733,7 +744,7 @@ export function ScrollingFeatureCards() {
                           </h3>
                           
                           <p 
-                            className="text-sm xl:text-base leading-relaxed opacity-80 break-words"
+                            className="text-sm md:text-sm xl:text-base leading-relaxed opacity-80 break-words"
                             style={{ color: 'rgba(0, 0, 0, 0.7)' }}
                           >
                             <EditableTranslation translationKey={card.descriptionKey}>
@@ -761,14 +772,14 @@ export function ScrollingFeatureCards() {
                         
                         {/* Right: Image with gradient background */}
                         <div 
-                          className="relative rounded-3xl overflow-hidden aspect-square xl:aspect-[16/10]"
+                          className="relative rounded-2xl md:rounded-3xl overflow-hidden aspect-square"
                           style={{
                             backgroundImage: 'var(--gradient-warmth)'
                           }}
                         >
                           {/* Image wrapper with asymmetric padding - gradient hugs top and right only */}
-                          <div className="absolute inset-0 pt-3 pr-3 pb-0 pl-0 xl:pt-5 xl:pr-5 flex items-start justify-end">
-                            <div className="relative w-full h-full rounded-r-2xl overflow-hidden shadow-lg bg-white">
+                          <div className="absolute inset-0 pt-2 pr-2 pb-[15px] pl-0 md:pt-3 md:pr-3 xl:pt-4 xl:pr-4 flex items-start justify-end">
+                            <div className="relative w-full h-full rounded-xl md:rounded-2xl overflow-hidden shadow-lg bg-white">
                               <EditableUniversalMedia
                                 locationId={`scrolling-card-${index + 1}`}
                                 onSave={() => loadImageSettings()}
