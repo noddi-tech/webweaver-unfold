@@ -186,6 +186,7 @@ export function UnifiedStyleModal({
     GRADIENT_COLORS,
     GLASS_EFFECTS,
     TEXT_COLOR_OPTIONS,
+    ALL_BACKGROUND_OPTIONS,
     loading: colorSystemLoading,
   } = useColorSystem();
 
@@ -893,12 +894,16 @@ export function UnifiedStyleModal({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {TEXT_COLOR_OPTIONS.map((option) => (
+                      {ALL_BACKGROUND_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           <div className="flex items-center gap-2">
                             <div 
                               className="w-4 h-4 rounded border" 
-                              style={{ backgroundColor: `hsl(${option.hslValue})` }}
+                              style={
+                                option.type === 'gradient' || option.type === 'glass'
+                                  ? { backgroundImage: `var(${option.cssVar})` }
+                                  : { backgroundColor: `hsl(${option.hslValue})` }
+                              }
                             />
                             {option.label}
                           </div>
