@@ -256,8 +256,8 @@ export function ScrollingFeatureCards() {
         newFitModes[i] = (data.fit_mode as 'contain' | 'cover') || 'contain';
         newAspectRatios[i] = data.aspect_ratio || 'auto';
         newObjectPositions[i] = (data.object_position as 'top' | 'center' | 'bottom') || 'center';
-        newCardHeights[i] = data.card_height || 'h-auto min-h-[400px] sm:h-[450px] lg:h-[480px] xl:h-[520px]';
-        newCardWidths[i] = data.card_width || 'w-full';
+        newCardHeights[i] = data.card_height || 'h-auto min-h-[600px] sm:h-[675px] lg:h-[720px] xl:h-[780px]';
+        newCardWidths[i] = data.card_width || 'w-[70%]';
         newCardBorderRadii[i] = data.card_border_radius || 'rounded-2xl';
         
         // Gap is global (use first card's gap)
