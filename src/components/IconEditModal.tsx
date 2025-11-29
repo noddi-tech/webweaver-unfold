@@ -38,13 +38,23 @@ const shapeOptions = [
 ];
 
 const iconColorOptions = [
-  { value: 'primary-foreground', label: 'Primary Foreground', class: 'text-primary-foreground' },
-  { value: 'foreground', label: 'Foreground', class: 'text-foreground' },
-  { value: 'primary', label: 'Primary', class: 'text-primary' },
-  { value: 'secondary', label: 'Secondary', class: 'text-secondary' },
-  { value: 'accent', label: 'Accent', class: 'text-accent' },
-  { value: 'muted-foreground', label: 'Muted', class: 'text-muted-foreground' },
-  { value: 'white', label: 'White', class: 'text-white' }
+  // Core colors
+  { value: 'primary-foreground', label: 'Primary Foreground' },
+  { value: 'foreground', label: 'Foreground' },
+  { value: 'primary', label: 'Primary' },
+  { value: 'secondary', label: 'Secondary' },
+  { value: 'accent', label: 'Accent' },
+  { value: 'muted-foreground', label: 'Muted' },
+  { value: 'white', label: 'White' },
+  // Semantic colors
+  { value: 'text-success', label: 'Success (Green)' },
+  { value: 'text-destructive', label: 'Destructive (Red)' },
+  { value: 'text-warning', label: 'Warning' },
+  { value: 'text-info', label: 'Info' },
+  // Brand colors
+  { value: 'text-vibrant-purple', label: 'Vibrant Purple' },
+  { value: 'text-brand-orange', label: 'Brand Orange' },
+  { value: 'text-brand-teal', label: 'Brand Teal' }
 ];
 
 export function IconEditModal({
@@ -123,7 +133,10 @@ export function IconEditModal({
         {typeof Icon === 'function' && Icon.length === 0 ? (
           <Icon />
         ) : (
-          <Icon className={cn(selectedSizeConfig.icon, `text-${selectedIconColor}`)} />
+          <Icon 
+            className={selectedSizeConfig.icon} 
+            style={{ color: `hsl(var(--${selectedIconColor}))` }}
+          />
         )}
       </div>
     );
@@ -264,20 +277,21 @@ export function IconEditModal({
         {/* ICON COLOR PICKER */}
         <div className="border-t pt-6 mt-4">
           <h3 className="text-sm font-semibold mb-3">Icon Color</h3>
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-5 gap-2">
             {iconColorOptions.map((color) => (
               <button
                 key={color.value}
                 onClick={() => setSelectedIconColor(color.value)}
                 className={cn(
-                  'p-4 rounded-lg border-2 transition-all hover:scale-105',
+                  'p-3 rounded-lg border-2 transition-all hover:scale-105',
                   selectedIconColor === color.value
                     ? 'border-primary ring-2 ring-primary/20'
                     : 'border-border hover:border-primary/50'
                 )}
                 title={color.label}
               >
-                <div className={cn('text-2xl font-bold', color.class)}>A</div>
+                <div className="text-2xl font-bold" style={{ color: `hsl(var(--${color.value}))` }}>A</div>
+                <div className="text-xs mt-1 text-muted-foreground truncate">{color.label}</div>
               </button>
             ))}
           </div>
