@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Palette, type LucideIcon } from 'lucide-react';
+import { Settings, type LucideIcon } from 'lucide-react';
 import { useEditMode } from '@/contexts/EditModeContext';
 import { useIconStyle } from '@/hooks/useIconStyle';
 import { cn } from '@/lib/utils';
@@ -73,7 +73,6 @@ export function EditableIcon({
           editMode && setIsHovered(true);
         }}
         onMouseLeave={() => setIsHovered(false)}
-        style={{ padding: '8px', margin: '-8px' }}
       >
         <div
           className={cn(
@@ -101,9 +100,10 @@ export function EditableIcon({
               e.preventDefault();
               setIsModalOpen(true);
             }}
-            className="absolute -top-1 -right-1 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg z-[200] hover:scale-110 transition-transform pointer-events-auto"
+            className="absolute -top-2 -right-2 p-1.5 bg-vibrant-purple text-white rounded-full shadow-lg z-[200] hover:scale-110 transition-transform"
+            title="Edit icon style"
           >
-            <Palette className="w-3 h-3" />
+            <Settings className="w-3 h-3" />
           </button>
         )}
       </div>
