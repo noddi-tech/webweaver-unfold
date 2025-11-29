@@ -73,6 +73,10 @@ export function EditableIcon({
           editMode && setIsHovered(true);
         }}
         onMouseLeave={() => setIsHovered(false)}
+        style={{ 
+          padding: '12px 12px 0 0',
+          margin: '-12px -12px 0 0'
+        }}
       >
         <div
           className={cn(

@@ -59,7 +59,7 @@ export default function HowItWorks() {
         </div>
 
         {/* Desktop: Horizontal Flow */}
-        <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 mb-12 items-start">
+        <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 mb-12 items-stretch">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -75,8 +75,8 @@ export default function HowItWorks() {
                     defaultBackground="bg-card"
                     allowedBackgrounds={allowedBackgrounds}
                   >
-                    <Card className="hover-scale">
-                      <CardContent className="p-6 flex flex-col overflow-visible">
+                    <Card className="hover-scale h-full">
+                      <CardContent className="p-6 h-full flex flex-col overflow-visible">
                         <EditableIcon
                           elementId={`how-it-works-icon-${index}`}
                           icon={Icon}
@@ -95,7 +95,7 @@ export default function HowItWorks() {
                           <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
                         </EditableTranslation>
                         <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                          <p className="text-sm mb-2">{step.description}</p>
+                          <p className="text-sm mb-2 flex-grow">{step.description}</p>
                         </EditableTranslation>
                         <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
                           <p className="text-xs">{step.details}</p>
@@ -131,8 +131,8 @@ export default function HowItWorks() {
                   defaultBackground="bg-card"
                   allowedBackgrounds={allowedBackgrounds}
                 >
-                  <Card className="hover-scale">
-                    <CardContent className="p-6 flex flex-col overflow-visible">
+                  <Card className="hover-scale h-full">
+                    <CardContent className="p-6 h-full flex flex-col overflow-visible">
                       <div className="flex items-start gap-4">
                         <EditableIcon
                           elementId={`how-it-works-icon-${index}`}
@@ -152,9 +152,9 @@ export default function HowItWorks() {
                           <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
                             <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
                           </EditableTranslation>
-                          <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                            <p className="text-sm mb-2">{step.description}</p>
-                          </EditableTranslation>
+                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
+                          <p className="text-sm mb-2 flex-grow">{step.description}</p>
+                        </EditableTranslation>
                           <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
                             <p className="text-xs">{step.details}</p>
                           </EditableTranslation>
