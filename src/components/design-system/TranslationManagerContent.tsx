@@ -1068,6 +1068,7 @@ export default function TranslationManagerContent() {
 
         console.log(`Translating to ${lang.code}...`);
 
+        // Step 1: Translate
         const { data, error } = await supabase.functions.invoke('translate-content', {
           body: {
             translationKeys,
@@ -1111,12 +1112,35 @@ export default function TranslationManagerContent() {
         };
         results.push(result);
 
-        // Show per-language completion
+        // Show per-language translation completion
         toast({
-          title: `${lang.name} complete`,
+          title: `${lang.name} translation complete`,
           description: `${data.count} translations saved${data.failed > 0 ? `, ${data.failed} failed` : ''}`,
           duration: 3000
         });
+
+        // Step 2: Auto-trigger evaluation
+        setTranslationProgress(
+          `Evaluating ${lang.name} translation quality (${i + 1}/${targetLanguages.length})...`
+        );
+
+        try {
+          await supabase.functions.invoke('evaluate-translation-quality', {
+            body: { 
+              targetLanguage: lang.code,
+              sourceLanguage: 'en'
+            }
+          });
+          
+          toast({
+            title: `${lang.name} evaluation started`,
+            description: 'Quality evaluation is running in the background',
+            duration: 2000
+          });
+        } catch (evalError: any) {
+          console.error(`Evaluation error for ${lang.name} (non-fatal):`, evalError);
+          // Don't fail the whole process if evaluation fails
+        }
 
         // Reload data to show updated translations
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -1141,8 +1165,8 @@ export default function TranslationManagerContent() {
       const totalTranslated = results.reduce((sum, r) => sum + (r.count || 0), 0);
 
       toast({
-        title: 'Translation complete!',
-        description: `${successCount} languages completed successfully${partialCount > 0 ? `, ${partialCount} partial` : ''}${failedCount > 0 ? `, ${failedCount} failed` : ''}. Total: ${totalTranslated} translations.`,
+        title: 'Translation & evaluation complete!',
+        description: `${successCount} languages completed successfully${partialCount > 0 ? `, ${partialCount} partial` : ''}${failedCount > 0 ? `, ${failedCount} failed` : ''}. Total: ${totalTranslated} translations. Quality evaluation running in background.`,
         duration: 8000
       });
 
