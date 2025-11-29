@@ -1108,14 +1108,43 @@ export default function TranslationManagerContent() {
 
         console.log(`Translating to ${lang.code}...`);
 
-        // Step 1: Translate
-        const { data, error } = await supabase.functions.invoke('translate-content', {
-          body: {
-            translationKeys,
-            targetLanguage: lang.code,
-            sourceLanguage: 'en',
+        // Step 1: Translate with batching for scalability
+        const KEYS_PER_REQUEST = 500;
+        const keyChunks: string[][] = [];
+        for (let i = 0; i < translationKeys.length; i += KEYS_PER_REQUEST) {
+          keyChunks.push(translationKeys.slice(i, i + KEYS_PER_REQUEST));
+        }
+
+        // Send multiple requests if keys exceed 500
+        let totalCount = 0;
+        let totalFailed = 0;
+        let lastData: any = null;
+        let lastError: any = null;
+
+        for (let chunkIndex = 0; chunkIndex < keyChunks.length; chunkIndex++) {
+          const chunk = keyChunks[chunkIndex];
+          console.log(`Translating chunk ${chunkIndex + 1}/${keyChunks.length} (${chunk.length} keys) for ${lang.code}...`);
+          
+          const { data: chunkData, error: chunkError } = await supabase.functions.invoke('translate-content', {
+            body: {
+              translationKeys: chunk,
+              targetLanguage: lang.code,
+              sourceLanguage: 'en',
+            }
+          });
+
+          if (chunkError) {
+            lastError = chunkError;
+            console.error(`Error translating chunk ${chunkIndex + 1} for ${lang.name}:`, chunkError);
+          } else if (chunkData) {
+            totalCount += chunkData.count || 0;
+            totalFailed += chunkData.failed || 0;
+            lastData = { ...chunkData, count: totalCount, failed: totalFailed };
           }
-        });
+        }
+
+        const data = lastData;
+        const error = lastError;
 
         if (error) {
           console.error(`Error translating ${lang.name}:`, error);
