@@ -145,8 +145,8 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        <WhyNoddi />
         <ScrollingFeatureCards />
+        <WhyNoddi />
         <HowItWorks />
         <FinalCTA />
       </main>
