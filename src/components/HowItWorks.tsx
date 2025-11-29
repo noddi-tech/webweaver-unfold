@@ -59,7 +59,7 @@ export default function HowItWorks() {
         </div>
 
         {/* Desktop: Horizontal Flow */}
-        <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 mb-12 items-stretch">
+        <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 mb-12 items-start">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -75,8 +75,8 @@ export default function HowItWorks() {
                     defaultBackground="bg-card"
                     allowedBackgrounds={allowedBackgrounds}
                   >
-                    <Card className="hover-scale h-full">
-                      <CardContent className="p-6 h-full flex flex-col overflow-visible">
+                    <Card className="hover-scale">
+                      <CardContent className="p-6 flex flex-col overflow-visible">
                         <EditableIcon
                           elementId={`how-it-works-icon-${index}`}
                           icon={Icon}
@@ -131,8 +131,8 @@ export default function HowItWorks() {
                   defaultBackground="bg-card"
                   allowedBackgrounds={allowedBackgrounds}
                 >
-                  <Card className="hover-scale h-full">
-                    <CardContent className="p-6 h-full flex flex-col overflow-visible">
+                  <Card className="hover-scale">
+                    <CardContent className="p-6 flex flex-col overflow-visible">
                       <div className="flex items-start gap-4">
                         <EditableIcon
                           elementId={`how-it-works-icon-${index}`}
