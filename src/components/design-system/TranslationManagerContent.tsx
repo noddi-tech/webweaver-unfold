@@ -1026,35 +1026,75 @@ export default function TranslationManagerContent() {
 
   async function handleTranslateAll() {
     setIsTranslating(true);
+    setTranslationProgress('Cleaning up broken data...');
     
-    // Get all English keys
-    const { data: englishKeys } = await supabase
-      .from('translations')
-      .select('translation_key')
-      .eq('language_code', 'en');
-
-    if (!englishKeys || englishKeys.length === 0) {
-      toast({ title: 'No English translations found', variant: 'destructive' });
-      setIsTranslating(false);
-      setTranslationProgress('');
-      return;
-    }
-
-    // Get enabled languages (except English)
-    const targetLanguages = languages.filter(l => l.enabled && l.code !== 'en');
-
-    if (targetLanguages.length === 0) {
-      toast({ title: 'No target languages enabled', variant: 'destructive' });
-      setIsTranslating(false);
-      setTranslationProgress('');
-      return;
-    }
-
-    const batchSize = 100;
-    const totalBatches = Math.ceil(englishKeys.length / batchSize);
-    const translationKeys = englishKeys.map(k => k.translation_key);
+    // Variables accessible across both try blocks
+    let englishKeys: any[] = [];
+    let targetLanguages: any[] = [];
+    let translationKeys: string[] = [];
+    let totalBatches = 0;
     
-    setTranslationProgress(`Preparing to translate ${translationKeys.length} keys to ${targetLanguages.length} languages...`);
+    try {
+      // Step 1: Delete broken entries for all non-English languages
+      const { data: allLanguages } = await supabase
+        .from('languages')
+        .select('code')
+        .eq('enabled', true)
+        .neq('code', 'en');
+
+      if (allLanguages) {
+        for (const lang of allLanguages) {
+          const { error: cleanupError } = await supabase
+            .from('translations')
+            .delete()
+            .eq('language_code', lang.code)
+            .filter('translated_text', 'eq', 'translation_key');
+
+          if (cleanupError) {
+            console.warn(`Cleanup warning for ${lang.code}:`, cleanupError);
+          } else {
+            console.log(`Cleaned up broken entries for ${lang.code}`);
+          }
+        }
+      }
+
+      setTranslationProgress('Starting translation...');
+      
+      // Step 2: Continue with normal translation flow
+      // Get all English keys
+      const { data: keys } = await supabase
+        .from('translations')
+        .select('translation_key')
+        .eq('language_code', 'en');
+
+      englishKeys = keys || [];
+
+      if (!englishKeys || englishKeys.length === 0) {
+        toast({ title: 'No English translations found', variant: 'destructive' });
+        setIsTranslating(false);
+        setTranslationProgress('');
+        return;
+      }
+
+      // Get enabled languages (except English)
+      targetLanguages = languages.filter(l => l.enabled && l.code !== 'en');
+
+      if (targetLanguages.length === 0) {
+        toast({ title: 'No target languages enabled', variant: 'destructive' });
+        setIsTranslating(false);
+        setTranslationProgress('');
+        return;
+      }
+
+      const batchSize = 100;
+      totalBatches = Math.ceil(englishKeys.length / batchSize);
+      translationKeys = englishKeys.map(k => k.translation_key);
+      
+      setTranslationProgress(`Preparing to translate ${translationKeys.length} keys to ${targetLanguages.length} languages...`);
+    } catch (cleanupError: any) {
+      console.error('Cleanup error:', cleanupError);
+      // Continue with translation even if cleanup fails
+    }
 
     try {
       const results = [];

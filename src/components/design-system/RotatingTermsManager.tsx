@@ -39,6 +39,45 @@ export function RotatingTermsManager() {
     setLoading(false);
   };
 
+  // Sync term to translations table
+  const syncTermToTranslations = async (term: RotatingTerm) => {
+    try {
+      // Upsert English translation for term_key
+      await supabase.from('translations').upsert({
+        translation_key: term.term_key,
+        language_code: 'en',
+        translated_text: term.term_fallback,
+        approved: true,
+        page_location: 'homepage',
+        context: 'Hero section rotating headline term'
+      }, {
+        onConflict: 'translation_key,language_code'
+      });
+      
+      // Upsert English translation for descriptor_key  
+      await supabase.from('translations').upsert({
+        translation_key: term.descriptor_key,
+        language_code: 'en',
+        translated_text: term.descriptor_fallback,
+        approved: true,
+        page_location: 'homepage',
+        context: 'Hero section rotating headline descriptor'
+      }, {
+        onConflict: 'translation_key,language_code'
+      });
+      
+      // Mark other languages as stale (English changed)
+      await supabase.from('translations')
+        .update({ is_stale: true, review_status: 'stale' })
+        .in('translation_key', [term.term_key, term.descriptor_key])
+        .neq('language_code', 'en');
+        
+      console.log('Synced term to translations:', term.term_key, term.descriptor_key);
+    } catch (error) {
+      console.error('Failed to sync term to translations:', error);
+    }
+  };
+
   const handleAdd = async () => {
     const newTerm = {
       term_key: 'hero.rotating.new.term',
@@ -50,12 +89,15 @@ export function RotatingTermsManager() {
       sort_order: terms.length + 1,
     };
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('rotating_headline_terms')
-      .insert([newTerm]);
+      .insert([newTerm])
+      .select()
+      .single();
 
-    if (!error) {
-      toast.success('Term added successfully');
+    if (!error && data) {
+      toast.success('Term added and synced to translations!');
+      await syncTermToTranslations(data);
       fetchTerms();
     } else {
       toast.error('Failed to add term');
@@ -63,13 +105,21 @@ export function RotatingTermsManager() {
   };
 
   const handleUpdate = async (id: string, field: string, value: string | boolean) => {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('rotating_headline_terms')
       .update({ [field]: value })
-      .eq('id', id);
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!error) {
+    if (!error && data) {
       setTerms(terms.map(t => t.id === id ? { ...t, [field]: value } : t));
+      
+      // If fallback text changed, sync to translations
+      if (field === 'term_fallback' || field === 'descriptor_fallback') {
+        await syncTermToTranslations(data);
+        toast.success('Term updated and translations marked as stale');
+      }
     } else {
       toast.error('Failed to update term');
     }
