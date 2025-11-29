@@ -67,9 +67,13 @@ export function EditableIcon({
   return (
     <>
       <div
-        className={cn("relative inline-flex overflow-visible p-2 -m-2", className)}
-        onMouseEnter={() => editMode && setIsHovered(true)}
+        className={cn("relative inline-block", className)}
+        onMouseEnter={(e) => {
+          e.stopPropagation();
+          editMode && setIsHovered(true);
+        }}
         onMouseLeave={() => setIsHovered(false)}
+        style={{ padding: '8px', margin: '-8px' }}
       >
         <div
           className={cn(
@@ -94,9 +98,10 @@ export function EditableIcon({
           <button
             onClick={(e) => {
               e.stopPropagation();
+              e.preventDefault();
               setIsModalOpen(true);
             }}
-            className="absolute top-0 right-0 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg z-[100] hover:scale-110 transition-transform pointer-events-auto"
+            className="absolute -top-1 -right-1 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg z-[200] hover:scale-110 transition-transform pointer-events-auto"
           >
             <Palette className="w-3 h-3" />
           </button>
