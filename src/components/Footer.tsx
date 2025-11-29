@@ -93,17 +93,22 @@ const Footer = () => {
                   // Translate contact label - empty strings will hide the label (icon only)
                   const contactLabel = contact.title ? t(contact.title, contact.title) : '';
                   return (
-                    <div key={index} className="flex items-center text-muted-foreground">
-                      <IconComponent className="w-4 h-4 mr-2 shrink-0" />
-                      {contactLabel && <span className="mr-2 text-sm font-medium">{contactLabel}:</span>}
-                      {contact.link ? (
-                        <a href={contact.link} className="hover:text-primary transition-colors">
-                          {contact.value}
-                        </a>
-                      ) : (
-                        contact.value
-                      )}
-                    </div>
+                    <EditableTranslation 
+                      key={index} 
+                      translationKey={`footer.contact_info.${index}`}
+                    >
+                      <div className="flex items-center text-muted-foreground">
+                        <IconComponent className="w-4 h-4 mr-2 shrink-0" />
+                        {contactLabel && <span className="mr-2 text-sm font-medium">{contactLabel}:</span>}
+                        {contact.link ? (
+                          <a href={contact.link} className="hover:text-primary transition-colors">
+                            {contact.value}
+                          </a>
+                        ) : (
+                          contact.value
+                        )}
+                      </div>
+                    </EditableTranslation>
                   );
                 })}
               </div>
