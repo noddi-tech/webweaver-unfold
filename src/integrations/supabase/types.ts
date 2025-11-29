@@ -1616,12 +1616,15 @@ export type Database = {
           font_weight: string | null
           id: string
           is_italic: boolean | null
+          is_stale: boolean | null
           is_underline: boolean | null
           language_code: string
           page_location: string | null
           quality_metrics: Json | null
           quality_score: number | null
           review_status: string | null
+          source_hash: string | null
+          source_updated_at: string | null
           translated_text: string
           translation_key: string
           updated_at: string
@@ -1641,12 +1644,15 @@ export type Database = {
           font_weight?: string | null
           id?: string
           is_italic?: boolean | null
+          is_stale?: boolean | null
           is_underline?: boolean | null
           language_code: string
           page_location?: string | null
           quality_metrics?: Json | null
           quality_score?: number | null
           review_status?: string | null
+          source_hash?: string | null
+          source_updated_at?: string | null
           translated_text: string
           translation_key: string
           updated_at?: string
@@ -1666,12 +1672,15 @@ export type Database = {
           font_weight?: string | null
           id?: string
           is_italic?: boolean | null
+          is_stale?: boolean | null
           is_underline?: boolean | null
           language_code?: string
           page_location?: string | null
           quality_metrics?: Json | null
           quality_score?: number | null
           review_status?: string | null
+          source_hash?: string | null
+          source_updated_at?: string | null
           translated_text?: string
           translation_key?: string
           updated_at?: string
