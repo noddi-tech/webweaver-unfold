@@ -8,6 +8,7 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { EditableBackground } from "@/components/EditableBackground";
 import { EditableIcon } from "@/components/EditableIcon";
+import { EditableListIcon } from "@/components/EditableListIcon";
 
 export default function WhyNoddi() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
@@ -71,7 +72,12 @@ export default function WhyNoddi() {
                 <ul className="space-y-4">
                   {beforeItems.map((item, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <X className="w-5 h-5 flex-shrink-0 mt-0.5 text-destructive" />
+                      <EditableListIcon
+                        elementId="why-noddi-before-list-icon"
+                        icon={X}
+                        defaultColor="text-destructive"
+                        className="w-5 h-5 flex-shrink-0 mt-0.5"
+                      />
                       <EditableTranslation translationKey={`why_noddi.before.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
                         <span>{item}</span>
                       </EditableTranslation>
@@ -108,7 +114,12 @@ export default function WhyNoddi() {
                 <ul className="space-y-4">
                   {afterItems.map((item, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 flex-shrink-0 mt-0.5 text-primary" />
+                      <EditableListIcon
+                        elementId="why-noddi-after-list-icon"
+                        icon={Check}
+                        defaultColor="text-success"
+                        className="w-5 h-5 flex-shrink-0 mt-0.5"
+                      />
                       <EditableTranslation translationKey={`why_noddi.after.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
                         <span className="font-medium">{item}</span>
                       </EditableTranslation>
