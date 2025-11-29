@@ -67,7 +67,7 @@ export function EditableIcon({
   return (
     <>
       <div
-        className={cn("relative inline-flex overflow-visible", className)}
+        className={cn("relative inline-flex overflow-visible p-2 -m-2", className)}
         onMouseEnter={() => editMode && setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -96,7 +96,7 @@ export function EditableIcon({
               e.stopPropagation();
               setIsModalOpen(true);
             }}
-            className="absolute -top-2 -right-2 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg z-[100] hover:scale-110 transition-transform pointer-events-auto"
+            className="absolute top-0 right-0 p-1.5 bg-primary text-primary-foreground rounded-full shadow-lg z-[100] hover:scale-110 transition-transform pointer-events-auto"
           >
             <Palette className="w-3 h-3" />
           </button>

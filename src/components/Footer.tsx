@@ -9,18 +9,37 @@ import { EditableTranslation } from "@/components/EditableTranslation";
 const Footer = () => {
   const { t } = useAppTranslation();
   const [footerSettings, setFooterSettings] = useState<any>(null);
+  const [brand, setBrand] = useState<{
+    logo_image_url: string | null;
+    logo_variant: string;
+    logo_text: string | null;
+    logo_image_height: number;
+  } | null>(null);
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      const { data } = await supabase
-        .from("footer_settings")
-        .select("*")
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
+      const [brandData, footerData] = await Promise.all([
+        supabase.from("brand_settings")
+          .select("logo_image_url, logo_variant, logo_text, logo_image_height")
+          .limit(1)
+          .maybeSingle(),
+        supabase.from("footer_settings")
+          .select("*")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle()
+      ]);
+      
       if (!mounted) return;
-      setFooterSettings(data);
+      
+      if (brandData.data) {
+        setBrand(brandData.data);
+      }
+      
+      if (footerData.data) {
+        setFooterSettings(footerData.data);
+      }
     };
     load();
     return () => { mounted = false; };
@@ -44,11 +63,22 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
-            <EditableTranslation translationKey="footer.company_name">
-              <div className="text-2xl font-bold gradient-text mb-4">
-                {footerSettings.company_name}
-              </div>
-            </EditableTranslation>
+            {/* Logo - displayed ABOVE the description */}
+            {brand?.logo_variant === 'image' && brand?.logo_image_url ? (
+              <img 
+                src={brand.logo_image_url} 
+                alt={brand.logo_text || "Logo"} 
+                className="mb-4 w-auto"
+                style={{ height: brand.logo_image_height || 40 }}
+              />
+            ) : (
+              <EditableTranslation translationKey="footer.company_name">
+                <div className="text-2xl font-bold gradient-text mb-4">
+                  {footerSettings.company_name}
+                </div>
+              </EditableTranslation>
+            )}
+            
             {footerSettings.company_description && (
               <EditableTranslation translationKey="footer.company_description">
                 <p className="text-muted-foreground mb-6 max-w-md">
