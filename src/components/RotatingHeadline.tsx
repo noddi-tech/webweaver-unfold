@@ -106,20 +106,20 @@ export function RotatingHeadline({
           <span className="text-foreground">for mobile & workshop car services.</span>
         </EditableTranslation>
         
-        {/* Pause button - hidden on mobile, inline on desktop */}
+        {/* Pause button - hidden */}
         <Button
           variant="ghost"
           size="icon"
           onClick={togglePlayPause}
           aria-label={isPlaying ? 'Pause rotation' : 'Resume rotation'}
-          className="opacity-60 hover:opacity-100 transition-opacity hidden sm:inline-flex ml-2"
+          className="hidden"
         >
           {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
         </Button>
       </h1>
       
-      {/* Pause button for mobile - shown below text */}
-      <div className="sm:hidden mt-3 flex justify-center">
+      {/* Pause button for mobile - hidden */}
+      <div className="hidden">
         <Button
           variant="ghost"
           size="sm"
