@@ -3,6 +3,32 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { supabase } from '@/integrations/supabase/client';
 
+// Cache valid switcher languages to avoid repeated database queries
+let validSwitcherLanguages: string[] = ['en']; // Default to English only
+
+// Function to refresh valid languages from database
+async function refreshValidLanguages() {
+  try {
+    const { data, error } = await supabase
+      .from('languages')
+      .select('code')
+      .eq('enabled', true)
+      .eq('show_in_switcher', true);
+    
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      validSwitcherLanguages = data.map(l => l.code);
+      console.log('[i18n] Valid switcher languages:', validSwitcherLanguages);
+    }
+  } catch (error) {
+    console.error('[i18n] Error loading valid switcher languages:', error);
+  }
+}
+
+// Load valid languages on init
+refreshValidLanguages();
+
 // Custom backend to load from Supabase
 const supabaseBackend = {
   type: 'backend' as const,
@@ -76,19 +102,28 @@ const supabaseBackend = {
 const customDetector = {
   name: 'customDetector',
   lookup: (): string | undefined => {
-    // 1. Check URL path first
+    // 1. Check URL path first - only if it's a valid switcher language
     const pathLang = window.location.pathname.split('/')[1];
-    if (pathLang && pathLang.length === 2) {
+    if (pathLang && pathLang.length === 2 && validSwitcherLanguages.includes(pathLang)) {
       return pathLang;
     }
 
-    // 2. Check localStorage
+    // 2. Check localStorage - only if it's a valid switcher language
     const stored = localStorage.getItem('noddi-language');
-    if (stored) return stored;
+    if (stored && validSwitcherLanguages.includes(stored)) {
+      return stored;
+    }
 
-    // 3. Browser language fallback
+    // 3. Browser language - ONLY if it's in the switcher list
     const browserLang = navigator.language.split('-')[0];
-    return browserLang || 'en';
+    if (validSwitcherLanguages.includes(browserLang)) {
+      console.log('[i18n] Using browser language:', browserLang);
+      return browserLang;
+    }
+
+    // 4. Fallback to English
+    console.log('[i18n] Falling back to English (no valid language detected)');
+    return 'en';
   },
   cacheUserLanguage: (lng: string) => {
     localStorage.setItem('noddi-language', lng);
