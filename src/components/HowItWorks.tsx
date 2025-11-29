@@ -81,7 +81,7 @@ export default function HowItWorks() {
                           elementId={`how-it-works-icon-${index}`}
                           icon={Icon}
                           defaultBackground="bg-gradient-primary"
-                          className="mb-4"
+                          className="mb-6"
                         />
                         <EditableTranslation 
                           translationKey={`how_it_works.step_${index + 1}.label`} 
