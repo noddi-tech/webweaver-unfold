@@ -119,6 +119,7 @@ export function RichTextEditModal({
   const [translations, setTranslations] = useState<Translation[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [autoTranslateEnabled, setAutoTranslateEnabled] = useState(false);
   const { currentLanguage } = useAppTranslation();
   const { TEXT_COLOR_OPTIONS } = useColorSystem();
 
@@ -137,8 +138,20 @@ export function RichTextEditModal({
   useEffect(() => {
     if (open) {
       loadContent();
+      loadAutoTranslateSetting();
     }
   }, [open, contentId]);
+
+  const loadAutoTranslateSetting = async () => {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('setting_value')
+      .eq('setting_key', 'auto_translate_on_edit')
+      .single();
+    
+    const settingValue = data?.setting_value as { enabled?: boolean } | null;
+    setAutoTranslateEnabled(settingValue?.enabled === true);
+  };
 
   const loadContent = async () => {
     setLoading(true);
@@ -329,6 +342,12 @@ export function RichTextEditModal({
       }
 
       toast.success('Content updated successfully');
+      
+      // Auto-translate if enabled and this is English
+      if (currentLanguage === 'en' && autoTranslateEnabled && translationKey) {
+        await triggerAutoTranslate();
+      }
+      
       onOpenChange(false);
       
       await i18n.reloadResources(currentLanguage);
@@ -346,6 +365,35 @@ export function RichTextEditModal({
       toast.error('Failed to save content');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const triggerAutoTranslate = async () => {
+    try {
+      const { data: enabledLanguages } = await supabase
+        .from('languages')
+        .select('code')
+        .eq('enabled', true)
+        .neq('code', 'en');
+
+      if (!enabledLanguages || enabledLanguages.length === 0) return;
+
+      toast.info(`Auto-translating to ${enabledLanguages.length} languages...`);
+
+      const translatePromises = enabledLanguages.map(lang =>
+        supabase.functions.invoke('translate-single-key', {
+          body: {
+            translationKey,
+            targetLanguage: lang.code,
+          }
+        })
+      );
+
+      await Promise.allSettled(translatePromises);
+      toast.success('Auto-translation completed!');
+    } catch (error) {
+      console.error('Auto-translate error:', error);
+      toast.error('Auto-translation failed');
     }
   };
 
