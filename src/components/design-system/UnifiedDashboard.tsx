@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslationStats } from '@/hooks/useTranslationStats';
 import { Loader2 } from 'lucide-react';
 import LanguageStatsTable from './LanguageStatsTable';
+import TranslationHealthCheck from './TranslationHealthCheck';
 
 export default function UnifiedDashboard() {
   const { toast } = useToast();
@@ -82,6 +83,9 @@ export default function UnifiedDashboard() {
           Complete system status across all languages
         </p>
       </div>
+
+      {/* Translation Health Check */}
+      <TranslationHealthCheck />
 
       {/* Global Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
