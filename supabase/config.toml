@@ -12,6 +12,9 @@ verify_jwt = false
 [functions.evaluate-translation-quality]
 verify_jwt = false
 
+[functions.verify-translation-quality]
+verify_jwt = false
+
 [functions.generate-meta-description]
 verify_jwt = false
 

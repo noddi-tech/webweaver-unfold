@@ -118,7 +118,7 @@ serve(async (req) => {
       return guides[lang] || '';
     };
 
-    // Enhanced TOV guide with context awareness
+    // Enhanced TOV guide with phrase-level transformation examples
     const tovGuide = `You are translating content for Noddi Tech, an automotive service technology platform.
 
 TONE OF VOICE PRINCIPLES:
@@ -134,6 +134,28 @@ TRANSLATION RULES:
 - Maintain professional tone while being human
 - Preserve ALL HTML tags and placeholders exactly as they appear (e.g., <strong>, {variable}, %s)
 - Maintain the same level of formality as the source
+
+**🚨 CRITICAL: PHRASE-LEVEL ADAPTATION (NOT WORD-FOR-WORD) 🚨**
+
+In Germanic languages (German, Norwegian, Swedish, Danish, Dutch), multi-word English phrases 
+often become SINGLE compound words. NEVER translate word-by-word.
+
+**EXAMPLES - Germanic Languages:**
+✅ CORRECT: "Operations platform" → Norwegian: "driftsplattform" (NOT "operasjoner plattform")
+✅ CORRECT: "Service scheduling" → German: "Serviceterminierung" (NOT "Service Planung")
+✅ CORRECT: "Customer portal" → Swedish: "kundportalen" (NOT "kund portal")
+✅ CORRECT: "Booking system" → Norwegian: "bookingsystem" (NOT "booking system" - keep as compound)
+✅ CORRECT: "User experience" → German: "Benutzererfahrung" (NOT "Benutzer Erfahrung")
+✅ CORRECT: "Mobile services" → Norwegian: "mobile tjenester" (compound when natural)
+✅ CORRECT: "Capacity management" → Danish: "kapacitetsstyring" (NOT "kapacitet styring")
+
+**EXAMPLES - Romance Languages (French, Spanish, Italian, Portuguese):**
+✅ CORRECT: "Get started" → French: "Commencer" (NOT "Obtenir commencé")
+✅ CORRECT: "Sign up for free" → Spanish: "Regístrate gratis" (NOT "Inscribirse para gratis")
+✅ CORRECT: "Learn more" → French: "En savoir plus" (NOT "Apprendre plus")
+✅ CORRECT: "Book now" → Italian: "Prenota ora" (NOT "Libro ora")
+
+**RULE:** Translate for MEANING and NATURAL FLOW in the target language, not for word-for-word equivalence.
 
 **🚨 CRITICAL: TECHNICAL TERMS POLICY 🚨**
 
