@@ -74,8 +74,8 @@ export function EditableIcon({
         }}
         onMouseLeave={() => setIsHovered(false)}
         style={{ 
-          padding: '12px 12px 0 0',
-          margin: '-12px -12px 0 0'
+          padding: '0 8px 8px 0',
+          margin: '0 -8px -8px 0'
         }}
       >
         <div
@@ -104,7 +104,7 @@ export function EditableIcon({
               e.preventDefault();
               setIsModalOpen(true);
             }}
-            className="absolute -top-2 -right-2 p-1.5 bg-vibrant-purple text-white rounded-full shadow-lg z-[200] hover:scale-110 transition-transform"
+            className="absolute -bottom-1 -right-1 p-1.5 bg-vibrant-purple text-white rounded-full shadow-lg z-[200] hover:scale-110 transition-transform"
             title="Edit icon style"
           >
             <Settings className="w-3 h-3" />
