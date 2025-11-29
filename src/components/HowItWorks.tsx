@@ -76,16 +76,21 @@ export default function HowItWorks() {
                     allowedBackgrounds={allowedBackgrounds}
                   >
                     <Card className="hover-scale h-full">
-                      <CardContent className="p-6 h-full flex flex-col">
+                      <CardContent className="p-6 h-full flex flex-col overflow-visible">
                         <EditableIcon
                           elementId={`how-it-works-icon-${index}`}
                           icon={Icon}
                           defaultBackground="bg-gradient-primary"
                           className="mb-4"
                         />
-                        <LockedText reason="Step number - Update in code">
-                          <div className="text-sm font-bold text-white mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
-                        </LockedText>
+                        <EditableTranslation 
+                          translationKey={`how_it_works.step_${index + 1}.label`} 
+                          onSave={() => setRefreshKey(prev => prev + 1)}
+                        >
+                          <div className="text-sm font-bold text-primary mb-2">
+                            {t(`how_it_works.step_${index + 1}.label`, `Step ${index + 1}`)}
+                          </div>
+                        </EditableTranslation>
                         <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
                           <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
                         </EditableTranslation>
@@ -127,7 +132,7 @@ export default function HowItWorks() {
                   allowedBackgrounds={allowedBackgrounds}
                 >
                   <Card className="hover-scale h-full">
-                    <CardContent className="p-6 h-full flex flex-col">
+                    <CardContent className="p-6 h-full flex flex-col overflow-visible">
                       <div className="flex items-start gap-4">
                         <EditableIcon
                           elementId={`how-it-works-icon-${index}`}
@@ -136,9 +141,14 @@ export default function HowItWorks() {
                           className="flex-shrink-0"
                         />
                         <div className="flex-1">
-                          <LockedText reason="Step number - Update in code">
-                            <div className="text-sm font-bold text-white mb-2">{t('how_it_works.step_label', 'Step {index}').replace('{index}', String(index + 1))}</div>
-                          </LockedText>
+                          <EditableTranslation 
+                            translationKey={`how_it_works.step_${index + 1}.label`} 
+                            onSave={() => setRefreshKey(prev => prev + 1)}
+                          >
+                            <div className="text-sm font-bold text-primary mb-2">
+                              {t(`how_it_works.step_${index + 1}.label`, `Step ${index + 1}`)}
+                            </div>
+                          </EditableTranslation>
                           <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
                             <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
                           </EditableTranslation>
