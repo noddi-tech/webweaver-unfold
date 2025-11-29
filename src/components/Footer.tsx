@@ -4,6 +4,7 @@ import * as Icons from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LanguageLink } from "@/components/LanguageLink";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { EditableTranslation } from "@/components/EditableTranslation";
 
 const Footer = () => {
   const { t } = useAppTranslation();
@@ -43,13 +44,17 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
-            <div className="text-2xl font-bold gradient-text mb-4">
-              {t('footer.company_name', footerSettings.company_name)}
-            </div>
-            {(footerSettings.company_description || t('footer.company_description')) && (
-              <p className="text-muted-foreground mb-6 max-w-md">
-                {t('footer.company_description', footerSettings.company_description)}
-              </p>
+            <EditableTranslation translationKey="footer.company_name">
+              <div className="text-2xl font-bold gradient-text mb-4">
+                {footerSettings.company_name}
+              </div>
+            </EditableTranslation>
+            {footerSettings.company_description && (
+              <EditableTranslation translationKey="footer.company_description">
+                <p className="text-muted-foreground mb-6 max-w-md">
+                  {footerSettings.company_description}
+                </p>
+              </EditableTranslation>
             )}
             {footerSettings.contact_info && footerSettings.contact_info.length > 0 && (
               <div className="space-y-2">
@@ -78,15 +83,19 @@ const Footer = () => {
           {/* Quick Links */}
           {footerSettings.quick_links && footerSettings.quick_links.length > 0 && (
             <div>
-              <h4 className="font-semibold text-foreground mb-4">
-                {t('footer.quick_links_heading', 'Quick Links')}
-              </h4>
+              <EditableTranslation translationKey="footer.quick_links_heading">
+                <h4 className="font-semibold text-foreground mb-4">
+                  Quick Links
+                </h4>
+              </EditableTranslation>
               <ul className="space-y-2">
                 {footerSettings.quick_links.map((link: any, index: number) => (
                   <li key={index}>
-                    <LanguageLink to={link.url} className="text-muted-foreground hover:text-primary transition-colors">
-                      {t(link.title, link.title)}
-                    </LanguageLink>
+                    <EditableTranslation translationKey={`footer.quick_links.${index}`}>
+                      <LanguageLink to={link.url} className="text-muted-foreground hover:text-primary transition-colors">
+                        {t(link.title, link.title)}
+                      </LanguageLink>
+                    </EditableTranslation>
                   </li>
                 ))}
               </ul>
@@ -96,15 +105,19 @@ const Footer = () => {
           {/* Legal */}
           {footerSettings.legal_links && footerSettings.legal_links.length > 0 && (
             <div>
-              <h4 className="font-semibold text-foreground mb-4">
-                {t('footer.legal_heading', 'Legal')}
-              </h4>
+              <EditableTranslation translationKey="footer.legal_heading">
+                <h4 className="font-semibold text-foreground mb-4">
+                  Legal
+                </h4>
+              </EditableTranslation>
               <ul className="space-y-2">
                 {footerSettings.legal_links.map((link: any, index: number) => (
                   <li key={index}>
-                    <LanguageLink to={link.url} className="text-muted-foreground hover:text-primary transition-colors">
-                      {t(link.title, link.title)}
-                    </LanguageLink>
+                    <EditableTranslation translationKey={`footer.legal_links.${index}`}>
+                      <LanguageLink to={link.url} className="text-muted-foreground hover:text-primary transition-colors">
+                        {t(link.title, link.title)}
+                      </LanguageLink>
+                    </EditableTranslation>
                   </li>
                 ))}
               </ul>
@@ -112,9 +125,11 @@ const Footer = () => {
           )}
         </div>
 
-        {(footerSettings.copyright_text || t('footer.copyright')) && (
+        {footerSettings.copyright_text && (
           <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
-            <p>{t('footer.copyright', footerSettings.copyright_text)}</p>
+            <EditableTranslation translationKey="footer.copyright">
+              <p>{footerSettings.copyright_text}</p>
+            </EditableTranslation>
           </div>
         )}
       </div>
