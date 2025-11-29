@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Play, Pause } from 'lucide-react';
 import { useRotatingTerms } from '@/hooks/useRotatingTerms';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
-import { Button } from '@/components/ui/button';
 import { EditableTranslation } from '@/components/EditableTranslation';
 
 interface RotatingHeadlineProps {
@@ -20,20 +18,6 @@ export function RotatingHeadline({
   const [isPlaying, setIsPlaying] = useState(true);
   const [isFading, setIsFading] = useState(false);
 
-  // Detect prefers-reduced-motion
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (mediaQuery.matches) {
-      setIsPlaying(false);
-    }
-    
-    const handler = (e: MediaQueryListEvent) => {
-      if (e.matches) setIsPlaying(false);
-    };
-    
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, []);
 
   // Rotation logic
   useEffect(() => {
@@ -51,9 +35,6 @@ export function RotatingHeadline({
     return () => clearInterval(interval);
   }, [isPlaying, loading, terms.length, rotationInterval]);
 
-  const togglePlayPause = () => {
-    setIsPlaying((prev) => !prev);
-  };
 
   if (loading || terms.length === 0) {
     return (
@@ -105,31 +86,7 @@ export function RotatingHeadline({
         >
           <span className="text-foreground">for mobile & workshop car services.</span>
         </EditableTranslation>
-        
-        {/* Pause button - hidden */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={togglePlayPause}
-          aria-label={isPlaying ? 'Pause rotation' : 'Resume rotation'}
-          className="hidden"
-        >
-          {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-        </Button>
       </h1>
-      
-      {/* Pause button for mobile - hidden */}
-      <div className="hidden">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={togglePlayPause}
-          aria-label={isPlaying ? 'Pause rotation' : 'Resume rotation'}
-          className="opacity-60 hover:opacity-100 transition-opacity"
-        >
-          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        </Button>
-      </div>
     </div>
   );
 }
