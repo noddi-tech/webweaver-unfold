@@ -66,50 +66,52 @@ export function EditableIcon({
 
   return (
     <>
-      <div
-        className={cn("relative inline-block", className)}
-        onMouseEnter={(e) => {
-          e.stopPropagation();
-          editMode && setIsHovered(true);
-        }}
-        onMouseLeave={() => setIsHovered(false)}
-        style={{ 
-          padding: '0 8px 8px 0',
-          margin: '0 -8px -8px 0'
-        }}
-      >
+      <div className={cn("inline-block", className)}>
         <div
-          className={cn(
-            sizeMap[actualSize].container,
-            backgroundClass,
-            shapeClass,
-            'flex items-center justify-center',
-            iconStyle.background_token !== 'transparent' && iconStyle.background_token !== 'bg-transparent' ? 'shadow-lg' : ''
-          )}
+          className="relative inline-block"
+          onMouseEnter={(e) => {
+            e.stopPropagation();
+            editMode && setIsHovered(true);
+          }}
+          onMouseLeave={() => setIsHovered(false)}
+          style={{ 
+            padding: '0 8px 8px 0',
+            margin: '0 -8px -8px 0'
+          }}
         >
-          {typeof Icon === 'function' && Icon.length === 0 ? (
-            <Icon />
-          ) : (
-            <Icon 
-              className={cn(sizeMap[actualSize].icon, iconClassName)} 
-              style={{ color: `hsl(var(--${iconStyle.icon_color_token}))` }}
-            />
+          <div
+            className={cn(
+              sizeMap[actualSize].container,
+              backgroundClass,
+              shapeClass,
+              'flex items-center justify-center',
+              iconStyle.background_token !== 'transparent' && iconStyle.background_token !== 'bg-transparent' ? 'shadow-lg' : ''
+            )}
+          >
+            {typeof Icon === 'function' && Icon.length === 0 ? (
+              <Icon />
+            ) : (
+              <Icon 
+                className={cn(sizeMap[actualSize].icon, iconClassName)} 
+                style={{ color: `hsl(var(--${iconStyle.icon_color_token}))` }}
+              />
+            )}
+          </div>
+
+          {editMode && (isHovered || isModalOpen) && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setIsModalOpen(true);
+              }}
+              className="absolute -bottom-1 -right-1 p-1.5 bg-vibrant-purple text-white rounded-full shadow-lg z-[200] hover:scale-110 transition-transform"
+              title="Edit icon style"
+            >
+              <Settings className="w-3 h-3" />
+            </button>
           )}
         </div>
-
-        {editMode && (isHovered || isModalOpen) && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              setIsModalOpen(true);
-            }}
-            className="absolute -bottom-1 -right-1 p-1.5 bg-vibrant-purple text-white rounded-full shadow-lg z-[200] hover:scale-110 transition-transform"
-            title="Edit icon style"
-          >
-            <Settings className="w-3 h-3" />
-          </button>
-        )}
       </div>
 
       <IconEditModal
