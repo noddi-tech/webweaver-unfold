@@ -9,7 +9,7 @@ const corsHeaders = {
 
 // Input validation schema
 const TranslateRequestSchema = z.object({
-  translationKeys: z.array(z.string().min(1).max(500)).min(1).max(500),
+  translationKeys: z.array(z.string().min(1).max(500)).min(1).max(2000),
   targetLanguage: z.string().min(2).max(10).regex(/^[a-z]{2}(-[A-Z]{2})?$/),
   sourceLanguage: z.string().min(2).max(10).regex(/^[a-z]{2}(-[A-Z]{2})?$/).optional()
 });
