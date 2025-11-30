@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSiteStyles } from '@/contexts/SiteStylesContext';
 
 interface IconStyle {
   background_token: string;
@@ -10,19 +11,37 @@ interface IconStyle {
 }
 
 export const useIconStyle = (elementId: string, defaultBackground = 'gradient-primary') => {
-  const [iconStyle, setIconStyle] = useState<IconStyle>({
+  const { iconStyles, isLoaded } = useSiteStyles();
+  
+  // Get saved style from preloaded context
+  const savedStyle = iconStyles[elementId];
+  const initialStyle: IconStyle = savedStyle || {
     background_token: defaultBackground,
     icon_color_token: 'primary-foreground',
     size: 'default',
     shape: 'rounded-xl'
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  };
+  
+  const [iconStyle, setIconStyle] = useState<IconStyle>(initialStyle);
 
+  // Update local state when context loads
   useEffect(() => {
-    loadIconStyle();
-  }, [elementId]);
+    if (!isLoaded) return;
+    
+    const savedStyle = iconStyles[elementId];
+    if (savedStyle) {
+      setIconStyle({
+        background_token: savedStyle.background_token,
+        icon_name: savedStyle.icon_name,
+        icon_color_token: savedStyle.icon_color_token,
+        size: savedStyle.size,
+        shape: savedStyle.shape
+      });
+    }
+  }, [elementId, iconStyles, isLoaded]);
 
   const loadIconStyle = async () => {
+    // This is now only called after updates to refresh data
     try {
       const { data } = await supabase
         .from('icon_styles')
@@ -41,8 +60,6 @@ export const useIconStyle = (elementId: string, defaultBackground = 'gradient-pr
       }
     } catch (error) {
       console.error('Error loading icon style:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -69,6 +86,6 @@ export const useIconStyle = (elementId: string, defaultBackground = 'gradient-pr
   return {
     iconStyle,
     updateIconStyle,
-    isLoading
+    isLoading: !isLoaded
   };
 };

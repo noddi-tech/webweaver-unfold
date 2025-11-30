@@ -1,55 +1,41 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getOptimalTextColorForBackground } from '@/config/colorSystem';
+import { useSiteStyles } from '@/contexts/SiteStylesContext';
 
 export function useBackgroundStyle(
   elementId: string,
   defaultBackground: string = 'bg-card',
   defaultTextColor?: string
 ) {
-  const [background, setBackground] = useState(defaultBackground);
+  const { backgroundStyles, colorTokens, isLoaded } = useSiteStyles();
+  
+  // Get saved style from preloaded context
+  const savedStyle = backgroundStyles[elementId];
+  const initialBackground = savedStyle?.background_class || defaultBackground;
+  const initialTextColor = savedStyle?.text_color_class || defaultTextColor || getOptimalTextColorForBackground(initialBackground);
+  
+  const [background, setBackground] = useState(initialBackground);
   const [backgroundStyle, setBackgroundStyle] = useState<React.CSSProperties>({});
-  const [textColor, setTextColor] = useState(
-    defaultTextColor || getOptimalTextColorForBackground(defaultBackground)
-  );
-  const [isLoading, setIsLoading] = useState(true);
+  const [textColor, setTextColor] = useState(initialTextColor);
 
+  // Update local state when context loads
   useEffect(() => {
-    const fetchColorToken = async (backgroundClass: string) => {
-      try {
-        const baseClass = backgroundClass.split('/')[0];
-        if (!baseClass.startsWith('bg-')) return null;
+    if (!isLoaded) return;
+    
+    const savedStyle = backgroundStyles[elementId];
+    if (savedStyle) {
+      const newBackground = savedStyle.background_class;
+      setBackground(newBackground);
+      
+      // Fetch color token for styling
+      const fetchColorToken = async () => {
+        try {
+          const baseClass = newBackground.split('/')[0];
+          if (!baseClass.startsWith('bg-')) return null;
 
-        const cssVar = `--${baseClass.replace('bg-', '')}`;
-        const { data: colorToken } = await supabase
-          .from('color_tokens')
-          .select('css_var, color_type, value')
-          .eq('css_var', cssVar)
-          .maybeSingle();
-
-        return colorToken;
-      } catch (error) {
-        console.error('Error fetching color token for background:', error);
-        return null;
-      }
-    };
-
-    const fetchBackgroundStyle = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('background_styles')
-          .select('background_class, text_color_class')
-          .eq('element_id', elementId)
-          .maybeSingle();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error fetching background style:', error);
-        }
-
-        if (data) {
-          setBackground(data.background_class);
-
-          const colorToken = await fetchColorToken(data.background_class);
+          const cssVar = `--${baseClass.replace('bg-', '')}`;
+          const colorToken = colorTokens.find(token => token.css_var === cssVar);
 
           if (colorToken) {
             if (colorToken.color_type === 'gradient' || colorToken.color_type === 'glass') {
@@ -58,27 +44,22 @@ export function useBackgroundStyle(
               setBackgroundStyle({ backgroundColor: `hsl(${colorToken.value})` });
             }
           } else {
-            // Fallback: no matching token, rely on Tailwind class
             setBackgroundStyle({});
           }
-
-          if (data.text_color_class) {
-            setTextColor(data.text_color_class);
-          } else {
-            // Auto-set optimal text color if not stored
-            const optimal = getOptimalTextColorForBackground(data.background_class);
-            setTextColor(optimal);
-          }
+        } catch (error) {
+          console.error('Error fetching color token:', error);
         }
-      } catch (error) {
-        console.error('Error in fetchBackgroundStyle:', error);
-      } finally {
-        setIsLoading(false);
+      };
+      
+      fetchColorToken();
+      
+      if (savedStyle.text_color_class) {
+        setTextColor(savedStyle.text_color_class);
+      } else {
+        setTextColor(getOptimalTextColorForBackground(newBackground));
       }
-    };
-
-    fetchBackgroundStyle();
-  }, [elementId, defaultBackground]);
+    }
+  }, [elementId, backgroundStyles, colorTokens, isLoaded]);
 
   const updateBackgroundAndTextColor = async (
     newBackground: string,
@@ -151,7 +132,7 @@ export function useBackgroundStyle(
     background, 
     backgroundStyle,
     textColor,
-    isLoading,
+    isLoading: !isLoaded,
     updateBackground: updateBackgroundAndTextColor, // Keep same method name for backward compat
     updateBackgroundAndTextColor,
   };
