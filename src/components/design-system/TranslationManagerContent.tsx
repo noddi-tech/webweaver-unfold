@@ -2210,17 +2210,17 @@ export default function TranslationManagerContent() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Translation Complete!</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription asChild>
               <div className="space-y-3">
-                <p>
+                <span className="block">
                   {completedLanguageName} translation is complete with {translatedCount} translations saved.
-                </p>
-                <p>
+                </span>
+                <span className="block">
                   Would you like to evaluate translation quality now? This will check accuracy, tone, grammar, and cultural fit.
-                </p>
-                <p className="text-xs text-muted-foreground">
+                </span>
+                <span className="block text-xs text-muted-foreground">
                   Takes ~2-3 minutes. You can also evaluate later from the language tab.
-                </p>
+                </span>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>

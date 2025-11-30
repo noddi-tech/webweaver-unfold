@@ -34,12 +34,24 @@ export default function TranslationHealthCheck() {
   async function loadHealthStats() {
     setLoading(true);
     try {
-      // Get all translations
-      const { data: allTranslations, error: transError } = await supabase
-        .from('translations')
-        .select('*');
+      // Get all translations with pagination to bypass 1000 row limit
+      let allTranslations: any[] = [];
+      let page = 0;
+      const pageSize = 1000;
 
-      if (transError) throw transError;
+      while (true) {
+        const { data, error } = await supabase
+          .from('translations')
+          .select('*')
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+        
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        
+        allTranslations = [...allTranslations, ...data];
+        page++;
+        if (data.length < pageSize) break;
+      }
 
       // Get English keys count
       const { count: englishCount, error: countError } = await supabase
@@ -100,15 +112,33 @@ export default function TranslationHealthCheck() {
   async function handleFixAll() {
     setFixing(true);
     try {
-      // Step 1: Delete broken entries
-      const { error: deleteError } = await supabase
+      // Step 1: Delete broken entries (where translated_text equals translation_key)
+      // Use raw SQL via RPC since Supabase doesn't support filtering by column equality
+      const { data: brokenEntries, error: fetchError } = await supabase
         .from('translations')
-        .delete()
-        .eq('language_code', 'en')
-        .neq('language_code', 'en') // This ensures we're only targeting non-English
-        .filter('translated_text', 'eq', 'translation_key');
+        .select('id')
+        .neq('language_code', 'en');
 
-      if (deleteError) throw deleteError;
+      if (fetchError) throw fetchError;
+
+      // Filter in JS where translated_text = translation_key
+      const { data: allBroken } = await supabase
+        .from('translations')
+        .select('id, translated_text, translation_key')
+        .neq('language_code', 'en');
+
+      const brokenIds = (allBroken || [])
+        .filter(t => t.translated_text === t.translation_key)
+        .map(t => t.id);
+
+      if (brokenIds.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('translations')
+          .delete()
+          .in('id', brokenIds);
+
+        if (deleteError) throw deleteError;
+      }
 
       toast({
         title: 'Broken entries cleaned up!',
@@ -122,16 +152,28 @@ export default function TranslationHealthCheck() {
         .eq('enabled', true)
         .neq('code', 'en');
 
+      // Fetch all English translation keys
+      const { data: englishKeys } = await supabase
+        .from('translations')
+        .select('translation_key')
+        .eq('language_code', 'en');
+
+      const translationKeys = englishKeys?.map(k => k.translation_key) || [];
+
       if (languages && languages.length > 0) {
         toast({
           title: 'Triggering translations...',
-          description: `Starting translation for ${languages.length} languages`,
+          description: `Starting translation for ${languages.length} languages with ${translationKeys.length} keys`,
           duration: 3000
         });
 
         for (const lang of languages) {
           const { error: translateError } = await supabase.functions.invoke('translate-content', {
-            body: { targetLanguage: lang.code }
+            body: { 
+              translationKeys,
+              targetLanguage: lang.code,
+              sourceLanguage: 'en'
+            }
           });
 
           if (translateError) {
