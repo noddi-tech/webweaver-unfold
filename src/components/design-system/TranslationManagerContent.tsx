@@ -114,7 +114,7 @@ export default function TranslationManagerContent() {
     loadData();
     
     // Load TOV content
-    fetch('/content/brand/tov-noddi-tech.md')
+    fetch('/content/brand/tov-navio.md')
       .then(res => res.text())
       .then(setTovContent)
       .catch(console.error);
@@ -1015,8 +1015,12 @@ export default function TranslationManagerContent() {
 
       if (fetchError) throw fetchError;
 
-      // Calculate missing keys for each language
-      const englishKeys = new Set(englishTranslations.map(t => t.translation_key));
+      // Calculate missing keys for each language using fresh database data
+      const englishKeys = new Set(
+        (allTranslations || [])
+          .filter(t => t.language_code === 'en')
+          .map(t => t.translation_key)
+      );
       const languageStats = targetLanguages.map(lang => {
         const existingKeys = new Set(
           (allTranslations || [])

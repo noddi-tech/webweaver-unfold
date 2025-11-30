@@ -371,7 +371,7 @@ When translating, adapt idioms and expressions naturally to the target language 
 
     return new Response(JSON.stringify({ 
       language: targetLanguage,
-      count: totalTranslated,
+      translated: totalTranslated,
       failed: totalFailed,
       failedBatches: failedBatches,
       status: failedBatches.length > 0 ? 'partial' : 'success'
