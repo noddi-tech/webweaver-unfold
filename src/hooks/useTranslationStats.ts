@@ -33,25 +33,21 @@ export function useTranslationStats() {
       { data: metaStats },
       { data: evalProgress },
       { data: languages },
-      { data: actualEvaluated }
+      { data: evaluatedCounts }
     ] = await Promise.all([
       supabase.from('translation_stats' as any).select('*'),
       supabase.from('page_meta_stats' as any).select('*'),
       supabase.from('evaluation_progress').select('*'),
       supabase.from('languages').select('code, show_in_switcher'),
-      // Query actual evaluated count: translations with quality_score IS NOT NULL
-      supabase
-        .from('translations')
-        .select('language_code')
-        .not('quality_score', 'is', null)
-        .neq('language_code', 'en')
+      // Query pre-aggregated evaluated counts from database view
+      supabase.from('evaluated_counts_by_language' as any).select('*')
     ]);
 
-    // Group actual evaluated counts by language
+    // Extract pre-aggregated evaluated counts from view
     const evaluatedByLanguage: Record<string, number> = {};
-    if (actualEvaluated && Array.isArray(actualEvaluated)) {
-      actualEvaluated.forEach((t: any) => {
-        evaluatedByLanguage[t.language_code] = (evaluatedByLanguage[t.language_code] || 0) + 1;
+    if (evaluatedCounts && Array.isArray(evaluatedCounts)) {
+      evaluatedCounts.forEach((row: any) => {
+        evaluatedByLanguage[row.language_code] = row.evaluated_count || 0;
       });
     }
 
