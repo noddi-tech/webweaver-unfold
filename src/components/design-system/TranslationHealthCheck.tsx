@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { AlertCircle, CheckCircle2, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 
 interface HealthCheckStats {
   brokenCount: number;
@@ -26,6 +27,13 @@ export default function TranslationHealthCheck() {
     healthyCount: 0,
     totalCount: 0
   });
+  const [progressInfo, setProgressInfo] = useState<{
+    phase: 'idle' | 'cleaning' | 'translating' | 'done';
+    currentLanguage: string;
+    languageIndex: number;
+    totalLanguages: number;
+    deletedCount: number;
+  } | null>(null);
 
   useEffect(() => {
     loadHealthStats();
@@ -83,12 +91,31 @@ export default function TranslationHealthCheck() {
         t => t.is_stale === true && t.language_code !== 'en'
       ).length;
 
-      // Count missing entries
-      const actualCount = translations.length;
-      const missing = Math.max(0, totalExpected - actualCount - broken);
+      // Count missing entries per language
+      const englishKeys = new Set(
+        translations.filter(t => t.language_code === 'en').map(t => t.translation_key)
+      );
+      
+      const { data: enabledLanguages } = await supabase
+        .from('languages')
+        .select('code')
+        .eq('enabled', true)
+        .neq('code', 'en');
 
-      // Count healthy entries (not broken, not stale, not missing)
-      const healthy = actualCount - broken - stale;
+      let missing = 0;
+      for (const lang of enabledLanguages || []) {
+        const langKeys = new Set(
+          translations.filter(t => t.language_code === lang.code).map(t => t.translation_key)
+        );
+        missing += [...englishKeys].filter(k => !langKeys.has(k)).length;
+      }
+
+      // Count healthy entries (non-English translations that are NOT broken AND NOT stale)
+      const nonEnglish = translations.filter(t => t.language_code !== 'en');
+      const healthy = nonEnglish.filter(t => 
+        t.translated_text !== t.translation_key && // not broken
+        !t.is_stale // not stale
+      ).length;
 
       setStats({
         brokenCount: broken,
@@ -111,6 +138,8 @@ export default function TranslationHealthCheck() {
 
   async function handleFixAll() {
     setFixing(true);
+    setProgressInfo({ phase: 'cleaning', currentLanguage: '', languageIndex: 0, totalLanguages: 0, deletedCount: 0 });
+    
     try {
       // Step 1: Delete broken entries with pagination
       let allBroken: any[] = [];
@@ -143,12 +172,13 @@ export default function TranslationHealthCheck() {
           .in('id', brokenIds);
 
         if (deleteError) throw deleteError;
+        
+        setProgressInfo(prev => prev ? { ...prev, deletedCount: brokenIds.length } : null);
+        toast({
+          title: '🗑️ Broken entries cleaned',
+          description: `Deleted ${brokenIds.length} broken translations`
+        });
       }
-
-      toast({
-        title: 'Broken entries cleaned up!',
-        description: `Removed ${stats.brokenCount} broken translations`
-      });
 
       // Step 2: Trigger translation for all enabled languages
       const { data: languages } = await supabase
@@ -167,12 +197,22 @@ export default function TranslationHealthCheck() {
 
       if (languages && languages.length > 0) {
         toast({
-          title: 'Triggering translations...',
-          description: `Starting translation for ${languages.length} languages with ${translationKeys.length} keys`,
+          title: 'Starting translations...',
+          description: `Processing ${languages.length} languages with ${translationKeys.length} keys`,
           duration: 3000
         });
 
-        for (const lang of languages) {
+        for (let i = 0; i < languages.length; i++) {
+          const lang = languages[i];
+          
+          setProgressInfo({
+            phase: 'translating',
+            currentLanguage: lang.name,
+            languageIndex: i + 1,
+            totalLanguages: languages.length,
+            deletedCount: brokenIds.length
+          });
+
           const { error: translateError } = await supabase.functions.invoke('translate-content', {
             body: { 
               translationKeys,
@@ -183,12 +223,20 @@ export default function TranslationHealthCheck() {
 
           if (translateError) {
             console.error(`Translation failed for ${lang.code}:`, translateError);
+          } else {
+            toast({
+              title: `✅ ${lang.name} complete`,
+              description: `${i + 1}/${languages.length} languages processed`,
+              duration: 2000
+            });
           }
         }
 
+        setProgressInfo({ phase: 'done', currentLanguage: '', languageIndex: languages.length, totalLanguages: languages.length, deletedCount: brokenIds.length });
+        
         toast({
-          title: 'Translation process started!',
-          description: 'Check the Translation Manager for progress',
+          title: '🎉 All translations complete!',
+          description: `Successfully processed ${languages.length} languages`,
           duration: 5000
         });
       }
@@ -204,6 +252,7 @@ export default function TranslationHealthCheck() {
       });
     } finally {
       setFixing(false);
+      setProgressInfo(null);
     }
   }
 
@@ -305,23 +354,39 @@ export default function TranslationHealthCheck() {
           </div>
         </div>
 
-        {hasIssues && (
+        {fixing && progressInfo && (
+          <Card className="border-primary bg-primary/5">
+            <CardContent className="pt-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <span className="font-medium">
+                    {progressInfo.phase === 'cleaning' && `Cleaning ${progressInfo.deletedCount} broken entries...`}
+                    {progressInfo.phase === 'translating' && `Translating ${progressInfo.currentLanguage}...`}
+                    {progressInfo.phase === 'done' && 'Finalizing...'}
+                  </span>
+                </div>
+                {progressInfo.phase === 'translating' && (
+                  <>
+                    <Progress value={(progressInfo.languageIndex / progressInfo.totalLanguages) * 100} />
+                    <p className="text-sm text-muted-foreground">
+                      {progressInfo.languageIndex} of {progressInfo.totalLanguages} languages
+                    </p>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {hasIssues && !fixing && (
           <Button
             onClick={handleFixAll}
             disabled={fixing}
             className="w-full"
           >
-            {fixing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Fixing Issues...
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="w-4 h-4 mr-2" />
-                Fix All Issues
-              </>
-            )}
+            <CheckCircle2 className="w-4 h-4 mr-2" />
+            Fix All Issues
           </Button>
         )}
       </CardContent>
