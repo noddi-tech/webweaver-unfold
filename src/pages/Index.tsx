@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
-import WhyNoddi from "@/components/WhyNoddi";
+import WhyNavio from "@/components/WhyNavio";
 import HowItWorks from "@/components/HowItWorks";
 import FinalCTA from "@/components/FinalCTA";
 import { HreflangTags } from "@/components/HreflangTags";
@@ -146,7 +146,7 @@ const Index = () => {
       <main>
         <Hero />
         <ScrollingFeatureCards />
-        <WhyNoddi />
+        <WhyNavio />
         <HowItWorks />
         <FinalCTA />
       </main>

@@ -10,7 +10,7 @@ import { EditableBackground } from "@/components/EditableBackground";
 import { EditableIcon } from "@/components/EditableIcon";
 import { EditableListIcon } from "@/components/EditableListIcon";
 
-export default function WhyNoddi() {
+export default function WhyNavio() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const { t } = useAppTranslation();
   const [refreshKey, setRefreshKey] = useState(0);
@@ -40,7 +40,7 @@ export default function WhyNoddi() {
           </EditableTranslation>
           <EditableTranslation translationKey="why_noddi.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              {t('why_noddi.subtitle', 'Most automotive service providers patch together 5+ tools. Noddi replaces them all.')}
+              {t('why_noddi.subtitle', 'Most automotive service providers patch together 5+ tools. Navio replaces them all.')}
             </p>
           </EditableTranslation>
         </div>
@@ -66,7 +66,7 @@ export default function WhyNoddi() {
                     shape="rounded-lg"
                   />
                   <EditableTranslation translationKey="why_noddi.before.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-                    <h3 className="text-2xl font-bold">{t('why_noddi.before.title', 'Before Noddi')}</h3>
+                    <h3 className="text-2xl font-bold">{t('why_noddi.before.title', 'Before Navio')}</h3>
                   </EditableTranslation>
                 </div>
                 <ul className="space-y-4">
@@ -108,7 +108,7 @@ export default function WhyNoddi() {
                     shape="rounded-lg"
                   />
                   <EditableTranslation translationKey="why_noddi.after.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-                    <h3 className="text-2xl font-bold">{t('why_noddi.after.title', 'With Noddi')}</h3>
+                    <h3 className="text-2xl font-bold">{t('why_noddi.after.title', 'With Navio')}</h3>
                   </EditableTranslation>
                 </div>
                 <ul className="space-y-4">
