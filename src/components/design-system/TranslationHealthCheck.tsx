@@ -89,18 +89,24 @@ export default function TranslationHealthCheck() {
       ).length;
 
       // Count stale entries (is_stale = true, but NOT orphaned)
-      // Get English keys with empty text to identify orphans
+      // Get English keys with empty text to identify orphans (excluding intentionally empty)
       const englishEmptyKeys = new Set(
-        translations.filter(t => t.language_code === 'en' && (!t.translated_text || t.translated_text.trim() === '')).map(t => t.translation_key)
+        translations.filter(t => 
+          t.language_code === 'en' && 
+          (!t.translated_text || t.translated_text.trim() === '') &&
+          !t.is_intentionally_empty  // Only flag as orphan if NOT intentional
+        ).map(t => t.translation_key)
       );
       
       const stale = translations.filter(
         t => t.is_stale === true && t.language_code !== 'en' && !englishEmptyKeys.has(t.translation_key)
       ).length;
 
-      // Count orphaned entries (translations where English source is empty)
+      // Count orphaned entries (translations where English source is empty AND not intentionally empty)
       const orphaned = translations.filter(
-        t => t.language_code !== 'en' && englishEmptyKeys.has(t.translation_key)
+        t => t.language_code !== 'en' && 
+             englishEmptyKeys.has(t.translation_key) &&
+             !t.is_intentionally_empty  // Exclude intentionally empty
       ).length;
 
       // Count missing entries per language
@@ -122,12 +128,13 @@ export default function TranslationHealthCheck() {
         missing += [...englishKeys].filter(k => !langKeys.has(k)).length;
       }
 
-      // Count healthy entries including English (all English + non-broken/non-stale non-English)
+      // Count healthy entries including English (all English + non-broken/non-stale non-English + intentionally empty)
       const englishTranslations = translations.filter(t => t.language_code === 'en');
       const nonEnglish = translations.filter(t => t.language_code !== 'en');
       const healthyNonEnglish = nonEnglish.filter(t => 
         t.translated_text !== t.translation_key && // not broken
-        !t.is_stale // not stale
+        !t.is_stale && // not stale
+        (!englishEmptyKeys.has(t.translation_key) || t.is_intentionally_empty) // not orphaned OR intentionally empty
       ).length;
       const healthy = englishTranslations.length + healthyNonEnglish;
 
