@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { LanguageLink } from "@/components/LanguageLink";
-import noddiLocationScreen from "@/assets/noddi-location-screen.png";
+import navioLocationScreen from "@/assets/navio-location-screen.png";
 import tiamatLocationScreen from "@/assets/tiamat-location-screen.png";
 import hurtigrutaLocationScreen from "@/assets/hurtigruta-location-screen.png";
 import { useState, useEffect, useRef } from "react";
@@ -50,7 +50,7 @@ const Hero = () => {
   const [carouselImages, setCarouselImages] = useState<any[]>([]);
 
   const fallbackImages = [
-    { url: noddiLocationScreen, alt: "Noddi location screen" },
+    { url: navioLocationScreen, alt: "Navio location screen" },
     { url: tiamatLocationScreen, alt: "Tiamat location screen" },
     { url: hurtigrutaLocationScreen, alt: "Hurtigruta location screen" },
   ];
