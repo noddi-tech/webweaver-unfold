@@ -12,6 +12,7 @@ interface HealthCheckStats {
   brokenCount: number;
   missingCount: number;
   staleCount: number;
+  orphanedCount: number;
   healthyCount: number;
   totalCount: number;
 }
@@ -24,6 +25,7 @@ export default function TranslationHealthCheck() {
     brokenCount: 0,
     missingCount: 0,
     staleCount: 0,
+    orphanedCount: 0,
     healthyCount: 0,
     totalCount: 0
   });
@@ -86,9 +88,19 @@ export default function TranslationHealthCheck() {
         t => t.translated_text === t.translation_key && t.language_code !== 'en'
       ).length;
 
-      // Count stale entries (is_stale = true)
+      // Count stale entries (is_stale = true, but NOT orphaned)
+      // Get English keys with empty text to identify orphans
+      const englishEmptyKeys = new Set(
+        translations.filter(t => t.language_code === 'en' && (!t.translated_text || t.translated_text.trim() === '')).map(t => t.translation_key)
+      );
+      
       const stale = translations.filter(
-        t => t.is_stale === true && t.language_code !== 'en'
+        t => t.is_stale === true && t.language_code !== 'en' && !englishEmptyKeys.has(t.translation_key)
+      ).length;
+
+      // Count orphaned entries (translations where English source is empty)
+      const orphaned = translations.filter(
+        t => t.language_code !== 'en' && englishEmptyKeys.has(t.translation_key)
       ).length;
 
       // Count missing entries per language
@@ -123,6 +135,7 @@ export default function TranslationHealthCheck() {
         brokenCount: broken,
         missingCount: missing,
         staleCount: stale,
+        orphanedCount: orphaned,
         healthyCount: Math.max(0, healthy),
         totalCount: totalExpected
       });
@@ -359,7 +372,7 @@ export default function TranslationHealthCheck() {
     }
   }
 
-  const hasIssues = stats.brokenCount > 0 || stats.missingCount > 0 || stats.staleCount > 0;
+  const hasIssues = stats.brokenCount > 0 || stats.missingCount > 0 || stats.staleCount > 0 || stats.orphanedCount > 0;
 
   if (loading) {
     return (
@@ -396,7 +409,7 @@ export default function TranslationHealthCheck() {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Translation Issues Detected</AlertTitle>
             <AlertDescription>
-              Your translation system has {stats.brokenCount + stats.missingCount + stats.staleCount} issues that need attention.
+              Your translation system has {stats.brokenCount + stats.missingCount + stats.staleCount + stats.orphanedCount} issues that need attention.
             </AlertDescription>
           </Alert>
         )}
@@ -411,7 +424,7 @@ export default function TranslationHealthCheck() {
           </Alert>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-destructive" />
@@ -442,6 +455,17 @@ export default function TranslationHealthCheck() {
             <div className="text-3xl font-bold">{stats.staleCount}</div>
             <p className="text-xs text-muted-foreground">
               Need re-translation
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-muted-foreground" />
+              <span className="text-sm font-medium">Orphaned</span>
+            </div>
+            <div className="text-3xl font-bold">{stats.orphanedCount}</div>
+            <p className="text-xs text-muted-foreground">
+              Empty English source
             </p>
           </div>
 
@@ -484,6 +508,16 @@ export default function TranslationHealthCheck() {
 
         {hasIssues && !fixing && (
           <div className="space-y-2">
+            {stats.orphanedCount > 0 && (
+              <Alert variant="default" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Orphaned Translations Detected</AlertTitle>
+                <AlertDescription>
+                  {stats.orphanedCount} translations have empty English source text and cannot be automatically fixed. 
+                  Please add English content for these keys or delete them manually.
+                </AlertDescription>
+              </Alert>
+            )}
             <Button
               onClick={handleFixAll}
               disabled={fixing}
