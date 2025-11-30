@@ -20,7 +20,7 @@ export function LanguageRedirect() {
         console.log('[LanguageRedirect] Valid switcher languages:', validCodes);
         
         // Get language preferences
-        const storedLang = localStorage.getItem('noddi-language');
+        const storedLang = localStorage.getItem('navio-language');
         const browserLang = navigator.language.split('-')[0];
         
         // Only use stored/browser language if it's in the valid switcher list

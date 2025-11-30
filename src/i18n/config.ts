@@ -109,7 +109,7 @@ const customDetector = {
     }
 
     // 2. Check localStorage - only if it's a valid switcher language
-    const stored = localStorage.getItem('noddi-language');
+    const stored = localStorage.getItem('navio-language');
     if (stored && validSwitcherLanguages.includes(stored)) {
       return stored;
     }
@@ -126,7 +126,7 @@ const customDetector = {
     return 'en';
   },
   cacheUserLanguage: (lng: string) => {
-    localStorage.setItem('noddi-language', lng);
+    localStorage.setItem('navio-language', lng);
   }
 };
 
@@ -145,7 +145,7 @@ i18n
     detection: {
       order: ['customDetector', 'localStorage', 'navigator'],
       caches: ['localStorage'],
-      lookupLocalStorage: 'noddi-language',
+      lookupLocalStorage: 'navio-language',
     },
     interpolation: {
       escapeValue: false,

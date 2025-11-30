@@ -53,7 +53,7 @@ serve(async (req) => {
     }
 
     // Create SEO-optimized prompt
-    const seoPrompt = `You are an expert SEO copywriter for Noddi Tech, an automotive service technology platform.
+    const seoPrompt = `You are an expert SEO copywriter for Navio, an automotive service technology platform.
 
 Page: ${pageSlug}
 Title: ${metaTitle}
@@ -63,10 +63,10 @@ Write a compelling meta description (150-160 characters) that:
 1. Includes the main keyword from the title naturally
 2. Clearly states the page's value proposition
 3. Creates urgency or curiosity to click
-4. Matches Noddi Tech's tone: confident, clear, direct (no corporate buzzwords)
+4. Matches Navio's tone: confident, clear, direct (no corporate buzzwords)
 5. Is grammatically perfect in ${language}
 
-For Noddi Tech pages:
+For Navio pages:
 - Homepage: Focus on transforming automotive service, intelligent booking, NPS tracking
 - Pricing: Emphasize transparency, no hidden costs, ROI
 - Features: Highlight specific capabilities and benefits

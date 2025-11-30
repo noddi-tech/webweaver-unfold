@@ -65,13 +65,13 @@ Deno.serve(async (req) => {
     const { data: tovDoc } = await supabase
       .from('static_files')
       .select('content')
-      .eq('file_path', 'content/brand/tov-noddi-tech.md')
+      .eq('file_path', 'content/brand/tov-navio.md')
       .single();
 
     const brandTOV = tovDoc?.content || '';
 
     // Technical terms to preserve
-    const technicalTerms = ['Noddi', 'Navio', 'API', 'CRM', 'ERP', 'ROI', 'NPS', 'SaaS'];
+    const technicalTerms = ['Navio', 'API', 'CRM', 'ERP', 'ROI', 'NPS', 'SaaS'];
 
     // Construct AI translation prompt
     const systemPrompt = `You are a professional translator specializing in software localization and marketing content.

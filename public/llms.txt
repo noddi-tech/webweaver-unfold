@@ -1,6 +1,6 @@
-# Noddi Tech
+# Navio
 
-> **Noddi Tech** is a globally scalable SaaS platform that transforms car maintenance by combining advanced logistics technology with exceptional end-user experience. We empower service providers to deliver mobile-first, on-demand car services anywhere in the world — with less than a day to go live.  
+> **Navio** is a globally scalable SaaS platform that transforms car maintenance by combining advanced logistics technology with exceptional end-user experience. We empower service providers to deliver mobile-first, on-demand car services anywhere in the world — with less than a day to go live.  
 
 ## Key Capabilities
 
@@ -18,7 +18,7 @@
 
 ## Proven Traction
 
-- **18,000+ Appointments** completed through Noddi-powered operations.  
+- **18,000+ Appointments** completed through Navio-powered operations.  
 - **4 SaaS Partners** live across different markets.  
 - **€600K Run-Rate** from services.  
 - **Addressable Market > €65B** annually, with convenience segment CAGR ~50% through 2031.  

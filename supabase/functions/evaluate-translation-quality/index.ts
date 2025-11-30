@@ -243,7 +243,7 @@ serve(async (req) => {
       const stage1TermPrompt = `Analyze these ${targetLanguage} translations and identify technical terms that were incorrectly translated.
 
 **CRITICAL TECHNICAL TERMS TO CHECK (MUST be in English):**
-API, Backend, Frontend, Database, Cloud, DevOps, SaaS, SDK, JSON, HTTP, REST, GraphQL, OAuth, JWT, Git, GitHub, Noddi, booking, whitelabel, NPS, CRM, ERP, Dashboard, Analytics, Metrics, KPI, ROI, Button, Toggle, Modal, Dialog, Tooltip, Sidebar, Header, Footer, Login, Logout, Download, Upload, Sync, Deploy, Onboarding
+API, Backend, Frontend, Database, Cloud, DevOps, SaaS, SDK, JSON, HTTP, REST, GraphQL, OAuth, JWT, Git, GitHub, Navio, booking, whitelabel, NPS, CRM, ERP, Dashboard, Analytics, Metrics, KPI, ROI, Button, Toggle, Modal, Dialog, Tooltip, Sidebar, Header, Footer, Login, Logout, Download, Upload, Sync, Deploy, Onboarding
 
 **YOUR TASK:**
 1. Compare each translation against the original English text
