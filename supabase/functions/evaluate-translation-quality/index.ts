@@ -62,6 +62,34 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // ✅ WATCHDOG: Auto-reset stuck evaluations (>1 hour without update)
+    console.log('🔍 Watchdog: Checking for stuck evaluation states...');
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { data: stuckEvals, error: stuckError } = await supabase
+      .from('evaluation_progress')
+      .select('language_code, updated_at')
+      .eq('status', 'in_progress')
+      .lt('updated_at', oneHourAgo);
+
+    if (stuckEvals && stuckEvals.length > 0) {
+      console.log(`⚠️ Found ${stuckEvals.length} stuck evaluations. Auto-resetting...`);
+      
+      for (const stuck of stuckEvals) {
+        const hoursSinceUpdate = (Date.now() - new Date(stuck.updated_at).getTime()) / (1000 * 60 * 60);
+        console.log(`  • ${stuck.language_code}: stuck for ${hoursSinceUpdate.toFixed(1)}h`);
+      }
+
+      await supabase
+        .from('evaluation_progress')
+        .update({ 
+          status: 'idle',
+          updated_at: new Date().toISOString() 
+        })
+        .in('language_code', stuckEvals.map(s => s.language_code));
+      
+      console.log(`✓ Reset ${stuckEvals.length} stuck evaluations to idle`);
+    }
+
     // Initialize or update progress tracking
     const { data: existingProgress } = await supabase
       .from('evaluation_progress')

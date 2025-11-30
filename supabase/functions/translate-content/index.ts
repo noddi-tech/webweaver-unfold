@@ -67,6 +67,31 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // ✅ WATCHDOG: Auto-reset stuck translations (>1 hour without update)
+    console.log('🔍 Watchdog: Checking for stuck translation states...');
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { data: stuckTranslations, error: stuckError } = await supabase
+      .from('translations')
+      .select('language_code')
+      .eq('review_status', 'in_progress')
+      .lt('updated_at', oneHourAgo);
+
+    if (stuckTranslations && stuckTranslations.length > 0) {
+      const stuckLangs = [...new Set(stuckTranslations.map(t => t.language_code))];
+      console.log(`⚠️ Found ${stuckLangs.length} languages with stuck translations. Auto-resetting...`);
+      
+      await supabase
+        .from('translations')
+        .update({ 
+          review_status: 'pending',
+          updated_at: new Date().toISOString() 
+        })
+        .eq('review_status', 'in_progress')
+        .lt('updated_at', oneHourAgo);
+      
+      console.log(`✓ Reset ${stuckTranslations.length} stuck translations`);
+    }
+
     // Fetch ALL source texts to avoid URL length limits
     console.log(`Fetching all source texts for language: ${sourceLanguage}`);
     
@@ -320,7 +345,9 @@ When translating, adapt idioms and expressions naturally to the target language 
         translated_text: t.text,
         page_location: t.key.split('.')[0],
         context: t.context || null,
-        approved: false
+        approved: false,
+        is_stale: false,  // ✅ SCALABLE FIX: Always reset stale flag on translation
+        review_status: 'pending'  // ✅ SCALABLE FIX: Set to pending (valid constraint value)
       }));
 
       const { error: insertError } = await supabase
