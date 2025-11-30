@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.evaluate-single-translation]
 verify_jwt = false
+
+[functions.evaluation-watchdog]
+verify_jwt = false

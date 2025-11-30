@@ -263,28 +263,73 @@ export default function EvaluationHealthDashboard() {
         </Card>
       </div>
 
-      {/* Stuck Evaluations Warning */}
+      {/* Stuck Evaluations Warning - ENHANCED */}
       {(() => {
         const stuckEvals = detectStuckEvaluations();
         return stuckEvals.length > 0 && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              <strong>{stuckEvals.length} evaluation(s) appear stuck</strong>
-              <br />
-              Languages: {stuckEvals.map(e => {
-                const langStat = stats.find(s => s.code === e.language_code);
-                return langStat?.name || e.language_code;
-              }).join(', ')}
-              <br />
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2"
-                onClick={handleResetStuckEvaluations}
-              >
-                Reset Stuck Evaluations
-              </Button>
+          <Alert variant="destructive" className="border-2">
+            <AlertCircle className="h-5 w-5" />
+            <AlertDescription className="ml-2">
+              <div className="font-semibold text-base mb-2">
+                ⚠️ {stuckEvals.length} evaluation(s) appear stuck and need attention
+              </div>
+              <div className="space-y-1 mb-3">
+                {stuckEvals.map(e => {
+                  const langStat = stats.find(s => s.code === e.language_code);
+                  const minutesStuck = Math.round((Date.now() - new Date(e.updated_at).getTime()) / (1000 * 60));
+                  return (
+                    <div key={e.language_code} className="text-sm flex items-center gap-2">
+                      <Badge variant="outline" className="font-mono">
+                        {e.language_code.toUpperCase()}
+                      </Badge>
+                      <span>{langStat?.name || e.language_code}</span>
+                      <span className="text-muted-foreground">
+                        • Stuck for {minutesStuck} minutes
+                      </span>
+                      <span className="text-muted-foreground">
+                        • {e.evaluated_keys}/{e.total_keys} evaluated
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleResetStuckEvaluations}
+                  className="bg-background"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Reset to Idle
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={async () => {
+                    // Resume all stuck evaluations
+                    for (const stuck of stuckEvals) {
+                      const { error } = await supabase.functions.invoke('evaluate-translation-quality', {
+                        body: {
+                          targetLanguage: stuck.language_code,
+                          startFromKey: stuck.last_evaluated_key
+                        }
+                      });
+                      if (error) {
+                        console.error(`Failed to resume ${stuck.language_code}:`, error);
+                      }
+                    }
+                    refresh();
+                  }}
+                >
+                  <Activity className="h-4 w-4 mr-2" />
+                  Resume All
+                </Button>
+              </div>
+              <p className="text-xs mt-2 opacity-80">
+                Stuck evaluations are automatically detected when they haven't updated in 10+ minutes. 
+                The system watchdog runs every 10 minutes to auto-reset them.
+              </p>
             </AlertDescription>
           </Alert>
         );
