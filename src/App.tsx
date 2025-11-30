@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageRedirect } from "./components/LanguageRedirect";
 import { LanguageSync } from "./components/LanguageSync";
 import { EditModeProvider } from "@/contexts/EditModeContext";
+import { SiteStylesProvider } from "@/contexts/SiteStylesContext";
 import { useTypographySettings } from "@/hooks/useTypographySettings";
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
@@ -34,10 +35,11 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <EditModeProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+      <SiteStylesProvider>
+        <EditModeProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
         <Routes>
           {/* Language-prefixed routes */}
           <Route path="/:lang" element={<LanguageSync><Index /></LanguageSync>} />
@@ -81,7 +83,8 @@ const App = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
         </BrowserRouter>
-      </EditModeProvider>
+        </EditModeProvider>
+      </SiteStylesProvider>
     </TooltipProvider>
   </QueryClientProvider>
   );

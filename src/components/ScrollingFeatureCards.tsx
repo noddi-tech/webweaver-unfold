@@ -15,6 +15,7 @@ import { useTypography } from '@/hooks/useTypography';
 import { useEditMode } from '@/contexts/EditModeContext';
 import { useColorSystem } from '@/hooks/useColorSystem';
 import { useAllowedBackgrounds } from '@/hooks/useAllowedBackgrounds';
+import { useSiteStyles } from '@/contexts/SiteStylesContext';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeColorToken } from '@/lib/colorUtils';
@@ -165,6 +166,7 @@ export function ScrollingFeatureCards() {
   const { editMode } = useEditMode();
   const { GRADIENT_COLORS, GLASS_EFFECTS } = useColorSystem();
   const { allowedBackgrounds } = useAllowedBackgrounds();
+  const { backgroundStyles, textStyles, isLoaded: stylesLoaded } = useSiteStyles();
   
   // Define unique default styles for each card using CMS colors
   const defaultCardStyles = useMemo(() => [
@@ -345,93 +347,50 @@ export function ScrollingFeatureCards() {
     setCardGap(newCardGap);
   };
 
-  const loadCardData = async (index: number) => {
+  const loadCardData = (index: number) => {
+    // Load card data from preloaded context instead of individual queries
     const elementPrefix = `scrolling-card-${index + 1}`;
     const defaults = defaultCardStyles[index];
     
-    try {
-      // Load main background
-      // @ts-ignore
-      const { data: bgData } = await supabase
-        .from('background_styles')
-        .select('background_class')
-        .eq('element_id', `${elementPrefix}-background`)
-        .maybeSingle();
-
-      // Load icon card background
-      // @ts-ignore
-      const { data: iconCardBgData } = await supabase
-        .from('background_styles')
-        .select('background_class')
-        .eq('element_id', `${elementPrefix}-icon-card`)
-        .maybeSingle();
-
-      // Load text elements
-      // @ts-ignore
-      const { data: numberData } = await supabase
-        .from('text_content')
-        .select('content, color_token')
-        .eq('element_id', `${elementPrefix}-number`)
-        .maybeSingle();
-
-      // @ts-ignore
-      const { data: titleData } = await supabase
-        .from('text_content')
-        .select('content, color_token')
-        .eq('element_id', `${elementPrefix}-title`)
-        .maybeSingle();
-
-      // @ts-ignore
-      const { data: descData } = await supabase
-        .from('text_content')
-        .select('content, color_token')
-        .eq('element_id', `${elementPrefix}-description`)
-        .maybeSingle();
-
-      // @ts-ignore
-      const { data: ctaData } = await supabase
-        .from('text_content')
-        .select('content, color_token, button_url, button_bg_color')
-        .eq('element_id', `${elementPrefix}-cta`)
-        .maybeSingle();
-
-      // @ts-ignore
-      const { data: iconColorData } = await supabase
-        .from('text_content')
-        .select('color_token')
-        .eq('element_id', `${elementPrefix}-icon-color`)
-        .maybeSingle();
-
-      // Use per-card defaults as fallbacks for beautiful styling
-      setCardData(prev => ({
-        ...prev,
-        [index]: {
-          background: bgData?.background_class || defaults.background,
-          iconCardBg: iconCardBgData?.background_class || 'bg-white/10',
-          number: numberData?.content || cards[index].number,
-          numberColor: numberData?.color_token || defaults.numberColor,
-          title: titleData?.content || cards[index].title,
-          titleColor: titleData?.color_token || defaults.titleColor,
-          description: descData?.content || cards[index].description,
-          descriptionColor: descData?.color_token || defaults.descriptionColor,
-          ctaText: ctaData?.content || cards[index].ctaText,
-          ctaBgColor: ctaData?.button_bg_color || defaults.ctaBgColor,
-          ctaTextColor: ctaData?.color_token || defaults.ctaTextColor,
-          iconColor: iconColorData?.color_token || 'foreground',
-        }
-      }));
-    } catch (error) {
-      console.error('Error loading card data:', error);
-    }
+    const bgData = backgroundStyles[`${elementPrefix}-background`];
+    const iconCardBgData = backgroundStyles[`${elementPrefix}-icon-card`];
+    const numberData = textStyles[`${elementPrefix}-number`];
+    const titleData = textStyles[`${elementPrefix}-title`];
+    const descData = textStyles[`${elementPrefix}-description`];
+    const ctaData = textStyles[`${elementPrefix}-cta`];
+    const iconColorData = textStyles[`${elementPrefix}-icon-color`];
+    
+    setCardData(prev => ({
+      ...prev,
+      [index]: {
+        background: bgData?.background_class || defaults.background,
+        iconCardBg: iconCardBgData?.background_class || 'bg-white/10',
+        number: numberData?.content || cards[index].number,
+        numberColor: numberData?.color_token || defaults.numberColor,
+        title: titleData?.content || cards[index].title,
+        titleColor: titleData?.color_token || defaults.titleColor,
+        description: descData?.content || cards[index].description,
+        descriptionColor: descData?.color_token || defaults.descriptionColor,
+        ctaText: ctaData?.content || cards[index].ctaText,
+        ctaBgColor: ctaData?.button_bg_color || defaults.ctaBgColor,
+        ctaTextColor: ctaData?.color_token || defaults.ctaTextColor,
+        iconColor: iconColorData?.color_token || 'foreground',
+      }
+    }));
   };
 
   useEffect(() => {
     loadImageSettings();
-    // Load data for all cards
-    cards.forEach((_, index) => {
-      loadCardData(index);
-    });
   }, []);
+  
+  // Load card data from context when styles are loaded
+  useEffect(() => {
+    if (stylesLoaded) {
+      cards.forEach((_, index) => {
+        loadCardData(index);
+      });
+    }
+  }, [stylesLoaded, backgroundStyles, textStyles]);
 
   // Image container always fills available space - card wrapper controls size
   const getContainerClasses = (): string => {
