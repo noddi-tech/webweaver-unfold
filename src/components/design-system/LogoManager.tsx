@@ -179,7 +179,7 @@ const iconPx = useMemo(() => iconSizeMap[iconSize] ?? 24, [iconSize]);
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="logo-text">Logo text</Label>
-              <Input id="logo-text" value={logoText} onChange={(e) => setLogoText(e.target.value)} placeholder="Noddi Tech" />
+              <Input id="logo-text" value={logoText} onChange={(e) => setLogoText(e.target.value)} placeholder="Navio" />
               <p className="text-xs text-muted-foreground">Optional when using an uploaded logo image.</p>
             </div>
 

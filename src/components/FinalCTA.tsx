@@ -30,7 +30,7 @@ export default function FinalCTA() {
               </EditableTranslation>
               <EditableTranslation translationKey="final_cta.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
                 <p className="text-xl text-white/90 max-w-2xl mx-auto mb-8">
-                  {t('final_cta.subtitle', 'Schedule a personalized demo or see how your specific use case can be automated with Noddi')}
+                  {t('final_cta.subtitle', 'Schedule a personalized demo or see how your specific use case can be automated with Navio')}
                 </p>
               </EditableTranslation>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

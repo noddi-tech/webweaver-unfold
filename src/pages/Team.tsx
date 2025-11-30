@@ -174,7 +174,7 @@ const Team = () => {
         if (page.meta_description) {
           ensureMeta("description", page.meta_description);
         } else {
-          ensureMeta("description", "Meet the Noddi Tech team: names, roles, and contact details.");
+          ensureMeta("description", "Meet the Navio team: names, roles, and contact details.");
         }
 
         // Apply page background using proper background class mapping
@@ -189,8 +189,8 @@ const Team = () => {
         document.body.classList.add(...backgroundClass.split(' '), ...textClass.split(' '));
       } else {
         // Fallback if no page data
-        document.title = "Our Team – Noddi Tech";
-        ensureMeta("description", "Meet the Noddi Tech team: names, roles, and contact details.");
+        document.title = "Our Team – Navio";
+        ensureMeta("description", "Meet the Navio team: names, roles, and contact details.");
       }
     };
 

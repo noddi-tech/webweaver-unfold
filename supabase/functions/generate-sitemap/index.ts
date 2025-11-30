@@ -42,7 +42,7 @@ serve(async (req) => {
 
     if (pagesError) throw pagesError;
 
-    const defaultDomain = 'https://noddi.tech';
+    const defaultDomain = 'https://naviosolutions.com';
     const today = new Date().toISOString();
 
     // Build sitemap XML

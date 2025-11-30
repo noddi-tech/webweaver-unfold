@@ -37,7 +37,7 @@ interface FooterSettings {
 
 const FooterManager = () => {
   const [settings, setSettings] = useState<FooterSettings>({
-    company_name: "Noddi Tech",
+    company_name: "Navio",
     company_description: "",
     contact_info: [],
     quick_links: [],
@@ -219,7 +219,7 @@ const FooterManager = () => {
                 id="company-name"
                 value={settings.company_name}
                 onChange={(e) => setSettings(prev => ({ ...prev, company_name: e.target.value }))}
-                placeholder="Noddi Tech or footer.company_name"
+                placeholder="Navio or footer.company_name"
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Current translations managed in Translation Manager

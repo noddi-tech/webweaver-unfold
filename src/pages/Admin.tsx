@@ -326,7 +326,7 @@ const Admin = () => {
               Learn about color tokens, spacing, and accessibility guidelines.
             </p>
             <a 
-              href="https://github.com/yourusername/noddi-tech/blob/main/content/design-system/README.md" 
+              href="https://github.com/yourusername/navio/blob/main/content/design-system/README.md" 
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-primary hover:underline"

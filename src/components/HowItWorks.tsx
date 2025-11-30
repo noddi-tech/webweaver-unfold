@@ -30,7 +30,7 @@ export default function HowItWorks() {
     },
     {
       icon: Smartphone,
-      title: t('how_it_works.step_3.title', 'Technicians execute with Noddi Worker app'),
+      title: t('how_it_works.step_3.title', 'Technicians execute with Navio Worker app'),
       description: t('how_it_works.step_3.description', 'Native app for mobile + garage workflows'),
       details: t('how_it_works.step_3.details', 'Standardized inspection capture and tire sales')
     },
@@ -48,7 +48,7 @@ export default function HowItWorks() {
         <div className="text-center mb-16">
           <EditableTranslation translationKey="how_it_works.title" onSave={() => setRefreshKey(prev => prev + 1)}>
             <h2 className="text-4xl font-bold mb-6 text-foreground">
-              {t('how_it_works.title', 'How Noddi Powers Your Operations')}
+              {t('how_it_works.title', 'How Navio Powers Your Operations')}
             </h2>
           </EditableTranslation>
           <EditableTranslation translationKey="how_it_works.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>

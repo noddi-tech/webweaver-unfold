@@ -1,8 +1,8 @@
-# 🧭 Noddi Tech – Tone of Voice Guide
+# 🧭 Navio – Tone of Voice Guide
 
 ## Purpose
 
-Noddi Tech builds the digital backbone of automotive services — from booking to backend automation.
+Navio builds the digital backbone of automotive services — from booking to backend automation.
 Our tone of voice turns complex technology into something people instantly get.
 It's confident, clear, and human — the way good tech should feel.
 
@@ -79,7 +79,7 @@ It's confident, clear, and human — the way good tech should feel.
 
 ## 6. Signature Lines
 
-These short phrases capture the Noddi Tech essence. Use them across marketing, decks, and UI copy.
+These short phrases capture the Navio essence. Use them across marketing, decks, and UI copy.
 
 - "One platform. Every function."
 - "Automation that feels human."

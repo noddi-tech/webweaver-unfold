@@ -100,7 +100,7 @@ const Index = () => {
           setPageData(page);
           
           // Update document head with page data
-          document.title = page.title || "Noddi Tech - Unified Booking & ERP for Auto Services";
+          document.title = page.title || "Navio - Unified Booking & ERP for Auto Services";
           if (page.meta_description) {
             const metaDescription = document.querySelector('meta[name="description"]');
             if (metaDescription) {

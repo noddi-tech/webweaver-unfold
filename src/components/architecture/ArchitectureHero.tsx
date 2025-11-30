@@ -20,7 +20,7 @@ export default function ArchitectureHero() {
           </EditableTranslation>
           <EditableTranslation translationKey="architecture.hero.subtitle">
             <p className={`${body} text-muted-foreground mb-8`}>
-              {t('architecture.hero.subtitle', 'Noddi runs backend and frontend in perfect sync — because they\'re the same thing.')}
+              {t('architecture.hero.subtitle', 'Navio runs backend and frontend in perfect sync — because they\'re the same thing.')}
             </p>
           </EditableTranslation>
           <Button size="lg" className="text-lg px-8 py-6 group" asChild>

@@ -144,7 +144,7 @@ serve(async (req) => {
     };
 
     // Enhanced TOV guide with phrase-level transformation examples
-    const tovGuide = `You are translating content for Noddi Tech, an automotive service technology platform.
+    const tovGuide = `You are translating content for Navio, an automotive service technology platform.
 
 TONE OF VOICE PRINCIPLES:
 1. Intelligent Confidence - Expert but never condescending
@@ -190,7 +190,7 @@ The following terms MUST ALWAYS remain in ENGLISH (never translate):
 API, Backend, Frontend, Database, Cloud, DevOps, SaaS, PaaS, SDK, JSON, XML, HTTP, HTTPS, REST, GraphQL, WebSocket, OAuth, JWT, CI/CD, Git, GitHub
 
 **Business/Product:**
-Noddi, booking, whitelabel, NPS (Net Promoter Score), CRM, ERP, Dashboard, Analytics, Metrics, KPI, ROI, B2B, B2C, SLA, MVP
+Navio, booking, whitelabel, NPS (Net Promoter Score), CRM, ERP, Dashboard, Analytics, Metrics, KPI, ROI, B2B, B2C, SLA, MVP
 
 **UI/UX Components:**
 Button, Toggle, Switch, Dropdown, Select, Modal, Dialog, Tooltip, Popover, Sidebar, Header, Footer, Navigation, Breadcrumb, Tab, Accordion, Carousel

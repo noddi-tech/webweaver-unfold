@@ -11,7 +11,7 @@ export default function CoreLoop() {
     {
       icon: Calendar,
       title: t('core_loop.step_1.title', 'Book.'),
-      description: t('core_loop.step_1.description', 'The customer picks a time — Noddi handles the rest.'),
+      description: t('core_loop.step_1.description', 'The customer picks a time — Navio handles the rest.'),
     },
     {
       icon: Zap,

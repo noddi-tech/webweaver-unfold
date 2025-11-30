@@ -185,7 +185,7 @@ export function PricingFeatureCards({ currency, contractType, textContent }: Pri
       <div className="text-center mt-8 md:mt-12">
         <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
           <a 
-            href="https://calendly.com/joachim-noddi/30min"
+            href="https://calendly.com/navio/30min"
             target="_blank"
             rel="noopener noreferrer"
           >

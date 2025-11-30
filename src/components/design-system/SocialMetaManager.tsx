@@ -57,7 +57,7 @@ const SocialMetaManager = () => {
         // Initialize with current page data
         setMetaSettings(prev => ({
           ...prev,
-          og_title: document.title || 'Noddi Tech - Automotive Logistics Technology Platform',
+          og_title: document.title || 'Navio - Automotive Logistics Technology Platform',
           og_description: document.querySelector('meta[name="description"]')?.getAttribute('content') || 'Empower your automotive maintenance operations',
           og_url: window.location.origin
         }));
