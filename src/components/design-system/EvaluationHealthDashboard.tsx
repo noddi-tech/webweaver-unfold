@@ -64,8 +64,24 @@ export default function EvaluationHealthDashboard() {
         .in('language_code', stuck.map(s => s.language_code));
       
       console.log(`✓ Auto-reset complete`);
-      refresh(); // Refresh dashboard to show updated states
     }
+    
+    // ✅ ALWAYS refresh data, even if no stuck items found
+    refresh();
+  }
+
+  // Manual reset handler for stuck evaluations button
+  async function handleResetStuckEvaluations() {
+    const stuckEvals = detectStuckEvaluations();
+    if (stuckEvals.length === 0) {
+      return;
+    }
+    
+    await supabase.from('evaluation_progress')
+      .update({ status: 'idle', updated_at: new Date().toISOString() })
+      .in('language_code', stuckEvals.map(s => s.language_code));
+    
+    refresh();
   }
 
   function calculateSystemHealth() {
@@ -85,9 +101,12 @@ export default function EvaluationHealthDashboard() {
     });
     const avgTime = timeCount > 0 ? Math.round(totalTime / timeCount / 1000) : 0;
 
-    // Calculate success rate
+    // Calculate success rate (count completed OR idle with all keys evaluated)
     const totalAttempts = allProgress.length;
-    const successCount = allProgress.filter(p => p.status === 'completed').length;
+    const successCount = allProgress.filter(p => 
+      p.status === 'completed' || 
+      (p.status === 'idle' && p.evaluated_keys > 0 && p.evaluated_keys >= p.total_keys)
+    ).length;
     const successRate = totalAttempts > 0 ? Math.round((successCount / totalAttempts) * 100) : 0;
 
     // Total evaluated
@@ -258,7 +277,14 @@ export default function EvaluationHealthDashboard() {
                 return langStat?.name || e.language_code;
               }).join(', ')}
               <br />
-              <span className="text-sm">Go to "Translations" tab and click "Reset Stuck Evaluations" to fix.</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+                onClick={handleResetStuckEvaluations}
+              >
+                Reset Stuck Evaluations
+              </Button>
             </AlertDescription>
           </Alert>
         );
