@@ -133,6 +133,32 @@ export default function EvaluationHealthDashboard() {
     });
   }
 
+  function detectIncompleteEvaluations() {
+    return allProgress.filter(p => 
+      p.evaluated_keys > 0 && 
+      p.evaluated_keys < p.total_keys && 
+      p.status !== 'in_progress'
+    );
+  }
+
+  async function handleResumeAllIncomplete() {
+    const incompleteEvals = detectIncompleteEvaluations();
+    if (incompleteEvals.length === 0) return;
+    
+    for (const incomplete of incompleteEvals) {
+      const { error } = await supabase.functions.invoke('evaluate-translation-quality', {
+        body: {
+          targetLanguage: incomplete.language_code,
+          startFromKey: incomplete.last_evaluated_key
+        }
+      });
+      if (error) {
+        console.error(`Failed to resume ${incomplete.language_code}:`, error);
+      }
+    }
+    refresh();
+  }
+
   function getStatusIcon(status: string) {
     switch (status) {
       case 'completed':
@@ -329,6 +355,60 @@ export default function EvaluationHealthDashboard() {
               <p className="text-xs mt-2 opacity-80">
                 Stuck evaluations are automatically detected when they haven't updated in 10+ minutes. 
                 The system watchdog runs every 10 minutes to auto-reset them.
+              </p>
+            </AlertDescription>
+          </Alert>
+        );
+      })()}
+
+      {/* Incomplete Evaluations - Resumable */}
+      {(() => {
+        const incompleteEvals = detectIncompleteEvaluations();
+        return incompleteEvals.length > 0 && (
+          <Alert className="border-2 border-blue-500/30 bg-blue-50 dark:bg-blue-950/20">
+            <Activity className="h-5 w-5 text-blue-600" />
+            <AlertDescription className="ml-2">
+              <div className="font-semibold text-base mb-2 text-blue-900 dark:text-blue-100">
+                📊 {incompleteEvals.length} evaluation(s) partially completed
+              </div>
+              <div className="space-y-2 mb-3">
+                {incompleteEvals.map(e => {
+                  const langStat = stats.find(s => s.code === e.language_code);
+                  const percentage = e.total_keys > 0 
+                    ? Math.round((e.evaluated_keys / e.total_keys) * 100) 
+                    : 0;
+                  return (
+                    <div key={e.language_code} className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <FlagIcon code={e.language_code} />
+                          <span className="font-medium">{langStat?.name || e.language_code}</span>
+                          <Badge variant="secondary">{percentage}%</Badge>
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {e.evaluated_keys}/{e.total_keys}
+                        </span>
+                      </div>
+                      <Progress value={percentage} className="h-2" />
+                      {e.last_evaluated_key && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Last key: {e.last_evaluated_key}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <Button 
+                onClick={handleResumeAllIncomplete}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                size="sm"
+              >
+                <Activity className="h-4 w-4 mr-2" />
+                Resume All Incomplete
+              </Button>
+              <p className="text-xs mt-2 text-blue-900/70 dark:text-blue-100/70">
+                These evaluations have made progress but aren't finished yet. Click to resume from where they left off.
               </p>
             </AlertDescription>
           </Alert>

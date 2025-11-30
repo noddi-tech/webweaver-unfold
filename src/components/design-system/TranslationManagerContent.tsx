@@ -2133,13 +2133,13 @@ export default function TranslationManagerContent() {
                         ) : (
                           <>
                             <Sparkles className="w-4 h-4 mr-2" />
-                            Evaluate Incomplete
+                            Resume/Evaluate Incomplete
                           </>
                         )}
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Only evaluate languages not yet at 100%</p>
+                      <p>Resume partially completed evaluations and start new ones for unevaluated languages</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
