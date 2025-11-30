@@ -1615,6 +1615,7 @@ export type Database = {
           font_size_tablet: string | null
           font_weight: string | null
           id: string
+          is_intentionally_empty: boolean | null
           is_italic: boolean | null
           is_stale: boolean | null
           is_underline: boolean | null
@@ -1643,6 +1644,7 @@ export type Database = {
           font_size_tablet?: string | null
           font_weight?: string | null
           id?: string
+          is_intentionally_empty?: boolean | null
           is_italic?: boolean | null
           is_stale?: boolean | null
           is_underline?: boolean | null
@@ -1671,6 +1673,7 @@ export type Database = {
           font_size_tablet?: string | null
           font_weight?: string | null
           id?: string
+          is_intentionally_empty?: boolean | null
           is_italic?: boolean | null
           is_stale?: boolean | null
           is_underline?: boolean | null
