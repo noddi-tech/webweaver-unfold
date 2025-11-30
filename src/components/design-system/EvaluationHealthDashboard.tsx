@@ -19,10 +19,12 @@ import {
 } from 'lucide-react';
 import * as Flags from 'country-flag-icons/react/3x2';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export default function EvaluationHealthDashboard() {
   const { allProgress, loading, refresh } = useEvaluationProgress();
   const [stats, setStats] = useState<any[]>([]);
+  const [isResuming, setIsResuming] = useState(false);
   const [systemHealth, setSystemHealth] = useState({
     activeEvaluations: 0,
     averageTime: 0,
@@ -143,20 +145,53 @@ export default function EvaluationHealthDashboard() {
 
   async function handleResumeAllIncomplete() {
     const incompleteEvals = detectIncompleteEvaluations();
-    if (incompleteEvals.length === 0) return;
-    
-    for (const incomplete of incompleteEvals) {
-      const { error } = await supabase.functions.invoke('evaluate-translation-quality', {
-        body: {
-          targetLanguage: incomplete.language_code,
-          startFromKey: incomplete.last_evaluated_key
-        }
-      });
-      if (error) {
-        console.error(`Failed to resume ${incomplete.language_code}:`, error);
-      }
+    if (incompleteEvals.length === 0) {
+      toast.info('No incomplete evaluations to resume');
+      return;
     }
-    refresh();
+    
+    setIsResuming(true);
+    let successCount = 0;
+    let failCount = 0;
+    
+    try {
+      for (const incomplete of incompleteEvals) {
+        toast.loading(`Resuming ${incomplete.language_code.toUpperCase()}...`, {
+          id: `resume-${incomplete.language_code}`
+        });
+        
+        const { error } = await supabase.functions.invoke('evaluate-translation-quality', {
+          body: {
+            targetLanguage: incomplete.language_code,
+            startFromKey: incomplete.last_evaluated_key
+          }
+        });
+        
+        if (error) {
+          failCount++;
+          toast.error(`Failed to resume ${incomplete.language_code.toUpperCase()}`, {
+            id: `resume-${incomplete.language_code}`
+          });
+          console.error(`Failed to resume ${incomplete.language_code}:`, error);
+        } else {
+          successCount++;
+          toast.success(`Started ${incomplete.language_code.toUpperCase()}`, {
+            id: `resume-${incomplete.language_code}`
+          });
+        }
+      }
+      
+      // Summary toast
+      if (successCount > 0) {
+        toast.success(`Resumed ${successCount} evaluation(s)`);
+      }
+      if (failCount > 0) {
+        toast.error(`${failCount} evaluation(s) failed to start`);
+      }
+    } finally {
+      setIsResuming(false);
+      refresh();
+    }
   }
 
   function getStatusIcon(status: string) {
@@ -403,9 +438,19 @@ export default function EvaluationHealthDashboard() {
                 onClick={handleResumeAllIncomplete}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 size="sm"
+                disabled={isResuming}
               >
-                <Activity className="h-4 w-4 mr-2" />
-                Resume All Incomplete
+                {isResuming ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Resuming...
+                  </>
+                ) : (
+                  <>
+                    <Activity className="h-4 w-4 mr-2" />
+                    Resume All Incomplete
+                  </>
+                )}
               </Button>
               <p className="text-xs mt-2 text-blue-900/70 dark:text-blue-100/70">
                 These evaluations have made progress but aren't finished yet. Click to resume from where they left off.
