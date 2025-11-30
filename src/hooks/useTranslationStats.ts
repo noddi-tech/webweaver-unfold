@@ -32,25 +32,42 @@ export function useTranslationStats() {
       { data: translationStats },
       { data: metaStats },
       { data: evalProgress },
-      { data: languages }
+      { data: languages },
+      { data: actualEvaluated }
     ] = await Promise.all([
       supabase.from('translation_stats' as any).select('*'),
       supabase.from('page_meta_stats' as any).select('*'),
       supabase.from('evaluation_progress').select('*'),
-      supabase.from('languages').select('code, show_in_switcher')
+      supabase.from('languages').select('code, show_in_switcher'),
+      // Query actual evaluated count: translations with quality_score IS NOT NULL
+      supabase
+        .from('translations')
+        .select('language_code')
+        .not('quality_score', 'is', null)
+        .neq('language_code', 'en')
     ]);
 
-    // Merge show_in_switcher into stats
+    // Group actual evaluated counts by language
+    const evaluatedByLanguage: Record<string, number> = {};
+    if (actualEvaluated && Array.isArray(actualEvaluated)) {
+      actualEvaluated.forEach((t: any) => {
+        evaluatedByLanguage[t.language_code] = (evaluatedByLanguage[t.language_code] || 0) + 1;
+      });
+    }
+
+    // Merge show_in_switcher and actual evaluated counts into stats
     if (translationStats && Array.isArray(translationStats) && languages) {
       const enrichedStats = (translationStats as any[]).map((stat: any) => ({
         ...stat,
-        show_in_switcher: languages.find((l: any) => l.code === stat.code)?.show_in_switcher ?? true
+        show_in_switcher: languages.find((l: any) => l.code === stat.code)?.show_in_switcher ?? true,
+        actual_evaluated_count: evaluatedByLanguage[stat.code] || 0
       }));
       setStats(enrichedStats);
       console.log('[useTranslationStats] Loaded stats:', {
         timestamp: new Date().toISOString(),
         loadTime: `${Date.now() - startTime}ms`,
         languages: enrichedStats.length,
+        evaluatedCounts: evaluatedByLanguage,
         sampleData: enrichedStats.slice(0, 2)
       });
     } else if (translationStats && Array.isArray(translationStats)) {

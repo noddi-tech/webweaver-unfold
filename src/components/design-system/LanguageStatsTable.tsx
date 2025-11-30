@@ -83,20 +83,20 @@ export default function LanguageStatsTable({
                         {translationComplete && <Check className="w-4 h-4 text-success" />}
                       </div>
                     </td>
-                    <td className="py-3">
+                     <td className="py-3">
                       {lang.code === 'en' ? (
                         <span className="text-muted-foreground">N/A</span>
                       ) : (
                         <div className="flex items-center gap-2">
                           <span className="font-mono">
-                            {Math.min(progress?.evaluated_keys || 0, lang.total_translations)}/{lang.total_translations}
+                            {lang.actual_evaluated_count || 0}/{lang.total_translations}
                           </span>
                           {lang.total_translations < englishCount && (
                             <Badge variant="destructive" className="text-xs">
                               {englishCount - lang.total_translations} missing
                             </Badge>
                           )}
-                          {evaluationComplete && <Check className="w-4 h-4 text-success" />}
+                          {(lang.actual_evaluated_count || 0) === lang.total_translations && <Check className="w-4 h-4 text-success" />}
                           {progress?.status === 'in_progress' && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
                           {progress?.status === 'paused' && <AlertTriangle className="w-4 h-4 text-warning" />}
                         </div>
