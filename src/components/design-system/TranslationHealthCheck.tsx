@@ -112,22 +112,27 @@ export default function TranslationHealthCheck() {
   async function handleFixAll() {
     setFixing(true);
     try {
-      // Step 1: Delete broken entries (where translated_text equals translation_key)
-      // Use raw SQL via RPC since Supabase doesn't support filtering by column equality
-      const { data: brokenEntries, error: fetchError } = await supabase
-        .from('translations')
-        .select('id')
-        .neq('language_code', 'en');
+      // Step 1: Delete broken entries with pagination
+      let allBroken: any[] = [];
+      let page = 0;
+      const pageSize = 1000;
 
-      if (fetchError) throw fetchError;
+      while (true) {
+        const { data, error } = await supabase
+          .from('translations')
+          .select('id, translated_text, translation_key')
+          .neq('language_code', 'en')
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+        
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        
+        allBroken = [...allBroken, ...data];
+        page++;
+        if (data.length < pageSize) break;
+      }
 
-      // Filter in JS where translated_text = translation_key
-      const { data: allBroken } = await supabase
-        .from('translations')
-        .select('id, translated_text, translation_key')
-        .neq('language_code', 'en');
-
-      const brokenIds = (allBroken || [])
+      const brokenIds = allBroken
         .filter(t => t.translated_text === t.translation_key)
         .map(t => t.id);
 
