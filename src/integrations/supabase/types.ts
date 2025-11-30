@@ -1995,6 +1995,43 @@ export type Database = {
           },
         ]
       }
+      evaluated_counts_by_language: {
+        Row: {
+          evaluated_count: number | null
+          language_code: string | null
+          total_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "language_translation_stats"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "page_meta_stats"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "translation_stats"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       language_translation_stats: {
         Row: {
           approval_percentage: number | null
