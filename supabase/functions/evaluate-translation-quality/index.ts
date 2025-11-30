@@ -115,13 +115,10 @@ serve(async (req) => {
       .from('translations')
       .select('translation_key, translated_text')
       .eq('language_code', targetLanguage)
+      .is('quality_score', null) // Find ANY unevaluated keys
       .order('translation_key');
 
-    // Resume from last key if provided
-    if (startFromKey) {
-      query = query.gt('translation_key', startFromKey);
-      console.log(`Resuming from key: ${startFromKey}`);
-    }
+    console.log(`Finding unevaluated translations (quality_score IS NULL)`);
 
     const { data: targetTexts, error: targetError } = await query;
 
@@ -555,16 +552,25 @@ ${JSON.stringify(translationsForEvaluation, null, 2)}`;
       }
     }
 
+    // Query for remaining unevaluated keys to determine completion
+    const { count: unevaluatedCount } = await supabase
+      .from('translations')
+      .select('*', { count: 'exact', head: true })
+      .eq('language_code', targetLanguage)
+      .is('quality_score', null);
+    
     // Query final actual evaluated count from database
     const { count: finalEvaluatedCount } = await supabase
       .from('translations')
       .select('*', { count: 'exact', head: true })
       .eq('language_code', targetLanguage)
-      .not('ai_reviewed_at', 'is', null);
+      .not('quality_score', 'is', null);
     
     const currentTotalEvaluated = finalEvaluatedCount || 0;
     const totalKeys = existingProgress?.total_keys || sourceTexts.length;
-    const isComplete = currentTotalEvaluated >= totalKeys;
+    const isComplete = unevaluatedCount === 0; // Complete only when NO unevaluated keys remain
+    
+    console.log(`Completion check: ${unevaluatedCount} unevaluated keys remaining (${currentTotalEvaluated}/${totalKeys} evaluated)`);
 
     if (isComplete) {
       await supabase
