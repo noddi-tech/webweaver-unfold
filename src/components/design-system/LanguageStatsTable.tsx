@@ -61,7 +61,7 @@ export default function LanguageStatsTable({
             </thead>
             <tbody className="text-sm">
               {stats.map((lang) => {
-                const Flag = (Flags as any)[lang.code === 'en' ? 'US' : lang.code === 'ja' ? 'JP' : lang.code === 'zh' ? 'CN' : lang.code === 'ko' ? 'KR' : lang.code === 'ar' ? 'SA' : lang.code === 'he' ? 'IL' : lang.code.toUpperCase()];
+                const Flag = (Flags as any)[lang.flag_code || lang.code.toUpperCase()];
                 const progress = evaluationProgress.find(ep => ep.language_code === lang.code);
                 const metaStat = pageMetaStats.find(m => m.code === lang.code);
                 
