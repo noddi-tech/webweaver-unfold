@@ -110,12 +110,14 @@ export default function TranslationHealthCheck() {
         missing += [...englishKeys].filter(k => !langKeys.has(k)).length;
       }
 
-      // Count healthy entries (non-English translations that are NOT broken AND NOT stale)
+      // Count healthy entries including English (all English + non-broken/non-stale non-English)
+      const englishTranslations = translations.filter(t => t.language_code === 'en');
       const nonEnglish = translations.filter(t => t.language_code !== 'en');
-      const healthy = nonEnglish.filter(t => 
+      const healthyNonEnglish = nonEnglish.filter(t => 
         t.translated_text !== t.translation_key && // not broken
         !t.is_stale // not stale
       ).length;
+      const healthy = englishTranslations.length + healthyNonEnglish;
 
       setStats({
         brokenCount: broken,
@@ -180,7 +182,108 @@ export default function TranslationHealthCheck() {
         });
       }
 
-      // Step 2: Trigger translation for all enabled languages
+      // Step 2: Query ONLY stale translations and group by language
+      const { data: staleTranslations } = await supabase
+        .from('translations')
+        .select('translation_key, language_code')
+        .eq('is_stale', true)
+        .neq('language_code', 'en');
+
+      // Group stale keys by language
+      const staleByLanguage = new Map<string, string[]>();
+      staleTranslations?.forEach(t => {
+        const keys = staleByLanguage.get(t.language_code) || [];
+        keys.push(t.translation_key);
+        staleByLanguage.set(t.language_code, keys);
+      });
+
+      const totalStaleKeys = staleTranslations?.length || 0;
+
+      if (staleByLanguage.size > 0) {
+        const { data: languages } = await supabase
+          .from('languages')
+          .select('code, name')
+          .in('code', Array.from(staleByLanguage.keys()));
+
+        const languageMap = new Map(languages?.map(l => [l.code, l.name]) || []);
+
+        toast({
+          title: 'Fixing stale translations...',
+          description: `Processing ${totalStaleKeys} stale translations across ${staleByLanguage.size} languages`,
+          duration: 3000
+        });
+
+        let processedCount = 0;
+        for (const [langCode, keys] of staleByLanguage) {
+          processedCount++;
+          const langName = languageMap.get(langCode) || langCode;
+          
+          setProgressInfo({
+            phase: 'translating',
+            currentLanguage: langName,
+            languageIndex: processedCount,
+            totalLanguages: staleByLanguage.size,
+            deletedCount: brokenIds.length
+          });
+
+          const { error: translateError } = await supabase.functions.invoke('translate-content', {
+            body: { 
+              translationKeys: keys,  // Only stale keys for this language!
+              targetLanguage: langCode,
+              sourceLanguage: 'en'
+            }
+          });
+
+          if (translateError) {
+            console.error(`Translation failed for ${langCode}:`, translateError);
+          } else {
+            toast({
+              title: `✅ ${langName} complete`,
+              description: `Fixed ${keys.length} stale translations (${processedCount}/${staleByLanguage.size})`,
+              duration: 2000
+            });
+          }
+        }
+
+        setProgressInfo({ phase: 'done', currentLanguage: '', languageIndex: staleByLanguage.size, totalLanguages: staleByLanguage.size, deletedCount: brokenIds.length });
+        
+        toast({
+          title: '🎉 All stale translations fixed!',
+          description: `Successfully processed ${totalStaleKeys} translations`,
+          duration: 5000
+        });
+      } else {
+        toast({
+          title: 'No stale translations found',
+          description: 'All translations are up to date!',
+          duration: 3000
+        });
+      }
+
+      // Reload stats
+      await loadHealthStats();
+    } catch (error: any) {
+      console.error('Fix all failed:', error);
+      toast({
+        title: 'Fix process failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setFixing(false);
+      setProgressInfo(null);
+    }
+  }
+
+  async function handleRetranslateAll() {
+    if (!confirm('⚠️ WARNING: This will re-translate ALL content for ALL enabled languages.\n\nThis will take several minutes and consume significant API credits.\n\nAre you sure you want to continue?')) {
+      return;
+    }
+
+    setFixing(true);
+    setProgressInfo({ phase: 'translating', currentLanguage: '', languageIndex: 0, totalLanguages: 0, deletedCount: 0 });
+    
+    try {
       const { data: languages } = await supabase
         .from('languages')
         .select('code, name')
@@ -197,7 +300,7 @@ export default function TranslationHealthCheck() {
 
       if (languages && languages.length > 0) {
         toast({
-          title: 'Starting translations...',
+          title: 'Starting full re-translation...',
           description: `Processing ${languages.length} languages with ${translationKeys.length} keys`,
           duration: 3000
         });
@@ -210,7 +313,7 @@ export default function TranslationHealthCheck() {
             currentLanguage: lang.name,
             languageIndex: i + 1,
             totalLanguages: languages.length,
-            deletedCount: brokenIds.length
+            deletedCount: 0
           });
 
           const { error: translateError } = await supabase.functions.invoke('translate-content', {
@@ -232,10 +335,10 @@ export default function TranslationHealthCheck() {
           }
         }
 
-        setProgressInfo({ phase: 'done', currentLanguage: '', languageIndex: languages.length, totalLanguages: languages.length, deletedCount: brokenIds.length });
+        setProgressInfo({ phase: 'done', currentLanguage: '', languageIndex: languages.length, totalLanguages: languages.length, deletedCount: 0 });
         
         toast({
-          title: '🎉 All translations complete!',
+          title: '🎉 Full re-translation complete!',
           description: `Successfully processed ${languages.length} languages`,
           duration: 5000
         });
@@ -244,9 +347,9 @@ export default function TranslationHealthCheck() {
       // Reload stats
       await loadHealthStats();
     } catch (error: any) {
-      console.error('Fix all failed:', error);
+      console.error('Re-translate all failed:', error);
       toast({
-        title: 'Fix process failed',
+        title: 'Re-translation failed',
         description: error.message,
         variant: 'destructive'
       });
@@ -380,13 +483,36 @@ export default function TranslationHealthCheck() {
         )}
 
         {hasIssues && !fixing && (
+          <div className="space-y-2">
+            <Button
+              onClick={handleFixAll}
+              disabled={fixing}
+              className="w-full"
+            >
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Fix All Issues ({stats.brokenCount + stats.staleCount} items)
+            </Button>
+            <Button
+              onClick={handleRetranslateAll}
+              disabled={fixing}
+              variant="outline"
+              className="w-full"
+            >
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              Re-translate All (Slow, ~5 min)
+            </Button>
+          </div>
+        )}
+
+        {!hasIssues && !fixing && (
           <Button
-            onClick={handleFixAll}
+            onClick={handleRetranslateAll}
             disabled={fixing}
+            variant="outline"
             className="w-full"
           >
-            <CheckCircle2 className="w-4 h-4 mr-2" />
-            Fix All Issues
+            <AlertTriangle className="w-4 h-4 mr-2" />
+            Re-translate All (Slow, ~5 min)
           </Button>
         )}
       </CardContent>
