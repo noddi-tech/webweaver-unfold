@@ -31,10 +31,10 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Fetch English source text
+    // Fetch English source text AND styling
     const { data: englishTranslation, error: fetchError } = await supabase
       .from('translations')
-      .select('translated_text, context')
+      .select('translated_text, context, color_token, font_size, font_size_mobile, font_size_tablet, font_size_desktop, font_weight, is_italic, is_underline')
       .eq('translation_key', translationKey)
       .eq('language_code', 'en')
       .single();
@@ -150,7 +150,7 @@ Return ONLY the translated text. No explanations. No quotes. Just the translatio
 
     console.log(`Translation complete: ${englishText} → ${translatedText}`);
 
-    // Save translation to database
+    // Save translation to database with styling copied from English
     const { error: upsertError } = await supabase
       .from('translations')
       .upsert({
@@ -161,6 +161,15 @@ Return ONLY the translated text. No explanations. No quotes. Just the translatio
         is_stale: false,
         review_status: 'pending',
         context: translationContext,
+        // Copy styling from English
+        color_token: englishTranslation.color_token,
+        font_size: englishTranslation.font_size,
+        font_size_mobile: englishTranslation.font_size_mobile,
+        font_size_tablet: englishTranslation.font_size_tablet,
+        font_size_desktop: englishTranslation.font_size_desktop,
+        font_weight: englishTranslation.font_weight,
+        is_italic: englishTranslation.is_italic,
+        is_underline: englishTranslation.is_underline,
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'translation_key,language_code'

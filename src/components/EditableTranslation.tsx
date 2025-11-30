@@ -84,15 +84,31 @@ export function EditableTranslation({
       if (data) {
         setContentId(data.id);
         setDisplayText(data.translated_text);
+        
+        // If styling is NULL for current language, fetch from English as fallback
+        let stylingSource = data;
+        if (!data.color_token && currentLanguage !== 'en') {
+          const { data: englishData } = await supabase
+            .from('translations')
+            .select('color_token, font_size, font_size_mobile, font_size_tablet, font_size_desktop, font_weight, is_italic, is_underline')
+            .eq('translation_key', translationKey)
+            .eq('language_code', 'en')
+            .maybeSingle();
+          
+          if (englishData) {
+            stylingSource = { ...data, ...englishData };
+          }
+        }
+        
         setStyleSettings({
-          colorToken: data.color_token,
-          fontSize: data.font_size,
-          fontSizeMobile: data.font_size_mobile,
-          fontSizeTablet: data.font_size_tablet,
-          fontSizeDesktop: data.font_size_desktop,
-          fontWeight: data.font_weight,
-          isItalic: data.is_italic,
-          isUnderline: data.is_underline,
+          colorToken: stylingSource.color_token || 'foreground',
+          fontSize: stylingSource.font_size || 'base',
+          fontSizeMobile: stylingSource.font_size_mobile || 'inherit',
+          fontSizeTablet: stylingSource.font_size_tablet || 'inherit',
+          fontSizeDesktop: stylingSource.font_size_desktop || 'inherit',
+          fontWeight: stylingSource.font_weight || 'normal',
+          isItalic: stylingSource.is_italic || false,
+          isUnderline: stylingSource.is_underline || false,
         });
       } else {
         setDisplayText(null);
