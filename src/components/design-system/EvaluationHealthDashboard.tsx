@@ -32,6 +32,7 @@ export default function EvaluationHealthDashboard() {
 
   useEffect(() => {
     loadStats();
+    autoResetStuckEvaluations(); // ✅ WATCHDOG: Auto-reset on load
     const interval = setInterval(loadStats, 5000); // Update every 5 seconds
     return () => clearInterval(interval);
   }, []);
@@ -43,6 +44,28 @@ export default function EvaluationHealthDashboard() {
   async function loadStats() {
     const { data } = await supabase.from('translation_stats' as any).select('*');
     if (data) setStats(data);
+  }
+
+  // ✅ WATCHDOG: Automatically detect and reset stuck evaluations on dashboard load
+  async function autoResetStuckEvaluations() {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    
+    const { data: stuck } = await supabase
+      .from('evaluation_progress')
+      .select('language_code, updated_at')
+      .eq('status', 'in_progress')
+      .lt('updated_at', oneHourAgo);
+    
+    if (stuck && stuck.length > 0) {
+      console.log(`🔧 Dashboard watchdog: Auto-resetting ${stuck.length} stuck evaluations...`);
+      
+      await supabase.from('evaluation_progress')
+        .update({ status: 'idle', updated_at: new Date().toISOString() })
+        .in('language_code', stuck.map(s => s.language_code));
+      
+      console.log(`✓ Auto-reset complete`);
+      refresh(); // Refresh dashboard to show updated states
+    }
   }
 
   function calculateSystemHealth() {
