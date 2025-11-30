@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Check, X, Upload, Loader2, Plus, RefreshCw, AlertTriangle, Sparkles, Search, CheckCircle2, Clock, TrendingUp, TrendingDown, AlertCircle, FileText, Code, RotateCcw } from 'lucide-react';
+import { Check, X, Upload, Loader2, Plus, RefreshCw, AlertTriangle, Sparkles, Search, CheckCircle2, Clock, TrendingUp, TrendingDown, AlertCircle, FileText, Code, RotateCcw, ExternalLink } from 'lucide-react';
 import * as Flags from 'country-flag-icons/react/3x2';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Checkbox } from "@/components/ui/checkbox";
 import LanguageSettings from './LanguageSettings';
 import EvaluationControls from './EvaluationControls';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -78,6 +79,7 @@ export default function TranslationManagerContent() {
   const [approvalStatusFilter, setApprovalStatusFilter] = useState<string>('all'); // 'all', 'pending', 'approved'
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [isSyncingVisibility, setIsSyncingVisibility] = useState(false);
+  const [showIntentionallyEmpty, setShowIntentionallyEmpty] = useState(false);
 
   // Load saved filters on mount
   useEffect(() => {
@@ -161,13 +163,53 @@ export default function TranslationManagerContent() {
       .filter(Boolean)
   )).sort();
 
-  // Helper function to check for empty translations
+  // Helper function to check for empty translations (ALL empty, regardless of approval)
   const hasEmptyTranslations = (languageCode: string): number => {
     return translations.filter(
       t => t.language_code === languageCode && 
-           !t.approved && 
-           (!t.translated_text || t.translated_text.trim() === '')
+           (!t.translated_text || t.translated_text.trim() === '') &&
+           !t.is_intentionally_empty  // Exclude intentionally empty
     ).length;
+  };
+
+  // Helper function for approved empty translations (for warnings)
+  const hasApprovedEmptyTranslations = (languageCode: string): number => {
+    return translations.filter(
+      t => t.language_code === languageCode && 
+           t.approved && 
+           (!t.translated_text || t.translated_text.trim() === '') &&
+           !t.is_intentionally_empty
+    ).length;
+  };
+
+  // Helper to get intentionally empty count
+  const getIntentionallyEmptyCount = (languageCode: string): number => {
+    return translations.filter(
+      t => t.language_code === languageCode && t.is_intentionally_empty
+    ).length;
+  };
+
+  // Helper to create page links from translation keys
+  const getSectionLink = (translationKey: string, pageLocation: string): string | null => {
+    // Extract section from translation key (e.g., "hero.title" → "hero")
+    const parts = translationKey.split('.');
+    const section = parts[0]?.replace(/_/g, '-'); // how_it_works → how-it-works
+    
+    // Map page_location to route
+    const pageRoutes: Record<string, string> = {
+      'homepage': '/',
+      'pricing': '/pricing',
+      'contact': '/contact',
+      'team': '/team',
+      'solutions': '/solutions',
+      'features': '/features',
+      'partners': '/partners',
+      'architecture': '/architecture',
+      'functions': '/functions',
+    };
+    
+    const route = pageRoutes[pageLocation] || '/';
+    return `${route}#${section}`;
   };
 
   // Helper function to get missing translations count
@@ -236,8 +278,13 @@ export default function TranslationManagerContent() {
       }
     }
     
-    // Empty translations filter
-    if (showEmptyOnly && t.translated_text?.trim()) {
+    // Empty translations filter (exclude intentionally empty)
+    if (showEmptyOnly && (t.translated_text?.trim() || t.is_intentionally_empty)) {
+      return false;
+    }
+
+    // Intentionally empty filter
+    if (showIntentionallyEmpty && !t.is_intentionally_empty) {
       return false;
     }
     
@@ -2554,11 +2601,30 @@ export default function TranslationManagerContent() {
                       size="sm"
                       onClick={() => {
                         setShowEmptyOnly(!showEmptyOnly);
-                        if (!showEmptyOnly) setShowMissingOnly(false);
+                        if (!showEmptyOnly) {
+                          setShowMissingOnly(false);
+                          setShowIntentionallyEmpty(false);
+                        }
                       }}
                     >
                       <AlertTriangle className="w-4 h-4 mr-2" />
                       Show Empty Only ({emptyCount})
+                    </Button>
+
+                    {/* Show Intentionally Empty Toggle */}
+                    <Button
+                      variant={showIntentionallyEmpty ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        setShowIntentionallyEmpty(!showIntentionallyEmpty);
+                        if (!showIntentionallyEmpty) {
+                          setShowEmptyOnly(false);
+                          setShowMissingOnly(false);
+                        }
+                      }}
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Show Intentionally Empty ({getIntentionallyEmptyCount(lang.code)})
                     </Button>
                     
                     {/* Show Missing Only */}
@@ -2900,7 +2966,19 @@ export default function TranslationManagerContent() {
                         ) : (
                           <Badge variant="secondary">Pending</Badge>
                         )}
-                        <Badge variant="outline">{translation.page_location}</Badge>
+                        {translation.page_location && (
+                          <a 
+                            href={getSectionLink(translation.translation_key, translation.page_location)} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:opacity-70 transition-opacity"
+                          >
+                            <Badge variant="outline" className="flex items-center gap-1 cursor-pointer">
+                              {translation.page_location}
+                              <ExternalLink className="w-3 h-3" />
+                            </Badge>
+                          </a>
+                        )}
                       </div>
                     </CardTitle>
                   </CardHeader>
@@ -2927,15 +3005,50 @@ export default function TranslationManagerContent() {
                           onChange={(e) => handleLocalUpdate(translation.id, e.target.value)}
                           className={cn(
                             "font-mono text-sm",
-                            !translation.translated_text?.trim() && "border-destructive border-2"
+                            !translation.translated_text?.trim() && !translation.is_intentionally_empty && "border-destructive border-2"
                           )}
                           rows={3}
                         />
+                        
+                        {/* Intentionally Empty Checkbox */}
                         {!translation.translated_text?.trim() && (
-                          <p className="text-sm text-destructive flex items-center gap-1">
-                            <AlertTriangle className="w-4 h-4" />
-                            Translation text is empty - please add content before approving
-                          </p>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Checkbox
+                                id={`intentional-${translation.id}`}
+                                checked={translation.is_intentionally_empty || false}
+                                onCheckedChange={async (checked) => {
+                                  const { error } = await supabase
+                                    .from('translations')
+                                    .update({ is_intentionally_empty: checked === true })
+                                    .eq('id', translation.id);
+                                  
+                                  if (error) {
+                                    toast({ 
+                                      title: 'Error updating flag', 
+                                      description: error.message, 
+                                      variant: 'destructive' 
+                                    });
+                                  } else {
+                                    toast({ 
+                                      title: checked ? 'Marked as intentionally empty' : 'Unmarked as intentionally empty' 
+                                    });
+                                    loadData();
+                                  }
+                                }}
+                              />
+                              <Label htmlFor={`intentional-${translation.id}`} className="text-sm cursor-pointer">
+                                Mark as intentionally empty (no warning)
+                              </Label>
+                            </div>
+                            
+                            {!translation.is_intentionally_empty && (
+                              <p className="text-sm text-destructive flex items-center gap-1">
+                                <AlertTriangle className="w-4 h-4" />
+                                Translation text is empty - please add content or mark as intentionally empty
+                              </p>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
