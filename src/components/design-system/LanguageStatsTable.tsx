@@ -88,7 +88,9 @@ export default function LanguageStatsTable({
                         <span className="text-muted-foreground">N/A</span>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="font-mono">{progress?.evaluated_keys || 0}/{lang.total_translations}</span>
+                          <span className="font-mono">
+                            {Math.min(progress?.evaluated_keys || 0, lang.total_translations)}/{lang.total_translations}
+                          </span>
                           {lang.total_translations < englishCount && (
                             <Badge variant="destructive" className="text-xs">
                               {englishCount - lang.total_translations} missing

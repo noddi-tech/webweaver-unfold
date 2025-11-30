@@ -192,13 +192,18 @@ serve(async (req) => {
       if (elapsedTime > MAX_EXECUTION_TIME) {
         console.log(`⏱️ Approaching timeout at ${elapsedTime}ms - returning partial results`);
         
-        const currentEvaluatedCount = (existingProgress?.evaluated_keys || 0) + totalEvaluated;
+        // Query actual evaluated count from database (prevents double counting)
+        const { count: actualEvaluatedCount } = await supabase
+          .from('translations')
+          .select('*', { count: 'exact', head: true })
+          .eq('language_code', targetLanguage)
+          .not('ai_reviewed_at', 'is', null);
         
-        // Update progress
+        // Update progress with actual count
         await supabase
           .from('evaluation_progress')
           .update({
-            evaluated_keys: currentEvaluatedCount,
+            evaluated_keys: actualEvaluatedCount || 0,
             last_evaluated_key: lastProcessedKey,
             updated_at: new Date().toISOString(),
             status: 'in_progress'
@@ -209,12 +214,12 @@ serve(async (req) => {
           language: targetLanguage,
           evaluatedCount: totalEvaluated,
           failedCount: totalFailed,
-          totalEvaluated: currentEvaluatedCount,
+          totalEvaluated: actualEvaluatedCount || 0,
           totalKeys: existingProgress?.total_keys || sourceTexts.length,
           lastKey: lastProcessedKey,
           shouldContinue: true,
           status: 'partial',
-          message: `Processed ${totalEvaluated} translations in this batch. ${sourceTexts.length - currentEvaluatedCount} remaining.`
+          message: `Processed ${totalEvaluated} translations in this batch. ${sourceTexts.length - (actualEvaluatedCount || 0)} remaining.`
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -497,12 +502,18 @@ ${JSON.stringify(translationsForEvaluation, null, 2)}`;
           totalEvaluated += qualityScores.length;
           lastProcessedKey = batch[batch.length - 1].translation_key;
           
-          // Update progress after each batch
-          const currentEvaluatedCount = (existingProgress?.evaluated_keys || 0) + totalEvaluated;
+          // Query actual evaluated count from database (prevents double counting)
+          const { count: actualEvaluatedCount } = await supabase
+            .from('translations')
+            .select('*', { count: 'exact', head: true })
+            .eq('language_code', targetLanguage)
+            .not('ai_reviewed_at', 'is', null);
+          
+          // Update progress after each batch with actual count
           await supabase
             .from('evaluation_progress')
             .update({
-              evaluated_keys: currentEvaluatedCount,
+              evaluated_keys: actualEvaluatedCount || 0,
               last_evaluated_key: lastProcessedKey,
               updated_at: new Date().toISOString()
             })
@@ -518,8 +529,14 @@ ${JSON.stringify(translationsForEvaluation, null, 2)}`;
       }
     }
 
-    // Check if all translations evaluated
-    const currentTotalEvaluated = (existingProgress?.evaluated_keys || 0) + totalEvaluated;
+    // Query final actual evaluated count from database
+    const { count: finalEvaluatedCount } = await supabase
+      .from('translations')
+      .select('*', { count: 'exact', head: true })
+      .eq('language_code', targetLanguage)
+      .not('ai_reviewed_at', 'is', null);
+    
+    const currentTotalEvaluated = finalEvaluatedCount || 0;
     const totalKeys = existingProgress?.total_keys || sourceTexts.length;
     const isComplete = currentTotalEvaluated >= totalKeys;
 
