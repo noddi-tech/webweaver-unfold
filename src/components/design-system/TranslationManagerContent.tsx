@@ -120,6 +120,51 @@ export default function TranslationManagerContent() {
       .catch(console.error);
   }, [selectedLang]); // Reload when language changes
 
+  // Auto-recovery polling: check for stuck evaluations every 2 minutes
+  useEffect(() => {
+    const checkAndResumeStuckEvaluations = async () => {
+      try {
+        // Find evaluations stuck for >15 minutes
+        const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+        
+        const { data: stuckEvals, error } = await supabase
+          .from('evaluation_progress')
+          .select('*')
+          .eq('status', 'in_progress')
+          .lt('updated_at', fifteenMinutesAgo);
+
+        if (error) {
+          console.error('Auto-recovery check failed:', error);
+          return;
+        }
+
+        if (stuckEvals && stuckEvals.length > 0) {
+          console.log(`🔄 Auto-recovery: Found ${stuckEvals.length} stuck evaluations`);
+          
+          for (const stuck of stuckEvals) {
+            const lang = languages.find(l => l.code === stuck.language_code);
+            if (!lang) continue;
+            
+            console.log(`  • Resuming ${lang.name} from key: ${stuck.last_evaluated_key || 'start'}`);
+            
+            // Auto-resume the evaluation
+            await handleEvaluateQuality(stuck.language_code, stuck.last_evaluated_key);
+          }
+        }
+      } catch (err) {
+        console.error('Auto-recovery error:', err);
+      }
+    };
+
+    // Run check every 2 minutes
+    const interval = setInterval(checkAndResumeStuckEvaluations, 2 * 60 * 1000);
+    
+    // Run immediately on mount
+    checkAndResumeStuckEvaluations();
+
+    return () => clearInterval(interval);
+  }, [languages]); // Dependency on languages for name lookup
+
   async function loadData() {
     // Load languages with show_in_switcher
     const { data: langs } = await supabase.from('languages').select('*').order('sort_order');

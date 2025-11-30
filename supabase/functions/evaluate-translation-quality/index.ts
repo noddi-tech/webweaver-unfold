@@ -315,6 +315,20 @@ ${JSON.stringify(translationsForEvaluation, null, 2)}`;
         }
       } catch (e) {
         console.error('⚠️ Stage 1: Technical term scan failed:', e);
+        
+        // On critical failure, mark evaluation as error
+        await supabase
+          .from('evaluation_progress')
+          .update({
+            status: 'error',
+            error_message: `Stage 1 technical scan crashed: ${e.message}`,
+            last_error: new Date().toISOString(),
+            error_count: (existingProgress?.error_count || 0) + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('language_code', targetLanguage);
+        
+        throw e; // Re-throw to stop batch processing
       }
 
       // STAGE 2: Deep reasoning for HIGH CONFIDENCE uncertain cases (optimized)
@@ -441,6 +455,18 @@ ${JSON.stringify(translationsForEvaluation, null, 2)}`;
         if (!response.ok) {
           console.error(`⚠️ AI API error for batch:`, response.status);
           totalFailed += batch.length;
+          
+          // Update progress with error status
+          await supabase
+            .from('evaluation_progress')
+            .update({
+              error_count: (existingProgress?.error_count || 0) + 1,
+              last_error: new Date().toISOString(),
+              error_message: `AI API error: ${response.status} ${response.statusText}`,
+              updated_at: new Date().toISOString()
+            })
+            .eq('language_code', targetLanguage);
+          
           continue;
         }
 
