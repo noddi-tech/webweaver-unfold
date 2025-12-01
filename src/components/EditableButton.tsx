@@ -8,8 +8,10 @@ interface EditableButtonProps {
   buttonText: string | null;
   buttonUrl: string | null;
   buttonBgColor?: string;
+  buttonIcon?: string;
   onSave: (text: string, url: string) => void;
   onBgColorChange?: (color: string) => void;
+  onIconChange?: (icon: string) => void;
   className?: string;
 }
 
@@ -18,8 +20,10 @@ export function EditableButton({
   buttonText,
   buttonUrl,
   buttonBgColor = 'primary',
+  buttonIcon = '',
   onSave,
   onBgColorChange,
+  onIconChange,
   className = '',
 }: EditableButtonProps) {
   const { editMode } = useEditMode();
@@ -58,10 +62,14 @@ export function EditableButton({
         buttonText={buttonText || ''}
         buttonUrl={buttonUrl || ''}
         buttonBgColor={buttonBgColor}
-        onSave={(text, url, bgColor) => {
+        buttonIcon={buttonIcon}
+        onSave={(text, url, bgColor, icon) => {
           onSave(text, url);
           if (onBgColorChange) {
             onBgColorChange(bgColor);
+          }
+          if (onIconChange) {
+            onIconChange(icon);
           }
         }}
       />

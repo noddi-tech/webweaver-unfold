@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Pencil, Save, ExternalLink } from 'lucide-react';
+import { icons } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -13,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useColorSystem } from '@/hooks/useColorSystem';
+import IconPicker from '@/components/design-system/IconPicker';
 
 interface ButtonEditModalProps {
   open: boolean;
@@ -20,7 +22,8 @@ interface ButtonEditModalProps {
   buttonText: string;
   buttonUrl: string;
   buttonBgColor?: string;
-  onSave: (text: string, url: string, bgColor: string) => void;
+  buttonIcon?: string;
+  onSave: (text: string, url: string, bgColor: string, icon: string) => void;
 }
 
 export function ButtonEditModal({
@@ -29,11 +32,13 @@ export function ButtonEditModal({
   buttonText,
   buttonUrl,
   buttonBgColor = 'primary',
+  buttonIcon = '',
   onSave,
 }: ButtonEditModalProps) {
   const [text, setText] = useState(buttonText);
   const [url, setUrl] = useState(buttonUrl);
   const [bgColor, setBgColor] = useState(buttonBgColor);
+  const [icon, setIcon] = useState(buttonIcon);
   const { SOLID_COLORS, GRADIENT_COLORS, loading } = useColorSystem();
 
   useEffect(() => {
@@ -41,8 +46,9 @@ export function ButtonEditModal({
       setText(buttonText);
       setUrl(buttonUrl);
       setBgColor(buttonBgColor);
+      setIcon(buttonIcon);
     }
-  }, [open, buttonText, buttonUrl, buttonBgColor]);
+  }, [open, buttonText, buttonUrl, buttonBgColor, buttonIcon]);
 
   const handleSave = () => {
     if (!text.trim()) {
@@ -55,9 +61,15 @@ export function ButtonEditModal({
       return;
     }
 
-    onSave(text, url, bgColor);
+    onSave(text, url, bgColor, icon);
     toast.success('Button updated successfully');
     onOpenChange(false);
+  };
+
+  // Dynamic icon component for preview
+  const DynamicIcon = ({ name }: { name: string }) => {
+    const IconComponent = (icons as Record<string, any>)[name];
+    return IconComponent ? <IconComponent className="ml-2 h-4 w-4" /> : null;
   };
 
   return (
@@ -138,6 +150,7 @@ export function ButtonEditModal({
                   }}
                 >
                   {text || 'Preview'}
+                  {icon && <DynamicIcon name={icon} />}
                 </Button>
               </div>
 
@@ -189,6 +202,32 @@ export function ButtonEditModal({
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Icon Picker Section */}
+            <div className="space-y-3 pt-4 border-t">
+              <Label>Button Icon (Optional)</Label>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <IconPicker 
+                    value={icon} 
+                    onChange={setIcon}
+                    placeholder="Select icon (optional)"
+                  />
+                </div>
+                {icon && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setIcon('')}
+                  >
+                    Remove Icon
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Icon will appear after the button text
+              </p>
             </div>
           </TabsContent>
         </Tabs>
