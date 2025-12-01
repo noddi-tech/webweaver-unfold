@@ -12,6 +12,8 @@ import { EditableButton } from "@/components/EditableButton";
 import { AlternatingContentSection } from "@/components/AlternatingContentSection";
 import { EditableKeyBenefit } from "@/components/EditableKeyBenefit";
 import { EditableImage } from "@/components/EditableImage";
+import { EditableBackground } from "@/components/EditableBackground";
+import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -48,6 +50,7 @@ interface Solution {
 
 const SolutionDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { allowedBackgrounds } = useAllowedBackgrounds();
   const [solution, setSolution] = useState<Solution | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -316,38 +319,36 @@ const SolutionDetail = () => {
         </section>
       )}
 
-      {/* Description Section */}
-      {solution.description_heading && (
-        <section className="py-20 px-6 bg-muted/20">
-          <div className="container mx-auto max-w-4xl text-center">
-            <EditableSolutionText 
-              solutionId={solution.id} 
-              field="description_heading"
-              onSave={handleContentSave}
-            >
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-                {solution.description_heading}
-              </h2>
-            </EditableSolutionText>
-            {solution.description_text && (
-              <EditableSolutionText 
-                solutionId={solution.id} 
-                field="description_text"
-                onSave={handleContentSave}
-              >
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  {solution.description_text}
-                </p>
-              </EditableSolutionText>
-            )}
-          </div>
-        </section>
-      )}
-
       {/* Key Benefits Section */}
       {solution.key_benefits && solution.key_benefits.length > 0 && (
         <AlternatingContentSection
           items={solution.key_benefits}
+          sectionTitle={
+            solution.description_heading && (
+              <EditableSolutionText
+                solutionId={solution.id}
+                field="description_heading"
+                onSave={handleContentSave}
+              >
+                <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
+                  {solution.description_heading}
+                </h2>
+              </EditableSolutionText>
+            )
+          }
+          sectionDescription={
+            solution.description_text && (
+              <EditableSolutionText
+                solutionId={solution.id}
+                field="description_text"
+                onSave={handleContentSave}
+              >
+                <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+                  {solution.description_text}
+                </p>
+              </EditableSolutionText>
+            )
+          }
           enableScrollReveal={true}
           sectionSpacing="xl"
           maxWidth="6xl"
@@ -407,42 +408,50 @@ const SolutionDetail = () => {
 
       {/* Solution Footer / CTA Section */}
       {solution.footer_heading && (
-        <section className="py-20 px-6 bg-gradient-primary">
-          <div className="container mx-auto max-w-4xl text-center">
-            <EditableSolutionText 
-              solutionId={solution.id} 
-              field="footer_heading"
-              onSave={handleContentSave}
+        <section className="py-section">
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+            <EditableBackground
+              elementId={`solution-footer-cta-${slug}`}
+              defaultBackground="bg-gradient-hero"
+              allowedBackgrounds={allowedBackgrounds}
             >
-              <h3 className="text-4xl md:text-5xl font-bold mb-6 text-primary-foreground">
-                {solution.footer_heading}
-              </h3>
-            </EditableSolutionText>
-            {solution.footer_text && (
-              <EditableSolutionText 
-                solutionId={solution.id} 
-                field="footer_text"
-                onSave={handleContentSave}
-              >
-                <p className="text-xl text-primary-foreground/90 mb-8">
-                  {solution.footer_text}
-                </p>
-              </EditableSolutionText>
-            )}
-            {solution.footer_cta_text && solution.footer_cta_url && (
-              <EditableButton
-                buttonText={solution.footer_cta_text}
-                buttonUrl={solution.footer_cta_url}
-                onSave={(text, url) => handleButtonSave('footer_cta_text', 'footer_cta_url', text, url)}
-              >
-                <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
-                  <LanguageLink to={solution.footer_cta_url}>
-                    {solution.footer_cta_text}
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </LanguageLink>
-                </Button>
-              </EditableButton>
-            )}
+              <div className="relative overflow-hidden rounded-2xl md:rounded-3xl p-12 md:p-16 text-center">
+                <EditableSolutionText
+                  solutionId={solution.id}
+                  field="footer_heading"
+                  onSave={handleContentSave}
+                >
+                  <h3 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+                    {solution.footer_heading}
+                  </h3>
+                </EditableSolutionText>
+                {solution.footer_text && (
+                  <EditableSolutionText
+                    solutionId={solution.id}
+                    field="footer_text"
+                    onSave={handleContentSave}
+                  >
+                    <p className="text-xl mb-10 text-white/95 leading-relaxed">
+                      {solution.footer_text}
+                    </p>
+                  </EditableSolutionText>
+                )}
+                {solution.footer_cta_text && solution.footer_cta_url && (
+                  <EditableButton
+                    buttonText={solution.footer_cta_text}
+                    buttonUrl={solution.footer_cta_url}
+                    onSave={(text, url) => handleButtonSave('footer_cta_text', 'footer_cta_url', text, url)}
+                  >
+                    <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
+                      <LanguageLink to={solution.footer_cta_url}>
+                        {solution.footer_cta_text}
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </LanguageLink>
+                    </Button>
+                  </EditableButton>
+                )}
+              </div>
+            </EditableBackground>
           </div>
         </section>
       )}
