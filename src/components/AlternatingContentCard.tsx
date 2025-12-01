@@ -125,39 +125,57 @@ export function AlternatingContentCard({
       )}
       style={animationStyles}
     >
-      <div className={cn(
-        'grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center',
-        imageOnLeft && 'lg:grid-flow-dense'
-      )}>
-        {/* Text Content */}
-        <div className={cn(
-          imageOnLeft && 'lg:col-start-2'
-        )}>
-          <div className="flex items-start gap-4">
-            {/* Accent Bar */}
+      {/* Outer flex container for mobile accent bar */}
+      <div className="flex gap-4">
+        {/* Mobile/Tablet accent bar - left side of entire card */}
+        {showAccentBar && (
+          <div 
+            className="w-1.5 rounded-full self-stretch shrink-0 lg:hidden"
+            style={{ backgroundImage: `var(${accentBarGradient})` }}
+          />
+        )}
+        
+        {/* Main content wrapper */}
+        <div className="flex-1">
+          <div className={cn(
+            'grid gap-6 lg:gap-8 items-stretch',
+            // Mobile: single column, Desktop: 3 columns (content | bar | content)
+            'grid-cols-1 lg:grid-cols-[1fr_auto_1fr]'
+          )}>
+            {/* Image - first on mobile (order-1), positioned via grid on desktop */}
+            <div className={cn(
+              'w-full overflow-hidden order-1 lg:order-none',
+              radiusStyles[borderRadius],
+              aspectRatioStyles[imageAspectRatio],
+              // On desktop: position based on imageOnLeft
+              imageOnLeft ? 'lg:col-start-1' : 'lg:col-start-3'
+            )}>
+              {renderImage ? renderImage(content.imageUrl, content.heading) : defaultImage}
+            </div>
+            
+            {/* Desktop center accent bar */}
             {showAccentBar && (
               <div 
-                className="w-1.5 rounded-full self-stretch min-h-[80px] shrink-0"
-                style={{ backgroundImage: `var(${accentBarGradient})` }}
-              />
+                className="hidden lg:flex items-stretch lg:col-start-2"
+              >
+                <div 
+                  className="w-1.5 rounded-full"
+                  style={{ backgroundImage: `var(${accentBarGradient})` }}
+                />
+              </div>
             )}
             
-            {/* Text Content */}
-            <div className="space-y-6">
-              {renderHeading ? renderHeading(content.heading) : defaultHeading}
-              {renderDescription ? renderDescription(content.description) : defaultDescription}
+            {/* Text Content - second on mobile (order-2), positioned via grid on desktop */}
+            <div className={cn(
+              'order-2 lg:order-none',
+              imageOnLeft ? 'lg:col-start-3' : 'lg:col-start-1'
+            )}>
+              <div className="space-y-6">
+                {renderHeading ? renderHeading(content.heading) : defaultHeading}
+                {renderDescription ? renderDescription(content.description) : defaultDescription}
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Image Content */}
-        <div className={cn(
-          'w-full overflow-hidden',
-          radiusStyles[borderRadius],
-          aspectRatioStyles[imageAspectRatio],
-          imageOnLeft && 'lg:col-start-1 lg:row-start-1'
-        )}>
-          {renderImage ? renderImage(content.imageUrl, content.heading) : defaultImage}
         </div>
       </div>
     </div>
