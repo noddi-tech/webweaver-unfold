@@ -215,6 +215,7 @@ export function ScrollingFeatureCards() {
   // Remove hardcoded fallback images - let smart fallback chain handle empty states
   const [imageUrls, setImageUrls] = useState<Record<number, string>>({});
   const [mainCtaUrl, setMainCtaUrl] = useState('/functions');
+  const [mainCtaBgColor, setMainCtaBgColor] = useState<string>('primary');
   const [editingCard, setEditingCard] = useState<number | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [cardData, setCardData] = useState<Record<number, any>>({});
@@ -254,6 +255,17 @@ export function ScrollingFeatureCards() {
     const newCardWidths: Record<number, string> = {};
     const newCardBorderRadii: Record<number, string> = {};
     let newCardGap = 'gap-8';
+    
+    // Load main CTA button background color
+    const { data: ctaData } = await supabase
+      .from('text_content')
+      .select('button_bg_color')
+      .eq('element_id', 'scrolling-features-cta')
+      .maybeSingle();
+    
+    if (ctaData?.button_bg_color) {
+      setMainCtaBgColor(ctaData.button_bg_color);
+    }
     
     for (let i = 0; i < 5; i++) {
       const { data } = await supabase
@@ -609,16 +621,37 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
               <EditableButton
                 buttonText="Book a Demo"
                 buttonUrl={mainCtaUrl}
+                buttonBgColor={mainCtaBgColor}
                 onSave={(text, url) => {
                   setMainCtaUrl(url);
+                }}
+                onBgColorChange={async (color) => {
+                  setMainCtaBgColor(color);
+                  await supabase
+                    .from('text_content')
+                    .upsert({
+                      element_id: 'scrolling-features-cta',
+                      page_location: 'homepage',
+                      section: 'scrolling-features',
+                      element_type: 'cta_button',
+                      content: 'Book a Demo',
+                      button_bg_color: color,
+                      active: true,
+                    }, {
+                      onConflict: 'element_id'
+                    });
                 }}
               >
                 <Button 
                   size="lg"
                   className="rounded-full px-8 py-4 group self-start"
                   style={{
-                    backgroundColor: 'rgb(31, 32, 35)',
-                    color: 'rgb(255, 255, 255)',
+                    backgroundColor: mainCtaBgColor.startsWith('gradient-') || mainCtaBgColor.startsWith('glass-')
+                      ? undefined
+                      : `hsl(var(--${mainCtaBgColor}))`,
+                    backgroundImage: mainCtaBgColor.startsWith('gradient-') || mainCtaBgColor.startsWith('glass-')
+                      ? `var(--${mainCtaBgColor})`
+                      : undefined,
                   }}
                   asChild
                 >

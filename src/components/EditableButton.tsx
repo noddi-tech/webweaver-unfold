@@ -7,7 +7,9 @@ interface EditableButtonProps {
   children: React.ReactNode;
   buttonText: string | null;
   buttonUrl: string | null;
+  buttonBgColor?: string;
   onSave: (text: string, url: string) => void;
+  onBgColorChange?: (color: string) => void;
   className?: string;
 }
 
@@ -15,7 +17,9 @@ export function EditableButton({
   children,
   buttonText,
   buttonUrl,
+  buttonBgColor = 'primary',
   onSave,
+  onBgColorChange,
   className = '',
 }: EditableButtonProps) {
   const { editMode } = useEditMode();
@@ -53,7 +57,13 @@ export function EditableButton({
         onOpenChange={setModalOpen}
         buttonText={buttonText || ''}
         buttonUrl={buttonUrl || ''}
-        onSave={onSave}
+        buttonBgColor={buttonBgColor}
+        onSave={(text, url, bgColor) => {
+          onSave(text, url);
+          if (onBgColorChange) {
+            onBgColorChange(bgColor);
+          }
+        }}
       />
     </>
   );
