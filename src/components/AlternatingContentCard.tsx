@@ -159,7 +159,7 @@ export function AlternatingContentCard({
                 className="hidden lg:flex items-stretch lg:col-start-2"
               >
                 <div 
-                  className="w-1.5 rounded-full"
+                  className="w-1.5 rounded-full h-full"
                   style={{ backgroundImage: `var(${accentBarGradient})` }}
                 />
               </div>
@@ -167,7 +167,7 @@ export function AlternatingContentCard({
             
             {/* Text Content - second on mobile (order-2), positioned via grid on desktop */}
             <div className={cn(
-              'order-2 lg:order-none',
+              'order-2 lg:order-none flex items-start',
               imageOnLeft ? 'lg:col-start-3' : 'lg:col-start-1'
             )}>
               <div className="space-y-6">
