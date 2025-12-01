@@ -99,23 +99,18 @@ export function AlternatingContentSection({
         maxWidthStyles[maxWidth],
         spacingStyles[sectionSpacing]
       )}>
-        {/* Continuous Accent Bar - renders once at section level */}
-        {showContinuousAccentBar && (
-          <div 
-            className="absolute top-0 bottom-0 w-1.5 rounded-full left-0 lg:left-1/2 lg:-translate-x-1/2"
-            style={{ backgroundImage: `var(${accentBarGradient})` }}
-          />
-        )}
-        
         {items.map((item, index) => (
           <AlternatingContentCard
             key={item.id}
             content={item}
             index={index}
+            totalCards={items.length}
+            synchronizedGradient={showContinuousAccentBar}
             enableScrollAnimation={enableScrollReveal}
             animationState={enableScrollReveal ? cardStates[index] : undefined}
             {...cardOptions}
-            showAccentBar={showContinuousAccentBar ? false : cardOptions.showAccentBar}
+            showAccentBar={showContinuousAccentBar || cardOptions.showAccentBar}
+            accentBarGradient={accentBarGradient}
             renderHeading={renderCardHeading ? (heading) => renderCardHeading(item, index) : undefined}
             renderDescription={renderCardDescription ? (description) => renderCardDescription(item, index) : undefined}
             renderImage={renderCardImage ? (imageUrl, altText) => renderCardImage(item, index) : undefined}
