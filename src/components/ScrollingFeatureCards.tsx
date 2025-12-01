@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
-import { Calendar, Package, Users, BarChart3, Settings, ArrowRight, Pencil } from 'lucide-react';
+import { Calendar, Package, Users, BarChart3, Settings, Pencil, icons } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -216,6 +216,7 @@ export function ScrollingFeatureCards() {
   const [imageUrls, setImageUrls] = useState<Record<number, string>>({});
   const [mainCtaUrl, setMainCtaUrl] = useState('/functions');
   const [mainCtaBgColor, setMainCtaBgColor] = useState<string>('primary');
+  const [mainCtaIcon, setMainCtaIcon] = useState<string>('ArrowRight');
   const [editingCard, setEditingCard] = useState<number | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [cardData, setCardData] = useState<Record<number, any>>({});
@@ -256,15 +257,20 @@ export function ScrollingFeatureCards() {
     const newCardBorderRadii: Record<number, string> = {};
     let newCardGap = 'gap-8';
     
-    // Load main CTA button background color
+    // Load main CTA button background color and icon
     const { data: ctaData } = await supabase
       .from('text_content')
-      .select('button_bg_color')
+      .select('button_bg_color, button_icon')
       .eq('element_id', 'scrolling-features-cta')
       .maybeSingle();
     
-    if (ctaData?.button_bg_color) {
-      setMainCtaBgColor(ctaData.button_bg_color);
+    if (ctaData) {
+      if (ctaData.button_bg_color) {
+        setMainCtaBgColor(ctaData.button_bg_color);
+      }
+      if (ctaData.button_icon) {
+        setMainCtaIcon(ctaData.button_icon);
+      }
     }
     
     for (let i = 0; i < 5; i++) {
@@ -622,6 +628,7 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                 buttonText="Book a Demo"
                 buttonUrl={mainCtaUrl}
                 buttonBgColor={mainCtaBgColor}
+                buttonIcon={mainCtaIcon}
                 onSave={(text, url) => {
                   setMainCtaUrl(url);
                 }}
@@ -636,6 +643,24 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                       element_type: 'cta_button',
                       content: 'Book a Demo',
                       button_bg_color: color,
+                      button_icon: mainCtaIcon,
+                      active: true,
+                    }, {
+                      onConflict: 'element_id'
+                    });
+                }}
+                onIconChange={async (icon) => {
+                  setMainCtaIcon(icon);
+                  await supabase
+                    .from('text_content')
+                    .upsert({
+                      element_id: 'scrolling-features-cta',
+                      page_location: 'homepage',
+                      section: 'scrolling-features',
+                      element_type: 'cta_button',
+                      content: 'Book a Demo',
+                      button_bg_color: mainCtaBgColor,
+                      button_icon: icon,
                       active: true,
                     }, {
                       onConflict: 'element_id'
@@ -659,7 +684,12 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                     <EditableTranslation translationKey="scrolling_features.cta">
                       Book a Demo
                     </EditableTranslation>
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    {mainCtaIcon && (() => {
+                      const IconComponent = (icons as Record<string, any>)[mainCtaIcon];
+                      return IconComponent ? (
+                        <IconComponent className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      ) : null;
+                    })()}
                   </a>
                 </Button>
               </EditableButton>
@@ -774,7 +804,12 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                               <EditableTranslation translationKey={card.ctaKey}>
                                 {cardData[index]?.ctaText || card.ctaText}
                               </EditableTranslation>
-                              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                              {(() => {
+                                const IconComponent = (icons as Record<string, any>)['ArrowRight'];
+                                return IconComponent ? (
+                                  <IconComponent className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                ) : null;
+                              })()}
                             </a>
                           </Button>
                         </div>

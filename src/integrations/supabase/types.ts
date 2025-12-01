@@ -1553,6 +1553,7 @@ export type Database = {
         Row: {
           active: boolean
           button_bg_color: string | null
+          button_icon: string | null
           button_url: string | null
           color_token: string | null
           content: string
@@ -1569,6 +1570,7 @@ export type Database = {
         Insert: {
           active?: boolean
           button_bg_color?: string | null
+          button_icon?: string | null
           button_url?: string | null
           color_token?: string | null
           content: string
@@ -1585,6 +1587,7 @@ export type Database = {
         Update: {
           active?: boolean
           button_bg_color?: string | null
+          button_icon?: string | null
           button_url?: string | null
           color_token?: string | null
           content?: string
