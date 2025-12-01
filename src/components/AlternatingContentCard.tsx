@@ -30,6 +30,8 @@ interface AlternatingContentCardProps {
   // Accent bar options
   showAccentBar?: boolean;
   accentBarGradient?: string;
+  totalCards?: number;
+  synchronizedGradient?: boolean;
   
   // Custom rendering (for CMS editing)
   renderHeading?: (heading: string) => React.ReactNode;
@@ -89,6 +91,8 @@ export function AlternatingContentCard({
   imageSize = 'md',
   showAccentBar = false,
   accentBarGradient = '--gradient-warmth',
+  totalCards,
+  synchronizedGradient = false,
   renderHeading,
   renderDescription,
   renderImage,
@@ -103,6 +107,17 @@ export function AlternatingContentCard({
     transform: `scale(${animationState.scale})`,
     transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
   } : {};
+
+  // Calculate synchronized gradient positioning
+  const gradientStyle = synchronizedGradient && totalCards && totalCards > 1
+    ? {
+        backgroundImage: `var(${accentBarGradient})`,
+        backgroundSize: `100% ${totalCards * 100}%`,
+        backgroundPosition: `0 ${(index / (totalCards - 1)) * 100}%`,
+      }
+    : {
+        backgroundImage: `var(${accentBarGradient})`,
+      };
 
   const defaultHeading = (
     <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
@@ -140,7 +155,7 @@ export function AlternatingContentCard({
         {showAccentBar && (
           <div 
             className="w-1.5 rounded-full self-stretch shrink-0 lg:hidden"
-            style={{ backgroundImage: `var(${accentBarGradient})` }}
+            style={gradientStyle}
           />
         )}
         
@@ -173,7 +188,7 @@ export function AlternatingContentCard({
               >
                 <div 
                   className="w-1.5 rounded-full h-full min-h-full"
-                  style={{ backgroundImage: `var(${accentBarGradient})` }}
+                  style={gradientStyle}
                 />
               </div>
             )}
