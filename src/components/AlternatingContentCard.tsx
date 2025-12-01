@@ -25,6 +25,7 @@ interface AlternatingContentCardProps {
   padding?: 'none' | 'sm' | 'md' | 'lg';
   borderRadius?: 'none' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   imageAspectRatio?: '1/1' | '4/3' | '16/9' | '3/2';
+  imageSize?: 'sm' | 'md' | 'lg' | 'full';
   
   // Accent bar options
   showAccentBar?: boolean;
@@ -67,6 +68,13 @@ const aspectRatioStyles = {
   '3/2': 'aspect-[3/2]',
 };
 
+const imageSizeStyles = {
+  sm: 'lg:max-w-xs',      // ~320px - very small
+  md: 'lg:max-w-sm',      // ~384px - 50% reduction
+  lg: 'lg:max-w-md',      // ~448px - slight reduction
+  full: '',               // no constraint
+};
+
 export function AlternatingContentCard({
   content,
   index,
@@ -78,6 +86,7 @@ export function AlternatingContentCard({
   padding = 'lg',
   borderRadius = '3xl',
   imageAspectRatio = '4/3',
+  imageSize = 'md',
   showAccentBar = false,
   accentBarGradient = '--gradient-warmth',
   renderHeading,
@@ -147,8 +156,9 @@ export function AlternatingContentCard({
               'w-full overflow-hidden order-1 lg:order-none lg:row-start-1',
               radiusStyles[borderRadius],
               aspectRatioStyles[imageAspectRatio],
+              imageSizeStyles[imageSize],
               // On desktop: position based on imageOnLeft
-              imageOnLeft ? 'lg:col-start-1' : 'lg:col-start-3'
+              imageOnLeft ? 'lg:col-start-1 lg:justify-self-start' : 'lg:col-start-3 lg:justify-self-end'
             )}>
               {renderImage ? renderImage(content.imageUrl, content.heading) : defaultImage}
             </div>
