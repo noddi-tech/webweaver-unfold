@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useColorSystem } from '@/hooks/useColorSystem';
 import IconPicker from '@/components/design-system/IconPicker';
+import { resolveTextColor } from '@/lib/textColorUtils';
 
 interface ButtonEditModalProps {
   open: boolean;
@@ -23,7 +24,8 @@ interface ButtonEditModalProps {
   buttonUrl: string;
   buttonBgColor?: string;
   buttonIcon?: string;
-  onSave: (text: string, url: string, bgColor: string, icon: string) => void;
+  buttonTextColor?: string;
+  onSave: (text: string, url: string, bgColor: string, icon: string, textColor: string) => void;
 }
 
 export function ButtonEditModal({
@@ -33,13 +35,15 @@ export function ButtonEditModal({
   buttonUrl,
   buttonBgColor = 'primary',
   buttonIcon = '',
+  buttonTextColor = 'white',
   onSave,
 }: ButtonEditModalProps) {
   const [text, setText] = useState(buttonText);
   const [url, setUrl] = useState(buttonUrl);
   const [bgColor, setBgColor] = useState(buttonBgColor);
   const [icon, setIcon] = useState(buttonIcon);
-  const { SOLID_COLORS, GRADIENT_COLORS, loading } = useColorSystem();
+  const [textColor, setTextColor] = useState(buttonTextColor);
+  const { SOLID_COLORS, GRADIENT_COLORS, TEXT_COLOR_OPTIONS, loading } = useColorSystem();
 
   useEffect(() => {
     if (open) {
@@ -47,8 +51,9 @@ export function ButtonEditModal({
       setUrl(buttonUrl);
       setBgColor(buttonBgColor);
       setIcon(buttonIcon);
+      setTextColor(buttonTextColor);
     }
-  }, [open, buttonText, buttonUrl, buttonBgColor, buttonIcon]);
+  }, [open, buttonText, buttonUrl, buttonBgColor, buttonIcon, buttonTextColor]);
 
   const handleSave = () => {
     if (!text.trim()) {
@@ -61,7 +66,7 @@ export function ButtonEditModal({
       return;
     }
 
-    onSave(text, url, bgColor, icon);
+    onSave(text, url, bgColor, icon, textColor);
     toast.success('Button updated successfully');
     onOpenChange(false);
   };
@@ -147,6 +152,7 @@ export function ButtonEditModal({
                     backgroundImage: bgColor.startsWith('gradient-') || bgColor.startsWith('glass-')
                       ? `var(--${bgColor})`
                       : undefined,
+                    color: resolveTextColor(textColor),
                   }}
                 >
                   {text || 'Preview'}
@@ -202,6 +208,38 @@ export function ButtonEditModal({
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Text Color Picker Section */}
+            <div className="space-y-3 pt-4 border-t">
+              <Label>Text Color</Label>
+              <div className="grid grid-cols-8 gap-2">
+                {TEXT_COLOR_OPTIONS.map((color) => (
+                  <button
+                    key={color.value}
+                    className={`w-10 h-10 rounded-lg border-2 transition-all ${
+                      textColor === color.cssVar.replace('--', '')
+                        ? 'border-primary ring-2 ring-primary/20 scale-110'
+                        : 'border-transparent hover:border-border'
+                    }`}
+                    style={{
+                      backgroundColor: color.hslValue && color.hslValue.includes('0%') && color.hslValue.includes('100%')
+                        ? 'hsl(0 0% 20%)'
+                        : 'hsl(0 0% 100%)',
+                      color: `hsl(${color.hslValue})`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                    }}
+                    onClick={() => setTextColor(color.cssVar.replace('--', ''))}
+                    title={color.label}
+                  >
+                    A
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Icon Picker Section */}

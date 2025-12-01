@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LanguageLink } from "@/components/LanguageLink";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EditableSolutionText } from "@/components/EditableSolutionText";
 import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
@@ -14,6 +14,8 @@ import { EditableKeyBenefit } from "@/components/EditableKeyBenefit";
 import { EditableImage } from "@/components/EditableImage";
 import { EditableBackground } from "@/components/EditableBackground";
 import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
+import { resolveTextColor } from "@/lib/textColorUtils";
+import { toast } from "sonner";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -54,6 +56,11 @@ const SolutionDetail = () => {
   const [solution, setSolution] = useState<Solution | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Button styling state
+  const [footerCtaBgColor, setFooterCtaBgColor] = useState('primary');
+  const [footerCtaIcon, setFooterCtaIcon] = useState('');
+  const [footerCtaTextColor, setFooterCtaTextColor] = useState('white');
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
   const [heroDisplayType, setHeroDisplayType] = useState<'image' | 'carousel'>('image');
 
@@ -87,6 +94,11 @@ const SolutionDetail = () => {
               }))
             : []
         });
+        
+        // Initialize button styling state
+        setFooterCtaBgColor(data.footer_cta_bg_color || 'primary');
+        setFooterCtaIcon(data.footer_cta_icon || '');
+        setFooterCtaTextColor(data.footer_cta_text_color || 'white');
         
         // Load hero media settings
         loadHeroMediaSettings();
@@ -220,6 +232,12 @@ const SolutionDetail = () => {
       </div>
     );
   }
+
+  // Dynamic icon component for button
+  const DynamicIcon = ({ name }: { name: string }) => {
+    const IconComponent = (icons as Record<string, any>)[name];
+    return IconComponent ? <IconComponent className="ml-2 h-4 w-4" /> : null;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -444,12 +462,63 @@ const SolutionDetail = () => {
                   <EditableButton
                     buttonText={solution.footer_cta_text}
                     buttonUrl={solution.footer_cta_url}
-                    onSave={(text, url) => handleButtonSave('footer_cta_text', 'footer_cta_url', text, url)}
+                    buttonBgColor={footerCtaBgColor}
+                    buttonIcon={footerCtaIcon}
+                    buttonTextColor={footerCtaTextColor}
+                    onSave={async (text, url) => {
+                      await handleButtonSave('footer_cta_text', 'footer_cta_url', text, url);
+                    }}
+                    onBgColorChange={async (color) => {
+                      setFooterCtaBgColor(color);
+                      const { error } = await supabase
+                        .from('solutions')
+                        .update({ footer_cta_bg_color: color })
+                        .eq('id', solution.id);
+                      if (error) {
+                        console.error('Error updating button bg color:', error);
+                        toast.error('Failed to update button color');
+                      }
+                    }}
+                    onIconChange={async (icon) => {
+                      setFooterCtaIcon(icon);
+                      const { error } = await supabase
+                        .from('solutions')
+                        .update({ footer_cta_icon: icon })
+                        .eq('id', solution.id);
+                      if (error) {
+                        console.error('Error updating button icon:', error);
+                        toast.error('Failed to update button icon');
+                      }
+                    }}
+                    onTextColorChange={async (color) => {
+                      setFooterCtaTextColor(color);
+                      const { error } = await supabase
+                        .from('solutions')
+                        .update({ footer_cta_text_color: color })
+                        .eq('id', solution.id);
+                      if (error) {
+                        console.error('Error updating button text color:', error);
+                        toast.error('Failed to update button text color');
+                      }
+                    }}
                   >
-                    <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
+                    <Button 
+                      size="lg" 
+                      className="rounded-full px-8 py-4 text-lg"
+                      style={{
+                        backgroundColor: footerCtaBgColor.startsWith('gradient-') || footerCtaBgColor.startsWith('glass-')
+                          ? undefined
+                          : `hsl(var(--${footerCtaBgColor}))`,
+                        backgroundImage: footerCtaBgColor.startsWith('gradient-') || footerCtaBgColor.startsWith('glass-')
+                          ? `var(--${footerCtaBgColor})`
+                          : undefined,
+                        color: resolveTextColor(footerCtaTextColor),
+                      }}
+                      asChild
+                    >
                       <LanguageLink to={solution.footer_cta_url}>
                         {solution.footer_cta_text}
-                        <ArrowRight className="w-5 h-5 ml-2" />
+                        {footerCtaIcon ? <DynamicIcon name={footerCtaIcon} /> : <ArrowRight className="ml-2 h-4 w-4" />}
                       </LanguageLink>
                     </Button>
                   </EditableButton>

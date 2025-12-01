@@ -1394,11 +1394,17 @@ export type Database = {
           description: string | null
           description_heading: string | null
           description_text: string | null
+          footer_cta_bg_color: string | null
+          footer_cta_icon: string | null
           footer_cta_text: string | null
+          footer_cta_text_color: string | null
           footer_cta_url: string | null
           footer_heading: string | null
           footer_text: string | null
+          hero_cta_bg_color: string | null
+          hero_cta_icon: string | null
           hero_cta_text: string | null
+          hero_cta_text_color: string | null
           hero_cta_url: string | null
           hero_description: string | null
           hero_image_url: string | null
@@ -1423,11 +1429,17 @@ export type Database = {
           description?: string | null
           description_heading?: string | null
           description_text?: string | null
+          footer_cta_bg_color?: string | null
+          footer_cta_icon?: string | null
           footer_cta_text?: string | null
+          footer_cta_text_color?: string | null
           footer_cta_url?: string | null
           footer_heading?: string | null
           footer_text?: string | null
+          hero_cta_bg_color?: string | null
+          hero_cta_icon?: string | null
           hero_cta_text?: string | null
+          hero_cta_text_color?: string | null
           hero_cta_url?: string | null
           hero_description?: string | null
           hero_image_url?: string | null
@@ -1452,11 +1464,17 @@ export type Database = {
           description?: string | null
           description_heading?: string | null
           description_text?: string | null
+          footer_cta_bg_color?: string | null
+          footer_cta_icon?: string | null
           footer_cta_text?: string | null
+          footer_cta_text_color?: string | null
           footer_cta_url?: string | null
           footer_heading?: string | null
           footer_text?: string | null
+          hero_cta_bg_color?: string | null
+          hero_cta_icon?: string | null
           hero_cta_text?: string | null
+          hero_cta_text_color?: string | null
           hero_cta_url?: string | null
           hero_description?: string | null
           hero_image_url?: string | null
