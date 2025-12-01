@@ -156,10 +156,10 @@ export function AlternatingContentCard({
             {/* Desktop center accent bar */}
             {showAccentBar && (
               <div 
-                className="hidden lg:flex items-stretch lg:col-start-2"
+                className="hidden lg:flex items-stretch self-stretch lg:col-start-2 lg:row-start-1"
               >
                 <div 
-                  className="w-1.5 rounded-full h-full"
+                  className="w-1.5 rounded-full h-full min-h-full"
                   style={{ backgroundImage: `var(${accentBarGradient})` }}
                 />
               </div>
