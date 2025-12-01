@@ -19,6 +19,7 @@ import { useSiteStyles } from '@/contexts/SiteStylesContext';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeColorToken } from '@/lib/colorUtils';
+import { resolveTextColor } from '@/lib/textColorUtils';
 import { getOptimizedImageUrl, generateSrcSet } from '@/utils/imageTransform';
 
 // Helper function to calculate rendered image bounds for object-contain
@@ -217,6 +218,7 @@ export function ScrollingFeatureCards() {
   const [mainCtaUrl, setMainCtaUrl] = useState('/functions');
   const [mainCtaBgColor, setMainCtaBgColor] = useState<string>('primary');
   const [mainCtaIcon, setMainCtaIcon] = useState<string>('ArrowRight');
+  const [mainCtaTextColor, setMainCtaTextColor] = useState<string>('white');
   const [editingCard, setEditingCard] = useState<number | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [cardData, setCardData] = useState<Record<number, any>>({});
@@ -257,7 +259,7 @@ export function ScrollingFeatureCards() {
     const newCardBorderRadii: Record<number, string> = {};
     let newCardGap = 'gap-8';
     
-    // Load main CTA button background color and icon
+    // Load main CTA button background color, icon, and text color
     const { data: ctaData } = await supabase
       .from('text_content')
       .select('button_bg_color, button_icon')
@@ -271,6 +273,18 @@ export function ScrollingFeatureCards() {
       if (ctaData.button_icon) {
         setMainCtaIcon(ctaData.button_icon);
       }
+    }
+
+    // Fetch text color from translations table
+    const { data: translationData } = await supabase
+      .from('translations')
+      .select('color_token')
+      .eq('translation_key', 'scrolling_features.cta')
+      .eq('language_code', 'en')
+      .maybeSingle();
+    
+    if (translationData?.color_token) {
+      setMainCtaTextColor(translationData.color_token);
     }
     
     for (let i = 0; i < 5; i++) {
@@ -681,15 +695,20 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                   asChild
                 >
                   <a href={mainCtaUrl}>
-                    <EditableTranslation translationKey="scrolling_features.cta">
-                      Book a Demo
-                    </EditableTranslation>
-                    {mainCtaIcon && (() => {
-                      const IconComponent = (icons as Record<string, any>)[mainCtaIcon];
-                      return IconComponent ? (
-                        <IconComponent className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                      ) : null;
-                    })()}
+                    <span 
+                      className="flex items-center"
+                      style={{ color: resolveTextColor(mainCtaTextColor) }}
+                    >
+                      <EditableTranslation translationKey="scrolling_features.cta">
+                        Book a Demo
+                      </EditableTranslation>
+                      {mainCtaIcon && (() => {
+                        const IconComponent = (icons as Record<string, any>)[mainCtaIcon];
+                        return IconComponent ? (
+                          <IconComponent className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        ) : null;
+                      })()}
+                    </span>
                   </a>
                 </Button>
               </EditableButton>
