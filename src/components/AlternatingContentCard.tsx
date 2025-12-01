@@ -167,7 +167,7 @@ export function AlternatingContentCard({
             
             {/* Text Content - second on mobile (order-2), positioned via grid on desktop */}
             <div className={cn(
-              'order-2 lg:order-none flex items-start',
+              'order-2 lg:order-none flex items-start lg:self-start',
               imageOnLeft ? 'lg:col-start-3' : 'lg:col-start-1'
             )}>
               <div className="space-y-6">
