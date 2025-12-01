@@ -118,17 +118,17 @@ const Footer = () => {
                   Quick Links
                 </h4>
               </EditableTranslation>
-              <ul className="space-y-2">
-                {footerSettings.quick_links.map((link: any, index: number) => (
-                  <li key={index}>
-                    <EditableTranslation translationKey={`footer.quick_links.${index}`}>
-                      <LanguageLink to={link.url} className="text-muted-foreground hover:text-primary transition-colors">
-                        {t(link.title, link.title)}
-                      </LanguageLink>
-                    </EditableTranslation>
-                  </li>
-                ))}
-              </ul>
+            <ul className="space-y-2">
+              {footerSettings.quick_links.filter((link: any) => link.active).map((link: any, index: number) => (
+                <li key={index}>
+                  <EditableTranslation translationKey={`footer.quick_links.${index}`}>
+                    <LanguageLink to={link.url} className="text-muted-foreground hover:text-primary transition-colors">
+                      {t(link.title, link.title)}
+                    </LanguageLink>
+                  </EditableTranslation>
+                </li>
+              ))}
+            </ul>
             </div>
           )}
 
@@ -140,17 +140,17 @@ const Footer = () => {
                   Legal
                 </h4>
               </EditableTranslation>
-              <ul className="space-y-2">
-                {footerSettings.legal_links.map((link: any, index: number) => (
-                  <li key={index}>
-                    <EditableTranslation translationKey={`footer.legal_links.${index}`}>
-                      <LanguageLink to={link.url} className="text-muted-foreground hover:text-primary transition-colors">
-                        {t(link.title, link.title)}
-                      </LanguageLink>
-                    </EditableTranslation>
-                  </li>
-                ))}
-              </ul>
+            <ul className="space-y-2">
+              {footerSettings.legal_links.filter((link: any) => link.active).map((link: any, index: number) => (
+                <li key={index}>
+                  <EditableTranslation translationKey={`footer.legal_links.${index}`}>
+                    <LanguageLink to={link.url} className="text-muted-foreground hover:text-primary transition-colors">
+                      {t(link.title, link.title)}
+                    </LanguageLink>
+                  </EditableTranslation>
+                </li>
+              ))}
+            </ul>
             </div>
           )}
         </div>
