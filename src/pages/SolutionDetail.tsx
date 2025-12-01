@@ -137,8 +137,12 @@ const SolutionDetail = () => {
 
       if (error) throw error;
       
-      // Refresh the solution data
-      setRefreshKey(prev => prev + 1);
+      // Update local state directly to preserve component state
+      setSolution(prev => prev ? {
+        ...prev,
+        [textField]: text,
+        [urlField]: url
+      } : null);
     } catch (error) {
       console.error('Error saving button:', error);
     }
