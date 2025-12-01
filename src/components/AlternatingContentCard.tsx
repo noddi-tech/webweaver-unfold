@@ -162,7 +162,7 @@ export function AlternatingContentCard({
         {/* Main content wrapper */}
         <div className="flex-1">
           <div className={cn(
-            'grid gap-6 lg:gap-8 items-stretch',
+            'grid gap-6 lg:gap-8 items-center',
             // Mobile: single column, Desktop: 3 columns with bar or 2 columns without
             'grid-cols-1',
             showAccentBar ? 'lg:grid-cols-[1fr_auto_1fr]' : 'lg:grid-cols-2'
@@ -195,7 +195,7 @@ export function AlternatingContentCard({
             
             {/* Text Content - second on mobile (order-2), positioned via grid on desktop */}
             <div className={cn(
-              'order-2 lg:order-none flex items-start lg:self-start lg:row-start-1',
+              'order-2 lg:order-none flex items-center lg:self-center lg:row-start-1',
               imageOnLeft 
                 ? (showAccentBar ? 'lg:col-start-3' : 'lg:col-start-2')
                 : 'lg:col-start-1'
