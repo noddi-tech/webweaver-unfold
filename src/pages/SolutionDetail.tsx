@@ -421,7 +421,7 @@ const SolutionDetail = () => {
                   field="footer_heading"
                   onSave={handleContentSave}
                 >
-                  <h3 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+                  <h3 className="text-4xl md:text-5xl font-bold mb-6">
                     {solution.footer_heading}
                   </h3>
                 </EditableSolutionText>
@@ -431,7 +431,7 @@ const SolutionDetail = () => {
                     field="footer_text"
                     onSave={handleContentSave}
                   >
-                    <p className="text-xl mb-10 text-white/95 leading-relaxed">
+                    <p className="text-xl mb-10 opacity-95 leading-relaxed">
                       {solution.footer_text}
                     </p>
                   </EditableSolutionText>
