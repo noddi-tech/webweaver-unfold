@@ -10,16 +10,19 @@ interface AlternatingContentSectionProps {
   cardOptions?: {
     alternateLayout?: boolean;
     reverseFirstCard?: boolean;
-    cardStyle?: 'elevated' | 'flat' | 'outlined' | 'glass';
+    cardStyle?: 'elevated' | 'flat' | 'outlined' | 'glass' | 'transparent';
     padding?: 'none' | 'sm' | 'md' | 'lg';
     borderRadius?: 'none' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
     imageAspectRatio?: '1/1' | '4/3' | '16/9' | '3/2';
+    showAccentBar?: boolean;
+    accentBarGradient?: string;
   };
   
   // Section options
   enableScrollReveal?: boolean;
-  sectionSpacing?: 'sm' | 'md' | 'lg';
+  sectionSpacing?: 'sm' | 'md' | 'lg' | 'xl';
   maxWidth?: 'container' | '7xl' | '6xl' | '5xl';
+  sectionBackground?: 'none' | 'muted' | 'cream';
   className?: string;
   
   // CMS integration
@@ -32,6 +35,13 @@ const spacingStyles = {
   sm: 'space-y-8',
   md: 'space-y-12',
   lg: 'space-y-16',
+  xl: 'space-y-20',
+};
+
+const backgroundStyles = {
+  none: '',
+  muted: 'bg-muted/30',
+  cream: 'bg-[hsl(var(--cream))]',
 };
 
 const maxWidthStyles = {
@@ -47,6 +57,7 @@ export function AlternatingContentSection({
   enableScrollReveal = false,
   sectionSpacing = 'lg',
   maxWidth = '6xl',
+  sectionBackground = 'none',
   className,
   renderCardHeading,
   renderCardDescription,
@@ -60,7 +71,7 @@ export function AlternatingContentSection({
   return (
     <section 
       ref={sectionRef}
-      className={cn('py-16 md:py-20 px-4 sm:px-6', className)}
+      className={cn('py-16 md:py-20 px-4 sm:px-6', backgroundStyles[sectionBackground], className)}
     >
       <div className={cn(
         'mx-auto',

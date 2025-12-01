@@ -349,14 +349,17 @@ const SolutionDetail = () => {
         <AlternatingContentSection
           items={solution.key_benefits}
           enableScrollReveal={true}
-          sectionSpacing="lg"
+          sectionSpacing="xl"
           maxWidth="6xl"
+          sectionBackground="cream"
           cardOptions={{
             alternateLayout: true,
-            cardStyle: 'elevated',
-            borderRadius: '3xl',
-            padding: 'lg',
-            imageAspectRatio: '4/3',
+            cardStyle: 'transparent',
+            borderRadius: 'xl',
+            padding: 'none',
+            imageAspectRatio: '1/1',
+            showAccentBar: true,
+            accentBarGradient: '--gradient-warmth',
           }}
           renderCardHeading={(item, index) => (
             <EditableKeyBenefit
