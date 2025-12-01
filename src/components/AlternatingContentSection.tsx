@@ -25,6 +25,10 @@ interface AlternatingContentSectionProps {
   sectionBackground?: 'none' | 'muted' | 'cream';
   className?: string;
   
+  // Section header (renders inside the section background)
+  sectionTitle?: React.ReactNode;
+  sectionDescription?: React.ReactNode;
+  
   // CMS integration
   renderCardHeading?: (item: CardContent, index: number) => React.ReactNode;
   renderCardDescription?: (item: CardContent, index: number) => React.ReactNode;
@@ -59,6 +63,8 @@ export function AlternatingContentSection({
   maxWidth = '6xl',
   sectionBackground = 'none',
   className,
+  sectionTitle,
+  sectionDescription,
   renderCardHeading,
   renderCardDescription,
   renderCardImage,
@@ -73,6 +79,14 @@ export function AlternatingContentSection({
       ref={sectionRef}
       className={cn('py-16 md:py-20 px-4 sm:px-6', backgroundStyles[sectionBackground], className)}
     >
+      {/* Section Header - renders inside the section background */}
+      {(sectionTitle || sectionDescription) && (
+        <div className="mx-auto max-w-4xl text-center mb-16">
+          {sectionTitle}
+          {sectionDescription}
+        </div>
+      )}
+      
       <div className={cn(
         'mx-auto',
         maxWidthStyles[maxWidth],
