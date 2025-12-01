@@ -345,6 +345,8 @@ const SolutionDetail = () => {
       {solution.key_benefits && solution.key_benefits.length > 0 && (
         <AlternatingContentSection
           items={solution.key_benefits}
+          showContinuousAccentBar={true}
+          accentBarGradient="--gradient-warmth"
           sectionTitle={
             solution.description_heading && (
               <EditableSolutionText
@@ -381,8 +383,6 @@ const SolutionDetail = () => {
             borderRadius: 'xl',
             padding: 'none',
             imageAspectRatio: '1/1',
-            showAccentBar: true,
-            accentBarGradient: '--gradient-warmth',
           }}
           renderCardHeading={(item, index) => (
             <EditableKeyBenefit
