@@ -144,7 +144,7 @@ export function AlternatingContentCard({
           )}>
             {/* Image - first on mobile (order-1), positioned via grid on desktop */}
             <div className={cn(
-              'w-full overflow-hidden order-1 lg:order-none',
+              'w-full overflow-hidden order-1 lg:order-none lg:row-start-1',
               radiusStyles[borderRadius],
               aspectRatioStyles[imageAspectRatio],
               // On desktop: position based on imageOnLeft
@@ -167,7 +167,7 @@ export function AlternatingContentCard({
             
             {/* Text Content - second on mobile (order-2), positioned via grid on desktop */}
             <div className={cn(
-              'order-2 lg:order-none flex items-start lg:self-start',
+              'order-2 lg:order-none flex items-start lg:self-start lg:row-start-1',
               imageOnLeft ? 'lg:col-start-3' : 'lg:col-start-1'
             )}>
               <div className="space-y-6">
