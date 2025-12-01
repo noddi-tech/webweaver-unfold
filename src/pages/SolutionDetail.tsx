@@ -352,7 +352,7 @@ const SolutionDetail = () => {
           enableScrollReveal={true}
           sectionSpacing="xl"
           maxWidth="6xl"
-          sectionBackground="cream"
+          sectionBackground="none"
           cardOptions={{
             alternateLayout: true,
             cardStyle: 'transparent',
