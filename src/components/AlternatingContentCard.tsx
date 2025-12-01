@@ -148,8 +148,9 @@ export function AlternatingContentCard({
         <div className="flex-1">
           <div className={cn(
             'grid gap-6 lg:gap-8 items-stretch',
-            // Mobile: single column, Desktop: 3 columns (content | bar | content)
-            'grid-cols-1 lg:grid-cols-[1fr_auto_1fr]'
+            // Mobile: single column, Desktop: 3 columns with bar or 2 columns without
+            'grid-cols-1',
+            showAccentBar ? 'lg:grid-cols-[1fr_auto_1fr]' : 'lg:grid-cols-2'
           )}>
             {/* Image - first on mobile (order-1), positioned via grid on desktop */}
             <div className={cn(
@@ -157,8 +158,10 @@ export function AlternatingContentCard({
               radiusStyles[borderRadius],
               aspectRatioStyles[imageAspectRatio],
               imageSizeStyles[imageSize],
-              // On desktop: position based on imageOnLeft
-              imageOnLeft ? 'lg:col-start-1 lg:justify-self-start' : 'lg:col-start-3 lg:justify-self-end'
+              // On desktop: position based on imageOnLeft and grid type
+              imageOnLeft 
+                ? 'lg:col-start-1 lg:justify-self-start' 
+                : (showAccentBar ? 'lg:col-start-3 lg:justify-self-end' : 'lg:col-start-2 lg:justify-self-end')
             )}>
               {renderImage ? renderImage(content.imageUrl, content.heading) : defaultImage}
             </div>
@@ -178,7 +181,9 @@ export function AlternatingContentCard({
             {/* Text Content - second on mobile (order-2), positioned via grid on desktop */}
             <div className={cn(
               'order-2 lg:order-none flex items-start lg:self-start lg:row-start-1',
-              imageOnLeft ? 'lg:col-start-3' : 'lg:col-start-1'
+              imageOnLeft 
+                ? (showAccentBar ? 'lg:col-start-3' : 'lg:col-start-2')
+                : 'lg:col-start-1'
             )}>
               <div className="space-y-6">
                 {renderHeading ? renderHeading(content.heading) : defaultHeading}
