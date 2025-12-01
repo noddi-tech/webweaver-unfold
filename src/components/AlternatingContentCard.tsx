@@ -21,10 +21,14 @@ interface AlternatingContentCardProps {
   animationState?: { opacity: number; scale: number };
   
   // Styling options
-  cardStyle?: 'elevated' | 'flat' | 'outlined' | 'glass';
+  cardStyle?: 'elevated' | 'flat' | 'outlined' | 'glass' | 'transparent';
   padding?: 'none' | 'sm' | 'md' | 'lg';
   borderRadius?: 'none' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   imageAspectRatio?: '1/1' | '4/3' | '16/9' | '3/2';
+  
+  // Accent bar options
+  showAccentBar?: boolean;
+  accentBarGradient?: string;
   
   // Custom rendering (for CMS editing)
   renderHeading?: (heading: string) => React.ReactNode;
@@ -37,6 +41,7 @@ const cardStyles = {
   flat: 'bg-muted/30',
   outlined: 'border border-border bg-transparent',
   glass: 'bg-card/60 backdrop-blur-lg shadow-lg',
+  transparent: '',
 };
 
 const paddingStyles = {
@@ -73,6 +78,8 @@ export function AlternatingContentCard({
   padding = 'lg',
   borderRadius = '3xl',
   imageAspectRatio = '4/3',
+  showAccentBar = false,
+  accentBarGradient = '--gradient-warmth',
   renderHeading,
   renderDescription,
   renderImage,
@@ -113,8 +120,8 @@ export function AlternatingContentCard({
       className={cn(
         cardStyles[cardStyle],
         paddingStyles[padding],
-        radiusStyles[borderRadius],
-        'overflow-hidden'
+        cardStyle !== 'transparent' && radiusStyles[borderRadius],
+        cardStyle !== 'transparent' && 'overflow-hidden'
       )}
       style={animationStyles}
     >
@@ -124,11 +131,23 @@ export function AlternatingContentCard({
       )}>
         {/* Text Content */}
         <div className={cn(
-          'space-y-6',
           imageOnLeft && 'lg:col-start-2'
         )}>
-          {renderHeading ? renderHeading(content.heading) : defaultHeading}
-          {renderDescription ? renderDescription(content.description) : defaultDescription}
+          <div className="flex items-start gap-4">
+            {/* Accent Bar */}
+            {showAccentBar && (
+              <div 
+                className="w-1.5 rounded-full self-stretch min-h-[80px] shrink-0"
+                style={{ backgroundImage: `var(${accentBarGradient})` }}
+              />
+            )}
+            
+            {/* Text Content */}
+            <div className="space-y-6">
+              {renderHeading ? renderHeading(content.heading) : defaultHeading}
+              {renderDescription ? renderDescription(content.description) : defaultDescription}
+            </div>
+          </div>
         </div>
 
         {/* Image Content */}

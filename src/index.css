@@ -29,6 +29,7 @@ All colors MUST be HSL.
     --brand-blue: 210 100% 50%;                /* Brand Blue - Ocean accent */
     --brand-teal: 180 70% 45%;                 /* Brand Teal - Ocean accent */
     --brand-green: 142 76% 50%;                /* Brand Green - Success accent */
+    --cream: 35 30% 96%;                       /* Warm cream/beige - Section backgrounds */
 
     /* ========================================
        FEEDBACK COLORS - System states
