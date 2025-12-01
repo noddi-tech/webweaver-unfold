@@ -14,9 +14,14 @@ interface AlternatingContentSectionProps {
     padding?: 'none' | 'sm' | 'md' | 'lg';
     borderRadius?: 'none' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
     imageAspectRatio?: '1/1' | '4/3' | '16/9' | '3/2';
+    imageSize?: 'sm' | 'md' | 'lg' | 'full';
     showAccentBar?: boolean;
     accentBarGradient?: string;
   };
+  
+  // Continuous accent bar (renders at section level)
+  showContinuousAccentBar?: boolean;
+  accentBarGradient?: string;
   
   // Section options
   enableScrollReveal?: boolean;
@@ -65,6 +70,8 @@ export function AlternatingContentSection({
   className,
   sectionTitle,
   sectionDescription,
+  showContinuousAccentBar = false,
+  accentBarGradient = '--gradient-warmth',
   renderCardHeading,
   renderCardDescription,
   renderCardImage,
@@ -88,10 +95,18 @@ export function AlternatingContentSection({
       )}
       
       <div className={cn(
-        'mx-auto',
+        'mx-auto relative',
         maxWidthStyles[maxWidth],
         spacingStyles[sectionSpacing]
       )}>
+        {/* Continuous Accent Bar - renders once at section level */}
+        {showContinuousAccentBar && (
+          <div 
+            className="absolute top-0 bottom-0 w-1.5 rounded-full left-0 lg:left-1/2 lg:-translate-x-1/2"
+            style={{ backgroundImage: `var(${accentBarGradient})` }}
+          />
+        )}
+        
         {items.map((item, index) => (
           <AlternatingContentCard
             key={item.id}
@@ -100,6 +115,7 @@ export function AlternatingContentSection({
             enableScrollAnimation={enableScrollReveal}
             animationState={enableScrollReveal ? cardStates[index] : undefined}
             {...cardOptions}
+            showAccentBar={showContinuousAccentBar ? false : cardOptions.showAccentBar}
             renderHeading={renderCardHeading ? (heading) => renderCardHeading(item, index) : undefined}
             renderDescription={renderCardDescription ? (description) => renderCardDescription(item, index) : undefined}
             renderImage={renderCardImage ? (imageUrl, altText) => renderCardImage(item, index) : undefined}
