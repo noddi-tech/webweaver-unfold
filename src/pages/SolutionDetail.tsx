@@ -9,7 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditableSolutionText } from "@/components/EditableSolutionText";
 import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
 import { EditableButton } from "@/components/EditableButton";
-import { KeyBenefitItem } from "@/components/KeyBenefitItem";
+import { AlternatingContentSection } from "@/components/AlternatingContentSection";
+import { EditableKeyBenefit } from "@/components/EditableKeyBenefit";
+import { EditableImage } from "@/components/EditableImage";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -344,20 +346,60 @@ const SolutionDetail = () => {
 
       {/* Key Benefits Section */}
       {solution.key_benefits && solution.key_benefits.length > 0 && (
-        <section className="py-20 px-6">
-          <div className="container mx-auto max-w-7xl space-y-24">
-            {solution.key_benefits.map((benefit, index) => (
-              <KeyBenefitItem
-                key={benefit.id}
-                benefit={benefit}
-                solutionId={solution.id}
-                benefitIndex={index}
-                onContentSave={handleContentSave}
-                onImageSave={handleKeyBenefitImageSave}
-              />
-            ))}
-          </div>
-        </section>
+        <AlternatingContentSection
+          items={solution.key_benefits}
+          enableScrollReveal={true}
+          sectionSpacing="lg"
+          maxWidth="6xl"
+          cardOptions={{
+            alternateLayout: true,
+            cardStyle: 'elevated',
+            borderRadius: '3xl',
+            padding: 'lg',
+            imageAspectRatio: '4/3',
+          }}
+          renderCardHeading={(item, index) => (
+            <EditableKeyBenefit
+              solutionId={solution.id}
+              benefitIndex={index}
+              field="heading"
+              onSave={handleContentSave}
+            >
+              <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+                {item.heading}
+              </h3>
+            </EditableKeyBenefit>
+          )}
+          renderCardDescription={(item, index) => (
+            <EditableKeyBenefit
+              solutionId={solution.id}
+              benefitIndex={index}
+              field="description"
+              onSave={handleContentSave}
+            >
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                {item.description}
+              </p>
+            </EditableKeyBenefit>
+          )}
+          renderCardImage={(item, index) => (
+            <EditableImage
+              imageUrl={item.imageUrl || null}
+              onSave={(newUrl) => handleKeyBenefitImageSave(index, newUrl)}
+              altText={item.heading}
+              placeholder="Add benefit image"
+              aspectRatio="4/3"
+            >
+              {item.imageUrl && (
+                <img 
+                  src={item.imageUrl}
+                  alt={item.heading}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </EditableImage>
+          )}
+        />
       )}
 
       {/* Solution Footer / CTA Section */}
