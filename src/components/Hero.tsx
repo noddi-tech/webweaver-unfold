@@ -164,13 +164,8 @@ const Hero = () => {
             </div>
           </div>
 
-            {/* Logo Marquee */}
-            <div className="w-full mt-4 sm:mt-6">
-              <LogoMarquee />
-            </div>
-
           {/* Product Image with USP Section */}
-          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+          <div className="w-full px-0 sm:px-4 lg:px-8 max-w-6xl mx-auto">
             <EditableUniversalMedia
               locationId="homepage-hero"
               onSave={handleMediaSave}
@@ -240,6 +235,11 @@ const Hero = () => {
                         ))}
                       </div>
                     )}
+                  </div>
+
+                  {/* Logo Marquee */}
+                  <div className="w-full">
+                    <LogoMarquee />
                   </div>
 
                   {/* USP section - directly on page gradient */}
