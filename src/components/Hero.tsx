@@ -165,7 +165,7 @@ const Hero = () => {
           </div>
 
           {/* Product Image with USP Section */}
-          <div className="w-full px-0 sm:px-4 lg:px-8 max-w-6xl mx-auto">
+          <div className="w-full px-0 sm:px-2 lg:px-4 max-w-7xl mx-auto">
             <EditableUniversalMedia
               locationId="homepage-hero"
               onSave={handleMediaSave}
@@ -175,7 +175,7 @@ const Hero = () => {
                (mediaSettings.displayType === 'image' && mediaSettings.imageUrl) ? (
                 <div className="w-full space-y-12">
                   {/* Image/Carousel section with shadow for depth */}
-                  <div className="w-full bg-transparent rounded-xl overflow-hidden aspect-[2/1] max-h-[500px]">
+                  <div className="w-full bg-transparent rounded-xl overflow-hidden aspect-[2/1] max-h-[640px]">
                     {mediaSettings.displayType === 'carousel' && carouselImages.length > 0 ? (
                       <Carousel
                         key={`hero-carousel-${mediaKey}`}
