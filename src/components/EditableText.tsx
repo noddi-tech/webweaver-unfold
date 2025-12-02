@@ -45,7 +45,7 @@ export function EditableText({
   return (
     <>
       <div
-        className={`relative group ${className}`}
+        className={`relative group pr-4 pt-3 -mr-4 -mt-3 ${className}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

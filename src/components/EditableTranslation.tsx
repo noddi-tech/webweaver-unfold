@@ -179,8 +179,7 @@ export function EditableTranslation({
       {editMode ? (
         <span
           key={refreshKey}
-          className={`relative inline-block group ${className}`}
-          style={{ display: 'contents' }}
+          className={`relative inline-flex items-baseline group pr-4 pt-3 -mr-4 -mt-3 ${className}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
