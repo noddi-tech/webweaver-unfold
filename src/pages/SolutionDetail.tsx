@@ -374,7 +374,7 @@ const SolutionDetail = () => {
             )
           }
           enableScrollReveal={true}
-          sectionSpacing="xl"
+          sectionSpacing="2xl"
           maxWidth="6xl"
           sectionBackground="none"
           cardOptions={{

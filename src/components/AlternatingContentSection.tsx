@@ -25,7 +25,7 @@ interface AlternatingContentSectionProps {
   
   // Section options
   enableScrollReveal?: boolean;
-  sectionSpacing?: 'sm' | 'md' | 'lg' | 'xl';
+  sectionSpacing?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   maxWidth?: 'container' | '7xl' | '6xl' | '5xl';
   sectionBackground?: 'none' | 'muted' | 'cream';
   className?: string;
@@ -45,6 +45,7 @@ const spacingStyles = {
   md: 'space-y-12',
   lg: 'space-y-16',
   xl: 'space-y-20',
+  '2xl': 'space-y-[100px]',
 };
 
 const backgroundStyles = {
