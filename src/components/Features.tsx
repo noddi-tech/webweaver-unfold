@@ -163,22 +163,22 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
                   elementId={`feature-card-${f.id}`}
                   defaultBackground={cardBg}
                   allowedBackgrounds={allowedBackgrounds}
-                  className="[&_*]:text-inherit"
+                  className="[&_*]:text-inherit h-full"
                 >
-                  <div className={`rounded-xl p-6 hover:scale-105 transition-transform duration-300 border shadow-sm`}>
+                  <div className="h-full rounded-xl p-6 hover:scale-105 transition-transform duration-300 border shadow-sm flex flex-col min-h-[240px]">
                     <EditableIcon
                       elementId={`feature-icon-${f.id}`}
                       icon={Icon}
                       defaultBackground="bg-gradient-primary"
                       size="default"
-                      className="mb-4"
+                      className="mb-4 flex-shrink-0"
                     />
-                    <h3 className="text-xl font-semibold mb-3">
+                    <h3 className="text-xl font-semibold mb-3 flex-shrink-0">
                       <EditableFeature featureId={f.id} field="title">
                         {f.title}
                       </EditableFeature>
                     </h3>
-                    <p className="opacity-90">
+                    <p className="opacity-90 flex-grow">
                       <EditableFeature featureId={f.id} field="description">
                         {f.description}
                       </EditableFeature>
