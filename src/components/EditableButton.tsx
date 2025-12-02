@@ -41,7 +41,7 @@ export function EditableButton({
   return (
     <>
       <div
-        className={`relative inline-block group ${className}`}
+        className={`relative inline-block group pr-4 pt-3 -mr-4 -mt-3 ${className}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
