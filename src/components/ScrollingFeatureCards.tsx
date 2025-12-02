@@ -230,6 +230,7 @@ export function ScrollingFeatureCards() {
   const [cardBorderRadii, setCardBorderRadii] = useState<Record<number, string>>({});
   const [cardGap, setCardGap] = useState<string>('gap-8');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isXlScreen, setIsXlScreen] = useState(false);
   const [carouselData, setCarouselData] = useState<Record<number, {
     display_type: 'image' | 'carousel';
     carousel_config?: {
@@ -247,6 +248,14 @@ export function ScrollingFeatureCards() {
   useEffect(() => {
     setRefreshKey(prev => prev + 1);
   }, [fitModes, aspectRatios, cardHeights, cardWidths, cardBorderRadii, cardGap]);
+
+  // Track viewport width for responsive minHeight
+  useEffect(() => {
+    const checkWidth = () => setIsXlScreen(window.innerWidth >= 1280);
+    checkWidth();
+    window.addEventListener('resize', checkWidth);
+    return () => window.removeEventListener('resize', checkWidth);
+  }, []);
 
   const loadImageSettings = async () => {
     const newImageUrls: Record<number, string> = {};
@@ -616,8 +625,8 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
     >
       <section
         ref={sectionRef}
-        className="relative pt-16 lg:pt-24 pb-12 lg:pb-20"
-        style={{ minHeight: `${100 + (cards.length * 20)}vh` }}
+        className="relative py-12 md:py-16 lg:py-section"
+        style={isXlScreen ? { minHeight: `${100 + (cards.length * 20)}vh` } : undefined}
       >
         {/* Edge-hugging container */}
         <div className="px-6 sm:px-12 lg:px-24 max-w-[1600px] mx-auto">

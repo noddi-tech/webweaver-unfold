@@ -13,7 +13,7 @@ export default function FinalCTA() {
   const { allowedBackgrounds } = useAllowedBackgrounds();
 
   return (
-    <section className="py-section">
+    <section className="py-12 md:py-16 lg:py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8" key={refreshKey}>
         <EditableBackground
           elementId="final-cta-section"
