@@ -121,7 +121,7 @@ const FeaturesPage = () => {
             const h1Heading = headings.find(h => h.element_type === 'h1');
             const h1Class = h1Heading?.color_token ? 
               `${getTypographyClass('h1')} mb-6 ${getColorClass(h1Heading.color_token)}` : 
-              'text-6xl font-bold gradient-text mb-6';
+              'text-6xl font-bold text-foreground mb-6';
             
             const subtitleHeading = headings.find(h => h.element_type === 'subtitle');
             const subtitleClass = subtitleHeading?.color_token ? 

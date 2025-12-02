@@ -132,19 +132,44 @@ export function EditableTranslation({
       return children;
     }
     
-    // Apply styling if available
+     // Apply styling if available
     // Only apply fontSize/fontWeight if they're NOT the default values
     // 'base' and 'normal' mean "inherit from element" not "override"
+    
+    // Detect if the color token is a gradient
+    const isGradientText = styleSettings?.colorToken?.includes('gradient');
+    
     const styledContent = styleSettings ? (
       <span
         data-responsive-font
         style={{
-          color: styleSettings.colorToken
-            ? resolveTextColor(styleSettings.colorToken)
-            : undefined,
+          // Apply gradient text styling if gradient token, otherwise solid color
+          ...(isGradientText ? {
+            background: `var(--${styleSettings.colorToken})`,
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            color: 'transparent',
+          } : {
+            color: styleSettings.colorToken
+              ? resolveTextColor(styleSettings.colorToken)
+              : undefined,
+            // Override any inherited gradient-text effect for solid colors
+            WebkitTextFillColor: styleSettings.colorToken
+              ? resolveTextColor(styleSettings.colorToken)
+              : undefined,
+            background: 'none',
+            WebkitBackgroundClip: 'unset',
+            backgroundClip: 'unset',
+          }),
           fontSize: styleSettings.fontSize && styleSettings.fontSize !== 'base' 
             ? FONT_SIZE_MAP[styleSettings.fontSize] 
             : undefined,
+          fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
+            ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
+            : undefined,
+          fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
+          textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
           '--font-size-mobile': styleSettings.fontSizeMobile && styleSettings.fontSizeMobile !== 'inherit' && styleSettings.fontSizeMobile !== 'base'
             ? FONT_SIZE_MAP[styleSettings.fontSizeMobile]
             : undefined,
@@ -154,12 +179,11 @@ export function EditableTranslation({
           '--font-size-desktop': styleSettings.fontSizeDesktop && styleSettings.fontSizeDesktop !== 'inherit' && styleSettings.fontSizeDesktop !== 'base'
             ? FONT_SIZE_MAP[styleSettings.fontSizeDesktop]
             : undefined,
-          fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
-            ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
-            : undefined,
-          fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
-          textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
-        } as React.CSSProperties}
+        } as React.CSSProperties & {
+          '--font-size-mobile'?: string;
+          '--font-size-tablet'?: string;
+          '--font-size-desktop'?: string;
+        }}
       >
         {displayText}
       </span>
