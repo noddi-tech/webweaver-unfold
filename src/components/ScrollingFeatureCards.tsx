@@ -616,7 +616,7 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
     >
       <section
         ref={sectionRef}
-        className="relative pt-24 pb-32"
+        className="relative pt-16 lg:pt-24 pb-12 lg:pb-20"
         style={{ minHeight: `${100 + (cards.length * 20)}vh` }}
       >
         {/* Edge-hugging container */}
