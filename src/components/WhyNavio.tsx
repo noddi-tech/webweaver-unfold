@@ -57,14 +57,7 @@ export default function WhyNavio() {
               }`}
             >
               <CardContent className="p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <EditableIcon 
-                    elementId="why-noddi-before-icon" 
-                    icon={X} 
-                    defaultBackground="bg-destructive/10"
-                    size="default"
-                    shape="rounded-lg"
-                  />
+                <div className="mb-6">
                   <EditableTranslation translationKey="why_noddi.before.title" onSave={() => setRefreshKey(prev => prev + 1)}>
                     <h3 className="text-2xl font-bold">{t('why_noddi.before.title', 'Before Navio')}</h3>
                   </EditableTranslation>
@@ -99,14 +92,7 @@ export default function WhyNavio() {
               }`}
             >
               <CardContent className="p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <EditableIcon 
-                    elementId="why-noddi-after-icon" 
-                    icon={Check} 
-                    defaultBackground="bg-gradient-primary"
-                    size="default"
-                    shape="rounded-lg"
-                  />
+                <div className="mb-6">
                   <EditableTranslation translationKey="why_noddi.after.title" onSave={() => setRefreshKey(prev => prev + 1)}>
                     <h3 className="text-2xl font-bold">{t('why_noddi.after.title', 'With Navio')}</h3>
                   </EditableTranslation>
