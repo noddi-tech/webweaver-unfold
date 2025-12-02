@@ -92,9 +92,6 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
   const bg = settings && useSectionBg ? (bgClass[settings.background_token] || "") : "";
   const cardBg = settings ? (bgClass[settings.card_bg_token] || "bg-card") : "bg-card";
   const iconClr = settings ? (textClass[settings.icon_token] || "text-primary") : "text-primary";
-  // Always use white text for card content since cards have dark backgrounds
-  const titleClr = "text-white";
-  const descClr = "text-white/90";
   const borderClr = settings ? (borderClass[settings.border_token] || "border-border") : "border-border";
 
   return (
@@ -166,6 +163,7 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
                   elementId={`feature-card-${f.id}`}
                   defaultBackground={cardBg}
                   allowedBackgrounds={allowedBackgrounds}
+                  className="[&_*]:text-inherit"
                 >
                   <div className={`rounded-xl p-6 hover:scale-105 transition-transform duration-300 border shadow-sm`}>
                     <EditableIcon
@@ -175,12 +173,12 @@ const Features = ({ useSectionBg = true }: FeaturesProps) => {
                       size="default"
                       className="mb-4"
                     />
-                    <h3 className={`text-xl font-semibold mb-3 ${titleClr}`}>
+                    <h3 className="text-xl font-semibold mb-3">
                       <EditableFeature featureId={f.id} field="title">
                         {f.title}
                       </EditableFeature>
                     </h3>
-                    <p className={`${descClr}`}>
+                    <p className="opacity-90">
                       <EditableFeature featureId={f.id} field="description">
                         {f.description}
                       </EditableFeature>
