@@ -180,6 +180,7 @@ export function EditableTranslation({
         <span
           key={refreshKey}
           className={`relative inline-block group ${className}`}
+          style={{ display: 'contents' }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
