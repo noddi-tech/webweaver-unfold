@@ -6,6 +6,15 @@ import { supabase } from '@/integrations/supabase/client';
 // Cache valid switcher languages to avoid repeated database queries
 let validSwitcherLanguages: string[] = ['en']; // Default to English only
 
+// Global ready state for translation loading
+let translationsReady = false;
+let readyResolve: () => void;
+export const translationsReadyPromise = new Promise<void>((resolve) => {
+  readyResolve = resolve;
+});
+
+export const isTranslationsReady = () => translationsReady;
+
 // Function to refresh valid languages from database
 async function refreshValidLanguages() {
   try {
@@ -90,9 +99,22 @@ const supabaseBackend = {
       });
 
       console.log(`[i18n] Loaded ${data?.length || 0} translations for ${language}`);
+      
+      // Mark translations as ready after first successful load
+      if (!translationsReady) {
+        translationsReady = true;
+        readyResolve();
+        console.log('[i18n] Translations ready');
+      }
+      
       callback(null, translations);
     } catch (error: any) {
       console.error('[i18n] Error loading translations:', error);
+      // Still mark as ready on error to prevent infinite loading
+      if (!translationsReady) {
+        translationsReady = true;
+        readyResolve();
+      }
       callback(error, null);
     }
   }

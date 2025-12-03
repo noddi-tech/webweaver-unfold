@@ -15,10 +15,20 @@ export function useAppTranslation() {
    */
   const t = (key: string, fallback?: string) => {
     const translation = translate(key);
+    
     // If translation equals the key, it means no translation was found
-    if (translation === key && fallback) {
-      return fallback;
+    if (translation === key) {
+      if (fallback) {
+        return fallback;
+      }
+      // In development, warn about missing fallbacks
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[i18n] Missing translation and no fallback for key: "${key}"`);
+      }
+      // Return empty string in production to avoid showing raw keys
+      return '';
     }
+    
     return translation;
   };
 
