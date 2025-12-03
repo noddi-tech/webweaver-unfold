@@ -306,20 +306,24 @@ const Header = () => {
 
           {/* Auth Buttons, Language switcher and user menu */}
           <div className="hidden md:flex items-center space-x-4">
-            {headerSettings?.show_auth_buttons && (
-              <>
-                <Button asChild variant="ghost" size="sm">
-                  <a href={headerSettings.sign_in_url || '/auth'}>
-                    {t('header.sign_in', headerSettings.sign_in_text || 'Sign In')}
-                  </a>
-                </Button>
-                <Button asChild variant="default" size="sm">
-                  <a href={headerSettings.sign_up_url || '/auth?tab=signup'}>
-                    {t('header.sign_up', headerSettings.get_started_text || 'Sign Up')}
-                  </a>
-                </Button>
-              </>
-            )}
+{headerSettings?.show_auth_buttons && (
+                  <>
+                    {headerSettings.show_sign_in_button && (
+                      <Button asChild variant="ghost" size="sm">
+                        <a href={headerSettings.sign_in_url || '/auth'}>
+                          {t('header.sign_in', headerSettings.sign_in_text || 'Sign In')}
+                        </a>
+                      </Button>
+                    )}
+                    {headerSettings.show_sign_up_button && (
+                      <Button asChild variant="default" size="sm">
+                        <a href={headerSettings.sign_up_url || '/auth?tab=signup'}>
+                          {t('header.sign_up', headerSettings.get_started_text || 'Sign Up')}
+                        </a>
+                      </Button>
+                    )}
+                  </>
+                )}
             <LanguageSwitcher variant="header" />
             {user && <UserMenuDropdown user={user} />}
           </div>
@@ -396,20 +400,24 @@ const Header = () => {
                 );
               })}
               <div className="flex flex-col space-y-2 pt-4 border-t border-border">
-                {headerSettings?.show_auth_buttons && (
-                  <>
-                    <Button asChild variant="outline" className="w-full">
-                      <a href={headerSettings.sign_in_url || '/auth'}>
-                        {t('header.sign_in', headerSettings.sign_in_text || 'Sign In')}
-                      </a>
-                    </Button>
-                    <Button asChild variant="default" className="w-full">
-                      <a href={headerSettings.sign_up_url || '/auth?tab=signup'}>
-                        {t('header.sign_up', headerSettings.get_started_text || 'Sign Up')}
-                      </a>
-                    </Button>
-                  </>
-                )}
+{headerSettings?.show_auth_buttons && (
+                    <>
+                      {headerSettings.show_sign_in_button && (
+                        <Button asChild variant="outline" className="w-full">
+                          <a href={headerSettings.sign_in_url || '/auth'}>
+                            {t('header.sign_in', headerSettings.sign_in_text || 'Sign In')}
+                          </a>
+                        </Button>
+                      )}
+                      {headerSettings.show_sign_up_button && (
+                        <Button asChild variant="default" className="w-full">
+                          <a href={headerSettings.sign_up_url || '/auth?tab=signup'}>
+                            {t('header.sign_up', headerSettings.get_started_text || 'Sign Up')}
+                          </a>
+                        </Button>
+                      )}
+                    </>
+                  )}
                 <LanguageSwitcher variant="header" />
                 {user && (
                   <div className="flex items-center justify-between">
