@@ -162,7 +162,7 @@ const Contact = () => {
             elementId="contact-form-card"
             defaultBackground="glass-card"
           >
-            <Card>
+            <Card className="shadow-xl">
               <CardHeader>
                 <CardTitle className="text-2xl text-foreground">{settings?.form_title ?? "Send us a message"}</CardTitle>
                 <CardDescription>{settings?.form_description ?? "Fill out the form below and we'll get back to you as soon as possible."}</CardDescription>
@@ -241,7 +241,7 @@ const Contact = () => {
                 elementId="contact-methods-card"
                 defaultBackground="glass-card"
               >
-                <Card>
+                <Card className="shadow-xl">
                   <CardHeader>
                     <CardTitle className="text-2xl text-foreground">{settings?.get_in_touch_title ?? "Get in touch"}</CardTitle>
                     <CardDescription>
@@ -278,7 +278,7 @@ const Contact = () => {
                 elementId="contact-hours-card"
                 defaultBackground="glass-card"
               >
-                <Card>
+                <Card className="shadow-xl">
                   <CardHeader>
                     <CardTitle className="text-xl text-foreground">{settings?.business_hours_title ?? "Business Hours"}</CardTitle>
                   </CardHeader>
