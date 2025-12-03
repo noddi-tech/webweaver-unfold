@@ -187,7 +187,8 @@ export function BackgroundEditModal({
               } else if (bgOption?.hslValue) {
                 return { backgroundColor: `hsl(${bgOption.hslValue})` };
               }
-              return {};
+              // Fallback for unknown backgrounds - show a default gradient
+              return { backgroundColor: 'hsl(249, 67%, 24%)' };
             })()
           }}
         >
