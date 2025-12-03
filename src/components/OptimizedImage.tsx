@@ -12,6 +12,7 @@ interface OptimizedImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElem
   aspectRatio?: string;
   containerClassName?: string;
   responsiveSizes?: number[];
+  onImageLoad?: () => void;
 }
 
 export function OptimizedImage({
@@ -26,6 +27,7 @@ export function OptimizedImage({
   responsiveSizes = [320, 640, 1024, 1920, 2560],
   className,
   style,
+  onImageLoad,
   ...props
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -59,11 +61,13 @@ export function OptimizedImage({
 
   const handleLoad = () => {
     setIsLoaded(true);
+    onImageLoad?.();
   };
 
   const handleError = () => {
     setHasError(true);
     setIsLoaded(true);
+    onImageLoad?.();
   };
 
   return (
@@ -82,10 +86,11 @@ export function OptimizedImage({
         alt={alt}
         loading={priority ? 'eager' : 'lazy'}
         decoding={priority ? 'sync' : 'async'}
+        fetchPriority={priority ? 'high' : 'auto'}
         onLoad={handleLoad}
         onError={handleError}
         className={cn(
-          'transition-opacity duration-300',
+          'transition-opacity duration-500 ease-out',
           isLoaded ? 'opacity-100' : 'opacity-0',
           className
         )}
