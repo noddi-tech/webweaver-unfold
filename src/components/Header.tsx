@@ -8,6 +8,7 @@ import GlobalUSPBar from "@/components/GlobalUSPBar";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LanguageLink } from "@/components/LanguageLink";
 import { UserMenuDropdown } from "@/components/UserMenuDropdown";
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -16,6 +17,28 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+
+// Map solution slugs to translation keys
+const getSolutionTranslationKey = (slug: string): string => {
+  const slugToKey: Record<string, string> = {
+    'tire-services': 'tire_services',
+    'windscreen-repair': 'windscreen_repair',
+    'car-wash': 'car_wash',
+    'service-diagnostics': 'service_diagnostics',
+    'warranty-recalls': 'warranty_recalls',
+  };
+  return slugToKey[slug] || slug.replace(/-/g, '_');
+};
+
+// Map navigation titles to translation keys
+const getNavTranslationKey = (title: string): string => {
+  const titleToKey: Record<string, string> = {
+    'Solutions': 'nav.solutions',
+    'Functionality': 'nav.functionality',
+  };
+  return titleToKey[title] || `nav.${title.toLowerCase().replace(/\s+/g, '_')}`;
+};
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
@@ -26,6 +49,8 @@ const Header = () => {
   const location = useLocation();
   const isHome = location.pathname === "/";
   const HeadingTag = (isHome ? "h1" : "h2") as keyof JSX.IntrinsicElements;
+  const { t } = useAppTranslation();
+
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
@@ -163,6 +188,27 @@ const Header = () => {
     }
   };
 
+  // Helper to get translated title for navigation items
+  const getTranslatedNavTitle = (link: any): string => {
+    const translationKey = getNavTranslationKey(link.title);
+    return t(translationKey, link.title);
+  };
+
+  // Helper to get translated content for solution dropdown items
+  const getTranslatedSolutionItem = (item: any, collection: string): { title: string; description: string } => {
+    if (collection === 'solutions' && item.slug) {
+      const translationKey = getSolutionTranslationKey(item.slug);
+      return {
+        title: t(`solutions.${translationKey}.title`, item.title || item.name),
+        description: t(`solutions.${translationKey}.subtitle`, item.subtitle || item.description || '')
+      };
+    }
+    return {
+      title: item.title || item.name,
+      description: item.subtitle || item.description || ''
+    };
+  };
+
   if (!brand.logo_text && !brand.logo_image_url) return null;
 
   return (
@@ -200,10 +246,12 @@ const Header = () => {
                   ? link.children?.filter((child: any) => child.active) || []
                   : link.type === 'dynamic-dropdown' 
                   ? (dynamicDropdowns[originalIndex] || []).map((item: any) => ({
+                      ...item,
                       title: item.title || item.name,
                       url: `/${link.collection}/${item.slug || item.id}`,
                       description: item.subtitle || item.description,
-                      active: true
+                      active: true,
+                      _collection: link.collection
                     }))
                   : [];
 
@@ -212,24 +260,30 @@ const Header = () => {
                       {((link.type === 'static-dropdown' || link.type === 'dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0) ? (
                         <>
                           <NavigationMenuTrigger className="bg-transparent text-base font-medium data-[state=open]:animate-none data-[state=closed]:animate-none">
-                            {link.title}
+                            {getTranslatedNavTitle(link)}
                           </NavigationMenuTrigger>
                           <NavigationMenuContent className="data-[state=open]:animate-none data-[state=closed]:animate-none transition-none">
                             <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                              {dropdownItems.map((child: any, childIndex: number) => (
-                                <LanguageLink
-                                  key={childIndex}
-                                  to={child.url}
-                                  className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                                >
-                                  <div className="text-base font-bold leading-none">{child.title}</div>
-                                  {child.description && (
-                                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                                      {child.description}
-                                    </p>
-                                  )}
-                                </LanguageLink>
-                              ))}
+                              {dropdownItems.map((child: any, childIndex: number) => {
+                                const translated = child._collection 
+                                  ? getTranslatedSolutionItem(child, child._collection)
+                                  : { title: child.title, description: child.description };
+                                
+                                return (
+                                  <LanguageLink
+                                    key={childIndex}
+                                    to={child.url}
+                                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                  >
+                                    <div className="text-base font-bold leading-none">{translated.title}</div>
+                                    {translated.description && (
+                                      <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                        {translated.description}
+                                      </p>
+                                    )}
+                                  </LanguageLink>
+                                );
+                              })}
                             </div>
                           </NavigationMenuContent>
                         </>
@@ -239,7 +293,7 @@ const Header = () => {
                             to={link.url || '#'} 
                             className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
                           >
-                            {link.title}
+                            {getTranslatedNavTitle(link)}
                           </LanguageLink>
                         </NavigationMenuLink>
                       )}
@@ -274,10 +328,12 @@ const Header = () => {
                   ? link.children?.filter((child: any) => child.active) || []
                   : link.type === 'dynamic-dropdown' 
                   ? (dynamicDropdowns[originalIndex] || []).map((item: any) => ({
+                      ...item,
                       title: item.title || item.name,
                       url: `/${link.collection}/${item.slug || item.id}`,
                       description: item.subtitle || item.description,
-                      active: true
+                      active: true,
+                      _collection: link.collection
                     }))
                   : [];
 
@@ -289,21 +345,27 @@ const Header = () => {
                           onClick={() => setOpenDropdown(openDropdown === originalIndex ? null : originalIndex)}
                           className="w-full flex items-center justify-between text-foreground hover:text-primary transition-colors py-2 text-base"
                         >
-                          <span>{link.title}</span>
+                          <span>{getTranslatedNavTitle(link)}</span>
                           <ChevronDown className={`w-4 h-4 transition-transform ${openDropdown === originalIndex ? 'rotate-180' : ''}`} />
                         </button>
                         {openDropdown === originalIndex && (
                           <div className="pl-4 space-y-2 border-l-2 border-border">
-                            {dropdownItems.map((child: any, childIndex: number) => (
-                              <LanguageLink
-                                key={childIndex}
-                                to={child.url}
-                                className="block text-base text-foreground hover:text-primary transition-colors py-1"
-                                onClick={() => setIsMenuOpen(false)}
-                              >
-                                {child.title}
-                              </LanguageLink>
-                            ))}
+                            {dropdownItems.map((child: any, childIndex: number) => {
+                              const translated = child._collection 
+                                ? getTranslatedSolutionItem(child, child._collection)
+                                : { title: child.title, description: child.description };
+                              
+                              return (
+                                <LanguageLink
+                                  key={childIndex}
+                                  to={child.url}
+                                  className="block text-base text-foreground hover:text-primary transition-colors py-1"
+                                  onClick={() => setIsMenuOpen(false)}
+                                >
+                                  {translated.title}
+                                </LanguageLink>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -313,7 +375,7 @@ const Header = () => {
                         className="block text-foreground hover:text-primary transition-colors py-2 text-base" 
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        {link.title}
+                        {getTranslatedNavTitle(link)}
                       </LanguageLink>
                     )}
                   </div>
