@@ -351,7 +351,7 @@ const ContactManager = () => {
       </div>
 
       {/* Tab visibility controls */}
-      <Card className="bg-card border-border">
+      <Card className="bg-background text-foreground border-border">
         <CardHeader>
           <CardTitle className="text-foreground">Tab Visibility</CardTitle>
           <CardDescription>Toggle which tabs are visible in the Contact CMS</CardDescription>
@@ -392,7 +392,7 @@ const ContactManager = () => {
         </TabsList>
 
         <TabsContent value="settings" className="space-y-6">
-          <Card className="bg-card border-border">
+          <Card className="bg-background text-foreground border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Contact Form Settings</CardTitle>
               <CardDescription>Configure the titles and descriptions for your contact page sections</CardDescription>
@@ -442,7 +442,7 @@ const ContactManager = () => {
         </TabsContent>
 
         {showContactTab && <TabsContent value="contact" className="space-y-6">
-          <Card className="bg-card border-border">
+          <Card className="bg-background text-foreground border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Add New Contact Method</CardTitle>
               <CardDescription>Create a new contact item for the "Get in touch" section</CardDescription>
@@ -507,7 +507,7 @@ const ContactManager = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-background text-foreground border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Contact Methods</CardTitle>
               <CardDescription>Manage existing contact methods</CardDescription>
@@ -602,7 +602,7 @@ const ContactManager = () => {
         </TabsContent>}
 
         {showBusinessHoursTab && <TabsContent value="hours" className="space-y-6">
-          <Card className="bg-card border-border">
+          <Card className="bg-background text-foreground border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Business Hours</CardTitle>
               <CardDescription>Configure your business hours for each day of the week</CardDescription>
