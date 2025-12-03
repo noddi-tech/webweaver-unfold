@@ -32,7 +32,8 @@ interface HeaderSettings {
   show_auth_buttons: boolean;
   sign_in_text: string;
   get_started_text: string;
-  cta_button_url: string;
+  sign_in_url: string;
+  sign_up_url: string;
   show_global_usp_bar: boolean;
 }
 
@@ -41,8 +42,9 @@ const HeaderManager = () => {
     navigation_links: [],
     show_auth_buttons: true,
     sign_in_text: "Sign In",
-    get_started_text: "Get Started",
-    cta_button_url: "/auth",
+    get_started_text: "Sign Up",
+    sign_in_url: "/auth",
+    sign_up_url: "/auth?tab=signup",
     show_global_usp_bar: true,
   });
   const [loading, setLoading] = useState(true);
@@ -70,7 +72,8 @@ const HeaderManager = () => {
           show_auth_buttons: data.show_auth_buttons,
           sign_in_text: data.sign_in_text,
           get_started_text: data.get_started_text,
-          cta_button_url: (data as any).cta_button_url || '/auth',
+          sign_in_url: (data as any).sign_in_url || '/auth',
+          sign_up_url: (data as any).sign_up_url || '/auth?tab=signup',
           show_global_usp_bar: data.show_global_usp_bar,
         });
       }
@@ -93,7 +96,8 @@ const HeaderManager = () => {
               show_auth_buttons: settings.show_auth_buttons,
               sign_in_text: settings.sign_in_text,
               get_started_text: settings.get_started_text,
-              cta_button_url: settings.cta_button_url,
+              sign_in_url: settings.sign_in_url,
+              sign_up_url: settings.sign_up_url,
               show_global_usp_bar: settings.show_global_usp_bar,
             } as any)
             .eq("id", settings.id)
@@ -104,7 +108,8 @@ const HeaderManager = () => {
               show_auth_buttons: settings.show_auth_buttons,
               sign_in_text: settings.sign_in_text,
               get_started_text: settings.get_started_text,
-              cta_button_url: settings.cta_button_url,
+              sign_in_url: settings.sign_in_url,
+              sign_up_url: settings.sign_up_url,
               show_global_usp_bar: settings.show_global_usp_bar,
             } as any]);
 
@@ -405,9 +410,9 @@ const HeaderManager = () => {
             </div>
 
             {settings.show_auth_buttons && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="sign-in-text">Button Text</Label>
+                  <Label htmlFor="sign-in-text">Sign In Button Text</Label>
                   <Input
                     id="sign-in-text"
                     value={settings.sign_in_text}
@@ -415,22 +420,29 @@ const HeaderManager = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="cta-button-url">Button URL</Label>
+                  <Label htmlFor="sign-in-url">Sign In Button URL</Label>
                   <Input
-                    id="cta-button-url"
-                    value={settings.cta_button_url}
-                    onChange={(e) => setSettings(prev => ({ ...prev, cta_button_url: e.target.value }))}
+                    id="sign-in-url"
+                    value={settings.sign_in_url}
+                    onChange={(e) => setSettings(prev => ({ ...prev, sign_in_url: e.target.value }))}
                     placeholder="/auth"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="get-started-text">Get Started Text (unused)</Label>
+                  <Label htmlFor="get-started-text">Sign Up Button Text</Label>
                   <Input
                     id="get-started-text"
                     value={settings.get_started_text}
                     onChange={(e) => setSettings(prev => ({ ...prev, get_started_text: e.target.value }))}
-                    disabled
-                    className="opacity-50"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="sign-up-url">Sign Up Button URL</Label>
+                  <Input
+                    id="sign-up-url"
+                    value={settings.sign_up_url}
+                    onChange={(e) => setSettings(prev => ({ ...prev, sign_up_url: e.target.value }))}
+                    placeholder="/auth?tab=signup"
                   />
                 </div>
               </div>
