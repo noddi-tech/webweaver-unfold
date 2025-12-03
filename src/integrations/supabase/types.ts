@@ -693,6 +693,7 @@ export type Database = {
       header_settings: {
         Row: {
           created_at: string
+          cta_button_url: string | null
           get_started_text: string
           id: string
           navigation_links: Json
@@ -703,6 +704,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          cta_button_url?: string | null
           get_started_text?: string
           id?: string
           navigation_links?: Json
@@ -713,6 +715,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          cta_button_url?: string | null
           get_started_text?: string
           id?: string
           navigation_links?: Json
