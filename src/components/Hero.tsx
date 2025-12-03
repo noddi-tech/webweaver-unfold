@@ -171,7 +171,29 @@ const Hero = () => {
               onSave={handleMediaSave}
               placeholder="Add hero image or carousel"
             >
-              {(mediaSettings.displayType === 'carousel' && carouselImages.length > 0) || 
+              {isLoading ? (
+                /* Skeleton with exact same dimensions to prevent layout shift */
+                <div className="w-full space-y-12">
+                  {/* Image skeleton - same aspect-[2/1] max-h-[640px] as loaded content */}
+                  <div className="w-full bg-muted/30 rounded-xl overflow-hidden aspect-[2/1] max-h-[640px] animate-pulse" />
+                  
+                  {/* Logo marquee skeleton */}
+                  <div className="w-full h-12 bg-muted/20 rounded-lg animate-pulse" />
+                  
+                  {/* USP section skeleton */}
+                  <div className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4 md:px-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex flex-col items-center space-y-2">
+                          <div className="w-5 h-5 bg-muted/30 rounded-full animate-pulse" />
+                          <div className="w-48 h-5 bg-muted/30 rounded animate-pulse" />
+                          <div className="w-64 h-4 bg-muted/20 rounded animate-pulse" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (mediaSettings.displayType === 'carousel' && carouselImages.length > 0) || 
                (mediaSettings.displayType === 'image' && mediaSettings.imageUrl) ? (
                 <div className="w-full space-y-12">
                   {/* Image/Carousel section with shadow for depth */}
