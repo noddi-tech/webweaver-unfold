@@ -693,35 +693,38 @@ export type Database = {
       header_settings: {
         Row: {
           created_at: string
-          cta_button_url: string | null
           get_started_text: string
           id: string
           navigation_links: Json
           show_auth_buttons: boolean
           show_global_usp_bar: boolean
           sign_in_text: string
+          sign_in_url: string | null
+          sign_up_url: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
-          cta_button_url?: string | null
           get_started_text?: string
           id?: string
           navigation_links?: Json
           show_auth_buttons?: boolean
           show_global_usp_bar?: boolean
           sign_in_text?: string
+          sign_in_url?: string | null
+          sign_up_url?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
-          cta_button_url?: string | null
           get_started_text?: string
           id?: string
           navigation_links?: Json
           show_auth_buttons?: boolean
           show_global_usp_bar?: boolean
           sign_in_text?: string
+          sign_in_url?: string | null
+          sign_up_url?: string | null
           updated_at?: string
         }
         Relationships: []
