@@ -304,8 +304,15 @@ const Header = () => {
             </NavigationMenu>
           )}
 
-          {/* CTA Buttons - Hidden for clean public interface */}
+          {/* CTA Button, Language switcher and user menu */}
           <div className="hidden md:flex items-center space-x-4">
+            {headerSettings?.show_auth_buttons && (
+              <Button asChild variant="default" size="sm">
+                <a href={(headerSettings as any).cta_button_url || '/auth'}>
+                  {headerSettings.sign_in_text || 'Sign In'}
+                </a>
+              </Button>
+            )}
             <LanguageSwitcher variant="header" />
             {user && <UserMenuDropdown user={user} />}
           </div>
@@ -382,6 +389,13 @@ const Header = () => {
                 );
               })}
               <div className="flex flex-col space-y-2 pt-4 border-t border-border">
+                {headerSettings?.show_auth_buttons && (
+                  <Button asChild variant="default" className="w-full">
+                    <a href={(headerSettings as any).cta_button_url || '/auth'}>
+                      {headerSettings.sign_in_text || 'Sign In'}
+                    </a>
+                  </Button>
+                )}
                 <LanguageSwitcher variant="header" />
                 {user && (
                   <div className="flex items-center justify-between">
