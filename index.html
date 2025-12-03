@@ -33,7 +33,22 @@
     <link rel="preconnect" href="https://ouhfgazomdmirdazvjys.supabase.co">
     <link rel="dns-prefetch" href="https://ouhfgazomdmirdazvjys.supabase.co">
     
-    <!-- Preload critical hero image with optimization params -->
+    <!-- Intelligent hero image preloading for returning visitors -->
+    <script>
+      (function() {
+        var cachedHeroUrl = localStorage.getItem('navio-hero-image-url');
+        if (cachedHeroUrl) {
+          var link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'image';
+          link.href = cachedHeroUrl;
+          link.setAttribute('fetchpriority', 'high');
+          document.head.appendChild(link);
+        }
+      })();
+    </script>
+    
+    <!-- Fallback static preload for first-time visitors -->
     <link rel="preload" as="image" href="https://ouhfgazomdmirdazvjys.supabase.co/storage/v1/object/public/site-images/Library/1764748559319-NODDI-hero-illustration.png?width=1920&quality=95&format=webp&resize=contain" fetchpriority="high">
     
     <!-- Atkinson Hyperlegible Next Font - Loaded statically for immediate availability -->

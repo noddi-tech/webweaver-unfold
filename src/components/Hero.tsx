@@ -27,6 +27,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { cn } from "@/lib/utils";
+import { getOptimizedImageUrl } from "@/utils/imageTransform";
 
 const Hero = () => {
   const { t } = useAppTranslation();
@@ -69,14 +70,32 @@ const Hero = () => {
     return () => window.removeEventListener('translation-updated', handleTranslationUpdate);
   }, []);
 
-  const injectPreloadLink = (imageUrl: string) => {
+  const injectPreloadLink = (imageUrl: string, cacheToStorage = false) => {
+    // Generate optimized URL with transformation params
+    const optimizedUrl = getOptimizedImageUrl(imageUrl, { 
+      width: 1920, 
+      quality: 95, 
+      format: 'webp',
+      fit: 'contain'
+    });
+    
+    // Cache to localStorage for returning visitors
+    if (cacheToStorage && optimizedUrl) {
+      try {
+        localStorage.setItem('navio-hero-image-url', optimizedUrl);
+      } catch (e) {
+        // localStorage might be full or disabled
+      }
+    }
+    
     // Check if preload link already exists
-    const existingPreload = document.querySelector(`link[href="${imageUrl}"]`);
-    if (!existingPreload && imageUrl) {
+    const existingPreload = document.querySelector(`link[href="${optimizedUrl}"]`);
+    if (!existingPreload && optimizedUrl) {
       const preloadLink = document.createElement('link');
       preloadLink.rel = 'preload';
       preloadLink.as = 'image';
-      preloadLink.href = imageUrl;
+      preloadLink.href = optimizedUrl;
+      preloadLink.setAttribute('fetchpriority', 'high');
       document.head.appendChild(preloadLink);
     }
   };
@@ -92,9 +111,9 @@ const Hero = () => {
         .maybeSingle();
 
       if (!error && settings) {
-        // Dynamically inject preload link for the actual image
+        // Dynamically inject preload link and cache for returning visitors
         if (settings.image_url) {
-          injectPreloadLink(settings.image_url);
+          injectPreloadLink(settings.image_url, true);
         }
 
         setMediaSettings({
