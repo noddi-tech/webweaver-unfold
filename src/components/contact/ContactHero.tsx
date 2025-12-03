@@ -18,8 +18,8 @@ export default function ContactHero() {
     `${body} text-muted-foreground max-w-3xl mx-auto`;
   
   return (
-    <section className="py-section">
-      <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+    <section className="pt-20 sm:pt-24 lg:pt-32 pb-8 sm:pb-12 px-2.5">
+      <div className="container max-w-container">
         <div className="text-center">
           <h1 className={h1Class}>
             {getHeading('h1', '')}

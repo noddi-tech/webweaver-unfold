@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import ContactHero from "@/components/contact/ContactHero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -153,25 +154,13 @@ const Contact = () => {
       <main>
         <ContactHero />
 
-        <section className="py-section">
-          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+        <section className="py-12 md:py-16 lg:py-section px-2.5">
+          <div className="container max-w-container">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}
           <EditableBackground
             elementId="contact-form-card"
             defaultBackground="glass-card"
-            allowedBackgrounds={[
-              'bg-gradient-hero',
-              'bg-gradient-sunset',
-              'bg-gradient-warmth',
-              'bg-gradient-ocean',
-              'bg-gradient-fire',
-              'glass-card',
-              'glass-prominent',
-              'bg-card',
-              'bg-background',
-              'bg-muted'
-            ]}
           >
             <Card>
               <CardHeader>
@@ -251,18 +240,6 @@ const Contact = () => {
               <EditableBackground
                 elementId="contact-methods-card"
                 defaultBackground="glass-card"
-                allowedBackgrounds={[
-                  'bg-gradient-hero',
-                  'bg-gradient-sunset',
-                  'bg-gradient-warmth',
-                  'bg-gradient-ocean',
-                  'bg-gradient-fire',
-                  'glass-card',
-                  'glass-prominent',
-                  'bg-card',
-                  'bg-background',
-                  'bg-muted'
-                ]}
               >
                 <Card>
                   <CardHeader>
@@ -300,18 +277,6 @@ const Contact = () => {
               <EditableBackground
                 elementId="contact-hours-card"
                 defaultBackground="glass-card"
-                allowedBackgrounds={[
-                  'bg-gradient-hero',
-                  'bg-gradient-sunset',
-                  'bg-gradient-warmth',
-                  'bg-gradient-ocean',
-                  'bg-gradient-fire',
-                  'glass-card',
-                  'glass-prominent',
-                  'bg-card',
-                  'bg-background',
-                  'bg-muted'
-                ]}
               >
                 <Card>
                   <CardHeader>
@@ -337,6 +302,7 @@ const Contact = () => {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 };
