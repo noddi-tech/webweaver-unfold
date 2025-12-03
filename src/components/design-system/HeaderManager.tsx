@@ -30,6 +30,8 @@ interface HeaderSettings {
   id?: string;
   navigation_links: NavigationLink[];
   show_auth_buttons: boolean;
+  show_sign_in_button: boolean;
+  show_sign_up_button: boolean;
   sign_in_text: string;
   get_started_text: string;
   sign_in_url: string;
@@ -41,6 +43,8 @@ const HeaderManager = () => {
   const [settings, setSettings] = useState<HeaderSettings>({
     navigation_links: [],
     show_auth_buttons: true,
+    show_sign_in_button: true,
+    show_sign_up_button: true,
     sign_in_text: "Sign In",
     get_started_text: "Sign Up",
     sign_in_url: "/auth",
@@ -70,6 +74,8 @@ const HeaderManager = () => {
           id: data.id,
           navigation_links: (data.navigation_links as NavigationLink[]) || [],
           show_auth_buttons: data.show_auth_buttons,
+          show_sign_in_button: (data as any).show_sign_in_button ?? true,
+          show_sign_up_button: (data as any).show_sign_up_button ?? true,
           sign_in_text: data.sign_in_text,
           get_started_text: data.get_started_text,
           sign_in_url: (data as any).sign_in_url || '/auth',
@@ -94,6 +100,8 @@ const HeaderManager = () => {
             .update({
               navigation_links: settings.navigation_links,
               show_auth_buttons: settings.show_auth_buttons,
+              show_sign_in_button: settings.show_sign_in_button,
+              show_sign_up_button: settings.show_sign_up_button,
               sign_in_text: settings.sign_in_text,
               get_started_text: settings.get_started_text,
               sign_in_url: settings.sign_in_url,
@@ -106,6 +114,8 @@ const HeaderManager = () => {
             .insert([{
               navigation_links: settings.navigation_links,
               show_auth_buttons: settings.show_auth_buttons,
+              show_sign_in_button: settings.show_sign_in_button,
+              show_sign_up_button: settings.show_sign_up_button,
               sign_in_text: settings.sign_in_text,
               get_started_text: settings.get_started_text,
               sign_in_url: settings.sign_in_url,
@@ -410,40 +420,69 @@ const HeaderManager = () => {
             </div>
 
             {settings.show_auth_buttons && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="sign-in-text">Sign In Button Text</Label>
-                  <Input
-                    id="sign-in-text"
-                    value={settings.sign_in_text}
-                    onChange={(e) => setSettings(prev => ({ ...prev, sign_in_text: e.target.value }))}
-                  />
+              <div className="space-y-6">
+                {/* Sign In Button */}
+                <div className="space-y-3 p-4 border border-border rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-medium">Sign In Button</Label>
+                    <Switch
+                      checked={settings.show_sign_in_button}
+                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, show_sign_in_button: checked }))}
+                    />
+                  </div>
+                  {settings.show_sign_in_button && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="sign-in-text">Button Text</Label>
+                        <Input
+                          id="sign-in-text"
+                          value={settings.sign_in_text}
+                          onChange={(e) => setSettings(prev => ({ ...prev, sign_in_text: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="sign-in-url">Button URL</Label>
+                        <Input
+                          id="sign-in-url"
+                          value={settings.sign_in_url}
+                          onChange={(e) => setSettings(prev => ({ ...prev, sign_in_url: e.target.value }))}
+                          placeholder="/auth"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <Label htmlFor="sign-in-url">Sign In Button URL</Label>
-                  <Input
-                    id="sign-in-url"
-                    value={settings.sign_in_url}
-                    onChange={(e) => setSettings(prev => ({ ...prev, sign_in_url: e.target.value }))}
-                    placeholder="/auth"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="get-started-text">Sign Up Button Text</Label>
-                  <Input
-                    id="get-started-text"
-                    value={settings.get_started_text}
-                    onChange={(e) => setSettings(prev => ({ ...prev, get_started_text: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="sign-up-url">Sign Up Button URL</Label>
-                  <Input
-                    id="sign-up-url"
-                    value={settings.sign_up_url}
-                    onChange={(e) => setSettings(prev => ({ ...prev, sign_up_url: e.target.value }))}
-                    placeholder="/auth?tab=signup"
-                  />
+
+                {/* Sign Up Button */}
+                <div className="space-y-3 p-4 border border-border rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-medium">Sign Up Button</Label>
+                    <Switch
+                      checked={settings.show_sign_up_button}
+                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, show_sign_up_button: checked }))}
+                    />
+                  </div>
+                  {settings.show_sign_up_button && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="get-started-text">Button Text</Label>
+                        <Input
+                          id="get-started-text"
+                          value={settings.get_started_text}
+                          onChange={(e) => setSettings(prev => ({ ...prev, get_started_text: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="sign-up-url">Button URL</Label>
+                        <Input
+                          id="sign-up-url"
+                          value={settings.sign_up_url}
+                          onChange={(e) => setSettings(prev => ({ ...prev, sign_up_url: e.target.value }))}
+                          placeholder="/auth?tab=signup"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

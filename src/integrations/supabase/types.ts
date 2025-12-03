@@ -698,6 +698,8 @@ export type Database = {
           navigation_links: Json
           show_auth_buttons: boolean
           show_global_usp_bar: boolean
+          show_sign_in_button: boolean | null
+          show_sign_up_button: boolean | null
           sign_in_text: string
           sign_in_url: string | null
           sign_up_url: string | null
@@ -710,6 +712,8 @@ export type Database = {
           navigation_links?: Json
           show_auth_buttons?: boolean
           show_global_usp_bar?: boolean
+          show_sign_in_button?: boolean | null
+          show_sign_up_button?: boolean | null
           sign_in_text?: string
           sign_in_url?: string | null
           sign_up_url?: string | null
@@ -722,6 +726,8 @@ export type Database = {
           navigation_links?: Json
           show_auth_buttons?: boolean
           show_global_usp_bar?: boolean
+          show_sign_in_button?: boolean | null
+          show_sign_up_button?: boolean | null
           sign_in_text?: string
           sign_in_url?: string | null
           sign_up_url?: string | null
