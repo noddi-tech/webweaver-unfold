@@ -200,170 +200,150 @@ const Hero = () => {
           </div>
 
           {/* Product Image with USP Section */}
-          <div className="w-full px-0 sm:px-2 lg:px-4 max-w-7xl mx-auto">
+          <div className="w-full px-0 sm:px-2 lg:px-4 max-w-7xl mx-auto space-y-12">
+            {/* Image/Carousel container with FIXED dimensions - prevents layout shift */}
             <EditableUniversalMedia
               locationId="homepage-hero"
               onSave={handleMediaSave}
               placeholder="Add hero image or carousel"
             >
-              <div className="relative w-full">
-                {/* Skeleton layer - crossfades out when image loads */}
+              {/* Fixed aspect-ratio container - ALWAYS reserves exact space */}
+              <div className="relative w-full aspect-[2/1] max-h-[640px]">
+                {/* Skeleton layer - absolutely positioned, fades out */}
                 <div className={cn(
                   "absolute inset-0 z-10 transition-opacity duration-500 ease-out pointer-events-none",
                   !showSkeleton ? "opacity-0" : "opacity-100"
                 )}>
-                  <div className="w-full space-y-12">
-                    {/* Image skeleton */}
-                    <div className="w-full bg-muted/30 rounded-xl overflow-hidden aspect-[2/1] max-h-[640px] animate-pulse" />
-                    
-                    {/* Logo marquee skeleton */}
-                    <div className="w-full h-12 bg-muted/20 rounded-lg animate-pulse" />
-                    
-                    {/* USP section skeleton */}
-                    <div className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4 md:px-6">
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="flex flex-col items-center space-y-2">
-                            <div className="w-5 h-5 bg-muted/30 rounded-full animate-pulse" />
-                            <div className="w-48 h-5 bg-muted/30 rounded animate-pulse" />
-                            <div className="w-64 h-4 bg-muted/20 rounded animate-pulse" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  <div className="w-full h-full bg-muted/30 rounded-xl animate-pulse" />
                 </div>
 
-                {/* Content layer - crossfades in when image loads */}
+                {/* Content layer - absolutely positioned, fades in */}
                 <div className={cn(
-                  "transition-opacity duration-500 ease-out",
+                  "absolute inset-0 z-20 transition-opacity duration-500 ease-out",
                   !showSkeleton ? "opacity-100" : "opacity-0"
                 )}>
                   {hasContent ? (
-                    <div className="w-full space-y-12">
-                      {/* Image/Carousel section with shadow for depth */}
-                      <div className="w-full bg-transparent rounded-xl overflow-hidden aspect-[2/1] max-h-[640px]">
-                        {mediaSettings.displayType === 'carousel' && carouselImages.length > 0 ? (
-                          <Carousel
-                            key={`hero-carousel-${mediaKey}`}
-                            setApi={setApi}
-                            opts={{ align: "center", loop: true }}
-                            plugins={[Autoplay({ delay: mediaSettings.autoplayDelay || 5000, stopOnInteraction: false })]}
-                            className="w-full h-full"
-                          >
-                            <CarouselContent>
-                              {carouselImages.map((image, index) => (
-                                <CarouselItem key={`hero-slide-${index}`} className="h-full">
-                                  <div className={`${containerClasses} rounded-xl overflow-hidden`}>
-                                    <OptimizedImage
-                                      src={image.url}
-                                      alt={image.alt || `Hero slide ${index + 1}`}
-                                      className={`w-full h-full ${fitModeClass} rounded-xl`}
-                                      containerClassName="h-full"
-                                      priority={index === 0}
-                                      quality={95}
-                                      onImageLoad={index === 0 ? handleImageLoad : undefined}
-                                    />
-                                  </div>
-                                </CarouselItem>
-                              ))}
-                            </CarouselContent>
-                            {mediaSettings.showNavigation && (
-                              <>
-                                <CarouselPrevious className="left-4" />
-                                <CarouselNext className="right-4" />
-                              </>
-                            )}
-                          </Carousel>
-                        ) : (
-                          <div className={`${containerClasses} rounded-xl overflow-hidden`}>
-                            <OptimizedImage
-                              src={mediaSettings.imageUrl || ''}
-                              alt={mediaSettings.imageAlt || 'Hero image'}
-                              className={`w-full h-full ${fitModeClass} rounded-xl`}
-                              containerClassName="h-full"
-                              priority={true}
-                              quality={95}
-                              onImageLoad={handleImageLoad}
-                            />
-                          </div>
-                        )}
-                        {mediaSettings.showDots && mediaSettings.displayType === 'carousel' && carouselImages.length > 1 && (
-                          <div className="flex justify-center gap-2 mt-6 pb-4">
-                            {carouselImages.map((_, index) => (
-                              <button
-                                key={`hero-dot-${index}`}
-                                onClick={() => api?.scrollTo(index)}
-                                className={`w-2 h-2 rounded-full transition-all ${
-                                  current === index ? "bg-primary w-8" : "bg-primary/30 hover:bg-primary/50"
-                                }`}
-                                aria-label={`Go to slide ${index + 1}`}
-                              />
+                    <div className="w-full h-full bg-transparent rounded-xl overflow-hidden">
+                      {mediaSettings.displayType === 'carousel' && carouselImages.length > 0 ? (
+                        <Carousel
+                          key={`hero-carousel-${mediaKey}`}
+                          setApi={setApi}
+                          opts={{ align: "center", loop: true }}
+                          plugins={[Autoplay({ delay: mediaSettings.autoplayDelay || 5000, stopOnInteraction: false })]}
+                          className="w-full h-full"
+                        >
+                          <CarouselContent className="h-full">
+                            {carouselImages.map((image, index) => (
+                              <CarouselItem key={`hero-slide-${index}`} className="h-full">
+                                <div className={`${containerClasses} rounded-xl overflow-hidden`}>
+                                  <OptimizedImage
+                                    src={image.url}
+                                    alt={image.alt || `Hero slide ${index + 1}`}
+                                    className={`w-full h-full ${fitModeClass} rounded-xl`}
+                                    containerClassName="h-full"
+                                    priority={index === 0}
+                                    quality={95}
+                                    onImageLoad={index === 0 ? handleImageLoad : undefined}
+                                  />
+                                </div>
+                              </CarouselItem>
                             ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Logo Marquee */}
-                      <div className="w-full">
-                        <LogoMarquee />
-                      </div>
-
-                      {/* USP section - directly on page gradient */}
-                      <div className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4 md:px-6 relative">
-                        {/* Glow effect */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="w-64 h-64 rounded-full" style={{ 
-                            background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
-                          }} />
+                          </CarouselContent>
+                          {mediaSettings.showNavigation && (
+                            <>
+                              <CarouselPrevious className="left-4" />
+                              <CarouselNext className="right-4" />
+                            </>
+                          )}
+                        </Carousel>
+                      ) : (
+                        <div className={`${containerClasses} rounded-xl overflow-hidden`}>
+                          <OptimizedImage
+                            src={mediaSettings.imageUrl || ''}
+                            alt={mediaSettings.imageAlt || 'Hero image'}
+                            className={`w-full h-full ${fitModeClass} rounded-xl`}
+                            containerClassName="h-full"
+                            priority={true}
+                            quality={95}
+                            onImageLoad={handleImageLoad}
+                          />
                         </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
-                          {/* Capacity USP */}
-                          <div className="flex flex-col items-center text-center space-y-2">
-                            <CheckCircle2 className="w-5 h-5 text-foreground" />
-                            <div>
-                              <EditableTranslation translationKey="hero.usp1.title" fallbackText="Capacity opens itself. Teams stay in flow.">
-                                <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Capacity opens itself. Teams stay in flow.</h3>
-                              </EditableTranslation>
-                              <EditableTranslation translationKey="hero.usp1.description" fallbackText="Automatic slotting and crew scheduling — no more bottlenecks.">
-                                <p className="text-sm text-white/70">Automatic slotting and crew scheduling — no more bottlenecks.</p>
-                              </EditableTranslation>
-                            </div>
-                          </div>
-
-                          {/* Schedules USP */}
-                          <div className="flex flex-col items-center text-center space-y-2">
-                            <CheckCircle2 className="w-5 h-5 text-foreground" />
-                            <div>
-                              <EditableTranslation translationKey="hero.usp2.title" fallbackText="Schedules adapt. Every job starts on time.">
-                                <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Schedules adapt. Every job starts on time.</h3>
-                              </EditableTranslation>
-                              <EditableTranslation translationKey="hero.usp2.description" fallbackText="Intelligent planning and live re-sequencing for mobile and garage services.">
-                                <p className="text-sm text-white/70">Intelligent planning and live re-sequencing for mobile and garage services.</p>
-                              </EditableTranslation>
-                            </div>
-                          </div>
-
-                          {/* Customers USP */}
-                          <div className="flex flex-col items-center text-center space-y-2">
-                            <CheckCircle2 className="w-5 h-5 text-foreground" />
-                            <div>
-                              <EditableTranslation translationKey="hero.usp3.title" fallbackText="Customers in control. Loved by end users.">
-                                <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Customers in control. Loved by end users.</h3>
-                              </EditableTranslation>
-                              <EditableTranslation translationKey="hero.usp3.description" fallbackText="Self-service booking, inspection, payment transparency — NPS ≈ 90.">
-                                <p className="text-sm text-white/70">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
-                              </EditableTranslation>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   ) : null}
                 </div>
+
+                {/* Carousel dots - positioned at bottom of fixed container */}
+                {!showSkeleton && mediaSettings.showDots && mediaSettings.displayType === 'carousel' && carouselImages.length > 1 && (
+                  <div className="absolute bottom-4 left-0 right-0 z-30 flex justify-center gap-2">
+                    {carouselImages.map((_, index) => (
+                      <button
+                        key={`hero-dot-${index}`}
+                        onClick={() => api?.scrollTo(index)}
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          current === index ? "bg-primary w-8" : "bg-primary/30 hover:bg-primary/50"
+                        }`}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </EditableUniversalMedia>
+
+            {/* Logo Marquee - ALWAYS renders, outside loading conditional */}
+            <LogoMarquee />
+
+            {/* USP section - ALWAYS renders, outside loading conditional */}
+            <div className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4 md:px-6 relative">
+              {/* Glow effect */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-64 h-64 rounded-full" style={{ 
+                  background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
+                }} />
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
+                {/* Capacity USP */}
+                <div className="flex flex-col items-center text-center space-y-2">
+                  <CheckCircle2 className="w-5 h-5 text-foreground" />
+                  <div>
+                    <EditableTranslation translationKey="hero.usp1.title" fallbackText="Capacity opens itself. Teams stay in flow.">
+                      <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Capacity opens itself. Teams stay in flow.</h3>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey="hero.usp1.description" fallbackText="Automatic slotting and crew scheduling — no more bottlenecks.">
+                      <p className="text-sm text-white/70">Automatic slotting and crew scheduling — no more bottlenecks.</p>
+                    </EditableTranslation>
+                  </div>
+                </div>
+
+                {/* Schedules USP */}
+                <div className="flex flex-col items-center text-center space-y-2">
+                  <CheckCircle2 className="w-5 h-5 text-foreground" />
+                  <div>
+                    <EditableTranslation translationKey="hero.usp2.title" fallbackText="Schedules adapt. Every job starts on time.">
+                      <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Schedules adapt. Every job starts on time.</h3>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey="hero.usp2.description" fallbackText="Intelligent planning and live re-sequencing for mobile and garage services.">
+                      <p className="text-sm text-white/70">Intelligent planning and live re-sequencing for mobile and garage services.</p>
+                    </EditableTranslation>
+                  </div>
+                </div>
+
+                {/* Customers USP */}
+                <div className="flex flex-col items-center text-center space-y-2">
+                  <CheckCircle2 className="w-5 h-5 text-foreground" />
+                  <div>
+                    <EditableTranslation translationKey="hero.usp3.title" fallbackText="Customers in control. Loved by end users.">
+                      <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Customers in control. Loved by end users.</h3>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey="hero.usp3.description" fallbackText="Self-service booking, inspection, payment transparency — NPS ≈ 90.">
+                      <p className="text-sm text-white/70">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
+                    </EditableTranslation>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
