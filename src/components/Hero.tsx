@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { OptimizedImage } from "@/components/OptimizedImage";
+import { cn } from "@/lib/utils";
 
 const Hero = () => {
   const { t } = useAppTranslation();
@@ -37,6 +38,7 @@ const Hero = () => {
   const [translationKey, setTranslationKey] = useState(0);
   
   const [isLoading, setIsLoading] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [mediaSettings, setMediaSettings] = useState({
     displayType: 'carousel' as 'image' | 'carousel',
     imageUrl: '',
@@ -67,8 +69,21 @@ const Hero = () => {
     return () => window.removeEventListener('translation-updated', handleTranslationUpdate);
   }, []);
 
+  const injectPreloadLink = (imageUrl: string) => {
+    // Check if preload link already exists
+    const existingPreload = document.querySelector(`link[href="${imageUrl}"]`);
+    if (!existingPreload && imageUrl) {
+      const preloadLink = document.createElement('link');
+      preloadLink.rel = 'preload';
+      preloadLink.as = 'image';
+      preloadLink.href = imageUrl;
+      document.head.appendChild(preloadLink);
+    }
+  };
+
   const loadMediaSettings = async () => {
     setIsLoading(true);
+    setImageLoaded(false);
     try {
       const { data: settings, error } = await supabase
         .from('image_carousel_settings')
@@ -77,6 +92,11 @@ const Hero = () => {
         .maybeSingle();
 
       if (!error && settings) {
+        // Dynamically inject preload link for the actual image
+        if (settings.image_url) {
+          injectPreloadLink(settings.image_url);
+        }
+
         setMediaSettings({
           displayType: settings.display_type as 'image' | 'carousel',
           imageUrl: settings.image_url || '',
@@ -96,8 +116,14 @@ const Hero = () => {
             .single();
 
           if (carouselConfig?.images) {
-            const images = Array.isArray(carouselConfig.images) ? carouselConfig.images : [];
+            const rawImages = Array.isArray(carouselConfig.images) ? carouselConfig.images : [];
+            const images = rawImages as Array<{ url: string; alt?: string }>;
             setCarouselImages(images.length > 0 ? images : fallbackImages);
+            
+            // Preload first carousel image
+            if (images.length > 0 && images[0]?.url) {
+              injectPreloadLink(images[0].url);
+            }
           }
         }
         
@@ -114,6 +140,10 @@ const Hero = () => {
     loadMediaSettings();
   };
 
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
   useEffect(() => {
     if (!api) return;
     setCurrent(api.selectedScrollSnap());
@@ -123,6 +153,11 @@ const Hero = () => {
   // Container fills parent, fitMode is dynamic based on database settings
   const containerClasses = 'w-full h-full';
   const fitModeClass = mediaSettings.fitMode === 'cover' ? 'object-cover' : 'object-contain';
+
+  // Determine if we should show skeleton (loading data OR image not yet loaded)
+  const showSkeleton = isLoading || !imageLoaded;
+  const hasContent = (mediaSettings.displayType === 'carousel' && carouselImages.length > 0) || 
+                     (mediaSettings.displayType === 'image' && mediaSettings.imageUrl);
 
   return (
     <section className="pt-20 sm:pt-24 lg:pt-32 pb-8 sm:pb-12 px-2.5">
@@ -171,151 +206,163 @@ const Hero = () => {
               onSave={handleMediaSave}
               placeholder="Add hero image or carousel"
             >
-              {isLoading ? (
-                /* Skeleton with exact same dimensions to prevent layout shift */
-                <div className="w-full space-y-12">
-                  {/* Image skeleton - same aspect-[2/1] max-h-[640px] as loaded content */}
-                  <div className="w-full bg-muted/30 rounded-xl overflow-hidden aspect-[2/1] max-h-[640px] animate-pulse" />
-                  
-                  {/* Logo marquee skeleton */}
-                  <div className="w-full h-12 bg-muted/20 rounded-lg animate-pulse" />
-                  
-                  {/* USP section skeleton */}
-                  <div className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4 md:px-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex flex-col items-center space-y-2">
-                          <div className="w-5 h-5 bg-muted/30 rounded-full animate-pulse" />
-                          <div className="w-48 h-5 bg-muted/30 rounded animate-pulse" />
-                          <div className="w-64 h-4 bg-muted/20 rounded animate-pulse" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (mediaSettings.displayType === 'carousel' && carouselImages.length > 0) || 
-               (mediaSettings.displayType === 'image' && mediaSettings.imageUrl) ? (
-                <div className="w-full space-y-12">
-                  {/* Image/Carousel section with shadow for depth */}
-                  <div className="w-full bg-transparent rounded-xl overflow-hidden aspect-[2/1] max-h-[640px]">
-                    {mediaSettings.displayType === 'carousel' && carouselImages.length > 0 ? (
-                      <Carousel
-                        key={`hero-carousel-${mediaKey}`}
-                        setApi={setApi}
-                        opts={{ align: "center", loop: true }}
-                        plugins={[Autoplay({ delay: mediaSettings.autoplayDelay || 5000, stopOnInteraction: false })]}
-                        className="w-full h-full"
-                      >
-                        <CarouselContent>
-                          {carouselImages.map((image, index) => (
-                            <CarouselItem key={`hero-slide-${index}`} className="h-full">
-                  <div className={`${containerClasses} rounded-xl overflow-hidden`}>
-                                <OptimizedImage
-                                  src={image.url}
-                                  alt={image.alt || `Hero slide ${index + 1}`}
-                                  className={`w-full h-full ${fitModeClass} rounded-xl`}
-                                  containerClassName="h-full"
-                                  width={1920}
-                                  height={1080}
-                                  quality={95}
-                                />
-                              </div>
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                        {mediaSettings.showNavigation && (
-                          <>
-                            <CarouselPrevious className="left-4" />
-                            <CarouselNext className="right-4" />
-                          </>
-                        )}
-                      </Carousel>
-                    ) : (
-                      <div className={`${containerClasses} rounded-xl overflow-hidden`}>
-                        <OptimizedImage
-                          src={mediaSettings.imageUrl || ''}
-                          alt={mediaSettings.imageAlt || 'Hero image'}
-                          className={`w-full h-full ${fitModeClass} rounded-xl`}
-                          containerClassName="h-full"
-                          width={1920}
-                          height={1080}
-                          quality={95}
-                        />
-                      </div>
-                    )}
-                    {mediaSettings.showDots && mediaSettings.displayType === 'carousel' && carouselImages.length > 1 && (
-                      <div className="flex justify-center gap-2 mt-6 pb-4">
-                        {carouselImages.map((_, index) => (
-                          <button
-                            key={`hero-dot-${index}`}
-                            onClick={() => api?.scrollTo(index)}
-                            className={`w-2 h-2 rounded-full transition-all ${
-                              current === index ? "bg-primary w-8" : "bg-primary/30 hover:bg-primary/50"
-                            }`}
-                            aria-label={`Go to slide ${index + 1}`}
-                          />
+              <div className="relative w-full">
+                {/* Skeleton layer - crossfades out when image loads */}
+                <div className={cn(
+                  "absolute inset-0 z-10 transition-opacity duration-500 ease-out pointer-events-none",
+                  !showSkeleton ? "opacity-0" : "opacity-100"
+                )}>
+                  <div className="w-full space-y-12">
+                    {/* Image skeleton */}
+                    <div className="w-full bg-muted/30 rounded-xl overflow-hidden aspect-[2/1] max-h-[640px] animate-pulse" />
+                    
+                    {/* Logo marquee skeleton */}
+                    <div className="w-full h-12 bg-muted/20 rounded-lg animate-pulse" />
+                    
+                    {/* USP section skeleton */}
+                    <div className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4 md:px-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="flex flex-col items-center space-y-2">
+                            <div className="w-5 h-5 bg-muted/30 rounded-full animate-pulse" />
+                            <div className="w-48 h-5 bg-muted/30 rounded animate-pulse" />
+                            <div className="w-64 h-4 bg-muted/20 rounded animate-pulse" />
+                          </div>
                         ))}
                       </div>
-                    )}
-                  </div>
-
-                  {/* Logo Marquee */}
-                  <div className="w-full">
-                    <LogoMarquee />
-                  </div>
-
-                  {/* USP section - directly on page gradient */}
-                  <div className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4 md:px-6 relative">
-                    {/* Glow effect */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-64 h-64 rounded-full" style={{ 
-                        background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
-                      }} />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
-                      {/* Capacity USP */}
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <CheckCircle2 className="w-5 h-5 text-foreground" />
-                        <div>
-                          <EditableTranslation translationKey="hero.usp1.title" fallbackText="Capacity opens itself. Teams stay in flow.">
-                            <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Capacity opens itself. Teams stay in flow.</h3>
-                          </EditableTranslation>
-                          <EditableTranslation translationKey="hero.usp1.description" fallbackText="Automatic slotting and crew scheduling — no more bottlenecks.">
-                            <p className="text-sm text-white/70">Automatic slotting and crew scheduling — no more bottlenecks.</p>
-                          </EditableTranslation>
-                        </div>
-                      </div>
-
-                      {/* Schedules USP */}
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <CheckCircle2 className="w-5 h-5 text-foreground" />
-                        <div>
-                          <EditableTranslation translationKey="hero.usp2.title" fallbackText="Schedules adapt. Every job starts on time.">
-                            <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Schedules adapt. Every job starts on time.</h3>
-                          </EditableTranslation>
-                          <EditableTranslation translationKey="hero.usp2.description" fallbackText="Intelligent planning and live re-sequencing for mobile and garage services.">
-                            <p className="text-sm text-white/70">Intelligent planning and live re-sequencing for mobile and garage services.</p>
-                          </EditableTranslation>
-                        </div>
-                      </div>
-
-                      {/* Customers USP */}
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <CheckCircle2 className="w-5 h-5 text-foreground" />
-                        <div>
-                          <EditableTranslation translationKey="hero.usp3.title" fallbackText="Customers in control. Loved by end users.">
-                            <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Customers in control. Loved by end users.</h3>
-                          </EditableTranslation>
-                          <EditableTranslation translationKey="hero.usp3.description" fallbackText="Self-service booking, inspection, payment transparency — NPS ≈ 90.">
-                            <p className="text-sm text-white/70">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
-                          </EditableTranslation>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
-              ) : null}
+
+                {/* Content layer - crossfades in when image loads */}
+                <div className={cn(
+                  "transition-opacity duration-500 ease-out",
+                  !showSkeleton ? "opacity-100" : "opacity-0"
+                )}>
+                  {hasContent ? (
+                    <div className="w-full space-y-12">
+                      {/* Image/Carousel section with shadow for depth */}
+                      <div className="w-full bg-transparent rounded-xl overflow-hidden aspect-[2/1] max-h-[640px]">
+                        {mediaSettings.displayType === 'carousel' && carouselImages.length > 0 ? (
+                          <Carousel
+                            key={`hero-carousel-${mediaKey}`}
+                            setApi={setApi}
+                            opts={{ align: "center", loop: true }}
+                            plugins={[Autoplay({ delay: mediaSettings.autoplayDelay || 5000, stopOnInteraction: false })]}
+                            className="w-full h-full"
+                          >
+                            <CarouselContent>
+                              {carouselImages.map((image, index) => (
+                                <CarouselItem key={`hero-slide-${index}`} className="h-full">
+                                  <div className={`${containerClasses} rounded-xl overflow-hidden`}>
+                                    <OptimizedImage
+                                      src={image.url}
+                                      alt={image.alt || `Hero slide ${index + 1}`}
+                                      className={`w-full h-full ${fitModeClass} rounded-xl`}
+                                      containerClassName="h-full"
+                                      priority={index === 0}
+                                      quality={95}
+                                      onImageLoad={index === 0 ? handleImageLoad : undefined}
+                                    />
+                                  </div>
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            {mediaSettings.showNavigation && (
+                              <>
+                                <CarouselPrevious className="left-4" />
+                                <CarouselNext className="right-4" />
+                              </>
+                            )}
+                          </Carousel>
+                        ) : (
+                          <div className={`${containerClasses} rounded-xl overflow-hidden`}>
+                            <OptimizedImage
+                              src={mediaSettings.imageUrl || ''}
+                              alt={mediaSettings.imageAlt || 'Hero image'}
+                              className={`w-full h-full ${fitModeClass} rounded-xl`}
+                              containerClassName="h-full"
+                              priority={true}
+                              quality={95}
+                              onImageLoad={handleImageLoad}
+                            />
+                          </div>
+                        )}
+                        {mediaSettings.showDots && mediaSettings.displayType === 'carousel' && carouselImages.length > 1 && (
+                          <div className="flex justify-center gap-2 mt-6 pb-4">
+                            {carouselImages.map((_, index) => (
+                              <button
+                                key={`hero-dot-${index}`}
+                                onClick={() => api?.scrollTo(index)}
+                                className={`w-2 h-2 rounded-full transition-all ${
+                                  current === index ? "bg-primary w-8" : "bg-primary/30 hover:bg-primary/50"
+                                }`}
+                                aria-label={`Go to slide ${index + 1}`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Logo Marquee */}
+                      <div className="w-full">
+                        <LogoMarquee />
+                      </div>
+
+                      {/* USP section - directly on page gradient */}
+                      <div className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4 md:px-6 relative">
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-64 h-64 rounded-full" style={{ 
+                            background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
+                          }} />
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
+                          {/* Capacity USP */}
+                          <div className="flex flex-col items-center text-center space-y-2">
+                            <CheckCircle2 className="w-5 h-5 text-foreground" />
+                            <div>
+                              <EditableTranslation translationKey="hero.usp1.title" fallbackText="Capacity opens itself. Teams stay in flow.">
+                                <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Capacity opens itself. Teams stay in flow.</h3>
+                              </EditableTranslation>
+                              <EditableTranslation translationKey="hero.usp1.description" fallbackText="Automatic slotting and crew scheduling — no more bottlenecks.">
+                                <p className="text-sm text-white/70">Automatic slotting and crew scheduling — no more bottlenecks.</p>
+                              </EditableTranslation>
+                            </div>
+                          </div>
+
+                          {/* Schedules USP */}
+                          <div className="flex flex-col items-center text-center space-y-2">
+                            <CheckCircle2 className="w-5 h-5 text-foreground" />
+                            <div>
+                              <EditableTranslation translationKey="hero.usp2.title" fallbackText="Schedules adapt. Every job starts on time.">
+                                <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Schedules adapt. Every job starts on time.</h3>
+                              </EditableTranslation>
+                              <EditableTranslation translationKey="hero.usp2.description" fallbackText="Intelligent planning and live re-sequencing for mobile and garage services.">
+                                <p className="text-sm text-white/70">Intelligent planning and live re-sequencing for mobile and garage services.</p>
+                              </EditableTranslation>
+                            </div>
+                          </div>
+
+                          {/* Customers USP */}
+                          <div className="flex flex-col items-center text-center space-y-2">
+                            <CheckCircle2 className="w-5 h-5 text-foreground" />
+                            <div>
+                              <EditableTranslation translationKey="hero.usp3.title" fallbackText="Customers in control. Loved by end users.">
+                                <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Customers in control. Loved by end users.</h3>
+                              </EditableTranslation>
+                              <EditableTranslation translationKey="hero.usp3.description" fallbackText="Self-service booking, inspection, payment transparency — NPS ≈ 90.">
+                                <p className="text-sm text-white/70">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
+                              </EditableTranslation>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
             </EditableUniversalMedia>
           </div>
         </div>
