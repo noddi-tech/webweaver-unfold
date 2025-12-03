@@ -159,7 +159,7 @@ const Contact = () => {
           {/* Contact Form */}
           <EditableBackground
             elementId="contact-form-card"
-            defaultBackground="liquid-glass"
+            defaultBackground="glass-card"
             allowedBackgrounds={[
               'bg-gradient-hero',
               'bg-gradient-sunset',
@@ -167,7 +167,6 @@ const Contact = () => {
               'bg-gradient-ocean',
               'bg-gradient-fire',
               'glass-card',
-              'liquid-glass',
               'glass-prominent',
               'bg-card',
               'bg-background',
@@ -180,8 +179,67 @@ const Contact = () => {
                 <CardDescription>{settings?.form_description ?? "Fill out the form below and we'll get back to you as soon as possible."}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <form onSubmit={handleSubmit}>
-...
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-1 block">First Name *</label>
+                      <Input
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        placeholder="John"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-1 block">Last Name</label>
+                      <Input
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        placeholder="Doe"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-1 block">Email *</label>
+                    <Input
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="john@example.com"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-1 block">Subject</label>
+                    <Input
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      placeholder="How can we help?"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-1 block">Message *</label>
+                    <Textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      placeholder="Your message..."
+                      rows={5}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" disabled={isSubmitting} className="w-full">
+                    {isSubmitting ? "Sending..." : (
+                      <>
+                        <Send className="w-4 h-4 mr-2" />
+                        Send Message
+                      </>
+                    )}
+                  </Button>
                 </form>
               </CardContent>
             </Card>
@@ -192,7 +250,7 @@ const Contact = () => {
             {settings?.show_contact_methods_tab !== false && (
               <EditableBackground
                 elementId="contact-methods-card"
-                defaultBackground="liquid-glass"
+                defaultBackground="glass-card"
                 allowedBackgrounds={[
                   'bg-gradient-hero',
                   'bg-gradient-sunset',
@@ -200,7 +258,6 @@ const Contact = () => {
                   'bg-gradient-ocean',
                   'bg-gradient-fire',
                   'glass-card',
-                  'liquid-glass',
                   'glass-prominent',
                   'bg-card',
                   'bg-background',
@@ -214,8 +271,26 @@ const Contact = () => {
                       Reach out to us through any of these channels.
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-...
+                  <CardContent className="space-y-4">
+                    {contactItems.map((item) => {
+                      const IconComponent = item.icon_name === 'Mail' ? Mail : 
+                                           item.icon_name === 'Phone' ? Phone : MapPin;
+                      return (
+                        <a
+                          key={item.id}
+                          href={item.link_url || '#'}
+                          className="flex items-start gap-4 p-4 rounded-lg hover:bg-accent/10 transition-colors group"
+                        >
+                          <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                            <IconComponent className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">{item.title}</p>
+                            <p className="text-muted-foreground text-sm">{item.value}</p>
+                          </div>
+                        </a>
+                      );
+                    })}
                   </CardContent>
                 </Card>
               </EditableBackground>
@@ -224,7 +299,7 @@ const Contact = () => {
             {settings?.show_business_hours_tab !== false && (
               <EditableBackground
                 elementId="contact-hours-card"
-                defaultBackground="liquid-glass"
+                defaultBackground="glass-card"
                 allowedBackgrounds={[
                   'bg-gradient-hero',
                   'bg-gradient-sunset',
@@ -232,7 +307,6 @@ const Contact = () => {
                   'bg-gradient-ocean',
                   'bg-gradient-fire',
                   'glass-card',
-                  'liquid-glass',
                   'glass-prominent',
                   'bg-card',
                   'bg-background',
@@ -244,7 +318,16 @@ const Contact = () => {
                     <CardTitle className="text-xl text-foreground">{settings?.business_hours_title ?? "Business Hours"}</CardTitle>
                   </CardHeader>
                   <CardContent>
-...
+                    <div className="space-y-3">
+                      {hours.map((hour) => (
+                        <div key={hour.id} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
+                          <span className="font-medium text-foreground">{hour.day_name}</span>
+                          <span className="text-muted-foreground">
+                            {hour.closed ? 'Closed' : `${hour.open_time} - ${hour.close_time}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
               </EditableBackground>
