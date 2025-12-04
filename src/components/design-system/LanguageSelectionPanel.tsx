@@ -44,6 +44,7 @@ interface LanguageSelectionPanelProps {
   onEvaluateSelected: () => void;
   onSyncKeys?: () => void;
   onResetStuck?: () => void;
+  onResetForReEvaluation?: (languageCode: string) => void;
   onAddKey?: () => void;
   translationProgress?: string;
 }
@@ -70,6 +71,7 @@ export default function LanguageSelectionPanel({
   onEvaluateSelected,
   onSyncKeys,
   onResetStuck,
+  onResetForReEvaluation,
   onAddKey,
   translationProgress,
 }: LanguageSelectionPanelProps) {
@@ -355,6 +357,27 @@ export default function LanguageSelectionPanel({
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>Reset evaluations stuck for &gt;10 minutes</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+
+                  {onResetForReEvaluation && selectedLanguages.length === 1 && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            onClick={() => onResetForReEvaluation(selectedLanguages[0])}
+                            disabled={isProcessing}
+                            className="gap-2 text-amber-600 border-amber-300 hover:bg-amber-50"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                            Reset for Re-evaluation
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Clear all quality scores so {selectedLanguages[0].toUpperCase()} can be re-evaluated from scratch</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
