@@ -65,8 +65,11 @@ export default function LanguageStatsTable({
                 const progress = evaluationProgress.find(ep => ep.language_code === lang.code);
                 const metaStat = pageMetaStats.find(m => m.code === lang.code);
                 
-                const translationComplete = lang.total_translations === englishCount;
-                const evaluationComplete = progress?.evaluated_keys === lang.total_translations;
+                // Use actual_translations (non-empty) for accuracy
+                const actualTranslations = lang.actual_translations || 0;
+                const missingTranslations = lang.missing_translations || 0;
+                const translationComplete = actualTranslations === englishCount && missingTranslations === 0;
+                const evaluationComplete = progress?.evaluated_keys === actualTranslations;
                 const hasPageMeta = metaStat && metaStat.completed_entries > 0;
                 
                 return (
@@ -79,7 +82,12 @@ export default function LanguageStatsTable({
                     </td>
                     <td className="py-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono">{lang.total_translations}/{englishCount}</span>
+                        <span className="font-mono">{actualTranslations}/{englishCount}</span>
+                        {missingTranslations > 0 && (
+                          <Badge variant="destructive" className="text-xs">
+                            {missingTranslations} missing
+                          </Badge>
+                        )}
                         {translationComplete && <Check className="w-4 h-4 text-success" />}
                       </div>
                     </td>
@@ -89,14 +97,9 @@ export default function LanguageStatsTable({
                       ) : (
                         <div className="flex items-center gap-2">
                           <span className="font-mono">
-                            {lang.actual_evaluated_count || 0}/{lang.total_translations}
+                            {lang.actual_evaluated_count || 0}/{actualTranslations}
                           </span>
-                          {lang.total_translations < englishCount && (
-                            <Badge variant="destructive" className="text-xs">
-                              {englishCount - lang.total_translations} missing
-                            </Badge>
-                          )}
-                          {(lang.actual_evaluated_count || 0) === lang.total_translations && <Check className="w-4 h-4 text-success" />}
+                          {(lang.actual_evaluated_count || 0) === actualTranslations && actualTranslations > 0 && <Check className="w-4 h-4 text-success" />}
                           {progress?.status === 'in_progress' && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
                           {progress?.status === 'paused' && <AlertTriangle className="w-4 h-4 text-warning" />}
                         </div>
@@ -118,7 +121,7 @@ export default function LanguageStatsTable({
                       )}
                     </td>
                     <td className="py-3">
-                      <span className="font-mono">{lang.approved_translations || 0}/{englishCount}</span>
+                      <span className="font-mono">{lang.approved_translations || 0}/{actualTranslations}</span>
                     </td>
                     <td className="py-3">
                       {metaStat ? (

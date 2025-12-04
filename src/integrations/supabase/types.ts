@@ -2149,6 +2149,7 @@ export type Database = {
       }
       translation_stats: {
         Row: {
+          actual_translations: number | null
           approval_percentage: number | null
           approved_translations: number | null
           avg_quality_score: number | null
@@ -2157,6 +2158,7 @@ export type Database = {
           high_quality_count: number | null
           low_quality_count: number | null
           medium_quality_count: number | null
+          missing_translations: number | null
           name: string | null
           needs_review_count: number | null
           sort_order: number | null

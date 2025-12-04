@@ -43,23 +43,28 @@ export default function UnifiedDashboard() {
     );
   }
 
-  // Calculate global stats - use ACTUAL data from stats, not theoretical calculations
+  // Calculate global stats - use ACTUAL translations (non-empty) from database
   const totalLanguages = stats.filter(s => s.enabled && s.code !== 'en').length;
-  const englishCount = stats.find(s => s.code === 'en')?.total_translations || 0;
+  const englishCount = stats.find(s => s.code === 'en')?.actual_translations || 0;
   
-  // ✓ Use actual sum from database instead of theoretical calculation
-  const actualTotalTranslations = stats.reduce((sum, s) => sum + s.total_translations, 0);
+  // Use actual_translations (non-empty content) instead of total_translations (includes empty rows)
+  const actualTotalTranslations = stats.reduce((sum, s) => sum + (s.actual_translations || 0), 0);
   const expectedTotalTranslations = (totalLanguages + 1) * englishCount;
+  
+  // Count total missing translations
+  const totalMissing = stats.reduce((sum, s) => sum + (s.missing_translations || 0), 0);
   
   // Only count evaluation for non-English languages
   const totalEvaluated = stats
     .filter(s => s.code !== 'en')
     .reduce((sum, s) => {
-      const progress = evaluationProgress.find(ep => ep.language_code === s.code);
-      return sum + (progress?.evaluated_keys || 0);
+      return sum + (s.actual_evaluated_count || 0);
     }, 0);
   
-  const totalEvaluationRequired = totalLanguages * englishCount;
+  // Evaluation required = actual translations (non-empty) for non-English languages
+  const totalEvaluationRequired = stats
+    .filter(s => s.code !== 'en')
+    .reduce((sum, s) => sum + (s.actual_translations || 0), 0);
   
   const totalApproved = stats.reduce((sum, s) => sum + (s.approved_translations || 0), 0);
   
@@ -70,10 +75,16 @@ export default function UnifiedDashboard() {
     sum + (s.completed_entries || 0), 0
   );
 
-  // ✓ Fix completion rate to compare actual vs expected
-  const translationCompletionRate = Math.round((actualTotalTranslations / expectedTotalTranslations) * 100) || 0;
-  const evaluationCompletionRate = Math.round((totalEvaluated / totalEvaluationRequired) * 100) || 0;
-  const pageMetaCompletionRate = Math.round((totalPageMetaCompleted / totalPageMetaRequired) * 100) || 0;
+  // Fix completion rate to compare actual vs expected
+  const translationCompletionRate = expectedTotalTranslations > 0 
+    ? Math.round((actualTotalTranslations / expectedTotalTranslations) * 100) 
+    : 0;
+  const evaluationCompletionRate = totalEvaluationRequired > 0 
+    ? Math.round((totalEvaluated / totalEvaluationRequired) * 100) 
+    : 0;
+  const pageMetaCompletionRate = totalPageMetaRequired > 0 
+    ? Math.round((totalPageMetaCompleted / totalPageMetaRequired) * 100) 
+    : 0;
 
   return (
     <div className="space-y-6">

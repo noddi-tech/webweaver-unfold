@@ -7,6 +7,8 @@ export interface TranslationStat {
   enabled: boolean;
   sort_order: number;
   total_translations: number;
+  actual_translations: number;
+  missing_translations: number;
   approved_translations: number;
   approval_percentage: number;
   avg_quality_score: number;
@@ -15,6 +17,7 @@ export interface TranslationStat {
   low_quality_count: number;
   needs_review_count: number;
   show_in_switcher?: boolean;
+  actual_evaluated_count?: number;
 }
 
 export function useTranslationStats() {
