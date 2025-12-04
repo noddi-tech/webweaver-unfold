@@ -48,13 +48,14 @@ const supabaseBackend = {
       
       // For English (source language), load all translations regardless of approval status
       // For other languages, only load approved translations
-      const query = supabase
+      let query = supabase
         .from('translations')
         .select('translation_key, translated_text')
-        .eq('language_code', language);
+        .eq('language_code', language)
+        .range(0, 10000); // Override default 1000-row limit
       
       if (language !== 'en') {
-        query.eq('approved', true);
+        query = query.eq('approved', true);
       }
       
       const { data, error } = await query;
