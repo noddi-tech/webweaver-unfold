@@ -11,12 +11,15 @@ import { UserMenuDropdown } from "@/components/UserMenuDropdown";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Map solution slugs to translation keys
 const getSolutionTranslationKey = (slug: string): string => {
@@ -258,12 +261,15 @@ const Header = () => {
                   return (
                     <NavigationMenuItem key={originalIndex}>
                       {((link.type === 'static-dropdown' || link.type === 'dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0) ? (
-                        <>
-                          <NavigationMenuTrigger className="bg-transparent text-base font-medium data-[state=open]:animate-none data-[state=closed]:animate-none">
-                            {getTranslatedNavTitle(link)}
-                          </NavigationMenuTrigger>
-                          <NavigationMenuContent className="data-[state=open]:animate-none data-[state=closed]:animate-none transition-none">
-                            <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
+                              {getTranslatedNavTitle(link)}
+                              <ChevronDown className="relative top-[1px] ml-1 h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-[400px] md:w-[500px] lg:w-[600px] p-4 bg-background" align="start">
+                            <div className="grid gap-3 md:grid-cols-2">
                               {dropdownItems.map((child: any, childIndex: number) => {
                                 const translated = child._collection 
                                   ? getTranslatedSolutionItem(child, child._collection)
@@ -285,8 +291,8 @@ const Header = () => {
                                 );
                               })}
                             </div>
-                          </NavigationMenuContent>
-                        </>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       ) : (
                         <NavigationMenuLink asChild>
                           <LanguageLink 
