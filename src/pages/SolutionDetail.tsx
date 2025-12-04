@@ -399,7 +399,7 @@ const SolutionDetail = () => {
               onSave={handleContentSave}
             >
               <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
-                {item.heading}
+                {t(`solutions.${slugKey}.key_benefit_${index}.heading`, item.heading)}
               </h3>
             </EditableKeyBenefit>
           )}
@@ -411,7 +411,7 @@ const SolutionDetail = () => {
               onSave={handleContentSave}
             >
               <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                {item.description}
+                {t(`solutions.${slugKey}.key_benefit_${index}.description`, item.description)}
               </p>
             </EditableKeyBenefit>
           )}

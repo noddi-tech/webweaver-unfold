@@ -183,7 +183,7 @@ const Solutions = () => {
                         {solution.benefits.map((benefit, idx) => (
                           <li key={idx} className={`flex items-start gap-2 ${descClr}`}>
                             <icons.Check className={`w-5 h-5 ${iconClr} shrink-0 mt-0.5`} />
-                            <span>{benefit}</span>
+                            <span>{t(`solutions.${slugKey}.benefit_${idx}`, benefit)}</span>
                           </li>
                         ))}
                       </ul>
