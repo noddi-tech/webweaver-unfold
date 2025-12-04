@@ -122,8 +122,6 @@ serve(async (req) => {
 
     console.log(`Finding unevaluated translations (quality_score IS NULL OR < 1)`);
 
-    const { data: targetTexts, error: targetError } = await query;
-
     if (targetError) {
       throw new Error(`Failed to fetch target translations: ${targetError?.message}`);
     }
