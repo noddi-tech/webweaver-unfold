@@ -168,24 +168,32 @@ export default function TranslationManagerContent() {
   }, [languages]); // Dependency on languages for name lookup
 
   async function loadData() {
-    // Load languages with show_in_switcher
-    const { data: langs } = await supabase.from('languages').select('*').order('sort_order');
+    // BULLETPROOF: Fetch each language SEPARATELY to avoid server-side max_rows limit
+    // When using .in(), PostgREST limits total results (1000), not per-value
+    // Fetching separately: each query gets its own 1000-row limit
+    const [langsResult, englishResult, selectedLangResult] = await Promise.all([
+      supabase.from('languages').select('*').order('sort_order'),
+      supabase
+        .from('translations')
+        .select('*')
+        .eq('language_code', 'en')
+        .order('translation_key'),
+      supabase
+        .from('translations')
+        .select('*')
+        .eq('language_code', selectedLang)
+        .order('translation_key')
+    ]);
     
-    // Only load English translations + currently selected language
-    // CRITICAL: Use .range() to override Supabase's default 1000 row limit
-    const { data: trans } = await supabase
-      .from('translations')
-      .select('*')
-      .in('language_code', ['en', selectedLang])
-      .order('translation_key')
-      .range(0, 10000); // Bulletproof: ensure we get ALL rows
+    if (langsResult.data) setLanguages(langsResult.data);
     
-    if (langs) setLanguages(langs);
+    // Combine both language results
+    const englishTrans = englishResult.data || [];
+    const selectedTrans = selectedLangResult.data || [];
+    const allTranslations = [...englishTrans, ...selectedTrans];
     
-    if (trans) {
-      setTranslations(trans);
-      setEnglishTranslations(trans.filter(t => t.language_code === 'en'));
-    }
+    setTranslations(allTranslations);
+    setEnglishTranslations(englishTrans);
     
     // Refresh shared stats after loading
     refreshStats();
