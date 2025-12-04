@@ -41,6 +41,7 @@ import EvaluationControls from './EvaluationControls';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslationStats } from '@/hooks/useTranslationStats';
 import LanguageStatsTable from './LanguageStatsTable';
+import LanguageSelectionPanel from './LanguageSelectionPanel';
 
 export default function TranslationManagerContent() {
   const { toast } = useToast();
@@ -80,6 +81,7 @@ export default function TranslationManagerContent() {
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [isSyncingVisibility, setIsSyncingVisibility] = useState(false);
   const [showIntentionallyEmpty, setShowIntentionallyEmpty] = useState(false);
+  const [selectedLanguagesForAction, setSelectedLanguagesForAction] = useState<string[]>([]);
 
   // Load saved filters on mount
   useEffect(() => {
@@ -1349,6 +1351,171 @@ export default function TranslationManagerContent() {
     }
   }
 
+  // Translate only selected languages
+  async function handleTranslateSelected() {
+    if (selectedLanguagesForAction.length === 0) {
+      toast({ title: 'No languages selected', variant: 'destructive' });
+      return;
+    }
+
+    setIsTranslating(true);
+    setTranslationProgress('Starting selective translation...');
+
+    try {
+      // Get all English keys
+      const { data: keys } = await supabase
+        .from('translations')
+        .select('translation_key')
+        .eq('language_code', 'en');
+
+      if (!keys || keys.length === 0) {
+        toast({ title: 'No English translations found', variant: 'destructive' });
+        return;
+      }
+
+      const translationKeys = keys.map(k => k.translation_key);
+      const targetLanguages = languages.filter(l => 
+        selectedLanguagesForAction.includes(l.code) && l.enabled
+      );
+
+      if (targetLanguages.length === 0) {
+        toast({ title: 'No valid target languages selected', variant: 'destructive' });
+        return;
+      }
+
+      const results = [];
+
+      for (let i = 0; i < targetLanguages.length; i++) {
+        const lang = targetLanguages[i];
+        setTranslationProgress(
+          `Translating ${lang.name} (${i + 1}/${targetLanguages.length})...`
+        );
+
+        try {
+          const { data, error } = await supabase.functions.invoke('translate-content', {
+            body: {
+              translationKeys,
+              targetLanguage: lang.code,
+              sourceLanguage: 'en',
+            }
+          });
+
+          if (error) {
+            results.push({ lang: lang.name, error: error.message });
+            toast({
+              title: `${lang.name} translation failed`,
+              description: error.message,
+              variant: 'destructive',
+              duration: 3000
+            });
+          } else {
+            results.push({ lang: lang.name, count: data.count, failed: data.failed });
+            toast({
+              title: `${lang.name} complete`,
+              description: `${data.count} translations${data.failed > 0 ? `, ${data.failed} failed` : ''}`,
+              duration: 3000
+            });
+          }
+
+          await loadData();
+
+          // Small delay between languages
+          if (i < targetLanguages.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        } catch (err: any) {
+          results.push({ lang: lang.name, error: err.message });
+        }
+      }
+
+      const successCount = results.filter(r => !r.error).length;
+      toast({
+        title: 'Selective translation complete!',
+        description: `${successCount}/${targetLanguages.length} languages translated successfully`,
+        duration: 8000
+      });
+
+    } catch (error: any) {
+      toast({
+        title: 'Translation failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsTranslating(false);
+      setTranslationProgress('');
+    }
+  }
+
+  // Evaluate only selected languages
+  async function handleEvaluateSelected() {
+    if (selectedLanguagesForAction.length === 0) {
+      toast({ title: 'No languages selected', variant: 'destructive' });
+      return;
+    }
+
+    setIsEvaluating(true);
+
+    try {
+      const targetLanguages = languages.filter(l => 
+        selectedLanguagesForAction.includes(l.code) && l.enabled && l.code !== 'en'
+      );
+
+      if (targetLanguages.length === 0) {
+        toast({ title: 'No valid target languages selected', variant: 'destructive' });
+        return;
+      }
+
+      let successCount = 0;
+
+      for (let i = 0; i < targetLanguages.length; i++) {
+        const lang = targetLanguages[i];
+        setTranslationProgress(
+          `Evaluating ${lang.name} (${i + 1}/${targetLanguages.length})...`
+        );
+
+        try {
+          await handleEvaluateQuality(lang.code, null);
+          successCount++;
+
+          toast({
+            title: `${lang.name} evaluation started`,
+            description: 'Quality evaluation running in background',
+            duration: 2000
+          });
+        } catch (err: any) {
+          toast({
+            title: `${lang.name} evaluation failed`,
+            description: err.message,
+            variant: 'destructive',
+            duration: 3000
+          });
+        }
+
+        // Small delay between languages
+        if (i < targetLanguages.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+
+      toast({
+        title: 'Selective evaluation complete!',
+        description: `Started evaluation for ${successCount}/${targetLanguages.length} languages`,
+        duration: 8000
+      });
+
+    } catch (error: any) {
+      toast({
+        title: 'Evaluation failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsEvaluating(false);
+      setTranslationProgress('');
+    }
+  }
+
   function handleLocalUpdate(id: string, newText: string) {
     // Update local state immediately for smooth typing
     setEditingValues(prev => ({ ...prev, [id]: newText }));
@@ -1977,6 +2144,18 @@ export default function TranslationManagerContent() {
             </Card>
           </CollapsibleContent>
         </Collapsible>
+
+        {/* Language Selection Panel for Selective Operations */}
+        <LanguageSelectionPanel
+          languages={languages}
+          selectedLanguages={selectedLanguagesForAction}
+          onSelectionChange={setSelectedLanguagesForAction}
+          isTranslating={isTranslating}
+          isEvaluating={isEvaluating}
+          onTranslateSelected={handleTranslateSelected}
+          onEvaluateSelected={handleEvaluateSelected}
+          translationProgress={translationProgress}
+        />
 
         {/* Action Groups - Organized by Function */}
         <div className="space-y-6 mb-6">
