@@ -1,91 +1,166 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, icons } from "lucide-react";
+import { ArrowRight, Calendar, Pencil, icons } from "lucide-react";
 import { LanguageLink } from "@/components/LanguageLink";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
-import { EditableBackground } from "@/components/EditableBackground";
-import { EditableButton } from "@/components/EditableButton";
-import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
+import { UnifiedStyleModal } from "@/components/UnifiedStyleModal";
+import { useEditMode } from "@/contexts/EditModeContext";
+import { useSiteStyles } from "@/contexts/SiteStylesContext";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveTextColor } from "@/lib/textColorUtils";
+import { BackgroundTextColorProvider } from "@/contexts/BackgroundTextColorContext";
 
-interface ButtonSettings {
-  text: string;
-  url: string;
-  bgColor: string;
-  icon: string;
-  textColor: string;
+interface CTAData {
+  background: string;
+  titleColor: string;
+  descriptionColor: string;
+  footerColor: string;
+  ctaText: string;
+  ctaUrl: string;
+  ctaBgColor: string;
+  ctaTextColor: string;
+  secondaryCtaText: string;
+  secondaryCtaUrl: string;
+  secondaryCtaBgColor: string;
+  secondaryCtaTextColor: string;
+  iconColor: string;
 }
 
 export default function FinalCTA() {
   const { t } = useAppTranslation();
-  const { allowedBackgrounds } = useAllowedBackgrounds();
+  const { editMode } = useEditMode();
+  const { backgroundStyles, textStyles, isLoaded: stylesLoaded, refreshBackgroundStyles } = useSiteStyles();
   
-  // Button settings state
-  const [primaryButton, setPrimaryButton] = useState<ButtonSettings>({
-    text: t('final_cta.button_primary', 'Book a Demo'),
-    url: '/contact',
-    bgColor: 'primary',
-    icon: '',
-    textColor: 'primary-foreground',
-  });
-  
-  const [secondaryButton, setSecondaryButton] = useState<ButtonSettings>({
-    text: t('final_cta.button_secondary', 'See Technical Overview'),
-    url: '/architecture',
-    bgColor: 'transparent',
-    icon: '',
-    textColor: 'white',
+  const [isHovered, setIsHovered] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [ctaData, setCtaData] = useState<CTAData>({
+    background: 'bg-gradient-hero',
+    titleColor: 'white',
+    descriptionColor: 'white',
+    footerColor: 'white',
+    ctaText: t('final_cta.button_primary', 'Book a Demo'),
+    ctaUrl: '/contact',
+    ctaBgColor: 'primary',
+    ctaTextColor: 'primary-foreground',
+    secondaryCtaText: t('final_cta.button_secondary', 'See Technical Overview'),
+    secondaryCtaUrl: '/architecture',
+    secondaryCtaBgColor: 'transparent',
+    secondaryCtaTextColor: 'white',
+    iconColor: 'white',
   });
 
-  // Load button settings from database
+  // Load styles from database on mount and when context updates
   useEffect(() => {
-    const loadButtonSettings = async () => {
-      const { data } = await supabase
-        .from('text_content')
-        .select('element_id, content, button_url, button_bg_color, button_icon, color_token')
-        .in('element_id', ['final-cta-button-primary', 'final-cta-button-secondary']);
-
-      data?.forEach((item) => {
-        if (item.element_id === 'final-cta-button-primary') {
-          setPrimaryButton({
-            text: item.content || t('final_cta.button_primary', 'Book a Demo'),
-            url: item.button_url || '/contact',
-            bgColor: item.button_bg_color || 'primary',
-            icon: item.button_icon || '',
-            textColor: item.color_token || 'primary-foreground',
-          });
-        } else if (item.element_id === 'final-cta-button-secondary') {
-          setSecondaryButton({
-            text: item.content || t('final_cta.button_secondary', 'See Technical Overview'),
-            url: item.button_url || '/architecture',
-            bgColor: item.button_bg_color || 'transparent',
-            icon: item.button_icon || '',
-            textColor: item.color_token || 'white',
-          });
-        }
-      });
+    if (!stylesLoaded) return;
+    
+    const loadCtaData = () => {
+      // Load from context (preloaded data)
+      const bgData = backgroundStyles['final-cta-background'];
+      const titleData = textStyles['final-cta-title'];
+      const descData = textStyles['final-cta-description'];
+      const footerData = textStyles['final-cta-footer'];
+      const ctaData = textStyles['final-cta-cta'];
+      const secondaryCtaData = textStyles['final-cta-secondary-cta'];
+      const iconColorData = textStyles['final-cta-icon-color'];
+      
+      setCtaData(prev => ({
+        ...prev,
+        background: bgData?.background_class || 'bg-gradient-hero',
+        titleColor: bgData?.text_color_class || titleData?.color_token || 'white',
+        descriptionColor: descData?.color_token || 'white',
+        footerColor: footerData?.color_token || 'white',
+        ctaText: ctaData?.content || prev.ctaText,
+        ctaUrl: ctaData?.button_url || '/contact',
+        ctaBgColor: ctaData?.button_bg_color || 'primary',
+        ctaTextColor: ctaData?.color_token || 'primary-foreground',
+        secondaryCtaText: secondaryCtaData?.content || prev.secondaryCtaText,
+        secondaryCtaUrl: secondaryCtaData?.button_url || '/architecture',
+        secondaryCtaBgColor: secondaryCtaData?.button_bg_color || 'transparent',
+        secondaryCtaTextColor: secondaryCtaData?.color_token || 'white',
+        iconColor: iconColorData?.color_token || 'white',
+      }));
     };
+    
+    loadCtaData();
+  }, [stylesLoaded, backgroundStyles, textStyles, t]);
 
-    loadButtonSettings();
-  }, [t]);
+  // Also fetch directly from DB to ensure latest data
+  useEffect(() => {
+    const fetchFromDb = async () => {
+      // Fetch background
+      const { data: bgData } = await supabase
+        .from('background_styles')
+        .select('background_class, text_color_class')
+        .eq('element_id', 'final-cta-background')
+        .maybeSingle();
+      
+      // Fetch CTA buttons
+      const { data: textData } = await supabase
+        .from('text_content')
+        .select('element_id, content, button_url, button_bg_color, color_token')
+        .in('element_id', ['final-cta-cta', 'final-cta-secondary-cta', 'final-cta-icon-color']);
+      
+      if (bgData || textData) {
+        setCtaData(prev => {
+          const ctaItem = textData?.find(d => d.element_id === 'final-cta-cta');
+          const secondaryCtaItem = textData?.find(d => d.element_id === 'final-cta-secondary-cta');
+          const iconColorItem = textData?.find(d => d.element_id === 'final-cta-icon-color');
+          
+          return {
+            ...prev,
+            background: bgData?.background_class || prev.background,
+            titleColor: bgData?.text_color_class || prev.titleColor,
+            ctaText: ctaItem?.content || prev.ctaText,
+            ctaUrl: ctaItem?.button_url || prev.ctaUrl,
+            ctaBgColor: ctaItem?.button_bg_color || prev.ctaBgColor,
+            ctaTextColor: ctaItem?.color_token || prev.ctaTextColor,
+            secondaryCtaText: secondaryCtaItem?.content || prev.secondaryCtaText,
+            secondaryCtaUrl: secondaryCtaItem?.button_url || prev.secondaryCtaUrl,
+            secondaryCtaBgColor: secondaryCtaItem?.button_bg_color || prev.secondaryCtaBgColor,
+            secondaryCtaTextColor: secondaryCtaItem?.color_token || prev.secondaryCtaTextColor,
+            iconColor: iconColorItem?.color_token || prev.iconColor,
+          };
+        });
+      }
+    };
+    
+    fetchFromDb();
+  }, []);
 
-  // Save button settings to database
-  const saveButtonSettings = async (elementId: string, settings: ButtonSettings) => {
-    await supabase
-      .from('text_content')
-      .upsert({
-        element_id: elementId,
-        content: settings.text,
-        button_url: settings.url,
-        button_bg_color: settings.bgColor,
-        button_icon: settings.icon,
-        color_token: settings.textColor,
-        element_type: 'button',
-        section: 'final-cta',
-        page_location: 'homepage',
-      }, { onConflict: 'element_id' });
+  // Get background styles as inline style object
+  const getBackgroundStyle = () => {
+    const bg = ctaData.background;
+    if (!bg) return {};
+    
+    // Handle gradients
+    if (bg.startsWith('bg-gradient-') || bg.startsWith('gradient-')) {
+      const varName = bg.replace('bg-', '');
+      return { backgroundImage: `var(--${varName})` };
+    }
+    // Handle glass effects
+    if (bg.startsWith('bg-glass-') || bg.startsWith('glass-')) {
+      const varName = bg.replace('bg-', '');
+      return { backgroundImage: `var(--${varName})` };
+    }
+    // Handle solid colors
+    if (bg.startsWith('bg-')) {
+      const colorName = bg.replace('bg-', '');
+      return { backgroundColor: `hsl(var(--${colorName}))` };
+    }
+    return {};
+  };
+
+  // Get button styles
+  const getButtonStyle = (bgColor: string, textColor: string) => {
+    const isGradient = bgColor.startsWith('gradient-') || bgColor.startsWith('glass-');
+    const isTransparent = bgColor === 'transparent';
+    
+    return {
+      backgroundColor: isGradient || isTransparent ? undefined : `hsl(var(--${bgColor}))`,
+      backgroundImage: isGradient ? `var(--${bgColor})` : undefined,
+      color: resolveTextColor(textColor),
+    };
   };
 
   // Dynamic icon component
@@ -94,137 +169,125 @@ export default function FinalCTA() {
     return IconComponent ? <IconComponent className={className} /> : null;
   };
 
-  // Get button styles
-  const getButtonStyle = (settings: ButtonSettings) => {
-    const isGradient = settings.bgColor.startsWith('gradient-') || settings.bgColor.startsWith('glass-');
-    const isTransparent = settings.bgColor === 'transparent';
+  const handleSave = async (data: any) => {
+    setCtaData(prev => ({
+      ...prev,
+      background: data.background || prev.background,
+      titleColor: data.titleColor || prev.titleColor,
+      descriptionColor: data.descriptionColor || prev.descriptionColor,
+      ctaText: data.ctaText || prev.ctaText,
+      ctaUrl: data.ctaUrl || prev.ctaUrl,
+      ctaBgColor: data.ctaBgColor || prev.ctaBgColor,
+      ctaTextColor: data.ctaTextColor || prev.ctaTextColor,
+      iconColor: data.iconColor || prev.iconColor,
+    }));
     
-    return {
-      backgroundColor: isGradient || isTransparent ? undefined : `hsl(var(--${settings.bgColor}))`,
-      backgroundImage: isGradient ? `var(--${settings.bgColor})` : undefined,
-      color: resolveTextColor(settings.textColor),
-    };
+    // Refresh context to get latest data
+    await refreshBackgroundStyles();
   };
 
   return (
     <section className="py-12 md:py-16 lg:py-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
-        <EditableBackground
-          elementId="final-cta-section"
-          defaultBackground="bg-gradient-hero"
-          allowedBackgrounds={allowedBackgrounds}
+        <div 
+          className="relative overflow-hidden rounded-2xl p-12 md:p-16 text-center"
+          style={getBackgroundStyle()}
+          onMouseEnter={() => editMode && setIsHovered(true)}
+          onMouseLeave={() => editMode && setIsHovered(false)}
         >
-          <div className="relative overflow-hidden rounded-2xl p-12 md:p-16 text-center">
-            <div className="absolute inset-0 bg-gradient-primary opacity-10" />
+          {/* Edit Button - Only in Edit Mode on hover */}
+          {editMode && isHovered && (
+            <button
+              className="absolute top-4 right-4 p-3 bg-primary text-primary-foreground rounded-full shadow-xl hover:scale-110 transition-transform z-20"
+              onClick={() => setIsEditing(true)}
+            >
+              <Pencil className="w-5 h-5" />
+            </button>
+          )}
+          
+          <div className="absolute inset-0 bg-gradient-primary opacity-10" />
+          
+          <BackgroundTextColorProvider textColor={ctaData.titleColor}>
             <div className="relative z-10">
               <EditableTranslation translationKey="final_cta.title">
-                <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                <h2 
+                  className="text-4xl md:text-5xl font-bold mb-6"
+                  style={{ color: resolveTextColor(ctaData.titleColor) }}
+                >
                   {t('final_cta.title', "Let's build your digital workshop")}
                 </h2>
               </EditableTranslation>
+              
               <EditableTranslation translationKey="final_cta.subtitle">
-                <p className="text-xl max-w-2xl mx-auto mb-8">
+                <p 
+                  className="text-xl max-w-2xl mx-auto mb-8"
+                  style={{ color: resolveTextColor(ctaData.descriptionColor) }}
+                >
                   {t('final_cta.subtitle', 'Schedule a personalized demo or see how your specific use case can be automated with Navio')}
                 </p>
               </EditableTranslation>
+              
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <EditableButton
-                  buttonText={primaryButton.text}
-                  buttonUrl={primaryButton.url}
-                  buttonBgColor={primaryButton.bgColor}
-                  buttonIcon={primaryButton.icon}
-                  buttonTextColor={primaryButton.textColor}
-                  onSave={(text, url) => {
-                    const newSettings = { ...primaryButton, text, url };
-                    setPrimaryButton(newSettings);
-                    saveButtonSettings('final-cta-button-primary', newSettings);
-                  }}
-                  onBgColorChange={(bgColor) => {
-                    const newSettings = { ...primaryButton, bgColor };
-                    setPrimaryButton(newSettings);
-                    saveButtonSettings('final-cta-button-primary', newSettings);
-                  }}
-                  onIconChange={(icon) => {
-                    const newSettings = { ...primaryButton, icon };
-                    setPrimaryButton(newSettings);
-                    saveButtonSettings('final-cta-button-primary', newSettings);
-                  }}
-                  onTextColorChange={(textColor) => {
-                    const newSettings = { ...primaryButton, textColor };
-                    setPrimaryButton(newSettings);
-                    saveButtonSettings('final-cta-button-primary', newSettings);
-                  }}
+                <Button 
+                  size="lg" 
+                  className="text-lg px-8 py-6 group" 
+                  style={getButtonStyle(ctaData.ctaBgColor, ctaData.ctaTextColor)}
+                  asChild
                 >
-                  <Button 
-                    size="lg" 
-                    className="text-lg px-8 py-6 group" 
-                    style={getButtonStyle(primaryButton)}
-                    asChild
-                  >
-                    <LanguageLink to={primaryButton.url}>
-                      <Calendar className="w-5 h-5 mr-2" />
-                      <span>{primaryButton.text}</span>
-                      {primaryButton.icon ? (
-                        <DynamicIcon name={primaryButton.icon} className="w-5 h-5 ml-2" />
-                      ) : (
-                        <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                      )}
-                    </LanguageLink>
-                  </Button>
-                </EditableButton>
+                  <LanguageLink to={ctaData.ctaUrl}>
+                    <Calendar className="w-5 h-5 mr-2" />
+                    <EditableTranslation translationKey="final_cta.button_primary">
+                      <span>{t('final_cta.button_primary', 'Book a Demo')}</span>
+                    </EditableTranslation>
+                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </LanguageLink>
+                </Button>
                 
-                <EditableButton
-                  buttonText={secondaryButton.text}
-                  buttonUrl={secondaryButton.url}
-                  buttonBgColor={secondaryButton.bgColor}
-                  buttonIcon={secondaryButton.icon}
-                  buttonTextColor={secondaryButton.textColor}
-                  onSave={(text, url) => {
-                    const newSettings = { ...secondaryButton, text, url };
-                    setSecondaryButton(newSettings);
-                    saveButtonSettings('final-cta-button-secondary', newSettings);
-                  }}
-                  onBgColorChange={(bgColor) => {
-                    const newSettings = { ...secondaryButton, bgColor };
-                    setSecondaryButton(newSettings);
-                    saveButtonSettings('final-cta-button-secondary', newSettings);
-                  }}
-                  onIconChange={(icon) => {
-                    const newSettings = { ...secondaryButton, icon };
-                    setSecondaryButton(newSettings);
-                    saveButtonSettings('final-cta-button-secondary', newSettings);
-                  }}
-                  onTextColorChange={(textColor) => {
-                    const newSettings = { ...secondaryButton, textColor };
-                    setSecondaryButton(newSettings);
-                    saveButtonSettings('final-cta-button-secondary', newSettings);
-                  }}
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="text-lg px-8 py-6 border-white/30 hover:bg-white/10" 
+                  style={getButtonStyle(ctaData.secondaryCtaBgColor, ctaData.secondaryCtaTextColor)}
+                  asChild
                 >
-                  <Button 
-                    size="lg" 
-                    variant="outline" 
-                    className="text-lg px-8 py-6 border-white/30 hover:bg-white/10" 
-                    style={getButtonStyle(secondaryButton)}
-                    asChild
-                  >
-                    <LanguageLink to={secondaryButton.url}>
-                      <span>{secondaryButton.text}</span>
-                      {secondaryButton.icon && (
-                        <DynamicIcon name={secondaryButton.icon} className="w-5 h-5 ml-2" />
-                      )}
-                    </LanguageLink>
-                  </Button>
-                </EditableButton>
+                  <LanguageLink to={ctaData.secondaryCtaUrl}>
+                    <EditableTranslation translationKey="final_cta.button_secondary">
+                      <span>{t('final_cta.button_secondary', 'See Technical Overview')}</span>
+                    </EditableTranslation>
+                  </LanguageLink>
+                </Button>
               </div>
+              
               <EditableTranslation translationKey="final_cta.footer_text">
-                <p className="mt-8 text-sm opacity-70">
+                <p 
+                  className="mt-8 text-sm opacity-70"
+                  style={{ color: resolveTextColor(ctaData.footerColor) }}
+                >
                   {t('final_cta.footer_text', 'No credit card required • Free consultation • See results in 30 days')}
                 </p>
               </EditableTranslation>
             </div>
-          </div>
-        </EditableBackground>
+          </BackgroundTextColorProvider>
+        </div>
       </div>
+      
+      {/* Unified Style Modal */}
+      <UnifiedStyleModal
+        isOpen={isEditing}
+        onClose={() => setIsEditing(false)}
+        elementIdPrefix="final-cta"
+        initialData={{
+          background: ctaData.background,
+          titleColor: ctaData.titleColor,
+          descriptionColor: ctaData.descriptionColor,
+          ctaText: ctaData.ctaText,
+          ctaUrl: ctaData.ctaUrl,
+          ctaBgColor: ctaData.ctaBgColor,
+          ctaTextColor: ctaData.ctaTextColor,
+          iconColor: ctaData.iconColor,
+        }}
+        onSave={handleSave}
+      />
     </section>
   );
 }
