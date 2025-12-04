@@ -1351,7 +1351,7 @@ export default function TranslationManagerContent() {
     }
   }
 
-  // Translate only selected languages
+  // Translate only MISSING keys for selected languages
   async function handleTranslateSelected() {
     if (selectedLanguagesForAction.length === 0) {
       toast({ title: 'No languages selected', variant: 'destructive' });
@@ -1359,21 +1359,9 @@ export default function TranslationManagerContent() {
     }
 
     setIsTranslating(true);
-    setTranslationProgress('Starting selective translation...');
+    setTranslationProgress('Checking for missing translations...');
 
     try {
-      // Get all English keys
-      const { data: keys } = await supabase
-        .from('translations')
-        .select('translation_key')
-        .eq('language_code', 'en');
-
-      if (!keys || keys.length === 0) {
-        toast({ title: 'No English translations found', variant: 'destructive' });
-        return;
-      }
-
-      const translationKeys = keys.map(k => k.translation_key);
       const targetLanguages = languages.filter(l => 
         selectedLanguagesForAction.includes(l.code) && l.enabled
       );
@@ -1384,17 +1372,48 @@ export default function TranslationManagerContent() {
       }
 
       const results = [];
+      let totalMissingKeys = 0;
 
       for (let i = 0; i < targetLanguages.length; i++) {
         const lang = targetLanguages[i];
         setTranslationProgress(
-          `Translating ${lang.name} (${i + 1}/${targetLanguages.length})...`
+          `Checking ${lang.name} for missing translations (${i + 1}/${targetLanguages.length})...`
         );
 
         try {
+          // Find missing/empty translations for this specific language
+          const { data: missingTranslations, error: queryError } = await supabase
+            .from('translations')
+            .select('translation_key')
+            .eq('language_code', lang.code)
+            .or('translated_text.is.null,translated_text.eq.');
+
+          if (queryError) {
+            results.push({ lang: lang.name, error: queryError.message });
+            continue;
+          }
+
+          const missingKeys = missingTranslations?.map(t => t.translation_key) || [];
+
+          // Skip if no missing translations
+          if (missingKeys.length === 0) {
+            toast({
+              title: `${lang.name} - Already complete`,
+              description: 'No missing translations to process',
+              duration: 3000
+            });
+            results.push({ lang: lang.name, count: 0, skipped: true });
+            continue;
+          }
+
+          totalMissingKeys += missingKeys.length;
+          setTranslationProgress(
+            `Translating ${missingKeys.length} missing keys for ${lang.name} (${i + 1}/${targetLanguages.length})...`
+          );
+
           const { data, error } = await supabase.functions.invoke('translate-content', {
             body: {
-              translationKeys,
+              translationKeys: missingKeys,
               targetLanguage: lang.code,
               sourceLanguage: 'en',
             }
@@ -1412,7 +1431,7 @@ export default function TranslationManagerContent() {
             results.push({ lang: lang.name, count: data.count, failed: data.failed });
             toast({
               title: `${lang.name} complete`,
-              description: `${data.count} translations${data.failed > 0 ? `, ${data.failed} failed` : ''}`,
+              description: `${data.count} missing translations added${data.failed > 0 ? `, ${data.failed} failed` : ''}`,
               duration: 3000
             });
           }
@@ -1428,10 +1447,12 @@ export default function TranslationManagerContent() {
         }
       }
 
-      const successCount = results.filter(r => !r.error).length;
+      const successCount = results.filter(r => !r.error && !r.skipped).length;
+      const skippedCount = results.filter(r => r.skipped).length;
+      
       toast({
         title: 'Selective translation complete!',
-        description: `${successCount}/${targetLanguages.length} languages translated successfully`,
+        description: `${successCount} languages translated, ${skippedCount} already complete. ${totalMissingKeys} total keys processed.`,
         duration: 8000
       });
 
