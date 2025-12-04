@@ -8,7 +8,7 @@ export function useBackgroundStyle(
   defaultBackground: string = 'bg-card',
   defaultTextColor?: string
 ) {
-  const { backgroundStyles, colorTokens, isLoaded } = useSiteStyles();
+  const { backgroundStyles, colorTokens, isLoaded, refreshBackgroundStyles } = useSiteStyles();
   
   // Get saved style from preloaded context
   const savedStyle = backgroundStyles[elementId];
@@ -19,7 +19,7 @@ export function useBackgroundStyle(
   const [backgroundStyle, setBackgroundStyle] = useState<React.CSSProperties>({});
   const [textColor, setTextColor] = useState(initialTextColor);
 
-  // Update local state when context loads
+  // Update local state when context loads or refreshes
   useEffect(() => {
     if (!isLoaded) return;
     
@@ -119,6 +119,9 @@ export function useBackgroundStyle(
         // Revert on error
         setBackground(defaultBackground);
         setTextColor(defaultTextColor || getOptimalTextColorForBackground(defaultBackground));
+      } else {
+        // Refresh the context so other components get the updated data
+        await refreshBackgroundStyles();
       }
     } catch (error) {
       console.error('Error in updateBackgroundAndTextColor:', error);
