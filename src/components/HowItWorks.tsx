@@ -75,7 +75,7 @@ export default function HowItWorks() {
                     defaultBackground="bg-card"
                     allowedBackgrounds={allowedBackgrounds}
                   >
-                    <Card className="hover-scale h-full">
+                    <Card className="hover-scale h-full shadow-xl">
                       <CardContent className="p-6 h-full flex flex-col overflow-visible">
                         <EditableIcon
                           elementId={`how-it-works-icon-${index}`}
@@ -131,7 +131,7 @@ export default function HowItWorks() {
                   defaultBackground="bg-card"
                   allowedBackgrounds={allowedBackgrounds}
                 >
-                  <Card className="hover-scale h-full">
+                  <Card className="hover-scale h-full shadow-xl">
                     <CardContent className="p-6 h-full flex flex-col overflow-visible">
                       <div className="flex items-start gap-4">
                         <EditableIcon
