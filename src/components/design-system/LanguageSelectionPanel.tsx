@@ -206,12 +206,19 @@ export default function LanguageSelectionPanel({
                 const missingCount = stats?.missing_translations || 0;
                 
                 return (
-                  <button
+                  <div
                     key={lang.code}
-                    onClick={() => toggleLanguage(lang.code)}
-                    disabled={isProcessing}
+                    role="button"
+                    tabIndex={isProcessing ? -1 : 0}
+                    onClick={() => !isProcessing && toggleLanguage(lang.code)}
+                    onKeyDown={(e) => {
+                      if (!isProcessing && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault();
+                        toggleLanguage(lang.code);
+                      }
+                    }}
                     className={cn(
-                      "flex flex-col p-2 rounded-lg border transition-all text-left",
+                      "flex flex-col p-2 rounded-lg border transition-all text-left cursor-pointer",
                       isSelected 
                         ? "border-primary bg-primary/10 ring-1 ring-primary" 
                         : "border-border hover:border-muted-foreground/50",
@@ -222,6 +229,7 @@ export default function LanguageSelectionPanel({
                       <Checkbox
                         checked={isSelected}
                         className="pointer-events-none"
+                        tabIndex={-1}
                       />
                       {FlagIcon && <FlagIcon className="w-5 h-4 flex-shrink-0" />}
                       <span className="text-sm truncate">{lang.name}</span>
@@ -231,7 +239,7 @@ export default function LanguageSelectionPanel({
                         {missingCount} missing
                       </span>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>

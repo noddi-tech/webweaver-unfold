@@ -422,6 +422,16 @@ export default function TranslationManagerContent() {
 
   // Bulk evaluate filtered translations
   async function handleBulkEvaluate(translations: any[]) {
+    // Validate target language
+    if (!selectedLang || selectedLang === 'en') {
+      toast({ 
+        title: 'Cannot evaluate English translations',
+        description: 'Select a target language to evaluate',
+        variant: 'destructive' 
+      });
+      return;
+    }
+
     setIsEvaluating(true);
     try {
       const keys = translations.map(t => t.translation_key);
