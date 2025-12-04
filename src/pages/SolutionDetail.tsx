@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { LanguageLink } from "@/components/LanguageLink";
 import { ArrowRight, icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { EditableSolutionText } from "@/components/EditableSolutionText";
+import { EditableTranslation } from "@/components/EditableTranslation";
 import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
 import { EditableButton } from "@/components/EditableButton";
 import { AlternatingContentSection } from "@/components/AlternatingContentSection";
@@ -14,7 +14,7 @@ import { EditableKeyBenefit } from "@/components/EditableKeyBenefit";
 import { EditableImage } from "@/components/EditableImage";
 import { EditableBackground } from "@/components/EditableBackground";
 import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
-import { resolveTextColor } from "@/lib/textColorUtils";
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { toast } from "sonner";
 import {
   Breadcrumb,
@@ -35,6 +35,7 @@ interface KeyBenefit {
 interface Solution {
   id: string;
   title: string;
+  slug: string;
   hero_title: string | null;
   hero_subtitle: string | null;
   hero_description: string | null;
@@ -50,8 +51,12 @@ interface Solution {
   footer_cta_url: string | null;
 }
 
+// Convert slug format (tire-services) to translation key format (tire_services)
+const slugToKey = (slug: string) => slug.replace(/-/g, '_');
+
 const SolutionDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { t } = useAppTranslation();
   const { allowedBackgrounds } = useAllowedBackgrounds();
   const [solution, setSolution] = useState<Solution | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,6 +68,9 @@ const SolutionDetail = () => {
   const [footerCtaTextColor, setFooterCtaTextColor] = useState('white');
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
   const [heroDisplayType, setHeroDisplayType] = useState<'image' | 'carousel'>('image');
+
+  // Get the translation key from slug
+  const slugKey = slug ? slugToKey(slug) : '';
 
   useEffect(() => {
     const loadSolution = async () => {
@@ -210,7 +218,7 @@ const SolutionDetail = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-20 text-center">
-          <p className="text-muted-foreground">Loading solution...</p>
+          <p className="text-muted-foreground">{t('solutions.page.loading', 'Loading solution...')}</p>
         </div>
         <Footer />
       </div>
@@ -222,10 +230,14 @@ const SolutionDetail = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-4xl font-bold mb-4 text-foreground">Solution Not Found</h1>
-          <p className="text-muted-foreground mb-8">The solution you're looking for doesn't exist.</p>
+          <h1 className="text-4xl font-bold mb-4 text-foreground">
+            {t('solutions.page.not_found_title', 'Solution Not Found')}
+          </h1>
+          <p className="text-muted-foreground mb-8">
+            {t('solutions.page.not_found_text', "The solution you're looking for doesn't exist.")}
+          </p>
           <Button asChild>
-            <LanguageLink to="/solutions">View All Solutions</LanguageLink>
+            <LanguageLink to="/solutions">{t('solutions.page.view_all', 'View All Solutions')}</LanguageLink>
           </Button>
         </div>
         <Footer />
@@ -249,18 +261,18 @@ const SolutionDetail = () => {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <LanguageLink to="/">Home</LanguageLink>
+                <LanguageLink to="/">{t('nav.home', 'Home')}</LanguageLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <LanguageLink to="/solutions">Solutions</LanguageLink>
+                <LanguageLink to="/solutions">{t('nav.solutions', 'Solutions')}</LanguageLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{solution.title}</BreadcrumbPage>
+              <BreadcrumbPage>{t(`solutions.${slugKey}.title`, solution.title)}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -273,45 +285,42 @@ const SolutionDetail = () => {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
                 {solution.hero_subtitle && (
-                  <EditableSolutionText 
-                    solutionId={solution.id} 
-                    field="hero_subtitle"
-                    onSave={handleContentSave}
+                  <EditableTranslation
+                    translationKey={`solutions.${slugKey}.hero_subtitle`}
+                    fallbackText={solution.hero_subtitle}
                   >
                     <p className="text-primary font-semibold mb-4 text-lg">
-                      {solution.hero_subtitle}
+                      {t(`solutions.${slugKey}.hero_subtitle`, solution.hero_subtitle)}
                     </p>
-                  </EditableSolutionText>
+                  </EditableTranslation>
                 )}
-                <EditableSolutionText 
-                  solutionId={solution.id} 
-                  field="hero_title"
-                  onSave={handleContentSave}
+                <EditableTranslation
+                  translationKey={`solutions.${slugKey}.hero_title`}
+                  fallbackText={solution.hero_title}
                 >
                   <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
-                    {solution.hero_title}
+                    {t(`solutions.${slugKey}.hero_title`, solution.hero_title)}
                   </h1>
-                </EditableSolutionText>
+                </EditableTranslation>
                 {solution.hero_description && (
-                  <EditableSolutionText 
-                    solutionId={solution.id} 
-                    field="hero_description"
-                    onSave={handleContentSave}
+                  <EditableTranslation
+                    translationKey={`solutions.${slugKey}.hero_description`}
+                    fallbackText={solution.hero_description}
                   >
                     <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-                      {solution.hero_description}
+                      {t(`solutions.${slugKey}.hero_description`, solution.hero_description)}
                     </p>
-                  </EditableSolutionText>
+                  </EditableTranslation>
                 )}
                 {solution.hero_cta_text && solution.hero_cta_url && (
                   <EditableButton
-                    buttonText={solution.hero_cta_text}
+                    buttonText={t(`solutions.${slugKey}.hero_cta_text`, solution.hero_cta_text)}
                     buttonUrl={solution.hero_cta_url}
                     onSave={(text, url) => handleButtonSave('hero_cta_text', 'hero_cta_url', text, url)}
                   >
                     <Button size="lg" className="text-lg px-8" asChild>
                       <LanguageLink to={solution.hero_cta_url}>
-                        {solution.hero_cta_text}
+                        {t(`solutions.${slugKey}.hero_cta_text`, solution.hero_cta_text)}
                         <ArrowRight className="w-5 h-5 ml-2" />
                       </LanguageLink>
                     </Button>
@@ -330,7 +339,7 @@ const SolutionDetail = () => {
                   <div className="rounded-2xl overflow-hidden shadow-2xl">
                     <img 
                       src={heroImageUrl} 
-                      alt={solution.hero_title || ''}
+                      alt={t(`solutions.${slugKey}.hero_title`, solution.hero_title || '')}
                       className="w-full h-auto object-cover"
                     />
                   </div>
@@ -349,28 +358,26 @@ const SolutionDetail = () => {
           accentBarGradient="--gradient-warmth"
           sectionTitle={
             solution.description_heading && (
-              <EditableSolutionText
-                solutionId={solution.id}
-                field="description_heading"
-                onSave={handleContentSave}
+              <EditableTranslation
+                translationKey={`solutions.${slugKey}.description_heading`}
+                fallbackText={solution.description_heading}
               >
                 <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-                  {solution.description_heading}
+                  {t(`solutions.${slugKey}.description_heading`, solution.description_heading)}
                 </h2>
-              </EditableSolutionText>
+              </EditableTranslation>
             )
           }
           sectionDescription={
             solution.description_text && (
-              <EditableSolutionText
-                solutionId={solution.id}
-                field="description_text"
-                onSave={handleContentSave}
+              <EditableTranslation
+                translationKey={`solutions.${slugKey}.description_text`}
+                fallbackText={solution.description_text}
               >
                 <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-                  {solution.description_text}
+                  {t(`solutions.${slugKey}.description_text`, solution.description_text)}
                 </p>
-              </EditableSolutionText>
+              </EditableTranslation>
             )
           }
           enableScrollReveal={true}
@@ -438,29 +445,27 @@ const SolutionDetail = () => {
               allowedBackgrounds={allowedBackgrounds}
             >
               <div className="relative overflow-hidden rounded-2xl md:rounded-3xl p-12 md:p-16 text-center">
-                <EditableSolutionText
-                  solutionId={solution.id}
-                  field="footer_heading"
-                  onSave={handleContentSave}
+                <EditableTranslation
+                  translationKey={`solutions.${slugKey}.footer_heading`}
+                  fallbackText={solution.footer_heading}
                 >
                   <h3 className="text-4xl md:text-5xl font-bold mb-6">
-                    {solution.footer_heading}
+                    {t(`solutions.${slugKey}.footer_heading`, solution.footer_heading)}
                   </h3>
-                </EditableSolutionText>
+                </EditableTranslation>
                 {solution.footer_text && (
-                  <EditableSolutionText
-                    solutionId={solution.id}
-                    field="footer_text"
-                    onSave={handleContentSave}
+                  <EditableTranslation
+                    translationKey={`solutions.${slugKey}.footer_text`}
+                    fallbackText={solution.footer_text}
                   >
                     <p className="text-xl mb-10 opacity-95 leading-relaxed">
-                      {solution.footer_text}
+                      {t(`solutions.${slugKey}.footer_text`, solution.footer_text)}
                     </p>
-                  </EditableSolutionText>
+                  </EditableTranslation>
                 )}
                 {solution.footer_cta_text && solution.footer_cta_url && (
                   <EditableButton
-                    buttonText={solution.footer_cta_text}
+                    buttonText={t(`solutions.${slugKey}.footer_cta_text`, solution.footer_cta_text)}
                     buttonUrl={solution.footer_cta_url}
                     buttonBgColor={footerCtaBgColor}
                     buttonIcon={footerCtaIcon}
@@ -504,20 +509,15 @@ const SolutionDetail = () => {
                   >
                     <Button 
                       size="lg" 
-                      className="rounded-full px-8 py-4 text-lg"
+                      className="text-lg px-8"
                       style={{
-                        backgroundColor: footerCtaBgColor.startsWith('gradient-') || footerCtaBgColor.startsWith('glass-')
-                          ? undefined
-                          : `hsl(var(--${footerCtaBgColor}))`,
-                        backgroundImage: footerCtaBgColor.startsWith('gradient-') || footerCtaBgColor.startsWith('glass-')
-                          ? `var(--${footerCtaBgColor})`
-                          : undefined,
-                        color: resolveTextColor(footerCtaTextColor),
+                        backgroundColor: `hsl(var(--${footerCtaBgColor}))`,
+                        color: footerCtaTextColor === 'white' ? 'white' : `hsl(var(--${footerCtaTextColor}))`
                       }}
                       asChild
                     >
                       <LanguageLink to={solution.footer_cta_url}>
-                        {solution.footer_cta_text}
+                        {t(`solutions.${slugKey}.footer_cta_text`, solution.footer_cta_text)}
                         {footerCtaIcon ? <DynamicIcon name={footerCtaIcon} /> : <ArrowRight className="ml-2 h-4 w-4" />}
                       </LanguageLink>
                     </Button>
