@@ -111,14 +111,16 @@ serve(async (req) => {
 
     // Fetch target translations (with resume capability)
     console.log(`Fetching target translations for language: ${targetLanguage}`);
-    let query = supabase
+    // Defensive query: include both NULL and invalid scores (< 1) for evaluation
+    // This self-heals any bad data that might slip through
+    const { data: targetTexts, error: targetError } = await supabase
       .from('translations')
       .select('translation_key, translated_text')
       .eq('language_code', targetLanguage)
-      .is('quality_score', null) // Find ANY unevaluated keys
+      .or('quality_score.is.null,quality_score.lt.1') // Find NULL OR invalid scores
       .order('translation_key');
 
-    console.log(`Finding unevaluated translations (quality_score IS NULL)`);
+    console.log(`Finding unevaluated translations (quality_score IS NULL OR < 1)`);
 
     const { data: targetTexts, error: targetError } = await query;
 
@@ -482,9 +484,36 @@ ${JSON.stringify(translationsForEvaluation, null, 2)}`;
           continue;
         }
 
-        // Batch update translations (much faster than individual updates)
-        const updates = qualityScores.map(quality => {
-          const score = quality.score || 0;
+        // Batch update translations - FILTER OUT INVALID SCORES FIRST
+        // This prevents quality_score = 0 from being saved to the database
+        let invalidScoresCount = 0;
+        
+        const validScores = qualityScores.filter(quality => {
+          const score = quality.score;
+          const isValid = typeof score === 'number' && 
+                          !isNaN(score) && 
+                          score >= 1 && // CRITICAL: Reject 0 as invalid
+                          score <= 100;
+          
+          if (!isValid) {
+            console.warn(`⚠️ SKIPPING invalid score for "${quality.key}": ${score} (type: ${typeof score})`);
+            invalidScoresCount++;
+            totalFailed++;
+          }
+          return isValid;
+        });
+
+        if (invalidScoresCount > 0) {
+          console.error(`🚨 ALERT: ${invalidScoresCount}/${qualityScores.length} translations had invalid scores in this batch`);
+        }
+
+        if (validScores.length === 0) {
+          console.warn(`⚠️ No valid scores in batch ${batchIndex + 1}, skipping database update`);
+          continue;
+        }
+
+        const updates = validScores.map(quality => {
+          const score = quality.score; // Now guaranteed to be valid (1-100)
           
           qualitySum += score;
           if (score >= 85) highQualityCount++;
