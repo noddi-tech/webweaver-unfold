@@ -6,6 +6,7 @@ import { RichTextEditModal } from './RichTextEditModal';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveTextColor } from '@/lib/textColorUtils';
+import { useBackgroundTextColor } from '@/contexts/BackgroundTextColorContext';
 
 // Font size and weight mapping to actual CSS values
 const FONT_SIZE_MAP: Record<string, string> = {
@@ -64,6 +65,7 @@ export function EditableTranslation({
 }: EditableTranslationProps) {
   const { editMode } = useEditMode();
   const { currentLanguage } = useAppTranslation();
+  const { inheritedTextColor } = useBackgroundTextColor();
   const [isHovered, setIsHovered] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [contentId, setContentId] = useState<string | null>(null);
@@ -139,24 +141,31 @@ export function EditableTranslation({
     // Detect if the color token is a gradient
     const isGradientText = styleSettings?.colorToken?.includes('gradient');
     
+    // Determine effective color: use inherited from background if default, otherwise use explicit setting
+    const effectiveColorToken = (styleSettings?.colorToken === 'foreground' || !styleSettings?.colorToken)
+      ? (inheritedTextColor ? inheritedTextColor.replace('text-', '') : 'foreground')
+      : styleSettings?.colorToken;
+    
+    const isEffectiveGradient = effectiveColorToken?.includes('gradient');
+    
     const styledContent = styleSettings ? (
       <span
         data-responsive-font
         style={{
           // Apply gradient text styling if gradient token, otherwise solid color
-          ...(isGradientText ? {
-            background: `var(--${styleSettings.colorToken})`,
+          ...(isEffectiveGradient ? {
+            background: `var(--${effectiveColorToken})`,
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             color: 'transparent',
           } : {
-            color: styleSettings.colorToken
-              ? resolveTextColor(styleSettings.colorToken)
+            color: effectiveColorToken
+              ? resolveTextColor(effectiveColorToken)
               : undefined,
             // Override any inherited gradient-text effect for solid colors
-            WebkitTextFillColor: styleSettings.colorToken
-              ? resolveTextColor(styleSettings.colorToken)
+            WebkitTextFillColor: effectiveColorToken
+              ? resolveTextColor(effectiveColorToken)
               : undefined,
             background: 'none',
             WebkitBackgroundClip: 'unset',

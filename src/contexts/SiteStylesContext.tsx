@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface BackgroundStyle {
@@ -41,6 +41,7 @@ interface SiteStylesContextValue {
   textStyles: Record<string, TextStyle>;
   colorTokens: ColorToken[];
   isLoaded: boolean;
+  refreshBackgroundStyles: () => Promise<void>;
 }
 
 const SiteStylesContext = createContext<SiteStylesContextValue>({
@@ -49,6 +50,7 @@ const SiteStylesContext = createContext<SiteStylesContextValue>({
   textStyles: {},
   colorTokens: [],
   isLoaded: false,
+  refreshBackgroundStyles: async () => {},
 });
 
 export function useSiteStyles() {
@@ -60,13 +62,39 @@ export function useSiteStyles() {
 }
 
 export function SiteStylesProvider({ children }: { children: React.ReactNode }) {
-  const [styles, setStyles] = useState<SiteStylesContextValue>({
+  const [styles, setStyles] = useState<Omit<SiteStylesContextValue, 'refreshBackgroundStyles'>>({
     backgroundStyles: {},
     iconStyles: {},
     textStyles: {},
     colorTokens: [],
     isLoaded: false,
   });
+
+  // Function to refresh just background styles (called after saves)
+  const refreshBackgroundStyles = useCallback(async () => {
+    try {
+      const { data } = await supabase
+        .from('background_styles')
+        .select('element_id, background_class, text_color_class');
+
+      const backgroundMap: Record<string, BackgroundStyle> = {};
+      data?.forEach(item => {
+        if (item.element_id) {
+          backgroundMap[item.element_id] = {
+            background_class: item.background_class,
+            text_color_class: item.text_color_class,
+          };
+        }
+      });
+
+      setStyles(prev => ({
+        ...prev,
+        backgroundStyles: backgroundMap,
+      }));
+    } catch (error) {
+      console.error('Error refreshing background styles:', error);
+    }
+  }, []);
 
   useEffect(() => {
     const loadAllStyles = async () => {
@@ -132,8 +160,13 @@ export function SiteStylesProvider({ children }: { children: React.ReactNode }) 
     loadAllStyles();
   }, []);
 
+  const contextValue: SiteStylesContextValue = {
+    ...styles,
+    refreshBackgroundStyles,
+  };
+
   return (
-    <SiteStylesContext.Provider value={styles}>
+    <SiteStylesContext.Provider value={contextValue}>
       {children}
     </SiteStylesContext.Provider>
   );

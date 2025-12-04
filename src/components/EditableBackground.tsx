@@ -3,6 +3,7 @@ import { Palette } from 'lucide-react';
 import { useEditMode } from '@/contexts/EditModeContext';
 import { useBackgroundStyle } from '@/hooks/useBackgroundStyle';
 import { BackgroundEditModal } from './BackgroundEditModal';
+import { BackgroundTextColorProvider } from '@/contexts/BackgroundTextColorContext';
 
 interface EditableBackgroundProps {
   children: React.ReactNode;
@@ -49,13 +50,20 @@ export function EditableBackground({
     },
   });
 
+  // Wrap children with text color context for inheritance
+  const wrappedChildren = (
+    <BackgroundTextColorProvider textColor={textColor}>
+      {childWithBackground}
+    </BackgroundTextColorProvider>
+  );
+
   return (
     <div
       className={`relative block h-full w-full ${className}`}
       onMouseEnter={() => editMode && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {childWithBackground}
+      {wrappedChildren}
 
       {editMode && isHovered && (
         <button
