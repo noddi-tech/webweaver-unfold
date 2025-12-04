@@ -171,12 +171,14 @@ export default function TranslationManagerContent() {
     // Load languages with show_in_switcher
     const { data: langs } = await supabase.from('languages').select('*').order('sort_order');
     
-    // Only load English translations + currently selected language (much faster!)
+    // Only load English translations + currently selected language
+    // CRITICAL: Use .range() to override Supabase's default 1000 row limit
     const { data: trans } = await supabase
       .from('translations')
       .select('*')
       .in('language_code', ['en', selectedLang])
-      .order('translation_key');
+      .order('translation_key')
+      .range(0, 10000); // Bulletproof: ensure we get ALL rows
     
     if (langs) setLanguages(langs);
     
@@ -1912,6 +1914,56 @@ export default function TranslationManagerContent() {
     }
   }
 
+  // Reset translations for re-evaluation (clears quality_score to NULL so they can be evaluated again)
+  async function handleResetForReEvaluation(languageCode: string) {
+    try {
+      const langName = languages.find(l => l.code === languageCode)?.name || languageCode;
+      
+      // Reset quality_score to NULL for all translations of this language
+      const { error } = await supabase
+        .from('translations')
+        .update({ 
+          quality_score: null, 
+          quality_metrics: null,
+          ai_reviewed_at: null,
+          review_status: 'pending'
+        })
+        .eq('language_code', languageCode);
+        
+      if (error) throw error;
+      
+      // Also reset evaluation progress
+      await supabase
+        .from('evaluation_progress')
+        .upsert({
+          language_code: languageCode,
+          status: 'idle',
+          evaluated_keys: 0,
+          total_keys: 0,
+          last_evaluated_key: null,
+          error_count: 0,
+          last_error: null,
+          error_message: null,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'language_code' });
+      
+      toast({ 
+        title: `${langName} reset for re-evaluation`,
+        description: `All translations can now be evaluated again`
+      });
+      
+      await loadData();
+      refreshStats();
+      
+    } catch (error: any) {
+      toast({ 
+        title: 'Reset failed', 
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  }
+
   // Enhanced evaluation with progress tracking and auto-resume
   async function handleEvaluateAllLanguages() {
     setIsEvaluating(true);
@@ -2190,7 +2242,7 @@ export default function TranslationManagerContent() {
             avg_quality_score: s.avg_quality_score,
             evaluated_count: s.actual_evaluated_count,
           }))}
-          englishCount={englishTranslations.length}
+          englishCount={sharedStats.find(s => s.code === 'en')?.total_translations || englishTranslations.length}
           isTranslating={isTranslating}
           isEvaluating={isEvaluating}
           isSyncing={isSyncing}
@@ -2199,6 +2251,7 @@ export default function TranslationManagerContent() {
           onEvaluateSelected={handleEvaluateSelected}
           onSyncKeys={handleSyncKeys}
           onResetStuck={resetStuckEvaluations}
+          onResetForReEvaluation={handleResetForReEvaluation}
           onAddKey={() => setIsAddDialogOpen(true)}
           translationProgress={translationProgress}
         />
