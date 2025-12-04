@@ -428,7 +428,8 @@ export default function TranslationManagerContent() {
       
       const { error } = await supabase.functions.invoke('evaluate-translation-quality', {
         body: { 
-          languageCode: selectedLang,
+          targetLanguage: selectedLang,
+          sourceLanguage: 'en',
           translationKeys: keys
         }
       });
