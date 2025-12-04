@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LanguageLink } from "@/components/LanguageLink";
-import { EditableSolutionText } from "@/components/EditableSolutionText";
 import { EditableBackground } from "@/components/EditableBackground";
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 type IconName = keyof typeof icons;
 
@@ -56,7 +56,11 @@ const textClass: Record<string, string> = {
   "white-80": "text-white/80",
 };
 
+// Convert slug format (tire-services) to translation key format (tire_services)
+const slugToKey = (slug: string) => slug.replace(/-/g, '_');
+
 const Solutions = () => {
+  const { t } = useAppTranslation();
   const [solutions, setSolutions] = useState<Solution[]>([]);
   const [settings, setSettings] = useState<SolutionSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,7 +95,7 @@ const Solutions = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-20 text-center">
-          <p className="text-muted-foreground">Loading solutions...</p>
+          <p className="text-muted-foreground">{t('solutions.page.loading', 'Loading solutions...')}</p>
         </div>
         <Footer />
       </div>
@@ -113,7 +117,7 @@ const Solutions = () => {
       <section className="py-20 px-6">
         <div className="container mx-auto max-w-4xl text-center">
           <h1 className={`text-5xl md:text-6xl font-bold mb-6 ${titleClr}`}>
-            {settings?.section_title || "Solutions"}
+            {t('solutions.page.title', settings?.section_title || 'Solutions')}
           </h1>
           {settings?.section_subtitle && (
             <p className={`text-xl ${subtitleClr} max-w-2xl mx-auto`}>
@@ -129,6 +133,7 @@ const Solutions = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {solutions.map((solution) => {
               const Icon = icons[(solution.icon_name as IconName)] || icons["Sparkles"];
+              const slugKey = slugToKey(solution.slug);
               
               return (
                 <EditableBackground
@@ -157,24 +162,18 @@ const Solutions = () => {
 
                     {/* Title & Subtitle */}
                     <h2 className={`text-3xl font-bold mb-2 ${titleClr}`}>
-                      {solution.title}
+                      {t(`solutions.${slugKey}.title`, solution.title)}
                     </h2>
                     {solution.subtitle && (
-                      <EditableSolutionText
-                        solutionId={solution.id}
-                        field="subtitle"
-                        onSave={() => loadData()}
-                      >
-                        <p className={`text-lg mb-4 ${subtitleClr} font-medium`}>
-                          {solution.subtitle}
-                        </p>
-                      </EditableSolutionText>
+                      <p className={`text-lg mb-4 ${subtitleClr} font-medium`}>
+                        {t(`solutions.${slugKey}.subtitle`, solution.subtitle)}
+                      </p>
                     )}
 
                     {/* Description */}
                     {solution.hero_description && (
                       <p className={`${descClr} mb-6 leading-relaxed`}>
-                        {solution.hero_description}
+                        {t(`solutions.${slugKey}.hero_description`, solution.hero_description)}
                       </p>
                     )}
 
@@ -195,7 +194,7 @@ const Solutions = () => {
                       <div className="mb-6 rounded-lg overflow-hidden">
                         <img
                           src={solution.image_url}
-                          alt={solution.title}
+                          alt={t(`solutions.${slugKey}.title`, solution.title)}
                           className="w-full h-auto object-cover"
                         />
                       </div>
@@ -205,7 +204,7 @@ const Solutions = () => {
                     <div className="mt-6">
                       <Button asChild size="lg" className="w-full">
                         <LanguageLink to={`/solutions/${solution.slug}`}>
-                          {solution.cta_text || "Learn More"}
+                          {t('solutions.page.learn_more', solution.cta_text || 'Learn More')}
                           <icons.ArrowRight className="w-4 h-4 ml-2" />
                         </LanguageLink>
                       </Button>
@@ -220,7 +219,7 @@ const Solutions = () => {
           {solutions.length === 0 && (
             <div className="text-center py-20">
               <p className={`text-xl ${descClr}`}>
-                No solutions available yet. Check back soon!
+                {t('solutions.page.empty', 'No solutions available yet. Check back soon!')}
               </p>
             </div>
           )}
