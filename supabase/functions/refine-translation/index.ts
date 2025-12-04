@@ -7,9 +7,9 @@ const RefineTranslationSchema = z.object({
   currentTranslation: z.string().min(1).max(10000),
   targetLanguage: z.string().min(2).max(10),
   targetLanguageName: z.string().min(1).max(100),
-  context: z.string().max(500).optional(),
-  pageLocation: z.string().max(200).optional(),
-  tovContent: z.string().max(10000).optional()
+  context: z.string().max(500).nullish(),
+  pageLocation: z.string().max(200).nullish(),
+  tovContent: z.string().max(10000).nullish()
 });
 
 const corsHeaders = {
