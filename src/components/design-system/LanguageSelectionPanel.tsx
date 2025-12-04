@@ -4,9 +4,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Languages, Globe, Sparkles, CheckCircle2, Loader2 } from 'lucide-react';
+import { ChevronDown, Languages, Globe, Sparkles, Loader2, AlertTriangle, RefreshCw, Plus, RotateCcw } from 'lucide-react';
 import * as Flags from 'country-flag-icons/react/3x2';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Separator } from '@/components/ui/separator';
 
 interface Language {
   id: string;
@@ -17,14 +19,32 @@ interface Language {
   enabled: boolean;
 }
 
+interface LanguageStats {
+  code: string;
+  missing_translations: number;
+  actual_translations: number;
+  total_translations: number;
+  avg_quality_score: number | null;
+  evaluated_count?: number;
+}
+
 interface LanguageSelectionPanelProps {
   languages: Language[];
   selectedLanguages: string[];
   onSelectionChange: (selected: string[]) => void;
+  languageStats?: LanguageStats[];
+  englishCount?: number;
+  // Operations state
   isTranslating?: boolean;
   isEvaluating?: boolean;
+  isSyncing?: boolean;
+  isResettingStuck?: boolean;
+  // Operation handlers
   onTranslateSelected: () => void;
   onEvaluateSelected: () => void;
+  onSyncKeys?: () => void;
+  onResetStuck?: () => void;
+  onAddKey?: () => void;
   translationProgress?: string;
 }
 
@@ -40,10 +60,17 @@ export default function LanguageSelectionPanel({
   languages,
   selectedLanguages,
   onSelectionChange,
+  languageStats = [],
+  englishCount = 0,
   isTranslating = false,
   isEvaluating = false,
+  isSyncing = false,
+  isResettingStuck = false,
   onTranslateSelected,
   onEvaluateSelected,
+  onSyncKeys,
+  onResetStuck,
+  onAddKey,
   translationProgress,
 }: LanguageSelectionPanelProps) {
   const [isOpen, setIsOpen] = useState(true);
@@ -75,7 +102,33 @@ export default function LanguageSelectionPanel({
     onSelectionChange(availableCodes);
   };
 
-  const isProcessing = isTranslating || isEvaluating;
+  const isProcessing = isTranslating || isEvaluating || isSyncing || isResettingStuck;
+
+  // Calculate totals based on selection
+  const selectedStats = languageStats.filter(s => 
+    selectedLanguages.length === 0 
+      ? targetLanguages.some(l => l.code === s.code)
+      : selectedLanguages.includes(s.code)
+  );
+
+  const totalMissingKeys = selectedStats.reduce((sum, s) => sum + (s.missing_translations || 0), 0);
+  const totalTranslations = selectedStats.reduce((sum, s) => sum + (s.actual_translations || 0), 0);
+  const languagesWithMissing = selectedStats.filter(s => (s.missing_translations || 0) > 0).length;
+
+  // Get stats for a specific language
+  const getLanguageStats = (code: string) => {
+    return languageStats.find(s => s.code === code);
+  };
+
+  // Scope label
+  const getScopeLabel = () => {
+    if (selectedLanguages.length === 0) return 'All languages';
+    if (selectedLanguages.length === 1) {
+      const lang = languages.find(l => l.code === selectedLanguages[0]);
+      return lang?.name || selectedLanguages[0];
+    }
+    return `${selectedLanguages.length} languages`;
+  };
 
   return (
     <Card className="mb-6">
@@ -85,10 +138,15 @@ export default function LanguageSelectionPanel({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Languages className="w-5 h-5 text-primary" />
-                <CardTitle className="text-lg">Language Selection</CardTitle>
+                <CardTitle className="text-lg">Translation Operations</CardTitle>
                 {selectedLanguages.length > 0 && (
                   <Badge variant="secondary" className="ml-2">
                     {selectedLanguages.length} selected
+                  </Badge>
+                )}
+                {totalMissingKeys > 0 && (
+                  <Badge variant="destructive" className="ml-1">
+                    {totalMissingKeys} missing
                   </Badge>
                 )}
               </div>
@@ -98,7 +156,7 @@ export default function LanguageSelectionPanel({
               )} />
             </div>
             <CardDescription>
-              Select specific languages to translate or evaluate
+              Select languages to scope all operations, or leave empty to operate on all
             </CardDescription>
           </CardHeader>
         </CollapsibleTrigger>
@@ -139,11 +197,13 @@ export default function LanguageSelectionPanel({
               </Button>
             </div>
 
-            {/* Language Grid */}
+            {/* Language Grid with Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
               {targetLanguages.map(lang => {
                 const FlagIcon = (Flags as any)[lang.flag_code];
                 const isSelected = selectedLanguages.includes(lang.code);
+                const stats = getLanguageStats(lang.code);
+                const missingCount = stats?.missing_translations || 0;
                 
                 return (
                   <button
@@ -151,19 +211,26 @@ export default function LanguageSelectionPanel({
                     onClick={() => toggleLanguage(lang.code)}
                     disabled={isProcessing}
                     className={cn(
-                      "flex items-center gap-2 p-2 rounded-lg border transition-all text-left",
+                      "flex flex-col p-2 rounded-lg border transition-all text-left",
                       isSelected 
                         ? "border-primary bg-primary/10 ring-1 ring-primary" 
                         : "border-border hover:border-muted-foreground/50",
                       isProcessing && "opacity-50 cursor-not-allowed"
                     )}
                   >
-                    <Checkbox
-                      checked={isSelected}
-                      className="pointer-events-none"
-                    />
-                    {FlagIcon && <FlagIcon className="w-5 h-4 flex-shrink-0" />}
-                    <span className="text-sm truncate">{lang.name}</span>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={isSelected}
+                        className="pointer-events-none"
+                      />
+                      {FlagIcon && <FlagIcon className="w-5 h-4 flex-shrink-0" />}
+                      <span className="text-sm truncate">{lang.name}</span>
+                    </div>
+                    {missingCount > 0 && (
+                      <span className="text-xs text-destructive mt-1 ml-6">
+                        {missingCount} missing
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -177,41 +244,168 @@ export default function LanguageSelectionPanel({
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3 pt-2 border-t">
-              <Button
-                onClick={onTranslateSelected}
-                disabled={isProcessing || selectedLanguages.length === 0}
-                className="gap-2"
-              >
-                {isTranslating ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Globe className="w-4 h-4" />
+            {/* Scope Indicator */}
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Operating on:</span>
+                <span className="font-medium">{getScopeLabel()}</span>
+                {totalMissingKeys > 0 && (
+                  <>
+                    <Separator orientation="vertical" className="h-4" />
+                    <span className="text-destructive">{totalMissingKeys} total missing keys</span>
+                  </>
                 )}
-                Translate Selected ({selectedLanguages.length})
-              </Button>
-              
-              <Button
-                variant="outline"
-                onClick={onEvaluateSelected}
-                disabled={isProcessing || selectedLanguages.length === 0}
-                className="gap-2"
-              >
-                {isEvaluating ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Sparkles className="w-4 h-4" />
-                )}
-                Evaluate Selected ({selectedLanguages.length})
-              </Button>
+              </div>
+            </div>
 
-              {selectedLanguages.length === 0 && (
-                <span className="text-sm text-muted-foreground self-center ml-2">
-                  Select at least one language
-                </span>
+            <Separator />
+
+            {/* Consolidated Action Buttons */}
+            <div className="space-y-4">
+              {/* Translation Actions */}
+              <div className="space-y-2">
+                <span className="text-sm font-medium text-muted-foreground">Translation</span>
+                <div className="flex flex-wrap gap-3">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={onTranslateSelected}
+                          disabled={isProcessing || (selectedLanguages.length > 0 && totalMissingKeys === 0)}
+                          className="gap-2"
+                        >
+                          {isTranslating ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Globe className="w-4 h-4" />
+                          )}
+                          Translate Missing
+                          {totalMissingKeys > 0 && (
+                            <Badge variant="secondary" className="ml-1 bg-background">
+                              {totalMissingKeys}
+                            </Badge>
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Translate only empty/missing translations for {getScopeLabel()}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              </div>
+
+              {/* Evaluation Actions */}
+              <div className="space-y-2">
+                <span className="text-sm font-medium text-muted-foreground">Quality Evaluation</span>
+                <div className="flex flex-wrap gap-3">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="secondary"
+                          onClick={onEvaluateSelected}
+                          disabled={isProcessing || (selectedLanguages.length > 0 && totalTranslations === 0)}
+                          className="gap-2"
+                        >
+                          {isEvaluating ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Sparkles className="w-4 h-4" />
+                          )}
+                          Evaluate Quality
+                          {selectedLanguages.length > 0 && (
+                            <Badge variant="outline" className="ml-1">
+                              {selectedLanguages.length === 1 ? getScopeLabel() : `${selectedLanguages.length} langs`}
+                            </Badge>
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Run AI quality evaluation for {getScopeLabel()}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  {onResetStuck && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            onClick={onResetStuck}
+                            disabled={isProcessing}
+                            className="gap-2"
+                          >
+                            {isResettingStuck ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <RotateCcw className="w-4 h-4" />
+                            )}
+                            Reset Stuck
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Reset evaluations stuck for &gt;10 minutes</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+              </div>
+
+              {/* Setup Actions */}
+              {(onAddKey || onSyncKeys) && (
+                <div className="space-y-2">
+                  <span className="text-sm font-medium text-muted-foreground">Setup (Global)</span>
+                  <div className="flex flex-wrap gap-3">
+                    {onAddKey && (
+                      <Button
+                        variant="outline"
+                        onClick={onAddKey}
+                        disabled={isProcessing}
+                        className="gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Translation Key
+                      </Button>
+                    )}
+
+                    {onSyncKeys && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              onClick={onSyncKeys}
+                              disabled={isProcessing}
+                              className="gap-2"
+                            >
+                              {isSyncing ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <RefreshCw className="w-4 h-4" />
+                              )}
+                              Sync Keys
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Ensure all languages have entries for all English keys</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
+
+            {/* Help text */}
+            {selectedLanguages.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                💡 Tip: Select specific languages above to scope operations, or leave empty to operate on all enabled languages.
+              </p>
+            )}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
