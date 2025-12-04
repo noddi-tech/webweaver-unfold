@@ -4,9 +4,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Zap, Languages } from 'lucide-react';
+import { Loader2, Zap, Languages, Trash2, AlertTriangle } from 'lucide-react';
 import * as Flags from 'country-flag-icons/react/3x2';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Language = {
   id: string;
@@ -24,6 +35,10 @@ export default function LanguageVisibilityManager() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [autoTranslateEnabled, setAutoTranslateEnabled] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [languageToDelete, setLanguageToDelete] = useState<Language | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadLanguages();
@@ -122,6 +137,105 @@ export default function LanguageVisibilityManager() {
     }
   }
 
+  function openDeleteDialog(language: Language) {
+    setLanguageToDelete(language);
+    setDeleteConfirmation('');
+    setDeleteDialogOpen(true);
+  }
+
+  async function handleDeleteLanguage() {
+    if (!languageToDelete) return;
+    
+    // Verify confirmation matches language name
+    if (deleteConfirmation.toLowerCase() !== languageToDelete.name.toLowerCase()) {
+      toast({
+        title: 'Confirmation required',
+        description: `Please type "${languageToDelete.name}" to confirm deletion`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const langCode = languageToDelete.code;
+
+      // Step 1: Delete all translations for this language
+      const { error: translationsError } = await supabase
+        .from('translations')
+        .delete()
+        .eq('language_code', langCode);
+
+      if (translationsError) {
+        throw new Error(`Failed to delete translations: ${translationsError.message}`);
+      }
+
+      // Step 2: Delete evaluation progress for this language
+      const { error: evalProgressError } = await supabase
+        .from('evaluation_progress')
+        .delete()
+        .eq('language_code', langCode);
+
+      if (evalProgressError) {
+        console.warn('Failed to delete evaluation progress:', evalProgressError);
+        // Continue anyway - this is not critical
+      }
+
+      // Step 3: Delete evaluation batches for this language
+      const { error: evalBatchesError } = await supabase
+        .from('evaluation_batches')
+        .delete()
+        .eq('language_code', langCode);
+
+      if (evalBatchesError) {
+        console.warn('Failed to delete evaluation batches:', evalBatchesError);
+        // Continue anyway - this is not critical
+      }
+
+      // Step 4: Delete page meta translations for this language
+      const { error: pageMetaError } = await supabase
+        .from('page_meta_translations')
+        .delete()
+        .eq('language_code', langCode);
+
+      if (pageMetaError) {
+        console.warn('Failed to delete page meta translations:', pageMetaError);
+        // Continue anyway - this is not critical
+      }
+
+      // Step 5: Delete the language itself
+      const { error: languageError } = await supabase
+        .from('languages')
+        .delete()
+        .eq('id', languageToDelete.id);
+
+      if (languageError) {
+        throw new Error(`Failed to delete language: ${languageError.message}`);
+      }
+
+      toast({
+        title: 'Language deleted',
+        description: `${languageToDelete.name} and all its translations have been permanently deleted`,
+      });
+
+      // Refresh the list
+      await loadLanguages();
+      setDeleteDialogOpen(false);
+      setLanguageToDelete(null);
+
+    } catch (error: any) {
+      console.error('Delete language error:', error);
+      toast({
+        title: 'Deletion failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   if (loading) {
     return (
       <Card>
@@ -172,37 +286,105 @@ export default function LanguageVisibilityManager() {
             Languages must be enabled to appear in switchers.
           </CardDescription>
         </CardHeader>
-      <CardContent className="space-y-4">
-        {languages.map((language) => {
-          const FlagIcon = (Flags as any)[language.flag_code];
-          return (
-            <div
-              key={language.id}
-              className="flex items-center justify-between p-4 border rounded-lg"
-            >
-              <div className="flex items-center gap-3">
-                {FlagIcon && <FlagIcon className="w-8 h-5" />}
-                <div>
-                  <div className="font-medium">{language.native_name}</div>
-                  <div className="text-sm text-muted-foreground">{language.name}</div>
+        <CardContent className="space-y-4">
+          {languages.map((language) => {
+            const FlagIcon = (Flags as any)[language.flag_code];
+            const isEnglish = language.code === 'en';
+            
+            return (
+              <div
+                key={language.id}
+                className="flex items-center justify-between p-4 border rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  {FlagIcon && <FlagIcon className="w-8 h-5" />}
+                  <div>
+                    <div className="font-medium">{language.native_name}</div>
+                    <div className="text-sm text-muted-foreground">{language.name}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-muted-foreground">
+                    {language.show_in_switcher ? 'Visible' : 'Hidden'}
+                  </span>
+                  <Switch
+                    checked={language.show_in_switcher}
+                    onCheckedChange={() =>
+                      toggleVisibility(language.id, language.show_in_switcher)
+                    }
+                  />
+                  {!isEnglish && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => openDeleteDialog(language)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-muted-foreground">
-                  {language.show_in_switcher ? 'Visible' : 'Hidden'}
-                </span>
-                <Switch
-                  checked={language.show_in_switcher}
-                  onCheckedChange={() =>
-                    toggleVisibility(language.id, language.show_in_switcher)
-                  }
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Delete {languageToDelete?.name}?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p>
+                This action <strong>cannot be undone</strong>. This will permanently delete:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>All {languageToDelete?.name} translations</li>
+                <li>All evaluation data for {languageToDelete?.name}</li>
+                <li>All page meta translations for {languageToDelete?.name}</li>
+                <li>The language configuration itself</li>
+              </ul>
+              <div className="pt-4">
+                <Label htmlFor="delete-confirm" className="text-foreground">
+                  Type <strong>{languageToDelete?.name}</strong> to confirm:
+                </Label>
+                <Input
+                  id="delete-confirm"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder={languageToDelete?.name}
+                  className="mt-2"
+                  autoComplete="off"
                 />
               </div>
-            </div>
-          );
-        })}
-      </CardContent>
-    </Card>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteLanguage}
+              disabled={isDeleting || deleteConfirmation.toLowerCase() !== languageToDelete?.name.toLowerCase()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Permanently
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
