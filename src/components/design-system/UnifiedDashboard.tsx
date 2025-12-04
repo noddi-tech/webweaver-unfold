@@ -43,9 +43,9 @@ export default function UnifiedDashboard() {
     );
   }
 
-  // Calculate global stats - use ACTUAL translations (non-empty) from database
+  // Calculate global stats - use TOTAL translations (all keys) as the universal denominator
   const totalLanguages = stats.filter(s => s.enabled && s.code !== 'en').length;
-  const englishCount = stats.find(s => s.code === 'en')?.actual_translations || 0;
+  const englishCount = stats.find(s => s.code === 'en')?.total_translations || 0;
   
   // Use actual_translations (non-empty content) instead of total_translations (includes empty rows)
   const actualTotalTranslations = stats.reduce((sum, s) => sum + (s.actual_translations || 0), 0);

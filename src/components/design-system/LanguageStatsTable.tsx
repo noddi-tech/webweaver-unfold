@@ -65,11 +65,13 @@ export default function LanguageStatsTable({
                 const progress = evaluationProgress.find(ep => ep.language_code === lang.code);
                 const metaStat = pageMetaStats.find(m => m.code === lang.code);
                 
-                // Use actual_translations (non-empty) for accuracy
+                // Use total_translations as the universal denominator for consistency
+                const totalTranslations = lang.total_translations || englishCount;
                 const actualTranslations = lang.actual_translations || 0;
                 const missingTranslations = lang.missing_translations || 0;
                 const translationComplete = actualTranslations === englishCount && missingTranslations === 0;
-                const evaluationComplete = progress?.evaluated_keys === actualTranslations;
+                // Fix: Compare actual_evaluated_count against actualTranslations (content-filled)
+                const evaluationComplete = (lang.actual_evaluated_count || 0) >= actualTranslations && actualTranslations > 0;
                 const hasPageMeta = metaStat && metaStat.completed_entries > 0;
                 
                 return (
@@ -82,7 +84,7 @@ export default function LanguageStatsTable({
                     </td>
                     <td className="py-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono">{actualTranslations}/{englishCount}</span>
+                        <span className="font-mono">{actualTranslations}/{totalTranslations}</span>
                         {missingTranslations > 0 && (
                           <Badge variant="destructive" className="text-xs">
                             {missingTranslations} missing
@@ -97,9 +99,9 @@ export default function LanguageStatsTable({
                       ) : (
                         <div className="flex items-center gap-2">
                           <span className="font-mono">
-                            {lang.actual_evaluated_count || 0}/{actualTranslations}
+                            {lang.actual_evaluated_count || 0}/{totalTranslations}
                           </span>
-                          {(lang.actual_evaluated_count || 0) === actualTranslations && actualTranslations > 0 && <Check className="w-4 h-4 text-success" />}
+                          {evaluationComplete && <Check className="w-4 h-4 text-success" />}
                           {progress?.status === 'in_progress' && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
                           {progress?.status === 'paused' && <AlertTriangle className="w-4 h-4 text-warning" />}
                         </div>
