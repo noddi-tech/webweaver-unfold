@@ -1,45 +1,26 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Database, Zap, Cloud, Shield, Plug, Gauge } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
-import { EditableBackground } from "@/components/EditableBackground";
+import { EditableCard } from "@/components/EditableCard";
+import { EditableCardIcon } from "@/components/EditableCardIcon";
+import { EditableCardTitle } from "@/components/EditableCardTitle";
+import { EditableCardDescription } from "@/components/EditableCardDescription";
 
 export default function ArchitecturePrinciples() {
   const { h2, body } = useTypography();
   const { t } = useAppTranslation();
 
+  const principleKeys = ['unified', 'reactive', 'scalable', 'secure', 'open', 'fast'];
+  
   const principles = [
-    {
-      icon: Database,
-      headline: t('architecture.principles.unified.title', 'Everything speaks the same language.'),
-      subtext: t('architecture.principles.unified.description', 'One schema for customers, bookings, and tires.'),
-    },
-    {
-      icon: Zap,
-      headline: t('architecture.principles.reactive.title', 'The system reacts before you can.'),
-      subtext: t('architecture.principles.reactive.description', 'Real-time automation on every action.'),
-    },
-    {
-      icon: Cloud,
-      headline: t('architecture.principles.scalable.title', 'Built for cities, not just garages.'),
-      subtext: t('architecture.principles.scalable.description', 'Regional deployments, multi-tenant by default.'),
-    },
-    {
-      icon: Shield,
-      headline: t('architecture.principles.secure.title', 'Privacy isn\'t a feature — it\'s architecture.'),
-      subtext: t('architecture.principles.secure.description', 'Encryption, roles, audit trails.'),
-    },
-    {
-      icon: Plug,
-      headline: t('architecture.principles.open.title', 'Open by default.'),
-      subtext: t('architecture.principles.open.description', 'REST + GraphQL endpoints for anything external.'),
-    },
-    {
-      icon: Gauge,
-      headline: t('architecture.principles.fast.title', 'Fast. Always.'),
-      subtext: t('architecture.principles.fast.description', '99.9% uptime and sub-second load speeds.'),
-    },
+    { icon: Database, key: 'unified' },
+    { icon: Zap, key: 'reactive' },
+    { icon: Cloud, key: 'scalable' },
+    { icon: Shield, key: 'secure' },
+    { icon: Plug, key: 'open' },
+    { icon: Gauge, key: 'fast' },
   ];
   
   return (
@@ -53,7 +34,7 @@ export default function ArchitecturePrinciples() {
           </EditableTranslation>
           <EditableTranslation translationKey="architecture.principles.subtitle">
             <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
-              {t('architecture.principles.subtitle', 'How Noddi is built to scale, secure, and perform.')}
+              {t('architecture.principles.subtitle', 'How Navio is built to scale, secure, and perform.')}
             </p>
           </EditableTranslation>
         </div>
@@ -61,41 +42,33 @@ export default function ArchitecturePrinciples() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {principles.map((principle, index) => {
             const Icon = principle.icon;
+            const key = principle.key;
+            
             return (
-              <EditableBackground
+              <EditableCard
                 key={index}
-                elementId={`architecture-principle-${index}`}
+                elementIdPrefix={`architecture-principle-${index}`}
                 defaultBackground="glass-card"
-                allowedBackgrounds={[
-                  'bg-gradient-hero',
-                  'bg-gradient-sunset',
-                  'bg-gradient-warmth',
-                  'bg-gradient-ocean',
-                  'bg-gradient-fire',
-                  'glass-card',
-                  'liquid-glass',
-                  'glass-prominent',
-                  'bg-card',
-                  'bg-background',
-                  'bg-muted'
-                ]}
+                defaultTextColor="foreground"
               >
-                <Card className="hover:shadow-lg transition-shadow">
+                <Card className="hover:shadow-lg transition-shadow h-full">
                   <CardHeader>
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 mb-4">
-                      <Icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <EditableTranslation translationKey={`architecture.principles.${['unified', 'reactive', 'scalable', 'secure', 'open', 'fast'][index]}.title`}>
-                      <CardTitle className="text-xl">{principle.headline}</CardTitle>
+                    <EditableCardIcon icon={Icon} size="default" />
+                    <EditableTranslation translationKey={`architecture.principles.${key}.title`}>
+                      <EditableCardTitle className="text-xl">
+                        {t(`architecture.principles.${key}.title`)}
+                      </EditableCardTitle>
                     </EditableTranslation>
                   </CardHeader>
                   <CardContent>
-                    <EditableTranslation translationKey={`architecture.principles.${['unified', 'reactive', 'scalable', 'secure', 'open', 'fast'][index]}.description`}>
-                      <p className="text-muted-foreground">{principle.subtext}</p>
+                    <EditableTranslation translationKey={`architecture.principles.${key}.description`}>
+                      <EditableCardDescription>
+                        {t(`architecture.principles.${key}.description`)}
+                      </EditableCardDescription>
                     </EditableTranslation>
                   </CardContent>
                 </Card>
-              </EditableBackground>
+              </EditableCard>
             );
           })}
         </div>
