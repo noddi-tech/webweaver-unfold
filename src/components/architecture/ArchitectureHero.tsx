@@ -10,7 +10,7 @@ export default function ArchitectureHero() {
   const { t } = useAppTranslation();
   
   return (
-    <section className="py-section">
+    <section className="pt-20 sm:pt-24 lg:pt-32 pb-12 md:pb-16 lg:pb-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
           <EditableTranslation translationKey="architecture.hero.title">
