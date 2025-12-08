@@ -315,6 +315,35 @@ export function UnifiedStyleModal({
     return normalized1 === normalized2;
   };
 
+  // Build background style object for inline rendering (same logic as EditableCard)
+  const getPreviewBackgroundStyle = (): React.CSSProperties => {
+    if (!background) return {};
+    
+    // Gradients - use backgroundImage with CSS variable
+    if (background.includes('gradient') || background.includes('mesh')) {
+      const cssVar = `--${background}`;
+      return { backgroundImage: `var(${cssVar})` };
+    }
+    
+    // Glass effects
+    if (background.includes('glass') || background.includes('liquid')) {
+      const cssVar = `--${background}`;
+      return { 
+        backgroundImage: `var(${cssVar})`,
+        backdropFilter: 'blur(12px)',
+      };
+    }
+    
+    // Solid colors (bg-* classes)
+    if (background.startsWith('bg-')) {
+      const colorToken = background.replace('bg-', '').split('/')[0];
+      return { backgroundColor: `hsl(var(--${colorToken}))` };
+    }
+
+    // Direct color tokens
+    return { backgroundColor: `hsl(var(--${background}))` };
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -462,7 +491,10 @@ export function UnifiedStyleModal({
           {/* Live Preview */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Live Preview</label>
-            <div className={cn('p-6 rounded-xl border', background)}>
+            <div 
+              className="p-6 rounded-xl border"
+              style={getPreviewBackgroundStyle()}
+            >
               {/* Icon card preview */}
               {iconCardBg && (
                 <div className={cn('p-2.5 rounded-lg backdrop-blur-sm mb-4 inline-block', iconCardBg)}>

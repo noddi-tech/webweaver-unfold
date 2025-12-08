@@ -5,7 +5,6 @@ import { BackgroundTextColorProvider } from '@/contexts/BackgroundTextColorConte
 import { UnifiedStyleModal } from './UnifiedStyleModal';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
-import { resolveTextColor } from '@/lib/textColorUtils';
 
 interface EditableCardProps {
   children: React.ReactNode;
@@ -94,8 +93,8 @@ export function EditableCard({
   const getBackgroundStyle = (): React.CSSProperties => {
     if (!background) return {};
     
-    // Gradients
-    if (background.includes('gradient')) {
+    // Gradients - use backgroundImage with CSS variable
+    if (background.includes('gradient') || background.includes('mesh')) {
       const cssVar = `--${background}`;
       return { backgroundImage: `var(${cssVar})` };
     }
@@ -132,6 +131,20 @@ export function EditableCard({
     iconBackground,
   };
 
+  // Clone child element and apply background styles directly
+  const childWithStyles = React.isValidElement(children)
+    ? React.cloneElement(children as React.ReactElement<any>, {
+        className: cn(
+          (children as React.ReactElement<any>).props.className,
+          'rounded-xl overflow-hidden'
+        ),
+        style: {
+          ...((children as React.ReactElement<any>).props.style || {}),
+          ...getBackgroundStyle(),
+        },
+      })
+    : children;
+
   return (
     <div
       className={cn('relative', className)}
@@ -155,9 +168,7 @@ export function EditableCard({
       {/* Card Content with inherited styles */}
       <BackgroundTextColorProvider textColor={textColor}>
         <EditableCardContext.Provider value={contextValue}>
-          <div style={getBackgroundStyle()} className="rounded-xl">
-            {children}
-          </div>
+          {childWithStyles}
         </EditableCardContext.Provider>
       </BackgroundTextColorProvider>
 
