@@ -16,6 +16,7 @@ import { Card } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import { UnifiedStyleModalLayoutTab } from './UnifiedStyleModalLayoutTab';
 import { getBackgroundStyleFromToken } from '@/lib/backgroundUtils';
+import { resolveTextColor } from '@/lib/textColorUtils';
 
 interface SubElement {
   id: string;
@@ -303,14 +304,14 @@ export function UnifiedStyleModal({
     setAccessibilityScores(scores);
   }, [background, number, numberColor, title, titleColor, description, descriptionColor, ctaText, ctaBgColor, ctaTextColor]);
 
-  // Helper to normalize color token for comparison
-  const normalizeColorToken = (token: string) => {
+  // Helper to strip color prefixes for comparison (renamed to avoid shadowing imported normalizeColorToken)
+  const stripColorPrefix = (token: string) => {
     return token.replace('text-', '').replace('--', '').trim();
   };
 
   const isColorSelected = (colorValue: string, currentValue: string) => {
-    const normalized1 = normalizeColorToken(colorValue);
-    const normalized2 = normalizeColorToken(currentValue);
+    const normalized1 = stripColorPrefix(colorValue);
+    const normalized2 = stripColorPrefix(currentValue);
     
     // Exact match only - no fuzzy mapping
     return normalized1 === normalized2;
@@ -475,7 +476,7 @@ export function UnifiedStyleModal({
                 <div className={cn('p-2.5 rounded-lg backdrop-blur-sm mb-4 inline-block', iconCardBg)}>
                   <ImageIcon 
                     className="w-8 h-8" 
-                    style={{ color: `hsl(var(--${normalizeColorToken(iconColor)}))` }}
+                    style={{ color: resolveTextColor(iconColor) }}
                   />
                 </div>
               )}
@@ -484,7 +485,7 @@ export function UnifiedStyleModal({
                 <div className="mb-4">
                   <span 
                     className="text-2xl font-bold"
-                    style={{ color: `hsl(var(--${normalizeColorToken(numberColor)}))` }}
+                    style={{ color: resolveTextColor(numberColor) }}
                   >
                     {number}
                   </span>
@@ -493,7 +494,7 @@ export function UnifiedStyleModal({
               {title && (
                 <h3 
                   className="text-xl font-bold mb-2"
-                  style={{ color: `hsl(var(--${normalizeColorToken(titleColor)}))` }}
+                  style={{ color: resolveTextColor(titleColor) }}
                 >
                   {title}
                 </h3>
@@ -501,7 +502,7 @@ export function UnifiedStyleModal({
               {description && (
                 <p 
                   className="mb-4"
-                  style={{ color: `hsl(var(--${normalizeColorToken(descriptionColor)}))` }}
+                  style={{ color: resolveTextColor(descriptionColor) }}
                 >
                   {description}
                 </p>
@@ -510,8 +511,8 @@ export function UnifiedStyleModal({
                 <button 
                   className="px-4 py-2 rounded-lg font-medium"
                   style={{
-                    backgroundColor: `hsl(var(--${normalizeColorToken(ctaBgColor)}))`,
-                    color: `hsl(var(--${normalizeColorToken(ctaTextColor)}))`
+                    backgroundColor: `hsl(var(--${stripColorPrefix(ctaBgColor)}))`,
+                    color: resolveTextColor(ctaTextColor)
                   }}
                 >
                   {ctaText}
