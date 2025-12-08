@@ -76,6 +76,7 @@ All colors MUST be HSL.
     
     /* Text Colors - Foreground colors for content */
     --foreground: 249 67% 24%;                 /* Federal blue text | Used in: Body text, headings on white */
+    --white: 0 0% 100%;                        /* Pure white | Used in: White text on dark backgrounds */
     --popover: 0 0% 100%;                      /* Popover background | Used in: Dropdowns, tooltips */
     --popover-foreground: 249 67% 24%;         /* Popover text | Used in: Dropdown text */
     
