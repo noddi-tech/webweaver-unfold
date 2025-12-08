@@ -97,6 +97,8 @@ export function EditableCard({
     if (data.background) setBackground(data.background);
     if (data.iconColor) setIconColor(data.iconColor);
     if (data.iconCardBg) setIconBackground(data.iconCardBg);
+    // Update text color from title color (main text color for the card)
+    if (data.titleColor) setTextColor(data.titleColor);
   };
 
   // Create context value for children

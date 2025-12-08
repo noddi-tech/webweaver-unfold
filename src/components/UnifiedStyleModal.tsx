@@ -86,10 +86,10 @@ export function UnifiedStyleModal({
     const loadSavedData = async () => {
       setLoading(true);
       try {
-        // Load background
+        // Load background AND text_color_class
         const { data: bgData } = await supabase
           .from('background_styles')
-          .select('background_class')
+          .select('background_class, text_color_class')
           .eq('element_id', `${elementIdPrefix}-background`)
           .maybeSingle();
 
@@ -102,6 +102,14 @@ export function UnifiedStyleModal({
         
         if (bgData?.background_class) {
           setBackground(bgData.background_class);
+        }
+        
+        // Load text color from background_styles and apply to all text elements
+        if (bgData?.text_color_class) {
+          setTitleColor(bgData.text_color_class);
+          setDescriptionColor(bgData.text_color_class);
+          setNumberColor(bgData.text_color_class);
+          setIconColor(bgData.text_color_class);
         }
 
         // Load icon card background
@@ -343,11 +351,18 @@ export function UnifiedStyleModal({
           .eq('element_id', bgUpdate.element_id)
           .maybeSingle();
 
+        // For main background, also save text_color_class
+        const isMainBackground = bgUpdate.element_id === `${elementIdPrefix}-background`;
+        const textColorForBg = isMainBackground ? titleColor : undefined;
+
         if (existingBg) {
           // @ts-ignore
           await supabase
             .from('background_styles')
-            .update({ background_class: bgUpdate.background_class })
+            .update({ 
+              background_class: bgUpdate.background_class,
+              ...(textColorForBg && { text_color_class: textColorForBg }),
+            })
             .eq('element_id', bgUpdate.element_id);
         } else {
           // @ts-ignore
@@ -356,6 +371,7 @@ export function UnifiedStyleModal({
             .insert([{
               element_id: bgUpdate.element_id,
               background_class: bgUpdate.background_class,
+              ...(textColorForBg && { text_color_class: textColorForBg }),
             }]);
         }
       }
