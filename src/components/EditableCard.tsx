@@ -5,6 +5,7 @@ import { BackgroundTextColorProvider } from '@/contexts/BackgroundTextColorConte
 import { UnifiedStyleModal } from './UnifiedStyleModal';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { getBackgroundStyleFromToken } from '@/lib/backgroundUtils';
 
 interface EditableCardProps {
   children: React.ReactNode;
@@ -89,34 +90,8 @@ export function EditableCard({
     loadStyles();
   }, [elementIdPrefix]);
 
-  // Build background style object for inline rendering
-  const getBackgroundStyle = (): React.CSSProperties => {
-    if (!background) return {};
-    
-    // Gradients - use backgroundImage with CSS variable
-    if (background.includes('gradient') || background.includes('mesh')) {
-      const cssVar = `--${background}`;
-      return { backgroundImage: `var(${cssVar})` };
-    }
-    
-    // Glass effects
-    if (background.includes('glass') || background.includes('liquid')) {
-      const cssVar = `--${background}`;
-      return { 
-        backgroundImage: `var(${cssVar})`,
-        backdropFilter: 'blur(12px)',
-      };
-    }
-    
-    // Solid colors (bg-* classes)
-    if (background.startsWith('bg-')) {
-      const colorToken = background.replace('bg-', '').split('/')[0];
-      return { backgroundColor: `hsl(var(--${colorToken}))` };
-    }
-
-    // Direct color tokens
-    return { backgroundColor: `hsl(var(--${background}))` };
-  };
+  // Use centralized utility for background styles
+  const backgroundStyle = getBackgroundStyleFromToken(background);
 
   const handleSave = (data: any) => {
     if (data.background) setBackground(data.background);
@@ -140,7 +115,7 @@ export function EditableCard({
         ),
         style: {
           ...((children as React.ReactElement<any>).props.style || {}),
-          ...getBackgroundStyle(),
+          ...backgroundStyle,
         },
       })
     : children;

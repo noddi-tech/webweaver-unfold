@@ -15,6 +15,7 @@ import type { ColorOption } from '@/config/colorSystem';
 import { Card } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import { UnifiedStyleModalLayoutTab } from './UnifiedStyleModalLayoutTab';
+import { getBackgroundStyleFromToken } from '@/lib/backgroundUtils';
 
 interface SubElement {
   id: string;
@@ -315,34 +316,8 @@ export function UnifiedStyleModal({
     return normalized1 === normalized2;
   };
 
-  // Build background style object for inline rendering (same logic as EditableCard)
-  const getPreviewBackgroundStyle = (): React.CSSProperties => {
-    if (!background) return {};
-    
-    // Gradients - use backgroundImage with CSS variable
-    if (background.includes('gradient') || background.includes('mesh')) {
-      const cssVar = `--${background}`;
-      return { backgroundImage: `var(${cssVar})` };
-    }
-    
-    // Glass effects
-    if (background.includes('glass') || background.includes('liquid')) {
-      const cssVar = `--${background}`;
-      return { 
-        backgroundImage: `var(${cssVar})`,
-        backdropFilter: 'blur(12px)',
-      };
-    }
-    
-    // Solid colors (bg-* classes)
-    if (background.startsWith('bg-')) {
-      const colorToken = background.replace('bg-', '').split('/')[0];
-      return { backgroundColor: `hsl(var(--${colorToken}))` };
-    }
-
-    // Direct color tokens
-    return { backgroundColor: `hsl(var(--${background}))` };
-  };
+  // Use centralized utility for background preview styles
+  const previewBackgroundStyle = getBackgroundStyleFromToken(background);
 
   const handleSave = async () => {
     setSaving(true);
@@ -493,7 +468,7 @@ export function UnifiedStyleModal({
             <label className="text-sm font-medium">Live Preview</label>
             <div 
               className="p-6 rounded-xl border"
-              style={getPreviewBackgroundStyle()}
+              style={previewBackgroundStyle}
             >
               {/* Icon card preview */}
               {iconCardBg && (
