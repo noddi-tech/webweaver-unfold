@@ -793,15 +793,22 @@ export function UnifiedStyleModal({
                         key={colorOption.value}
                         onClick={() => setNumberColor(colorOption.value.replace('text-', ''))}
                         className={cn(
-                          'p-3 rounded-lg border-2 transition-all hover:scale-105',
+                          'p-3 rounded-lg border-2 transition-all hover:scale-105 bg-primary/90 relative',
                           isColorSelected(colorOption.value, numberColor)
-                            ? 'border-primary ring-2 ring-primary/20'
-                            : 'border-transparent hover:border-border',
-                          background
+                            ? 'border-white ring-2 ring-white/50'
+                            : 'border-transparent hover:border-white/30'
                         )}
                         title={colorOption.description}
                       >
-                        <div className={cn('text-center font-bold text-xl', colorOption.className)}>Aa</div>
+                        {isColorSelected(colorOption.value, numberColor) && (
+                          <Check className="absolute top-1 right-1 w-4 h-4 text-primary bg-white rounded-full p-0.5" />
+                        )}
+                        <div 
+                          className="text-center font-bold text-xl"
+                          style={{ color: resolveTextColor(colorOption.value.replace('text-', '')) }}
+                        >
+                          Aa
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -816,16 +823,21 @@ export function UnifiedStyleModal({
                         key={`icon-${colorOption.value}`}
                         onClick={() => setIconColor(colorOption.value.replace('text-', ''))}
                         className={cn(
-                          'p-3 rounded-lg border-2 transition-all hover:scale-105',
+                          'p-3 rounded-lg border-2 transition-all hover:scale-105 bg-primary/90 relative',
                           isColorSelected(colorOption.value, iconColor)
-                            ? 'border-primary ring-2 ring-primary/20'
-                            : 'border-transparent hover:border-border',
-                          background
+                            ? 'border-white ring-2 ring-white/50'
+                            : 'border-transparent hover:border-white/30'
                         )}
                         title={colorOption.description}
                       >
+                        {isColorSelected(colorOption.value, iconColor) && (
+                          <Check className="absolute top-1 right-1 w-4 h-4 text-primary bg-white rounded-full p-0.5" />
+                        )}
                         <div className="text-center">
-                          <Settings className={cn('w-6 h-6 mx-auto', colorOption.className)} />
+                          <Settings 
+                            className="w-6 h-6 mx-auto" 
+                            style={{ color: resolveTextColor(colorOption.value.replace('text-', '')) }}
+                          />
                         </div>
                       </button>
                     ))}
@@ -842,15 +854,22 @@ export function UnifiedStyleModal({
                         key={colorOption.value}
                         onClick={() => setTitleColor(colorOption.value.replace('text-', ''))}
                         className={cn(
-                          'p-3 rounded-lg border-2 transition-all hover:scale-105',
+                          'p-3 rounded-lg border-2 transition-all hover:scale-105 bg-primary/90 relative',
                           isColorSelected(colorOption.value, titleColor)
-                            ? 'border-primary ring-2 ring-primary/20'
-                            : 'border-transparent hover:border-border',
-                          background
+                            ? 'border-white ring-2 ring-white/50'
+                            : 'border-transparent hover:border-white/30'
                         )}
                         title={colorOption.description}
                       >
-                        <div className={cn('text-center font-bold text-xl', colorOption.className)}>Aa</div>
+                        {isColorSelected(colorOption.value, titleColor) && (
+                          <Check className="absolute top-1 right-1 w-4 h-4 text-primary bg-white rounded-full p-0.5" />
+                        )}
+                        <div 
+                          className="text-center font-bold text-xl"
+                          style={{ color: resolveTextColor(colorOption.value.replace('text-', '')) }}
+                        >
+                          Aa
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -870,15 +889,22 @@ export function UnifiedStyleModal({
                         key={colorOption.value}
                         onClick={() => setDescriptionColor(colorOption.value.replace('text-', ''))}
                         className={cn(
-                          'p-3 rounded-lg border-2 transition-all hover:scale-105',
+                          'p-3 rounded-lg border-2 transition-all hover:scale-105 bg-primary/90 relative',
                           isColorSelected(colorOption.value, descriptionColor)
-                            ? 'border-primary ring-2 ring-primary/20'
-                            : 'border-transparent hover:border-border',
-                          background
+                            ? 'border-white ring-2 ring-white/50'
+                            : 'border-transparent hover:border-white/30'
                         )}
                         title={colorOption.description}
                       >
-                        <div className={cn('text-center font-bold text-xl', colorOption.className)}>Aa</div>
+                        {isColorSelected(colorOption.value, descriptionColor) && (
+                          <Check className="absolute top-1 right-1 w-4 h-4 text-primary bg-white rounded-full p-0.5" />
+                        )}
+                        <div 
+                          className="text-center font-bold text-xl"
+                          style={{ color: resolveTextColor(colorOption.value.replace('text-', '')) }}
+                        >
+                          Aa
+                        </div>
                       </button>
                     ))}
                   </div>
