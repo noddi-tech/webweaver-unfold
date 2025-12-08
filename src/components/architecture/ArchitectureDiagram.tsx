@@ -3,29 +3,19 @@ import { ArrowDown } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
-import { EditableBackground } from "@/components/EditableBackground";
+import { EditableCard } from "@/components/EditableCard";
+import { EditableCardTitle } from "@/components/EditableCardTitle";
+import { EditableCardDescription } from "@/components/EditableCardDescription";
 
 export default function ArchitectureDiagram() {
   const { h2, body } = useTypography();
   const { t } = useAppTranslation();
 
   const layers = [
-    {
-      title: t('architecture.diagram.layer_1.title', 'Frontend'),
-      subtitle: t('architecture.diagram.layer_1.subtitle', 'Booking + Admin UI'),
-    },
-    {
-      title: t('architecture.diagram.layer_2.title', 'Unified API Layer'),
-      subtitle: t('architecture.diagram.layer_2.subtitle', 'Single source of truth'),
-    },
-    {
-      title: t('architecture.diagram.layer_3.title', 'Backend Services'),
-      subtitle: t('architecture.diagram.layer_3.subtitle', 'Booking, Capacity, Recall, Analytics'),
-    },
-    {
-      title: t('architecture.diagram.layer_4.title', 'External Integrations'),
-      subtitle: t('architecture.diagram.layer_4.subtitle', 'Tire DBs, Scanners, Payments, ERP'),
-    },
+    { key: 'layer_1' },
+    { key: 'layer_2' },
+    { key: 'layer_3' },
+    { key: 'layer_4' },
   ];
   
   return (
@@ -47,34 +37,26 @@ export default function ArchitectureDiagram() {
         <div className="max-w-3xl mx-auto space-y-4">
           {layers.map((layer, index) => (
             <div key={index} className="space-y-4">
-              <EditableBackground
-                elementId={`architecture-diagram-layer-${index}`}
+              <EditableCard
+                elementIdPrefix={`architecture-diagram-layer-${index}`}
                 defaultBackground="glass-card"
-                allowedBackgrounds={[
-                  'bg-gradient-hero',
-                  'bg-gradient-sunset',
-                  'bg-gradient-warmth',
-                  'bg-gradient-ocean',
-                  'bg-gradient-fire',
-                  'glass-card',
-                  'liquid-glass',
-                  'glass-prominent',
-                  'bg-card',
-                  'bg-background',
-                  'bg-muted'
-                ]}
+                defaultTextColor="foreground"
               >
                 <Card>
                   <CardContent className="py-8 text-center">
-                    <EditableTranslation translationKey={`architecture.diagram.layer_${index + 1}.title`}>
-                      <h3 className="text-2xl font-bold mb-2 text-foreground">{layer.title}</h3>
+                    <EditableTranslation translationKey={`architecture.diagram.${layer.key}.title`}>
+                      <EditableCardTitle className="text-2xl font-bold mb-2">
+                        {t(`architecture.diagram.${layer.key}.title`)}
+                      </EditableCardTitle>
                     </EditableTranslation>
-                    <EditableTranslation translationKey={`architecture.diagram.layer_${index + 1}.subtitle`}>
-                      <p className="text-sm text-muted-foreground">{layer.subtitle}</p>
+                    <EditableTranslation translationKey={`architecture.diagram.${layer.key}.subtitle`}>
+                      <EditableCardDescription className="text-sm">
+                        {t(`architecture.diagram.${layer.key}.subtitle`)}
+                      </EditableCardDescription>
                     </EditableTranslation>
                   </CardContent>
                 </Card>
-              </EditableBackground>
+              </EditableCard>
               {index < layers.length - 1 && (
                 <div className="flex justify-center">
                   <ArrowDown className="w-6 h-6 text-muted-foreground" />

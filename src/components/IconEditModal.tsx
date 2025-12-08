@@ -37,25 +37,8 @@ const shapeOptions = [
   { value: 'rounded-none', label: 'Square' }
 ];
 
-const iconColorOptions = [
-  // Core colors
-  { value: 'primary-foreground', label: 'Primary Foreground' },
-  { value: 'foreground', label: 'Foreground' },
-  { value: 'primary', label: 'Primary' },
-  { value: 'secondary', label: 'Secondary' },
-  { value: 'accent', label: 'Accent' },
-  { value: 'muted-foreground', label: 'Muted' },
-  { value: 'white', label: 'White' },
-  // Semantic colors
-  { value: 'text-success', label: 'Success (Green)' },
-  { value: 'text-destructive', label: 'Destructive (Red)' },
-  { value: 'text-warning', label: 'Warning' },
-  { value: 'text-info', label: 'Info' },
-  // Brand colors
-  { value: 'text-vibrant-purple', label: 'Vibrant Purple' },
-  { value: 'text-brand-orange', label: 'Brand Orange' },
-  { value: 'text-brand-teal', label: 'Brand Teal' }
-];
+// Icon color options now come from useColorSystem hook (database-driven)
+// Moved inside component to use TEXT_COLOR_OPTIONS from database
 
 export function IconEditModal({
   isOpen,
@@ -73,7 +56,7 @@ export function IconEditModal({
   const [selectedShape, setSelectedShape] = useState(currentShape);
   const [activeTab, setActiveTab] = useState('gradients');
 
-  const { SOLID_COLORS, GRADIENT_COLORS, GLASS_EFFECTS } = useColorSystem();
+  const { SOLID_COLORS, GRADIENT_COLORS, GLASS_EFFECTS, TEXT_COLOR_OPTIONS } = useColorSystem();
 
   const selectedSizeConfig = sizeOptions.find(s => s.value === selectedSize) || sizeOptions[1];
 
@@ -277,23 +260,32 @@ export function IconEditModal({
         {/* ICON COLOR PICKER */}
         <div className="border-t pt-6 mt-4">
           <h3 className="text-sm font-semibold mb-3">Icon Color</h3>
-          <div className="grid grid-cols-5 gap-2">
-            {iconColorOptions.map((color) => (
-              <button
-                key={color.value}
-                onClick={() => setSelectedIconColor(color.value)}
-                className={cn(
-                  'p-3 rounded-lg border-2 transition-all hover:scale-105',
-                  selectedIconColor === color.value
-                    ? 'border-primary ring-2 ring-primary/20'
-                    : 'border-border hover:border-primary/50'
-                )}
-                title={color.label}
-              >
-                <div className="text-2xl font-bold" style={{ color: `hsl(var(--${color.value}))` }}>A</div>
-                <div className="text-xs mt-1 text-muted-foreground truncate">{color.label}</div>
-              </button>
-            ))}
+          <div className="grid grid-cols-5 gap-2 max-h-[300px] overflow-y-auto">
+            {TEXT_COLOR_OPTIONS.map((color) => {
+              const colorToken = color.value.replace('text-', '');
+              const isSelected = selectedIconColor === colorToken || selectedIconColor === color.value;
+              return (
+                <button
+                  key={color.value}
+                  onClick={() => setSelectedIconColor(colorToken)}
+                  className={cn(
+                    'p-3 rounded-lg border-2 transition-all hover:scale-105',
+                    isSelected
+                      ? 'border-primary ring-2 ring-primary/20'
+                      : 'border-border hover:border-primary/50'
+                  )}
+                  title={color.description || color.label}
+                >
+                  <div 
+                    className="text-2xl font-bold" 
+                    style={{ color: color.hslValue ? `hsl(${color.hslValue})` : `hsl(var(--${colorToken}))` }}
+                  >
+                    A
+                  </div>
+                  <div className="text-xs mt-1 text-muted-foreground truncate">{color.label}</div>
+                </button>
+              );
+            })}
           </div>
         </div>
 

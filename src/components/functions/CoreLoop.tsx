@@ -2,37 +2,21 @@ import { Calendar, Zap, Wrench, BarChart3, RefreshCcw } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableCard } from "@/components/EditableCard";
+import { EditableCardIcon } from "@/components/EditableCardIcon";
+import { EditableCardTitle } from "@/components/EditableCardTitle";
+import { EditableCardDescription } from "@/components/EditableCardDescription";
 
 export default function CoreLoop() {
   const { h2, body } = useTypography();
   const { t } = useAppTranslation();
 
   const steps = [
-    {
-      icon: Calendar,
-      title: t('core_loop.step_1.title', 'Book.'),
-      description: t('core_loop.step_1.description', 'The customer picks a time — Navio handles the rest.'),
-    },
-    {
-      icon: Zap,
-      title: t('core_loop.step_2.title', 'Plan.'),
-      description: t('core_loop.step_2.description', 'Routes and lanes auto-optimize in real time.'),
-    },
-    {
-      icon: Wrench,
-      title: t('core_loop.step_3.title', 'Execute.'),
-      description: t('core_loop.step_3.description', 'Technicians get clear, connected workflows.'),
-    },
-    {
-      icon: BarChart3,
-      title: t('core_loop.step_4.title', 'Analyze.'),
-      description: t('core_loop.step_4.description', 'Data flows instantly into insights.'),
-    },
-    {
-      icon: RefreshCcw,
-      title: t('core_loop.step_5.title', 'Re-engage.'),
-      description: t('core_loop.step_5.description', 'Customers return before they even think to.'),
-    },
+    { icon: Calendar, key: 'step_1' },
+    { icon: Zap, key: 'step_2' },
+    { icon: Wrench, key: 'step_3' },
+    { icon: BarChart3, key: 'step_4' },
+    { icon: RefreshCcw, key: 'step_5' },
   ];
   
   return (
@@ -55,24 +39,32 @@ export default function CoreLoop() {
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <div key={index} className="text-center relative">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                  <Icon className="w-8 h-8 text-primary" />
+              <EditableCard
+                key={index}
+                elementIdPrefix={`core-loop-step-${index}`}
+                defaultBackground="bg-transparent"
+                defaultTextColor="foreground"
+                className="text-center relative"
+              >
+                <div>
+                  <div className="flex justify-center mb-4">
+                    <EditableCardIcon icon={Icon} size="lg" containerClassName="rounded-full" />
+                  </div>
+                  <EditableTranslation translationKey={`core_loop.${step.key}.title`}>
+                    <EditableCardTitle className="text-xl font-bold mb-2">
+                      {t(`core_loop.${step.key}.title`)}
+                    </EditableCardTitle>
+                  </EditableTranslation>
+                  <EditableTranslation translationKey={`core_loop.${step.key}.description`}>
+                    <EditableCardDescription className="text-sm">
+                      {t(`core_loop.${step.key}.description`)}
+                    </EditableCardDescription>
+                  </EditableTranslation>
                 </div>
-                <EditableTranslation translationKey={`core_loop.step_${index + 1}.title`}>
-                  <h3 className="text-xl font-bold mb-2 text-foreground">
-                    {step.title}
-                  </h3>
-                </EditableTranslation>
-                <EditableTranslation translationKey={`core_loop.step_${index + 1}.description`}>
-                  <p className="text-sm text-muted-foreground">
-                    {step.description}
-                  </p>
-                </EditableTranslation>
                 {index < steps.length - 1 && (
                   <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-border" />
                 )}
-              </div>
+              </EditableCard>
             );
           })}
         </div>

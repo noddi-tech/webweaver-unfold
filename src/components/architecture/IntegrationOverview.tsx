@@ -3,33 +3,20 @@ import { Database, ScanLine, CreditCard, FileText } from "lucide-react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
-import { EditableBackground } from "@/components/EditableBackground";
+import { EditableCard } from "@/components/EditableCard";
+import { EditableCardIcon } from "@/components/EditableCardIcon";
+import { EditableCardTitle } from "@/components/EditableCardTitle";
+import { EditableCardDescription } from "@/components/EditableCardDescription";
 
 export default function IntegrationOverview() {
   const { h2, body } = useTypography();
   const { t } = useAppTranslation();
 
   const integrations = [
-    {
-      icon: Database,
-      name: t('architecture.integrations.tire_databases.name', 'Tire Databases'),
-      description: t('architecture.integrations.tire_databases.description', 'Real-time inventory'),
-    },
-    {
-      icon: ScanLine,
-      name: t('architecture.integrations.laser_scanners.name', 'Laser Scanners'),
-      description: t('architecture.integrations.laser_scanners.description', 'Instant tire depth'),
-    },
-    {
-      icon: CreditCard,
-      name: t('architecture.integrations.payment_gateways.name', 'Payment Gateways'),
-      description: t('architecture.integrations.payment_gateways.description', 'Secure checkout'),
-    },
-    {
-      icon: FileText,
-      name: t('architecture.integrations.crm_erp.name', 'CRM / ERP Systems'),
-      description: t('architecture.integrations.crm_erp.description', 'Data flow'),
-    },
+    { icon: Database, key: 'tire_databases' },
+    { icon: ScanLine, key: 'laser_scanners' },
+    { icon: CreditCard, key: 'payment_gateways' },
+    { icon: FileText, key: 'crm_erp' },
   ];
   
   return (
@@ -51,43 +38,32 @@ export default function IntegrationOverview() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {integrations.map((integration, index) => {
             const Icon = integration.icon;
+            
             return (
-              <EditableBackground
+              <EditableCard
                 key={index}
-                elementId={`architecture-integration-${index}`}
+                elementIdPrefix={`architecture-integration-${index}`}
                 defaultBackground="glass-card"
-                allowedBackgrounds={[
-                  'bg-gradient-hero',
-                  'bg-gradient-sunset',
-                  'bg-gradient-warmth',
-                  'bg-gradient-ocean',
-                  'bg-gradient-fire',
-                  'glass-card',
-                  'liquid-glass',
-                  'glass-prominent',
-                  'bg-card',
-                  'bg-background',
-                  'bg-muted'
-                ]}
+                defaultTextColor="foreground"
               >
-                <Card className="text-center hover:shadow-lg transition-shadow">
+                <Card className="text-center hover:shadow-lg transition-shadow h-full">
                   <CardContent className="pt-8 pb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-                      <Icon className="w-8 h-8 text-primary" />
+                    <div className="flex justify-center mb-4">
+                      <EditableCardIcon icon={Icon} size="lg" containerClassName="rounded-full" />
                     </div>
-                    <EditableTranslation translationKey={`architecture.integrations.${['tire_databases', 'laser_scanners', 'payment_gateways', 'crm_erp'][index]}.name`}>
-                      <h3 className="text-lg font-bold mb-2 text-foreground">
-                        {integration.name}
-                      </h3>
+                    <EditableTranslation translationKey={`architecture.integrations.${integration.key}.name`}>
+                      <EditableCardTitle className="text-lg font-bold mb-2">
+                        {t(`architecture.integrations.${integration.key}.name`)}
+                      </EditableCardTitle>
                     </EditableTranslation>
-                    <EditableTranslation translationKey={`architecture.integrations.${['tire_databases', 'laser_scanners', 'payment_gateways', 'crm_erp'][index]}.description`}>
-                      <p className="text-sm text-muted-foreground">
-                        {integration.description}
-                      </p>
+                    <EditableTranslation translationKey={`architecture.integrations.${integration.key}.description`}>
+                      <EditableCardDescription className="text-sm">
+                        {t(`architecture.integrations.${integration.key}.description`)}
+                      </EditableCardDescription>
                     </EditableTranslation>
                   </CardContent>
                 </Card>
-              </EditableBackground>
+              </EditableCard>
             );
           })}
         </div>
