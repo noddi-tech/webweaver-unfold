@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Calendar, Package, Bell, Map, Workflow, PieChart, Building2, ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -74,16 +74,17 @@ export default function FunctionCards() {
                                 </EditableCardTitle>
                               </EditableTranslation>
                               <EditableTranslation translationKey={`function_cards.${func.key}.headline`}>
-                                <CardDescription className="text-base font-medium">
+                                <EditableCardDescription className="text-base font-medium" muted={false}>
                                   {t(`function_cards.${func.key}.headline`)}
-                                </CardDescription>
+                                </EditableCardDescription>
                               </EditableTranslation>
                             </div>
                           </div>
                           <ChevronDown
-                            className={`w-5 h-5 text-muted-foreground transition-transform ${
+                            className={`w-5 h-5 transition-transform ${
                               isOpen ? "transform rotate-180" : ""
                             }`}
+                            style={{ color: 'inherit' }}
                           />
                         </div>
                       </CardHeader>
@@ -97,11 +98,13 @@ export default function FunctionCards() {
                         </EditableTranslation>
                         <ul className="space-y-2">
                           {[1, 2, 3].map((fIndex) => (
-                            <li key={fIndex} className="flex items-center text-sm text-muted-foreground">
-                              <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3" />
-                              <EditableTranslation translationKey={`function_cards.${func.key}.feature_${fIndex}`}>
-                                <span>{t(`function_cards.${func.key}.feature_${fIndex}`)}</span>
-                              </EditableTranslation>
+                            <li key={fIndex} className="flex items-center text-sm">
+                              <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3 flex-shrink-0" />
+                              <EditableCardDescription muted={true} className="inline">
+                                <EditableTranslation translationKey={`function_cards.${func.key}.feature_${fIndex}`}>
+                                  <span>{t(`function_cards.${func.key}.feature_${fIndex}`)}</span>
+                                </EditableTranslation>
+                              </EditableCardDescription>
                             </li>
                           ))}
                         </ul>
