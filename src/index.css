@@ -60,6 +60,11 @@ All colors MUST be HSL.
     --card-foreground: 0 0% 100%;              /* White text on cards | Used in: Card content, Hero text */
     --card-background: 0 0% 98%;               /* Light surface for glass cards | Used in: Glass card backgrounds */
     --card-border: 0 0% 90%;                   /* Border for glass cards | Used in: Glass card borders */
+    
+    /* Glass Effects - CSS Variables - Using LIGHT card-background */
+    --glass-solid: hsl(0 0% 98% / 1.0);
+    --glass-card: hsl(0 0% 98% / 0.95);
+    --glass-prominent: hsl(0 0% 98% / 0.98);
     --muted: 0 0% 96%;                         /* Light gray surfaces | Used in: Disabled states, secondary sections */
     --muted-foreground: 0 0% 35%;              /* Darker gray for AAA contrast (7:1) | Used in: Descriptions, labels, helper text */
     

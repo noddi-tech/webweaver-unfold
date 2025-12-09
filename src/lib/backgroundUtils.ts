@@ -28,10 +28,10 @@ export function getBackgroundStyleFromToken(background: string): React.CSSProper
     return { backgroundImage: `var(--${cssVarName})` };
   }
   
-  // Glass effects - use background (not backgroundImage) for HSL color values
+  // Glass effects - use LIGHT card-background, not the CSS variable (which may have wrong value)
   if (cssVarName.includes('glass') || cssVarName.includes('liquid')) {
     return { 
-      background: `var(--${cssVarName})`,
+      background: 'hsl(var(--card-background) / 0.95)',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
       border: '1px solid hsl(var(--card-border))',
