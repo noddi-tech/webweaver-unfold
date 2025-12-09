@@ -28,12 +28,15 @@ export function getBackgroundStyleFromToken(background: string): React.CSSProper
     return { backgroundImage: `var(--${cssVarName})` };
   }
   
-  // Glass effects
+  // Glass effects - use background (not backgroundImage) for HSL color values
   if (cssVarName.includes('glass') || cssVarName.includes('liquid')) {
     return { 
-      backgroundImage: `var(--${cssVarName})`,
-      backdropFilter: 'blur(12px)',
-    };
+      background: `var(--${cssVarName})`,
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      border: '1px solid hsl(var(--card-border))',
+      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+    } as React.CSSProperties;
   }
   
   // Solid colors - handle opacity notation (e.g., primary/10)
