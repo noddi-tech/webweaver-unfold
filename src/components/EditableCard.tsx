@@ -38,6 +38,7 @@ export function EditableCard({
   const [textColor, setTextColor] = useState(defaultTextColor);
   const [iconColor, setIconColor] = useState('primary');
   const [iconBackground, setIconBackground] = useState('bg-primary/10');
+  const [iconSize, setIconSize] = useState('default');
   const [isLoading, setIsLoading] = useState(true);
 
   // Load saved styles from database
@@ -59,15 +60,18 @@ export function EditableCard({
           setTextColor(bgData.text_color_class);
         }
 
-        // Load icon color
-        const { data: iconColorData } = await supabase
-          .from('text_content')
-          .select('color_token')
-          .eq('element_id', `${elementIdPrefix}-icon-color`)
+        // Load icon color and size from icon_styles table
+        const { data: iconStyleData } = await supabase
+          .from('icon_styles')
+          .select('icon_color_token, size')
+          .eq('element_id', `${elementIdPrefix}-icon`)
           .maybeSingle();
 
-        if (iconColorData?.color_token) {
-          setIconColor(iconColorData.color_token);
+        if (iconStyleData?.icon_color_token) {
+          setIconColor(iconStyleData.icon_color_token);
+        }
+        if (iconStyleData?.size) {
+          setIconSize(iconStyleData.size);
         }
 
         // Load icon background
@@ -97,6 +101,7 @@ export function EditableCard({
     if (data.background) setBackground(data.background);
     if (data.iconColor) setIconColor(data.iconColor);
     if (data.iconCardBg) setIconBackground(data.iconCardBg);
+    if (data.iconSize) setIconSize(data.iconSize);
     // Update text color from title color (main text color for the card)
     if (data.titleColor) setTextColor(data.titleColor);
   };
@@ -106,25 +111,14 @@ export function EditableCard({
     textColor,
     iconColor,
     iconBackground,
+    iconSize,
   };
 
-  // Clone child element and apply background styles directly
-  const childWithStyles = React.isValidElement(children)
-    ? React.cloneElement(children as React.ReactElement<any>, {
-        className: cn(
-          (children as React.ReactElement<any>).props.className,
-          'rounded-xl overflow-hidden'
-        ),
-        style: {
-          ...((children as React.ReactElement<any>).props.style || {}),
-          ...backgroundStyle,
-        },
-      })
-    : children;
-
+  // Apply background to wrapper div instead of cloning children
   return (
     <div
-      className={cn('relative', className)}
+      className={cn('relative rounded-xl overflow-hidden', className)}
+      style={backgroundStyle}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -145,7 +139,7 @@ export function EditableCard({
       {/* Card Content with inherited styles */}
       <BackgroundTextColorProvider textColor={textColor}>
         <EditableCardContext.Provider value={contextValue}>
-          {childWithStyles}
+          {children}
         </EditableCardContext.Provider>
       </BackgroundTextColorProvider>
 
@@ -169,12 +163,14 @@ interface EditableCardContextValue {
   textColor: string;
   iconColor: string;
   iconBackground: string;
+  iconSize: string;
 }
 
 const EditableCardContext = React.createContext<EditableCardContextValue>({
   textColor: 'foreground',
   iconColor: 'primary',
   iconBackground: 'bg-primary/10',
+  iconSize: 'default',
 });
 
 export function useEditableCardContext() {
