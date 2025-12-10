@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { LanguageLink } from "@/components/LanguageLink";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
-import { EditableBackground } from "@/components/EditableBackground";
+import { EditableCard } from "@/components/EditableCard";
 
 export default function PartnershipModel() {
   const { h2, body } = useTypography();
@@ -30,36 +30,23 @@ export default function PartnershipModel() {
             </p>
           </div>
 
-          <EditableBackground
-            elementId="partners-benefits-card"
+          <EditableCard
+            elementIdPrefix="partners-benefits-card"
             defaultBackground="glass-card"
-            allowedBackgrounds={[
-              'bg-gradient-hero',
-              'bg-gradient-sunset',
-              'bg-gradient-warmth',
-              'bg-gradient-ocean',
-              'bg-gradient-fire',
-              'glass-card',
-              'liquid-glass',
-              'glass-prominent',
-              'bg-card',
-              'bg-background',
-              'bg-muted'
-            ]}
+            defaultTextColor="foreground"
+            className="mb-8"
           >
-            <Card className="mb-8">
-              <CardContent className="pt-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {benefits.map((benefit, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />
-                      <span className="text-lg text-foreground font-medium">{benefit}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </EditableBackground>
+            <CardContent className="pt-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0" />
+                    <span className="text-lg font-medium">{benefit}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </EditableCard>
 
           <div className="text-center">
             <Button size="lg" className="text-lg px-8 py-6 group" asChild>
