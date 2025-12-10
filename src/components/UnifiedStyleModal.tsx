@@ -1081,6 +1081,8 @@ export function UnifiedStyleModal({
                   setCardBorderRadius={setCardBorderRadius}
                   cardGap={cardGap}
                   setCardGap={setCardGap}
+                  cardShadow={cardShadow}
+                  setCardShadow={setCardShadow}
                 />
               </TabsContent>
             </Tabs>
