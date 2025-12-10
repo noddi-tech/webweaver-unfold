@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { TrendingUp, Users, Award, Target } from "lucide-react";
 import { Counter } from "@/components/ui/counter";
 import { Button } from "@/components/ui/button";
@@ -6,14 +6,12 @@ import { LanguageLink } from "@/components/LanguageLink";
 import { ArrowRight } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
-import { EditableBackground } from "@/components/EditableBackground";
+import { EditableCard } from "@/components/EditableCard";
 import { EditableIcon } from "@/components/EditableIcon";
-import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
 
 export default function ProofMetricsHomepage() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const { t } = useAppTranslation();
-  const { allowedBackgrounds } = useAllowedBackgrounds();
 
   const metrics = [
     {
@@ -66,42 +64,42 @@ export default function ProofMetricsHomepage() {
           {metrics.map((metric, index) => {
             const Icon = metric.icon;
             return (
-              <EditableBackground
+              <div
                 key={index}
-                elementId={`proof-metric-card-${index}`}
-                defaultBackground="bg-card"
-                allowedBackgrounds={allowedBackgrounds}
+                className={`transition-all duration-500 ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <Card 
-                  className={`hover-scale transition-all duration-500 ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                  }`}
-                  style={{ transitionDelay: `${index * 100}ms` }}
+                <EditableCard
+                  elementIdPrefix={`proof-metric-card-${index}`}
+                  defaultBackground="bg-card"
+                  defaultTextColor="foreground"
+                  className="hover-scale h-full"
                 >
                   <CardContent className="p-6 text-center">
-                    <EditableIcon 
-                      elementId={`proof-metric-icon-${index}`}
-                      icon={Icon}
-                      defaultBackground="bg-gradient-primary"
-                      size="default"
-                      className="mx-auto mb-4"
+                    <EditableIcon
+                    elementId={`proof-metric-icon-${index}`}
+                    icon={Icon}
+                    defaultBackground="bg-gradient-primary"
+                    size="default"
+                    className="mx-auto mb-4"
+                  />
+                  <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
+                    <Counter 
+                      end={metric.value} 
+                      suffix={metric.suffix}
+                      prefix={metric.prefix}
                     />
-                    <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
-                      <Counter 
-                        end={metric.value} 
-                        suffix={metric.suffix}
-                        prefix={metric.prefix}
-                      />
-                    </div>
-                    <div className="text-sm font-semibold text-foreground mb-1">
-                      {metric.label}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {metric.context}
-                    </p>
-                  </CardContent>
-                </Card>
-              </EditableBackground>
+                  </div>
+                  <div className="text-sm font-semibold mb-1">
+                    {metric.label}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {metric.context}
+                  </p>
+                </CardContent>
+              </EditableCard>
             );
           })}
         </div>

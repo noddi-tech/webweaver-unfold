@@ -3,14 +3,14 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactHero from "@/components/contact/ContactHero";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { HreflangTags } from "@/components/HreflangTags";
-import { EditableBackground } from "@/components/EditableBackground";
+import { EditableCard } from "@/components/EditableCard";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -158,144 +158,144 @@ const Contact = () => {
           <div className="container max-w-container">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}
-          <EditableBackground
-            elementId="contact-form-card"
+          <EditableCard
+            elementIdPrefix="contact-form-card"
             defaultBackground="glass-card"
+            defaultTextColor="foreground"
+            className="shadow-xl"
           >
-            <Card className="shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-2xl text-foreground">{settings?.form_title ?? "Send us a message"}</CardTitle>
-                <CardDescription>{settings?.form_description ?? "Fill out the form below and we'll get back to you as soon as possible."}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-1 block">First Name *</label>
-                      <Input
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        placeholder="John"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-1 block">Last Name</label>
-                      <Input
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        placeholder="Doe"
-                      />
-                    </div>
-                  </div>
+            <CardHeader>
+              <CardTitle className="text-2xl">{settings?.form_title ?? "Send us a message"}</CardTitle>
+              <CardDescription>{settings?.form_description ?? "Fill out the form below and we'll get back to you as soon as possible."}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-foreground mb-1 block">Email *</label>
+                    <label className="text-sm font-medium mb-1 block">First Name *</label>
                     <Input
-                      name="email"
-                      type="email"
-                      value={formData.email}
+                      name="firstName"
+                      value={formData.firstName}
                       onChange={handleInputChange}
-                      placeholder="john@example.com"
+                      placeholder="John"
                       required
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-foreground mb-1 block">Subject</label>
+                    <label className="text-sm font-medium mb-1 block">Last Name</label>
                     <Input
-                      name="subject"
-                      value={formData.subject}
+                      name="lastName"
+                      value={formData.lastName}
                       onChange={handleInputChange}
-                      placeholder="How can we help?"
+                      placeholder="Doe"
                     />
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-1 block">Message *</label>
-                    <Textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      placeholder="Your message..."
-                      rows={5}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" disabled={isSubmitting} className="w-full">
-                    {isSubmitting ? "Sending..." : (
-                      <>
-                        <Send className="w-4 h-4 mr-2" />
-                        Send Message
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </EditableBackground>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Email *</label>
+                  <Input
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="john@example.com"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Subject</label>
+                  <Input
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    placeholder="How can we help?"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Message *</label>
+                  <Textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    placeholder="Your message..."
+                    rows={5}
+                    required
+                  />
+                </div>
+                <Button type="submit" disabled={isSubmitting} className="w-full">
+                  {isSubmitting ? "Sending..." : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Message
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </EditableCard>
 
           {/* Contact Information */}
           <div className="space-y-8">
             {settings?.show_contact_methods_tab !== false && (
-              <EditableBackground
-                elementId="contact-methods-card"
+              <EditableCard
+                elementIdPrefix="contact-methods-card"
                 defaultBackground="glass-card"
+                defaultTextColor="foreground"
+                className="shadow-xl"
               >
-                <Card className="shadow-xl">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-foreground">{settings?.get_in_touch_title ?? "Get in touch"}</CardTitle>
-                    <CardDescription>
-                      Reach out to us through any of these channels.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {contactItems.map((item) => {
-                      const IconComponent = item.icon_name === 'Mail' ? Mail : 
-                                           item.icon_name === 'Phone' ? Phone : MapPin;
-                      return (
-                        <a
-                          key={item.id}
-                          href={item.link_url || '#'}
-                          className="flex items-start gap-4 p-4 rounded-lg hover:bg-accent/10 transition-colors group"
-                        >
-                          <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                            <IconComponent className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-foreground">{item.title}</p>
-                            <p className="text-muted-foreground text-sm">{item.value}</p>
-                          </div>
-                        </a>
-                      );
-                    })}
-                  </CardContent>
-                </Card>
-              </EditableBackground>
+                <CardHeader>
+                  <CardTitle className="text-2xl">{settings?.get_in_touch_title ?? "Get in touch"}</CardTitle>
+                  <CardDescription>
+                    Reach out to us through any of these channels.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {contactItems.map((item) => {
+                    const IconComponent = item.icon_name === 'Mail' ? Mail : 
+                                         item.icon_name === 'Phone' ? Phone : MapPin;
+                    return (
+                      <a
+                        key={item.id}
+                        href={item.link_url || '#'}
+                        className="flex items-start gap-4 p-4 rounded-lg hover:bg-accent/10 transition-colors group"
+                      >
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                          <IconComponent className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{item.title}</p>
+                          <p className="text-muted-foreground text-sm">{item.value}</p>
+                        </div>
+                      </a>
+                    );
+                  })}
+                </CardContent>
+              </EditableCard>
             )}
 
             {settings?.show_business_hours_tab !== false && (
-              <EditableBackground
-                elementId="contact-hours-card"
+              <EditableCard
+                elementIdPrefix="contact-hours-card"
                 defaultBackground="glass-card"
+                defaultTextColor="foreground"
+                className="shadow-xl"
               >
-                <Card className="shadow-xl">
-                  <CardHeader>
-                    <CardTitle className="text-xl text-foreground">{settings?.business_hours_title ?? "Business Hours"}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {hours.map((hour) => (
-                        <div key={hour.id} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
-                          <span className="font-medium text-foreground">{hour.day_name}</span>
-                          <span className="text-muted-foreground">
-                            {hour.closed ? 'Closed' : `${hour.open_time} - ${hour.close_time}`}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </EditableBackground>
+                <CardHeader>
+                  <CardTitle className="text-xl">{settings?.business_hours_title ?? "Business Hours"}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {hours.map((hour) => (
+                      <div key={hour.id} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
+                        <span className="font-medium">{hour.day_name}</span>
+                        <span className="text-muted-foreground">
+                          {hour.closed ? 'Closed' : `${hour.open_time} - ${hour.close_time}`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </EditableCard>
             )}
           </div>
         </div>

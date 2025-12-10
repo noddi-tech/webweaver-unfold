@@ -4,7 +4,7 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { LockedText } from "@/components/LockedText";
 import { EditableIcon } from "@/components/EditableIcon";
-import { EditableBackground } from "@/components/EditableBackground";
+import { EditableCard } from "@/components/EditableCard";
 
 const testimonials = [
   {
@@ -81,86 +81,86 @@ export default function TrustProof() {
           {tractionMetrics.map((metric, index) => {
             const Icon = metric.icon;
             return (
-              <EditableBackground
+              <EditableCard
                 key={index}
-                elementId={`trust-proof-metric-card-${index}`}
+                elementIdPrefix={`trust-proof-metric-card-${index}`}
                 defaultBackground="bg-gradient-hero"
+                defaultTextColor="white"
+                className="border-0 hover-scale"
               >
-                <Card className="border-0 hover-scale">
-                  <CardContent className="p-6 text-center">
-                    <EditableIcon 
-                      elementId={`trust-proof-metric-icon-${index}`}
-                      icon={Icon}
-                      defaultBackground="bg-gradient-primary"
-                      size="default"
-                      shape="rounded-full"
-                      className="mx-auto mb-4"
-                    />
-                    <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.value`}>
-                      <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
-                        {metric.value}
-                      </div>
-                    </EditableTranslation>
-                    <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.label`}>
-                      <div className="text-sm font-semibold text-white/90 mb-2">{metric.label}</div>
-                    </EditableTranslation>
-                    <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.description`}>
-                      <div className="text-xs text-white/70">{metric.description}</div>
-                    </EditableTranslation>
-                  </CardContent>
-                </Card>
-              </EditableBackground>
+                <CardContent className="p-6 text-center">
+                  <EditableIcon 
+                    elementId={`trust-proof-metric-icon-${index}`}
+                    icon={Icon}
+                    defaultBackground="bg-gradient-primary"
+                    size="default"
+                    shape="rounded-full"
+                    className="mx-auto mb-4"
+                  />
+                  <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.value`}>
+                    <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
+                      {metric.value}
+                    </div>
+                  </EditableTranslation>
+                  <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.label`}>
+                    <div className="text-sm font-semibold mb-2">{metric.label}</div>
+                  </EditableTranslation>
+                  <EditableTranslation translationKey={`trust_proof.metric_${index + 1}.description`}>
+                    <div className="text-xs opacity-70">{metric.description}</div>
+                  </EditableTranslation>
+                </CardContent>
+              </EditableCard>
             );
           })}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* NPS Score Display */}
-          <EditableBackground
-            elementId="trust-proof-nps-card"
+          <EditableCard
+            elementIdPrefix="trust-proof-nps-card"
             defaultBackground="bg-gradient-hero"
+            defaultTextColor="white"
+            className="border-0"
           >
-            <Card className="border-0">
-              <CardContent className="p-8">
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-background/90 backdrop-blur-sm mb-4 shadow-lg">
-                    <div>
-                      <EditableTranslation translationKey="trust_proof.nps.value">
-                        <div className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                          {t('trust_proof.nps.value', '~90')}
-                        </div>
-                      </EditableTranslation>
-                      <EditableTranslation translationKey="trust_proof.nps.label">
-                        <div className="text-sm font-medium text-muted-foreground">{t('trust_proof.nps.label', 'NPS Score')}</div>
-                      </EditableTranslation>
-                    </div>
-                  </div>
-                  <EditableTranslation translationKey="trust_proof.nps.title">
-                    <h3 className="text-2xl font-bold mb-2 text-white">
-                      {t('trust_proof.nps.title', 'Industry-Leading Customer Satisfaction')}
-                    </h3>
-                  </EditableTranslation>
-                  <div className="inline-block px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg mb-6">
-                    <EditableTranslation translationKey="trust_proof.nps.callout">
-                      <p className="text-sm font-medium text-primary">{t('trust_proof.nps.callout', '3x better than industry average (20-30)')}</p>
+            <CardContent className="p-8">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-background/90 backdrop-blur-sm mb-4 shadow-lg">
+                  <div>
+                    <EditableTranslation translationKey="trust_proof.nps.value">
+                      <div className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                        {t('trust_proof.nps.value', '~90')}
+                      </div>
+                    </EditableTranslation>
+                    <EditableTranslation translationKey="trust_proof.nps.label">
+                      <div className="text-sm font-medium text-muted-foreground">{t('trust_proof.nps.label', 'NPS Score')}</div>
                     </EditableTranslation>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {npsCategories.map((category, index) => (
-                      <div key={index} className="bg-background/50 backdrop-blur-sm rounded-lg p-4">
-                        <LockedText reason="Metric value from database">
-                          <div className="text-2xl font-bold text-primary">{category.score}</div>
-                        </LockedText>
-                        <EditableTranslation translationKey={`trust_proof.nps.category_${index + 1}.label`}>
-                          <div className="text-sm text-muted-foreground">{category.label}</div>
-                        </EditableTranslation>
-                      </div>
-                    ))}
-                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </EditableBackground>
+                <EditableTranslation translationKey="trust_proof.nps.title">
+                  <h3 className="text-2xl font-bold mb-2">
+                    {t('trust_proof.nps.title', 'Industry-Leading Customer Satisfaction')}
+                  </h3>
+                </EditableTranslation>
+                <div className="inline-block px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg mb-6">
+                  <EditableTranslation translationKey="trust_proof.nps.callout">
+                    <p className="text-sm font-medium text-primary">{t('trust_proof.nps.callout', '3x better than industry average (20-30)')}</p>
+                  </EditableTranslation>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {npsCategories.map((category, index) => (
+                    <div key={index} className="bg-background/50 backdrop-blur-sm rounded-lg p-4">
+                      <LockedText reason="Metric value from database">
+                        <div className="text-2xl font-bold text-primary">{category.score}</div>
+                      </LockedText>
+                      <EditableTranslation translationKey={`trust_proof.nps.category_${index + 1}.label`}>
+                        <div className="text-sm text-muted-foreground">{category.label}</div>
+                      </EditableTranslation>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </EditableCard>
 
           {/* Conversion Stats */}
           <Card>

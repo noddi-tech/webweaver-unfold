@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { X, Check, ArrowRight } from "lucide-react";
 import { LanguageLink } from "@/components/LanguageLink";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
-import { EditableBackground } from "@/components/EditableBackground";
-import { EditableIcon } from "@/components/EditableIcon";
+import { EditableCard } from "@/components/EditableCard";
 import { EditableListIcon } from "@/components/EditableListIcon";
 
 export default function WhyNavio() {
@@ -47,74 +46,70 @@ export default function WhyNavio() {
 
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Before Card */}
-          <EditableBackground
-            elementId="why-noddi-before-card"
+          <EditableCard
+            elementIdPrefix="why-noddi-before-card"
             defaultBackground="bg-card"
+            defaultTextColor="foreground"
+            className={`border-2 border-destructive/20 transition-all duration-700 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
           >
-            <Card 
-              className={`border-2 border-destructive/20 transition-all duration-700 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-              }`}
-            >
-              <CardContent className="p-8">
-                <div className="mb-6">
-                  <EditableTranslation translationKey="why_noddi.before.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-                    <h3 className="text-2xl font-bold">{t('why_noddi.before.title', 'Before Navio')}</h3>
-                  </EditableTranslation>
-                </div>
-                <ul className="space-y-4">
-                  {beforeItems.map((item, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <EditableListIcon
-                        elementId="why-noddi-before-list-icon"
-                        icon={X}
-                        defaultColor="text-destructive"
-                        className="w-5 h-5 flex-shrink-0 mt-0.5"
-                      />
-                      <EditableTranslation translationKey={`why_noddi.before.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                        <span>{item}</span>
-                      </EditableTranslation>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </EditableBackground>
+            <CardContent className="p-8">
+              <div className="mb-6">
+                <EditableTranslation translationKey="why_noddi.before.title" onSave={() => setRefreshKey(prev => prev + 1)}>
+                  <h3 className="text-2xl font-bold">{t('why_noddi.before.title', 'Before Navio')}</h3>
+                </EditableTranslation>
+              </div>
+              <ul className="space-y-4">
+                {beforeItems.map((item, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <EditableListIcon
+                      elementId="why-noddi-before-list-icon"
+                      icon={X}
+                      defaultColor="text-destructive"
+                      className="w-5 h-5 flex-shrink-0 mt-0.5"
+                    />
+                    <EditableTranslation translationKey={`why_noddi.before.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
+                      <span>{item}</span>
+                    </EditableTranslation>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </EditableCard>
 
           {/* After Card */}
-          <EditableBackground
-            elementId="why-noddi-after-card"
+          <EditableCard
+            elementIdPrefix="why-noddi-after-card"
             defaultBackground="bg-primary/5"
+            defaultTextColor="foreground"
+            className={`border-2 border-primary/30 transition-all duration-700 delay-200 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
           >
-            <Card 
-              className={`border-2 border-primary/30 transition-all duration-700 delay-200 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-              }`}
-            >
-              <CardContent className="p-8">
-                <div className="mb-6">
-                  <EditableTranslation translationKey="why_noddi.after.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-                    <h3 className="text-2xl font-bold">{t('why_noddi.after.title', 'With Navio')}</h3>
-                  </EditableTranslation>
-                </div>
-                <ul className="space-y-4">
-                  {afterItems.map((item, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <EditableListIcon
-                        elementId="why-noddi-after-list-icon"
-                        icon={Check}
-                        defaultColor="text-success"
-                        className="w-5 h-5 flex-shrink-0 mt-0.5"
-                      />
-                      <EditableTranslation translationKey={`why_noddi.after.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                        <span className="font-medium">{item}</span>
-                      </EditableTranslation>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </EditableBackground>
+            <CardContent className="p-8">
+              <div className="mb-6">
+                <EditableTranslation translationKey="why_noddi.after.title" onSave={() => setRefreshKey(prev => prev + 1)}>
+                  <h3 className="text-2xl font-bold">{t('why_noddi.after.title', 'With Navio')}</h3>
+                </EditableTranslation>
+              </div>
+              <ul className="space-y-4">
+                {afterItems.map((item, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <EditableListIcon
+                      elementId="why-noddi-after-list-icon"
+                      icon={Check}
+                      defaultColor="text-success"
+                      className="w-5 h-5 flex-shrink-0 mt-0.5"
+                    />
+                    <EditableTranslation translationKey={`why_noddi.after.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
+                      <span className="font-medium">{item}</span>
+                    </EditableTranslation>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </EditableCard>
         </div>
 
         <div className="text-center">
