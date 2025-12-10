@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LanguageLink } from "@/components/LanguageLink";
-import { EditableBackground } from "@/components/EditableBackground";
+import { EditableCard, useEditableCardContext } from "@/components/EditableCard";
+import { EditableTranslation } from "@/components/EditableTranslation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { useBackgroundTextColor } from "@/contexts/BackgroundTextColorContext";
+import { cn } from "@/lib/utils";
+import { resolveTextColor } from "@/lib/textColorUtils";
 
 type IconName = keyof typeof icons;
 
@@ -37,27 +40,87 @@ interface SolutionSettings {
   description_token: string;
 }
 
-const bgClass: Record<string, string> = {
-  background: "bg-background",
-  card: "bg-card",
-  "gradient-primary": "bg-gradient-primary",
-  "gradient-background": "bg-gradient-background",
-  "gradient-hero": "bg-gradient-hero",
-};
-
-const textClass: Record<string, string> = {
-  foreground: "text-foreground",
-  "muted-foreground": "text-muted-foreground",
-  primary: "text-primary",
-  secondary: "text-secondary",
-  accent: "text-accent",
-  white: "text-white",
-  "white-90": "text-white/90",
-  "white-80": "text-white/80",
-};
-
 // Convert slug format (tire-services) to translation key format (tire_services)
 const slugToKey = (slug: string) => slug.replace(/-/g, '_');
+
+// Card content component that uses context for text colors
+function SolutionCardContent({ solution, slugKey }: { solution: Solution; slugKey: string }) {
+  const { t } = useAppTranslation();
+  const { textColor, iconColor } = useEditableCardContext();
+  const Icon = icons[(solution.icon_name as IconName)] || icons["Sparkles"];
+  
+  // Resolve colors to inline styles
+  const textStyle = { color: resolveTextColor(textColor) };
+  const iconStyle = { color: resolveTextColor(iconColor) };
+  const mutedStyle = { color: resolveTextColor(textColor), opacity: 0.8 };
+
+  return (
+    <LanguageLink 
+      to={`/solutions/${solution.slug}`} 
+      className="block h-full"
+    >
+      <div className="rounded-2xl p-8 border border-border h-full min-h-[420px] flex flex-col hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animate-fade-in cursor-pointer">
+        {/* Icon */}
+        <div className="mb-6">
+          <Icon className="w-12 h-12" style={iconStyle} />
+        </div>
+
+        {/* Title & Subtitle */}
+        <h2 className="text-3xl font-bold mb-2" style={textStyle}>
+          {t(`solutions.${slugKey}.title`, solution.title)}
+        </h2>
+        {solution.subtitle && (
+          <p className="text-lg mb-4 font-medium" style={{ ...textStyle, opacity: 0.9 }}>
+            {t(`solutions.${slugKey}.subtitle`, solution.subtitle)}
+          </p>
+        )}
+
+        {/* Description - flex-grow to push content to bottom */}
+        <div className="flex-grow">
+          {solution.hero_description && (
+            <p className="mb-6 leading-relaxed" style={mutedStyle}>
+              {t(`solutions.${slugKey}.hero_description`, solution.hero_description)}
+            </p>
+          )}
+
+          {/* Benefits */}
+          {solution.benefits && solution.benefits.length > 0 && (
+            <ul className="space-y-3 mb-6">
+              {solution.benefits.map((benefit, idx) => (
+                <li key={idx} className="flex items-start gap-2" style={mutedStyle}>
+                  <icons.Check className="w-5 h-5 shrink-0 mt-0.5" style={iconStyle} />
+                  <span>{t(`solutions.${slugKey}.benefit_${idx}`, benefit)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Image */}
+        {solution.image_url && (
+          <div className="mb-6 rounded-lg overflow-hidden">
+            <img
+              src={solution.image_url}
+              alt={t(`solutions.${slugKey}.title`, solution.title)}
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        )}
+
+        {/* CTA indicator at bottom */}
+        <div className="mt-auto pt-6 border-t border-border/30">
+          <span 
+            className="inline-flex items-center text-sm font-semibold group-hover:gap-3 transition-all"
+            style={textStyle}
+          >
+            {t('solutions.page.learn_more', solution.cta_text || 'Learn More')}
+            <icons.ArrowRight className="w-4 h-4 ml-2" />
+          </span>
+        </div>
+      </div>
+    </LanguageLink>
+  );
+}
 
 const Solutions = () => {
   const { t } = useAppTranslation();
@@ -102,27 +165,32 @@ const Solutions = () => {
     );
   }
 
-  const bg = settings ? (bgClass[settings.background_token] || "bg-background") : "bg-background";
-  const cardBg = settings ? (bgClass[settings.card_bg_token] || "bg-card") : "bg-card";
-  const iconClr = settings ? (textClass[settings.icon_token] || "text-white") : "text-white";
-  const titleClr = settings ? (textClass[settings.title_token] || "text-white") : "text-white";
-  const subtitleClr = settings ? (textClass[settings.subtitle_token] || "text-white/90") : "text-white/90";
-  const descClr = settings ? (textClass[settings.description_token] || "text-white/80") : "text-white/80";
-
   return (
-    <div className={`min-h-screen ${bg}`}>
+    <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Hero Section */}
-      <section className="py-20 px-6">
+      {/* Hero Section - responsive padding for header clearance */}
+      <section className="pt-20 sm:pt-24 lg:pt-32 pb-12 px-6">
         <div className="container mx-auto max-w-4xl text-center">
-          <h1 className={`text-5xl md:text-6xl font-bold mb-6 ${titleClr}`}>
-            {t('solutions.page.title', settings?.section_title || 'Solutions')}
-          </h1>
+          <EditableTranslation
+            translationKey="solutions.page.title"
+            className="text-5xl md:text-6xl font-bold mb-6 text-foreground"
+            fallbackText={settings?.section_title || 'Solutions'}
+          >
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
+              {t('solutions.page.title', settings?.section_title || 'Solutions')}
+            </h1>
+          </EditableTranslation>
           {settings?.section_subtitle && (
-            <p className={`text-xl ${subtitleClr} max-w-2xl mx-auto`}>
-              {settings.section_subtitle}
-            </p>
+            <EditableTranslation
+              translationKey="solutions.page.subtitle"
+              className="text-xl text-muted-foreground max-w-2xl mx-auto"
+              fallbackText={settings.section_subtitle}
+            >
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                {t('solutions.page.subtitle', settings.section_subtitle)}
+              </p>
+            </EditableTranslation>
           )}
         </div>
       </section>
@@ -132,85 +200,18 @@ const Solutions = () => {
         <div className="container mx-auto max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {solutions.map((solution) => {
-              const Icon = icons[(solution.icon_name as IconName)] || icons["Sparkles"];
               const slugKey = slugToKey(solution.slug);
               
               return (
-                <EditableBackground
+                <EditableCard
                   key={solution.id}
-                  elementId={`solution-card-${solution.id}`}
-                  defaultBackground={cardBg}
-                  allowedBackgrounds={[
-                    'bg-gradient-hero',
-                    'bg-gradient-sunset',
-                    'bg-gradient-warmth',
-                    'bg-gradient-ocean',
-                    'bg-gradient-fire',
-                    'glass-card',
-                    'liquid-glass',
-                    'glass-prominent',
-                    'bg-card',
-                    'bg-background',
-                    'bg-muted'
-                  ]}
+                  elementIdPrefix={`solution-card-${solution.id}`}
+                  defaultBackground="bg-gradient-hero"
+                  defaultTextColor="white"
+                  className="group"
                 >
-                  <div className="rounded-2xl p-8 border border-border hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animate-fade-in">
-                    {/* Icon */}
-                    <div className={`${iconClr} mb-6`}>
-                      <Icon className="w-12 h-12" />
-                    </div>
-
-                    {/* Title & Subtitle */}
-                    <h2 className={`text-3xl font-bold mb-2 ${titleClr}`}>
-                      {t(`solutions.${slugKey}.title`, solution.title)}
-                    </h2>
-                    {solution.subtitle && (
-                      <p className={`text-lg mb-4 ${subtitleClr} font-medium`}>
-                        {t(`solutions.${slugKey}.subtitle`, solution.subtitle)}
-                      </p>
-                    )}
-
-                    {/* Description */}
-                    {solution.hero_description && (
-                      <p className={`${descClr} mb-6 leading-relaxed`}>
-                        {t(`solutions.${slugKey}.hero_description`, solution.hero_description)}
-                      </p>
-                    )}
-
-                    {/* Benefits */}
-                    {solution.benefits && solution.benefits.length > 0 && (
-                      <ul className="space-y-3 mb-6">
-                        {solution.benefits.map((benefit, idx) => (
-                          <li key={idx} className={`flex items-start gap-2 ${descClr}`}>
-                            <icons.Check className={`w-5 h-5 ${iconClr} shrink-0 mt-0.5`} />
-                            <span>{t(`solutions.${slugKey}.benefit_${idx}`, benefit)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    {/* Image */}
-                    {solution.image_url && (
-                      <div className="mb-6 rounded-lg overflow-hidden">
-                        <img
-                          src={solution.image_url}
-                          alt={t(`solutions.${slugKey}.title`, solution.title)}
-                          className="w-full h-auto object-cover"
-                        />
-                      </div>
-                    )}
-
-                    {/* CTA */}
-                    <div className="mt-6">
-                      <Button asChild size="lg" className="w-full">
-                        <LanguageLink to={`/solutions/${solution.slug}`}>
-                          {t('solutions.page.learn_more', solution.cta_text || 'Learn More')}
-                          <icons.ArrowRight className="w-4 h-4 ml-2" />
-                        </LanguageLink>
-                      </Button>
-                    </div>
-                  </div>
-                </EditableBackground>
+                  <SolutionCardContent solution={solution} slugKey={slugKey} />
+                </EditableCard>
               );
             })}
           </div>
@@ -218,7 +219,7 @@ const Solutions = () => {
           {/* Empty State */}
           {solutions.length === 0 && (
             <div className="text-center py-20">
-              <p className={`text-xl ${descClr}`}>
+              <p className="text-xl text-muted-foreground">
                 {t('solutions.page.empty', 'No solutions available yet. Check back soon!')}
               </p>
             </div>
