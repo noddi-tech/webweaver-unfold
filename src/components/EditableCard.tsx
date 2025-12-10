@@ -39,6 +39,7 @@ export function EditableCard({
   const [iconColor, setIconColor] = useState('primary');
   const [iconBackground, setIconBackground] = useState('bg-primary/10');
   const [iconSize, setIconSize] = useState('default');
+  const [cardShadow, setCardShadow] = useState('shadow-none');
   const [isLoading, setIsLoading] = useState(true);
 
   // Load saved styles from database
@@ -49,7 +50,7 @@ export function EditableCard({
         // Load background style
         const { data: bgData } = await supabase
           .from('background_styles')
-          .select('background_class, text_color_class')
+          .select('background_class, text_color_class, shadow_class')
           .eq('element_id', `${elementIdPrefix}-background`)
           .maybeSingle();
 
@@ -58,6 +59,9 @@ export function EditableCard({
         }
         if (bgData?.text_color_class) {
           setTextColor(bgData.text_color_class);
+        }
+        if (bgData?.shadow_class) {
+          setCardShadow(bgData.shadow_class);
         }
 
         // Load icon color and size from icon_styles table
@@ -126,6 +130,7 @@ export function EditableCard({
     if (data.iconColor) setIconColor(data.iconColor);
     if (data.iconCardBg) setIconBackground(data.iconCardBg);
     if (data.iconSize) setIconSize(data.iconSize);
+    if (data.cardShadow) setCardShadow(data.cardShadow);
     // Update text color from title color (main text color for the card)
     if (data.titleColor) setTextColor(data.titleColor);
   };
@@ -143,6 +148,7 @@ export function EditableCard({
     <div
       className={cn(
         'relative rounded-xl overflow-hidden transition-opacity duration-300',
+        cardShadow,
         className
       )}
       style={backgroundStyle}

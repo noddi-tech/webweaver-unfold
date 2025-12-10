@@ -12,6 +12,8 @@ import PatternsShowcase from "@/components/design-system/PatternsShowcase";
 import SectionsManager from "@/components/design-system/SectionsManager";
 import { ColorPaletteTab } from "@/components/design-system/ColorPaletteTab";
 import FontManager from "@/components/design-system/FontManager";
+import BulkCardStyleUpdater from "@/components/design-system/BulkCardStyleUpdater";
+import { CardStylePresetPicker } from "@/components/design-system/CardStylePresetPicker";
 
 const DesignSystem = () => {
   return (
@@ -30,19 +32,20 @@ const DesignSystem = () => {
         </div>
 
         <Tabs defaultValue="colors" className="w-full">
-          <TabsList className="grid w-full grid-cols-12 mb-12">
+          <TabsList className="grid w-full grid-cols-13 mb-12">
             <TabsTrigger value="colors">Colors</TabsTrigger>
             <TabsTrigger value="fonts">Fonts</TabsTrigger>
             <TabsTrigger value="typography">Typography</TabsTrigger>
             <TabsTrigger value="spacing">Spacing</TabsTrigger>
-            <TabsTrigger value="buttons">Buttons/CTAs</TabsTrigger>
+            <TabsTrigger value="buttons">Buttons</TabsTrigger>
             <TabsTrigger value="components">Components</TabsTrigger>
+            <TabsTrigger value="cardstyles">Card Styles</TabsTrigger>
             <TabsTrigger value="icons">Icons</TabsTrigger>
             <TabsTrigger value="logo">Logo</TabsTrigger>
             <TabsTrigger value="sections">Sections</TabsTrigger>
             <TabsTrigger value="usps">USPs</TabsTrigger>
             <TabsTrigger value="patterns">Patterns</TabsTrigger>
-            <TabsTrigger value="videos">Demo Videos</TabsTrigger>
+            <TabsTrigger value="videos">Videos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="colors" className="space-y-8">
@@ -67,6 +70,17 @@ const DesignSystem = () => {
 
           <TabsContent value="components" className="space-y-8">
             <EditableComponentLibrary />
+          </TabsContent>
+
+          <TabsContent value="cardstyles" className="space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <BulkCardStyleUpdater />
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold">Style Presets</h2>
+                <p className="text-muted-foreground">Saved card style combinations for quick application</p>
+                <CardStylePresetPicker onApply={() => {}} />
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="icons" className="space-y-8">

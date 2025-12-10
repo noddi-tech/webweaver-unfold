@@ -17,6 +17,7 @@ import { Check } from 'lucide-react';
 import { UnifiedStyleModalLayoutTab } from './UnifiedStyleModalLayoutTab';
 import { getBackgroundStyleFromToken } from '@/lib/backgroundUtils';
 import { resolveTextColor } from '@/lib/textColorUtils';
+import { CardStylePresetPicker } from '@/components/design-system/CardStylePresetPicker';
 
 interface SubElement {
   id: string;
@@ -79,6 +80,7 @@ export function UnifiedStyleModal({
   const [cardWidth, setCardWidth] = useState('w-full');
   const [cardBorderRadius, setCardBorderRadius] = useState('rounded-2xl');
   const [cardGap, setCardGap] = useState('gap-8');
+  const [cardShadow, setCardShadow] = useState('shadow-none');
 
   // Load actual saved data from database when modal opens
   useEffect(() => {
@@ -87,10 +89,10 @@ export function UnifiedStyleModal({
     const loadSavedData = async () => {
       setLoading(true);
       try {
-        // Load background AND text_color_class
+        // Load background AND text_color_class AND shadow_class
         const { data: bgData } = await supabase
           .from('background_styles')
-          .select('background_class, text_color_class')
+          .select('background_class, text_color_class, shadow_class')
           .eq('element_id', `${elementIdPrefix}-background`)
           .maybeSingle();
 
@@ -118,6 +120,11 @@ export function UnifiedStyleModal({
           setDescriptionColor(bgData.text_color_class);
           setNumberColor(bgData.text_color_class);
           setIconColor(bgData.text_color_class);
+        }
+        
+        // Load shadow class
+        if (bgData?.shadow_class) {
+          setCardShadow(bgData.shadow_class);
         }
 
         // Load icon card background
@@ -385,9 +392,10 @@ export function UnifiedStyleModal({
           .eq('element_id', bgUpdate.element_id)
           .maybeSingle();
 
-        // For main background, also save text_color_class
+        // For main background, also save text_color_class and shadow_class
         const isMainBackground = bgUpdate.element_id === `${elementIdPrefix}-background`;
         const textColorForBg = isMainBackground ? titleColor : undefined;
+        const shadowForBg = isMainBackground ? cardShadow : undefined;
 
         if (existingBg) {
           // @ts-ignore
@@ -396,6 +404,7 @@ export function UnifiedStyleModal({
             .update({ 
               background_class: bgUpdate.background_class,
               ...(textColorForBg && { text_color_class: textColorForBg }),
+              ...(shadowForBg && { shadow_class: shadowForBg }),
             })
             .eq('element_id', bgUpdate.element_id);
         } else {
@@ -406,6 +415,7 @@ export function UnifiedStyleModal({
               element_id: bgUpdate.element_id,
               background_class: bgUpdate.background_class,
               ...(textColorForBg && { text_color_class: textColorForBg }),
+              ...(shadowForBg && { shadow_class: shadowForBg }),
             }]);
         }
       }
@@ -468,6 +478,7 @@ export function UnifiedStyleModal({
         cardWidth,
         cardBorderRadius,
         cardGap,
+        cardShadow,
       });
 
       // Save card layout settings
@@ -637,6 +648,21 @@ export function UnifiedStyleModal({
                   <p className="text-sm text-muted-foreground">Loading color options...</p>
                 ) : (
                   <>
+                    {/* Style Presets */}
+                    <CardStylePresetPicker
+                      onApply={(preset) => {
+                        setBackground(preset.background_class);
+                        setTitleColor(preset.text_color_class);
+                        setDescriptionColor(preset.text_color_class);
+                        setNumberColor(preset.text_color_class);
+                        if (preset.shadow_class) setCardShadow(preset.shadow_class);
+                        if (preset.icon_color_token) setIconColor(preset.icon_color_token);
+                      }}
+                      currentBackground={background}
+                      currentTextColor={titleColor}
+                      currentShadow={cardShadow}
+                    />
+                    
                     <div className="space-y-3">
                       <label className="text-sm font-medium">Main Card Background</label>
                       <Tabs defaultValue="gradients" className="w-full">

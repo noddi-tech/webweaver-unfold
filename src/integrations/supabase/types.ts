@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           element_id: string
           id: string
+          shadow_class: string | null
           text_color_class: string | null
           updated_at: string
         }
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           element_id: string
           id?: string
+          shadow_class?: string | null
           text_color_class?: string | null
           updated_at?: string
         }
@@ -36,6 +38,7 @@ export type Database = {
           created_at?: string
           element_id?: string
           id?: string
+          shadow_class?: string | null
           text_color_class?: string | null
           updated_at?: string
         }
@@ -116,6 +119,51 @@ export type Database = {
           open_time?: string | null
           sort_order?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      card_style_presets: {
+        Row: {
+          background_class: string
+          border_radius: string | null
+          created_at: string | null
+          description: string | null
+          icon_color_token: string | null
+          icon_size: string | null
+          id: string
+          is_system_preset: boolean | null
+          name: string
+          shadow_class: string | null
+          text_color_class: string
+          updated_at: string | null
+        }
+        Insert: {
+          background_class: string
+          border_radius?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon_color_token?: string | null
+          icon_size?: string | null
+          id?: string
+          is_system_preset?: boolean | null
+          name: string
+          shadow_class?: string | null
+          text_color_class?: string
+          updated_at?: string | null
+        }
+        Update: {
+          background_class?: string
+          border_radius?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon_color_token?: string | null
+          icon_size?: string | null
+          id?: string
+          is_system_preset?: boolean | null
+          name?: string
+          shadow_class?: string | null
+          text_color_class?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
