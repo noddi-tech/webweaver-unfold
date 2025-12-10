@@ -98,8 +98,9 @@ export default function ProofMetricsHomepage() {
                   <p className="text-xs text-muted-foreground">
                     {metric.context}
                   </p>
-                </CardContent>
-              </EditableCard>
+                  </CardContent>
+                </EditableCard>
+              </div>
             );
           })}
         </div>
