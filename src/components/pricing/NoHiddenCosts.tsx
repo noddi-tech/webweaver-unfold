@@ -2,6 +2,10 @@ import { UserX, MapPinOff, ShieldCheck, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EditableText } from "@/components/EditableText";
 import { LockedText } from "@/components/LockedText";
+import { EditableCard } from "@/components/EditableCard";
+import { EditableCardIcon } from "@/components/EditableCardIcon";
+import { EditableCardTitle } from "@/components/EditableCardTitle";
+import { EditableCardDescription } from "@/components/EditableCardDescription";
 
 interface TextContent {
   element_type: string;
@@ -54,24 +58,22 @@ export const NoHiddenCosts = ({ textContent, onOpenCalculator }: NoHiddenCostsPr
 
       <div className="grid md:grid-cols-3 gap-6 mb-12">
         {items.map((item, index) => (
-          <div
+          <EditableCard
             key={index}
-            className="text-center space-y-3 p-4 rounded-lg bg-background/50 border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105"
-            role="article"
-            aria-label={item.title}
+            elementIdPrefix={`pricing-no-hidden-cost-${index + 1}`}
+            defaultBackground="bg-background/50"
+            className="text-center rounded-lg border border-border/50 hover:border-primary/50 transition-all duration-300 hover:scale-105"
           >
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10">
-              <item.icon className="w-6 h-6 text-primary" aria-hidden="true" />
-            </div>
-            <LockedText reason="Dynamic list item">
-              <h4 className="text-lg font-semibold text-foreground">
+            <div className="p-4 space-y-3" role="article" aria-label={item.title}>
+              <EditableCardIcon icon={item.icon} />
+              <EditableCardTitle className="text-lg font-semibold">
                 {item.title}
-              </h4>
-              <p className="text-sm text-muted-foreground">
+              </EditableCardTitle>
+              <EditableCardDescription className="text-sm">
                 {item.description}
-              </p>
-            </LockedText>
-          </div>
+              </EditableCardDescription>
+            </div>
+          </EditableCard>
         ))}
       </div>
 
