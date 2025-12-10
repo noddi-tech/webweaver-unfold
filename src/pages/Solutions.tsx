@@ -46,23 +46,34 @@ const slugToKey = (slug: string) => slug.replace(/-/g, '_');
 // Card content component that uses context for text colors
 function SolutionCardContent({ solution, slugKey }: { solution: Solution; slugKey: string }) {
   const { t } = useAppTranslation();
-  const { textColor, iconColor } = useEditableCardContext();
+  const { textColor, iconColor, iconSize } = useEditableCardContext();
   const Icon = icons[(solution.icon_name as IconName)] || icons["Sparkles"];
   
   // Resolve colors to inline styles
   const textStyle = { color: resolveTextColor(textColor) };
   const iconStyle = { color: resolveTextColor(iconColor) };
   const mutedStyle = { color: resolveTextColor(textColor), opacity: 0.8 };
+  
+  // Map icon size to Tailwind classes
+  const iconSizeClass = cn(
+    iconSize === 'small' && 'w-4 h-4',
+    iconSize === 'default' && 'w-6 h-6',
+    iconSize === 'medium' && 'w-8 h-8',
+    iconSize === 'large' && 'w-12 h-12',
+    iconSize === 'xl' && 'w-16 h-16',
+    !['small', 'default', 'medium', 'large', 'xl'].includes(iconSize) && 'w-12 h-12'
+  );
 
   return (
     <LanguageLink 
       to={`/solutions/${solution.slug}`} 
       className="block h-full"
     >
-      <div className="rounded-2xl p-8 border border-border h-full min-h-[420px] flex flex-col hover:shadow-xl transition-all duration-300 hover:scale-[1.02] animate-fade-in cursor-pointer">
+      {/* Transparent inner div - background comes from parent EditableCard */}
+      <div className="p-8 border border-white/10 h-full min-h-[420px] flex flex-col hover:shadow-xl transition-all duration-300 cursor-pointer">
         {/* Icon */}
         <div className="mb-6">
-          <Icon className="w-12 h-12" style={iconStyle} />
+          <Icon className={iconSizeClass} style={iconStyle} />
         </div>
 
         {/* Title & Subtitle */}

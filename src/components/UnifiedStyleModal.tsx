@@ -72,6 +72,7 @@ export function UnifiedStyleModal({
   const [ctaBgColor, setCtaBgColor] = useState(initialData.ctaBgColor || 'primary');
   const [ctaTextColor, setCtaTextColor] = useState(initialData.ctaTextColor || 'primary-foreground');
   const [iconColor, setIconColor] = useState(initialData.iconColor || 'foreground');
+  const [iconSize, setIconSize] = useState('default');
   
   // Card layout settings
   const [cardHeight, setCardHeight] = useState('h-[500px]');
@@ -93,12 +94,19 @@ export function UnifiedStyleModal({
           .eq('element_id', `${elementIdPrefix}-background`)
           .maybeSingle();
 
-        // Load icon color
-        const { data: iconColorData } = await supabase
-          .from('text_content')
-          .select('color_token')
-          .eq('element_id', `${elementIdPrefix}-icon-color`)
+        // Load icon color and size from icon_styles table
+        const { data: iconStyleData } = await supabase
+          .from('icon_styles')
+          .select('icon_color_token, size')
+          .eq('element_id', `${elementIdPrefix}-icon`)
           .maybeSingle();
+        
+        if (iconStyleData?.icon_color_token) {
+          setIconColor(iconStyleData.icon_color_token);
+        }
+        if (iconStyleData?.size) {
+          setIconSize(iconStyleData.size);
+        }
         
         if (bgData?.background_class) {
           setBackground(bgData.background_class);
@@ -339,8 +347,34 @@ export function UnifiedStyleModal({
         { element_id: `${elementIdPrefix}-title`, content: title, color_token: titleColor },
         { element_id: `${elementIdPrefix}-description`, content: description, color_token: descriptionColor },
         { element_id: `${elementIdPrefix}-cta`, content: ctaText, color_token: ctaTextColor, button_url: ctaUrl, button_bg_color: ctaBgColor },
-        { element_id: `${elementIdPrefix}-icon-color`, content: '', color_token: iconColor },
       ];
+
+      // Save icon styles (color and size) to icon_styles table
+      const { data: existingIconStyle } = await supabase
+        .from('icon_styles')
+        .select('id')
+        .eq('element_id', `${elementIdPrefix}-icon`)
+        .maybeSingle();
+
+      if (existingIconStyle) {
+        await supabase
+          .from('icon_styles')
+          .update({ 
+            icon_color_token: iconColor,
+            size: iconSize,
+            updated_at: new Date().toISOString()
+          })
+          .eq('element_id', `${elementIdPrefix}-icon`);
+      } else {
+        await supabase
+          .from('icon_styles')
+          .insert([{
+            element_id: `${elementIdPrefix}-icon`,
+            icon_color_token: iconColor,
+            size: iconSize,
+            background_token: 'bg-transparent',
+          }]);
+      }
 
       // Save backgrounds (main, icon card, and image container)
       for (const bgUpdate of updates.slice(0, 3)) {
@@ -429,6 +463,7 @@ export function UnifiedStyleModal({
         ctaBgColor,
         ctaTextColor,
         iconColor,
+        iconSize,
         cardHeight,
         cardWidth,
         cardBorderRadius,
@@ -491,7 +526,14 @@ export function UnifiedStyleModal({
               {iconCardBg && (
                 <div className={cn('p-2.5 rounded-lg backdrop-blur-sm mb-4 inline-block', iconCardBg)}>
                   <ImageIcon 
-                    className="w-8 h-8" 
+                    className={cn(
+                      iconSize === 'small' && 'w-4 h-4',
+                      iconSize === 'default' && 'w-6 h-6',
+                      iconSize === 'medium' && 'w-8 h-8',
+                      iconSize === 'large' && 'w-12 h-12',
+                      iconSize === 'xl' && 'w-16 h-16',
+                      !['small', 'default', 'medium', 'large', 'xl'].includes(iconSize) && 'w-6 h-6'
+                    )}
                     style={{ color: resolveTextColor(iconColor) }}
                   />
                 </div>
@@ -842,6 +884,23 @@ export function UnifiedStyleModal({
                       </button>
                     ))}
                   </div>
+                </div>
+                
+                {/* Icon Size Section */}
+                <div className="space-y-2 border-b pb-4 mb-4">
+                  <label className="text-sm font-medium">Icon Size</label>
+                  <Select value={iconSize} onValueChange={setIconSize}>
+                    <SelectTrigger className="bg-background text-foreground border-border">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border-border">
+                      <SelectItem value="small">Small (16px)</SelectItem>
+                      <SelectItem value="default">Default (24px)</SelectItem>
+                      <SelectItem value="medium">Medium (32px)</SelectItem>
+                      <SelectItem value="large">Large (48px)</SelectItem>
+                      <SelectItem value="xl">X-Large (64px)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
