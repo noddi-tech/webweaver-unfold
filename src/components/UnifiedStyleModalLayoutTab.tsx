@@ -2,6 +2,20 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
+// Shadow options with visual examples
+export const SHADOW_OPTIONS = [
+  { value: 'shadow-none', label: 'None', description: 'No shadow' },
+  { value: 'shadow-sm', label: 'Subtle', description: 'Light shadow for minimal depth' },
+  { value: 'shadow-md', label: 'Medium', description: 'Balanced shadow for cards' },
+  { value: 'shadow-lg', label: 'Large', description: 'Prominent shadow for emphasis' },
+  { value: 'shadow-xl', label: 'X-Large', description: 'Strong shadow for floating effect' },
+  { value: 'shadow-2xl', label: '2X-Large', description: 'Maximum shadow depth' },
+  { value: 'shadow-[0_0_40px_hsl(var(--primary)/0.3)]', label: 'Glow (Primary)', description: 'Colored glow effect' },
+  { value: 'shadow-[0_0_40px_hsl(var(--vibrant-purple)/0.3)]', label: 'Glow (Purple)', description: 'Purple glow effect' },
+  { value: 'shadow-[0_0_40px_hsl(var(--brand-orange)/0.3)]', label: 'Glow (Orange)', description: 'Orange glow effect' },
+  { value: 'shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)]', label: 'Soft Drop', description: 'Elegant downward shadow' },
+];
+
 interface LayoutTabProps {
   cardHeight: string;
   setCardHeight: (value: string) => void;
@@ -11,6 +25,8 @@ interface LayoutTabProps {
   setCardBorderRadius: (value: string) => void;
   cardGap: string;
   setCardGap: (value: string) => void;
+  cardShadow?: string;
+  setCardShadow?: (value: string) => void;
 }
 
 export function UnifiedStyleModalLayoutTab({
@@ -22,10 +38,43 @@ export function UnifiedStyleModalLayoutTab({
   setCardBorderRadius,
   cardGap,
   setCardGap,
+  cardShadow = 'shadow-none',
+  setCardShadow,
 }: LayoutTabProps) {
   return (
     <div className="space-y-4">
       <h3 className="font-semibold text-foreground">Card Layout</h3>
+      
+      {/* Shadow Selection - Prominent placement */}
+      {setCardShadow && (
+        <div className="space-y-3">
+          <Label className="text-foreground font-medium">Card Shadow</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {SHADOW_OPTIONS.map((shadow) => (
+              <button
+                key={shadow.value}
+                onClick={() => setCardShadow(shadow.value)}
+                className={cn(
+                  'p-3 rounded-lg border text-left transition-all hover:border-primary/50',
+                  cardShadow === shadow.value
+                    ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                    : 'border-border'
+                )}
+              >
+                {/* Mini preview */}
+                <div
+                  className={cn(
+                    'h-8 w-full bg-card rounded mb-2',
+                    shadow.value
+                  )}
+                />
+                <p className="text-xs font-medium">{shadow.label}</p>
+                <p className="text-xs text-muted-foreground">{shadow.description}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* Card Height */}
       <div className="space-y-2">
@@ -106,11 +155,12 @@ export function UnifiedStyleModalLayoutTab({
           <div className={cn(
             cardWidth,
             cardHeight,
-          cardBorderRadius,
-          'bg-card text-card-foreground border border-border flex items-center justify-center text-sm'
-        )}>
-          Card Preview
-        </div>
+            cardBorderRadius,
+            cardShadow,
+            'bg-card text-card-foreground border border-border flex items-center justify-center text-sm max-h-32'
+          )}>
+            Card Preview
+          </div>
         </div>
       </div>
     </div>
