@@ -28,7 +28,7 @@ export default function CoreLoop() {
   }, []);
   
   return (
-    <section className="py-section">
+    <section className="pt-12 md:pt-16 pb-section">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <EditableTranslation translationKey="core_loop.title">
