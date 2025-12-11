@@ -43,8 +43,8 @@ export default function CoreLoop() {
           </EditableTranslation>
         </div>
 
-        <div className="flex justify-center mb-12">
-          <div className="w-full max-w-5xl">
+        <div className="flex justify-center mb-8 sm:mb-12">
+          <div className="w-full max-w-6xl px-0 sm:px-4 lg:px-8">
             <EditableUniversalMedia
               locationId="functions-core-loop"
               onSave={loadMediaSettings}
@@ -53,7 +53,7 @@ export default function CoreLoop() {
               <img 
                 src={imageUrl}
                 alt="The Core Loop: 1. Book - customer picks time, 2. Plan - routes auto-optimize, 3. Execute - technicians get workflows, 4. Analyze - data flows to insights, 5. Re-engage - customers return"
-                className="w-full rounded-lg"
+                className="w-full h-auto rounded-lg sm:rounded-xl"
               />
             </EditableUniversalMedia>
           </div>
