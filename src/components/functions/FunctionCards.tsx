@@ -1,14 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Calendar, Package, Bell, Map, Workflow, PieChart, Building2, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
-import { EditableCard } from "@/components/EditableCard";
-import { EditableCardIcon } from "@/components/EditableCardIcon";
-import { EditableCardTitle } from "@/components/EditableCardTitle";
-import { EditableCardDescription } from "@/components/EditableCardDescription";
 
 export default function FunctionCards() {
   const [openCards, setOpenCards] = useState<number[]>([]);
@@ -56,62 +52,55 @@ export default function FunctionCards() {
 
             return (
               <Collapsible key={index} open={isOpen} onOpenChange={() => toggleCard(index)}>
-                <EditableCard
-                  elementIdPrefix={`functions-card-${index}`}
-                  defaultBackground="glass-card"
-                  defaultTextColor="white"
-                >
-                  <Card className="transition-all duration-300">
-                    <CollapsibleTrigger className="w-full text-left">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start gap-4 flex-1">
-                            <EditableCardIcon icon={Icon} size="default" />
-                            <div className="flex-1">
-                              <EditableTranslation translationKey={`function_cards.${func.key}.title`}>
-                                <EditableCardTitle className="text-xl mb-2">
-                                  {t(`function_cards.${func.key}.title`)}
-                                </EditableCardTitle>
-                              </EditableTranslation>
-                              <EditableTranslation translationKey={`function_cards.${func.key}.headline`}>
-                                <EditableCardDescription className="text-base font-medium" muted={false}>
-                                  {t(`function_cards.${func.key}.headline`)}
-                                </EditableCardDescription>
-                              </EditableTranslation>
-                            </div>
+                <Card className="transition-all duration-300 bg-card border shadow-sm">
+                  <CollapsibleTrigger className="w-full text-left">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4 flex-1">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <Icon className="w-6 h-6 text-primary" />
                           </div>
-                          <ChevronDown
-                            className={`w-5 h-5 transition-transform ${
-                              isOpen ? "transform rotate-180" : ""
-                            }`}
-                            style={{ color: 'inherit' }}
-                          />
+                          <div className="flex-1">
+                            <EditableTranslation translationKey={`function_cards.${func.key}.title`}>
+                              <h3 className="text-xl font-semibold mb-2 text-foreground">
+                                {t(`function_cards.${func.key}.title`)}
+                              </h3>
+                            </EditableTranslation>
+                            <EditableTranslation translationKey={`function_cards.${func.key}.headline`}>
+                              <p className="text-base font-medium text-foreground">
+                                {t(`function_cards.${func.key}.headline`)}
+                              </p>
+                            </EditableTranslation>
+                          </div>
                         </div>
-                      </CardHeader>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <CardContent>
-                        <EditableTranslation translationKey={`function_cards.${func.key}.description`}>
-                          <EditableCardDescription className="text-sm mb-4">
-                            {t(`function_cards.${func.key}.description`)}
-                          </EditableCardDescription>
-                        </EditableTranslation>
-                        <ul className="space-y-2">
-                          {[1, 2, 3].map((fIndex) => (
-                            <li key={fIndex} className="flex items-center text-sm">
-                              <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3 flex-shrink-0" />
-                              <EditableCardDescription muted={true} className="inline">
-                                <EditableTranslation translationKey={`function_cards.${func.key}.feature_${fIndex}`}>
-                                  <span>{t(`function_cards.${func.key}.feature_${fIndex}`)}</span>
-                                </EditableTranslation>
-                              </EditableCardDescription>
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </CollapsibleContent>
-                  </Card>
-                </EditableCard>
+                        <ChevronDown
+                          className={`w-5 h-5 text-muted-foreground transition-transform ${
+                            isOpen ? "transform rotate-180" : ""
+                          }`}
+                        />
+                      </div>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <CardContent>
+                      <EditableTranslation translationKey={`function_cards.${func.key}.description`}>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          {t(`function_cards.${func.key}.description`)}
+                        </p>
+                      </EditableTranslation>
+                      <ul className="space-y-2">
+                        {[1, 2, 3].map((fIndex) => (
+                          <li key={fIndex} className="flex items-center text-sm">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3 flex-shrink-0" />
+                            <EditableTranslation translationKey={`function_cards.${func.key}.feature_${fIndex}`}>
+                              <span className="text-muted-foreground">{t(`function_cards.${func.key}.feature_${fIndex}`)}</span>
+                            </EditableTranslation>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
               </Collapsible>
             );
           })}
