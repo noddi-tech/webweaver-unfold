@@ -88,8 +88,9 @@ export default function FunctionsHero() {
                       }}
                     />
                   )}
-                  <div className="mx-auto mb-3 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center relative z-10">
-                    <span className="text-base sm:text-lg font-bold text-primary">{step.number}</span>
+                  <div className="mx-auto mb-3 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-background flex items-center justify-center relative z-10">
+                    <div className="absolute inset-0 rounded-full bg-primary/10" />
+                    <span className="text-base sm:text-lg font-bold text-primary relative">{step.number}</span>
                   </div>
                   <EditableTranslation translationKey={step.titleKey}>
                     <h3 className="text-base sm:text-lg font-bold text-foreground mb-1 sm:mb-2">
