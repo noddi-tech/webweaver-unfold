@@ -45,42 +45,11 @@ export default function FunctionsHero() {
               {t('functions_hero.subtitle', 'From booking to billing, everything connects — automatically.')}
             </p>
           </EditableTranslation>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" className="text-lg px-8 py-6 group" asChild>
-              <LanguageLink to="/contact">
-                <EditableTranslation translationKey="functions_hero.button_primary">
-                  <span>{t('functions_hero.button_primary', 'Book a demo')}</span>
-                </EditableTranslation>
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </LanguageLink>
-            </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 py-6" asChild>
-              <LanguageLink to="/architecture">
-                <Eye className="w-5 h-5 mr-2" />
-                <EditableTranslation translationKey="functions_hero.button_secondary">
-                  <span>{t('functions_hero.button_secondary', 'See how the system thinks')}</span>
-                </EditableTranslation>
-              </LanguageLink>
-            </Button>
-          </div>
         </div>
 
-        {/* Core Loop Section - Integrated */}
+        {/* Core Loop Section */}
         <div className="mt-12 sm:mt-16 lg:mt-20">
-          <div className="text-center mb-6 sm:mb-8">
-            <EditableTranslation translationKey="core_loop.title">
-              <h2 className={`${h2} mb-3 text-foreground`}>
-                {t('core_loop.title', 'The Core Loop')}
-              </h2>
-            </EditableTranslation>
-            <EditableTranslation translationKey="core_loop.subtitle">
-              <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
-                {t('core_loop.subtitle', 'Every step feeds the next. No gaps. No manual handoffs.')}
-              </p>
-            </EditableTranslation>
-          </div>
-
-          {/* Core Loop Illustration */}
+          {/* 1. Illustration FIRST */}
           <div className="flex justify-center">
             <div className="w-full max-w-6xl px-0 sm:px-4 lg:px-8">
               <EditableUniversalMedia
@@ -97,13 +66,38 @@ export default function FunctionsHero() {
             </div>
           </div>
 
-          {/* Footer tagline */}
-          <div className="text-center mt-6 sm:mt-8">
-            <EditableTranslation translationKey="core_loop.footer_text">
-              <p className="text-lg sm:text-xl font-semibold text-foreground">
-                {t('core_loop.footer_text', "It's not automation. It's orchestration.")}
+          {/* 2. The Core Loop heading + subtitle */}
+          <div className="text-center mt-8 sm:mt-12">
+            <EditableTranslation translationKey="core_loop.title">
+              <h2 className={`${h2} mb-3 text-foreground`}>
+                {t('core_loop.title', 'The Core Loop')}
+              </h2>
+            </EditableTranslation>
+            <EditableTranslation translationKey="core_loop.subtitle">
+              <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
+                {t('core_loop.subtitle', 'Every step feeds the next. No gaps. No manual handoffs.')}
               </p>
             </EditableTranslation>
+          </div>
+
+          {/* 3. CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
+            <Button size="lg" className="text-lg px-8 py-6 group" asChild>
+              <LanguageLink to="/contact">
+                <EditableTranslation translationKey="functions_hero.button_primary">
+                  <span>{t('functions_hero.button_primary', 'Book a demo')}</span>
+                </EditableTranslation>
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </LanguageLink>
+            </Button>
+            <Button size="lg" variant="outline" className="text-lg px-8 py-6" asChild>
+              <LanguageLink to="/architecture">
+                <Eye className="w-5 h-5 mr-2" />
+                <EditableTranslation translationKey="functions_hero.button_secondary">
+                  <span>{t('functions_hero.button_secondary', 'See how the system thinks')}</span>
+                </EditableTranslation>
+              </LanguageLink>
+            </Button>
           </div>
         </div>
       </div>
