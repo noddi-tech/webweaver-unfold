@@ -66,7 +66,36 @@ export default function FunctionsHero() {
             </div>
           </div>
 
-          {/* 2. The Core Loop heading + subtitle */}
+          {/* 2. Core Loop Steps */}
+          <div className="mt-8 sm:mt-12 lg:mt-16">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 max-w-6xl mx-auto px-4">
+              {[
+                { number: 1, titleKey: 'core_loop.step_1.title', descKey: 'core_loop.step_1.description', defaultTitle: 'Book.', defaultDesc: 'The customer picks a time — Navio handles the rest.' },
+                { number: 2, titleKey: 'core_loop.step_2.title', descKey: 'core_loop.step_2.description', defaultTitle: 'Plan.', defaultDesc: 'Routes and lanes auto-optimize in real time.' },
+                { number: 3, titleKey: 'core_loop.step_3.title', descKey: 'core_loop.step_3.description', defaultTitle: 'Execute.', defaultDesc: 'Technicians get clear, connected workflows.' },
+                { number: 4, titleKey: 'core_loop.step_4.title', descKey: 'core_loop.step_4.description', defaultTitle: 'Analyze.', defaultDesc: 'Data flows instantly into insights.' },
+                { number: 5, titleKey: 'core_loop.step_5.title', descKey: 'core_loop.step_5.description', defaultTitle: 'Re-engage.', defaultDesc: 'Customers return before they even think to.' },
+              ].map((step) => (
+                <div key={step.number} className="text-center">
+                  <div className="mx-auto mb-3 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-base sm:text-lg font-bold text-primary">{step.number}</span>
+                  </div>
+                  <EditableTranslation translationKey={step.titleKey}>
+                    <h3 className="text-base sm:text-lg font-bold text-foreground mb-1 sm:mb-2">
+                      {t(step.titleKey, step.defaultTitle)}
+                    </h3>
+                  </EditableTranslation>
+                  <EditableTranslation translationKey={step.descKey}>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                      {t(step.descKey, step.defaultDesc)}
+                    </p>
+                  </EditableTranslation>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 3. The Core Loop heading + subtitle */}
           <div className="text-center mt-8 sm:mt-12">
             <EditableTranslation translationKey="core_loop.title">
               <h2 className={`${h2} mb-3 text-foreground`}>
