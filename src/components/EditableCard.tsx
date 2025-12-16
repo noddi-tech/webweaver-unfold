@@ -101,29 +101,7 @@ export function EditableCard({
   // Use centralized utility for background styles
   const backgroundStyle = getBackgroundStyleFromToken(background);
 
-  // Show skeleton while loading to prevent flash of default styles
-  if (isLoading) {
-    return (
-      <div
-        className={cn(
-          'relative rounded-xl overflow-hidden animate-pulse',
-          className
-        )}
-        style={{ backgroundColor: 'hsl(var(--muted))' }}
-      >
-        <div className="p-8 min-h-[420px]">
-          <div className="w-12 h-12 rounded-lg bg-muted-foreground/20 mb-6" />
-          <div className="h-8 w-3/4 bg-muted-foreground/20 rounded mb-4" />
-          <div className="h-4 w-1/2 bg-muted-foreground/20 rounded mb-6" />
-          <div className="space-y-2">
-            <div className="h-4 bg-muted-foreground/20 rounded" />
-            <div className="h-4 bg-muted-foreground/20 rounded w-5/6" />
-            <div className="h-4 bg-muted-foreground/20 rounded w-4/6" />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Non-blocking: content renders immediately with defaults, DB styles apply when loaded
 
   const handleSave = (data: any) => {
     if (data.background) setBackground(data.background);
