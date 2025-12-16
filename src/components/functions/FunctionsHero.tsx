@@ -68,7 +68,12 @@ export default function FunctionsHero() {
 
           {/* 2. Core Loop Steps */}
           <div className="mt-8 sm:mt-12 lg:mt-16">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 max-w-6xl mx-auto px-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 max-w-6xl mx-auto px-4 relative">
+              {/* Single continuous gradient line - desktop only */}
+              <div 
+                className="hidden lg:block absolute top-10 left-[10%] right-[10%] h-0.5" 
+                style={{ backgroundImage: 'linear-gradient(to right, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))' }}
+              />
               {[
                 { number: 1, titleKey: 'core_loop.step_1.title', descKey: 'core_loop.step_1.description', defaultTitle: 'Book.', defaultDesc: 'The customer picks a time — Navio handles the rest.' },
                 { number: 2, titleKey: 'core_loop.step_2.title', descKey: 'core_loop.step_2.description', defaultTitle: 'Plan.', defaultDesc: 'Routes and lanes auto-optimize in real time.' },
@@ -77,14 +82,7 @@ export default function FunctionsHero() {
                 { number: 5, titleKey: 'core_loop.step_5.title', descKey: 'core_loop.step_5.description', defaultTitle: 'Re-engage.', defaultDesc: 'Customers return before they even think to.' },
               ].map((step, index) => (
                 <div key={step.number} className="text-center relative p-4 rounded-xl">
-                  {/* Connecting line to next step - desktop only */}
-                  {index < 4 && (
-                    <div 
-                      className="hidden lg:block absolute top-10 left-[calc(50%+28px)] w-[calc(100%-16px)] h-0.5 -z-10" 
-                      style={{ backgroundImage: 'linear-gradient(to right, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))' }}
-                    />
-                  )}
-                  <div className="mx-auto mb-3 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="mx-auto mb-3 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center relative z-10">
                     <span className="text-base sm:text-lg font-bold text-primary">{step.number}</span>
                   </div>
                   <EditableTranslation translationKey={step.titleKey}>
