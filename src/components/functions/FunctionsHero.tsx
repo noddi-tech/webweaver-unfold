@@ -75,9 +75,13 @@ export default function FunctionsHero() {
                 { number: 3, titleKey: 'core_loop.step_3.title', descKey: 'core_loop.step_3.description', defaultTitle: 'Execute.', defaultDesc: 'Technicians get clear, connected workflows.' },
                 { number: 4, titleKey: 'core_loop.step_4.title', descKey: 'core_loop.step_4.description', defaultTitle: 'Analyze.', defaultDesc: 'Data flows instantly into insights.' },
                 { number: 5, titleKey: 'core_loop.step_5.title', descKey: 'core_loop.step_5.description', defaultTitle: 'Re-engage.', defaultDesc: 'Customers return before they even think to.' },
-              ].map((step) => (
-                <div key={step.number} className="text-center">
-                  <div className="mx-auto mb-3 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              ].map((step, index) => (
+                <div key={step.number} className="text-center relative group cursor-pointer p-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-muted/30">
+                  {/* Connecting line to next step - desktop only */}
+                  {index < 4 && (
+                    <div className="hidden lg:block absolute top-7 left-[calc(50%+28px)] w-[calc(100%-16px)] h-0.5 bg-gradient-to-r from-primary/40 via-primary/20 to-primary/40 -z-10" />
+                  )}
+                  <div className="mx-auto mb-3 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 group-hover:shadow-md group-hover:shadow-primary/25">
                     <span className="text-base sm:text-lg font-bold text-primary">{step.number}</span>
                   </div>
                   <EditableTranslation translationKey={step.titleKey}>
