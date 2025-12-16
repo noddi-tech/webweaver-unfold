@@ -83,7 +83,7 @@ export default function FunctionsHero() {
                 { number: 4, titleKey: 'core_loop.step_4.title', descKey: 'core_loop.step_4.description', defaultTitle: 'Analyze.', defaultDesc: 'Data flows instantly into insights.' },
                 { number: 5, titleKey: 'core_loop.step_5.title', descKey: 'core_loop.step_5.description', defaultTitle: 'Re-engage.', defaultDesc: 'Customers return before they even think to.' },
               ].map((step, index) => (
-                <div key={step.number} className="text-center relative py-2 sm:p-4 rounded-xl">
+                <div key={step.number} className="text-center relative py-2 sm:p-4 rounded-xl z-10">
                   {/* Connecting line to next step - desktop only */}
                   {index < 4 && (
                     <div 
