@@ -80,7 +80,7 @@ export default function FunctionsHero() {
                   {/* Connecting line to next step - desktop only */}
                   {index < 4 && (
                     <div 
-                      className="hidden lg:block absolute top-6 left-[calc(50%+24px)] w-[calc(100%-8px)] h-0.5"
+                      className="hidden lg:block absolute top-10 left-[calc(50%+24px)] w-[calc(100%-8px)] h-0.5"
                       style={{ 
                         backgroundImage: 'linear-gradient(to right, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))',
                         backgroundSize: '400% 100%',
