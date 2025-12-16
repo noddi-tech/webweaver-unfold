@@ -68,7 +68,14 @@ export default function FunctionsHero() {
 
           {/* 2. Core Loop Steps */}
           <div className="mt-8 sm:mt-12 lg:mt-16">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 max-w-6xl mx-auto px-4">
+            <div className="relative grid grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto px-4">
+              {/* Vertical connecting line - mobile only */}
+              <div 
+                className="absolute left-1/2 -translate-x-1/2 top-[32px] bottom-[32px] w-0.5 sm:hidden z-0"
+                style={{ 
+                  backgroundImage: 'linear-gradient(to bottom, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))'
+                }}
+              />
               {[
                 { number: 1, titleKey: 'core_loop.step_1.title', descKey: 'core_loop.step_1.description', defaultTitle: 'Book.', defaultDesc: 'The customer picks a time — Navio handles the rest.' },
                 { number: 2, titleKey: 'core_loop.step_2.title', descKey: 'core_loop.step_2.description', defaultTitle: 'Plan.', defaultDesc: 'Routes and lanes auto-optimize in real time.' },
@@ -76,7 +83,7 @@ export default function FunctionsHero() {
                 { number: 4, titleKey: 'core_loop.step_4.title', descKey: 'core_loop.step_4.description', defaultTitle: 'Analyze.', defaultDesc: 'Data flows instantly into insights.' },
                 { number: 5, titleKey: 'core_loop.step_5.title', descKey: 'core_loop.step_5.description', defaultTitle: 'Re-engage.', defaultDesc: 'Customers return before they even think to.' },
               ].map((step, index) => (
-                <div key={step.number} className="text-center relative p-4 rounded-xl">
+                <div key={step.number} className="text-center relative py-2 sm:p-4 rounded-xl">
                   {/* Connecting line to next step - desktop only */}
                   {index < 4 && (
                     <div 
