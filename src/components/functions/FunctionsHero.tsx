@@ -66,9 +66,35 @@ export default function FunctionsHero() {
             </div>
           </div>
 
-          {/* 2. Core Loop Steps */}
-          <div className="mt-8 sm:mt-12 lg:mt-16">
-            <div className="relative grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-6 lg:gap-8 max-w-6xl mx-auto px-4">
+          {/* Mobile: Ultra-compact inline stepper */}
+          <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 sm:hidden mt-8 px-4">
+            {[
+              { number: 1, title: 'Book' },
+              { number: 2, title: 'Plan' },
+              { number: 3, title: 'Execute' },
+              { number: 4, title: 'Analyze' },
+              { number: 5, title: 'Re-engage' },
+            ].map((step, index) => (
+              <span key={step.number} className="flex items-center">
+                <span className="text-sm font-bold text-primary">{step.number}.</span>
+                <span className="text-sm font-medium text-foreground ml-1">{step.title}</span>
+                {index < 4 && (
+                  <span 
+                    className="mx-2 w-4 h-0.5 inline-block"
+                    style={{ 
+                      backgroundImage: 'linear-gradient(to right, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))',
+                      backgroundSize: '400% 100%',
+                      backgroundPosition: `${(index / 3) * 100}% 0`
+                    }}
+                  />
+                )}
+              </span>
+            ))}
+          </div>
+
+          {/* Desktop/Tablet: Full Core Loop Steps */}
+          <div className="hidden sm:block mt-12 lg:mt-16">
+            <div className="relative grid grid-cols-5 gap-6 lg:gap-8 max-w-6xl mx-auto px-4">
               {[
                 { number: 1, titleKey: 'core_loop.step_1.title', descKey: 'core_loop.step_1.description', defaultTitle: 'Book.', defaultDesc: 'The customer picks a time — Navio handles the rest.' },
                 { number: 2, titleKey: 'core_loop.step_2.title', descKey: 'core_loop.step_2.description', defaultTitle: 'Plan.', defaultDesc: 'Routes and lanes auto-optimize in real time.' },
@@ -76,8 +102,8 @@ export default function FunctionsHero() {
                 { number: 4, titleKey: 'core_loop.step_4.title', descKey: 'core_loop.step_4.description', defaultTitle: 'Analyze.', defaultDesc: 'Data flows instantly into insights.' },
                 { number: 5, titleKey: 'core_loop.step_5.title', descKey: 'core_loop.step_5.description', defaultTitle: 'Re-engage.', defaultDesc: 'Customers return before they even think to.' },
               ].map((step, index) => (
-                <div key={step.number} className="text-center relative py-1 sm:p-4 rounded-xl">
-                  {/* Connecting line to next step - desktop only */}
+                <div key={step.number} className="text-center relative p-4 rounded-xl">
+                  {/* Connecting line to next step */}
                   {index < 4 && (
                     <div 
                       className="hidden lg:block absolute top-10 left-[calc(50%+24px)] w-[calc(100%-8px)] h-0.5 z-0"
@@ -88,17 +114,17 @@ export default function FunctionsHero() {
                       }}
                     />
                   )}
-                  <div className="mx-auto mb-1 sm:mb-3 w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-background flex items-center justify-center relative z-10">
+                  <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-background flex items-center justify-center relative z-10">
                     <div className="absolute inset-0 rounded-full bg-primary/10" />
-                    <span className="text-sm sm:text-lg font-bold text-primary relative">{step.number}</span>
+                    <span className="text-lg font-bold text-primary relative">{step.number}</span>
                   </div>
                   <EditableTranslation translationKey={step.titleKey}>
-                    <h3 className="text-sm sm:text-lg font-bold text-foreground mb-0 sm:mb-2">
+                    <h3 className="text-lg font-bold text-foreground mb-2">
                       {t(step.titleKey, step.defaultTitle)}
                     </h3>
                   </EditableTranslation>
                   <EditableTranslation translationKey={step.descKey}>
-                    <p className="hidden sm:block text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       {t(step.descKey, step.defaultDesc)}
                     </p>
                   </EditableTranslation>
