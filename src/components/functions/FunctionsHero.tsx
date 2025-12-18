@@ -40,9 +40,9 @@ export default function FunctionsHero() {
               {t('functions_hero.h1', 'Every function. One platform.')}
             </h1>
           </EditableTranslation>
-          <EditableTranslation translationKey="functions_hero.subtitle">
+          <EditableTranslation translationKey="core_loop.subtitle">
             <p className={`${body} text-muted-foreground mb-8`}>
-              {t('functions_hero.subtitle', 'From booking to billing, everything connects — automatically.')}
+              {t('core_loop.subtitle', 'Every step feeds the next. No gaps. No manual handoffs.')}
             </p>
           </EditableTranslation>
         </div>
@@ -133,21 +133,7 @@ export default function FunctionsHero() {
             </div>
           </div>
 
-          {/* 3. The Core Loop heading + subtitle */}
-          <div className="text-center mt-8 sm:mt-12">
-            <EditableTranslation translationKey="core_loop.title">
-              <h2 className={`${h2} mb-3 text-foreground`}>
-                {t('core_loop.title', 'The Core Loop')}
-              </h2>
-            </EditableTranslation>
-            <EditableTranslation translationKey="core_loop.subtitle">
-              <p className={`${body} text-muted-foreground max-w-2xl mx-auto`}>
-                {t('core_loop.subtitle', 'Every step feeds the next. No gaps. No manual handoffs.')}
-              </p>
-            </EditableTranslation>
-          </div>
-
-          {/* 3. CTA Buttons */}
+          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
             <Button size="lg" className="text-lg px-8 py-6 group" asChild>
               <LanguageLink to="/contact">
