@@ -8,7 +8,7 @@ import { ColorPaletteTab } from './design-system/ColorPaletteTab';
 import { calculateContrastRatio, getOptimalTextColor, getContrastLevel } from '@/lib/colorUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useColorSystem } from '@/hooks/useColorSystem';
-import { getOptimalTextColorForBackground, meetsContrastRequirement, type ColorOption } from '@/config/colorSystem';
+import { meetsContrastRequirement, type ColorOption } from '@/config/colorSystem';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Check, AlertTriangle } from 'lucide-react';
@@ -41,9 +41,7 @@ export function BackgroundEditModal({
   affectedTextElements = [],
 }: BackgroundEditModalProps) {
   const [selectedBackground, setSelectedBackground] = useState(currentBackground);
-  const [selectedTextColor, setSelectedTextColor] = useState(
-    currentTextColor || getOptimalTextColorForBackground(currentBackground)
-  );
+  const [selectedTextColor, setSelectedTextColor] = useState(currentTextColor || 'text-foreground');
   const [activeTab, setActiveTab] = useState('gradients');
 
   // Load color system from database
@@ -109,9 +107,8 @@ export function BackgroundEditModal({
     } else if (bgOption?.optimalTextColor === 'dark') {
       setSelectedTextColor('text-foreground');
     } else {
-      // Fallback to static function for unknown backgrounds
-      const optimal = getOptimalTextColorForBackground(selectedBackground);
-      setSelectedTextColor(optimal);
+      // Default to foreground for unknown backgrounds (safe for light backgrounds)
+      setSelectedTextColor('text-foreground');
     }
   }, [selectedBackground, GRADIENT_COLORS, GLASS_EFFECTS, SOLID_COLORS]);
 

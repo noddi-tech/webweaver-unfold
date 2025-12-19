@@ -21,7 +21,7 @@ interface TextStyle {
   content: string;
 }
 
-interface ColorToken {
+export interface ColorToken {
   id: string;
   css_var: string;
   value: string;

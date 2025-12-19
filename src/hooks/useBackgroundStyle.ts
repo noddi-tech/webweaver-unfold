@@ -1,7 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { getOptimalTextColorForBackground } from '@/config/colorSystem';
-import { useSiteStyles } from '@/contexts/SiteStylesContext';
+import { useSiteStyles, type ColorToken } from '@/contexts/SiteStylesContext';
+
+/**
+ * Gets the optimal text color from preloaded colorTokens (CMS-driven)
+ * Falls back to 'text-foreground' only if color is truly unknown
+ */
+const getOptimalTextColorFromTokens = (
+  backgroundValue: string,
+  colorTokens: ColorToken[]
+): string => {
+  const baseBackground = backgroundValue.split('/')[0];
+  // Convert bg-gradient-mesh-velvet → --gradient-mesh-velvet
+  const cssVar = `--${baseBackground.replace('bg-', '')}`;
+  
+  const token = colorTokens.find(t => t.css_var === cssVar);
+  
+  if (token?.optimal_text_color === 'white') {
+    return 'text-white';
+  } else if (token?.optimal_text_color === 'dark') {
+    return 'text-foreground';
+  }
+  
+  // For backgrounds not in color_tokens, default to foreground (safe for light backgrounds)
+  return 'text-foreground';
+};
 
 export function useBackgroundStyle(
   elementId: string,
@@ -13,7 +36,8 @@ export function useBackgroundStyle(
   // Get saved style from preloaded context
   const savedStyle = backgroundStyles[elementId];
   const initialBackground = savedStyle?.background_class || defaultBackground;
-  const initialTextColor = savedStyle?.text_color_class || defaultTextColor || getOptimalTextColorForBackground(initialBackground);
+  const initialTextColor = savedStyle?.text_color_class || defaultTextColor || 
+    (isLoaded ? getOptimalTextColorFromTokens(initialBackground, colorTokens) : 'text-foreground');
   
   const [background, setBackground] = useState(initialBackground);
   const [backgroundStyle, setBackgroundStyle] = useState<React.CSSProperties>({});
@@ -56,7 +80,7 @@ export function useBackgroundStyle(
       if (savedStyle.text_color_class) {
         setTextColor(savedStyle.text_color_class);
       } else {
-        setTextColor(getOptimalTextColorForBackground(newBackground));
+        setTextColor(getOptimalTextColorFromTokens(newBackground, colorTokens));
       }
     }
   }, [elementId, backgroundStyles, colorTokens, isLoaded]);
@@ -65,7 +89,7 @@ export function useBackgroundStyle(
     newBackground: string,
     newTextColor?: string
   ) => {
-    const optimalTextColor = newTextColor || getOptimalTextColorForBackground(newBackground);
+    const optimalTextColor = newTextColor || getOptimalTextColorFromTokens(newBackground, colorTokens);
     
     // Step 1: Fetch color token FIRST (before any state updates)
     const colorToken = await (async () => {
@@ -118,7 +142,7 @@ export function useBackgroundStyle(
         console.error('Error updating background and text color:', error);
         // Revert on error
         setBackground(defaultBackground);
-        setTextColor(defaultTextColor || getOptimalTextColorForBackground(defaultBackground));
+        setTextColor(defaultTextColor || getOptimalTextColorFromTokens(defaultBackground, colorTokens));
       } else {
         // Refresh the context so other components get the updated data
         await refreshBackgroundStyles();
@@ -127,7 +151,7 @@ export function useBackgroundStyle(
       console.error('Error in updateBackgroundAndTextColor:', error);
       // Revert on error
       setBackground(defaultBackground);
-      setTextColor(defaultTextColor || getOptimalTextColorForBackground(defaultBackground));
+      setTextColor(defaultTextColor || getOptimalTextColorFromTokens(defaultBackground, colorTokens));
     }
   };
 
