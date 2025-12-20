@@ -57,7 +57,7 @@ export default function CustomerStory() {
                   alt={`${mockStory.companyName} logo`}
                   className="h-12 w-auto object-contain"
                 />
-                <h1 className={`${h1} text-foreground`}>
+                <h1 className="text-5xl md:text-6xl font-bold text-foreground">
                   {mockStory.title}
                 </h1>
               </div>
