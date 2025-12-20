@@ -94,13 +94,21 @@ export default function CustomerStory() {
           </div>
         </section>
 
-        {/* Section 3: CTA Button */}
-        <section className="py-12 bg-background">
-          <div className="container max-w-container px-4 sm:px-6 lg:px-8 text-center">
-            <Button size="lg" className="gap-2">
-              Book a Demo
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+        {/* Section 3: CTA */}
+        <section className="py-section bg-background">
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+            <div className="relative overflow-hidden rounded-2xl md:rounded-3xl p-12 md:p-16 text-center bg-gradient-hero">
+              <h3 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+                See how Navio can help you
+              </h3>
+              <p className="text-xl mb-10 opacity-95 leading-relaxed text-white">
+                Book a personalized demo and discover what's possible for your business.
+              </p>
+              <Button size="lg" variant="secondary" className="text-lg px-8 gap-2">
+                Book a Demo
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </section>
 
@@ -170,18 +178,20 @@ export default function CustomerStory() {
         </section>
 
         {/* Section 8: Final CTA */}
-        <section className="py-section bg-primary">
-          <div className="container max-w-container px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className={`${h2} text-primary-foreground mb-4`}>
-              Ready to transform your operations?
-            </h2>
-            <p className={`${body} text-primary-foreground/80 mb-8 max-w-2xl mx-auto`}>
-              Join Nordic Fleet Solutions and hundreds of other companies already using Navio.
-            </p>
-            <Button size="lg" variant="secondary" className="gap-2">
-              Get Started Today
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+        <section className="py-section bg-background">
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+            <div className="relative overflow-hidden rounded-2xl md:rounded-3xl p-12 md:p-16 text-center bg-gradient-hero">
+              <h3 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+                Ready to transform your operations?
+              </h3>
+              <p className="text-xl mb-10 opacity-95 leading-relaxed text-white">
+                Join Nordic Fleet Solutions and hundreds of other companies already using Navio.
+              </p>
+              <Button size="lg" variant="secondary" className="text-lg px-8 gap-2">
+                Get Started Today
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </section>
       </main>
