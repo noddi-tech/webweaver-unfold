@@ -27,6 +27,11 @@ Before implementing Navio, Nordic Fleet Solutions faced significant challenges w
     author: "Erik Lindqvist",
     title: "Chief Operations Officer, Nordic Fleet Solutions",
   },
+  useCase: `Nordic Fleet Solutions needed a unified platform that could handle their complex multi-location service network while delivering a seamless customer experience.
+
+Their main requirements included real-time availability management across 150+ locations, automated customer communications, and a mobile-first booking experience that matched modern consumer expectations.
+
+The team chose Navio for its ability to integrate with their existing systems while providing a complete customer journey – from initial booking through service completion and follow-up.`,
   impactStatement: `Since implementing Navio, Nordic Fleet Solutions has experienced a fundamental shift in their operational efficiency and customer satisfaction.
 
 The integrated booking system has eliminated double-bookings and reduced scheduling conflicts by 89%. Automated reminders have decreased no-show rates from 12% to just 3%, recovering significant revenue that was previously lost.
@@ -150,7 +155,23 @@ export default function CustomerStory() {
           </div>
         </section>
 
-        {/* Section 6: Impact Statement */}
+        {/* Section 6: The Use-Case */}
+        <section className="py-section bg-muted">
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto">
+              <h2 className={`${h2} text-foreground mb-8`}>
+                The Use-Case
+              </h2>
+              <div className={`${body} text-muted-foreground space-y-4`}>
+                {mockStory.useCase.split('\n\n').map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 7: Impact Statement */}
         <section className="py-section bg-background">
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto">
