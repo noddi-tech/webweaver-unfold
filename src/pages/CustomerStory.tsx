@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import { useTypography } from "@/hooks/useTypography";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Quote } from "lucide-react";
+import { ArrowRight, Quote, Smile, Users, Calendar } from "lucide-react";
 
 // Mock data for the customer story template
 const mockStory = {
@@ -13,9 +13,9 @@ const mockStory = {
   title: "How Nordic Fleet Solutions Transformed Their Service Operations with Navio",
   heroImage: "https://ouhfgazomdmirdazvjys.supabase.co/storage/v1/object/public/site-images/Library/dashboard-preview.jpg",
   results: [
-    { title: "Booking Efficiency", metric: "+47%" },
-    { title: "Customer Satisfaction", metric: "94 NPS" },
-    { title: "Support Tickets", metric: "-35%" },
+    { icon: Smile, metric: "+47% booking efficiency", description: "by streamlining the entire service booking flow from discovery to confirmation." },
+    { icon: Users, metric: "94 NPS score", description: "achieved through consistent customer experience across all touchpoints." },
+    { icon: Calendar, metric: "-35% support tickets", description: "thanks to automated reminders and self-service capabilities." },
   ],
   aboutCompany: `Nordic Fleet Solutions is a leading automotive service provider operating across Scandinavia. With over 150 service locations and a fleet of 2,000+ mobile service units, they serve both individual customers and major corporate clients.
 
@@ -81,18 +81,25 @@ export default function CustomerStory() {
         <section className="py-section bg-background">
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {mockStory.results.map((result, index) => (
-                <Card key={index} className="bg-card text-card-foreground border-0">
-                  <CardContent className="p-8 text-center">
-                    <p className={`${caption} text-card-foreground/80 uppercase tracking-wide mb-2`}>
-                      {result.title}
-                    </p>
-                    <p className="text-5xl font-bold text-card-foreground">
+              {mockStory.results.map((result, index) => {
+                const IconComponent = result.icon;
+                return (
+                  <div 
+                    key={index} 
+                    className="bg-primary/10 rounded-2xl p-8 text-center"
+                  >
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-primary/20 mb-6">
+                      <IconComponent className="w-7 h-7 text-primary" />
+                    </div>
+                    <p className="text-xl font-bold text-primary mb-3">
                       {result.metric}
                     </p>
-                  </CardContent>
-                </Card>
-              ))}
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {result.description}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
