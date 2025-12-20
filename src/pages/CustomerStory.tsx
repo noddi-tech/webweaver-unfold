@@ -121,18 +121,18 @@ export default function CustomerStory() {
         </section>
 
         {/* Section 5: Quote */}
-        <section className="py-section bg-primary">
+        <section className="py-section bg-background">
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto text-center">
-              <Quote className="w-12 h-12 text-primary-foreground/40 mx-auto mb-6" />
-              <blockquote className={`${h3} text-primary-foreground mb-8 italic`}>
+            <div className="relative overflow-hidden rounded-2xl md:rounded-3xl p-12 md:p-16 text-center bg-gradient-hero">
+              <Quote className="w-12 h-12 text-white/40 mx-auto mb-6" />
+              <blockquote className={`${h3} text-white mb-8 italic`}>
                 "{mockStory.quote.text}"
               </blockquote>
               <div>
-                <p className="text-lg font-semibold text-primary-foreground">
+                <p className="text-lg font-semibold text-white">
                   {mockStory.quote.author}
                 </p>
-                <p className={`${caption} text-primary-foreground/80`}>
+                <p className={`${caption} text-white/80`}>
                   {mockStory.quote.title}
                 </p>
               </div>
