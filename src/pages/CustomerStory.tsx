@@ -51,13 +51,16 @@ export default function CustomerStory() {
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               {/* Left: Logo + Title */}
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <img 
                   src={mockStory.companyLogo} 
                   alt={`${mockStory.companyName} logo`}
-                  className="h-12 w-auto object-contain"
+                  className="h-10 w-auto object-contain"
                 />
-                <h1 className="text-5xl md:text-6xl font-bold text-foreground">
+                <p className="text-sm font-semibold uppercase tracking-widest text-primary">
+                  Customer Story
+                </p>
+                <h1 className="text-3xl md:text-4xl font-bold text-foreground">
                   {mockStory.title}
                 </h1>
               </div>
