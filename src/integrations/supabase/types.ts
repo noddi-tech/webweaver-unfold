@@ -377,6 +377,81 @@ export type Database = {
           },
         ]
       }
+      customer_stories: {
+        Row: {
+          about_company: string | null
+          active: boolean
+          company_logo_url: string | null
+          company_name: string
+          created_at: string
+          final_cta_button_text: string | null
+          final_cta_button_url: string | null
+          final_cta_description: string | null
+          final_cta_heading: string | null
+          hero_image_url: string | null
+          id: string
+          impact_statement: string | null
+          product_screenshot_url: string | null
+          quote_author: string | null
+          quote_author_title: string | null
+          quote_text: string | null
+          results: Json | null
+          slug: string
+          sort_order: number | null
+          title: string
+          updated_at: string
+          use_case: string | null
+        }
+        Insert: {
+          about_company?: string | null
+          active?: boolean
+          company_logo_url?: string | null
+          company_name: string
+          created_at?: string
+          final_cta_button_text?: string | null
+          final_cta_button_url?: string | null
+          final_cta_description?: string | null
+          final_cta_heading?: string | null
+          hero_image_url?: string | null
+          id?: string
+          impact_statement?: string | null
+          product_screenshot_url?: string | null
+          quote_author?: string | null
+          quote_author_title?: string | null
+          quote_text?: string | null
+          results?: Json | null
+          slug: string
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+          use_case?: string | null
+        }
+        Update: {
+          about_company?: string | null
+          active?: boolean
+          company_logo_url?: string | null
+          company_name?: string
+          created_at?: string
+          final_cta_button_text?: string | null
+          final_cta_button_url?: string | null
+          final_cta_description?: string | null
+          final_cta_heading?: string | null
+          hero_image_url?: string | null
+          id?: string
+          impact_statement?: string | null
+          product_screenshot_url?: string | null
+          quote_author?: string | null
+          quote_author_title?: string | null
+          quote_text?: string | null
+          results?: Json | null
+          slug?: string
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+          use_case?: string | null
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           active: boolean
