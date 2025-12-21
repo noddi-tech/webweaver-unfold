@@ -1,0 +1,38 @@
+-- Insert second customer story
+INSERT INTO public.customer_stories (
+  slug,
+  company_name,
+  title,
+  hero_image_url,
+  about_company,
+  use_case,
+  impact_statement,
+  product_screenshot_url,
+  quote_text,
+  quote_author,
+  quote_author_title,
+  results,
+  final_cta_heading,
+  final_cta_description,
+  final_cta_button_text,
+  final_cta_button_url,
+  sort_order
+) VALUES (
+  'coastal-auto-group',
+  'Coastal Auto Group',
+  'How Coastal Auto Group reduced no-shows by 78% with automated reminders',
+  'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&h=600&fit=crop',
+  E'Coastal Auto Group is a premium automotive dealership network with 12 locations across the Pacific Northwest. Specializing in luxury and electric vehicles, they serve over 15,000 customers annually.\n\nWith a reputation for exceptional customer service, they needed a booking solution that matched their premium brand experience.',
+  E'Coastal Auto Group struggled with high no-show rates for service appointments, leading to lost revenue and scheduling inefficiencies.\n\nThey needed automated reminder systems, easy rescheduling options, and a mobile-first experience for their tech-savvy customer base.\n\nNavio provided the perfect solution with its intelligent reminder sequences and seamless calendar integration.',
+  E'After implementing Navio, Coastal Auto Group saw immediate improvements in appointment attendance and customer satisfaction.\n\nThe automated reminder system sends personalized messages via SMS and email, with one-tap rescheduling for customers who need to change their appointment.\n\nService bay utilization increased by 34%, directly impacting their bottom line.',
+  'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=800&fit=crop',
+  'The difference was immediate. Our no-show rate dropped from 23% to just 5% in the first month. Navio pays for itself many times over.',
+  'Sarah Chen',
+  'Service Director, Coastal Auto Group',
+  '[{"icon": "Calendar", "metric": "78%", "description": "Reduction in no-show appointments"}, {"icon": "TrendingUp", "metric": "34%", "description": "Increase in service bay utilization"}, {"icon": "Star", "metric": "4.9/5", "description": "Average customer satisfaction rating"}]'::jsonb,
+  'Ready to eliminate no-shows?',
+  'See how Navio can transform your service department.',
+  'Schedule a Demo',
+  '/contact',
+  1
+);
