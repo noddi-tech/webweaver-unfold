@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Quote, Smile, Users, Calendar, Clock, TrendingUp, Star, Zap, Target, Award } from "lucide-react";
 import { useCustomerStory } from "@/hooks/useCustomerStory";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EditableStoryField, EditableStoryImage, EditableStoryResults } from "@/components/EditableStoryField";
 
 // Icon mapping for dynamic icons from database
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -70,29 +71,46 @@ export default function CustomerStory() {
               {/* Left: Logo + Title */}
               <div className="space-y-4">
                 {story.company_logo_url && (
-                  <img 
-                    src={story.company_logo_url} 
-                    alt={`${story.company_name} logo`}
-                    className="h-10 w-auto object-contain"
-                  />
+                  <EditableStoryImage
+                    storyId={story.id}
+                    field="company_logo_url"
+                    value={story.company_logo_url}
+                  >
+                    <img 
+                      src={story.company_logo_url} 
+                      alt={`${story.company_name} logo`}
+                      className="h-10 w-auto object-contain"
+                    />
+                  </EditableStoryImage>
                 )}
                 <p className="text-sm font-semibold uppercase tracking-widest text-primary">
                   Customer Story
                 </p>
-                <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                  {story.title}
-                </h1>
+                <EditableStoryField
+                  storyId={story.id}
+                  field="title"
+                  value={story.title}
+                >
+                  <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                    {story.title}
+                  </h1>
+                </EditableStoryField>
               </div>
               
               {/* Right: Hero Image */}
               {story.hero_image_url && (
-                <div className="relative">
+                <EditableStoryImage
+                  storyId={story.id}
+                  field="hero_image_url"
+                  value={story.hero_image_url}
+                  className="relative"
+                >
                   <img 
                     src={story.hero_image_url}
                     alt="Customer story hero"
                     className="w-full rounded-2xl shadow-xl object-cover aspect-video"
                   />
-                </div>
+                </EditableStoryImage>
               )}
             </div>
           </div>
@@ -102,27 +120,32 @@ export default function CustomerStory() {
         {story.results.length > 0 && (
           <section className="py-section bg-background">
             <div className="container max-w-container px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {story.results.map((result, index) => {
-                  const IconComponent = iconMap[result.icon] || Smile;
-                  return (
-                    <div 
-                      key={index} 
-                      className="bg-primary/10 rounded-2xl p-8 text-center"
-                    >
-                      <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-primary/20 mb-6">
-                        <IconComponent className="w-7 h-7 text-primary" />
+              <EditableStoryResults
+                storyId={story.id}
+                results={story.results}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {story.results.map((result, index) => {
+                    const IconComponent = iconMap[result.icon] || Smile;
+                    return (
+                      <div 
+                        key={index} 
+                        className="bg-primary/10 rounded-2xl p-8 text-center"
+                      >
+                        <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-primary/20 mb-6">
+                          <IconComponent className="w-7 h-7 text-primary" />
+                        </div>
+                        <p className="text-xl font-bold text-primary mb-3">
+                          {result.metric}
+                        </p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {result.description}
+                        </p>
                       </div>
-                      <p className="text-xl font-bold text-primary mb-3">
-                        {result.metric}
-                      </p>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {result.description}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              </EditableStoryResults>
             </div>
           </section>
         )}
@@ -144,14 +167,27 @@ export default function CustomerStory() {
           <section className="py-section bg-muted">
             <div className="container max-w-container px-4 sm:px-6 lg:px-8">
               <div className="max-w-3xl mx-auto">
-                <h2 className={`${h2} text-foreground mb-8`}>
-                  About {story.company_name}
-                </h2>
-                <div className={`${body} text-muted-foreground space-y-4`}>
-                  {story.about_company.split('\n\n').map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))}
-                </div>
+                <EditableStoryField
+                  storyId={story.id}
+                  field="company_name"
+                  value={story.company_name}
+                >
+                  <h2 className={`${h2} text-foreground mb-8`}>
+                    About {story.company_name}
+                  </h2>
+                </EditableStoryField>
+                <EditableStoryField
+                  storyId={story.id}
+                  field="about_company"
+                  value={story.about_company}
+                  multiline
+                >
+                  <div className={`${body} text-muted-foreground space-y-4`}>
+                    {story.about_company.split('\n\n').map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                </EditableStoryField>
               </div>
             </div>
           </section>
@@ -163,20 +199,39 @@ export default function CustomerStory() {
             <div className="container max-w-container px-4 sm:px-6 lg:px-8">
               <div className="relative overflow-hidden rounded-2xl md:rounded-3xl p-12 md:p-16 text-center bg-gradient-hero">
                 <Quote className="w-12 h-12 text-white/40 mx-auto mb-6" />
-                <blockquote className={`${h3} text-white mb-8 italic`}>
-                  "{story.quote_text}"
-                </blockquote>
+                <EditableStoryField
+                  storyId={story.id}
+                  field="quote_text"
+                  value={story.quote_text}
+                  multiline
+                >
+                  <blockquote className={`${h3} text-white mb-8 italic`}>
+                    "{story.quote_text}"
+                  </blockquote>
+                </EditableStoryField>
                 {(story.quote_author || story.quote_author_title) && (
                   <div>
                     {story.quote_author && (
-                      <p className="text-lg font-semibold text-white">
-                        {story.quote_author}
-                      </p>
+                      <EditableStoryField
+                        storyId={story.id}
+                        field="quote_author"
+                        value={story.quote_author}
+                      >
+                        <p className="text-lg font-semibold text-white">
+                          {story.quote_author}
+                        </p>
+                      </EditableStoryField>
                     )}
                     {story.quote_author_title && (
-                      <p className={`${caption} text-white/80`}>
-                        {story.quote_author_title}
-                      </p>
+                      <EditableStoryField
+                        storyId={story.id}
+                        field="quote_author_title"
+                        value={story.quote_author_title}
+                      >
+                        <p className={`${caption} text-white/80`}>
+                          {story.quote_author_title}
+                        </p>
+                      </EditableStoryField>
                     )}
                   </div>
                 )}
@@ -193,11 +248,18 @@ export default function CustomerStory() {
                 <h2 className={`${h2} text-foreground mb-8`}>
                   The Use-Case
                 </h2>
-                <div className={`${body} text-muted-foreground space-y-4`}>
-                  {story.use_case.split('\n\n').map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))}
-                </div>
+                <EditableStoryField
+                  storyId={story.id}
+                  field="use_case"
+                  value={story.use_case}
+                  multiline
+                >
+                  <div className={`${body} text-muted-foreground space-y-4`}>
+                    {story.use_case.split('\n\n').map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                </EditableStoryField>
               </div>
             </div>
           </section>
@@ -211,11 +273,18 @@ export default function CustomerStory() {
                 <h2 className={`${h2} text-foreground mb-8`}>
                   The Impact
                 </h2>
-                <div className={`${body} text-muted-foreground space-y-4`}>
-                  {story.impact_statement.split('\n\n').map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))}
-                </div>
+                <EditableStoryField
+                  storyId={story.id}
+                  field="impact_statement"
+                  value={story.impact_statement}
+                  multiline
+                >
+                  <div className={`${body} text-muted-foreground space-y-4`}>
+                    {story.impact_statement.split('\n\n').map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                </EditableStoryField>
               </div>
             </div>
           </section>
@@ -226,11 +295,17 @@ export default function CustomerStory() {
           <section className="py-section bg-muted">
             <div className="container max-w-container px-4 sm:px-6 lg:px-8">
               <div className="max-w-5xl mx-auto">
-                <img 
-                  src={story.product_screenshot_url}
-                  alt="Product screenshot"
-                  className="w-full rounded-2xl shadow-2xl"
-                />
+                <EditableStoryImage
+                  storyId={story.id}
+                  field="product_screenshot_url"
+                  value={story.product_screenshot_url}
+                >
+                  <img 
+                    src={story.product_screenshot_url}
+                    alt="Product screenshot"
+                    className="w-full rounded-2xl shadow-2xl"
+                  />
+                </EditableStoryImage>
               </div>
             </div>
           </section>
@@ -240,13 +315,25 @@ export default function CustomerStory() {
         <section className="py-section bg-background">
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <div className="relative overflow-hidden rounded-2xl md:rounded-3xl p-12 md:p-16 text-center bg-gradient-hero">
-              <h3 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-                {story.final_cta_heading || 'Ready to transform your operations?'}
-              </h3>
+              <EditableStoryField
+                storyId={story.id}
+                field="final_cta_heading"
+                value={story.final_cta_heading}
+              >
+                <h3 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+                  {story.final_cta_heading || 'Ready to transform your operations?'}
+                </h3>
+              </EditableStoryField>
               {story.final_cta_description && (
-                <p className="text-xl mb-10 opacity-95 leading-relaxed text-white">
-                  {story.final_cta_description}
-                </p>
+                <EditableStoryField
+                  storyId={story.id}
+                  field="final_cta_description"
+                  value={story.final_cta_description}
+                >
+                  <p className="text-xl mb-10 opacity-95 leading-relaxed text-white">
+                    {story.final_cta_description}
+                  </p>
+                </EditableStoryField>
               )}
               <Button size="lg" variant="secondary" className="text-lg px-8 gap-2" asChild>
                 <Link to={story.final_cta_button_url || '/contact'}>

@@ -44,7 +44,7 @@ export function useCustomerStory(slug: string | undefined) {
         .from('customer_stories')
         .select('*')
         .eq('slug', slug)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching customer story:', error);
