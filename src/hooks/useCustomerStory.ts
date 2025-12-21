@@ -27,6 +27,10 @@ export interface CustomerStory {
   final_cta_description: string | null;
   final_cta_button_text: string | null;
   final_cta_button_url: string | null;
+  active: boolean;
+  sort_order: number | null;
+  created_at: string;
+  updated_at: string;
 }
 
 function parseResults(results: Json | null): CustomerStoryResult[] {

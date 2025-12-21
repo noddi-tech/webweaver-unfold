@@ -1,12 +1,21 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useTypography } from "@/hooks/useTypography";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Quote, Smile, Users, Calendar, Clock, TrendingUp, Star, Zap, Target, Award } from "lucide-react";
+import { ArrowRight, Quote, Smile, Users, Calendar, Clock, TrendingUp, Star, Zap, Target, Award, Settings } from "lucide-react";
 import { useCustomerStory } from "@/hooks/useCustomerStory";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EditableStoryField, EditableStoryImage, EditableStoryResults } from "@/components/EditableStoryField";
+import { useEditMode } from "@/contexts/EditModeContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useState } from "react";
 
 // Icon mapping for dynamic icons from database
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -22,9 +31,13 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default function CustomerStory() {
-  const { slug } = useParams();
+  const { slug, lang } = useParams();
+  const navigate = useNavigate();
   const { h2, h3, body, caption } = useTypography();
   const { data: story, isLoading, error } = useCustomerStory(slug);
+  const { editMode } = useEditMode();
+  const queryClient = useQueryClient();
+  const [isSaving, setIsSaving] = useState(false);
 
   if (isLoading) {
     return (
@@ -344,6 +357,129 @@ export default function CustomerStory() {
             </div>
           </div>
         </section>
+
+        {/* Admin Panel - Only visible in edit mode */}
+        {editMode && (
+          <section className="py-section bg-muted border-t-2 border-dashed border-primary/30">
+            <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+              <Card className="border-primary/20 bg-card">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Settings className="w-5 h-5 text-primary" />
+                    Admin Fields
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    These fields are not displayed on the page but can be edited here.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Slug */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="slug">URL Slug</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="slug"
+                        defaultValue={story.slug}
+                        className="font-mono text-sm"
+                        onBlur={async (e) => {
+                          const newSlug = e.target.value.trim().toLowerCase().replace(/\s+/g, '-');
+                          if (newSlug && newSlug !== story.slug) {
+                            setIsSaving(true);
+                            const { error } = await supabase
+                              .from('customer_stories')
+                              .update({ slug: newSlug })
+                              .eq('id', story.id);
+                            setIsSaving(false);
+                            if (error) {
+                              toast.error('Failed to update slug');
+                            } else {
+                              toast.success('Slug updated');
+                              queryClient.invalidateQueries({ queryKey: ['customer-story'] });
+                              queryClient.invalidateQueries({ queryKey: ['customer-stories'] });
+                              navigate(`/${lang}/stories/${newSlug}`, { replace: true });
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Current URL: /stories/{story.slug}
+                    </p>
+                  </div>
+
+                  {/* Active Toggle */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Active</Label>
+                      <p className="text-xs text-muted-foreground">
+                        When disabled, this story won't be visible to the public.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={story.active}
+                      onCheckedChange={async (checked) => {
+                        setIsSaving(true);
+                        const { error } = await supabase
+                          .from('customer_stories')
+                          .update({ active: checked })
+                          .eq('id', story.id);
+                        setIsSaving(false);
+                        if (error) {
+                          toast.error('Failed to update status');
+                        } else {
+                          toast.success(checked ? 'Story activated' : 'Story deactivated');
+                          queryClient.invalidateQueries({ queryKey: ['customer-story'] });
+                          queryClient.invalidateQueries({ queryKey: ['customer-stories'] });
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* Sort Order */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="sort_order">Sort Order</Label>
+                    <Input
+                      id="sort_order"
+                      type="number"
+                      defaultValue={story.sort_order || 0}
+                      className="w-24"
+                      onBlur={async (e) => {
+                        const newOrder = parseInt(e.target.value) || 0;
+                        if (newOrder !== story.sort_order) {
+                          setIsSaving(true);
+                          const { error } = await supabase
+                            .from('customer_stories')
+                            .update({ sort_order: newOrder })
+                            .eq('id', story.id);
+                          setIsSaving(false);
+                          if (error) {
+                            toast.error('Failed to update sort order');
+                          } else {
+                            toast.success('Sort order updated');
+                            queryClient.invalidateQueries({ queryKey: ['customer-story'] });
+                            queryClient.invalidateQueries({ queryKey: ['customer-stories'] });
+                          }
+                        }
+                      }}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Lower numbers appear first in the stories list.
+                    </p>
+                  </div>
+
+                  {/* Metadata (read-only) */}
+                  <div className="pt-4 border-t border-border">
+                    <p className="text-xs text-muted-foreground space-y-1">
+                      <span className="block">ID: {story.id}</span>
+                      <span className="block">Created: {new Date(story.created_at).toLocaleString()}</span>
+                      <span className="block">Updated: {new Date(story.updated_at).toLocaleString()}</span>
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+        )}
       </main>
 
       <Footer />
