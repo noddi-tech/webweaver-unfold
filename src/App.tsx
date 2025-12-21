@@ -26,6 +26,7 @@ import Partners from "./pages/Partners";
 import Architecture from "./pages/Architecture";
 import Solutions from "./pages/Solutions";
 import SolutionDetail from "./pages/SolutionDetail";
+import Stories from "./pages/Stories";
 import CustomerStory from "./pages/CustomerStory";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => {
             <Route path="/:lang/features" element={<LanguageSync><FeaturesPage /></LanguageSync>} />
             <Route path="/:lang/solutions" element={<LanguageSync><Solutions /></LanguageSync>} />
             <Route path="/:lang/solutions/:slug" element={<LanguageSync><SolutionDetail /></LanguageSync>} />
+            <Route path="/:lang/stories" element={<LanguageSync><Stories /></LanguageSync>} />
             <Route path="/:lang/stories/:slug" element={<LanguageSync><CustomerStory /></LanguageSync>} />
             <Route path="/:lang/partners" element={<LanguageSync><Partners /></LanguageSync>} />
             <Route path="/:lang/architecture" element={<LanguageSync><Architecture /></LanguageSync>} />
@@ -75,6 +77,7 @@ const App = () => {
             <Route path="/features" element={<LanguageRedirect />} />
             <Route path="/solutions" element={<LanguageRedirect />} />
             <Route path="/solutions/:slug" element={<LanguageRedirect />} />
+            <Route path="/stories" element={<LanguageRedirect />} />
             <Route path="/stories/:slug" element={<LanguageRedirect />} />
             <Route path="/partners" element={<LanguageRedirect />} />
             <Route path="/architecture" element={<LanguageRedirect />} />
