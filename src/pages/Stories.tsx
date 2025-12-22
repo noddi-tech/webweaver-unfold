@@ -71,10 +71,10 @@ export default function Stories() {
                     
                     {/* Card Content */}
                     <div className="p-6">
-                      <p className="text-sm font-medium text-primary mb-2">
+                      <p className="text-sm font-medium text-primary-foreground/80 mb-2">
                         {story.company_name}
                       </p>
-                      <h2 className={`${h2} text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2`}>
+                      <h2 className={`${h2} text-card-foreground mb-3 group-hover:text-primary-foreground transition-colors line-clamp-2`}>
                         {story.title}
                       </h2>
                       
@@ -84,7 +84,7 @@ export default function Stories() {
                           {story.results.slice(0, 2).map((result, idx) => (
                             <span
                               key={idx}
-                              className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium"
+                              className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-card-foreground text-sm font-medium"
                             >
                               {result.metric}
                             </span>
@@ -92,7 +92,7 @@ export default function Stories() {
                         </div>
                       )}
                       
-                      <div className="flex items-center text-primary font-medium text-sm group-hover:gap-3 gap-2 transition-all">
+                      <div className="flex items-center text-card-foreground font-medium text-sm group-hover:gap-3 gap-2 transition-all">
                         Read story
                         <ArrowRight className="w-4 h-4" />
                       </div>
