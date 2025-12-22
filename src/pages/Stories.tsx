@@ -75,23 +75,9 @@ export default function Stories() {
                       <p className="text-sm font-medium text-white/80 mb-2">
                         {story.company_name}
                       </p>
-                      <h2 className={`${h2} text-white mb-3 group-hover:text-white/90 transition-colors line-clamp-2`}>
+                      <h2 className="text-lg md:text-xl font-bold text-white mb-4 group-hover:text-white/90 transition-colors line-clamp-2">
                         {story.title}
                       </h2>
-                      
-                      {/* Results Preview */}
-                      {story.results.length > 0 && (
-                        <div className="flex flex-wrap gap-3 mb-4">
-                          {story.results.slice(0, 2).map((result, idx) => (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center px-3 py-1 rounded-full bg-white/10 text-white text-sm font-medium"
-                            >
-                              {result.metric}
-                            </span>
-                          ))}
-                        </div>
-                      )}
                       
                       <div className="flex items-center text-white font-medium text-sm group-hover:gap-3 gap-2 transition-all">
                         Read story
