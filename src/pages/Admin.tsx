@@ -38,6 +38,7 @@ import UnifiedDashboard from "@/components/design-system/UnifiedDashboard";
 import SEOSetupWizard from "@/components/design-system/SEOSetupWizard";
 import EvaluationHealthDashboard from "@/components/design-system/EvaluationHealthDashboard";
 import { RotatingTermsManager } from "@/components/design-system/RotatingTermsManager";
+import StoriesManager from "@/components/design-system/StoriesManager";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -144,6 +145,7 @@ const Admin = () => {
                     <TabsTrigger value="rotating">Rotating Headlines</TabsTrigger>
                     <TabsTrigger value="features">Features</TabsTrigger>
                     <TabsTrigger value="solutions">Solutions</TabsTrigger>
+                    <TabsTrigger value="stories">Stories</TabsTrigger>
                     <TabsTrigger value="usps">USPs</TabsTrigger>
                     <TabsTrigger value="contact">Contact</TabsTrigger>
                     <TabsTrigger value="faqs">FAQs</TabsTrigger>
@@ -165,6 +167,9 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="solutions" className="space-y-8">
                     <SolutionsManager />
+                  </TabsContent>
+                  <TabsContent value="stories" className="space-y-8">
+                    <StoriesManager />
                   </TabsContent>
                   <TabsContent value="usps" className="space-y-8">
                     <USPCms />
