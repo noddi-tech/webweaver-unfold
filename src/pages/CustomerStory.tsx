@@ -360,9 +360,9 @@ export default function CustomerStory() {
 
         {/* Admin Panel - Only visible in edit mode */}
         {editMode && (
-          <section className="py-section bg-background border-t-2 border-dashed border-border">
+          <section className="py-section bg-muted border-t-2 border-dashed border-border">
             <div className="container max-w-container px-4 sm:px-6 lg:px-8">
-              <Card className="border-border bg-card text-card-foreground">
+              <Card className="border-border bg-background text-foreground shadow-sm">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Settings className="w-5 h-5 text-primary" />
