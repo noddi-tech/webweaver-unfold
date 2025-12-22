@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Plus, X, Edit, MoveUp, MoveDown, AlertTriangle, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Trash2, Plus, X, Edit, MoveUp, MoveDown, AlertTriangle } from "lucide-react";
+import { ImageFieldEditor } from "./ImageFieldEditor";
 import type { Json } from "@/integrations/supabase/types";
 
 interface StoryResult {
@@ -111,43 +112,6 @@ const StoriesManager = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showEmptyWarning, setShowEmptyWarning] = useState(false);
   const [emptyFields, setEmptyFields] = useState<string[]>([]);
-  
-  // Image upload state
-  const [uploadingField, setUploadingField] = useState<string | null>(null);
-
-  // Upload image to Supabase storage
-  const uploadImage = async (file: File, fieldName: string): Promise<string | null> => {
-    setUploadingField(fieldName);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `stories/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('site-images')
-        .upload(fileName, file, { cacheControl: '3600', upsert: false });
-      
-      if (uploadError) {
-        toast({ title: 'Upload failed', description: uploadError.message, variant: 'destructive' });
-        return null;
-      }
-      
-      const { data: publicUrl } = supabase.storage.from('site-images').getPublicUrl(fileName);
-      toast({ title: 'Image uploaded successfully' });
-      return publicUrl.publicUrl;
-    } catch (error: any) {
-      toast({ title: 'Upload failed', description: error.message, variant: 'destructive' });
-      return null;
-    } finally {
-      setUploadingField(null);
-    }
-  };
-
-  const handleImageUpload = async (file: File, field: 'company_logo_url' | 'hero_image_url' | 'product_screenshot_url') => {
-    const url = await uploadImage(file, field);
-    if (url && editingStory) {
-      updateEditing({ [field]: url });
-    }
-  };
 
   const fetchStories = async () => {
     setLoading(true);
@@ -636,165 +600,36 @@ const StoriesManager = () => {
                     />
                   </div>
                   {/* Company Logo */}
-                  <div className="col-span-2 space-y-2">
-                    <Label className="text-sm text-muted-foreground">Company Logo</Label>
-                    <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border/50">
-                      {editingStory.company_logo_url ? (
-                        <div className="relative">
-                          <img 
-                            src={editingStory.company_logo_url} 
-                            alt="Company logo preview" 
-                            className="w-full h-24 object-contain rounded-md bg-background" 
-                          />
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-2 right-2 h-6 w-6"
-                            onClick={() => updateEditing({ company_logo_url: null })}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center h-24 bg-muted/50 rounded-md border-2 border-dashed border-border">
-                          <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-                        </div>
-                      )}
-                      <div className="flex gap-2">
-                        <div className="flex-1">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            disabled={uploadingField === 'company_logo_url'}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleImageUpload(file, 'company_logo_url');
-                            }}
-                            className="text-xs"
-                          />
-                        </div>
-                        {uploadingField === 'company_logo_url' && (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Uploading...
-                          </div>
-                        )}
-                      </div>
-                      <Input
-                        value={editingStory.company_logo_url || ""}
-                        onChange={(e) => updateEditing({ company_logo_url: e.target.value })}
-                        placeholder="Or paste URL: https://..."
-                        className="text-xs"
-                      />
-                    </div>
+                  <div className="col-span-2">
+                    <ImageFieldEditor
+                      label="Company Logo"
+                      value={editingStory.company_logo_url}
+                      onChange={(url) => updateEditing({ company_logo_url: url })}
+                      storagePath="stories/logos"
+                      previewHeight="h-24"
+                    />
                   </div>
 
                   {/* Hero Image */}
-                  <div className="col-span-2 space-y-2">
-                    <Label className="text-sm text-muted-foreground">Hero Image</Label>
-                    <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border/50">
-                      {editingStory.hero_image_url ? (
-                        <div className="relative">
-                          <img 
-                            src={editingStory.hero_image_url} 
-                            alt="Hero image preview" 
-                            className="w-full h-40 object-cover rounded-md" 
-                          />
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-2 right-2 h-6 w-6"
-                            onClick={() => updateEditing({ hero_image_url: null })}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center h-40 bg-muted/50 rounded-md border-2 border-dashed border-border">
-                          <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-                        </div>
-                      )}
-                      <div className="flex gap-2">
-                        <div className="flex-1">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            disabled={uploadingField === 'hero_image_url'}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleImageUpload(file, 'hero_image_url');
-                            }}
-                            className="text-xs"
-                          />
-                        </div>
-                        {uploadingField === 'hero_image_url' && (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Uploading...
-                          </div>
-                        )}
-                      </div>
-                      <Input
-                        value={editingStory.hero_image_url || ""}
-                        onChange={(e) => updateEditing({ hero_image_url: e.target.value })}
-                        placeholder="Or paste URL: https://..."
-                        className="text-xs"
-                      />
-                    </div>
+                  <div className="col-span-2">
+                    <ImageFieldEditor
+                      label="Hero Image"
+                      value={editingStory.hero_image_url}
+                      onChange={(url) => updateEditing({ hero_image_url: url })}
+                      storagePath="stories/heroes"
+                      previewHeight="h-40"
+                    />
                   </div>
 
                   {/* Product Screenshot */}
-                  <div className="col-span-2 space-y-2">
-                    <Label className="text-sm text-muted-foreground">Product Screenshot</Label>
-                    <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border/50">
-                      {editingStory.product_screenshot_url ? (
-                        <div className="relative">
-                          <img 
-                            src={editingStory.product_screenshot_url} 
-                            alt="Product screenshot preview" 
-                            className="w-full h-48 object-cover rounded-md" 
-                          />
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-2 right-2 h-6 w-6"
-                            onClick={() => updateEditing({ product_screenshot_url: null })}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center h-48 bg-muted/50 rounded-md border-2 border-dashed border-border">
-                          <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-                        </div>
-                      )}
-                      <div className="flex gap-2">
-                        <div className="flex-1">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            disabled={uploadingField === 'product_screenshot_url'}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleImageUpload(file, 'product_screenshot_url');
-                            }}
-                            className="text-xs"
-                          />
-                        </div>
-                        {uploadingField === 'product_screenshot_url' && (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Uploading...
-                          </div>
-                        )}
-                      </div>
-                      <Input
-                        value={editingStory.product_screenshot_url || ""}
-                        onChange={(e) => updateEditing({ product_screenshot_url: e.target.value })}
-                        placeholder="Or paste URL: https://..."
-                        className="text-xs"
-                      />
-                    </div>
+                  <div className="col-span-2">
+                    <ImageFieldEditor
+                      label="Product Screenshot"
+                      value={editingStory.product_screenshot_url}
+                      onChange={(url) => updateEditing({ product_screenshot_url: url })}
+                      storagePath="stories/screenshots"
+                      previewHeight="h-48"
+                    />
                   </div>
                 </div>
               </TabsContent>
