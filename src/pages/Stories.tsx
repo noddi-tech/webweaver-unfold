@@ -71,11 +71,11 @@ export default function Stories() {
                     )}
                     
                     {/* Card Content */}
-                    <div className="p-6">
+                    <div className="p-6 relative">
                       <p className="text-sm font-medium text-white/80 mb-2">
                         {story.company_name}
                       </p>
-                      <h2 className="text-lg md:text-xl font-bold text-white mb-4 group-hover:text-white/90 transition-colors line-clamp-2">
+                      <h2 className="text-lg md:text-xl font-bold text-white mb-4 group-hover:text-white/90 transition-colors line-clamp-2 pr-16">
                         {story.title}
                       </h2>
                       
@@ -83,6 +83,17 @@ export default function Stories() {
                         Read story
                         <ArrowRight className="w-4 h-4" />
                       </div>
+                      
+                      {/* Company Logo */}
+                      {story.company_logo_url && (
+                        <div className="absolute bottom-6 right-6 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-lg p-2 flex items-center justify-center">
+                          <img
+                            src={story.company_logo_url}
+                            alt={`${story.company_name} logo`}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      )}
                     </div>
                   </Link>
                 ))}
