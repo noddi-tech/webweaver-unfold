@@ -86,7 +86,7 @@ export default function Stories() {
                       
                       {/* Company Logo */}
                       {story.company_logo_url && (
-                        <div className="absolute bottom-6 right-6 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-lg p-2 flex items-center justify-center">
+                        <div className="absolute bottom-6 right-6 w-12 h-12 bg-white rounded-lg p-2 flex items-center justify-center shadow-md">
                           <img
                             src={story.company_logo_url}
                             alt={`${story.company_name} logo`}
