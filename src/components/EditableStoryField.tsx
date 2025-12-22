@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { ImageEditModal } from './ImageEditModal';
 
 interface EditableStoryFieldProps {
   children: React.ReactNode;
@@ -144,34 +145,55 @@ export function EditableStoryImage({
   const { editMode } = useEditMode();
   const [isHovered, setIsHovered] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editValue, setEditValue] = useState(value || '');
-  const [saving, setSaving] = useState(false);
   const queryClient = useQueryClient();
 
   if (!editMode) {
     return <>{children}</>;
   }
 
-  const handleSave = async () => {
-    setSaving(true);
+  const handleSave = async (newUrl: string) => {
     try {
       const { error } = await supabase
         .from('customer_stories')
-        .update({ [field]: editValue })
+        .update({ [field]: newUrl })
         .eq('id', storyId);
 
       if (error) throw error;
 
       await queryClient.invalidateQueries({ queryKey: ['customer-story'] });
-      toast.success('Image updated');
-      setModalOpen(false);
     } catch (error) {
       console.error('Error updating image:', error);
       toast.error('Failed to update image');
-    } finally {
-      setSaving(false);
     }
   };
+
+  // If no image exists, show placeholder
+  if (!value) {
+    return (
+      <>
+        <div
+          className={`relative group cursor-pointer border-2 border-dashed border-muted-foreground/50 rounded-2xl overflow-hidden hover:border-primary transition-colors ${className}`}
+          style={{ aspectRatio: '16/9' }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onClick={() => setModalOpen(true)}
+        >
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/30">
+            <Pencil className="h-8 w-8 text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground">Click to add image</p>
+          </div>
+        </div>
+
+        <ImageEditModal
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          currentUrl={''}
+          onSave={handleSave}
+          altText={field}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -182,53 +204,27 @@ export function EditableStoryImage({
       >
         {children}
         {isHovered && (
-          <button
-            className="absolute top-2 right-2 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer z-10"
-            onClick={(e) => {
-              e.stopPropagation();
-              setEditValue(value || '');
-              setModalOpen(true);
-            }}
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-opacity rounded-2xl">
+            <button
+              className="p-3 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                setModalOpen(true);
+              }}
+            >
+              <Pencil className="h-5 w-5" />
+            </button>
+          </div>
         )}
       </div>
 
-      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Edit Image</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {editValue && (
-              <img
-                src={editValue}
-                alt="Preview"
-                className="w-full h-40 object-cover rounded-lg"
-              />
-            )}
-            <div>
-              <Label htmlFor="image-url">Image URL</Label>
-              <Input
-                id="image-url"
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                placeholder="https://..."
-                className="mt-1"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? 'Saving...' : 'Save'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ImageEditModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        currentUrl={value}
+        onSave={handleSave}
+        altText={field}
+      />
     </>
   );
 }
