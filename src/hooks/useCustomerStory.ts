@@ -64,14 +64,19 @@ export function useCustomerStory(slug: string | undefined) {
   });
 }
 
-export function useCustomerStories() {
+export function useCustomerStories(includeInactive = false) {
   return useQuery({
-    queryKey: ['customer-stories'],
+    queryKey: ['customer-stories', includeInactive],
     queryFn: async (): Promise<CustomerStory[]> => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('customer_stories')
         .select('*')
         .order('sort_order', { ascending: true });
+
+      // Note: RLS policy only allows active stories for non-admins
+      // When includeInactive is true, we rely on admin RLS to see all
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching customer stories:', error);
