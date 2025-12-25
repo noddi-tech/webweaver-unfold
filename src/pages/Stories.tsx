@@ -85,15 +85,15 @@ export default function Stories() {
                   <div key={story.id} className="relative">
                     {/* Edit Mode Controls */}
                     {editMode && (
-                      <div className="absolute -top-3 left-4 right-4 z-10 flex items-center justify-between bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
+                      <div className="absolute -top-3 left-4 right-4 z-10 flex items-center justify-between bg-background border border-border rounded-lg px-3 py-2 shadow-lg">
                         <div className="flex items-center gap-3">
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="secondary" className="text-xs font-medium">
                             #{story.sort_order ?? 0}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">Sort Order</span>
+                          <span className="text-xs font-medium text-foreground">Sort Order</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">Active</span>
+                          <span className="text-xs font-medium text-foreground">Active</span>
                           <Switch
                             checked={story.active}
                             onCheckedChange={() => handleActiveToggle(story.id, story.active)}
