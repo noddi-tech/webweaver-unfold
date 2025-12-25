@@ -8,10 +8,11 @@ import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useEditMode } from "@/contexts/EditModeContext";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export default function Stories() {
   const { h1, h2, body } = useTypography();
@@ -40,6 +41,23 @@ export default function Stories() {
     } catch (error) {
       console.error('Error updating story:', error);
       toast.error('Failed to update story');
+    }
+  };
+
+  const handleSortOrderChange = async (storyId: string, newSortOrder: number) => {
+    try {
+      const { error } = await supabase
+        .from('customer_stories')
+        .update({ sort_order: newSortOrder })
+        .eq('id', storyId);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['customer-stories'] });
+      toast.success('Sort order updated');
+    } catch (error) {
+      console.error('Error updating sort order:', error);
+      toast.error('Failed to update sort order');
     }
   };
 
@@ -86,11 +104,16 @@ export default function Stories() {
                     {/* Edit Mode Controls */}
                     {editMode && (
                       <div className="absolute -top-3 left-4 right-4 z-10 flex items-center justify-between bg-background border border-border rounded-lg px-3 py-2 shadow-lg">
-                        <div className="flex items-center gap-3">
-                          <Badge variant="secondary" className="text-xs font-medium">
-                            #{story.sort_order ?? 0}
-                          </Badge>
-                          <span className="text-xs font-medium text-foreground">Sort Order</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-foreground">Order:</span>
+                          <Input
+                            type="number"
+                            value={story.sort_order ?? 0}
+                            onChange={(e) => handleSortOrderChange(story.id, parseInt(e.target.value) || 0)}
+                            onClick={(e) => e.preventDefault()}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            className="w-16 h-7 text-xs text-center"
+                          />
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-foreground">Active</span>
