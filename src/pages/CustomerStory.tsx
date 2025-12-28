@@ -137,24 +137,24 @@ export default function CustomerStory() {
                 storyId={story.id}
                 results={story.results}
               >
-                <div className="py-4">
-                  <div
+                <div className="flex justify-end">
+                  <div 
                     className="grid gap-8 md:gap-0"
                     style={{ 
-                      gridTemplateColumns: `repeat(${Math.min(story.results.length, 4)}, 1fr)` 
+                      gridTemplateColumns: `repeat(${Math.min(story.results.length, 4)}, minmax(180px, 240px))` 
                     }}
                   >
                     {story.results.map((result, index) => (
                       <div 
                         key={index} 
-                        className={`flex flex-col items-center text-center ${
+                        className={`flex flex-col items-start text-left px-6 py-4 ${
                           index > 0 ? 'md:border-l md:border-border' : ''
                         }`}
                       >
                         <p className="text-4xl md:text-5xl font-bold text-foreground mb-3 tracking-tight">
                           {result.metric}
                         </p>
-                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-[200px]">
+                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
                           {result.description}
                         </p>
                       </div>
