@@ -137,8 +137,8 @@ export default function CustomerStory() {
                 storyId={story.id}
                 results={story.results}
               >
-                <div className="bg-background rounded-2xl p-8 md:p-12">
-                  <div 
+                <div className="py-4">
+                  <div
                     className="grid gap-8 md:gap-0"
                     style={{ 
                       gridTemplateColumns: `repeat(${Math.min(story.results.length, 4)}, 1fr)` 
