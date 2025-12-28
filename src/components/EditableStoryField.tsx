@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pencil } from 'lucide-react';
+import { Pencil, Plus, ChevronUp, ChevronDown, Trash2 } from 'lucide-react';
 import { useEditMode } from '@/contexts/EditModeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -280,7 +280,27 @@ export function EditableStoryResults({
     );
   };
 
-  const iconOptions = ['Smile', 'Users', 'Calendar', 'Clock', 'TrendingUp', 'Star', 'Zap', 'Target', 'Award'];
+  const addResult = () => {
+    setEditResults(prev => [...prev, { icon: 'TrendingUp', metric: '', description: '' }]);
+  };
+
+  const removeResult = (index: number) => {
+    setEditResults(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const moveResult = (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= editResults.length) return;
+    
+    const newResults = [...editResults];
+    [newResults[index], newResults[newIndex]] = [newResults[newIndex], newResults[index]];
+    setEditResults(newResults);
+  };
+
+  const iconOptions = ['Smile', 'Users', 'Calendar', 'Clock', 'TrendingUp', 'Star', 'Zap', 'Target', 'Award', 'CheckCircle', 'ThumbsUp', 'Heart', 'DollarSign', 'Percent', 'BarChart'];
+
+  const resultCount = editResults.length;
+  const showCountWarning = resultCount < 2 || resultCount > 4;
 
   return (
     <>
@@ -307,12 +327,67 @@ export function EditableStoryResults({
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Results Cards</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Edit Results Cards</span>
+              <span className={`text-sm font-normal ${showCountWarning ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                {resultCount} {resultCount === 1 ? 'card' : 'cards'} {showCountWarning && '(2-4 recommended)'}
+              </span>
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-6">
+          <div className="space-y-4">
+            {/* Add button at top */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={addResult}
+              className="w-full border-dashed"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Result Card
+            </Button>
+
+            {editResults.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No result cards yet.</p>
+                <p className="text-sm">Click "Add Result Card" to create your first KPI.</p>
+              </div>
+            )}
+
             {editResults.map((result, index) => (
-              <div key={index} className="p-4 border rounded-lg space-y-3">
-                <h4 className="font-medium">Card {index + 1}</h4>
+              <div key={index} className="p-4 border rounded-lg space-y-3 relative">
+                {/* Card header with controls */}
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Card {index + 1}</h4>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => moveResult(index, 'up')}
+                      disabled={index === 0}
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => moveResult(index, 'down')}
+                      disabled={index === editResults.length - 1}
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => removeResult(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label>Icon</Label>
@@ -331,6 +406,7 @@ export function EditableStoryResults({
                     <Input
                       value={result.metric}
                       onChange={(e) => updateResult(index, 'metric', e.target.value)}
+                      placeholder="e.g. 95%"
                       className="mt-1"
                     />
                   </div>
@@ -340,12 +416,14 @@ export function EditableStoryResults({
                   <Input
                     value={result.description}
                     onChange={(e) => updateResult(index, 'description', e.target.value)}
+                    placeholder="e.g. Customer satisfaction rate"
                     className="mt-1"
                   />
                 </div>
               </div>
             ))}
-            <div className="flex justify-end gap-2">
+
+            <div className="flex justify-end gap-2 pt-2 border-t">
               <Button variant="outline" onClick={() => setModalOpen(false)}>
                 Cancel
               </Button>
