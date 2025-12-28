@@ -154,7 +154,7 @@ export default function CustomerStory() {
                         <p className="text-4xl md:text-5xl font-bold text-foreground mb-3 tracking-tight whitespace-nowrap">
                           {result.metric}
                         </p>
-                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                        <p className={`${body} text-muted-foreground leading-relaxed`}>
                           {result.description}
                         </p>
                       </div>
