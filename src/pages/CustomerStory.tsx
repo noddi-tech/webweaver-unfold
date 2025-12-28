@@ -137,29 +137,22 @@ export default function CustomerStory() {
                 storyId={story.id}
                 results={story.results}
               >
-                <div className="flex justify-start">
-                  <div 
-                    className="grid gap-8 md:gap-0"
-                    style={{ 
-                      gridTemplateColumns: `repeat(${Math.min(story.results.length, 4)}, auto)` 
-                    }}
-                  >
-                    {story.results.map((result, index) => (
-                      <div 
-                        key={index} 
-                        className={`flex flex-col items-start text-left px-6 py-4 ${
-                          index > 0 ? 'md:border-l md:border-border' : ''
-                        }`}
-                      >
-                        <p className="text-4xl md:text-5xl font-bold text-foreground mb-3 tracking-tight whitespace-nowrap">
-                          {result.metric}
-                        </p>
-                        <p className={`${body} text-muted-foreground leading-relaxed`}>
-                          {result.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+                <div className="flex flex-col md:flex-row md:justify-start">
+                  {story.results.map((result, index) => (
+                    <div 
+                      key={index} 
+                      className={`flex flex-col items-start text-left px-6 py-4 ${
+                        index > 0 ? 'md:border-l md:border-border' : ''
+                      }`}
+                    >
+                      <p className="text-4xl md:text-5xl font-bold text-foreground mb-3 tracking-tight whitespace-nowrap">
+                        {result.metric}
+                      </p>
+                      <p className={`${body} text-muted-foreground leading-relaxed`}>
+                        {result.description}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </EditableStoryResults>
             </div>
