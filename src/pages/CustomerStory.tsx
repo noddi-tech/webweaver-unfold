@@ -147,8 +147,8 @@ export default function CustomerStory() {
                     {story.results.map((result, index) => (
                       <div 
                         key={index} 
-                        className={`flex flex-col ${
-                          index > 0 ? 'md:border-l md:border-border md:pl-8' : ''
+                        className={`flex flex-col items-center text-center ${
+                          index > 0 ? 'md:border-l md:border-border' : ''
                         }`}
                       >
                         <p className="text-4xl md:text-5xl font-bold text-foreground mb-3 tracking-tight">
