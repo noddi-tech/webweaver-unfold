@@ -137,11 +137,11 @@ export default function CustomerStory() {
                 storyId={story.id}
                 results={story.results}
               >
-                <div className="flex justify-end">
+                <div className="flex justify-start">
                   <div 
                     className="grid gap-8 md:gap-0"
                     style={{ 
-                      gridTemplateColumns: `repeat(${Math.min(story.results.length, 4)}, minmax(180px, 240px))` 
+                      gridTemplateColumns: `repeat(${Math.min(story.results.length, 4)}, auto)` 
                     }}
                   >
                     {story.results.map((result, index) => (
@@ -151,7 +151,7 @@ export default function CustomerStory() {
                           index > 0 ? 'md:border-l md:border-border' : ''
                         }`}
                       >
-                        <p className="text-4xl md:text-5xl font-bold text-foreground mb-3 tracking-tight">
+                        <p className="text-4xl md:text-5xl font-bold text-foreground mb-3 tracking-tight whitespace-nowrap">
                           {result.metric}
                         </p>
                         <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
