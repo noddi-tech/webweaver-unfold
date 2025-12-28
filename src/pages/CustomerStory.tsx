@@ -129,34 +129,37 @@ export default function CustomerStory() {
           </div>
         </section>
 
-        {/* Section 2: Results Highlights */}
+        {/* Section 2: Results Highlights - Mixpanel-inspired layout */}
         {story.results.length > 0 && (
-          <section className="py-section bg-background">
+          <section className="py-section bg-muted/50">
             <div className="container max-w-container px-4 sm:px-6 lg:px-8">
               <EditableStoryResults
                 storyId={story.id}
                 results={story.results}
               >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {story.results.map((result, index) => {
-                    const IconComponent = iconMap[result.icon] || Smile;
-                    return (
+                <div className="bg-background rounded-2xl p-8 md:p-12">
+                  <div 
+                    className="grid gap-8 md:gap-0"
+                    style={{ 
+                      gridTemplateColumns: `repeat(${Math.min(story.results.length, 4)}, 1fr)` 
+                    }}
+                  >
+                    {story.results.map((result, index) => (
                       <div 
                         key={index} 
-                        className="bg-primary/10 rounded-2xl p-8 text-center"
+                        className={`flex flex-col ${
+                          index > 0 ? 'md:border-l md:border-border md:pl-8' : ''
+                        }`}
                       >
-                        <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-primary/20 mb-6">
-                          <IconComponent className="w-7 h-7 text-primary" />
-                        </div>
-                        <p className="text-xl font-bold text-primary mb-3">
+                        <p className="text-4xl md:text-5xl font-bold text-foreground mb-3 tracking-tight">
                           {result.metric}
                         </p>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
+                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-[200px]">
                           {result.description}
                         </p>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
               </EditableStoryResults>
             </div>
