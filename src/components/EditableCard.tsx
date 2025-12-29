@@ -3,6 +3,7 @@ import { Pencil } from 'lucide-react';
 import { useEditMode } from '@/contexts/EditModeContext';
 import { BackgroundTextColorProvider } from '@/contexts/BackgroundTextColorContext';
 import { UnifiedStyleModal } from './UnifiedStyleModal';
+import { useSiteStyles } from '@/contexts/SiteStylesContext';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { getBackgroundStyleFromToken } from '@/lib/backgroundUtils';
@@ -22,7 +23,7 @@ interface EditableCardProps {
  * - Single edit button per card (opens UnifiedStyleModal)
  * - BackgroundTextColorContext for child text color inheritance
  * - Inline styles for backgrounds (gradients, glass, solids)
- * - Database as single source of truth
+ * - Uses preloaded SiteStylesContext to prevent flash
  */
 export function EditableCard({
   children,
@@ -32,71 +33,48 @@ export function EditableCard({
   className,
 }: EditableCardProps) {
   const { editMode } = useEditMode();
+  const { backgroundStyles, iconStyles, isLoaded } = useSiteStyles();
+  
+  // Get preloaded values from context (no flash!)
+  const preloadedBg = backgroundStyles[`${elementIdPrefix}-background`];
+  const preloadedIconBg = backgroundStyles[`${elementIdPrefix}-icon-card`];
+  const preloadedIconStyle = iconStyles[`${elementIdPrefix}-icon`];
+  
   const [isHovered, setIsHovered] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [background, setBackground] = useState(defaultBackground);
-  const [textColor, setTextColor] = useState(defaultTextColor);
-  const [iconColor, setIconColor] = useState('primary');
-  const [iconBackground, setIconBackground] = useState('bg-primary/10');
-  const [iconSize, setIconSize] = useState('default');
+  
+  // Initialize from preloaded context or fall back to defaults
+  const [background, setBackground] = useState(
+    preloadedBg?.background_class || defaultBackground
+  );
+  const [textColor, setTextColor] = useState(
+    preloadedBg?.text_color_class || defaultTextColor
+  );
   const [cardShadow, setCardShadow] = useState('shadow-none');
-  const [isLoading, setIsLoading] = useState(true);
+  const [iconColor, setIconColor] = useState(
+    preloadedIconStyle?.icon_color_token || 'primary'
+  );
+  const [iconBackground, setIconBackground] = useState(
+    preloadedIconBg?.background_class || 'bg-primary/10'
+  );
+  const [iconSize, setIconSize] = useState(
+    preloadedIconStyle?.size || 'default'
+  );
 
-  // Load saved styles from database
+  // Sync state when context loads (for cases where component mounted before context)
   useEffect(() => {
-    const loadStyles = async () => {
-      setIsLoading(true);
-      try {
-        // Load background style
-        const { data: bgData } = await supabase
-          .from('background_styles')
-          .select('background_class, text_color_class, shadow_class')
-          .eq('element_id', `${elementIdPrefix}-background`)
-          .maybeSingle();
-
-        if (bgData?.background_class) {
-          setBackground(bgData.background_class);
-        }
-        if (bgData?.text_color_class) {
-          setTextColor(bgData.text_color_class);
-        }
-        if (bgData?.shadow_class) {
-          setCardShadow(bgData.shadow_class);
-        }
-
-        // Load icon color and size from icon_styles table
-        const { data: iconStyleData } = await supabase
-          .from('icon_styles')
-          .select('icon_color_token, size')
-          .eq('element_id', `${elementIdPrefix}-icon`)
-          .maybeSingle();
-
-        if (iconStyleData?.icon_color_token) {
-          setIconColor(iconStyleData.icon_color_token);
-        }
-        if (iconStyleData?.size) {
-          setIconSize(iconStyleData.size);
-        }
-
-        // Load icon background
-        const { data: iconBgData } = await supabase
-          .from('background_styles')
-          .select('background_class')
-          .eq('element_id', `${elementIdPrefix}-icon-card`)
-          .maybeSingle();
-
-        if (iconBgData?.background_class) {
-          setIconBackground(iconBgData.background_class);
-        }
-      } catch (error) {
-        console.error('Error loading card styles:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadStyles();
-  }, [elementIdPrefix]);
+    if (isLoaded) {
+      const bg = backgroundStyles[`${elementIdPrefix}-background`];
+      const iconBg = backgroundStyles[`${elementIdPrefix}-icon-card`];
+      const iconStyle = iconStyles[`${elementIdPrefix}-icon`];
+      
+      if (bg?.background_class) setBackground(bg.background_class);
+      if (bg?.text_color_class) setTextColor(bg.text_color_class);
+      if (iconBg?.background_class) setIconBackground(iconBg.background_class);
+      if (iconStyle?.icon_color_token) setIconColor(iconStyle.icon_color_token);
+      if (iconStyle?.size) setIconSize(iconStyle.size);
+    }
+  }, [isLoaded, elementIdPrefix, backgroundStyles, iconStyles]);
 
   // Use centralized utility for background styles
   const backgroundStyle = getBackgroundStyleFromToken(background);
