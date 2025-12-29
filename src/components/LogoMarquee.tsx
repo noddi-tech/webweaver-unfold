@@ -93,9 +93,9 @@ export function LogoMarquee() {
         </div>
       )}
       
-      {/* Actual marquee content */}
+      {/* Actual marquee content - removed will-change-transform to prevent GPU memory issues */}
       <div className={cn(
-        "flex animate-marquee will-change-transform transition-opacity duration-300",
+        "flex animate-marquee transition-opacity duration-300",
         isLoading ? "opacity-0 absolute" : "opacity-100"
       )}>
         {/* First strip */}
