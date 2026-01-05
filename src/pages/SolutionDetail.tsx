@@ -336,7 +336,7 @@ const SolutionDetail = () => {
                 placeholder="Add hero image or carousel"
               >
                 {heroDisplayType === 'image' && heroImageUrl && (
-                  <div className="rounded-2xl overflow-hidden shadow-2xl">
+                  <div>
                     <img 
                       src={heroImageUrl} 
                       alt={t(`solutions.${slugKey}.hero_title`, solution.hero_title || '')}
