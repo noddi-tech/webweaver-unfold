@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, ArrowRight, Star } from 'lucide-react';
+import NewsletterSignup from '@/components/NewsletterSignup';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -279,6 +280,13 @@ const Blog = () => {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="pb-24 px-4">
+        <div className="container mx-auto max-w-2xl">
+          <NewsletterSignup />
         </div>
       </section>
 
