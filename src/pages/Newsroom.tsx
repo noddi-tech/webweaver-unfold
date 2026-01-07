@@ -28,8 +28,8 @@ const Newsroom = () => {
       <main className="container mx-auto px-6 pt-32 pb-20">
         {/* Hero Section */}
         <section className="text-center max-w-4xl mx-auto mb-20">
-          <EditableTranslation translationKey="newsroom.hero.title" fallbackText="Newsroom">
-            <h1 className="text-5xl md:text-6xl font-bold gradient-text mb-6">
+          <EditableTranslation translationKey="newsroom.hero.title" fallbackText="Newsroom" disableStyling>
+            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
               {t("newsroom.hero.title", "Newsroom")}
             </h1>
           </EditableTranslation>
@@ -49,7 +49,7 @@ const Newsroom = () => {
           </EditableTranslation>
           <div className="space-y-6">
             <div className="p-6 bg-card text-card-foreground rounded-xl border border-border">
-              <EditableTranslation translationKey="newsroom.press.coming_soon" fallbackText="Press releases coming soon.">
+              <EditableTranslation translationKey="newsroom.press.coming_soon" fallbackText="Press releases coming soon." disableStyling>
                 <p className="text-card-foreground/70">
                   {t("newsroom.press.coming_soon", "Press releases coming soon. Stay tuned for the latest updates from Navio.")}
                 </p>

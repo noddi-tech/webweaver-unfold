@@ -89,8 +89,8 @@ const Careers = () => {
       <main className="container mx-auto px-6 pt-32 pb-20">
         {/* Hero Section */}
         <section className="text-center max-w-4xl mx-auto mb-20">
-          <EditableTranslation translationKey="careers.hero.title" fallbackText="Join Our Team">
-            <h1 className="text-5xl md:text-6xl font-bold gradient-text mb-6">
+          <EditableTranslation translationKey="careers.hero.title" fallbackText="Join Our Team" disableStyling>
+            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
               {t("careers.hero.title", "Join Our Team")}
             </h1>
           </EditableTranslation>
@@ -245,7 +245,7 @@ const Careers = () => {
             </div>
           ) : (
             <div className="p-8 bg-card text-card-foreground rounded-xl border border-border text-center">
-              <EditableTranslation translationKey="careers.positions.empty" fallbackText="No open positions at the moment.">
+              <EditableTranslation translationKey="careers.positions.empty" fallbackText="No open positions at the moment." disableStyling>
                 <p className="text-card-foreground/70">
                   {t("careers.positions.empty", "No open positions at the moment. Check back soon or send us your CV for future opportunities.")}
                 </p>

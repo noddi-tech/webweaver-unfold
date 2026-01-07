@@ -176,17 +176,6 @@ const Team = () => {
         } else {
           ensureMeta("description", "Meet the Navio team: names, roles, and contact details.");
         }
-
-        // Apply page background using proper background class mapping
-        const backgroundClass = getBackgroundClass(page.default_background_token);
-        const textClass = getTextClass(page.default_text_token);
-        
-        // Remove existing background classes and apply new ones
-        document.body.className = document.body.className
-          .replace(/bg-\S+/g, '')
-          .replace(/text-\S+/g, '')
-          .trim();
-        document.body.classList.add(...backgroundClass.split(' '), ...textClass.split(' '));
       } else {
         // Fallback if no page data
         document.title = "Our Team – Navio";
@@ -196,13 +185,6 @@ const Team = () => {
 
     loadPage();
     setCanonical("/team");
-  }, []);
-
-  // Cleanup body classes when component unmounts
-  useEffect(() => {
-    return () => {
-      document.body.className = '';
-    };
   }, []);
 
   useEffect(() => {
@@ -276,7 +258,7 @@ const Team = () => {
   const linkCls = textClass[settings?.link_token || "primary"];
 
   return (
-    <div className="min-h-screen text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
       <main className="container mx-auto px-6 pt-32 pb-20">
         <header className="text-center max-w-3xl mx-auto mb-12">
@@ -293,7 +275,7 @@ const Team = () => {
               );
             } else if (settings?.section_title) {
               return (
-                <h1 className={`${h1Option?.class || 'text-6xl font-bold'} gradient-text`}>
+                <h1 className={`${h1Option?.class || 'text-6xl font-bold'} text-foreground`}>
                   {settings.section_title}
                 </h1>
               );
