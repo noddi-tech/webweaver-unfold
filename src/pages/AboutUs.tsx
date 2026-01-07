@@ -64,7 +64,7 @@ const AboutUs = () => {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="p-6 bg-card text-card-foreground rounded-xl border border-border">
               <EditableTranslation translationKey="about.values.innovation.title" fallbackText="Innovation">
-                <h3 className="text-xl font-semibold mb-3">
+                <h3 className="text-xl font-semibold mb-3 text-white">
                   {t("about.values.innovation.title", "Innovation")}
                 </h3>
               </EditableTranslation>
@@ -76,7 +76,7 @@ const AboutUs = () => {
             </div>
             <div className="p-6 bg-card text-card-foreground rounded-xl border border-border">
               <EditableTranslation translationKey="about.values.trust.title" fallbackText="Trust">
-                <h3 className="text-xl font-semibold mb-3">
+                <h3 className="text-xl font-semibold mb-3 text-white">
                   {t("about.values.trust.title", "Trust")}
                 </h3>
               </EditableTranslation>
@@ -88,7 +88,7 @@ const AboutUs = () => {
             </div>
             <div className="p-6 bg-card text-card-foreground rounded-xl border border-border">
               <EditableTranslation translationKey="about.values.partnership.title" fallbackText="Partnership">
-                <h3 className="text-xl font-semibold mb-3">
+                <h3 className="text-xl font-semibold mb-3 text-white">
                   {t("about.values.partnership.title", "Partnership")}
                 </h3>
               </EditableTranslation>

@@ -6,7 +6,7 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { useJobListings } from "@/hooks/useJobListings";
 import { useEditMode } from "@/contexts/EditModeContext";
-import { Briefcase, Heart, Rocket, Users, MapPin, Clock, ExternalLink } from "lucide-react";
+import { Briefcase, Heart, Rocket, Users, MapPin, Clock, ExternalLink, TrendingUp, Zap, Building, Target } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,10 +33,12 @@ const Careers = () => {
   const { data: jobs, isLoading: jobsLoading } = useJobListings(editMode);
 
   const benefits = [
+    { icon: TrendingUp, titleKey: "careers.benefits.equity.title", descKey: "careers.benefits.equity.description", titleFallback: "Equity", descFallback: "All employees participate in our beneficial stock option program" },
+    { icon: Users, titleKey: "careers.benefits.team.title", descKey: "careers.benefits.team.description", titleFallback: "Team", descFallback: "Startup experience from companies like Oda, Kron, and Askeladden & Co" },
+    { icon: Building, titleKey: "careers.benefits.office.title", descKey: "careers.benefits.office.description", titleFallback: "Office-First", descFallback: "We strive to work from the office, but with flexibility when life doesn't align" },
+    { icon: Target, titleKey: "careers.benefits.output.title", descKey: "careers.benefits.output.description", titleFallback: "High Output", descFallback: "High speed, high output, and traction – no one controls your hours" },
+    { icon: Zap, titleKey: "careers.benefits.failfast.title", descKey: "careers.benefits.failfast.description", titleFallback: "Fail Fast", descFallback: "Learn and iterate quickly – don't be afraid to fail to build great products" },
     { icon: Rocket, titleKey: "careers.benefits.growth.title", descKey: "careers.benefits.growth.description", titleFallback: "Growth", descFallback: "Continuous learning and career development opportunities" },
-    { icon: Heart, titleKey: "careers.benefits.culture.title", descKey: "careers.benefits.culture.description", titleFallback: "Culture", descFallback: "Inclusive, collaborative, and innovation-driven environment" },
-    { icon: Users, titleKey: "careers.benefits.team.title", descKey: "careers.benefits.team.description", titleFallback: "Team", descFallback: "Work with talented people who are passionate about what they do" },
-    { icon: Briefcase, titleKey: "careers.benefits.flexibility.title", descKey: "careers.benefits.flexibility.description", titleFallback: "Flexibility", descFallback: "Flexible work arrangements to support work-life balance" },
   ];
 
   const handleActiveToggle = async (jobId: string, active: boolean) => {
@@ -105,7 +107,7 @@ const Careers = () => {
                 </div>
                 <div>
                   <EditableTranslation translationKey={benefit.titleKey} fallbackText={benefit.titleFallback}>
-                    <h3 className="text-xl font-semibold mb-2">
+                    <h3 className="text-xl font-semibold mb-2 text-white">
                       {t(benefit.titleKey, benefit.titleFallback)}
                     </h3>
                   </EditableTranslation>

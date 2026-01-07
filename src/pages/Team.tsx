@@ -270,8 +270,9 @@ const Team = () => {
 
   const cardBg = bgClass[settings?.card_bg_token || "card"];
   const borderCls = borderClass[settings?.border_token || "border"];
-  const nameCls = textClass[settings?.name_token || "foreground"];
-  const titleCls = textClass[settings?.title_token || "muted-foreground"];
+  const isDarkCard = settings?.card_bg_token === "card" || settings?.card_bg_token === "primary";
+  const nameCls = isDarkCard ? "text-white" : textClass[settings?.name_token || "foreground"];
+  const titleCls = isDarkCard ? "text-white/70" : textClass[settings?.title_token || "muted-foreground"];
   const linkCls = textClass[settings?.link_token || "primary"];
 
   return (
