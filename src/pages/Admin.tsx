@@ -42,6 +42,7 @@ import StoriesManager from "@/components/design-system/StoriesManager";
 import BlogManager from "@/components/design-system/BlogManager";
 import JobsManager from "@/components/design-system/JobsManager";
 import NewsletterManager from "@/components/design-system/NewsletterManager";
+import { PressManager } from "@/components/design-system/PressManager";
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -150,6 +151,7 @@ const Admin = () => {
                     <TabsTrigger value="stories">Stories</TabsTrigger>
                     <TabsTrigger value="blog">Blog</TabsTrigger>
                     <TabsTrigger value="jobs">Jobs</TabsTrigger>
+                    <TabsTrigger value="press">Press</TabsTrigger>
                     <TabsTrigger value="usps">USPs</TabsTrigger>
                     <TabsTrigger value="contact">Contact</TabsTrigger>
                     <TabsTrigger value="faqs">FAQs</TabsTrigger>
@@ -180,6 +182,9 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="jobs" className="space-y-8">
                     <JobsManager />
+                  </TabsContent>
+                  <TabsContent value="press" className="space-y-8">
+                    <PressManager />
                   </TabsContent>
                   <TabsContent value="usps" className="space-y-8">
                     <USPCms />

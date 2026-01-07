@@ -1484,6 +1484,54 @@ export type Database = {
         }
         Relationships: []
       }
+      press_mentions: {
+        Row: {
+          active: boolean
+          article_url: string
+          category: string
+          created_at: string
+          excerpt: string | null
+          featured: boolean
+          id: string
+          published_at: string | null
+          sort_order: number | null
+          source_logo_url: string | null
+          source_name: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          article_url: string
+          category?: string
+          created_at?: string
+          excerpt?: string | null
+          featured?: boolean
+          id?: string
+          published_at?: string | null
+          sort_order?: number | null
+          source_logo_url?: string | null
+          source_name: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          article_url?: string
+          category?: string
+          created_at?: string
+          excerpt?: string | null
+          featured?: boolean
+          id?: string
+          published_at?: string | null
+          sort_order?: number | null
+          source_logo_url?: string | null
+          source_name?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pricing_plans: {
         Row: {
           active: boolean
