@@ -47,15 +47,15 @@ const NewsletterSignup = () => {
   };
 
   return (
-    <Card className="bg-card border-border">
+    <Card className="bg-card border-border text-card-foreground">
       <CardHeader className="text-center">
-        <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-          <Mail className="w-6 h-6 text-primary" />
+        <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-card-foreground/10 flex items-center justify-center">
+          <Mail className="w-6 h-6 text-card-foreground" />
         </div>
-        <CardTitle className="text-2xl">
+        <CardTitle className="text-2xl text-card-foreground">
           {t("newsletter.title", "Stay Updated")}
         </CardTitle>
-        <CardDescription className="text-muted-foreground">
+        <CardDescription className="text-card-foreground/70">
           {t("newsletter.description", "Subscribe to our newsletter for the latest insights and updates.")}
         </CardDescription>
       </CardHeader>
@@ -67,9 +67,9 @@ const NewsletterSignup = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="flex-1"
+            className="flex-1 bg-card-foreground/10 border-card-foreground/20 text-card-foreground placeholder:text-card-foreground/50"
           />
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} variant="secondary">
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
