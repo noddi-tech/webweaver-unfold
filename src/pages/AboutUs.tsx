@@ -28,8 +28,8 @@ const AboutUs = () => {
       <main className="container mx-auto px-6 pt-32 pb-20">
         {/* Hero Section */}
         <section className="text-center max-w-4xl mx-auto mb-20">
-          <EditableTranslation translationKey="about.hero.title" fallbackText="About Navio">
-            <h1 className="text-5xl md:text-6xl font-bold gradient-text mb-6">
+          <EditableTranslation translationKey="about.hero.title" fallbackText="About Navio" disableStyling>
+            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
               {t("about.hero.title", "About Navio")}
             </h1>
           </EditableTranslation>
@@ -63,36 +63,36 @@ const AboutUs = () => {
           </EditableTranslation>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="p-6 bg-card text-card-foreground rounded-xl border border-border">
-              <EditableTranslation translationKey="about.values.innovation.title" fallbackText="Innovation">
+              <EditableTranslation translationKey="about.values.innovation.title" fallbackText="Innovation" disableStyling>
                 <h3 className="text-xl font-semibold mb-3 text-white">
                   {t("about.values.innovation.title", "Innovation")}
                 </h3>
               </EditableTranslation>
-              <EditableTranslation translationKey="about.values.innovation.description" fallbackText="We constantly push boundaries to create better solutions.">
+              <EditableTranslation translationKey="about.values.innovation.description" fallbackText="We constantly push boundaries to create better solutions." disableStyling>
                 <p className="text-card-foreground/70">
                   {t("about.values.innovation.description", "We constantly push boundaries to create better solutions for our customers and partners.")}
                 </p>
               </EditableTranslation>
             </div>
             <div className="p-6 bg-card text-card-foreground rounded-xl border border-border">
-              <EditableTranslation translationKey="about.values.trust.title" fallbackText="Trust">
+              <EditableTranslation translationKey="about.values.trust.title" fallbackText="Trust" disableStyling>
                 <h3 className="text-xl font-semibold mb-3 text-white">
                   {t("about.values.trust.title", "Trust")}
                 </h3>
               </EditableTranslation>
-              <EditableTranslation translationKey="about.values.trust.description" fallbackText="Transparency and reliability are at the core of everything we do.">
+              <EditableTranslation translationKey="about.values.trust.description" fallbackText="Transparency and reliability are at the core of everything we do." disableStyling>
                 <p className="text-card-foreground/70">
                   {t("about.values.trust.description", "Transparency and reliability are at the core of everything we do.")}
                 </p>
               </EditableTranslation>
             </div>
             <div className="p-6 bg-card text-card-foreground rounded-xl border border-border">
-              <EditableTranslation translationKey="about.values.partnership.title" fallbackText="Partnership">
+              <EditableTranslation translationKey="about.values.partnership.title" fallbackText="Partnership" disableStyling>
                 <h3 className="text-xl font-semibold mb-3 text-white">
                   {t("about.values.partnership.title", "Partnership")}
                 </h3>
               </EditableTranslation>
-              <EditableTranslation translationKey="about.values.partnership.description" fallbackText="We succeed when our partners and customers succeed.">
+              <EditableTranslation translationKey="about.values.partnership.description" fallbackText="We succeed when our partners and customers succeed." disableStyling>
                 <p className="text-card-foreground/70">
                   {t("about.values.partnership.description", "We succeed when our partners and customers succeed.")}
                 </p>
