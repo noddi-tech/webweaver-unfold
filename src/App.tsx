@@ -31,6 +31,8 @@ import CustomerStory from "./pages/CustomerStory";
 import AboutUs from "./pages/AboutUs";
 import Newsroom from "./pages/Newsroom";
 import Careers from "./pages/Careers";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +68,8 @@ const App = () => {
             <Route path="/:lang/about-us" element={<LanguageSync><AboutUs /></LanguageSync>} />
             <Route path="/:lang/newsroom" element={<LanguageSync><Newsroom /></LanguageSync>} />
             <Route path="/:lang/careers" element={<LanguageSync><Careers /></LanguageSync>} />
+            <Route path="/:lang/blog" element={<LanguageSync><Blog /></LanguageSync>} />
+            <Route path="/:lang/blog/:slug" element={<LanguageSync><BlogPost /></LanguageSync>} />
             
             {/* CMS and special routes (no language prefix) */}
             <Route path="/cms-login" element={<Auth />} />
@@ -95,6 +99,8 @@ const App = () => {
             <Route path="/about-us" element={<LanguageRedirect />} />
             <Route path="/newsroom" element={<LanguageRedirect />} />
             <Route path="/careers" element={<LanguageRedirect />} />
+            <Route path="/blog" element={<LanguageRedirect />} />
+            <Route path="/blog/:slug" element={<LanguageRedirect />} />
             
             {/* Catch-all for 404 */}
             <Route path="*" element={<NotFound />} />
