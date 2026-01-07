@@ -6,7 +6,7 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { useJobListings } from "@/hooks/useJobListings";
 import { useEditMode } from "@/contexts/EditModeContext";
-import { Briefcase, Heart, Rocket, Users, MapPin, Clock, ExternalLink, TrendingUp, Zap, Building, Target } from "lucide-react";
+import { Briefcase, Rocket, Users, MapPin, Clock, ExternalLink, TrendingUp, Zap, Building, Target } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,14 +33,12 @@ const Careers = () => {
   const { data: jobs, isLoading: jobsLoading } = useJobListings(editMode);
 
   const benefits = [
-    { icon: TrendingUp, titleKey: "careers.benefits.equity.title", descKey: "careers.benefits.equity.description", titleFallback: "Equity", descFallback: "All employees participate in beneficial stock option program" },
-    { icon: Users, titleKey: "careers.benefits.team.title", descKey: "careers.benefits.team.description", titleFallback: "Team", descFallback: "Startup veterans from Oda, Kron, Askeladden & Co" },
-    { icon: Heart, titleKey: "careers.benefits.culture.title", descKey: "careers.benefits.culture.description", titleFallback: "Culture", descFallback: "High-speed, high-output environment with flexibility" },
-    { icon: Briefcase, titleKey: "careers.benefits.flexibility.title", descKey: "careers.benefits.flexibility.description", titleFallback: "Flexibility", descFallback: "Work from office preferred, but freedom on where/when" },
-    { icon: Building, titleKey: "careers.benefits.office.title", descKey: "careers.benefits.office.description", titleFallback: "Office", descFallback: "We strive to work from the office for collaboration" },
-    { icon: Target, titleKey: "careers.benefits.output.title", descKey: "careers.benefits.output.description", titleFallback: "Output Focus", descFallback: "Not a work-life balance company – traction over balance" },
-    { icon: Zap, titleKey: "careers.benefits.failfast.title", descKey: "careers.benefits.failfast.description", titleFallback: "Fail Fast", descFallback: "Learn and iterate – don't be afraid to fail to build great products" },
-    { icon: Rocket, titleKey: "careers.benefits.growth.title", descKey: "careers.benefits.growth.description", titleFallback: "Growth", descFallback: "Continuous learning and career development" },
+    { icon: TrendingUp, titleKey: "careers.benefits.ownership.title", descKey: "careers.benefits.ownership.description", titleFallback: "Ownership Mindset", descFallback: "Participate in Navio's success — all employees receive equity through our stock option program." },
+    { icon: Users, titleKey: "careers.benefits.team.title", descKey: "careers.benefits.team.description", titleFallback: "High-Performing Team", descFallback: "Work alongside talented, mission-driven professionals who value collaboration and impact." },
+    { icon: Rocket, titleKey: "careers.benefits.growth.title", descKey: "careers.benefits.growth.description", titleFallback: "Growth & Development", descFallback: "Continuous learning, clear career pathways, and support for your professional evolution." },
+    { icon: Zap, titleKey: "careers.benefits.innovation.title", descKey: "careers.benefits.innovation.description", titleFallback: "Agile Innovation Culture", descFallback: "We move fast, iterate boldly, and learn from outcomes — grow through real responsibility." },
+    { icon: Building, titleKey: "careers.benefits.collaboration.title", descKey: "careers.benefits.collaboration.description", titleFallback: "Purposeful Collaboration", descFallback: "We champion in-person connection and teamwork to solve complex challenges together." },
+    { icon: Target, titleKey: "careers.benefits.flexibility.title", descKey: "careers.benefits.flexibility.description", titleFallback: "Outcome-Driven Flexibility", descFallback: "We focus on results over rigid routines and support flexible work arrangements where it enhances performance." },
   ];
 
   const handleActiveToggle = async (jobId: string, active: boolean) => {
