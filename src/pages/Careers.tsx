@@ -1,9 +1,20 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
-import { Briefcase, Heart, Rocket, Users } from "lucide-react";
+import { useJobListings } from "@/hooks/useJobListings";
+import { useEditMode } from "@/contexts/EditModeContext";
+import { Briefcase, Heart, Rocket, Users, MapPin, Clock, ExternalLink } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ensureMeta = (name: string, content: string) => {
   let tag = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
@@ -16,7 +27,10 @@ const ensureMeta = (name: string, content: string) => {
 };
 
 const Careers = () => {
-  const { t } = useAppTranslation();
+  const { t, i18n } = useAppTranslation();
+  const { editMode } = useEditMode();
+  const queryClient = useQueryClient();
+  const { data: jobs, isLoading: jobsLoading } = useJobListings(editMode);
 
   const benefits = [
     { icon: Rocket, titleKey: "careers.benefits.growth.title", descKey: "careers.benefits.growth.description", titleFallback: "Growth", descFallback: "Continuous learning and career development opportunities" },
@@ -24,6 +38,34 @@ const Careers = () => {
     { icon: Users, titleKey: "careers.benefits.team.title", descKey: "careers.benefits.team.description", titleFallback: "Team", descFallback: "Work with talented people who are passionate about what they do" },
     { icon: Briefcase, titleKey: "careers.benefits.flexibility.title", descKey: "careers.benefits.flexibility.description", titleFallback: "Flexibility", descFallback: "Flexible work arrangements to support work-life balance" },
   ];
+
+  const handleActiveToggle = async (jobId: string, active: boolean) => {
+    const { error } = await supabase
+      .from('job_listings')
+      .update({ active })
+      .eq('id', jobId);
+    
+    if (error) {
+      toast.error('Failed to update job status');
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['job-listings'] });
+      toast.success(active ? 'Job published' : 'Job unpublished');
+    }
+  };
+
+  const handleFeaturedToggle = async (jobId: string, featured: boolean) => {
+    const { error } = await supabase
+      .from('job_listings')
+      .update({ featured })
+      .eq('id', jobId);
+    
+    if (error) {
+      toast.error('Failed to update featured status');
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['job-listings'] });
+      toast.success(featured ? 'Job featured' : 'Job unfeatured');
+    }
+  };
 
   useEffect(() => {
     document.title = t("careers.meta.title", "Careers – Navio");
@@ -85,13 +127,111 @@ const Careers = () => {
               {t("careers.positions.title", "Open Positions")}
             </h2>
           </EditableTranslation>
-          <div className="p-8 bg-card rounded-xl border border-border text-center">
-            <EditableTranslation translationKey="careers.positions.empty" fallbackText="No open positions at the moment.">
-              <p className="text-muted-foreground">
-                {t("careers.positions.empty", "No open positions at the moment. Check back soon or send us your CV for future opportunities.")}
-              </p>
-            </EditableTranslation>
-          </div>
+          
+          {jobsLoading ? (
+            <div className="grid gap-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="p-6">
+                  <Skeleton className="h-6 w-48 mb-3" />
+                  <div className="flex gap-2 mb-3">
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-5 w-24" />
+                  </div>
+                  <Skeleton className="h-4 w-full" />
+                </Card>
+              ))}
+            </div>
+          ) : jobs && jobs.length > 0 ? (
+            <div className="grid gap-4">
+              {jobs.map((job) => (
+                <Card 
+                  key={job.id} 
+                  className={`p-6 hover:shadow-lg transition-shadow ${!job.active ? 'opacity-60' : ''}`}
+                >
+                  {editMode && (
+                    <div className="flex items-center gap-4 mb-4 pb-4 border-b border-border">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Active</span>
+                        <Switch 
+                          checked={job.active} 
+                          onCheckedChange={(checked) => handleActiveToggle(job.id, checked)} 
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Featured</span>
+                        <Switch 
+                          checked={job.featured} 
+                          onCheckedChange={(checked) => handleFeaturedToggle(job.id, checked)} 
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-xl font-semibold text-foreground">{job.title}</h3>
+                        {job.featured && (
+                          <Badge className="bg-primary text-primary-foreground">
+                            {t("careers.jobs.featured", "Featured")}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {job.department && (
+                          <Badge variant="secondary">
+                            <Briefcase className="w-3 h-3 mr-1" />
+                            {job.department}
+                          </Badge>
+                        )}
+                        {job.location && (
+                          <Badge variant="outline">
+                            <MapPin className="w-3 h-3 mr-1" />
+                            {job.location}
+                          </Badge>
+                        )}
+                        {job.employment_type && (
+                          <Badge variant="outline">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {job.employment_type}
+                          </Badge>
+                        )}
+                      </div>
+                      {job.description && (
+                        <p className="text-muted-foreground line-clamp-2 mb-4">
+                          {job.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    {job.application_url && (
+                      <Button asChild>
+                        <a href={job.application_url} target="_blank" rel="noopener noreferrer">
+                          {t("careers.jobs.apply", "Apply Now")}
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </a>
+                      </Button>
+                    )}
+                    {job.application_email && !job.application_url && (
+                      <Button asChild>
+                        <a href={`mailto:${job.application_email}`}>
+                          {t("careers.jobs.apply", "Apply Now")}
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 bg-card rounded-xl border border-border text-center">
+              <EditableTranslation translationKey="careers.positions.empty" fallbackText="No open positions at the moment.">
+                <p className="text-muted-foreground">
+                  {t("careers.positions.empty", "No open positions at the moment. Check back soon or send us your CV for future opportunities.")}
+                </p>
+              </EditableTranslation>
+            </div>
+          )}
         </section>
 
         {/* Contact Section */}
