@@ -171,7 +171,11 @@ const Careers = () => {
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-xl font-semibold text-foreground">{job.title}</h3>
+                        <Link to={`/${i18n.language}/careers/${job.slug}`}>
+                          <h3 className="text-xl font-semibold text-foreground hover:text-primary transition-colors">
+                            {job.title}
+                          </h3>
+                        </Link>
                         {job.featured && (
                           <Badge className="bg-primary text-primary-foreground">
                             {t("careers.jobs.featured", "Featured")}
@@ -206,6 +210,11 @@ const Careers = () => {
                     </div>
                   </div>
                   <div className="flex gap-3">
+                    <Button variant="outline" asChild>
+                      <Link to={`/${i18n.language}/careers/${job.slug}`}>
+                        {t("careers.jobs.viewDetails", "View Details")}
+                      </Link>
+                    </Button>
                     {job.application_url && (
                       <Button asChild>
                         <a href={job.application_url} target="_blank" rel="noopener noreferrer">
