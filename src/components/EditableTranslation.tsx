@@ -54,6 +54,11 @@ interface EditableTranslationProps {
   className?: string;
   onSave?: () => void;
   fallbackText?: string;
+  /**
+   * When true, EditableTranslation will NOT inject inline color/typography styles.
+   * It will render the translated text using the parent element's classes.
+   */
+  disableStyling?: boolean;
 }
 
 export function EditableTranslation({
@@ -62,6 +67,7 @@ export function EditableTranslation({
   className = '',
   onSave,
   fallbackText,
+  disableStyling = false,
 }: EditableTranslationProps) {
   const { editMode } = useEditMode();
   const { currentLanguage } = useAppTranslation();
@@ -133,21 +139,26 @@ export function EditableTranslation({
     if (!displayText) {
       return children;
     }
-    
-     // Apply styling if available
+
+    // For contexts where parent classes should control presentation (e.g. cards), skip inline styles.
+    if (disableStyling) {
+      if (React.isValidElement(children)) {
+        return React.cloneElement(children, {}, displayText);
+      }
+      return displayText;
+    }
+
+    // Apply styling if available
     // Only apply fontSize/fontWeight if they're NOT the default values
     // 'base' and 'normal' mean "inherit from element" not "override"
-    
-    // Detect if the color token is a gradient
-    const isGradientText = styleSettings?.colorToken?.includes('gradient');
-    
+
     // Determine effective color: use inherited from background if default, otherwise use explicit setting
     const effectiveColorToken = (styleSettings?.colorToken === 'foreground' || !styleSettings?.colorToken)
       ? (inheritedTextColor ? inheritedTextColor.replace('text-', '') : 'foreground')
       : styleSettings?.colorToken;
-    
+
     const isEffectiveGradient = effectiveColorToken?.includes('gradient');
-    
+
     const styledContent = styleSettings ? (
       <span
         data-responsive-font
@@ -171,11 +182,11 @@ export function EditableTranslation({
             WebkitBackgroundClip: 'unset',
             backgroundClip: 'unset',
           }),
-          fontSize: styleSettings.fontSize && styleSettings.fontSize !== 'base' 
-            ? FONT_SIZE_MAP[styleSettings.fontSize] 
+          fontSize: styleSettings.fontSize && styleSettings.fontSize !== 'base'
+            ? FONT_SIZE_MAP[styleSettings.fontSize]
             : undefined,
-          fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal' 
-            ? FONT_WEIGHT_MAP[styleSettings.fontWeight] 
+          fontWeight: styleSettings.fontWeight && styleSettings.fontWeight !== 'normal'
+            ? FONT_WEIGHT_MAP[styleSettings.fontWeight]
             : undefined,
           fontStyle: styleSettings.isItalic ? 'italic' : 'normal',
           textDecoration: styleSettings.isUnderline ? 'underline' : 'none',
@@ -197,12 +208,12 @@ export function EditableTranslation({
         {displayText}
       </span>
     ) : displayText;
-    
+
     // If displayText exists and children is a valid element, clone it with styled text
     if (React.isValidElement(children)) {
       return React.cloneElement(children, {}, styledContent);
     }
-    
+
     // Fallback: just return styled text
     return styledContent;
   };

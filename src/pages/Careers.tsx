@@ -108,12 +108,12 @@ const Careers = () => {
                   <benefit.icon className="h-8 w-8 text-primary" />
                 </div>
                 <div>
-                  <EditableTranslation translationKey={benefit.titleKey} fallbackText={benefit.titleFallback}>
+                  <EditableTranslation disableStyling translationKey={benefit.titleKey} fallbackText={benefit.titleFallback}>
                     <h3 className="text-xl font-semibold mb-2 text-foreground">
                       {t(benefit.titleKey, benefit.titleFallback)}
                     </h3>
                   </EditableTranslation>
-                  <EditableTranslation translationKey={benefit.descKey} fallbackText={benefit.descFallback}>
+                  <EditableTranslation disableStyling translationKey={benefit.descKey} fallbackText={benefit.descFallback}>
                     <p className="text-muted-foreground">
                       {t(benefit.descKey, benefit.descFallback)}
                     </p>
