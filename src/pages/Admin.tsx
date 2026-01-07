@@ -39,7 +39,9 @@ import SEOSetupWizard from "@/components/design-system/SEOSetupWizard";
 import EvaluationHealthDashboard from "@/components/design-system/EvaluationHealthDashboard";
 import { RotatingTermsManager } from "@/components/design-system/RotatingTermsManager";
 import StoriesManager from "@/components/design-system/StoriesManager";
-
+import BlogManager from "@/components/design-system/BlogManager";
+import JobsManager from "@/components/design-system/JobsManager";
+import NewsletterManager from "@/components/design-system/NewsletterManager";
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -146,6 +148,8 @@ const Admin = () => {
                     <TabsTrigger value="features">Features</TabsTrigger>
                     <TabsTrigger value="solutions">Solutions</TabsTrigger>
                     <TabsTrigger value="stories">Stories</TabsTrigger>
+                    <TabsTrigger value="blog">Blog</TabsTrigger>
+                    <TabsTrigger value="jobs">Jobs</TabsTrigger>
                     <TabsTrigger value="usps">USPs</TabsTrigger>
                     <TabsTrigger value="contact">Contact</TabsTrigger>
                     <TabsTrigger value="faqs">FAQs</TabsTrigger>
@@ -170,6 +174,12 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="stories" className="space-y-8">
                     <StoriesManager />
+                  </TabsContent>
+                  <TabsContent value="blog" className="space-y-8">
+                    <BlogManager />
+                  </TabsContent>
+                  <TabsContent value="jobs" className="space-y-8">
+                    <JobsManager />
                   </TabsContent>
                   <TabsContent value="usps" className="space-y-8">
                     <USPCms />
@@ -220,6 +230,7 @@ const Admin = () => {
                     <TabsTrigger value="social">Social Meta</TabsTrigger>
                     <TabsTrigger value="pricing">Pricing</TabsTrigger>
                     <TabsTrigger value="employees">Team</TabsTrigger>
+                    <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
                   </TabsList>
                   <TabsContent value="header" className="space-y-8">
                     <HeaderManager />
@@ -235,6 +246,9 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="employees" className="space-y-8">
                     <EmployeesManager />
+                  </TabsContent>
+                  <TabsContent value="newsletter" className="space-y-8">
+                    <NewsletterManager />
                   </TabsContent>
                 </Tabs>
               </TabsContent>
