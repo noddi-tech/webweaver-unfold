@@ -1,0 +1,227 @@
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Calendar, Clock, User } from 'lucide-react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
+import { useBlogPost, useBlogPosts } from '@/hooks/useBlogPosts';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+const BlogPost = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const { t, i18n } = useAppTranslation();
+  
+  const { data: post, isLoading, error } = useBlogPost(slug || '');
+  const { data: allPosts } = useBlogPosts();
+
+  const relatedPosts = allPosts?.filter(p => 
+    p.id !== post?.id && 
+    (p.category === post?.category || p.tags?.some(tag => post?.tags?.includes(tag)))
+  ).slice(0, 3) || [];
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString(i18n.language, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <article className="pt-32 pb-24 px-4">
+          <div className="container mx-auto max-w-3xl">
+            <Skeleton className="h-8 w-32 mb-8" />
+            <Skeleton className="h-6 w-24 mb-4" />
+            <Skeleton className="h-12 w-full mb-4" />
+            <Skeleton className="h-6 w-64 mb-8" />
+            <Skeleton className="aspect-video w-full mb-8" />
+            <div className="space-y-4">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </div>
+        </article>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !post) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-32 pb-24 px-4 text-center">
+          <div className="container mx-auto max-w-3xl">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Post not found</h1>
+            <Link to={`/${i18n.language}/blog`}>
+              <Button>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t('blog.back_to_blog', 'Back to Blog')}
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <article className="pt-32 pb-24 px-4">
+        <div className="container mx-auto max-w-3xl">
+          {/* Back Link */}
+          <Link 
+            to={`/${i18n.language}/blog`}
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t('blog.back_to_blog', 'Back to Blog')}
+          </Link>
+
+          {/* Category Badge */}
+          {post.category && (
+            <Badge variant="outline" className="mb-4">
+              {post.category}
+            </Badge>
+          )}
+
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+            {post.title}
+          </h1>
+
+          {/* Meta Info */}
+          <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-8">
+            {post.author_name && (
+              <div className="flex items-center gap-2">
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={post.author_avatar_url || undefined} alt={post.author_name} />
+                  <AvatarFallback>
+                    <User className="w-4 h-4" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <span className="text-foreground font-medium">{post.author_name}</span>
+                  {post.author_title && (
+                    <span className="text-sm"> · {post.author_title}</span>
+                  )}
+                </div>
+              </div>
+            )}
+            {post.published_at && (
+              <span className="flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
+                {formatDate(post.published_at)}
+              </span>
+            )}
+            <span className="flex items-center gap-1">
+              <Clock className="w-4 h-4" />
+              {t('blog.reading_time', '{minutes} min read').replace('{minutes}', String(post.reading_time_minutes))}
+            </span>
+          </div>
+
+          {/* Featured Image */}
+          {post.featured_image_url && (
+            <div className="aspect-video mb-12 rounded-xl overflow-hidden">
+              <img 
+                src={post.featured_image_url} 
+                alt={post.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          {/* Content */}
+          {post.content && (
+            <div 
+              className="prose prose-lg max-w-none dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
+          )}
+
+          {/* Tags */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-12 pt-8 border-t">
+              {post.tags.map((tag, index) => (
+                <Badge key={index} variant="secondary">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {/* Author Bio */}
+          {post.author_name && (
+            <div className="mt-12 p-6 bg-muted rounded-xl">
+              <div className="flex items-start gap-4">
+                <Avatar className="w-16 h-16">
+                  <AvatarImage src={post.author_avatar_url || undefined} alt={post.author_name} />
+                  <AvatarFallback>
+                    <User className="w-8 h-8" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold text-foreground">{post.author_name}</h3>
+                  {post.author_title && (
+                    <p className="text-muted-foreground">{post.author_title}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </article>
+
+      {/* Related Posts */}
+      {relatedPosts.length > 0 && (
+        <section className="pb-24 px-4 bg-muted/30">
+          <div className="container mx-auto max-w-6xl pt-16">
+            <h2 className="text-2xl font-bold text-foreground mb-8">
+              {t('blog.related_posts', 'Related Posts')}
+            </h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              {relatedPosts.map((relatedPost) => (
+                <Link key={relatedPost.id} to={`/${i18n.language}/blog/${relatedPost.slug}`}>
+                  <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
+                    {relatedPost.featured_image_url && (
+                      <div className="aspect-video">
+                        <img 
+                          src={relatedPost.featured_image_url} 
+                          alt={relatedPost.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-foreground line-clamp-2">
+                        {relatedPost.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {relatedPost.reading_time_minutes} min read
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <Footer />
+    </div>
+  );
+};
+
+export default BlogPost;

@@ -44,6 +44,69 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          active: boolean
+          author_avatar_url: string | null
+          author_name: string | null
+          author_title: string | null
+          category: string | null
+          content: string | null
+          created_at: string
+          excerpt: string | null
+          featured: boolean
+          featured_image_url: string | null
+          id: string
+          published_at: string | null
+          reading_time_minutes: number | null
+          slug: string
+          sort_order: number | null
+          tags: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          author_avatar_url?: string | null
+          author_name?: string | null
+          author_title?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          excerpt?: string | null
+          featured?: boolean
+          featured_image_url?: string | null
+          id?: string
+          published_at?: string | null
+          reading_time_minutes?: number | null
+          slug: string
+          sort_order?: number | null
+          tags?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          author_avatar_url?: string | null
+          author_name?: string | null
+          author_title?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          excerpt?: string | null
+          featured?: boolean
+          featured_image_url?: string | null
+          id?: string
+          published_at?: string | null
+          reading_time_minutes?: number | null
+          slug?: string
+          sort_order?: number | null
+          tags?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brand_settings: {
         Row: {
           created_at: string
