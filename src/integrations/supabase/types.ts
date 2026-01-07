@@ -1124,6 +1124,72 @@ export type Database = {
           },
         ]
       }
+      job_listings: {
+        Row: {
+          active: boolean | null
+          application_email: string | null
+          application_url: string | null
+          benefits: string | null
+          created_at: string
+          department: string | null
+          description: string | null
+          employment_type: string | null
+          expires_at: string | null
+          featured: boolean | null
+          id: string
+          location: string | null
+          posted_at: string | null
+          requirements: string | null
+          salary_range: string | null
+          slug: string
+          sort_order: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          application_email?: string | null
+          application_url?: string | null
+          benefits?: string | null
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          employment_type?: string | null
+          expires_at?: string | null
+          featured?: boolean | null
+          id?: string
+          location?: string | null
+          posted_at?: string | null
+          requirements?: string | null
+          salary_range?: string | null
+          slug: string
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          application_email?: string | null
+          application_url?: string | null
+          benefits?: string | null
+          created_at?: string
+          department?: string | null
+          description?: string | null
+          employment_type?: string | null
+          expires_at?: string | null
+          featured?: boolean | null
+          id?: string
+          location?: string | null
+          posted_at?: string | null
+          requirements?: string | null
+          salary_range?: string | null
+          slug?: string
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       language_settings: {
         Row: {
           created_at: string
@@ -1256,6 +1322,36 @@ export type Database = {
           show_in_switcher?: boolean
           sort_order?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          confirmed: boolean | null
+          created_at: string
+          email: string
+          id: string
+          source: string | null
+          subscribed_at: string
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          confirmed?: boolean | null
+          created_at?: string
+          email: string
+          id?: string
+          source?: string | null
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          confirmed?: boolean | null
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string | null
+          subscribed_at?: string
+          unsubscribed_at?: string | null
         }
         Relationships: []
       }
