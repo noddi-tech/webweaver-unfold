@@ -99,9 +99,9 @@ const Careers = () => {
           </EditableTranslation>
           <div className="grid md:grid-cols-2 gap-6">
             {benefits.map((benefit, index) => (
-              <div key={index} className="p-6 bg-card rounded-xl border border-border flex gap-4">
+              <div key={index} className="p-6 bg-card text-card-foreground rounded-xl border border-border flex gap-4">
                 <div className="flex-shrink-0">
-                  <benefit.icon className="h-8 w-8 text-primary" />
+                  <benefit.icon className="h-8 w-8 text-white" />
                 </div>
                 <div>
                   <EditableTranslation translationKey={benefit.titleKey} fallbackText={benefit.titleFallback}>
@@ -110,7 +110,7 @@ const Careers = () => {
                     </h3>
                   </EditableTranslation>
                   <EditableTranslation translationKey={benefit.descKey} fallbackText={benefit.descFallback}>
-                    <p className="text-muted-foreground">
+                    <p className="text-card-foreground/70">
                       {t(benefit.descKey, benefit.descFallback)}
                     </p>
                   </EditableTranslation>
@@ -224,9 +224,9 @@ const Careers = () => {
               ))}
             </div>
           ) : (
-            <div className="p-8 bg-card rounded-xl border border-border text-center">
+            <div className="p-8 bg-card text-card-foreground rounded-xl border border-border text-center">
               <EditableTranslation translationKey="careers.positions.empty" fallbackText="No open positions at the moment.">
-                <p className="text-muted-foreground">
+                <p className="text-card-foreground/70">
                   {t("careers.positions.empty", "No open positions at the moment. Check back soon or send us your CV for future opportunities.")}
                 </p>
               </EditableTranslation>

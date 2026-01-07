@@ -62,38 +62,38 @@ const AboutUs = () => {
             </h2>
           </EditableTranslation>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-6 bg-card rounded-xl border border-border">
+            <div className="p-6 bg-card text-card-foreground rounded-xl border border-border">
               <EditableTranslation translationKey="about.values.innovation.title" fallbackText="Innovation">
                 <h3 className="text-xl font-semibold mb-3">
                   {t("about.values.innovation.title", "Innovation")}
                 </h3>
               </EditableTranslation>
               <EditableTranslation translationKey="about.values.innovation.description" fallbackText="We constantly push boundaries to create better solutions.">
-                <p className="text-muted-foreground">
+                <p className="text-card-foreground/70">
                   {t("about.values.innovation.description", "We constantly push boundaries to create better solutions for our customers and partners.")}
                 </p>
               </EditableTranslation>
             </div>
-            <div className="p-6 bg-card rounded-xl border border-border">
+            <div className="p-6 bg-card text-card-foreground rounded-xl border border-border">
               <EditableTranslation translationKey="about.values.trust.title" fallbackText="Trust">
                 <h3 className="text-xl font-semibold mb-3">
                   {t("about.values.trust.title", "Trust")}
                 </h3>
               </EditableTranslation>
               <EditableTranslation translationKey="about.values.trust.description" fallbackText="Transparency and reliability are at the core of everything we do.">
-                <p className="text-muted-foreground">
+                <p className="text-card-foreground/70">
                   {t("about.values.trust.description", "Transparency and reliability are at the core of everything we do.")}
                 </p>
               </EditableTranslation>
             </div>
-            <div className="p-6 bg-card rounded-xl border border-border">
+            <div className="p-6 bg-card text-card-foreground rounded-xl border border-border">
               <EditableTranslation translationKey="about.values.partnership.title" fallbackText="Partnership">
                 <h3 className="text-xl font-semibold mb-3">
                   {t("about.values.partnership.title", "Partnership")}
                 </h3>
               </EditableTranslation>
               <EditableTranslation translationKey="about.values.partnership.description" fallbackText="We succeed when our partners and customers succeed.">
-                <p className="text-muted-foreground">
+                <p className="text-card-foreground/70">
                   {t("about.values.partnership.description", "We succeed when our partners and customers succeed.")}
                 </p>
               </EditableTranslation>
