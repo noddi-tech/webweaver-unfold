@@ -48,9 +48,9 @@ const Newsroom = () => {
             </h2>
           </EditableTranslation>
           <div className="space-y-6">
-            <div className="p-6 bg-card rounded-xl border border-border">
+            <div className="p-6 bg-card text-card-foreground rounded-xl border border-border">
               <EditableTranslation translationKey="newsroom.press.coming_soon" fallbackText="Press releases coming soon.">
-                <p className="text-muted-foreground">
+                <p className="text-card-foreground/70">
                   {t("newsroom.press.coming_soon", "Press releases coming soon. Stay tuned for the latest updates from Navio.")}
                 </p>
               </EditableTranslation>
