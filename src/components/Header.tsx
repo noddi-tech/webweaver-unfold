@@ -38,6 +38,16 @@ const getNavTranslationKey = (title: string): string => {
   const titleToKey: Record<string, string> = {
     'Solutions': 'nav.solutions',
     'Functionality': 'nav.functionality',
+    'About': 'nav.about',
+    'About Us': 'nav.about_us',
+    'Newsroom': 'nav.newsroom',
+    'Navio Blog': 'nav.blog',
+    'Blog': 'nav.blog',
+    'Careers': 'nav.careers',
+    'Stories': 'nav.stories',
+    'Pricing': 'nav.pricing',
+    'Contact': 'nav.contact',
+    'Team': 'nav.team',
   };
   return titleToKey[title] || `nav.${title.toLowerCase().replace(/\s+/g, '_')}`;
 };

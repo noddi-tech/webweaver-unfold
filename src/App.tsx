@@ -28,6 +28,9 @@ import Solutions from "./pages/Solutions";
 import SolutionDetail from "./pages/SolutionDetail";
 import Stories from "./pages/Stories";
 import CustomerStory from "./pages/CustomerStory";
+import AboutUs from "./pages/AboutUs";
+import Newsroom from "./pages/Newsroom";
+import Careers from "./pages/Careers";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +63,9 @@ const App = () => {
             <Route path="/:lang/contact" element={<LanguageSync><Contact /></LanguageSync>} />
             <Route path="/:lang/demo" element={<LanguageSync><Demo /></LanguageSync>} />
             <Route path="/:lang/team" element={<LanguageSync><Team /></LanguageSync>} />
+            <Route path="/:lang/about-us" element={<LanguageSync><AboutUs /></LanguageSync>} />
+            <Route path="/:lang/newsroom" element={<LanguageSync><Newsroom /></LanguageSync>} />
+            <Route path="/:lang/careers" element={<LanguageSync><Careers /></LanguageSync>} />
             
             {/* CMS and special routes (no language prefix) */}
             <Route path="/cms-login" element={<Auth />} />
@@ -86,6 +92,9 @@ const App = () => {
             <Route path="/contact" element={<LanguageRedirect />} />
             <Route path="/demo" element={<LanguageRedirect />} />
             <Route path="/team" element={<LanguageRedirect />} />
+            <Route path="/about-us" element={<LanguageRedirect />} />
+            <Route path="/newsroom" element={<LanguageRedirect />} />
+            <Route path="/careers" element={<LanguageRedirect />} />
             
             {/* Catch-all for 404 */}
             <Route path="*" element={<NotFound />} />
