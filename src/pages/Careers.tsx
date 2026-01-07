@@ -103,18 +103,18 @@ const Careers = () => {
           </EditableTranslation>
           <div className="grid md:grid-cols-2 gap-6">
             {benefits.map((benefit, index) => (
-              <div key={index} className="p-6 bg-card text-card-foreground rounded-xl border border-border flex gap-4">
+              <div key={index} className="p-6 bg-background rounded-xl border border-border shadow-sm flex gap-4">
                 <div className="flex-shrink-0">
-                  <benefit.icon className="h-8 w-8 text-white" />
+                  <benefit.icon className="h-8 w-8 text-primary" />
                 </div>
                 <div>
                   <EditableTranslation translationKey={benefit.titleKey} fallbackText={benefit.titleFallback}>
-                    <h3 className="text-xl font-semibold mb-2 text-white">
+                    <h3 className="text-xl font-semibold mb-2 text-foreground">
                       {t(benefit.titleKey, benefit.titleFallback)}
                     </h3>
                   </EditableTranslation>
                   <EditableTranslation translationKey={benefit.descKey} fallbackText={benefit.descFallback}>
-                    <p className="text-card-foreground/70">
+                    <p className="text-muted-foreground">
                       {t(benefit.descKey, benefit.descFallback)}
                     </p>
                   </EditableTranslation>
