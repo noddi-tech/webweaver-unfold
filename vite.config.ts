@@ -24,6 +24,11 @@ export default defineConfig(({ mode }) => ({
             console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
           });
         }
+      },
+      '/careers/feed.xml': {
+        target: 'https://ouhfgazomdmirdazvjys.supabase.co/functions/v1/jobs-rss-feed',
+        changeOrigin: true,
+        rewrite: () => ''
       }
     }
   },

@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.evaluation-watchdog]
 verify_jwt = false
+
+[functions.jobs-rss-feed]
+verify_jwt = false
