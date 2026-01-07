@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
@@ -7,7 +8,7 @@ import { EditableTranslation } from "@/components/EditableTranslation";
 import { useJobListings } from "@/hooks/useJobListings";
 import { useEditMode } from "@/contexts/EditModeContext";
 import { Briefcase, Rocket, Users, MapPin, Clock, ExternalLink, TrendingUp, Zap, Building, Target } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -76,6 +77,14 @@ const Careers = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Helmet>
+        <link 
+          rel="alternate" 
+          type="application/rss+xml" 
+          title="Navio Job Openings" 
+          href="/careers/feed.xml" 
+        />
+      </Helmet>
       <Header />
       <main className="container mx-auto px-6 pt-32 pb-20">
         {/* Hero Section */}
