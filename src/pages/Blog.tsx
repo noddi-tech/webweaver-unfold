@@ -205,7 +205,7 @@ const Blog = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post) => (
-                <Card key={post.id} className={`overflow-hidden hover:shadow-lg transition-shadow ${!post.active ? 'opacity-60' : ''}`}>
+                <Card key={post.id} className={`overflow-hidden hover:shadow-lg transition-shadow bg-background ${!post.active ? 'opacity-60' : ''}`}>
                   {editMode && (
                     <div className="p-4 border-b bg-muted/50 space-y-3">
                       <div className="flex items-center justify-between">
@@ -233,8 +233,8 @@ const Blog = () => {
                       </div>
                     </div>
                   )}
-                  <Link to={`/${i18n.language}/blog/${post.slug}`}>
-                    {post.featured_image_url && (
+                  {post.featured_image_url && (
+                    <Link to={`/${i18n.language}/blog/${post.slug}`}>
                       <div className="aspect-video">
                         <img 
                           src={post.featured_image_url} 
@@ -242,40 +242,28 @@ const Blog = () => {
                           className="w-full h-full object-cover"
                         />
                       </div>
+                    </Link>
+                  )}
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-2">
+                      {post.title}
+                    </h3>
+                    {post.published_at && (
+                      <p className="text-muted-foreground text-sm mb-3">
+                        {formatDate(post.published_at)}
+                      </p>
                     )}
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-2 mb-3">
-                        {post.category && (
-                          <Badge variant="outline" className="text-xs">
-                            {post.category}
-                          </Badge>
-                        )}
-                      </div>
-                      <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
-                        {post.title}
-                      </h3>
-                      {post.excerpt && (
-                        <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                          {post.excerpt}
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center gap-3">
-                          {post.published_at && (
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {formatDate(post.published_at)}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {post.reading_time_minutes}m
-                          </span>
-                        </div>
-                        <ArrowRight className="w-4 h-4" />
-                      </div>
-                    </CardContent>
-                  </Link>
+                    {post.excerpt && (
+                      <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
+                        {post.excerpt}
+                      </p>
+                    )}
+                    <Link to={`/${i18n.language}/blog/${post.slug}`}>
+                      <Button className="bg-foreground text-background hover:bg-foreground/90">
+                        {t('blog.read_more', 'Read more')}
+                      </Button>
+                    </Link>
+                  </CardContent>
                 </Card>
               ))}
             </div>
