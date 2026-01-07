@@ -33,12 +33,14 @@ const Careers = () => {
   const { data: jobs, isLoading: jobsLoading } = useJobListings(editMode);
 
   const benefits = [
-    { icon: TrendingUp, titleKey: "careers.benefits.equity.title", descKey: "careers.benefits.equity.description", titleFallback: "Equity", descFallback: "All employees participate in our beneficial stock option program" },
-    { icon: Users, titleKey: "careers.benefits.team.title", descKey: "careers.benefits.team.description", titleFallback: "Team", descFallback: "Startup experience from companies like Oda, Kron, and Askeladden & Co" },
-    { icon: Building, titleKey: "careers.benefits.office.title", descKey: "careers.benefits.office.description", titleFallback: "Office-First", descFallback: "We strive to work from the office, but with flexibility when life doesn't align" },
-    { icon: Target, titleKey: "careers.benefits.output.title", descKey: "careers.benefits.output.description", titleFallback: "High Output", descFallback: "High speed, high output, and traction – no one controls your hours" },
-    { icon: Zap, titleKey: "careers.benefits.failfast.title", descKey: "careers.benefits.failfast.description", titleFallback: "Fail Fast", descFallback: "Learn and iterate quickly – don't be afraid to fail to build great products" },
-    { icon: Rocket, titleKey: "careers.benefits.growth.title", descKey: "careers.benefits.growth.description", titleFallback: "Growth", descFallback: "Continuous learning and career development opportunities" },
+    { icon: TrendingUp, titleKey: "careers.benefits.equity.title", descKey: "careers.benefits.equity.description", titleFallback: "Equity", descFallback: "All employees participate in beneficial stock option program" },
+    { icon: Users, titleKey: "careers.benefits.team.title", descKey: "careers.benefits.team.description", titleFallback: "Team", descFallback: "Startup veterans from Oda, Kron, Askeladden & Co" },
+    { icon: Heart, titleKey: "careers.benefits.culture.title", descKey: "careers.benefits.culture.description", titleFallback: "Culture", descFallback: "High-speed, high-output environment with flexibility" },
+    { icon: Briefcase, titleKey: "careers.benefits.flexibility.title", descKey: "careers.benefits.flexibility.description", titleFallback: "Flexibility", descFallback: "Work from office preferred, but freedom on where/when" },
+    { icon: Building, titleKey: "careers.benefits.office.title", descKey: "careers.benefits.office.description", titleFallback: "Office", descFallback: "We strive to work from the office for collaboration" },
+    { icon: Target, titleKey: "careers.benefits.output.title", descKey: "careers.benefits.output.description", titleFallback: "Output Focus", descFallback: "Not a work-life balance company – traction over balance" },
+    { icon: Zap, titleKey: "careers.benefits.failfast.title", descKey: "careers.benefits.failfast.description", titleFallback: "Fail Fast", descFallback: "Learn and iterate – don't be afraid to fail to build great products" },
+    { icon: Rocket, titleKey: "careers.benefits.growth.title", descKey: "careers.benefits.growth.description", titleFallback: "Growth", descFallback: "Continuous learning and career development" },
   ];
 
   const handleActiveToggle = async (jobId: string, active: boolean) => {
