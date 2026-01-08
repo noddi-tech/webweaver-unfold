@@ -17,9 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { EditableCard } from "@/components/EditableCard";
-import { EditableCardTitle } from "@/components/EditableCardTitle";
-import { EditableCardDescription } from "@/components/EditableCardDescription";
-import { EditableCardIcon } from "@/components/EditableCardIcon";
+import { EditableBenefitCard } from "@/components/EditableBenefitCard";
 import type { LucideIcon } from "lucide-react";
 
 const ensureMeta = (name: string, content: string) => {
@@ -115,29 +113,15 @@ const Careers = () => {
           </EditableTranslation>
           <div className="grid md:grid-cols-2 gap-6">
             {benefits.map((benefit) => (
-              <EditableCard 
+              <EditableBenefitCard
                 key={benefit.key}
                 elementIdPrefix={`careers-benefit-${benefit.key}`}
-                defaultBackground="bg-background"
-                defaultTextColor="foreground"
-                className="p-6 rounded-xl border border-border shadow-sm flex gap-4"
-              >
-                <div className="flex-shrink-0">
-                  <EditableCardIcon icon={benefit.icon} size="lg" />
-                </div>
-                <div>
-                  <EditableTranslation translationKey={benefit.titleKey} fallbackText={benefit.titleFallback}>
-                    <EditableCardTitle className="text-xl font-semibold mb-2">
-                      {t(benefit.titleKey, benefit.titleFallback)}
-                    </EditableCardTitle>
-                  </EditableTranslation>
-                  <EditableTranslation translationKey={benefit.descKey} fallbackText={benefit.descFallback}>
-                    <EditableCardDescription>
-                      {t(benefit.descKey, benefit.descFallback)}
-                    </EditableCardDescription>
-                  </EditableTranslation>
-                </div>
-              </EditableCard>
+                icon={benefit.icon}
+                titleKey={benefit.titleKey}
+                titleFallback={benefit.titleFallback}
+                descKey={benefit.descKey}
+                descFallback={benefit.descFallback}
+              />
             ))}
           </div>
         </section>
@@ -166,8 +150,11 @@ const Careers = () => {
           ) : jobs && jobs.length > 0 ? (
             <div className="grid gap-4">
               {jobs.map((job) => (
-                <Card 
-                  key={job.id} 
+                <EditableCard
+                  key={job.id}
+                  elementIdPrefix={`careers-job-${job.slug}`}
+                  defaultBackground="bg-card"
+                  defaultTextColor="foreground"
                   className={`p-6 hover:shadow-lg transition-shadow ${!job.active ? 'opacity-60' : ''}`}
                 >
                   {editMode && (
@@ -251,7 +238,7 @@ const Careers = () => {
                       </Button>
                     )}
                   </div>
-                </Card>
+                </EditableCard>
               ))}
             </div>
           ) : (
