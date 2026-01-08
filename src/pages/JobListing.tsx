@@ -32,18 +32,26 @@ interface EditableSectionProps {
 }
 
 function EditableSection({ children, onEdit, editMode, className = "" }: EditableSectionProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  
   if (!editMode) return <>{children}</>;
   
   return (
-    <div className={`group relative ${className}`}>
+    <div 
+      className={`relative pr-8 pt-4 -mr-8 -mt-4 ${className}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {children}
-      <button
-        onClick={onEdit}
-        className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg hover:bg-primary/90"
-        title="Edit"
-      >
-        <Pencil className="w-3.5 h-3.5" />
-      </button>
+      {isHovered && (
+        <button
+          onClick={onEdit}
+          className="absolute top-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:scale-110 transition-transform cursor-pointer z-50"
+          title="Edit this section"
+        >
+          <Pencil className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 }
