@@ -12,8 +12,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Edit, Star, Eye, EyeOff, Briefcase } from "lucide-react";
+import { Trash2, Edit, Star, Eye, EyeOff, Briefcase, Pencil } from "lucide-react";
 import { format } from "date-fns";
+import { parseJobMarkdown } from "@/lib/markdownUtils";
 
 interface JobListing {
   id: string;
@@ -66,6 +67,54 @@ const generateSlug = (title: string): string => {
     .replace(/-+/g, "-")
     .trim();
 };
+
+// Markdown field with preview toggle
+interface MarkdownFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  rows?: number;
+}
+
+function MarkdownField({ label, value, onChange, placeholder, rows = 6 }: MarkdownFieldProps) {
+  const [showPreview, setShowPreview] = useState(false);
+  
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <Label>{label}</Label>
+        <Button
+          variant="ghost"
+          size="sm"
+          type="button"
+          onClick={() => setShowPreview(!showPreview)}
+        >
+          {showPreview ? <Pencil className="w-4 h-4 mr-1" /> : <Eye className="w-4 h-4 mr-1" />}
+          {showPreview ? "Edit" : "Preview"}
+        </Button>
+      </div>
+      {showPreview ? (
+        <div 
+          className="border rounded-md p-4 min-h-[120px] prose prose-sm max-w-none text-muted-foreground bg-muted/30"
+          dangerouslySetInnerHTML={{ __html: parseJobMarkdown(value) }}
+        />
+      ) : (
+        <>
+          <Textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            rows={rows}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Markdown: <code className="bg-muted px-1 rounded">-</code> bullet, <code className="bg-muted px-1 rounded">##</code> heading, <code className="bg-muted px-1 rounded">**bold**</code>
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
 
 const JobsManager = () => {
   const { toast } = useToast();
@@ -314,34 +363,28 @@ const JobsManager = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="details" className="space-y-4">
-                <div>
-                  <Label>Description (Markdown)</Label>
-                  <Textarea
-                    value={editingJob.description || ""}
-                    onChange={(e) => setEditingJob({ ...editingJob, description: e.target.value })}
-                    placeholder="Job description..."
-                    rows={6}
-                  />
-                </div>
-                <div>
-                  <Label>Requirements (Markdown)</Label>
-                  <Textarea
-                    value={editingJob.requirements || ""}
-                    onChange={(e) => setEditingJob({ ...editingJob, requirements: e.target.value })}
-                    placeholder="- 3+ years experience\n- Strong communication skills"
-                    rows={6}
-                  />
-                </div>
-                <div>
-                  <Label>Benefits (Markdown)</Label>
-                  <Textarea
-                    value={editingJob.benefits || ""}
-                    onChange={(e) => setEditingJob({ ...editingJob, benefits: e.target.value })}
-                    placeholder="- Competitive salary\n- Flexible hours"
-                    rows={4}
-                  />
-                </div>
+              <TabsContent value="details" className="space-y-6">
+                <MarkdownField
+                  label="Description"
+                  value={editingJob.description || ""}
+                  onChange={(v) => setEditingJob({ ...editingJob, description: v })}
+                  placeholder="Describe the role, responsibilities, and team..."
+                  rows={8}
+                />
+                <MarkdownField
+                  label="Requirements"
+                  value={editingJob.requirements || ""}
+                  onChange={(v) => setEditingJob({ ...editingJob, requirements: v })}
+                  placeholder="- 3+ years experience&#10;- Strong communication skills"
+                  rows={6}
+                />
+                <MarkdownField
+                  label="Benefits"
+                  value={editingJob.benefits || ""}
+                  onChange={(v) => setEditingJob({ ...editingJob, benefits: v })}
+                  placeholder="- Competitive salary&#10;- Flexible hours"
+                  rows={5}
+                />
               </TabsContent>
 
               <TabsContent value="settings" className="space-y-4">
