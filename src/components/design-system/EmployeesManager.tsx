@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import EmojiPicker from "@/components/ui/emoji-picker";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Pencil, Image as ImageIcon } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { ImageEditModal } from "@/components/ImageEditModal";
 
 interface Employee {
   id: string;
@@ -82,6 +83,7 @@ const EmployeesManager = () => {
   const [creating, setCreating] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [pendingDelete, setPendingDelete] = useState<EmpSection | null>(null);
+  const [editingImageId, setEditingImageId] = useState<string | null>(null);
 const [newEmp, setNewEmp] = useState<Omit<Employee, "id">>({
   name: "",
   title: "",
@@ -492,9 +494,44 @@ const sectionOptions = useMemo(() => {
           <div className="grid gap-6 md:grid-cols-2">
             {employees.map((e) => (
               <div key={e.id} className="grid gap-3 rounded-lg border border-border p-4 bg-background">
-                {e.image_url && (
-                  <img src={e.image_url} alt={`${e.name} – ${e.title}`} className={`w-full h-56 object-cover ${posClass(e.image_object_position) } rounded-md`} loading="lazy" />
-                )}
+                {/* Clickable image with hover overlay */}
+                <div 
+                  className="relative group cursor-pointer rounded-md overflow-hidden"
+                  onClick={() => setEditingImageId(e.id)}
+                >
+                  {e.image_url ? (
+                    <>
+                      <img 
+                        src={e.image_url} 
+                        alt={`${e.name} – ${e.title}`} 
+                        className={`w-full h-56 object-cover ${posClass(e.image_object_position)}`} 
+                        loading="lazy" 
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="bg-primary text-primary-foreground p-3 rounded-full">
+                          <Pencil className="h-5 w-5" />
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-56 border-2 border-dashed border-muted-foreground/40 flex flex-col items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors">
+                      <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
+                      <span className="text-sm text-muted-foreground">Click to add image</span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Image Edit Modal */}
+                <ImageEditModal
+                  open={editingImageId === e.id}
+                  onOpenChange={(open) => { if (!open) setEditingImageId(null); }}
+                  currentUrl={e.image_url || ''}
+                  onSave={(newUrl) => {
+                    setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, image_url: newUrl } : x));
+                    setEditingImageId(null);
+                  }}
+                  altText={`${e.name} - ${e.title}`}
+                />
                 <div className="grid gap-2 md:grid-cols-2">
                   <div className="grid gap-2">
                     <Label>Name</Label>
