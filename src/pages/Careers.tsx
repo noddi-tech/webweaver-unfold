@@ -16,6 +16,11 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { EditableCard } from "@/components/EditableCard";
+import { EditableCardTitle } from "@/components/EditableCardTitle";
+import { EditableCardDescription } from "@/components/EditableCardDescription";
+import { EditableCardIcon } from "@/components/EditableCardIcon";
+import type { LucideIcon } from "lucide-react";
 
 const ensureMeta = (name: string, content: string) => {
   let tag = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
@@ -33,13 +38,13 @@ const Careers = () => {
   const queryClient = useQueryClient();
   const { data: jobs, isLoading: jobsLoading } = useJobListings(editMode);
 
-  const benefits = [
-    { icon: TrendingUp, titleKey: "careers.benefits.ownership.title", descKey: "careers.benefits.ownership.description", titleFallback: "Ownership Mindset", descFallback: "Participate in Navio's success — all employees receive equity through our stock option program." },
-    { icon: Users, titleKey: "careers.benefits.team.title", descKey: "careers.benefits.team.description", titleFallback: "High-Performing Team", descFallback: "Work alongside talented, mission-driven professionals who value collaboration and impact." },
-    { icon: Rocket, titleKey: "careers.benefits.growth.title", descKey: "careers.benefits.growth.description", titleFallback: "Growth & Development", descFallback: "Continuous learning, clear career pathways, and support for your professional evolution." },
-    { icon: Zap, titleKey: "careers.benefits.innovation.title", descKey: "careers.benefits.innovation.description", titleFallback: "Agile Innovation Culture", descFallback: "We move fast, iterate boldly, and learn from outcomes — grow through real responsibility." },
-    { icon: Building, titleKey: "careers.benefits.collaboration.title", descKey: "careers.benefits.collaboration.description", titleFallback: "Purposeful Collaboration", descFallback: "We champion in-person connection and teamwork to solve complex challenges together." },
-    { icon: Target, titleKey: "careers.benefits.flexibility.title", descKey: "careers.benefits.flexibility.description", titleFallback: "Outcome-Driven Flexibility", descFallback: "We focus on results over rigid routines and support flexible work arrangements where it enhances performance." },
+  const benefits: { key: string; icon: LucideIcon; titleKey: string; descKey: string; titleFallback: string; descFallback: string }[] = [
+    { key: "ownership", icon: TrendingUp, titleKey: "careers.benefits.ownership.title", descKey: "careers.benefits.ownership.description", titleFallback: "Ownership Mindset", descFallback: "Participate in Navio's success — all employees receive equity through our stock option program." },
+    { key: "team", icon: Users, titleKey: "careers.benefits.team.title", descKey: "careers.benefits.team.description", titleFallback: "High-Performing Team", descFallback: "Work alongside talented, mission-driven professionals who value collaboration and impact." },
+    { key: "growth", icon: Rocket, titleKey: "careers.benefits.growth.title", descKey: "careers.benefits.growth.description", titleFallback: "Growth & Development", descFallback: "Continuous learning, clear career pathways, and support for your professional evolution." },
+    { key: "innovation", icon: Zap, titleKey: "careers.benefits.innovation.title", descKey: "careers.benefits.innovation.description", titleFallback: "Agile Innovation Culture", descFallback: "We move fast, iterate boldly, and learn from outcomes — grow through real responsibility." },
+    { key: "collaboration", icon: Building, titleKey: "careers.benefits.collaboration.title", descKey: "careers.benefits.collaboration.description", titleFallback: "Purposeful Collaboration", descFallback: "We champion in-person connection and teamwork to solve complex challenges together." },
+    { key: "flexibility", icon: Target, titleKey: "careers.benefits.flexibility.title", descKey: "careers.benefits.flexibility.description", titleFallback: "Outcome-Driven Flexibility", descFallback: "We focus on results over rigid routines and support flexible work arrangements where it enhances performance." },
   ];
 
   const handleActiveToggle = async (jobId: string, active: boolean) => {
@@ -109,24 +114,30 @@ const Careers = () => {
             </h2>
           </EditableTranslation>
           <div className="grid md:grid-cols-2 gap-6">
-            {benefits.map((benefit, index) => (
-              <div key={index} className="p-6 bg-background rounded-xl border border-border shadow-sm flex gap-4">
+            {benefits.map((benefit) => (
+              <EditableCard 
+                key={benefit.key}
+                elementIdPrefix={`careers-benefit-${benefit.key}`}
+                defaultBackground="bg-background"
+                defaultTextColor="foreground"
+                className="p-6 rounded-xl border border-border shadow-sm flex gap-4"
+              >
                 <div className="flex-shrink-0">
-                  <benefit.icon className="h-8 w-8 text-primary" />
+                  <EditableCardIcon icon={benefit.icon} size="lg" />
                 </div>
                 <div>
-                  <EditableTranslation disableStyling translationKey={benefit.titleKey} fallbackText={benefit.titleFallback}>
-                    <h3 className="text-xl font-semibold mb-2 text-foreground">
+                  <EditableTranslation translationKey={benefit.titleKey} fallbackText={benefit.titleFallback}>
+                    <EditableCardTitle className="text-xl font-semibold mb-2">
                       {t(benefit.titleKey, benefit.titleFallback)}
-                    </h3>
+                    </EditableCardTitle>
                   </EditableTranslation>
-                  <EditableTranslation disableStyling translationKey={benefit.descKey} fallbackText={benefit.descFallback}>
-                    <p className="text-muted-foreground">
+                  <EditableTranslation translationKey={benefit.descKey} fallbackText={benefit.descFallback}>
+                    <EditableCardDescription>
                       {t(benefit.descKey, benefit.descFallback)}
-                    </p>
+                    </EditableCardDescription>
                   </EditableTranslation>
                 </div>
-              </div>
+              </EditableCard>
             ))}
           </div>
         </section>
