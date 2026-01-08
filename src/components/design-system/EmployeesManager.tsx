@@ -8,9 +8,26 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import EmojiPicker from "@/components/ui/emoji-picker";
-import { Plus, X, Pencil, Image as ImageIcon } from "lucide-react";
+import { Plus, X, Pencil, Image as ImageIcon, GripVertical } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ImageEditModal } from "@/components/ImageEditModal";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Employee {
   id: string;
@@ -70,6 +87,46 @@ const posClass = (p?: string | null) => {
   }
 };
 
+// Sortable wrapper component for drag-and-drop
+const SortableEmployeeCard = ({ 
+  id, 
+  children 
+}: { 
+  id: string; 
+  children: React.ReactNode;
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 10 : 'auto' as const,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative">
+      {/* Drag handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-2 left-2 p-1.5 rounded-md cursor-grab hover:bg-muted/80 bg-background/80 backdrop-blur-sm z-10 border border-border/50 shadow-sm"
+        title="Drag to reorder"
+      >
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
+      </div>
+      {children}
+    </div>
+  );
+};
+
 const EmployeesManager = () => {
   const { toast } = useToast();
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -84,6 +141,50 @@ const EmployeesManager = () => {
   const [file, setFile] = useState<File | null>(null);
   const [pendingDelete, setPendingDelete] = useState<EmpSection | null>(null);
   const [editingImageId, setEditingImageId] = useState<string | null>(null);
+
+  // Drag-and-drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end - reorder and save to database
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = employees.findIndex(e => e.id === active.id);
+      const newIndex = employees.findIndex(e => e.id === over.id);
+      
+      // Optimistic update
+      const newOrder = arrayMove(employees, oldIndex, newIndex);
+      setEmployees(newOrder);
+      
+      // Save all sort orders to database
+      try {
+        const updates = newOrder.map((emp, index) => 
+          (supabase as any)
+            .from('employees')
+            .update({ sort_order: index })
+            .eq('id', emp.id)
+        );
+        
+        await Promise.all(updates);
+        toast({ title: "Order saved" });
+      } catch (error: any) {
+        toast({ title: "Failed to save order", description: error.message, variant: "destructive" });
+        // Revert on error
+        setEmployees(employees);
+      }
+    }
+  };
+
 const [newEmp, setNewEmp] = useState<Omit<Employee, "id">>({
   name: "",
   title: "",
@@ -491,104 +592,117 @@ const sectionOptions = useMemo(() => {
         ) : employees.length === 0 ? (
           <p className="text-muted-foreground">No members yet.</p>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2">
-            {employees.map((e) => (
-              <div key={e.id} className="grid gap-3 rounded-lg border border-border p-4 bg-background">
-                {/* Clickable image with hover overlay */}
-                <div 
-                  className="relative group cursor-pointer rounded-md overflow-hidden"
-                  onClick={() => setEditingImageId(e.id)}
-                >
-                  {e.image_url ? (
-                    <>
-                      <img 
-                        src={e.image_url} 
-                        alt={`${e.name} – ${e.title}`} 
-                        className={`w-full h-56 object-cover ${posClass(e.image_object_position)}`} 
-                        loading="lazy" 
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={employees.map(e => e.id)}
+              strategy={rectSortingStrategy}
+            >
+              <div className="grid gap-6 md:grid-cols-2">
+                {employees.map((e) => (
+                  <SortableEmployeeCard key={e.id} id={e.id}>
+                    <div className="grid gap-3 rounded-lg border border-border p-4 pt-12 bg-background">
+                      {/* Clickable image with hover overlay */}
+                      <div 
+                        className="relative group cursor-pointer rounded-md overflow-hidden"
+                        onClick={() => setEditingImageId(e.id)}
+                      >
+                        {e.image_url ? (
+                          <>
+                            <img 
+                              src={e.image_url} 
+                              alt={`${e.name} – ${e.title}`} 
+                              className={`w-full h-56 object-cover ${posClass(e.image_object_position)}`} 
+                              loading="lazy" 
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <div className="bg-primary text-primary-foreground p-3 rounded-full">
+                                <Pencil className="h-5 w-5" />
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-full h-56 border-2 border-dashed border-muted-foreground/40 flex flex-col items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors">
+                            <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
+                            <span className="text-sm text-muted-foreground">Click to add image</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Image Edit Modal */}
+                      <ImageEditModal
+                        open={editingImageId === e.id}
+                        onOpenChange={(open) => { if (!open) setEditingImageId(null); }}
+                        currentUrl={e.image_url || ''}
+                        onSave={(newUrl) => {
+                          setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, image_url: newUrl } : x));
+                          setEditingImageId(null);
+                        }}
+                        altText={`${e.name} - ${e.title}`}
                       />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <div className="bg-primary text-primary-foreground p-3 rounded-full">
-                          <Pencil className="h-5 w-5" />
+                      <div className="grid gap-2 md:grid-cols-2">
+                        <div className="grid gap-2">
+                          <Label>Name</Label>
+                          <Input value={e.name} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, name: ev.target.value } : x))} />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Title</Label>
+                          <Input value={e.title} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, title: ev.target.value } : x))} />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Section</Label>
+                          <Select value={e.section} onValueChange={(v) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, section: v } : x))}>
+                            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {sectionOptions.map((name) => (<SelectItem key={name} value={name}>{name}</SelectItem>))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Sort order</Label>
+                          <Input type="number" value={e.sort_order ?? 0} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, sort_order: Number(ev.target.value) } : x))} />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Email</Label>
+                          <Input value={e.email ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, email: ev.target.value } : x))} />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Phone</Label>
+                          <Input value={e.phone ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, phone: ev.target.value } : x))} />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>LinkedIn URL</Label>
+                          <Input value={e.linkedin_url ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, linkedin_url: ev.target.value } : x))} />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Image URL</Label>
+                          <Input value={e.image_url ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, image_url: ev.target.value } : x))} />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Image Position</Label>
+                          <Select value={e.image_object_position ?? "center"} onValueChange={(v) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, image_object_position: v } : x))}>
+                            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {imagePositionOptions.map((p) => (
+                                <SelectItem key={p} value={p}>{p.replace("-", " ")}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
-                    </>
-                  ) : (
-                    <div className="w-full h-56 border-2 border-dashed border-muted-foreground/40 flex flex-col items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
-                      <span className="text-sm text-muted-foreground">Click to add image</span>
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="secondary" onClick={() => save(e)} disabled={savingId === e.id}>{savingId === e.id ? "Saving..." : "Save"}</Button>
+                        <Button size="sm" variant="destructive" onClick={() => remove(e.id)}>Delete</Button>
+                      </div>
                     </div>
-                  )}
-                </div>
-                
-                {/* Image Edit Modal */}
-                <ImageEditModal
-                  open={editingImageId === e.id}
-                  onOpenChange={(open) => { if (!open) setEditingImageId(null); }}
-                  currentUrl={e.image_url || ''}
-                  onSave={(newUrl) => {
-                    setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, image_url: newUrl } : x));
-                    setEditingImageId(null);
-                  }}
-                  altText={`${e.name} - ${e.title}`}
-                />
-                <div className="grid gap-2 md:grid-cols-2">
-                  <div className="grid gap-2">
-                    <Label>Name</Label>
-                    <Input value={e.name} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, name: ev.target.value } : x))} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Title</Label>
-                    <Input value={e.title} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, title: ev.target.value } : x))} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Section</Label>
-                    <Select value={e.section} onValueChange={(v) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, section: v } : x))}>
-                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {sectionOptions.map((name) => (<SelectItem key={name} value={name}>{name}</SelectItem>))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Sort order</Label>
-                    <Input type="number" value={e.sort_order ?? 0} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, sort_order: Number(ev.target.value) } : x))} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Email</Label>
-                    <Input value={e.email ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, email: ev.target.value } : x))} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Phone</Label>
-                    <Input value={e.phone ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, phone: ev.target.value } : x))} />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>LinkedIn URL</Label>
-                    <Input value={e.linkedin_url ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, linkedin_url: ev.target.value } : x))} />
-                  </div>
-<div className="grid gap-2">
-  <Label>Image URL</Label>
-  <Input value={e.image_url ?? ""} onChange={(ev) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, image_url: ev.target.value } : x))} />
-</div>
-<div className="grid gap-2">
-  <Label>Image Position</Label>
-  <Select value={e.image_object_position ?? "center"} onValueChange={(v) => setEmployees((prev) => prev.map((x) => x.id === e.id ? { ...x, image_object_position: v } : x))}>
-    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-    <SelectContent>
-      {imagePositionOptions.map((p) => (
-        <SelectItem key={p} value={p}>{p.replace("-", " ")}</SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</div>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button size="sm" variant="secondary" onClick={() => save(e)} disabled={savingId === e.id}>{savingId === e.id ? "Saving..." : "Save"}</Button>
-                  <Button size="sm" variant="destructive" onClick={() => remove(e.id)}>Delete</Button>
-                </div>
+                  </SortableEmployeeCard>
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+          </DndContext>
         )}
       </Card>
     </section>
