@@ -33,62 +33,46 @@ export function EditableCard({
   className,
 }: EditableCardProps) {
   const { editMode } = useEditMode();
-  const { backgroundStyles, iconStyles, isLoaded } = useSiteStyles();
+  const { backgroundStyles, iconStyles, refreshBackgroundStyles } = useSiteStyles();
   
-  // Get preloaded values from context (no flash!)
-  const preloadedBg = backgroundStyles[`${elementIdPrefix}-background`];
-  const preloadedIconBg = backgroundStyles[`${elementIdPrefix}-icon-card`];
-  const preloadedIconStyle = iconStyles[`${elementIdPrefix}-icon`];
+  // Read saved values directly from context on every render (fixes navigation persistence)
+  const savedBg = backgroundStyles[`${elementIdPrefix}-background`];
+  const savedIconBg = backgroundStyles[`${elementIdPrefix}-icon-card`];
+  const savedIconStyle = iconStyles[`${elementIdPrefix}-icon`];
   
   const [isHovered, setIsHovered] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // Initialize from preloaded context or fall back to defaults
-  const [background, setBackground] = useState(
-    preloadedBg?.background_class || defaultBackground
-  );
-  const [textColor, setTextColor] = useState(
-    preloadedBg?.text_color_class || defaultTextColor
-  );
-  const [cardShadow, setCardShadow] = useState('shadow-none');
-  const [iconColor, setIconColor] = useState(
-    preloadedIconStyle?.icon_color_token || 'primary'
-  );
-  const [iconBackground, setIconBackground] = useState(
-    preloadedIconBg?.background_class || 'bg-primary/10'
-  );
-  const [iconSize, setIconSize] = useState(
-    preloadedIconStyle?.size || 'default'
-  );
+  // Local state only for unsaved edits during editing session
+  const [localBackground, setLocalBackground] = useState<string | null>(null);
+  const [localTextColor, setLocalTextColor] = useState<string | null>(null);
+  const [localCardShadow, setLocalCardShadow] = useState<string | null>(null);
+  const [localIconColor, setLocalIconColor] = useState<string | null>(null);
+  const [localIconBackground, setLocalIconBackground] = useState<string | null>(null);
+  const [localIconSize, setLocalIconSize] = useState<string | null>(null);
 
-  // Sync state when context loads (for cases where component mounted before context)
-  useEffect(() => {
-    if (isLoaded) {
-      const bg = backgroundStyles[`${elementIdPrefix}-background`];
-      const iconBg = backgroundStyles[`${elementIdPrefix}-icon-card`];
-      const iconStyle = iconStyles[`${elementIdPrefix}-icon`];
-      
-      if (bg?.background_class) setBackground(bg.background_class);
-      if (bg?.text_color_class) setTextColor(bg.text_color_class);
-      if (iconBg?.background_class) setIconBackground(iconBg.background_class);
-      if (iconStyle?.icon_color_token) setIconColor(iconStyle.icon_color_token);
-      if (iconStyle?.size) setIconSize(iconStyle.size);
-    }
-  }, [isLoaded, elementIdPrefix, backgroundStyles, iconStyles]);
+  // Derive current values: local override ?? saved from context ?? default
+  const background = localBackground ?? savedBg?.background_class ?? defaultBackground;
+  const textColor = localTextColor ?? savedBg?.text_color_class ?? defaultTextColor;
+  const cardShadow = localCardShadow ?? 'shadow-none';
+  const iconColor = localIconColor ?? savedIconStyle?.icon_color_token ?? 'primary';
+  const iconBackground = localIconBackground ?? savedIconBg?.background_class ?? 'bg-primary/10';
+  const iconSize = localIconSize ?? savedIconStyle?.size ?? 'default';
 
   // Use centralized utility for background styles
   const backgroundStyle = getBackgroundStyleFromToken(background);
 
-  // Non-blocking: content renders immediately with defaults, DB styles apply when loaded
-
-  const handleSave = (data: any) => {
-    if (data.background) setBackground(data.background);
-    if (data.iconColor) setIconColor(data.iconColor);
-    if (data.iconCardBg) setIconBackground(data.iconCardBg);
-    if (data.iconSize) setIconSize(data.iconSize);
-    if (data.cardShadow) setCardShadow(data.cardShadow);
-    // Update text color from title color (main text color for the card)
-    if (data.titleColor) setTextColor(data.titleColor);
+  const handleSave = async (data: any) => {
+    // Reset local overrides after save - context will have the new values after refresh
+    setLocalBackground(null);
+    setLocalTextColor(null);
+    setLocalCardShadow(null);
+    setLocalIconColor(null);
+    setLocalIconBackground(null);
+    setLocalIconSize(null);
+    
+    // Refresh context to pick up newly saved values from database
+    await refreshBackgroundStyles();
   };
 
   // Create context value for children
