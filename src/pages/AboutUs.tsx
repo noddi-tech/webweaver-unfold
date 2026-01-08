@@ -1,8 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { TeamMemberCard } from "@/components/TeamMemberCard";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Employee {
+  id: string;
+  name: string;
+  title: string;
+  image_url: string | null;
+  image_object_position: string;
+}
 
 const ensureMeta = (name: string, content: string) => {
   let tag = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
@@ -16,11 +26,24 @@ const ensureMeta = (name: string, content: string) => {
 
 const AboutUs = () => {
   const { t } = useAppTranslation();
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
   useEffect(() => {
     document.title = t("about.meta.title", "About Us – Navio");
     ensureMeta("description", t("about.meta.description", "Learn about Navio, our mission, and the team building the future of automotive services."));
   }, [t]);
+
+  useEffect(() => {
+    const loadEmployees = async () => {
+      const { data } = await supabase
+        .from("employees")
+        .select("id, name, title, image_url, image_object_position")
+        .eq("active", true)
+        .order("sort_order", { ascending: true });
+      setEmployees(data || []);
+    };
+    loadEmployees();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -102,7 +125,7 @@ const AboutUs = () => {
         </section>
 
         {/* Story Section */}
-        <section className="max-w-4xl mx-auto">
+        <section className="max-w-4xl mx-auto mb-20">
           <EditableTranslation translationKey="about.story.title" fallbackText="Our Story">
             <h2 className="text-3xl font-bold mb-6">
               {t("about.story.title", "Our Story")}
@@ -114,6 +137,34 @@ const AboutUs = () => {
             </p>
           </EditableTranslation>
         </section>
+
+        {/* Team Section */}
+        {employees.length > 0 && (
+          <section className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <EditableTranslation translationKey="about.team.title" fallbackText="Our Team">
+                <h2 className="text-3xl font-bold mb-4">
+                  {t("about.team.title", "Our Team")}
+                </h2>
+              </EditableTranslation>
+              <EditableTranslation translationKey="about.team.subtitle" fallbackText="The people behind Navio">
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  {t("about.team.subtitle", "The people behind Navio")}
+                </p>
+              </EditableTranslation>
+            </div>
+            
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {employees.map((member) => (
+                <TeamMemberCard
+                  key={member.id}
+                  member={member}
+                  pagePrefix="about"
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       <Footer />
     </div>
