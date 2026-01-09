@@ -40,6 +40,10 @@ export function HiringAnalytics() {
           created_at,
           status_updated_at,
           job_id,
+          source,
+          utm_source,
+          utm_medium,
+          utm_campaign,
           job_listings(id, title, department)
         `)
         .gte("created_at", startDate.toISOString())
@@ -179,6 +183,35 @@ export function HiringAnalytics() {
       .sort((a, b) => b.apps - a.apps)
       .slice(0, 10);
   }, [applications, jobs]);
+
+  // Source effectiveness data
+  const sourceEffectiveness = useMemo(() => {
+    if (!applications) return [];
+
+    const sourceMap: Record<string, { source: string; apps: number; hired: number; interviews: number }> = {};
+
+    applications.forEach(app => {
+      const sourceName = (app as any).source || "Direct";
+      if (!sourceMap[sourceName]) {
+        sourceMap[sourceName] = { source: sourceName, apps: 0, hired: 0, interviews: 0 };
+      }
+      sourceMap[sourceName].apps++;
+      if (app.status === "hired") {
+        sourceMap[sourceName].hired++;
+      }
+      if (["interview_scheduled", "interview_completed"].includes(app.status || "")) {
+        sourceMap[sourceName].interviews++;
+      }
+    });
+
+    return Object.values(sourceMap)
+      .map(s => ({
+        ...s,
+        conversionRate: s.apps > 0 ? ((s.hired / s.apps) * 100).toFixed(1) : "0",
+        interviewRate: s.apps > 0 ? ((s.interviews / s.apps) * 100).toFixed(1) : "0",
+      }))
+      .sort((a, b) => b.apps - a.apps);
+  }, [applications]);
 
   // Status distribution for pie chart
   const statusDistribution = useMemo(() => {
@@ -440,6 +473,76 @@ export function HiringAnalytics() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Source Effectiveness */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5" />
+            Source Effectiveness
+          </CardTitle>
+          <CardDescription>Where your best candidates come from</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Bar Chart */}
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={sourceEffectiveness} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <YAxis dataKey="source" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} width={100} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                  }}
+                />
+                <Bar dataKey="apps" fill="#6366f1" name="Applications" />
+                <Bar dataKey="hired" fill="#22c55e" name="Hired" />
+              </BarChart>
+            </ResponsiveContainer>
+            
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Source</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Apps</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Interviews</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Hired</th>
+                    <th className="text-right py-2 px-2 font-medium text-muted-foreground">Conv. %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sourceEffectiveness.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-8 text-muted-foreground">
+                        No source data yet
+                      </td>
+                    </tr>
+                  ) : (
+                    sourceEffectiveness.map((src, index) => (
+                      <tr key={index} className="border-b border-border/50 hover:bg-muted/50">
+                        <td className="py-2 px-2 font-medium capitalize">{src.source}</td>
+                        <td className="text-right py-2 px-2">{src.apps}</td>
+                        <td className="text-right py-2 px-2">{src.interviews}</td>
+                        <td className="text-right py-2 px-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                            {src.hired}
+                          </span>
+                        </td>
+                        <td className="text-right py-2 px-2 text-muted-foreground">{src.conversionRate}%</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

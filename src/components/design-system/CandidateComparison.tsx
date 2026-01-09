@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,8 +63,11 @@ interface CriteriaScore {
 }
 
 export function CandidateComparison() {
+  const [searchParams] = useSearchParams();
+  const idsFromUrl = searchParams.get("ids")?.split(",").filter(Boolean) || [];
+  
   const [selectedJobId, setSelectedJobId] = useState<string>("");
-  const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>([]);
+  const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>(idsFromUrl);
 
   // Fetch jobs
   const { data: jobs = [] } = useQuery({

@@ -58,6 +58,11 @@ interface Application {
   status_updated_at: string;
   internal_notes: string | null;
   created_at: string;
+  source: string | null;
+  source_detail: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
   job_listings: {
     id: string;
     title: string;
@@ -122,6 +127,23 @@ export default function ApplicationsManager() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Application[];
+    },
+  });
+
+  // Send booking link mutation
+  const sendBookingLinkMutation = useMutation({
+    mutationFn: async ({ applicationId, interviewType }: { applicationId: string; interviewType: string }) => {
+      const { data, error } = await supabase.functions.invoke("send-booking-link", {
+        body: { applicationId, interviewType, expiresInDays: 7 },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast({ title: "Booking link sent", description: "The candidate will receive an email with available slots." });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Failed to send booking link", description: err.message, variant: "destructive" });
     },
   });
 
@@ -450,9 +472,20 @@ export default function ApplicationsManager() {
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
+      ) : applications.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <User className="h-12 w-12 text-muted-foreground/50 mb-4" />
+            <h3 className="font-medium text-lg mb-2">No applications yet</h3>
+            <p className="text-muted-foreground text-center max-w-md">
+              Applications will appear here when candidates apply to your job listings. 
+              Make sure you have active job postings to receive applications.
+            </p>
+          </CardContent>
+        </Card>
       ) : filteredApps.length === 0 ? (
         <Card className="text-center py-12">
-          <p className="text-muted-foreground">No applications found.</p>
+          <p className="text-muted-foreground">No applications match your filters.</p>
         </Card>
       ) : (
         <>
@@ -468,6 +501,7 @@ export default function ApplicationsManager() {
                   </TableHead>
                   <TableHead>Candidate</TableHead>
                   <TableHead>Position</TableHead>
+                  <TableHead>Source</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Applied</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -497,6 +531,11 @@ export default function ApplicationsManager() {
                           </Badge>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="text-xs capitalize">
+                        {app.source || "Direct"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <ApplicationStatusBadge status={app.status as ApplicationStatus} size="sm" />

@@ -1,16 +1,18 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCorners, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { User, Calendar, Star, Mail, Eye, GripVertical } from "lucide-react";
+import { User, Calendar, Star, Mail, Eye, GripVertical, GitCompare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface Application {
@@ -42,7 +44,17 @@ const PIPELINE_COLUMNS = [
   { id: "hired", label: "Hired", color: "bg-green-500", bgColor: "bg-green-50 dark:bg-green-950/30", count: 0 },
 ];
 
-function CandidateCard({ application, isDragging }: { application: Application; isDragging?: boolean }) {
+function CandidateCard({ 
+  application, 
+  isDragging, 
+  isSelected, 
+  onToggleSelect 
+}: { 
+  application: Application; 
+  isDragging?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
+}) {
   const {
     attributes,
     listeners,
@@ -86,13 +98,23 @@ function CandidateCard({ application, isDragging }: { application: Application; 
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-card border border-border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing"
+      className={`bg-card border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing ${
+        isSelected ? "border-primary ring-1 ring-primary" : "border-border"
+      }`}
       {...attributes}
       {...listeners}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
+            {onToggleSelect && (
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={() => onToggleSelect(application.id)}
+                onClick={(e) => e.stopPropagation()}
+                className="shrink-0"
+              />
+            )}
             <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
             <h4 className="font-medium text-sm truncate">{application.applicant_name}</h4>
           </div>
@@ -124,11 +146,15 @@ function CandidateCard({ application, isDragging }: { application: Application; 
 function PipelineColumn({ 
   column, 
   applications, 
-  isOver 
+  isOver,
+  selectedIds,
+  onToggleSelect
 }: { 
   column: typeof PIPELINE_COLUMNS[0]; 
   applications: Application[];
   isOver?: boolean;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
 }) {
   return (
     <div className={`flex flex-col h-full min-w-[280px] ${column.bgColor} rounded-lg p-3 ${isOver ? 'ring-2 ring-primary' : ''}`}>
@@ -145,7 +171,12 @@ function PipelineColumn({
       <div className="flex-1 space-y-2 overflow-y-auto min-h-[200px]">
         <SortableContext items={applications.map(a => a.id)} strategy={verticalListSortingStrategy}>
           {applications.map(application => (
-            <CandidateCard key={application.id} application={application} />
+            <CandidateCard 
+              key={application.id} 
+              application={application}
+              isSelected={selectedIds?.has(application.id)}
+              onToggleSelect={onToggleSelect}
+            />
           ))}
         </SortableContext>
         
@@ -161,8 +192,11 @@ function PipelineColumn({
 
 export function CandidatePipeline() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [jobFilter, setJobFilter] = useState<string>("all");
+  const [selectedForComparison, setSelectedForComparison] = useState<Set<string>>(new Set());
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -283,6 +317,21 @@ export function CandidatePipeline() {
     updateStatus.mutate({ id: applicationId, status: targetColumn.id });
   };
 
+  const toggleForComparison = (id: string) => {
+    const newSet = new Set(selectedForComparison);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else if (newSet.size < 5) {
+      newSet.add(id);
+    }
+    setSelectedForComparison(newSet);
+  };
+
+  const goToComparison = () => {
+    const ids = Array.from(selectedForComparison).join(",");
+    navigate(`/cms?section=comparison&ids=${ids}`);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -303,6 +352,19 @@ export function CandidatePipeline() {
         <div>
           <h2 className="text-2xl font-bold text-foreground">Candidate Pipeline</h2>
           <p className="text-muted-foreground">Drag and drop to move candidates between stages</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {selectedForComparison.size >= 2 && (
+            <Button onClick={goToComparison} size="sm">
+              <GitCompare className="h-4 w-4 mr-2" />
+              Compare {selectedForComparison.size} Candidates
+            </Button>
+          )}
+          {selectedForComparison.size > 0 && (
+            <Button variant="ghost" size="sm" onClick={() => setSelectedForComparison(new Set())}>
+              Clear Selection
+            </Button>
+          )}
         </div>
         <Select value={jobFilter} onValueChange={setJobFilter}>
           <SelectTrigger className="w-56">
@@ -330,6 +392,8 @@ export function CandidatePipeline() {
               key={column.id}
               column={column}
               applications={groupedApplications[column.id] || []}
+              selectedIds={selectedForComparison}
+              onToggleSelect={toggleForComparison}
             />
           ))}
         </div>

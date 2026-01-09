@@ -11,6 +11,12 @@ export interface ApplicationFormData {
   portfolio_url?: string;
   resume_url?: string;
   cover_letter?: string;
+  source?: string;
+  source_detail?: string;
+  referrer_email?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
 }
 
 export type ApplicationStatus = 
