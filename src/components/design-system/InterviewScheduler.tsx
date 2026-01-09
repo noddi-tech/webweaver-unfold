@@ -351,7 +351,6 @@ export default function InterviewScheduler() {
                             return null;
                           })()}
                         </div>
-                      </div>
 
                         {/* Actions */}
                         <div className="flex items-start gap-2">
