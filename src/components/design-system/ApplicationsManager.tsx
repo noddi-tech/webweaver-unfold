@@ -35,8 +35,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { 
   Eye, Mail, Linkedin, ExternalLink, Loader2, Search, Filter, 
   Download, CheckSquare, X, Clock, User, FileText, History,
-  ChevronLeft, ChevronRight, Send
+  ChevronLeft, ChevronRight, Send, Star
 } from "lucide-react";
+import EvaluationForm from "./EvaluationForm";
+import EvaluationSummary from "./EvaluationSummary";
 import { ApplicationStatusBadge } from "@/components/jobs/ApplicationStatus";
 import { ApplicationStatus } from "@/hooks/useJobApplications";
 import { format } from "date-fns";
@@ -553,16 +555,20 @@ export default function ApplicationsManager() {
 
           {selectedApp && (
             <Tabs value={dialogTab} onValueChange={setDialogTab}>
-              <TabsList className="w-full">
-                <TabsTrigger value="overview" className="flex-1">
+              <TabsList className="w-full grid grid-cols-4">
+                <TabsTrigger value="overview">
                   <User className="w-4 h-4 mr-2" />
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="timeline" className="flex-1">
+                <TabsTrigger value="evaluations">
+                  <Star className="w-4 h-4 mr-2" />
+                  Evaluations
+                </TabsTrigger>
+                <TabsTrigger value="timeline">
                   <History className="w-4 h-4 mr-2" />
                   Timeline
                 </TabsTrigger>
-                <TabsTrigger value="notes" className="flex-1">
+                <TabsTrigger value="notes">
                   <FileText className="w-4 h-4 mr-2" />
                   Notes
                 </TabsTrigger>
@@ -669,6 +675,25 @@ export default function ApplicationsManager() {
                     </div>
                   )}
                 </div>
+              </TabsContent>
+
+              <TabsContent value="evaluations" className="mt-4 space-y-6">
+                <Tabs defaultValue="summary">
+                  <TabsList>
+                    <TabsTrigger value="summary">Summary</TabsTrigger>
+                    <TabsTrigger value="add">Add Evaluation</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="summary" className="mt-4">
+                    <EvaluationSummary applicationId={selectedApp.id} />
+                  </TabsContent>
+                  <TabsContent value="add" className="mt-4">
+                    <EvaluationForm
+                      applicationId={selectedApp.id}
+                      applicantName={selectedApp.applicant_name}
+                      jobTitle={selectedApp.job_listings?.title || "Position"}
+                    />
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
 
               <TabsContent value="timeline" className="mt-4">
