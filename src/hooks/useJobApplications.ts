@@ -9,6 +9,7 @@ export interface ApplicationFormData {
   applicant_phone?: string;
   linkedin_url?: string;
   portfolio_url?: string;
+  resume_url?: string;
   cover_letter?: string;
 }
 
@@ -69,19 +70,49 @@ export function useJobApplications() {
   });
 
   const submitApplicationMutation = useMutation({
-    mutationFn: async ({ jobId, formData }: { jobId: string; formData: ApplicationFormData }) => {
-      const { error } = await supabase
+    mutationFn: async ({ jobId, jobTitle, formData }: { jobId: string; jobTitle: string; formData: ApplicationFormData }) => {
+      // Insert the application
+      const { data: newApp, error } = await supabase
         .from("job_applications")
         .insert({
           job_id: jobId,
           user_id: userId,
           ...formData,
-        });
+        })
+        .select()
+        .single();
       if (error) throw error;
+
+      // Log the activity
+      await supabase.from("application_activity_log").insert({
+        application_id: newApp.id,
+        action: "submitted",
+        new_value: "Application submitted",
+      });
+
+      // Send confirmation email (non-blocking)
+      try {
+        await supabase.functions.invoke("send-application-confirmation", {
+          body: {
+            applicantName: formData.applicant_name,
+            applicantEmail: formData.applicant_email,
+            jobTitle: jobTitle,
+            applicationId: newApp.id,
+          },
+        });
+      } catch (emailError) {
+        console.error("Failed to send confirmation email:", emailError);
+        // Don't throw - application was still successful
+      }
+
+      return newApp;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["job-applications"] });
-      toast({ title: "Application submitted!", description: "We'll be in touch soon." });
+      toast({ 
+        title: "Application submitted!", 
+        description: "Check your email for confirmation." 
+      });
     },
     onError: (err: Error) => {
       toast({ title: "Submission failed", description: err.message, variant: "destructive" });
@@ -91,12 +122,21 @@ export function useJobApplications() {
   const withdrawApplicationMutation = useMutation({
     mutationFn: async (applicationId: string) => {
       if (!userId) throw new Error("Not authenticated");
+      
       const { error } = await supabase
         .from("job_applications")
-        .update({ status: "withdrawn" })
+        .update({ status: "withdrawn", status_updated_at: new Date().toISOString() })
         .eq("id", applicationId)
         .eq("user_id", userId);
       if (error) throw error;
+
+      // Log the activity
+      await supabase.from("application_activity_log").insert({
+        application_id: applicationId,
+        action: "status_changed",
+        old_value: "active",
+        new_value: "withdrawn",
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["job-applications"] });
