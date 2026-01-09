@@ -1124,6 +1124,68 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          applicant_email: string
+          applicant_name: string
+          applicant_phone: string | null
+          cover_letter: string | null
+          created_at: string | null
+          id: string
+          internal_notes: string | null
+          job_id: string
+          linkedin_url: string | null
+          portfolio_url: string | null
+          resume_url: string | null
+          status: string | null
+          status_updated_at: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          applicant_email: string
+          applicant_name: string
+          applicant_phone?: string | null
+          cover_letter?: string | null
+          created_at?: string | null
+          id?: string
+          internal_notes?: string | null
+          job_id: string
+          linkedin_url?: string | null
+          portfolio_url?: string | null
+          resume_url?: string | null
+          status?: string | null
+          status_updated_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          applicant_email?: string
+          applicant_name?: string
+          applicant_phone?: string | null
+          cover_letter?: string | null
+          created_at?: string | null
+          id?: string
+          internal_notes?: string | null
+          job_id?: string
+          linkedin_url?: string | null
+          portfolio_url?: string | null
+          resume_url?: string | null
+          status?: string | null
+          status_updated_at?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_listings: {
         Row: {
           active: boolean | null
@@ -1627,6 +1689,35 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      saved_jobs: {
+        Row: {
+          created_at: string | null
+          id: string
+          job_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          job_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          job_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_jobs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sections: {
         Row: {

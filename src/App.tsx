@@ -34,6 +34,7 @@ import Careers from "./pages/Careers";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import JobListing from "./pages/JobListing";
+import MyApplications from "./pages/MyApplications";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => {
             <Route path="/:lang/newsroom" element={<LanguageSync><Newsroom /></LanguageSync>} />
             <Route path="/:lang/careers" element={<LanguageSync><Careers /></LanguageSync>} />
             <Route path="/:lang/careers/:slug" element={<LanguageSync><JobListing /></LanguageSync>} />
+            <Route path="/:lang/my-applications" element={<LanguageSync><MyApplications /></LanguageSync>} />
             <Route path="/:lang/blog" element={<LanguageSync><Blog /></LanguageSync>} />
             <Route path="/:lang/blog/:slug" element={<LanguageSync><BlogPost /></LanguageSync>} />
             
