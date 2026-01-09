@@ -265,6 +265,7 @@ const JobListing = () => {
       {/* Sticky Apply CTA */}
       <StickyApplyCTA
         jobTitle={job.title}
+        jobId={job.id}
         applicationUrl={job.application_url}
         applicationEmail={job.application_email}
       />
@@ -288,6 +289,9 @@ const JobListing = () => {
             salary_range: job.salary_range,
             application_url: job.application_url,
             application_email: job.application_email,
+            company_intro: jobData.company_intro,
+            work_assignments: workAssignments as Array<{icon: string; title: string; description: string}>,
+            tech_stack: techStack.map((t: { id?: string; name: string }) => t.id || t.name),
           }}
         />
       )}

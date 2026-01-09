@@ -3,16 +3,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Mail } from "lucide-react";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { SaveJobButton } from "./SaveJobButton";
 
 interface StickyApplyCTAProps {
   jobTitle: string;
+  jobId: string;
   applicationUrl?: string | null;
   applicationEmail?: string | null;
   showAfterPx?: number;
 }
 
 export function StickyApplyCTA({ 
-  jobTitle, 
+  jobTitle,
+  jobId,
   applicationUrl, 
   applicationEmail,
   showAfterPx = 600 
@@ -59,19 +62,22 @@ export function StickyApplyCTA({
                   {jobTitle}
                 </p>
               </div>
-              <Button size="lg" onClick={handleApply} className="shrink-0 group">
-                {applicationEmail && !applicationUrl ? (
-                  <>
-                    <Mail className="w-4 h-4 mr-2" />
-                    {t("careers.jobs.apply", "Apply Now")}
-                  </>
-                ) : (
-                  <>
-                    {t("careers.jobs.apply", "Apply Now")}
-                    <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
-                  </>
-                )}
-              </Button>
+              <div className="flex items-center gap-2">
+                <SaveJobButton jobId={jobId} variant="icon" />
+                <Button size="lg" onClick={handleApply} className="shrink-0 group">
+                  {applicationEmail && !applicationUrl ? (
+                    <>
+                      <Mail className="w-4 h-4 mr-2" />
+                      {t("careers.jobs.apply", "Apply Now")}
+                    </>
+                  ) : (
+                    <>
+                      {t("careers.jobs.apply", "Apply Now")}
+                      <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </motion.div>
