@@ -1,0 +1,123 @@
+import { motion } from "framer-motion";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { EditableTranslation } from "@/components/EditableTranslation";
+import { Counter } from "@/components/ui/counter";
+import { Calendar, ThumbsUp, Zap, TrendingUp } from "lucide-react";
+
+const metrics = [
+  {
+    icon: Calendar,
+    value: 25000,
+    suffix: "+",
+    labelKey: "about.metrics.bookings.label",
+    labelFallback: "Bookings Processed",
+    contextKey: "about.metrics.bookings.context",
+    contextFallback: "Proven at scale",
+  },
+  {
+    icon: ThumbsUp,
+    value: 90,
+    suffix: "",
+    labelKey: "about.metrics.nps.label",
+    labelFallback: "Net Promoter Score",
+    contextKey: "about.metrics.nps.context",
+    contextFallback: "Industry-leading satisfaction",
+  },
+  {
+    icon: Zap,
+    value: 1,
+    prefix: "<",
+    suffix: " sec",
+    labelKey: "about.metrics.admin.label",
+    labelFallback: "Admin Time Per Booking",
+    contextKey: "about.metrics.admin.context",
+    contextFallback: "Radically efficient workflows",
+  },
+  {
+    icon: TrendingUp,
+    value: 50,
+    prefix: "30-",
+    suffix: "%",
+    labelKey: "about.metrics.margin.label",
+    labelFallback: "Margin Per Booking",
+    contextKey: "about.metrics.margin.context",
+    contextFallback: "Improved economics for operators",
+  },
+];
+
+export function AboutMetrics() {
+  const { ref, isVisible } = useScrollAnimation();
+
+  return (
+    <section id="metrics" className="py-20 md:py-28 bg-muted/30">
+      <div className="max-w-5xl mx-auto px-4">
+        <motion.div
+          ref={ref as React.RefObject<HTMLDivElement>}
+          initial={{ opacity: 0, y: 30 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <EditableTranslation
+              translationKey="about.metrics.title"
+              fallbackText="By the Numbers"
+            >
+              By the Numbers
+            </EditableTranslation>
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            <EditableTranslation
+              translationKey="about.metrics.subtitle"
+              fallbackText="Navio isn't just a concept — it's been proven in market through real performance."
+            >
+              Navio isn't just a concept — it's been proven in market through real performance.
+            </EditableTranslation>
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          {metrics.map((metric, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              animate={isVisible ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="bg-card rounded-xl p-6 border shadow-sm text-center hover:shadow-md transition-shadow"
+            >
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <metric.icon className="w-6 h-6 text-primary" />
+              </div>
+              <div className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+                {metric.prefix}
+                {isVisible && (
+                  <Counter
+                    end={metric.value}
+                    duration={2}
+                    suffix={metric.suffix}
+                  />
+                )}
+              </div>
+              <p className="font-medium text-foreground mb-1">
+                <EditableTranslation
+                  translationKey={metric.labelKey}
+                  fallbackText={metric.labelFallback}
+                >
+                  {metric.labelFallback}
+                </EditableTranslation>
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <EditableTranslation
+                  translationKey={metric.contextKey}
+                  fallbackText={metric.contextFallback}
+                >
+                  {metric.contextFallback}
+                </EditableTranslation>
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
