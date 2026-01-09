@@ -108,7 +108,7 @@ export function SlotManager() {
 
   // Create slots mutation
   const createSlots = useMutation({
-    mutationFn: async (slotsToCreate: Omit<InterviewSlot, 'id' | 'booked_by_application_id' | 'booking_token' | 'notes'>[]) => {
+    mutationFn: async (slotsToCreate: Record<string, unknown>[]) => {
       const { error } = await supabase
         .from("interview_slots")
         .insert(slotsToCreate as any);
@@ -142,7 +142,7 @@ export function SlotManager() {
 
   // Generate bulk slots
   const handleBulkCreate = () => {
-    const slotsToCreate: Partial<InterviewSlot>[] = [];
+    const slotsToCreate: Record<string, unknown>[] = [];
     let currentDate = new Date(bulkForm.dateRange.from);
     
     while (currentDate <= bulkForm.dateRange.to) {
