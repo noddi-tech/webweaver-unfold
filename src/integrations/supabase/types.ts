@@ -52,6 +52,50 @@ export type Database = {
           },
         ]
       }
+      application_messages: {
+        Row: {
+          application_id: string
+          body: string
+          created_at: string
+          id: string
+          is_read: boolean
+          sender_email: string
+          sender_name: string
+          sender_type: string
+          subject: string | null
+        }
+        Insert: {
+          application_id: string
+          body: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          sender_email: string
+          sender_name: string
+          sender_type: string
+          subject?: string | null
+        }
+        Update: {
+          application_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          sender_email?: string
+          sender_name?: string
+          sender_type?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_messages_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       background_styles: {
         Row: {
           background_class: string

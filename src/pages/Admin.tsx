@@ -47,6 +47,7 @@ import { PressManager } from "@/components/design-system/PressManager";
 import TechStackManager from "@/components/design-system/TechStackManager";
 import ApplicationsManager from "@/components/design-system/ApplicationsManager";
 import { EmailTemplatesManager } from "@/components/design-system/EmailTemplatesManager";
+import InboxManager from "@/components/design-system/InboxManager";
 const Admin = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -56,10 +57,11 @@ const Admin = () => {
   // URL parameter support for direct navigation (e.g., ?section=applications)
   const sectionParam = searchParams.get("section");
   const getDefaultTabs = () => {
-    if (sectionParam === "applications") {
-      return { main: "cms", cms: "config", config: "applications" };
+    // Career section tabs
+    if (sectionParam === "applications" || sectionParam === "inbox" || sectionParam === "jobs" || sectionParam === "emails") {
+      return { main: "career", career: sectionParam };
     }
-    return { main: "cms", cms: "content", config: "header" };
+    return { main: "cms", cms: "content", config: "header", career: "applications" };
   };
   const defaults = getDefaultTabs();
 
@@ -138,10 +140,11 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue={defaults.main} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-12">
+          <TabsList className="grid w-full grid-cols-4 mb-12">
             <TabsTrigger value="cms">CMS</TabsTrigger>
             <TabsTrigger value="translations">Translations & SEO</TabsTrigger>
             <TabsTrigger value="design">Design System</TabsTrigger>
+            <TabsTrigger value="career">Career</TabsTrigger>
           </TabsList>
 
           {/* CMS Section with nested tabs */}
@@ -165,7 +168,6 @@ const Admin = () => {
                     <TabsTrigger value="solutions">Solutions</TabsTrigger>
                     <TabsTrigger value="stories">Stories</TabsTrigger>
                     <TabsTrigger value="blog">Blog</TabsTrigger>
-                    <TabsTrigger value="jobs">Jobs</TabsTrigger>
                     <TabsTrigger value="press">Press</TabsTrigger>
                     <TabsTrigger value="usps">USPs</TabsTrigger>
                     <TabsTrigger value="contact">Contact</TabsTrigger>
@@ -194,9 +196,6 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="blog" className="space-y-8">
                     <BlogManager />
-                  </TabsContent>
-                  <TabsContent value="jobs" className="space-y-8">
-                    <JobsManager />
                   </TabsContent>
                   <TabsContent value="press" className="space-y-8">
                     <PressManager />
@@ -252,8 +251,6 @@ const Admin = () => {
                     <TabsTrigger value="employees">Team</TabsTrigger>
                     <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
                     <TabsTrigger value="techstack">Tech Stack</TabsTrigger>
-                    <TabsTrigger value="applications">Applications</TabsTrigger>
-                    <TabsTrigger value="emails">Emails</TabsTrigger>
                   </TabsList>
                   <TabsContent value="header" className="space-y-8">
                     <HeaderManager />
@@ -276,13 +273,35 @@ const Admin = () => {
                   <TabsContent value="techstack" className="space-y-8">
                     <TechStackManager />
                   </TabsContent>
-                  <TabsContent value="applications" className="space-y-8">
-                    <ApplicationsManager />
-                  </TabsContent>
-                  <TabsContent value="emails" className="space-y-8">
-                    <EmailTemplatesManager />
-                  </TabsContent>
                 </Tabs>
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          {/* Career Section - NEW */}
+          <TabsContent value="career" className="space-y-8">
+            <Tabs defaultValue={defaults.career} className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-8">
+                <TabsTrigger value="applications">Applications</TabsTrigger>
+                <TabsTrigger value="inbox">Inbox</TabsTrigger>
+                <TabsTrigger value="jobs">Jobs</TabsTrigger>
+                <TabsTrigger value="emails">Email Templates</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="applications" className="space-y-8">
+                <ApplicationsManager />
+              </TabsContent>
+
+              <TabsContent value="inbox" className="space-y-8">
+                <InboxManager />
+              </TabsContent>
+
+              <TabsContent value="jobs" className="space-y-8">
+                <JobsManager />
+              </TabsContent>
+
+              <TabsContent value="emails" className="space-y-8">
+                <EmailTemplatesManager />
               </TabsContent>
             </Tabs>
           </TabsContent>
