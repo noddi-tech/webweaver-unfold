@@ -1391,6 +1391,53 @@ export type Database = {
           },
         ]
       }
+      interview_reminders: {
+        Row: {
+          created_at: string | null
+          id: string
+          interview_id: string | null
+          interviewer_email: string
+          interviewer_id: string | null
+          interviewer_name: string | null
+          reminder_type: string
+          scheduled_for: string
+          sent_at: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          interview_id?: string | null
+          interviewer_email: string
+          interviewer_id?: string | null
+          interviewer_name?: string | null
+          reminder_type?: string
+          scheduled_for: string
+          sent_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          interview_id?: string | null
+          interviewer_email?: string
+          interviewer_id?: string | null
+          interviewer_name?: string | null
+          reminder_type?: string
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_reminders_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interviews: {
         Row: {
           application_id: string
