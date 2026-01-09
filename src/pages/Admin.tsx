@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,8 +48,19 @@ import TechStackManager from "@/components/design-system/TechStackManager";
 import ApplicationsManager from "@/components/design-system/ApplicationsManager";
 const Admin = () => {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const { isAdmin, loading: roleLoading } = useUserRole();
+
+  // URL parameter support for direct navigation (e.g., ?section=applications)
+  const sectionParam = searchParams.get("section");
+  const getDefaultTabs = () => {
+    if (sectionParam === "applications") {
+      return { main: "cms", cms: "config", config: "applications" };
+    }
+    return { main: "cms", cms: "content", config: "header" };
+  };
+  const defaults = getDefaultTabs();
 
   useEffect(() => {
     document.title = "Admin";
@@ -124,7 +136,7 @@ const Admin = () => {
           <h1 className="text-4xl font-bold gradient-text">Admin</h1>
         </div>
 
-        <Tabs defaultValue="cms" className="w-full">
+        <Tabs defaultValue={defaults.main} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-12">
             <TabsTrigger value="cms">CMS</TabsTrigger>
             <TabsTrigger value="translations">Translations & SEO</TabsTrigger>
@@ -133,7 +145,7 @@ const Admin = () => {
 
           {/* CMS Section with nested tabs */}
           <TabsContent value="cms" className="space-y-8">
-            <Tabs defaultValue="content" className="w-full">
+            <Tabs defaultValue={defaults.cms} className="w-full">
               <TabsList className="grid w-full grid-cols-4 mb-8">
                 <TabsTrigger value="content">Content Management</TabsTrigger>
                 <TabsTrigger value="media">Media Assets</TabsTrigger>
@@ -230,7 +242,7 @@ const Admin = () => {
 
               {/* Configuration Tab */}
               <TabsContent value="config">
-                <Tabs defaultValue="header">
+                <Tabs defaultValue={defaults.config}>
                   <TabsList className="flex flex-wrap gap-2 mb-6">
                     <TabsTrigger value="header">Header</TabsTrigger>
                     <TabsTrigger value="footer">Footer</TabsTrigger>

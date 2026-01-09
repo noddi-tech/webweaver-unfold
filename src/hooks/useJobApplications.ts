@@ -102,7 +102,24 @@ export function useJobApplications() {
         });
       } catch (emailError) {
         console.error("Failed to send confirmation email:", emailError);
-        // Don't throw - application was still successful
+      }
+
+      // Send Slack notification (non-blocking)
+      try {
+        await supabase.functions.invoke("send-application-slack-notification", {
+          body: {
+            applicantName: formData.applicant_name,
+            applicantEmail: formData.applicant_email,
+            applicantPhone: formData.applicant_phone,
+            jobTitle: jobTitle,
+            jobId: jobId,
+            linkedinUrl: formData.linkedin_url,
+            portfolioUrl: formData.portfolio_url,
+            applicationId: newApp.id,
+          },
+        });
+      } catch (slackError) {
+        console.error("Failed to send Slack notification:", slackError);
       }
 
       return newApp;
