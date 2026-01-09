@@ -1,6 +1,10 @@
 import { motion } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableCard } from "@/components/EditableCard";
+import { EditableCardTitle } from "@/components/EditableCardTitle";
+import { EditableCardDescription } from "@/components/EditableCardDescription";
+import { EditableCardIcon } from "@/components/EditableCardIcon";
 import { Lightbulb, Shield, Handshake } from "lucide-react";
 
 const values = [
@@ -64,27 +68,35 @@ export function AboutValues() {
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: index * 0.15 }}
-              className="bg-card rounded-xl p-8 border shadow-sm text-center hover:shadow-md transition-all hover:-translate-y-1"
             >
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-6">
-                <value.icon className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">
-                <EditableTranslation
-                  translationKey={value.titleKey}
-                  fallbackText={value.titleFallback}
-                >
-                  {value.titleFallback}
-                </EditableTranslation>
-              </h3>
-              <p className="text-muted-foreground">
-                <EditableTranslation
-                  translationKey={value.descKey}
-                  fallbackText={value.descFallback}
-                >
-                  {value.descFallback}
-                </EditableTranslation>
-              </p>
+              <EditableCard
+                elementIdPrefix={`about-value-${index}`}
+                defaultBackground="bg-card"
+                defaultTextColor="card-foreground"
+                className="p-8 border shadow-sm text-center hover:shadow-md transition-all hover:-translate-y-1 h-full"
+              >
+                <EditableCardIcon
+                  icon={value.icon}
+                  size="lg"
+                  containerClassName="mx-auto mb-6"
+                />
+                <EditableCardTitle className="text-xl font-semibold mb-3">
+                  <EditableTranslation
+                    translationKey={value.titleKey}
+                    fallbackText={value.titleFallback}
+                  >
+                    {value.titleFallback}
+                  </EditableTranslation>
+                </EditableCardTitle>
+                <EditableCardDescription muted>
+                  <EditableTranslation
+                    translationKey={value.descKey}
+                    fallbackText={value.descFallback}
+                  >
+                    {value.descFallback}
+                  </EditableTranslation>
+                </EditableCardDescription>
+              </EditableCard>
             </motion.div>
           ))}
         </div>
@@ -94,47 +106,54 @@ export function AboutValues() {
           initial={{ opacity: 0, y: 30 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-16 bg-card rounded-2xl p-8 md:p-12 border"
+          className="mt-16"
         >
-          <h3 className="text-2xl font-bold mb-6 text-center">
-            <EditableTranslation
-              translationKey="about.whyMatters.title"
-              fallbackText="Why Navio Matters"
-            >
-              Why Navio Matters
-            </EditableTranslation>
-          </h3>
-          <p className="text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
-            <EditableTranslation
-              translationKey="about.whyMatters.intro"
-              fallbackText="Mobile automotive services are not the same as workshop bookings. They require:"
-            >
-              Mobile automotive services are not the same as workshop bookings. They require:
-            </EditableTranslation>
-          </p>
-          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-8">
-            {whyFeatures.map((feature, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="w-2 h-2 rounded-full bg-primary" />
-                <span className="text-sm font-medium">
-                  <EditableTranslation
-                    translationKey={feature.key}
-                    fallbackText={feature.fallback}
-                  >
-                    {feature.fallback}
-                  </EditableTranslation>
-                </span>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-lg font-medium text-primary">
-            <EditableTranslation
-              translationKey="about.whyMatters.conclusion"
-              fallbackText="Navio is the system that finally makes this manageable at scale — not through workarounds, but by design."
-            >
-              Navio is the system that finally makes this manageable at scale — not through workarounds, but by design.
-            </EditableTranslation>
-          </p>
+          <EditableCard
+            elementIdPrefix="about-why-matters"
+            defaultBackground="bg-card"
+            defaultTextColor="card-foreground"
+            className="p-8 md:p-12 border"
+          >
+            <EditableCardTitle className="text-2xl font-bold mb-6 text-center">
+              <EditableTranslation
+                translationKey="about.whyMatters.title"
+                fallbackText="Why Navio Matters"
+              >
+                Why Navio Matters
+              </EditableTranslation>
+            </EditableCardTitle>
+            <EditableCardDescription muted className="text-center mb-8 max-w-2xl mx-auto">
+              <EditableTranslation
+                translationKey="about.whyMatters.intro"
+                fallbackText="Mobile automotive services are not the same as workshop bookings. They require:"
+              >
+                Mobile automotive services are not the same as workshop bookings. They require:
+              </EditableTranslation>
+            </EditableCardDescription>
+            <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-8">
+              {whyFeatures.map((feature, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-primary/10">
+                  <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                  <EditableCardTitle className="text-sm font-medium">
+                    <EditableTranslation
+                      translationKey={feature.key}
+                      fallbackText={feature.fallback}
+                    >
+                      {feature.fallback}
+                    </EditableTranslation>
+                  </EditableCardTitle>
+                </div>
+              ))}
+            </div>
+            <EditableCardTitle className="text-center text-lg font-medium">
+              <EditableTranslation
+                translationKey="about.whyMatters.conclusion"
+                fallbackText="Navio is the system that finally makes this manageable at scale — not through workarounds, but by design."
+              >
+                Navio is the system that finally makes this manageable at scale — not through workarounds, but by design.
+              </EditableTranslation>
+            </EditableCardTitle>
+          </EditableCard>
         </motion.div>
       </div>
     </section>

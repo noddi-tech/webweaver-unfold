@@ -1,6 +1,10 @@
 import { motion } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableCard } from "@/components/EditableCard";
+import { EditableCardTitle } from "@/components/EditableCardTitle";
+import { EditableCardDescription } from "@/components/EditableCardDescription";
+import { EditableCardIcon } from "@/components/EditableCardIcon";
 import { Counter } from "@/components/ui/counter";
 import { Calendar, ThumbsUp, Zap, TrendingUp } from "lucide-react";
 
@@ -83,37 +87,45 @@ export function AboutMetrics() {
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-card rounded-xl p-6 border shadow-sm text-center hover:shadow-md transition-shadow"
             >
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <metric.icon className="w-6 h-6 text-primary" />
-              </div>
-              <div className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                {metric.prefix}
-                {isVisible && (
-                  <Counter
-                    end={metric.value}
-                    duration={2}
-                    suffix={metric.suffix}
-                  />
-                )}
-              </div>
-              <p className="font-medium text-foreground mb-1">
-                <EditableTranslation
-                  translationKey={metric.labelKey}
-                  fallbackText={metric.labelFallback}
-                >
-                  {metric.labelFallback}
-                </EditableTranslation>
-              </p>
-              <p className="text-sm text-muted-foreground">
-                <EditableTranslation
-                  translationKey={metric.contextKey}
-                  fallbackText={metric.contextFallback}
-                >
-                  {metric.contextFallback}
-                </EditableTranslation>
-              </p>
+              <EditableCard
+                elementIdPrefix={`about-metrics-${index}`}
+                defaultBackground="bg-card"
+                defaultTextColor="card-foreground"
+                className="p-6 border shadow-sm text-center hover:shadow-md transition-shadow h-full"
+              >
+                <EditableCardIcon
+                  icon={metric.icon}
+                  size="default"
+                  containerClassName="mx-auto mb-4"
+                />
+                <EditableCardTitle className="text-3xl md:text-4xl font-bold mb-2">
+                  {metric.prefix}
+                  {isVisible && (
+                    <Counter
+                      end={metric.value}
+                      duration={2}
+                      suffix={metric.suffix}
+                    />
+                  )}
+                </EditableCardTitle>
+                <EditableCardTitle className="font-medium mb-1 text-base">
+                  <EditableTranslation
+                    translationKey={metric.labelKey}
+                    fallbackText={metric.labelFallback}
+                  >
+                    {metric.labelFallback}
+                  </EditableTranslation>
+                </EditableCardTitle>
+                <EditableCardDescription muted className="text-sm">
+                  <EditableTranslation
+                    translationKey={metric.contextKey}
+                    fallbackText={metric.contextFallback}
+                  >
+                    {metric.contextFallback}
+                  </EditableTranslation>
+                </EditableCardDescription>
+              </EditableCard>
             </motion.div>
           ))}
         </div>
