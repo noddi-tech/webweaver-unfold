@@ -80,7 +80,64 @@ export function AboutMetrics() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Mobile: Horizontal Scroll Snap */}
+        <div className="md:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
+          <div className="flex gap-4 w-max">
+            {metrics.map((metric, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isVisible ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="snap-center w-[70vw] max-w-[280px] shrink-0"
+              >
+                <EditableCard
+                  elementIdPrefix={`about-metrics-${index}`}
+                  defaultBackground="bg-card"
+                  defaultTextColor="card-foreground"
+                  defaultIconColor="card-foreground"
+                  defaultIconBackground="bg-card-foreground/10"
+                  className="p-5 border shadow-sm text-center h-full active:scale-[0.98] transition-transform"
+                >
+                  <EditableCardIcon
+                    icon={metric.icon}
+                    size="default"
+                    containerClassName="mx-auto mb-3"
+                  />
+                  <EditableCardTitle className="text-3xl font-bold mb-2">
+                    {metric.prefix}
+                    {isVisible && (
+                      <Counter
+                        end={metric.value}
+                        duration={2}
+                        suffix={metric.suffix}
+                      />
+                    )}
+                  </EditableCardTitle>
+                  <EditableCardTitle className="font-medium mb-1 text-sm">
+                    <EditableTranslation
+                      translationKey={metric.labelKey}
+                      fallbackText={metric.labelFallback}
+                    >
+                      {metric.labelFallback}
+                    </EditableTranslation>
+                  </EditableCardTitle>
+                  <EditableCardDescription muted className="text-xs">
+                    <EditableTranslation
+                      translationKey={metric.contextKey}
+                      fallbackText={metric.contextFallback}
+                    >
+                      {metric.contextFallback}
+                    </EditableTranslation>
+                  </EditableCardDescription>
+                </EditableCard>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop: Grid Layout */}
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6">
           {metrics.map((metric, index) => (
             <motion.div
               key={index}
