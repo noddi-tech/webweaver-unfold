@@ -92,6 +92,8 @@ export function AboutMetrics() {
                 elementIdPrefix={`about-metrics-${index}`}
                 defaultBackground="bg-card"
                 defaultTextColor="card-foreground"
+                defaultIconColor="card-foreground"
+                defaultIconBackground="bg-card-foreground/10"
                 className="p-6 border shadow-sm text-center hover:shadow-md transition-shadow h-full"
               >
                 <EditableCardIcon

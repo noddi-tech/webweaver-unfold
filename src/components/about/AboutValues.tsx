@@ -73,6 +73,8 @@ export function AboutValues() {
                 elementIdPrefix={`about-value-${index}`}
                 defaultBackground="bg-card"
                 defaultTextColor="card-foreground"
+                defaultIconColor="card-foreground"
+                defaultIconBackground="bg-card-foreground/10"
                 className="p-8 border shadow-sm text-center hover:shadow-md transition-all hover:-translate-y-1 h-full"
               >
                 <EditableCardIcon
@@ -112,6 +114,8 @@ export function AboutValues() {
             elementIdPrefix="about-why-matters"
             defaultBackground="bg-card"
             defaultTextColor="card-foreground"
+            defaultIconColor="card-foreground"
+            defaultIconBackground="bg-card-foreground/10"
             className="p-8 md:p-12 border"
           >
             <EditableCardTitle className="text-2xl font-bold mb-6 text-center">
