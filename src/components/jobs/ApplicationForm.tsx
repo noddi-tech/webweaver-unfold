@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -12,10 +13,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Loader2, Send, CheckCircle2 } from "lucide-react";
 import { useJobApplications, ApplicationFormData } from "@/hooks/useJobApplications";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ApplicationFormProps {
   open: boolean;
@@ -30,8 +39,21 @@ export function ApplicationForm({ open, onOpenChange, jobId, jobTitle }: Applica
   const [submitted, setSubmitted] = useState(false);
   const [searchParams] = useSearchParams();
   
+  // Fetch referral sources
+  const { data: referralSources } = useQuery({
+    queryKey: ["referral-sources"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("referral_sources")
+        .select("id, name")
+        .eq("active", true)
+        .order("name");
+      return data || [];
+    },
+  });
+  
   // Capture UTM and source parameters
-  const source = searchParams.get("source") || "direct";
+  const urlSource = searchParams.get("source") || "";
   const sourceDetail = searchParams.get("source_detail") || undefined;
   const utmSource = searchParams.get("utm_source") || undefined;
   const utmMedium = searchParams.get("utm_medium") || undefined;
@@ -45,7 +67,7 @@ export function ApplicationForm({ open, onOpenChange, jobId, jobTitle }: Applica
     linkedin_url: "",
     portfolio_url: "",
     cover_letter: "",
-    source,
+    source: urlSource || "direct",
     source_detail: sourceDetail,
     utm_source: utmSource,
     utm_medium: utmMedium,
@@ -74,7 +96,7 @@ export function ApplicationForm({ open, onOpenChange, jobId, jobTitle }: Applica
         linkedin_url: "",
         portfolio_url: "",
         cover_letter: "",
-        source,
+        source: urlSource || "direct",
         source_detail: sourceDetail,
         utm_source: utmSource,
         utm_medium: utmMedium,
@@ -203,6 +225,29 @@ export function ApplicationForm({ open, onOpenChange, jobId, jobTitle }: Applica
                     placeholder="https://github.com/johndoe"
                   />
                 </div>
+
+                {/* How did you hear about us - only show if we have sources and no URL source */}
+                {referralSources && referralSources.length > 0 && !urlSource && (
+                  <div>
+                    <Label htmlFor="source">{t("careers.apply.source", "How did you hear about us?")}</Label>
+                    <Select
+                      value={formData.source}
+                      onValueChange={(v) => setFormData({ ...formData, source: v })}
+                    >
+                      <SelectTrigger id="source">
+                        <SelectValue placeholder={t("careers.apply.sourcePlaceholder", "Select an option...")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="direct">Direct / Website</SelectItem>
+                        {referralSources.map((s) => (
+                          <SelectItem key={s.id} value={s.name.toLowerCase().replace(/\s+/g, "_")}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 <div>
                   <Label htmlFor="cover">{t("careers.apply.coverLetter", "Cover Letter")}</Label>
