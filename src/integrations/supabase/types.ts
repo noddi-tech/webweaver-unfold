@@ -1130,6 +1130,7 @@ export type Database = {
           application_email: string | null
           application_url: string | null
           benefits: string | null
+          company_intro: string | null
           created_at: string
           department: string | null
           description: string | null
@@ -1143,14 +1144,17 @@ export type Database = {
           salary_range: string | null
           slug: string
           sort_order: number | null
+          tech_stack: Json | null
           title: string
           updated_at: string
+          work_assignments: Json | null
         }
         Insert: {
           active?: boolean | null
           application_email?: string | null
           application_url?: string | null
           benefits?: string | null
+          company_intro?: string | null
           created_at?: string
           department?: string | null
           description?: string | null
@@ -1164,14 +1168,17 @@ export type Database = {
           salary_range?: string | null
           slug: string
           sort_order?: number | null
+          tech_stack?: Json | null
           title: string
           updated_at?: string
+          work_assignments?: Json | null
         }
         Update: {
           active?: boolean | null
           application_email?: string | null
           application_url?: string | null
           benefits?: string | null
+          company_intro?: string | null
           created_at?: string
           department?: string | null
           description?: string | null
@@ -1185,8 +1192,10 @@ export type Database = {
           salary_range?: string | null
           slug?: string
           sort_order?: number | null
+          tech_stack?: Json | null
           title?: string
           updated_at?: string
+          work_assignments?: Json | null
         }
         Relationships: []
       }
@@ -1906,6 +1915,42 @@ export type Database = {
           id?: string
           mime_type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      tech_stack_items: {
+        Row: {
+          active: boolean | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          sort_order?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
