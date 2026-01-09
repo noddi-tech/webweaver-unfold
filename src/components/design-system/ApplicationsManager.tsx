@@ -35,7 +35,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { 
   Eye, Mail, Linkedin, ExternalLink, Loader2, Search, Filter, 
   Download, CheckSquare, X, Clock, User, FileText, History,
-  ChevronLeft, ChevronRight, Send, Star
+  ChevronLeft, ChevronRight, Send, Star, Calendar
 } from "lucide-react";
 import EvaluationForm from "./EvaluationForm";
 import EvaluationSummary from "./EvaluationSummary";
@@ -676,6 +676,47 @@ export default function ApplicationsManager() {
                         </p>
                       </div>
                     )}
+                  </CardContent>
+              </Card>
+
+                {/* Quick Actions */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <Label className="text-sm text-muted-foreground mb-2 block">Send Interview Booking Link</Label>
+                      <Select
+                        onValueChange={(type) => {
+                          sendBookingLinkMutation.mutate({
+                            applicationId: selectedApp.id,
+                            interviewType: type,
+                          });
+                        }}
+                        disabled={sendBookingLinkMutation.isPending}
+                      >
+                        <SelectTrigger className="w-full">
+                          {sendBookingLinkMutation.isPending ? (
+                            <span className="flex items-center gap-2">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Sending...
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              Select Interview Type
+                            </span>
+                          )}
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="phone_screen">Phone Screen</SelectItem>
+                          <SelectItem value="technical">Technical Interview</SelectItem>
+                          <SelectItem value="cultural">Cultural Fit</SelectItem>
+                          <SelectItem value="final">Final Interview</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </CardContent>
                 </Card>
 
