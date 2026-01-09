@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,15 +8,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { 
   Loader2, Calendar, Clock, MapPin, Video, Phone, Building, 
-  User, MoreVertical, Check, X, RefreshCw
+  User, MoreVertical, Check, X, RefreshCw, Bell, AlertTriangle, ClipboardList
 } from "lucide-react";
 import { format, isToday, isTomorrow, addDays, startOfDay, isSameDay } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import ScheduleInterviewDialog from "./ScheduleInterviewDialog";
 
 interface Interview {
@@ -32,12 +39,17 @@ interface Interview {
   interviewer_names: string[] | null;
   status: string;
   notes: string | null;
+  reminder_sent: boolean | null;
   job_applications: {
+    id: string;
     applicant_name: string;
     applicant_email: string;
     job_listings: {
       title: string;
     } | null;
+    candidate_evaluations?: {
+      evaluator_name: string;
+    }[];
   } | null;
 }
 
@@ -71,10 +83,14 @@ export default function InterviewScheduler() {
         .select(`
           *,
           job_applications (
+            id,
             applicant_name,
             applicant_email,
             job_listings (
               title
+            ),
+            candidate_evaluations (
+              evaluator_name
             )
           )
         `)
@@ -92,6 +108,42 @@ export default function InterviewScheduler() {
       return data as Interview[];
     },
   });
+
+  // Send feedback reminder mutation
+  const sendReminderMutation = useMutation({
+    mutationFn: async ({ interviewId, interviewerEmail, interviewerName }: { 
+      interviewId: string; 
+      interviewerEmail?: string;
+      interviewerName?: string;
+    }) => {
+      const response = await supabase.functions.invoke("send-feedback-reminder", {
+        body: { 
+          interview_id: interviewId,
+          interviewer_email: interviewerEmail,
+          interviewer_name: interviewerName,
+        },
+      });
+      if (response.error) throw response.error;
+      return response.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["interviews"] });
+      toast({ 
+        title: "Reminder sent", 
+        description: `Sent to ${data.sent || 0} interviewer(s)` 
+      });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Failed to send reminder", description: err.message, variant: "destructive" });
+    },
+  });
+
+  // Get pending evaluations for an interview
+  const getPendingEvaluators = (interview: Interview): string[] => {
+    const interviewers = interview.interviewer_names || [];
+    const evaluators = interview.job_applications?.candidate_evaluations?.map(e => e.evaluator_name) || [];
+    return interviewers.filter(name => !evaluators.includes(name));
+  };
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
@@ -263,40 +315,108 @@ export default function InterviewScheduler() {
                               )}
                             </div>
                           </div>
+
+                          {/* Pending Evaluations Warning */}
+                          {interview.status === "completed" && (() => {
+                            const pending = getPendingEvaluators(interview);
+                            if (pending.length > 0) {
+                              return (
+                                <div className="flex items-center gap-2 mt-2 p-2 bg-amber-50 dark:bg-amber-950/30 rounded-md">
+                                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                                  <span className="text-sm text-amber-800 dark:text-amber-200">
+                                    Pending evaluations: {pending.join(", ")}
+                                  </span>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="ml-auto h-7 text-amber-700"
+                                          onClick={() => sendReminderMutation.mutate({ interviewId: interview.id })}
+                                          disabled={sendReminderMutation.isPending}
+                                        >
+                                          <Bell className="w-3 h-3 mr-1" />
+                                          Send Reminder
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        Send feedback reminder to pending evaluators
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
+                      </div>
 
                         {/* Actions */}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {interview.status === "scheduled" && (
-                              <>
-                                <DropdownMenuItem onClick={() => updateStatusMutation.mutate({ id: interview.id, status: "completed" })}>
-                                  <Check className="w-4 h-4 mr-2" />
-                                  Mark Completed
+                        <div className="flex items-start gap-2">
+                          {/* Quick Evaluation Link */}
+                          {interview.status === "completed" && interview.job_applications?.id && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => window.open(`/cms?section=applications&application=${interview.job_applications?.id}`, "_blank")}
+                                  >
+                                    <ClipboardList className="w-4 h-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>View Application & Evaluations</TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                          
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {interview.status === "scheduled" && (
+                                <>
+                                  <DropdownMenuItem onClick={() => updateStatusMutation.mutate({ id: interview.id, status: "completed" })}>
+                                    <Check className="w-4 h-4 mr-2" />
+                                    Mark Completed
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => updateStatusMutation.mutate({ id: interview.id, status: "no_show" })}>
+                                    <X className="w-4 h-4 mr-2" />
+                                    Mark No-Show
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => updateStatusMutation.mutate({ id: interview.id, status: "cancelled" })}>
+                                    <X className="w-4 h-4 mr-2" />
+                                    Cancel
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              {interview.status === "completed" && (
+                                <>
+                                  <DropdownMenuItem 
+                                    onClick={() => sendReminderMutation.mutate({ interviewId: interview.id })}
+                                    disabled={sendReminderMutation.isPending}
+                                  >
+                                    <Bell className="w-4 h-4 mr-2" />
+                                    Send Feedback Reminder
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                </>
+                              )}
+                              {interview.status === "cancelled" && (
+                                <DropdownMenuItem onClick={() => updateStatusMutation.mutate({ id: interview.id, status: "scheduled" })}>
+                                  <RefreshCw className="w-4 h-4 mr-2" />
+                                  Reschedule
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => updateStatusMutation.mutate({ id: interview.id, status: "no_show" })}>
-                                  <X className="w-4 h-4 mr-2" />
-                                  Mark No-Show
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => updateStatusMutation.mutate({ id: interview.id, status: "cancelled" })}>
-                                  <X className="w-4 h-4 mr-2" />
-                                  Cancel
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            {interview.status === "cancelled" && (
-                              <DropdownMenuItem onClick={() => updateStatusMutation.mutate({ id: interview.id, status: "scheduled" })}>
-                                <RefreshCw className="w-4 h-4 mr-2" />
-                                Reschedule
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
