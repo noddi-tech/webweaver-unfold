@@ -129,62 +129,6 @@ const Careers = () => {
           </EditableTranslation>
         </section>
 
-        {/* Why Join Section */}
-        <section className="max-w-4xl mx-auto mb-20">
-          <EditableTranslation translationKey="careers.why.title" fallbackText="Why Join Navio?">
-            <h2 className="text-3xl font-bold mb-8 text-center">
-              {t("careers.why.title", "Why Join Navio?")}
-            </h2>
-          </EditableTranslation>
-          <div className="grid md:grid-cols-2 gap-6">
-            {benefits.map((benefit) => (
-              <EditableBenefitCard
-                key={benefit.key}
-                elementIdPrefix={`careers-benefit-${benefit.key}`}
-                icon={benefit.icon}
-                titleKey={benefit.titleKey}
-                titleFallback={benefit.titleFallback}
-                descKey={benefit.descKey}
-                descFallback={benefit.descFallback}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Team Section */}
-        {(employees.length > 0 || employeesLoading) && (
-          <section className="max-w-4xl mx-auto mb-20">
-            <EditableTranslation translationKey="careers.team.title" fallbackText="Meet the Team">
-              <h2 className="text-3xl font-bold mb-8 text-center">
-                {t("careers.team.title", "Meet the Team")}
-              </h2>
-            </EditableTranslation>
-            {employeesLoading ? (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {[1, 2, 3].map((i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <Skeleton className="aspect-[4/5] w-full" />
-                    <div className="p-4">
-                      <Skeleton className="h-5 w-32 mb-2" />
-                      <Skeleton className="h-4 w-24" />
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {employees.map((member) => (
-                  <TeamMemberCard
-                    key={member.id}
-                    member={member}
-                    pagePrefix="careers"
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
         {/* Open Positions Section */}
         <section className="max-w-4xl mx-auto mb-20">
           <EditableTranslation translationKey="careers.positions.title" fallbackText="Open Positions">
@@ -310,6 +254,62 @@ const Careers = () => {
             </div>
           )}
         </section>
+
+        {/* Why Join Section */}
+        <section className="max-w-4xl mx-auto mb-20">
+          <EditableTranslation translationKey="careers.why.title" fallbackText="Why Join Navio?">
+            <h2 className="text-3xl font-bold mb-8 text-center">
+              {t("careers.why.title", "Why Join Navio?")}
+            </h2>
+          </EditableTranslation>
+          <div className="grid md:grid-cols-2 gap-6">
+            {benefits.map((benefit) => (
+              <EditableBenefitCard
+                key={benefit.key}
+                elementIdPrefix={`careers-benefit-${benefit.key}`}
+                icon={benefit.icon}
+                titleKey={benefit.titleKey}
+                titleFallback={benefit.titleFallback}
+                descKey={benefit.descKey}
+                descFallback={benefit.descFallback}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Team Section */}
+        {(employees.length > 0 || employeesLoading) && (
+          <section className="max-w-4xl mx-auto mb-20">
+            <EditableTranslation translationKey="careers.team.title" fallbackText="Meet the Team">
+              <h2 className="text-3xl font-bold mb-8 text-center">
+                {t("careers.team.title", "Meet the Team")}
+              </h2>
+            </EditableTranslation>
+            {employeesLoading ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <Skeleton className="aspect-[4/5] w-full" />
+                    <div className="p-4">
+                      <Skeleton className="h-5 w-32 mb-2" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {employees.map((member) => (
+                  <TeamMemberCard
+                    key={member.id}
+                    member={member}
+                    pagePrefix="careers"
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Contact Section */}
         <section className="max-w-4xl mx-auto text-center">
