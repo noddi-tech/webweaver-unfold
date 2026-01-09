@@ -1438,6 +1438,84 @@ export type Database = {
           },
         ]
       }
+      interview_slots: {
+        Row: {
+          booked_by_application_id: string | null
+          booking_token: string | null
+          booking_token_expires_at: string | null
+          created_at: string
+          duration_minutes: number
+          end_time: string
+          id: string
+          interview_type: string
+          interviewer_email: string | null
+          interviewer_id: string | null
+          interviewer_name: string
+          is_available: boolean
+          job_id: string | null
+          location: string | null
+          meeting_url: string | null
+          notes: string | null
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          booked_by_application_id?: string | null
+          booking_token?: string | null
+          booking_token_expires_at?: string | null
+          created_at?: string
+          duration_minutes?: number
+          end_time: string
+          id?: string
+          interview_type?: string
+          interviewer_email?: string | null
+          interviewer_id?: string | null
+          interviewer_name: string
+          is_available?: boolean
+          job_id?: string | null
+          location?: string | null
+          meeting_url?: string | null
+          notes?: string | null
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          booked_by_application_id?: string | null
+          booking_token?: string | null
+          booking_token_expires_at?: string | null
+          created_at?: string
+          duration_minutes?: number
+          end_time?: string
+          id?: string
+          interview_type?: string
+          interviewer_email?: string | null
+          interviewer_id?: string | null
+          interviewer_name?: string
+          is_available?: boolean
+          job_id?: string | null
+          location?: string | null
+          meeting_url?: string | null
+          notes?: string | null
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_slots_booked_by_application_id_fkey"
+            columns: ["booked_by_application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_slots_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interviews: {
         Row: {
           application_id: string
@@ -1524,11 +1602,17 @@ export type Database = {
           job_id: string
           linkedin_url: string | null
           portfolio_url: string | null
+          referrer_email: string | null
           resume_url: string | null
+          source: string | null
+          source_detail: string | null
           status: string | null
           status_updated_at: string | null
           updated_at: string | null
           user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
         }
         Insert: {
           applicant_email: string
@@ -1541,11 +1625,17 @@ export type Database = {
           job_id: string
           linkedin_url?: string | null
           portfolio_url?: string | null
+          referrer_email?: string | null
           resume_url?: string | null
+          source?: string | null
+          source_detail?: string | null
           status?: string | null
           status_updated_at?: string | null
           updated_at?: string | null
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Update: {
           applicant_email?: string
@@ -1558,11 +1648,17 @@ export type Database = {
           job_id?: string
           linkedin_url?: string | null
           portfolio_url?: string | null
+          referrer_email?: string | null
           resume_url?: string | null
+          source?: string | null
+          source_detail?: string | null
           status?: string | null
           status_updated_at?: string | null
           updated_at?: string | null
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Relationships: [
           {
@@ -2035,6 +2131,42 @@ export type Database = {
           popular?: boolean
           price?: string
           sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      referral_sources: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          icon_name: string | null
+          id: string
+          name: string
+          sort_order: number | null
+          tracking_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          name: string
+          sort_order?: number | null
+          tracking_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          name?: string
+          sort_order?: number | null
+          tracking_code?: string | null
           updated_at?: string
         }
         Relationships: []

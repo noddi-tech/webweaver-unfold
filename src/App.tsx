@@ -35,6 +35,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import JobListing from "./pages/JobListing";
 import MyApplications from "./pages/MyApplications";
+import CandidateBooking from "./pages/CandidateBooking";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => {
             <Route path="/cms" element={<Admin />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/cms/translations" element={<Navigate to="/cms" replace />} />
+            <Route path="/book/:token" element={<CandidateBooking />} />
             <Route path="/llms.txt" element={<LlmsTxt />} />
             
             {/* Redirect root to default language */}
