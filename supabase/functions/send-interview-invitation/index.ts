@@ -25,7 +25,6 @@ const getFromAddress = async (apiKey: string): Promise<string> => {
     console.log("Domain check failed, using fallback:", e);
   }
   
-  console.log("Using Resend test domain as fallback");
   return "Navio <onboarding@resend.dev>";
 };
 
@@ -34,6 +33,44 @@ const replaceVariables = (text: string, vars: Record<string, string>): string =>
     (result, [key, value]) => result.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value || ""),
     text
   );
+};
+
+// Generate ICS calendar file content
+const generateICS = (
+  title: string,
+  description: string,
+  startTime: Date,
+  durationMinutes: number,
+  location: string,
+  meetingUrl?: string
+): string => {
+  const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
+  
+  const formatDate = (date: Date) => {
+    return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  };
+  
+  const uid = `${Date.now()}-interview@navio.no`;
+  const locationStr = meetingUrl || location;
+  const descWithUrl = meetingUrl ? `${description}\n\nJoin: ${meetingUrl}` : description;
+  
+  return `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Navio//Interview Scheduler//EN
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:${uid}
+DTSTAMP:${formatDate(new Date())}
+DTSTART:${formatDate(startTime)}
+DTEND:${formatDate(endTime)}
+SUMMARY:${title}
+DESCRIPTION:${descWithUrl.replace(/\n/g, "\\n")}
+LOCATION:${locationStr}
+STATUS:CONFIRMED
+SEQUENCE:0
+END:VEVENT
+END:VCALENDAR`;
 };
 
 serve(async (req) => {
@@ -52,17 +89,29 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const { applicationId, applicantName, applicantEmail, jobTitle, messageBody } = await req.json();
+    const { 
+      applicationId, 
+      applicantName, 
+      applicantEmail, 
+      jobTitle,
+      interviewType,
+      interviewDate,
+      interviewTime,
+      interviewDuration,
+      interviewLocation,
+      meetingUrl,
+      notes
+    } = await req.json();
 
-    if (!applicationId || !applicantEmail || !messageBody) {
-      throw new Error("Missing required fields: applicationId, applicantEmail, messageBody");
+    if (!applicationId || !applicantEmail || !interviewDate || !interviewTime) {
+      throw new Error("Missing required fields");
     }
 
     // Fetch email template from database
     const { data: template } = await supabaseClient
       .from("email_templates")
       .select("*")
-      .eq("template_key", "admin_reply")
+      .eq("template_key", "interview_invitation")
       .eq("is_active", true)
       .single();
 
@@ -74,27 +123,49 @@ serve(async (req) => {
       job_title: jobTitle || "Position",
       site_url: siteUrl,
       current_year: currentYear,
-      message_body: messageBody,
+      interview_type: interviewType || "Interview",
+      interview_date: interviewDate,
+      interview_time: interviewTime,
+      interview_duration: interviewDuration?.toString() || "60",
+      interview_location: interviewLocation || "TBD",
+      meeting_url: meetingUrl || "",
+      interview_notes: notes || "",
     };
 
     // Use template or defaults
     const subject = replaceVariables(
-      template?.subject || "Re: Your Application for {{job_title}} at Navio",
+      template?.subject || "Interview Scheduled: {{job_title}} at Navio",
       variables
     );
     const heading = replaceVariables(
-      template?.heading || "Message from Navio",
+      template?.heading || "You're Invited to Interview! 🎉",
       variables
     );
-    const bodyHtml = replaceVariables(
-      template?.body_html || `<p>Hi {{applicant_name}},</p><p>{{message_body}}</p>`,
-      variables
-    );
-    const buttonText = template?.button_text ? replaceVariables(template.button_text, variables) : "View My Applications";
-    const buttonUrl = template?.button_url ? replaceVariables(template.button_url, variables) : `${siteUrl}/en/my-applications`;
-    const emoji = template?.emoji || "💬";
-    const headerBgStart = template?.header_bg_start || "#3b82f6";
-    const headerBgEnd = template?.header_bg_end || "#1d4ed8";
+    
+    // Build body with meeting link conditionally
+    let bodyHtml = template?.body_html || `
+<p>Hi {{applicant_name}},</p>
+<p>We're excited to invite you to an interview for the <strong>{{job_title}}</strong> position at Navio!</p>
+<p><strong>Interview Details:</strong></p>
+<ul>
+<li><strong>Date & Time:</strong> {{interview_date}} at {{interview_time}}</li>
+<li><strong>Duration:</strong> {{interview_duration}} minutes</li>
+<li><strong>Type:</strong> {{interview_type}}</li>
+<li><strong>Location:</strong> {{interview_location}}</li>
+</ul>
+${meetingUrl ? `<p><strong>Meeting Link:</strong> <a href="${meetingUrl}">${meetingUrl}</a></p>` : ""}
+${notes ? `<p>${notes}</p>` : ""}
+<p>Please confirm your attendance. If you need to reschedule, please reply to this email.</p>
+<p>We look forward to speaking with you!</p>
+<p>Best regards,<br>The Navio Team</p>`;
+
+    bodyHtml = replaceVariables(bodyHtml, variables);
+    
+    const buttonText = "View My Applications";
+    const buttonUrl = `${siteUrl}/en/my-applications`;
+    const emoji = template?.emoji || "📅";
+    const headerBgStart = template?.header_bg_start || "#8b5cf6";
+    const headerBgEnd = template?.header_bg_end || "#6d28d9";
 
     // Build email HTML
     const emailHtml = `
@@ -120,7 +191,6 @@ serve(async (req) => {
               <div style="color: #374151; font-size: 16px; line-height: 1.6;">
                 ${bodyHtml}
               </div>
-              ${buttonText && buttonUrl ? `
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 32px;">
                 <tr>
                   <td align="center">
@@ -130,7 +200,6 @@ serve(async (req) => {
                   </td>
                 </tr>
               </table>
-              ` : ""}
             </td>
           </tr>
           <tr>
@@ -147,10 +216,21 @@ serve(async (req) => {
 </body>
 </html>`;
 
+    // Generate ICS file for calendar attachment
+    const scheduledDateTime = new Date(`${interviewDate} ${interviewTime}`);
+    const icsContent = generateICS(
+      `Interview: ${jobTitle} at Navio`,
+      `Interview for ${jobTitle} position.\n\nType: ${interviewType}${notes ? `\n\nNotes: ${notes}` : ""}`,
+      scheduledDateTime,
+      interviewDuration || 60,
+      interviewLocation || "TBD",
+      meetingUrl
+    );
+
     const fromAddress = await getFromAddress(RESEND_API_KEY);
 
-    // Generate reply-to address for candidate replies
-    const replyToAddress = `application+${applicationId}@replies.navio.no`;
+    // Convert ICS to base64
+    const icsBase64 = btoa(icsContent);
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -160,13 +240,15 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: fromAddress,
-        reply_to: replyToAddress,
         to: [applicantEmail],
         subject,
         html: emailHtml,
-        headers: {
-          "X-Application-ID": applicationId,
-        },
+        attachments: [
+          {
+            filename: "interview.ics",
+            content: icsBase64,
+          },
+        ],
       }),
     });
 
@@ -177,13 +259,20 @@ serve(async (req) => {
       throw new Error(result.message || "Failed to send email");
     }
 
-    console.log("Email sent successfully:", result.id);
+    console.log("Interview invitation sent:", result.id);
+
+    // Log activity
+    await supabaseClient.from("application_activity_log").insert({
+      application_id: applicationId,
+      action: "email_sent",
+      new_value: `Interview invitation: ${interviewType} on ${interviewDate}`,
+    });
 
     return new Response(JSON.stringify({ success: true, emailId: result.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error in send-candidate-message:", error);
+    console.error("Error in send-interview-invitation:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

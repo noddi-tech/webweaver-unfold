@@ -48,6 +48,9 @@ import TechStackManager from "@/components/design-system/TechStackManager";
 import ApplicationsManager from "@/components/design-system/ApplicationsManager";
 import { EmailTemplatesManager } from "@/components/design-system/EmailTemplatesManager";
 import InboxManager from "@/components/design-system/InboxManager";
+import InterviewScheduler from "@/components/design-system/InterviewScheduler";
+import EvaluationCriteriaManager from "@/components/design-system/EvaluationCriteriaManager";
+
 const Admin = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -58,7 +61,7 @@ const Admin = () => {
   const sectionParam = searchParams.get("section");
   const getDefaultTabs = () => {
     // Career section tabs
-    if (sectionParam === "applications" || sectionParam === "inbox" || sectionParam === "jobs" || sectionParam === "emails") {
+    if (sectionParam === "applications" || sectionParam === "inbox" || sectionParam === "interviews" || sectionParam === "jobs" || sectionParam === "emails" || sectionParam === "settings") {
       return { main: "career", career: sectionParam };
     }
     return { main: "cms", cms: "content", config: "header", career: "applications" };
@@ -281,11 +284,13 @@ const Admin = () => {
           {/* Career Section - NEW */}
           <TabsContent value="career" className="space-y-8">
             <Tabs defaultValue={defaults.career} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-8">
+              <TabsList className="grid w-full grid-cols-6 mb-8">
                 <TabsTrigger value="applications">Applications</TabsTrigger>
                 <TabsTrigger value="inbox">Inbox</TabsTrigger>
+                <TabsTrigger value="interviews">Interviews</TabsTrigger>
                 <TabsTrigger value="jobs">Jobs</TabsTrigger>
                 <TabsTrigger value="emails">Email Templates</TabsTrigger>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
 
               <TabsContent value="applications" className="space-y-8">
@@ -296,12 +301,20 @@ const Admin = () => {
                 <InboxManager />
               </TabsContent>
 
+              <TabsContent value="interviews" className="space-y-8">
+                <InterviewScheduler />
+              </TabsContent>
+
               <TabsContent value="jobs" className="space-y-8">
                 <JobsManager />
               </TabsContent>
 
               <TabsContent value="emails" className="space-y-8">
                 <EmailTemplatesManager />
+              </TabsContent>
+
+              <TabsContent value="settings" className="space-y-8">
+                <EvaluationCriteriaManager />
               </TabsContent>
             </Tabs>
           </TabsContent>

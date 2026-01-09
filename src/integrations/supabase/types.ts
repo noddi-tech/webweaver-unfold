@@ -267,6 +267,56 @@ export type Database = {
         }
         Relationships: []
       }
+      candidate_evaluations: {
+        Row: {
+          application_id: string
+          concerns: string | null
+          created_at: string
+          evaluator_id: string | null
+          evaluator_name: string
+          id: string
+          notes: string | null
+          overall_recommendation: string | null
+          strengths: string | null
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          concerns?: string | null
+          created_at?: string
+          evaluator_id?: string | null
+          evaluator_name: string
+          id?: string
+          notes?: string | null
+          overall_recommendation?: string | null
+          strengths?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          concerns?: string | null
+          created_at?: string
+          evaluator_id?: string | null
+          evaluator_name?: string
+          id?: string
+          notes?: string | null
+          overall_recommendation?: string | null
+          strengths?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_evaluations_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       card_style_presets: {
         Row: {
           background_class: string
@@ -809,6 +859,45 @@ export type Database = {
         }
         Relationships: []
       }
+      evaluation_criteria: {
+        Row: {
+          active: boolean | null
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          max_score: number | null
+          name: string
+          sort_order: number | null
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          max_score?: number | null
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          max_score?: number | null
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
       evaluation_progress: {
         Row: {
           batch_size: number | null
@@ -859,6 +948,48 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      evaluation_scores: {
+        Row: {
+          comment: string | null
+          created_at: string
+          criteria_id: string
+          evaluation_id: string
+          id: string
+          score: number
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          criteria_id: string
+          evaluation_id: string
+          id?: string
+          score: number
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          criteria_id?: string
+          evaluation_id?: string
+          id?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluation_scores_criteria_id_fkey"
+            columns: ["criteria_id"]
+            isOneToOne: false
+            referencedRelation: "evaluation_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evaluation_scores_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       faqs: {
         Row: {
@@ -1256,6 +1387,80 @@ export type Database = {
             columns: ["section_id"]
             isOneToOne: false
             referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interviews: {
+        Row: {
+          application_id: string
+          calendar_event_id: string | null
+          candidate_notified: boolean | null
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          feedback: string | null
+          id: string
+          interview_type: string
+          interviewer_ids: string[] | null
+          interviewer_names: string[] | null
+          location: string | null
+          meeting_url: string | null
+          notes: string | null
+          reminder_sent: boolean | null
+          scheduled_at: string
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          calendar_event_id?: string | null
+          candidate_notified?: boolean | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          feedback?: string | null
+          id?: string
+          interview_type?: string
+          interviewer_ids?: string[] | null
+          interviewer_names?: string[] | null
+          location?: string | null
+          meeting_url?: string | null
+          notes?: string | null
+          reminder_sent?: boolean | null
+          scheduled_at: string
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          calendar_event_id?: string | null
+          candidate_notified?: boolean | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          feedback?: string | null
+          id?: string
+          interview_type?: string
+          interviewer_ids?: string[] | null
+          interviewer_names?: string[] | null
+          location?: string | null
+          meeting_url?: string | null
+          notes?: string | null
+          reminder_sent?: boolean | null
+          scheduled_at?: string
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interviews_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
             referencedColumns: ["id"]
           },
         ]
