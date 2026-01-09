@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      application_activity_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          application_id: string
+          created_at: string | null
+          id: string
+          new_value: string | null
+          old_value: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          application_id: string
+          created_at?: string | null
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          application_id?: string
+          created_at?: string | null
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_activity_log_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       background_styles: {
         Row: {
           background_class: string

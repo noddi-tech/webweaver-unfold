@@ -39,7 +39,7 @@ export function ApplicationForm({ open, onOpenChange, jobId, jobTitle }: Applica
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await submitApplication({ jobId, formData });
+      await submitApplication({ jobId, jobTitle, formData });
       setSubmitted(true);
     } catch (error) {
       // Error handled by hook
