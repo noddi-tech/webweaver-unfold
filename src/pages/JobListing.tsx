@@ -6,12 +6,22 @@ import Footer from "@/components/Footer";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { useJobListing } from "@/hooks/useJobListings";
 import { useEditMode } from "@/contexts/EditModeContext";
-import { ArrowLeft, Briefcase, MapPin, Clock, Calendar, DollarSign, ExternalLink, Mail, Pencil } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { JobEditModal } from "@/components/JobEditModal";
-import { parseJobMarkdown } from "@/lib/markdownUtils";
+
+// New components
+import { JobHero } from "@/components/jobs/JobHero";
+import { CompanyIntro } from "@/components/jobs/CompanyIntro";
+import { JobNavigation } from "@/components/jobs/JobNavigation";
+import { AboutRole } from "@/components/jobs/AboutRole";
+import { WorkAssignments } from "@/components/jobs/WorkAssignments";
+import { TechStackSection } from "@/components/jobs/TechStackSection";
+import { RequirementsList } from "@/components/jobs/RequirementsList";
+import { BenefitsGrid } from "@/components/jobs/BenefitsGrid";
+import { StickyApplyCTA } from "@/components/jobs/StickyApplyCTA";
+import { FinalApplyCTA } from "@/components/jobs/FinalApplyCTA";
 
 const mapEmploymentType = (type: string | null): string => {
   const mapping: Record<string, string> = {
@@ -38,7 +48,7 @@ function EditableSection({ children, onEdit, editMode, className = "" }: Editabl
   
   return (
     <div 
-      className={`relative pr-8 pt-4 -mr-8 -mt-4 ${className}`}
+      className={`relative ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -67,6 +77,11 @@ const JobListing = () => {
 
   const pageUrl = `https://noddi.tech/${i18n.language}/careers/${slug}`;
   const truncatedDescription = job?.description?.slice(0, 160) || t("careers.job.defaultDescription", "Join our team at Navio");
+
+  // Parse tech stack and work assignments from JSON (new columns from migration)
+  const jobData = job as typeof job & { tech_stack?: unknown; work_assignments?: unknown; company_intro?: string | null };
+  const techStack = jobData?.tech_stack ? (Array.isArray(jobData.tech_stack) ? jobData.tech_stack : []) : [];
+  const workAssignments = jobData?.work_assignments ? (Array.isArray(jobData.work_assignments) ? jobData.work_assignments : []) : [];
 
   // JSON-LD structured data for job posting
   const structuredData = job ? {
@@ -110,11 +125,19 @@ const JobListing = () => {
     setEditModalOpen(true);
   };
 
+  const handleApply = () => {
+    if (job?.application_url) {
+      window.open(job.application_url, "_blank", "noopener,noreferrer");
+    } else if (job?.application_email) {
+      window.location.href = `mailto:${job.application_email}`;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Header />
-        <main className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
+        <main className="container mx-auto px-6 pt-32 pb-20 max-w-5xl">
           <Skeleton className="h-6 w-32 mb-8" />
           <Skeleton className="h-12 w-3/4 mb-4" />
           <div className="flex gap-2 mb-6">
@@ -134,7 +157,7 @@ const JobListing = () => {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Header />
-        <main className="container mx-auto px-6 pt-32 pb-20 max-w-4xl text-center">
+        <main className="container mx-auto px-6 pt-32 pb-20 max-w-5xl text-center">
           <h1 className="text-3xl font-bold mb-4">{t("careers.job.notFound", "Job Not Found")}</h1>
           <p className="text-muted-foreground mb-8">
             {t("careers.job.notFoundDesc", "The job listing you're looking for doesn't exist or has been removed.")}
@@ -150,15 +173,6 @@ const JobListing = () => {
       </div>
     );
   }
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return null;
-    return new Date(dateString).toLocaleDateString(i18n.language, {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -181,136 +195,79 @@ const JobListing = () => {
       </Helmet>
 
       <Header />
-      <main className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
-        {/* Back link */}
-        <Link 
-          to={`/${i18n.language}/careers`} 
-          className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors mb-8"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          {t("careers.job.backToCareers", "Back to Careers")}
-        </Link>
-
-        {/* Header */}
+      
+      <main className="container mx-auto px-6 pt-32 pb-20 max-w-5xl">
+        {/* Hero Section */}
         <EditableSection editMode={editMode} onEdit={() => openEditModal("basics")}>
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <h1 className="text-4xl md:text-5xl font-bold">{job.title}</h1>
-              {job.featured && (
-                <Badge className="bg-primary text-primary-foreground">
-                  {t("careers.jobs.featured", "Featured")}
-                </Badge>
-              )}
-            </div>
-
-            {/* Meta badges */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {job.department && (
-                <Badge variant="secondary" className="text-sm">
-                  <Briefcase className="w-3 h-3 mr-1" />
-                  {job.department}
-                </Badge>
-              )}
-              {job.location && (
-                <Badge variant="outline" className="text-sm">
-                  <MapPin className="w-3 h-3 mr-1" />
-                  {job.location}
-                </Badge>
-              )}
-              {job.employment_type && (
-                <Badge variant="outline" className="text-sm">
-                  <Clock className="w-3 h-3 mr-1" />
-                  {job.employment_type}
-                </Badge>
-              )}
-            </div>
-
-            {/* Posted date & salary */}
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-              {job.posted_at && (
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  {t("careers.job.posted", "Posted:")} {formatDate(job.posted_at)}
-                </span>
-              )}
-              {job.salary_range && (
-                <span className="flex items-center gap-1">
-                  <DollarSign className="w-4 h-4" />
-                  {job.salary_range}
-                </span>
-              )}
-            </div>
-          </div>
+          <JobHero job={job} onApply={handleApply} />
         </EditableSection>
 
-        {/* Description */}
-        {job.description && (
-          <EditableSection editMode={editMode} onEdit={() => openEditModal("description")}>
-            <section className="mb-10">
-              <h2 className="text-2xl font-semibold mb-4">{t("careers.job.aboutRole", "About This Role")}</h2>
-              <div 
-                className="prose prose-lg max-w-none text-muted-foreground [&_ul]:list-disc [&_ul]:ml-6 [&_li]:mb-2"
-                dangerouslySetInnerHTML={{ __html: parseJobMarkdown(job.description) }}
-              />
-            </section>
-          </EditableSection>
-        )}
+        {/* Company Introduction */}
+        <div className="mt-10">
+          <CompanyIntro customIntro={jobData.company_intro} />
+        </div>
 
-        {/* Requirements */}
-        {job.requirements && (
-          <EditableSection editMode={editMode} onEdit={() => openEditModal("requirements")}>
-            <section className="mb-10">
-              <h2 className="text-2xl font-semibold mb-4">{t("careers.job.requirements", "Requirements")}</h2>
-              <div 
-                className="prose prose-lg max-w-none text-muted-foreground [&_ul]:list-disc [&_ul]:ml-6 [&_li]:mb-2"
-                dangerouslySetInnerHTML={{ __html: parseJobMarkdown(job.requirements) }}
-              />
-            </section>
-          </EditableSection>
-        )}
+        {/* Navigation */}
+        <div className="mt-10 mb-12">
+          <JobNavigation
+            hasDescription={!!job.description}
+            hasWorkAssignments={workAssignments.length > 0}
+            hasTechStack={techStack.length > 0}
+            hasRequirements={!!job.requirements}
+            hasBenefits={!!job.benefits}
+          />
+        </div>
 
-        {/* Benefits */}
-        {job.benefits && (
-          <EditableSection editMode={editMode} onEdit={() => openEditModal("benefits")}>
-            <section className="mb-10">
-              <h2 className="text-2xl font-semibold mb-4">{t("careers.job.benefits", "What We Offer")}</h2>
-              <div 
-                className="prose prose-lg max-w-none text-muted-foreground [&_ul]:list-disc [&_ul]:ml-6 [&_li]:mb-2"
-                dangerouslySetInnerHTML={{ __html: parseJobMarkdown(job.benefits) }}
-              />
-            </section>
-          </EditableSection>
-        )}
+        {/* Content Sections */}
+        <div className="space-y-16">
+          {/* About the Role */}
+          {job.description && (
+            <EditableSection editMode={editMode} onEdit={() => openEditModal("description")}>
+              <AboutRole description={job.description} />
+            </EditableSection>
+          )}
 
-        {/* Apply CTA */}
-        <section className="mt-12 p-8 bg-muted rounded-xl text-center">
-          <h2 className="text-2xl font-semibold mb-4">
-            {t("careers.job.interested", "Interested in this role?")}
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            {t("careers.job.applyDesc", "We'd love to hear from you. Apply now and join our team.")}
-          </p>
-          <div className="flex justify-center gap-4">
-            {job.application_url && (
-              <Button size="lg" asChild>
-                <a href={job.application_url} target="_blank" rel="noopener noreferrer">
-                  {t("careers.jobs.apply", "Apply Now")}
-                  <ExternalLink className="w-4 h-4 ml-2" />
-                </a>
-              </Button>
-            )}
-            {job.application_email && !job.application_url && (
-              <Button size="lg" asChild>
-                <a href={`mailto:${job.application_email}`}>
-                  <Mail className="w-4 h-4 mr-2" />
-                  {t("careers.jobs.apply", "Apply Now")}
-                </a>
-              </Button>
-            )}
-          </div>
-        </section>
+          {/* Work Assignments */}
+          {workAssignments.length > 0 && (
+            <WorkAssignments assignments={workAssignments as Array<{icon: string; title: string; description: string}>} />
+          )}
+
+          {/* Tech Stack */}
+          {techStack.length > 0 && (
+            <TechStackSection techStack={techStack as Array<{name: string; logo_url?: string; category: string; description?: string}>} />
+          )}
+
+          {/* Requirements */}
+          {job.requirements && (
+            <EditableSection editMode={editMode} onEdit={() => openEditModal("requirements")}>
+              <RequirementsList requirements={job.requirements} />
+            </EditableSection>
+          )}
+
+          {/* Benefits */}
+          {job.benefits && (
+            <EditableSection editMode={editMode} onEdit={() => openEditModal("benefits")}>
+              <BenefitsGrid benefits={job.benefits} />
+            </EditableSection>
+          )}
+        </div>
+
+        {/* Final CTA */}
+        <FinalApplyCTA 
+          jobTitle={job.title}
+          applicationUrl={job.application_url}
+          applicationEmail={job.application_email}
+        />
       </main>
+
       <Footer />
+
+      {/* Sticky Apply CTA */}
+      <StickyApplyCTA
+        jobTitle={job.title}
+        applicationUrl={job.application_url}
+        applicationEmail={job.application_email}
+      />
 
       {/* Edit Modal */}
       {job && (
