@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,16 @@ export function ApplicationForm({ open, onOpenChange, jobId, jobTitle }: Applica
   const { t } = useAppTranslation();
   const { submitApplication, isSubmitting, hasApplied } = useJobApplications();
   const [submitted, setSubmitted] = useState(false);
+  const [searchParams] = useSearchParams();
+  
+  // Capture UTM and source parameters
+  const source = searchParams.get("source") || "direct";
+  const sourceDetail = searchParams.get("source_detail") || undefined;
+  const utmSource = searchParams.get("utm_source") || undefined;
+  const utmMedium = searchParams.get("utm_medium") || undefined;
+  const utmCampaign = searchParams.get("utm_campaign") || undefined;
+  const referrer = searchParams.get("ref") || undefined;
+  
   const [formData, setFormData] = useState<ApplicationFormData>({
     applicant_name: "",
     applicant_email: "",
@@ -34,6 +45,12 @@ export function ApplicationForm({ open, onOpenChange, jobId, jobTitle }: Applica
     linkedin_url: "",
     portfolio_url: "",
     cover_letter: "",
+    source,
+    source_detail: sourceDetail,
+    utm_source: utmSource,
+    utm_medium: utmMedium,
+    utm_campaign: utmCampaign,
+    referrer_email: referrer,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,6 +74,12 @@ export function ApplicationForm({ open, onOpenChange, jobId, jobTitle }: Applica
         linkedin_url: "",
         portfolio_url: "",
         cover_letter: "",
+        source,
+        source_detail: sourceDetail,
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign,
+        referrer_email: referrer,
       });
     }
   };
