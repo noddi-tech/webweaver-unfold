@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Briefcase, MapPin, Clock, Calendar, DollarSign, ExternalLink, Mail, Star, Bookmark } from "lucide-react";
+import { ArrowLeft, Briefcase, MapPin, Clock, Calendar, DollarSign, ExternalLink, Star } from "lucide-react";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { motion } from "framer-motion";
+import { SaveJobButton } from "./SaveJobButton";
 
 interface JobHeroProps {
   job: {
+    id: string;
     title: string;
     department: string | null;
     location: string | null;
@@ -115,10 +117,7 @@ export function JobHero({ job, onApply }: JobHeroProps) {
               {t("careers.jobs.apply", "Apply Now")}
               <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
             </Button>
-            <Button variant="outline" size="lg" className="group">
-              <Bookmark className="w-4 h-4 mr-2" />
-              {t("careers.job.saveJob", "Save Job")}
-            </Button>
+            <SaveJobButton jobId={job.id} variant="text" />
           </div>
         </motion.div>
       </div>

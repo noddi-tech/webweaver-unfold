@@ -43,6 +43,8 @@ import BlogManager from "@/components/design-system/BlogManager";
 import JobsManager from "@/components/design-system/JobsManager";
 import NewsletterManager from "@/components/design-system/NewsletterManager";
 import { PressManager } from "@/components/design-system/PressManager";
+import TechStackManager from "@/components/design-system/TechStackManager";
+import ApplicationsManager from "@/components/design-system/ApplicationsManager";
 const Admin = () => {
   const { toast } = useToast();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
@@ -236,6 +238,8 @@ const Admin = () => {
                     <TabsTrigger value="pricing">Pricing</TabsTrigger>
                     <TabsTrigger value="employees">Team</TabsTrigger>
                     <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
+                    <TabsTrigger value="techstack">Tech Stack</TabsTrigger>
+                    <TabsTrigger value="applications">Applications</TabsTrigger>
                   </TabsList>
                   <TabsContent value="header" className="space-y-8">
                     <HeaderManager />
@@ -254,6 +258,12 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="newsletter" className="space-y-8">
                     <NewsletterManager />
+                  </TabsContent>
+                  <TabsContent value="techstack" className="space-y-8">
+                    <TechStackManager />
+                  </TabsContent>
+                  <TabsContent value="applications" className="space-y-8">
+                    <ApplicationsManager />
                   </TabsContent>
                 </Tabs>
               </TabsContent>
