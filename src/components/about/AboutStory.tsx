@@ -1,6 +1,10 @@
 import { motion } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableCard } from "@/components/EditableCard";
+import { EditableCardTitle } from "@/components/EditableCardTitle";
+import { EditableCardDescription } from "@/components/EditableCardDescription";
+import { EditableCardIcon } from "@/components/EditableCardIcon";
 import { Code, Wrench, Rocket } from "lucide-react";
 
 const milestones = [
@@ -72,27 +76,34 @@ export function AboutStory() {
                 <div className="hidden md:block absolute top-8 left-[calc(50%+2rem)] w-[calc(100%-4rem)] h-0.5 bg-border" />
               )}
               
-              <div className="bg-card rounded-xl p-6 border shadow-sm h-full">
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4 mx-auto">
-                  <milestone.icon className="w-7 h-7 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold text-center mb-3">
+              <EditableCard
+                elementIdPrefix={`about-story-${index}`}
+                defaultBackground="bg-card"
+                defaultTextColor="card-foreground"
+                className="p-6 border shadow-sm h-full"
+              >
+                <EditableCardIcon
+                  icon={milestone.icon}
+                  size="lg"
+                  containerClassName="mx-auto mb-4"
+                />
+                <EditableCardTitle className="text-lg font-semibold text-center mb-3">
                   <EditableTranslation
                     translationKey={milestone.titleKey}
                     fallbackText={milestone.titleFallback}
                   >
                     {milestone.titleFallback}
                   </EditableTranslation>
-                </h3>
-                <p className="text-muted-foreground text-center text-sm">
+                </EditableCardTitle>
+                <EditableCardDescription muted className="text-center text-sm">
                   <EditableTranslation
                     translationKey={milestone.descKey}
                     fallbackText={milestone.descFallback}
                   >
                     {milestone.descFallback}
                   </EditableTranslation>
-                </p>
-              </div>
+                </EditableCardDescription>
+              </EditableCard>
             </motion.div>
           ))}
         </div>

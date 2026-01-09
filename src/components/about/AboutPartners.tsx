@@ -1,6 +1,10 @@
 import { motion } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableCard } from "@/components/EditableCard";
+import { EditableCardTitle } from "@/components/EditableCardTitle";
+import { EditableCardDescription } from "@/components/EditableCardDescription";
+import { EditableCardIcon } from "@/components/EditableCardIcon";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -61,20 +65,30 @@ export function AboutPartners() {
               initial={{ opacity: 0, y: 20 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-              className="bg-card rounded-xl p-6 border hover:shadow-md transition-shadow"
             >
-              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center mb-4">
-                <Building2 className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">{partner.name}</h3>
-              <p className="text-muted-foreground text-sm">
-                <EditableTranslation
-                  translationKey={partner.descKey}
-                  fallbackText={partner.descFallback}
-                >
-                  {partner.descFallback}
-                </EditableTranslation>
-              </p>
+              <EditableCard
+                elementIdPrefix={`about-partner-${index}`}
+                defaultBackground="bg-card"
+                defaultTextColor="card-foreground"
+                className="p-6 border hover:shadow-md transition-shadow h-full"
+              >
+                <EditableCardIcon
+                  icon={Building2}
+                  size="default"
+                  containerClassName="mb-4"
+                />
+                <EditableCardTitle className="text-lg font-semibold mb-2">
+                  {partner.name}
+                </EditableCardTitle>
+                <EditableCardDescription muted className="text-sm">
+                  <EditableTranslation
+                    translationKey={partner.descKey}
+                    fallbackText={partner.descFallback}
+                  >
+                    {partner.descFallback}
+                  </EditableTranslation>
+                </EditableCardDescription>
+              </EditableCard>
             </motion.div>
           ))}
         </div>

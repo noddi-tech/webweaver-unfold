@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+import { EditableCard } from "@/components/EditableCard";
+import { EditableCardTitle } from "@/components/EditableCardTitle";
+import { EditableCardIcon } from "@/components/EditableCardIcon";
 import { Clock, TrendingUp, Target } from "lucide-react";
 
 const benefits = [
@@ -69,19 +72,27 @@ export function AboutMission() {
               initial={{ opacity: 0, y: 20 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-              className="flex flex-col items-center p-6 rounded-xl bg-card border hover:shadow-md transition-shadow"
             >
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <benefit.icon className="w-6 h-6 text-primary" />
-              </div>
-              <p className="font-medium text-foreground">
-                <EditableTranslation
-                  translationKey={benefit.key}
-                  fallbackText={benefit.fallback}
-                >
-                  {benefit.fallback}
-                </EditableTranslation>
-              </p>
+              <EditableCard
+                elementIdPrefix={`about-mission-benefit-${index}`}
+                defaultBackground="bg-card"
+                defaultTextColor="card-foreground"
+                className="flex flex-col items-center p-6 border hover:shadow-md transition-shadow h-full"
+              >
+                <EditableCardIcon
+                  icon={benefit.icon}
+                  size="default"
+                  containerClassName="mb-4"
+                />
+                <EditableCardTitle className="font-medium text-base text-center">
+                  <EditableTranslation
+                    translationKey={benefit.key}
+                    fallbackText={benefit.fallback}
+                  >
+                    {benefit.fallback}
+                  </EditableTranslation>
+                </EditableCardTitle>
+              </EditableCard>
             </motion.div>
           ))}
         </div>
