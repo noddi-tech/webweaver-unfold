@@ -4,24 +4,29 @@ import { EditableTranslation } from "@/components/EditableTranslation";
 import { EditableCard } from "@/components/EditableCard";
 import { EditableCardTitle } from "@/components/EditableCardTitle";
 import { EditableCardDescription } from "@/components/EditableCardDescription";
-import { EditableCardIcon } from "@/components/EditableCardIcon";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Building2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const partners = [
   {
     name: "Hurtigruta Carglass",
+    logoUrl: "https://ouhfgazomdmirdazvjys.supabase.co/storage/v1/object/public/site-images/Library/1764063455041-carglass%20logo.png",
+    logoAlt: "Hurtigruta Carglass logo",
     descKey: "about.partners.hurtigruta.desc",
     descFallback: "Signed expansion agreement for Norway after successful pilot",
   },
   {
     name: "Trøndedekk",
+    logoUrl: "https://ouhfgazomdmirdazvjys.supabase.co/storage/v1/object/public/site-images/Library/1764063503770-Tronderdekk%20logo.png",
+    logoAlt: "Trøndedekk logo",
     descKey: "about.partners.trondedekk.desc",
     descFallback: "Operational partner leveraging Navio for regional service delivery",
   },
   {
     name: "Noddi Automotive AS",
+    logoUrl: "https://ouhfgazomdmirdazvjys.supabase.co/storage/v1/object/public/site-images/Library/1764063447901-Noddi.png",
+    logoAlt: "Noddi Automotive logo",
     descKey: "about.partners.noddi.desc",
     descFallback: "Licensor of Navio as both operator and technology partner",
   },
@@ -70,17 +75,24 @@ export function AboutPartners() {
                 elementIdPrefix={`about-partner-${index}`}
                 defaultBackground="bg-card"
                 defaultTextColor="card-foreground"
+                defaultIconColor="card-foreground"
+                defaultIconBackground="bg-card-foreground/10"
                 className="p-6 border hover:shadow-md transition-shadow h-full"
               >
-                <EditableCardIcon
-                  icon={Building2}
-                  size="default"
-                  containerClassName="mb-4"
-                />
-                <EditableCardTitle className="text-lg font-semibold mb-2">
+                {/* Partner Logo */}
+                <div className="h-16 flex items-center justify-center mb-4">
+                  <div className="bg-white/90 rounded-lg px-4 py-2 h-14 flex items-center justify-center">
+                    <img
+                      src={partner.logoUrl}
+                      alt={partner.logoAlt}
+                      className="max-h-10 max-w-[140px] object-contain"
+                    />
+                  </div>
+                </div>
+                <EditableCardTitle className="text-lg font-semibold mb-2 text-center">
                   {partner.name}
                 </EditableCardTitle>
-                <EditableCardDescription muted className="text-sm">
+                <EditableCardDescription muted className="text-sm text-center">
                   <EditableTranslation
                     translationKey={partner.descKey}
                     fallbackText={partner.descFallback}

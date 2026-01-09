@@ -77,6 +77,8 @@ export function AboutMission() {
                 elementIdPrefix={`about-mission-benefit-${index}`}
                 defaultBackground="bg-card"
                 defaultTextColor="card-foreground"
+                defaultIconColor="card-foreground"
+                defaultIconBackground="bg-card-foreground/10"
                 className="flex flex-col items-center p-6 border hover:shadow-md transition-shadow h-full"
               >
                 <EditableCardIcon

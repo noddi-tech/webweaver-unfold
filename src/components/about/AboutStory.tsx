@@ -62,24 +62,53 @@ export function AboutStory() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        {/* Timeline Visual Connector - Desktop */}
+        <div className="hidden md:block relative mb-8">
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={isVisible ? { scaleX: 1 } : {}}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="absolute top-1/2 left-[16.67%] right-[16.67%] h-0.5 bg-primary/30 -translate-y-1/2 origin-left"
+          />
+          <div className="flex justify-between px-[calc(16.67%-1.25rem)]">
+            {milestones.map((_, index) => (
+              <motion.div
+                key={index}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={isVisible ? { scale: 1, opacity: 1 } : {}}
+                transition={{ duration: 0.4, delay: 0.5 + index * 0.15 }}
+                className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-lg z-10"
+              >
+                {index + 1}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Cards Grid */}
+        <div className="grid md:grid-cols-3 gap-8 relative">
+          {/* Mobile Timeline - Vertical */}
+          <div className="md:hidden absolute left-6 top-0 bottom-0 w-0.5 bg-primary/20" />
+          
           {milestones.map((milestone, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30 }}
               animate={isVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: index * 0.15 }}
-              className="relative"
+              transition={{ duration: 0.6, delay: 0.6 + index * 0.15 }}
+              className="relative pl-10 md:pl-0"
             >
-              {/* Timeline connector for desktop */}
-              {index < milestones.length - 1 && (
-                <div className="hidden md:block absolute top-8 left-[calc(50%+2rem)] w-[calc(100%-4rem)] h-0.5 bg-border" />
-              )}
+              {/* Mobile Timeline Dot */}
+              <div className="md:hidden absolute left-4 top-6 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold -translate-x-1/2 z-10">
+                {index + 1}
+              </div>
               
               <EditableCard
                 elementIdPrefix={`about-story-${index}`}
                 defaultBackground="bg-card"
                 defaultTextColor="card-foreground"
+                defaultIconColor="card-foreground"
+                defaultIconBackground="bg-card-foreground/10"
                 className="p-6 border shadow-sm h-full"
               >
                 <EditableCardIcon

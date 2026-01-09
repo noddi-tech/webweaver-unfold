@@ -13,6 +13,8 @@ interface EditableCardProps {
   elementIdPrefix: string;
   defaultBackground?: string;
   defaultTextColor?: string;
+  defaultIconColor?: string;
+  defaultIconBackground?: string;
   className?: string;
 }
 
@@ -30,6 +32,8 @@ export function EditableCard({
   elementIdPrefix,
   defaultBackground = 'glass-card',
   defaultTextColor = 'foreground',
+  defaultIconColor = 'primary',
+  defaultIconBackground = 'bg-primary/10',
   className,
 }: EditableCardProps) {
   const { editMode } = useEditMode();
@@ -55,8 +59,8 @@ export function EditableCard({
   const background = localBackground ?? savedBg?.background_class ?? defaultBackground;
   const textColor = localTextColor ?? savedBg?.text_color_class ?? defaultTextColor;
   const cardShadow = localCardShadow ?? 'shadow-none';
-  const iconColor = localIconColor ?? savedIconStyle?.icon_color_token ?? 'primary';
-  const iconBackground = localIconBackground ?? savedIconBg?.background_class ?? 'bg-primary/10';
+  const iconColor = localIconColor ?? savedIconStyle?.icon_color_token ?? defaultIconColor;
+  const iconBackground = localIconBackground ?? savedIconBg?.background_class ?? defaultIconBackground;
   const iconSize = localIconSize ?? savedIconStyle?.size ?? 'default';
 
   // Use centralized utility for background styles
