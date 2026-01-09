@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { EditableTranslation } from "@/components/EditableTranslation";
@@ -6,6 +7,12 @@ import { EditableCardTitle } from "@/components/EditableCardTitle";
 import { EditableCardDescription } from "@/components/EditableCardDescription";
 import { EditableCardIcon } from "@/components/EditableCardIcon";
 import { Code, Wrench, Rocket } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 
 const milestones = [
   {
@@ -33,6 +40,22 @@ const milestones = [
 
 export function AboutStory() {
   const { ref, isVisible } = useScrollAnimation();
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+
+  const onSelect = useCallback(() => {
+    if (!api) return;
+    setCurrent(api.selectedScrollSnap());
+  }, [api]);
+
+  useEffect(() => {
+    if (!api) return;
+    onSelect();
+    api.on("select", onSelect);
+    return () => {
+      api.off("select", onSelect);
+    };
+  }, [api, onSelect]);
 
   return (
     <section id="story" className="py-20 md:py-28 bg-muted/30">
@@ -62,79 +85,144 @@ export function AboutStory() {
           </p>
         </motion.div>
 
-        {/* Timeline Visual Connector - Desktop */}
-        <div className="hidden md:block relative mb-8">
-          <motion.div
-            initial={{ scaleX: 0 }}
-            animate={isVisible ? { scaleX: 1 } : {}}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="absolute top-1/2 left-[16.67%] right-[16.67%] h-0.5 bg-primary/30 -translate-y-1/2 origin-left"
-          />
-          <div className="flex justify-between px-[calc(16.67%-1.25rem)]">
+        {/* Mobile Swipeable Carousel */}
+        <div className="md:hidden">
+          <Carousel
+            opts={{ align: "start" }}
+            setApi={setApi}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-3">
+              {milestones.map((milestone, index) => (
+                <CarouselItem key={index} className="pl-3 basis-[85%]">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={isVisible ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
+                    <EditableCard
+                      elementIdPrefix={`about-story-${index}`}
+                      defaultBackground="bg-card"
+                      defaultTextColor="card-foreground"
+                      defaultIconColor="card-foreground"
+                      defaultIconBackground="bg-card-foreground/10"
+                      className="p-5 border shadow-sm h-full active:scale-[0.98] transition-transform touch-pan-x"
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shrink-0">
+                          {index + 1}
+                        </div>
+                        <EditableCardIcon
+                          icon={milestone.icon}
+                          size="default"
+                        />
+                      </div>
+                      <EditableCardTitle className="text-lg font-semibold mb-3">
+                        <EditableTranslation
+                          translationKey={milestone.titleKey}
+                          fallbackText={milestone.titleFallback}
+                        >
+                          {milestone.titleFallback}
+                        </EditableTranslation>
+                      </EditableCardTitle>
+                      <EditableCardDescription muted className="text-sm">
+                        <EditableTranslation
+                          translationKey={milestone.descKey}
+                          fallbackText={milestone.descFallback}
+                        >
+                          {milestone.descFallback}
+                        </EditableTranslation>
+                      </EditableCardDescription>
+                    </EditableCard>
+                  </motion.div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+          {/* Pagination Dots */}
+          <div className="flex justify-center gap-2 mt-6">
             {milestones.map((_, index) => (
-              <motion.div
+              <button
                 key={index}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={isVisible ? { scale: 1, opacity: 1 } : {}}
-                transition={{ duration: 0.4, delay: 0.5 + index * 0.15 }}
-                className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-lg z-10"
-              >
-                {index + 1}
-              </motion.div>
+                onClick={() => api?.scrollTo(index)}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  current === index
+                    ? "bg-primary w-6"
+                    : "bg-primary/30 hover:bg-primary/50"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
             ))}
           </div>
         </div>
 
-        {/* Cards Grid */}
-        <div className="grid md:grid-cols-3 gap-8 relative">
-          {/* Mobile Timeline - Vertical */}
-          <div className="md:hidden absolute left-6 top-0 bottom-0 w-0.5 bg-primary/20" />
-          
-          {milestones.map((milestone, index) => (
+        {/* Desktop Layout */}
+        <div className="hidden md:block">
+          {/* Timeline Visual Connector */}
+          <div className="relative mb-8">
             <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.6 + index * 0.15 }}
-              className="relative pl-10 md:pl-0"
-            >
-              {/* Mobile Timeline Dot */}
-              <div className="md:hidden absolute left-4 top-6 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold -translate-x-1/2 z-10">
-                {index + 1}
-              </div>
-              
-              <EditableCard
-                elementIdPrefix={`about-story-${index}`}
-                defaultBackground="bg-card"
-                defaultTextColor="card-foreground"
-                defaultIconColor="card-foreground"
-                defaultIconBackground="bg-card-foreground/10"
-                className="p-6 border shadow-sm h-full"
+              initial={{ scaleX: 0 }}
+              animate={isVisible ? { scaleX: 1 } : {}}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="absolute top-1/2 left-[16.67%] right-[16.67%] h-0.5 bg-primary/30 -translate-y-1/2 origin-left"
+            />
+            <div className="flex justify-between px-[calc(16.67%-1.25rem)]">
+              {milestones.map((_, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={isVisible ? { scale: 1, opacity: 1 } : {}}
+                  transition={{ duration: 0.4, delay: 0.5 + index * 0.15 }}
+                  className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-lg z-10"
+                >
+                  {index + 1}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Cards Grid */}
+          <div className="grid md:grid-cols-3 gap-8">
+            {milestones.map((milestone, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isVisible ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.6 + index * 0.15 }}
               >
-                <EditableCardIcon
-                  icon={milestone.icon}
-                  size="lg"
-                  containerClassName="mx-auto mb-4"
-                />
-                <EditableCardTitle className="text-lg font-semibold text-center mb-3">
-                  <EditableTranslation
-                    translationKey={milestone.titleKey}
-                    fallbackText={milestone.titleFallback}
-                  >
-                    {milestone.titleFallback}
-                  </EditableTranslation>
-                </EditableCardTitle>
-                <EditableCardDescription muted className="text-center text-sm">
-                  <EditableTranslation
-                    translationKey={milestone.descKey}
-                    fallbackText={milestone.descFallback}
-                  >
-                    {milestone.descFallback}
-                  </EditableTranslation>
-                </EditableCardDescription>
-              </EditableCard>
-            </motion.div>
-          ))}
+                <EditableCard
+                  elementIdPrefix={`about-story-${index}`}
+                  defaultBackground="bg-card"
+                  defaultTextColor="card-foreground"
+                  defaultIconColor="card-foreground"
+                  defaultIconBackground="bg-card-foreground/10"
+                  className="p-6 border shadow-sm h-full hover:shadow-md transition-shadow"
+                >
+                  <EditableCardIcon
+                    icon={milestone.icon}
+                    size="lg"
+                    containerClassName="mx-auto mb-4"
+                  />
+                  <EditableCardTitle className="text-lg font-semibold text-center mb-3">
+                    <EditableTranslation
+                      translationKey={milestone.titleKey}
+                      fallbackText={milestone.titleFallback}
+                    >
+                      {milestone.titleFallback}
+                    </EditableTranslation>
+                  </EditableCardTitle>
+                  <EditableCardDescription muted className="text-center text-sm">
+                    <EditableTranslation
+                      translationKey={milestone.descKey}
+                      fallbackText={milestone.descFallback}
+                    >
+                      {milestone.descFallback}
+                    </EditableTranslation>
+                  </EditableCardDescription>
+                </EditableCard>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

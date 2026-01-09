@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
@@ -18,7 +18,16 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { EditableCard } from "@/components/EditableCard";
 import { EditableBenefitCard } from "@/components/EditableBenefitCard";
+import { TeamMemberCard } from "@/components/TeamMemberCard";
 import type { LucideIcon } from "lucide-react";
+
+interface Employee {
+  id: string;
+  name: string;
+  title: string;
+  image_url: string | null;
+  image_object_position: string;
+}
 
 const ensureMeta = (name: string, content: string) => {
   let tag = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
@@ -35,6 +44,8 @@ const Careers = () => {
   const { editMode } = useEditMode();
   const queryClient = useQueryClient();
   const { data: jobs, isLoading: jobsLoading } = useJobListings(editMode);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employeesLoading, setEmployeesLoading] = useState(true);
 
   const benefits: { key: string; icon: LucideIcon; titleKey: string; descKey: string; titleFallback: string; descFallback: string }[] = [
     { key: "ownership", icon: TrendingUp, titleKey: "careers.benefits.ownership.title", descKey: "careers.benefits.ownership.description", titleFallback: "Ownership Mindset", descFallback: "Participate in Navio's success — all employees receive equity through our stock option program." },
@@ -44,6 +55,20 @@ const Careers = () => {
     { key: "collaboration", icon: Building, titleKey: "careers.benefits.collaboration.title", descKey: "careers.benefits.collaboration.description", titleFallback: "Purposeful Collaboration", descFallback: "We champion in-person connection and teamwork to solve complex challenges together." },
     { key: "flexibility", icon: Target, titleKey: "careers.benefits.flexibility.title", descKey: "careers.benefits.flexibility.description", titleFallback: "Outcome-Driven Flexibility", descFallback: "We focus on results over rigid routines and support flexible work arrangements where it enhances performance." },
   ];
+
+  useEffect(() => {
+    const loadEmployees = async () => {
+      setEmployeesLoading(true);
+      const { data } = await supabase
+        .from("employees")
+        .select("id, name, title, image_url, image_object_position")
+        .eq("active", true)
+        .order("sort_order", { ascending: true });
+      setEmployees(data || []);
+      setEmployeesLoading(false);
+    };
+    loadEmployees();
+  }, []);
 
   const handleActiveToggle = async (jobId: string, active: boolean) => {
     const { error } = await supabase
@@ -125,6 +150,40 @@ const Careers = () => {
             ))}
           </div>
         </section>
+
+        {/* Team Section */}
+        {(employees.length > 0 || employeesLoading) && (
+          <section className="max-w-4xl mx-auto mb-20">
+            <EditableTranslation translationKey="careers.team.title" fallbackText="Meet the Team">
+              <h2 className="text-3xl font-bold mb-8 text-center">
+                {t("careers.team.title", "Meet the Team")}
+              </h2>
+            </EditableTranslation>
+            {employeesLoading ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <Skeleton className="aspect-[4/5] w-full" />
+                    <div className="p-4">
+                      <Skeleton className="h-5 w-32 mb-2" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {employees.map((member) => (
+                  <TeamMemberCard
+                    key={member.id}
+                    member={member}
+                    pagePrefix="careers"
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Open Positions Section */}
         <section className="max-w-4xl mx-auto mb-20">
