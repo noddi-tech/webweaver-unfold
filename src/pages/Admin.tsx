@@ -46,6 +46,7 @@ import NewsletterManager from "@/components/design-system/NewsletterManager";
 import { PressManager } from "@/components/design-system/PressManager";
 import TechStackManager from "@/components/design-system/TechStackManager";
 import ApplicationsManager from "@/components/design-system/ApplicationsManager";
+import { EmailTemplatesManager } from "@/components/design-system/EmailTemplatesManager";
 const Admin = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -252,6 +253,7 @@ const Admin = () => {
                     <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
                     <TabsTrigger value="techstack">Tech Stack</TabsTrigger>
                     <TabsTrigger value="applications">Applications</TabsTrigger>
+                    <TabsTrigger value="emails">Emails</TabsTrigger>
                   </TabsList>
                   <TabsContent value="header" className="space-y-8">
                     <HeaderManager />
@@ -276,6 +278,9 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="applications" className="space-y-8">
                     <ApplicationsManager />
+                  </TabsContent>
+                  <TabsContent value="emails" className="space-y-8">
+                    <EmailTemplatesManager />
                   </TabsContent>
                 </Tabs>
               </TabsContent>
