@@ -553,6 +553,60 @@ export type Database = {
         }
         Relationships: []
       }
+      email_templates: {
+        Row: {
+          body_html: string
+          button_text: string | null
+          button_url: string | null
+          created_at: string | null
+          description: string | null
+          emoji: string | null
+          header_bg_end: string | null
+          header_bg_start: string | null
+          heading: string
+          id: string
+          is_active: boolean | null
+          name: string
+          subject: string
+          template_key: string
+          updated_at: string | null
+        }
+        Insert: {
+          body_html: string
+          button_text?: string | null
+          button_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          emoji?: string | null
+          header_bg_end?: string | null
+          header_bg_start?: string | null
+          heading: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subject: string
+          template_key: string
+          updated_at?: string | null
+        }
+        Update: {
+          body_html?: string
+          button_text?: string | null
+          button_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          emoji?: string | null
+          header_bg_end?: string | null
+          header_bg_start?: string | null
+          heading?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subject?: string
+          template_key?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           active: boolean
