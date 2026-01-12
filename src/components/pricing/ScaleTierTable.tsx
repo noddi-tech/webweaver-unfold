@@ -1,7 +1,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { type ScaleTier } from '@/config/newPricing';
-import { formatRevenue, formatPercentage } from '@/utils/newPricingCalculator';
+import { formatPercentage } from '@/utils/newPricingCalculator';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface ScaleTierTableProps {
   tiers: ScaleTier[];
@@ -9,6 +10,8 @@ interface ScaleTierTableProps {
 }
 
 export function ScaleTierTable({ tiers, currentTier }: ScaleTierTableProps) {
+  const { formatRevenue } = useCurrency();
+  
   return (
     <div className="rounded-lg border border-border overflow-hidden">
       <Table>

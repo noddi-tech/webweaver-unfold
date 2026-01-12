@@ -5,9 +5,12 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { usePricingConfig } from '@/hooks/usePricingConfig';
-import { comparePricing, formatPricingCurrency, formatPercentage, formatRevenue } from '@/utils/newPricingCalculator';
+import { comparePricing, formatPercentage } from '@/utils/newPricingCalculator';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import { CurrencySwitcher } from '@/components/pricing/CurrencySwitcher';
 
 export function PricingComparisonCalculator() {
+  const { formatAmount, formatRevenue, config: currencyConfig } = useCurrency();
   const { launch, scale, scaleTiers, isLoading } = usePricingConfig();
   
   // Revenue presets for slider (in EUR)
@@ -39,14 +42,17 @@ export function PricingComparisonCalculator() {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Calculator className="w-6 h-6 text-primary" />
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Calculator className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <CardTitle>Pricing Calculator</CardTitle>
+              <CardDescription>Find the best tier for your business</CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle>Pricing Calculator</CardTitle>
-            <CardDescription>Find the best tier for your business</CardDescription>
-          </div>
+          <CurrencySwitcher variant="compact" />
         </div>
       </CardHeader>
       
@@ -70,8 +76,8 @@ export function PricingComparisonCalculator() {
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>€100K</span>
-              <span>€100M</span>
+              <span>{formatRevenue(100_000)}</span>
+              <span>{formatRevenue(100_000_000)}</span>
             </div>
           </div>
           
@@ -122,16 +128,16 @@ export function PricingComparisonCalculator() {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Fixed (yearly)</span>
-                <span>{formatPricingCurrency(comparison.launch.fixedCostYearly)}</span>
+                <span>{formatAmount(comparison.launch.fixedCostYearly)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Revenue ({(launch.revenuePercentage * 100).toFixed(0)}%)</span>
-                <span>{formatPricingCurrency(comparison.launch.revenueCost)}</span>
+                <span>{formatAmount(comparison.launch.revenueCost)}</span>
               </div>
               <div className="border-t pt-2 mt-2">
                 <div className="flex justify-between font-semibold">
                   <span>Total/year</span>
-                  <span className="text-lg">{formatPricingCurrency(comparison.launch.totalYearly)}</span>
+                  <span className="text-lg">{formatAmount(comparison.launch.totalYearly)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Effective rate</span>
@@ -161,16 +167,16 @@ export function PricingComparisonCalculator() {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Fixed (yearly)</span>
-                <span>{formatPricingCurrency(comparison.scale.totalFixedYearly)}</span>
+                <span>{formatAmount(comparison.scale.totalFixedYearly)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Revenue ({formatPercentage(comparison.scale.tierTakeRate * 100)})</span>
-                <span>{formatPricingCurrency(comparison.scale.revenueCost)}</span>
+                <span>{formatAmount(comparison.scale.revenueCost)}</span>
               </div>
               <div className="border-t pt-2 mt-2">
                 <div className="flex justify-between font-semibold">
                   <span>Total/year</span>
-                  <span className="text-lg">{formatPricingCurrency(comparison.scale.totalYearly)}</span>
+                  <span className="text-lg">{formatAmount(comparison.scale.totalYearly)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Effective rate</span>
@@ -187,7 +193,7 @@ export function PricingComparisonCalculator() {
             <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
               <ArrowRight className="w-5 h-5" />
               <span className="font-medium">
-                Save {formatPricingCurrency(comparison.savingsAmount)}/year ({formatPercentage(comparison.savingsPercentage, 0)}) with {comparison.recommendation === 'launch' ? 'Launch' : 'Scale'}
+                Save {formatAmount(comparison.savingsAmount)}/year ({formatPercentage(comparison.savingsPercentage, 0)}) with {comparison.recommendation === 'launch' ? 'Launch' : 'Scale'}
               </span>
             </div>
           </div>

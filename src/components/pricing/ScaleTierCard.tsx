@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { type ScaleConfig, type ScaleTier } from '@/config/newPricing';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface ScaleTierCardProps {
   config: ScaleConfig;
@@ -12,8 +13,14 @@ interface ScaleTierCardProps {
 }
 
 export function ScaleTierCard({ config, tiers, onSelect, isSelected }: ScaleTierCardProps) {
+  const { formatAmount, formatRevenue } = useCurrency();
+  
   const minRate = tiers.length > 0 ? Math.min(...tiers.map(t => t.takeRate)) * 100 : 0.7;
   const maxRate = tiers.length > 0 ? Math.max(...tiers.map(t => t.takeRate)) * 100 : 1.5;
+  
+  // Get first and last tier for display
+  const firstTier = tiers[0];
+  const lastTier = tiers[tiers.length - 1];
   
   const features = [
     'Unlimited locations',
@@ -50,12 +57,12 @@ export function ScaleTierCard({ config, tiers, onSelect, isSelected }: ScaleTier
         {/* Pricing */}
         <div className="space-y-2">
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-bold">€{config.fixedMonthly}</span>
+            <span className="text-4xl font-bold">{formatAmount(config.fixedMonthly)}</span>
             <span className="text-muted-foreground">/month</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Building2 className="w-4 h-4" />
-            <span>+ €{config.perDepartment}/location/month</span>
+            <span>+ {formatAmount(config.perDepartment)}/location/month</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg font-semibold text-primary">
@@ -67,9 +74,9 @@ export function ScaleTierCard({ config, tiers, onSelect, isSelected }: ScaleTier
         
         {/* Tier preview */}
         <div className="p-3 rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20">
-          <p className="text-xs font-medium text-primary mb-2">15 Revenue Tiers</p>
+          <p className="text-xs font-medium text-primary mb-2">{tiers.length} Revenue Tiers</p>
           <p className="text-sm text-muted-foreground">
-            Rate decreases as your revenue grows, from {maxRate.toFixed(1)}% at €1M to {minRate.toFixed(1)}% at €389M+
+            Rate decreases as your revenue grows, from {maxRate.toFixed(1)}% at {firstTier ? formatRevenue(firstTier.revenueThreshold) : '€1M'} to {minRate.toFixed(1)}% at {lastTier ? formatRevenue(lastTier.revenueThreshold) : '€389M'}+
           </p>
         </div>
         
