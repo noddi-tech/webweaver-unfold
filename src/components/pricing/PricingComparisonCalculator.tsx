@@ -13,21 +13,26 @@ export function PricingComparisonCalculator() {
   const { formatAmount, formatRevenue, config: currencyConfig } = useCurrency();
   const { launch, scale, scaleTiers, isLoading } = usePricingConfig();
   
-  // Revenue presets for slider (in EUR)
+  // Revenue presets for slider (in EUR) - more granular from €5M to €100M
   const revenuePresets = [
-    100_000, 250_000, 500_000, 750_000,
-    1_000_000, 2_000_000, 3_000_000, 5_000_000,
-    10_000_000, 20_000_000, 50_000_000, 100_000_000
+    250_000, 500_000, 750_000, 1_000_000,
+    2_000_000, 3_000_000, 4_000_000, 5_000_000,
+    7_500_000, 10_000_000, 12_500_000, 15_000_000,
+    20_000_000, 25_000_000, 30_000_000, 40_000_000,
+    50_000_000, 75_000_000, 100_000_000
   ];
   
-  const [revenueIndex, setRevenueIndex] = useState(4); // Default to €1M
-  const [departments, setDepartments] = useState(2);
+  const [revenueIndex, setRevenueIndex] = useState(3); // Default to €1M
+  const [departments, setDepartments] = useState(1); // Default to 1 location
+  
+  // Launch is only available for single location
+  const isLaunchAvailable = departments === 1;
   
   const annualRevenue = revenuePresets[revenueIndex];
   
   const comparison = useMemo(() => {
-    return comparePricing(annualRevenue, departments, launch, scale, scaleTiers);
-  }, [annualRevenue, departments, launch, scale, scaleTiers]);
+    return comparePricing(annualRevenue, departments, launch, scale, scaleTiers, isLaunchAvailable);
+  }, [annualRevenue, departments, launch, scale, scaleTiers, isLaunchAvailable]);
   
   if (isLoading) {
     return (
@@ -76,7 +81,7 @@ export function PricingComparisonCalculator() {
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{formatRevenue(100_000)}</span>
+              <span>{formatRevenue(250_000)}</span>
               <span>{formatRevenue(100_000_000)}</span>
             </div>
           </div>
@@ -111,40 +116,52 @@ export function PricingComparisonCalculator() {
         <div className="grid md:grid-cols-2 gap-4">
           {/* Launch result */}
           <div className={`p-4 rounded-lg border-2 transition-all ${
-            comparison.recommendation === 'launch' 
-              ? 'border-primary bg-primary/5' 
-              : 'border-border bg-muted/30'
+            !isLaunchAvailable
+              ? 'border-border bg-muted/20 opacity-60'
+              : comparison.recommendation === 'launch' 
+                ? 'border-primary bg-primary/5' 
+                : 'border-border bg-muted/30'
           }`}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Rocket className="w-5 h-5 text-primary" />
+                <Rocket className={`w-5 h-5 ${isLaunchAvailable ? 'text-primary' : 'text-muted-foreground'}`} />
                 <span className="font-semibold">Launch</span>
               </div>
-              {comparison.recommendation === 'launch' && (
+              {isLaunchAvailable && comparison.recommendation === 'launch' && (
                 <Badge className="bg-green-500 hover:bg-green-600">Best Value</Badge>
+              )}
+              {!isLaunchAvailable && (
+                <Badge variant="secondary" className="text-xs">Single Location Only</Badge>
               )}
             </div>
             
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Fixed (yearly)</span>
-                <span>{formatAmount(comparison.launch.fixedCostYearly)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Revenue ({(launch.revenuePercentage * 100).toFixed(0)}%)</span>
-                <span>{formatAmount(comparison.launch.revenueCost)}</span>
-              </div>
-              <div className="border-t pt-2 mt-2">
-                <div className="flex justify-between font-semibold">
-                  <span>Total/year</span>
-                  <span className="text-lg">{formatAmount(comparison.launch.totalYearly)}</span>
+            {isLaunchAvailable ? (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Fixed (yearly)</span>
+                  <span>{formatAmount(comparison.launch.fixedCostYearly)}</span>
                 </div>
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Effective rate</span>
-                  <span>{formatPercentage(comparison.launch.effectiveRate)}</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Revenue ({(launch.revenuePercentage * 100).toFixed(0)}%)</span>
+                  <span>{formatAmount(comparison.launch.revenueCost)}</span>
+                </div>
+                <div className="border-t pt-2 mt-2">
+                  <div className="flex justify-between font-semibold">
+                    <span>Total/year</span>
+                    <span className="text-lg">{formatAmount(comparison.launch.totalYearly)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>Effective rate</span>
+                    <span>{formatPercentage(comparison.launch.effectiveRate)}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="text-sm text-muted-foreground py-4 text-center">
+                <p>Not available for multiple locations.</p>
+                <p className="mt-1">Choose Scale for {departments}+ locations.</p>
+              </div>
+            )}
           </div>
           
           {/* Scale result */}

@@ -111,21 +111,29 @@ export function calculateScalePricing(
 }
 
 // Compare Launch vs Scale and recommend best option
+// Launch is only available for single location (isLaunchAvailable = departments === 1)
 export function comparePricing(
   annualRevenue: number,
   numberOfDepartments: number,
   launchConfig: LaunchConfig = LAUNCH_CONFIG,
   scaleConfig: ScaleConfig = SCALE_CONFIG,
-  scaleTiers: ScaleTier[] = generateScaleTiers()
+  scaleTiers: ScaleTier[] = generateScaleTiers(),
+  isLaunchAvailable: boolean = true
 ): PricingComparison {
   const launch = calculateLaunchPricing(annualRevenue, launchConfig);
   const scale = calculateScalePricing(annualRevenue, numberOfDepartments, scaleConfig, scaleTiers);
   
-  const recommendation = launch.totalYearly <= scale.totalYearly ? 'launch' : 'scale';
-  const cheaperCost = Math.min(launch.totalYearly, scale.totalYearly);
-  const expensiveCost = Math.max(launch.totalYearly, scale.totalYearly);
-  const savingsAmount = expensiveCost - cheaperCost;
-  const savingsPercentage = expensiveCost > 0 ? (savingsAmount / expensiveCost) * 100 : 0;
+  // Launch is only available for single location
+  // If not available, always recommend Scale regardless of cost
+  const recommendation = !isLaunchAvailable 
+    ? 'scale' 
+    : launch.totalYearly <= scale.totalYearly ? 'launch' : 'scale';
+  
+  // Calculate savings only when both options are available
+  const cheaperCost = isLaunchAvailable ? Math.min(launch.totalYearly, scale.totalYearly) : scale.totalYearly;
+  const expensiveCost = isLaunchAvailable ? Math.max(launch.totalYearly, scale.totalYearly) : scale.totalYearly;
+  const savingsAmount = isLaunchAvailable ? expensiveCost - cheaperCost : 0;
+  const savingsPercentage = isLaunchAvailable && expensiveCost > 0 ? (savingsAmount / expensiveCost) * 100 : 0;
   
   return {
     launch,
