@@ -2244,6 +2244,7 @@ export type Database = {
       }
       pricing_tiers_config: {
         Row: {
+          base_revenue_threshold: number | null
           created_at: string | null
           description: string | null
           fixed_monthly_cost: number
@@ -2256,6 +2257,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          base_revenue_threshold?: number | null
           created_at?: string | null
           description?: string | null
           fixed_monthly_cost?: number
@@ -2268,6 +2270,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          base_revenue_threshold?: number | null
           created_at?: string | null
           description?: string | null
           fixed_monthly_cost?: number
