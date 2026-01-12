@@ -92,7 +92,7 @@ const BlogPost = () => {
 
           {/* Category Badge */}
           {post.category && (
-            <Badge variant="outline" className="mb-4">
+            <Badge variant="outline" className="mt-6 mb-4">
               {post.category}
             </Badge>
           )}
@@ -103,7 +103,7 @@ const BlogPost = () => {
           </h1>
 
           {/* Meta Info */}
-          <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-8">
+          <div className="flex flex-wrap items-center gap-6 text-muted-foreground mb-8">
             {post.author_name && (
               <div className="flex items-center gap-2">
                 <Avatar className="w-8 h-8">
@@ -120,16 +120,25 @@ const BlogPost = () => {
                 </div>
               </div>
             )}
-            {post.published_at && (
-              <span className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                {formatDate(post.published_at)}
-              </span>
+            
+            {/* Separator */}
+            {post.author_name && (
+              <span className="hidden sm:inline text-muted-foreground/40">|</span>
             )}
-            <span className="flex items-center gap-1">
-              <Clock className="w-4 h-4" />
-              {t('blog.reading_time', '{minutes} min read').replace('{minutes}', String(post.reading_time_minutes))}
-            </span>
+            
+            {/* Date and Read Time grouped */}
+            <div className="flex items-center gap-4">
+              {post.published_at && (
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4" />
+                  {formatDate(post.published_at)}
+                </span>
+              )}
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-4 h-4" />
+                {t('blog.reading_time', '{minutes} min read').replace('{minutes}', String(post.reading_time_minutes))}
+              </span>
+            </div>
           </div>
 
           {/* Featured Image */}
