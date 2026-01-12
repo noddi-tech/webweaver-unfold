@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -175,14 +176,15 @@ const FeaturesManager = () => {
         <h3 className="text-xl font-semibold text-foreground mb-4">Design Settings</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label className="text-sm text-muted-foreground">Section Title</label>
+            <Label htmlFor="feature-section-title">Section Title</Label>
             <Input
+              id="feature-section-title"
               value={settings?.section_title ?? ""}
               onChange={(e) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), section_title: e.target.value }))}
             />
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Background</label>
+            <Label htmlFor="feature-bg">Background</Label>
             <Select
               value={settings?.background_token ?? "background"}
               onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), background_token: v }))}
@@ -196,7 +198,7 @@ const FeaturesManager = () => {
             </Select>
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Card Background</label>
+            <Label htmlFor="feature-card-bg">Card Background</Label>
             <Select
               value={settings?.card_bg_token ?? "card"}
               onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), card_bg_token: v }))}
@@ -210,7 +212,7 @@ const FeaturesManager = () => {
             </Select>
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Icon Color</label>
+            <Label htmlFor="feature-icon-color">Icon Color</Label>
             <Select
               value={settings?.icon_token ?? "primary"}
               onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), icon_token: v }))}
@@ -224,7 +226,7 @@ const FeaturesManager = () => {
             </Select>
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Title Color</label>
+            <Label htmlFor="feature-title-color">Title Color</Label>
             <Select
               value={settings?.title_token ?? "foreground"}
               onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), title_token: v }))}
@@ -238,7 +240,7 @@ const FeaturesManager = () => {
             </Select>
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Description Color</label>
+            <Label htmlFor="feature-desc-color">Description Color</Label>
             <Select
               value={settings?.description_token ?? "muted-foreground"}
               onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), description_token: v }))}
@@ -252,7 +254,7 @@ const FeaturesManager = () => {
             </Select>
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Border Color</label>
+            <Label htmlFor="feature-border-color">Border Color</Label>
             <Select
               value={settings?.border_token ?? "border"}
               onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), border_token: v }))}
@@ -266,8 +268,9 @@ const FeaturesManager = () => {
             </Select>
           </div>
           <div className="md:col-span-3">
-            <label className="text-sm text-muted-foreground">Section Subtitle</label>
+            <Label htmlFor="feature-section-subtitle">Section Subtitle</Label>
             <Textarea
+              id="feature-section-subtitle"
               value={settings?.section_subtitle ?? ""}
               onChange={(e) => setSettings((s) => ({ ...(s || ({} as FeatureSettings)), section_subtitle: e.target.value }))}
             />
@@ -287,7 +290,10 @@ const FeaturesManager = () => {
         <h3 className="text-xl font-semibold text-foreground mb-4">Add Feature</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Input
+            id="new-feature-title"
             placeholder="Title"
+            autoFocus
+            aria-required="true"
             value={newFeature.title}
             onChange={(e) => setNewFeature((s) => ({ ...s, title: e.target.value }))}
           />

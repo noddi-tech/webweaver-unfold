@@ -213,8 +213,11 @@ export function SourceTrackingManager() {
             
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>Name *</Label>
+                <Label htmlFor="source-name">Name *</Label>
                 <Input
+                  id="source-name"
+                  autoFocus
+                  aria-required="true"
                   value={form.name}
                   onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="e.g., LinkedIn"
@@ -222,7 +225,7 @@ export function SourceTrackingManager() {
               </div>
               
               <div className="space-y-2">
-                <Label>Category *</Label>
+                <Label htmlFor="source-category">Category *</Label>
                 <Select
                   value={form.category}
                   onValueChange={(v) => setForm(f => ({ ...f, category: v }))}
@@ -239,8 +242,9 @@ export function SourceTrackingManager() {
               </div>
               
               <div className="space-y-2">
-                <Label>Tracking Code</Label>
+                <Label htmlFor="source-tracking-code">Tracking Code</Label>
                 <Input
+                  id="source-tracking-code"
                   value={form.tracking_code}
                   onChange={(e) => setForm(f => ({ ...f, tracking_code: e.target.value.toLowerCase().replace(/\s+/g, "_") }))}
                   placeholder="e.g., linkedin"

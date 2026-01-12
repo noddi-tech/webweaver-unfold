@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { useSaveShortcut } from "@/hooks/useFocusManagement";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -426,32 +427,39 @@ const StoriesManager = () => {
         <h3 className="text-xl font-semibold text-foreground mb-4">Add New Story</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label className="text-sm text-muted-foreground">Company Name *</label>
+            <Label htmlFor="new-story-company">Company Name *</Label>
             <Input
+              id="new-story-company"
+              autoFocus
+              aria-required="true"
               value={newStory.company_name}
               onChange={(e) => setNewStory({ ...newStory, company_name: e.target.value })}
               placeholder="Acme Inc."
             />
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Title *</label>
+            <Label htmlFor="new-story-title">Title *</Label>
             <Input
+              id="new-story-title"
+              aria-required="true"
               value={newStory.title}
               onChange={(e) => setNewStory({ ...newStory, title: e.target.value })}
               placeholder="How Acme increased efficiency by 50%"
             />
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Slug (auto-generated if empty)</label>
+            <Label htmlFor="new-story-slug">Slug (auto-generated if empty)</Label>
             <Input
+              id="new-story-slug"
               value={newStory.slug}
               onChange={(e) => setNewStory({ ...newStory, slug: e.target.value })}
               placeholder="acme-success-story"
             />
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Sort Order</label>
+            <Label htmlFor="new-story-order">Sort Order</Label>
             <Input
+              id="new-story-order"
               type="number"
               value={newStory.sort_order ?? 0}
               onChange={(e) => setNewStory({ ...newStory, sort_order: parseInt(e.target.value) || 0 })}
@@ -571,29 +579,36 @@ const StoriesManager = () => {
               <TabsContent value="basic" className="space-y-4 pt-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm text-muted-foreground">Company Name *</label>
+                    <Label htmlFor="edit-story-company">Company Name *</Label>
                     <Input
+                      id="edit-story-company"
+                      autoFocus
+                      aria-required="true"
                       value={editingStory.company_name}
                       onChange={(e) => updateEditing({ company_name: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Title *</label>
+                    <Label htmlFor="edit-story-title">Title *</Label>
                     <Input
+                      id="edit-story-title"
+                      aria-required="true"
                       value={editingStory.title}
                       onChange={(e) => updateEditing({ title: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Slug</label>
+                    <Label htmlFor="edit-story-slug">Slug</Label>
                     <Input
+                      id="edit-story-slug"
                       value={editingStory.slug}
                       onChange={(e) => updateEditing({ slug: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Sort Order</label>
+                    <Label htmlFor="edit-story-order">Sort Order</Label>
                     <Input
+                      id="edit-story-order"
                       type="number"
                       value={editingStory.sort_order ?? 0}
                       onChange={(e) => updateEditing({ sort_order: parseInt(e.target.value) || 0 })}
@@ -636,8 +651,9 @@ const StoriesManager = () => {
 
               <TabsContent value="content" className="space-y-4 pt-4">
                 <div>
-                  <label className="text-sm text-muted-foreground">About Company</label>
+                  <Label htmlFor="edit-story-about">About Company</Label>
                   <Textarea
+                    id="edit-story-about"
                     value={editingStory.about_company || ""}
                     onChange={(e) => updateEditing({ about_company: e.target.value })}
                     rows={4}
@@ -645,8 +661,9 @@ const StoriesManager = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-muted-foreground">Use Case</label>
+                  <Label htmlFor="edit-story-usecase">Use Case</Label>
                   <Textarea
+                    id="edit-story-usecase"
                     value={editingStory.use_case || ""}
                     onChange={(e) => updateEditing({ use_case: e.target.value })}
                     rows={4}
@@ -654,8 +671,9 @@ const StoriesManager = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-muted-foreground">Impact Statement</label>
+                  <Label htmlFor="edit-story-impact">Impact Statement</Label>
                   <Textarea
+                    id="edit-story-impact"
                     value={editingStory.impact_statement || ""}
                     onChange={(e) => updateEditing({ impact_statement: e.target.value })}
                     rows={4}
@@ -666,8 +684,9 @@ const StoriesManager = () => {
 
               <TabsContent value="quote" className="space-y-4 pt-4">
                 <div>
-                  <label className="text-sm text-muted-foreground">Quote Text</label>
+                  <Label htmlFor="edit-story-quote">Quote Text</Label>
                   <Textarea
+                    id="edit-story-quote"
                     value={editingStory.quote_text || ""}
                     onChange={(e) => updateEditing({ quote_text: e.target.value })}
                     rows={4}
@@ -676,16 +695,18 @@ const StoriesManager = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm text-muted-foreground">Quote Author</label>
+                    <Label htmlFor="edit-story-author">Quote Author</Label>
                     <Input
+                      id="edit-story-author"
                       value={editingStory.quote_author || ""}
                       onChange={(e) => updateEditing({ quote_author: e.target.value })}
                       placeholder="John Doe"
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-muted-foreground">Author Title</label>
+                    <Label htmlFor="edit-story-author-title">Author Title</Label>
                     <Input
+                      id="edit-story-author-title"
                       value={editingStory.quote_author_title || ""}
                       onChange={(e) => updateEditing({ quote_author_title: e.target.value })}
                       placeholder="CEO at Company"
@@ -773,32 +794,36 @@ const StoriesManager = () => {
                   <h4 className="text-sm font-medium mb-3">Final CTA Section</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2">
-                      <label className="text-sm text-muted-foreground">CTA Heading</label>
+                      <Label htmlFor="edit-story-cta-heading">CTA Heading</Label>
                       <Input
+                        id="edit-story-cta-heading"
                         value={editingStory.final_cta_heading || ""}
                         onChange={(e) => updateEditing({ final_cta_heading: e.target.value })}
                         placeholder="Ready to transform your business?"
                       />
                     </div>
                     <div className="col-span-2">
-                      <label className="text-sm text-muted-foreground">CTA Description</label>
+                      <Label htmlFor="edit-story-cta-desc">CTA Description</Label>
                       <Textarea
+                        id="edit-story-cta-desc"
                         value={editingStory.final_cta_description || ""}
                         onChange={(e) => updateEditing({ final_cta_description: e.target.value })}
                         rows={2}
                       />
                     </div>
                     <div>
-                      <label className="text-sm text-muted-foreground">Button Text</label>
+                      <Label htmlFor="edit-story-cta-btn">Button Text</Label>
                       <Input
+                        id="edit-story-cta-btn"
                         value={editingStory.final_cta_button_text || ""}
                         onChange={(e) => updateEditing({ final_cta_button_text: e.target.value })}
                         placeholder="Book a Demo"
                       />
                     </div>
                     <div>
-                      <label className="text-sm text-muted-foreground">Button URL</label>
+                      <Label htmlFor="edit-story-cta-url">Button URL</Label>
                       <Input
+                        id="edit-story-cta-url"
                         value={editingStory.final_cta_button_url || ""}
                         onChange={(e) => updateEditing({ final_cta_button_url: e.target.value })}
                         placeholder="/contact"
