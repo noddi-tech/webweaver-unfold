@@ -372,13 +372,12 @@ const BlogManager = () => {
                   />
                 </div>
 
-                <div>
-                  <Label>Featured Image</Label>
-                  <ImageFieldEditor
-                    value={editingPost.featured_image_url}
-                    onChange={(url) => setEditingPost({ ...editingPost, featured_image_url: url })}
-                  />
-                </div>
+                <ImageFieldEditor
+                  label="Featured Image"
+                  value={editingPost.featured_image_url}
+                  onChange={(url) => setEditingPost({ ...editingPost, featured_image_url: url })}
+                  storagePath="blog"
+                />
               </TabsContent>
 
               <TabsContent value="author" className="space-y-4">
@@ -424,15 +423,12 @@ const BlogManager = () => {
                     />
                   </div>
                 </div>
-                <div>
-                  <Label>Author Avatar</Label>
-                  <ImageFieldEditor
-                    value={editingPost.author_avatar_url}
-                    onChange={(url) => setEditingPost({ ...editingPost, author_avatar_url: url })}
-                    bucket="site-images"
-                    folder="authors"
-                  />
-                </div>
+                <ImageFieldEditor
+                  label="Author Avatar"
+                  value={editingPost.author_avatar_url}
+                  onChange={(url) => setEditingPost({ ...editingPost, author_avatar_url: url })}
+                  storagePath="blog/authors"
+                />
               </TabsContent>
 
               <TabsContent value="seo" className="space-y-4">
@@ -479,10 +475,10 @@ const BlogManager = () => {
                         )}
                       </div>
                       <ImageFieldEditor
+                        label="OG Image"
                         value={editingPost.og_image_url}
                         onChange={(url) => setEditingPost({ ...editingPost, og_image_url: url })}
-                        bucket="site-images"
-                        folder="og-images"
+                        storagePath="blog/og"
                       />
                     </div>
                     <div>
