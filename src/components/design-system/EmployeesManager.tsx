@@ -527,49 +527,49 @@ const sectionOptions = useMemo(() => {
         <h3 className="text-xl font-semibold">Add Employee</h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div className="grid gap-2">
-            <Label>Name</Label>
-            <Input value={newEmp.name} onChange={(e) => setNewEmp((s) => ({ ...s, name: e.target.value }))} />
+            <Label htmlFor="new-emp-name">Name *</Label>
+            <Input id="new-emp-name" autoFocus aria-required="true" value={newEmp.name} onChange={(e) => setNewEmp((s) => ({ ...s, name: e.target.value }))} />
           </div>
           <div className="grid gap-2">
-            <Label>Title</Label>
-            <Input value={newEmp.title} onChange={(e) => setNewEmp((s) => ({ ...s, title: e.target.value }))} />
+            <Label htmlFor="new-emp-title">Title *</Label>
+            <Input id="new-emp-title" aria-required="true" value={newEmp.title} onChange={(e) => setNewEmp((s) => ({ ...s, title: e.target.value }))} />
           </div>
           <div className="grid gap-2">
-            <Label>Section</Label>
+            <Label htmlFor="new-emp-section">Section</Label>
             <Select value={newEmp.section} onValueChange={(v) => setNewEmp((s) => ({ ...s, section: v }))}>
-              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectTrigger id="new-emp-section" className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {sectionOptions.map((name) => (<SelectItem key={name} value={name}>{name}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label>Sort order</Label>
-            <Input type="number" value={newEmp.sort_order ?? 0} onChange={(e) => setNewEmp((s) => ({ ...s, sort_order: Number(e.target.value) }))} />
+            <Label htmlFor="new-emp-order">Sort order</Label>
+            <Input id="new-emp-order" type="number" value={newEmp.sort_order ?? 0} onChange={(e) => setNewEmp((s) => ({ ...s, sort_order: Number(e.target.value) }))} />
           </div>
           <div className="grid gap-2">
-            <Label>Email</Label>
-            <Input type="email" value={newEmp.email ?? ""} onChange={(e) => setNewEmp((s) => ({ ...s, email: e.target.value }))} />
+            <Label htmlFor="new-emp-email">Email</Label>
+            <Input id="new-emp-email" type="email" value={newEmp.email ?? ""} onChange={(e) => setNewEmp((s) => ({ ...s, email: e.target.value }))} />
           </div>
           <div className="grid gap-2">
-            <Label>Phone</Label>
-            <Input value={newEmp.phone ?? ""} onChange={(e) => setNewEmp((s) => ({ ...s, phone: e.target.value }))} />
+            <Label htmlFor="new-emp-phone">Phone</Label>
+            <Input id="new-emp-phone" value={newEmp.phone ?? ""} onChange={(e) => setNewEmp((s) => ({ ...s, phone: e.target.value }))} />
           </div>
           <div className="grid gap-2">
-            <Label>LinkedIn URL</Label>
-            <Input value={newEmp.linkedin_url ?? ""} onChange={(e) => setNewEmp((s) => ({ ...s, linkedin_url: e.target.value }))} placeholder="https://linkedin.com/in/..." />
+            <Label htmlFor="new-emp-linkedin">LinkedIn URL</Label>
+            <Input id="new-emp-linkedin" value={newEmp.linkedin_url ?? ""} onChange={(e) => setNewEmp((s) => ({ ...s, linkedin_url: e.target.value }))} placeholder="https://linkedin.com/in/..." />
           </div>
 <div className="grid gap-2 lg:col-span-3">
-  <Label>Image</Label>
+  <Label htmlFor="new-emp-image-file">Image</Label>
   <div className="flex gap-2">
-    <Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-    <Input placeholder="or paste image URL" value={newEmp.image_url ?? ""} onChange={(e) => setNewEmp((s) => ({ ...s, image_url: e.target.value }))} />
+    <Input id="new-emp-image-file" type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+    <Input id="new-emp-image-url" placeholder="or paste image URL" value={newEmp.image_url ?? ""} onChange={(e) => setNewEmp((s) => ({ ...s, image_url: e.target.value }))} />
   </div>
 </div>
 <div className="grid gap-2">
-  <Label>Image Position</Label>
+  <Label htmlFor="new-emp-image-pos">Image Position</Label>
   <Select value={newEmp.image_object_position ?? "center"} onValueChange={(v) => setNewEmp((s) => ({ ...s, image_object_position: v }))}>
-    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+    <SelectTrigger id="new-emp-image-pos" className="w-full"><SelectValue /></SelectTrigger>
     <SelectContent>
       {imagePositionOptions.map((p) => (
         <SelectItem key={p} value={p}>{p.replace("-", " ")}</SelectItem>

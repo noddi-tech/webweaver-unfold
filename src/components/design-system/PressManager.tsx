@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSaveShortcut } from "@/hooks/useFocusManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { useAllPressMentions, PressMention } from "@/hooks/usePressMentions";
 import { Button } from "@/components/ui/button";
@@ -220,9 +221,11 @@ export const PressManager = () => {
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="create-title">Article Title *</Label>
+              <Label htmlFor="create-title">Article Title *</Label>
                 <Input
                   id="create-title"
+                  autoFocus
+                  aria-required="true"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Car dealers' missed opportunity..."
@@ -430,6 +433,8 @@ export const PressManager = () => {
               <Label htmlFor="edit-title">Article Title *</Label>
               <Input
                 id="edit-title"
+                autoFocus
+                aria-required="true"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Car dealers' missed opportunity..."

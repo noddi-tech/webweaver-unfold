@@ -174,8 +174,11 @@ export function FAQManager() {
           </div>
 
           <div className="space-y-2">
-            <Label>Question</Label>
+            <Label htmlFor="new-faq-question">Question</Label>
             <Input
+              id="new-faq-question"
+              autoFocus
+              aria-required="true"
               value={newFAQ.question}
               onChange={(e) => setNewFAQ({ ...newFAQ, question: e.target.value })}
               placeholder="Enter question"
@@ -183,8 +186,10 @@ export function FAQManager() {
           </div>
 
           <div className="space-y-2">
-            <Label>Answer</Label>
+            <Label htmlFor="new-faq-answer">Answer</Label>
             <Textarea
+              id="new-faq-answer"
+              aria-required="true"
               value={newFAQ.answer}
               onChange={(e) => setNewFAQ({ ...newFAQ, answer: e.target.value })}
               placeholder="Enter answer"

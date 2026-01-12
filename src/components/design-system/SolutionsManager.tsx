@@ -399,14 +399,15 @@ const SolutionsManager = () => {
         <h3 className="text-xl font-semibold text-foreground mb-4">Design Settings</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label className="text-sm text-muted-foreground">Section Title</label>
+            <Label htmlFor="solution-section-title">Section Title</Label>
             <Input
+              id="solution-section-title"
               value={settings?.section_title ?? ""}
               onChange={(e) => setSettings((s) => ({ ...(s || ({} as SolutionSettings)), section_title: e.target.value }))}
             />
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Background Token</label>
+            <Label htmlFor="solution-bg-token">Background Token</Label>
             <Select
               value={settings?.background_token ?? "background"}
               onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as SolutionSettings)), background_token: v }))}
@@ -418,7 +419,7 @@ const SolutionsManager = () => {
             </Select>
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Card BG Token</label>
+            <Label htmlFor="solution-card-bg">Card BG Token</Label>
             <Select
               value={settings?.card_bg_token ?? "card"}
               onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as SolutionSettings)), card_bg_token: v }))}
@@ -430,7 +431,7 @@ const SolutionsManager = () => {
             </Select>
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Icon Token</label>
+            <Label htmlFor="solution-icon-token">Icon Token</Label>
             <Select
               value={settings?.icon_token ?? "primary"}
               onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as SolutionSettings)), icon_token: v }))}
@@ -442,7 +443,7 @@ const SolutionsManager = () => {
             </Select>
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Title Token</label>
+            <Label htmlFor="solution-title-token">Title Token</Label>
             <Select
               value={settings?.title_token ?? "foreground"}
               onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as SolutionSettings)), title_token: v }))}
@@ -454,7 +455,7 @@ const SolutionsManager = () => {
             </Select>
           </div>
           <div>
-            <label className="text-sm text-muted-foreground">Subtitle Token</label>
+            <Label htmlFor="solution-subtitle-token">Subtitle Token</Label>
             <Select
               value={settings?.subtitle_token ?? "muted-foreground"}
               onValueChange={(v) => setSettings((s) => ({ ...(s || ({} as SolutionSettings)), subtitle_token: v }))}
@@ -466,8 +467,9 @@ const SolutionsManager = () => {
             </Select>
           </div>
           <div className="md:col-span-3">
-            <label className="text-sm text-muted-foreground">Section Subtitle</label>
+            <Label htmlFor="solution-section-subtitle">Section Subtitle</Label>
             <Textarea
+              id="solution-section-subtitle"
               value={settings?.section_subtitle ?? ""}
               onChange={(e) => setSettings((s) => ({ ...(s || ({} as SolutionSettings)), section_subtitle: e.target.value }))}
             />
