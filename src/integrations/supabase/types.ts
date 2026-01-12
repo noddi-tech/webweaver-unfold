@@ -2209,54 +2209,6 @@ export type Database = {
         }
         Relationships: []
       }
-      pricing_plans: {
-        Row: {
-          active: boolean
-          created_at: string
-          cta_text: string
-          cta_url: string | null
-          description: string | null
-          features: Json
-          id: string
-          name: string
-          period: string | null
-          popular: boolean
-          price: string
-          sort_order: number | null
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          cta_text?: string
-          cta_url?: string | null
-          description?: string | null
-          features?: Json
-          id?: string
-          name: string
-          period?: string | null
-          popular?: boolean
-          price: string
-          sort_order?: number | null
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          cta_text?: string
-          cta_url?: string | null
-          description?: string | null
-          features?: Json
-          id?: string
-          name?: string
-          period?: string | null
-          popular?: boolean
-          price?: string
-          sort_order?: number | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       pricing_scale_tiers: {
         Row: {
           created_at: string | null
