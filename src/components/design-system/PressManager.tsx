@@ -196,110 +196,6 @@ export const PressManager = () => {
     });
   };
 
-  const FormFields = () => (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="title">Article Title *</Label>
-        <Input
-          id="title"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          placeholder="Car dealers' missed opportunity..."
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="source_name">Source Name *</Label>
-          <Input
-            id="source_name"
-            value={formData.source_name}
-            onChange={(e) => setFormData({ ...formData, source_name: e.target.value })}
-            placeholder="Axios, TechCrunch, etc."
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
-          <Select
-            value={formData.category}
-            onValueChange={(value) => setFormData({ ...formData, category: value })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map((cat) => (
-                <SelectItem key={cat.value} value={cat.value}>
-                  {cat.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Source Logo/Image</Label>
-        <ImageFieldEditor
-          value={formData.source_logo_url}
-          onChange={(url) => setFormData({ ...formData, source_logo_url: url })}
-          label="Upload logo"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="article_url">Article URL *</Label>
-        <Input
-          id="article_url"
-          type="url"
-          value={formData.article_url}
-          onChange={(e) => setFormData({ ...formData, article_url: e.target.value })}
-          placeholder="https://..."
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="published_at">Publication Date</Label>
-        <Input
-          id="published_at"
-          type="date"
-          value={formData.published_at}
-          onChange={(e) => setFormData({ ...formData, published_at: e.target.value })}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="excerpt">Excerpt (optional)</Label>
-        <Textarea
-          id="excerpt"
-          value={formData.excerpt}
-          onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-          placeholder="Brief description or snippet..."
-          rows={3}
-        />
-      </div>
-
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2">
-          <Switch
-            id="active"
-            checked={formData.active}
-            onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
-          />
-          <Label htmlFor="active">Active</Label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Switch
-            id="featured"
-            checked={formData.featured}
-            onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
-          />
-          <Label htmlFor="featured">Featured</Label>
-        </div>
-      </div>
-    </div>
-  );
-
   if (isLoading) {
     return <div className="p-4">Loading...</div>;
   }
@@ -322,7 +218,107 @@ export const PressManager = () => {
             <DialogHeader>
               <DialogTitle>Add Press Mention</DialogTitle>
             </DialogHeader>
-            <FormFields />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="create-title">Article Title *</Label>
+                <Input
+                  id="create-title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Car dealers' missed opportunity..."
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="create-source">Source Name *</Label>
+                  <Input
+                    id="create-source"
+                    value={formData.source_name}
+                    onChange={(e) => setFormData({ ...formData, source_name: e.target.value })}
+                    placeholder="Axios, TechCrunch, etc."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-category">Category</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Source Logo/Image</Label>
+                <ImageFieldEditor
+                  value={formData.source_logo_url}
+                  onChange={(url) => setFormData({ ...formData, source_logo_url: url })}
+                  label="Upload logo"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="create-url">Article URL *</Label>
+                <Input
+                  id="create-url"
+                  type="url"
+                  value={formData.article_url}
+                  onChange={(e) => setFormData({ ...formData, article_url: e.target.value })}
+                  placeholder="https://..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="create-date">Publication Date</Label>
+                <Input
+                  id="create-date"
+                  type="date"
+                  value={formData.published_at}
+                  onChange={(e) => setFormData({ ...formData, published_at: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="create-excerpt">Excerpt (optional)</Label>
+                <Textarea
+                  id="create-excerpt"
+                  value={formData.excerpt}
+                  onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                  placeholder="Brief description or snippet..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="create-active"
+                    checked={formData.active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
+                  />
+                  <Label htmlFor="create-active">Active</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="create-featured"
+                    checked={formData.featured}
+                    onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
+                  />
+                  <Label htmlFor="create-featured">Featured</Label>
+                </div>
+              </div>
+            </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
                 Cancel
@@ -429,7 +425,107 @@ export const PressManager = () => {
           <DialogHeader>
             <DialogTitle>Edit Press Mention</DialogTitle>
           </DialogHeader>
-          <FormFields />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Article Title *</Label>
+              <Input
+                id="edit-title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Car dealers' missed opportunity..."
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-source">Source Name *</Label>
+                <Input
+                  id="edit-source"
+                  value={formData.source_name}
+                  onChange={(e) => setFormData({ ...formData, source_name: e.target.value })}
+                  placeholder="Axios, TechCrunch, etc."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-category">Category</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Source Logo/Image</Label>
+              <ImageFieldEditor
+                value={formData.source_logo_url}
+                onChange={(url) => setFormData({ ...formData, source_logo_url: url })}
+                label="Upload logo"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-url">Article URL *</Label>
+              <Input
+                id="edit-url"
+                type="url"
+                value={formData.article_url}
+                onChange={(e) => setFormData({ ...formData, article_url: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-date">Publication Date</Label>
+              <Input
+                id="edit-date"
+                type="date"
+                value={formData.published_at}
+                onChange={(e) => setFormData({ ...formData, published_at: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-excerpt">Excerpt (optional)</Label>
+              <Textarea
+                id="edit-excerpt"
+                value={formData.excerpt}
+                onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                placeholder="Brief description or snippet..."
+                rows={3}
+              />
+            </div>
+
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="edit-active"
+                  checked={formData.active}
+                  onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
+                />
+                <Label htmlFor="edit-active">Active</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="edit-featured"
+                  checked={formData.featured}
+                  onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
+                />
+                <Label htmlFor="edit-featured">Featured</Label>
+              </div>
+            </div>
+          </div>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setEditingMention(null)}>
               Cancel
