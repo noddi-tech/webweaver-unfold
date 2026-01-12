@@ -2257,6 +2257,78 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_scale_tiers: {
+        Row: {
+          created_at: string | null
+          id: string
+          rate_reduction: number | null
+          revenue_multiplier: number | null
+          revenue_threshold: number
+          take_rate: number
+          tier_number: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          rate_reduction?: number | null
+          revenue_multiplier?: number | null
+          revenue_threshold: number
+          take_rate: number
+          tier_number: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          rate_reduction?: number | null
+          revenue_multiplier?: number | null
+          revenue_threshold?: number
+          take_rate?: number
+          tier_number?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      pricing_tiers_config: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          fixed_monthly_cost: number
+          id: string
+          is_active: boolean | null
+          name: string
+          per_department_cost: number | null
+          revenue_percentage: number
+          tier_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          fixed_monthly_cost?: number
+          id?: string
+          is_active?: boolean | null
+          name: string
+          per_department_cost?: number | null
+          revenue_percentage?: number
+          tier_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          fixed_monthly_cost?: number
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          per_department_cost?: number | null
+          revenue_percentage?: number
+          tier_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       referral_sources: {
         Row: {
           active: boolean
