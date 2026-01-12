@@ -30,7 +30,7 @@ import { PagesManager } from "@/components/design-system/PagesManager";
 import FileManager from "@/components/design-system/FileManager";
 import FaviconManager from "@/components/design-system/FaviconManager";
 import SocialMetaManager from "@/components/design-system/SocialMetaManager";
-import PricingManager from "@/components/design-system/PricingManager";
+import { NewPricingManager } from "@/components/design-system/NewPricingManager";
 import { FAQManager } from "@/components/design-system/FAQManager";
 import TranslationManagerContent from "@/components/design-system/TranslationManagerContent";
 import PageMetaManager from "@/components/design-system/PageMetaManager";
@@ -271,7 +271,7 @@ const Admin = () => {
                     <SocialMetaManager />
                   </TabsContent>
                   <TabsContent value="pricing" className="space-y-8">
-                    <PricingManager />
+                    <NewPricingManager />
                   </TabsContent>
                   <TabsContent value="employees" className="space-y-8">
                     <EmployeesManager />

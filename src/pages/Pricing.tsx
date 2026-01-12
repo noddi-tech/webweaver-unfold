@@ -4,13 +4,18 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { NoHiddenCosts } from "@/components/pricing/NoHiddenCosts";
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
-import PricingHero from "@/components/pricing/PricingHero";
+import { PricingHeroNew } from "@/components/pricing/PricingHeroNew";
+import { LaunchTierCard } from "@/components/pricing/LaunchTierCard";
+import { ScaleTierCard } from "@/components/pricing/ScaleTierCard";
+import { usePricingConfig } from "@/hooks/usePricingConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
 import { LockedText } from "@/components/LockedText";
 
 const Pricing = () => {
+  const { launch, scale, scaleTiers, isLoading } = usePricingConfig();
+  
   // Fetch CMS content for pricing page
   const { textContent, loading: contentLoading } = useTextContent('pricing');
   
@@ -50,7 +55,27 @@ const Pricing = () => {
       <Header />
       <main>
         {/* Hero Section */}
-        <PricingHero textContent={textContent} />
+        <PricingHeroNew textContent={textContent} />
+
+        {/* Tier Cards */}
+        <section className="py-16 animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <div className="container max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-2 gap-8">
+              {!isLoading && (
+                <>
+                  <LaunchTierCard config={launch} />
+                  <ScaleTierCard config={scale} tiers={scaleTiers} />
+                </>
+              )}
+              {isLoading && (
+                <>
+                  <div className="h-96 rounded-lg bg-muted animate-pulse" />
+                  <div className="h-96 rounded-lg bg-muted animate-pulse" />
+                </>
+              )}
+            </div>
+          </div>
+        </section>
 
         {/* No Hidden Costs Banner */}
         <section className="pt-0 pb-section animate-fade-in" style={{ animationDelay: '175ms' }}>
