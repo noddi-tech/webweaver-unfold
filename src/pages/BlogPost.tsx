@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useRef } from 'react';
 import { ArrowLeft, Calendar, Clock, User, Facebook, Linkedin, Mail } from 'lucide-react';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
+import TableOfContents from '@/components/blog/TableOfContents';
 import { parseBlogMarkdown } from '@/lib/markdownUtils';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -81,11 +82,14 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <ReadingProgressBar contentRef={contentRef} />
+      <ReadingProgressBar contentRef={contentRef} readingTimeMinutes={post.reading_time_minutes} />
       <Header />
       
       <article className="pt-32 pb-24 px-4">
-        <div ref={contentRef} className="container mx-auto max-w-3xl">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex gap-12">
+            {/* Main content */}
+            <div ref={contentRef} className="flex-1 max-w-3xl">
           {/* Back Link */}
           <Link 
             to={`/${i18n.language}/blog`}
@@ -239,6 +243,16 @@ const BlogPost = () => {
                 <Mail className="w-5 h-5 text-foreground" />
               </a>
             </div>
+          </div>
+            </div>
+
+            {/* Table of Contents sidebar */}
+            {post.content && (
+              <TableOfContents 
+                content={post.content} 
+                contentRef={contentRef}
+              />
+            )}
           </div>
         </div>
       </article>
