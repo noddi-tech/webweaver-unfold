@@ -90,21 +90,22 @@ const BlogPost = () => {
           <div className="flex gap-12">
             {/* Main content */}
             <div ref={contentRef} className="flex-1 max-w-3xl">
-          {/* Back Link */}
-          <Link 
-            to={`/${i18n.language}/blog`}
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t('blog.back_to_blog', 'Back to Blog')}
-          </Link>
+              {/* Header row: Back Link + Category */}
+              <div className="flex flex-wrap items-center gap-4 mb-8">
+                <Link 
+                  to={`/${i18n.language}/blog`}
+                  className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  {t('blog.back_to_blog', 'Back to Blog')}
+                </Link>
 
-          {/* Category Badge */}
-          {post.category && (
-            <Badge variant="outline" className="mt-6 mb-4">
-              {post.category}
-            </Badge>
-          )}
+                {post.category && (
+                  <Badge variant="outline">
+                    {post.category}
+                  </Badge>
+                )}
+              </div>
 
           {/* Title */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
