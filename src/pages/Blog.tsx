@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, ArrowRight, Star } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, Star, Tag } from 'lucide-react';
 import NewsletterSignup from '@/components/NewsletterSignup';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { useBlogPosts, useFeaturedBlogPost } from '@/hooks/useBlogPosts';
+import { useBlogCategories } from '@/hooks/useBlogCategories';
 import { useEditMode } from '@/contexts/EditModeContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,25 +27,24 @@ const Blog = () => {
   
   const { data: posts, isLoading } = useBlogPosts(editMode);
   const { data: featuredPost } = useFeaturedBlogPost();
+  const { data: categories = [] } = useBlogCategories();
 
-  const categories = ['all', 'product', 'industry'];
-  
   const filteredPosts = posts?.filter(post => {
-    if (!selectedCategory || selectedCategory === 'all') return true;
-    return post.category?.toLowerCase() === selectedCategory;
+    if (!selectedCategory) return true;
+    return post.category_id === selectedCategory;
   }) || [];
 
-  const handleActiveToggle = async (postId: string, active: boolean) => {
+  const handleStatusChange = async (postId: string, status: string, active: boolean) => {
     const { error } = await supabase
       .from('blog_posts')
-      .update({ active })
+      .update({ status, active })
       .eq('id', postId);
     
     if (error) {
       toast.error('Failed to update post status');
     } else {
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
-      toast.success(active ? 'Post published' : 'Post unpublished');
+      toast.success('Post status updated');
     }
   };
 
@@ -163,14 +163,31 @@ const Blog = () => {
       <section className="pb-8 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant={!selectedCategory ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedCategory(null)}
+            >
+              {t('blog.categories.all', 'All')}
+              {posts && <span className="ml-1 text-xs opacity-70">({posts.length})</span>}
+            </Button>
             {categories.map((category) => (
               <Button
-                key={category}
-                variant={selectedCategory === category || (!selectedCategory && category === 'all') ? 'default' : 'outline'}
+                key={category.id}
+                variant={selectedCategory === category.id ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedCategory(category === 'all' ? null : category)}
+                onClick={() => setSelectedCategory(category.id)}
+                style={selectedCategory === category.id ? { 
+                  backgroundColor: category.color,
+                  borderColor: category.color 
+                } : {}}
               >
-                {t(`blog.categories.${category}`, category.charAt(0).toUpperCase() + category.slice(1))}
+                <span 
+                  className="w-2 h-2 rounded-full mr-2"
+                  style={{ backgroundColor: category.color }}
+                />
+                {category.name}
+                <span className="ml-1 text-xs opacity-70">({category.post_count})</span>
               </Button>
             ))}
           </div>
@@ -205,15 +222,21 @@ const Blog = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post) => (
-                <Card key={post.id} className={`overflow-hidden hover:shadow-lg transition-shadow bg-background ${!post.active ? 'opacity-60' : ''}`}>
+                <Card key={post.id} className={`overflow-hidden hover:shadow-lg transition-shadow bg-background ${post.status !== 'published' ? 'opacity-60' : ''}`}>
                   {editMode && (
                     <div className="p-4 border-b bg-muted/50 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Active</span>
-                        <Switch 
-                          checked={post.active} 
-                          onCheckedChange={(checked) => handleActiveToggle(post.id, checked)} 
-                        />
+                        <span className="text-sm font-medium">Status: {post.status}</span>
+                        <select 
+                          value={post.status}
+                          onChange={(e) => handleStatusChange(post.id, e.target.value, e.target.value === 'published')}
+                          className="text-sm border rounded px-2 py-1"
+                        >
+                          <option value="draft">Draft</option>
+                          <option value="scheduled">Scheduled</option>
+                          <option value="published">Published</option>
+                          <option value="archived">Archived</option>
+                        </select>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">Featured</span>
@@ -245,6 +268,18 @@ const Blog = () => {
                     </Link>
                   )}
                   <CardContent className="p-6">
+                    {post.category && (
+                      <Badge 
+                        variant="outline" 
+                        className="mb-3"
+                        style={{
+                          borderColor: categories.find(c => c.id === post.category_id)?.color,
+                          color: categories.find(c => c.id === post.category_id)?.color,
+                        }}
+                      >
+                        {post.category}
+                      </Badge>
+                    )}
                     <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-2">
                       {post.title}
                     </h3>
@@ -257,6 +292,22 @@ const Blog = () => {
                       <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
                         {post.excerpt}
                       </p>
+                    )}
+                    {/* Tags */}
+                    {post.tags && post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {post.tags.slice(0, 3).map(tag => (
+                          <Badge key={tag} variant="secondary" className="text-xs gap-1">
+                            <Tag className="w-3 h-3" />
+                            {tag}
+                          </Badge>
+                        ))}
+                        {post.tags.length > 3 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{post.tags.length - 3}
+                          </Badge>
+                        )}
+                      </div>
                     )}
                     <Link to={`/${i18n.language}/blog/${post.slug}`}>
                       <Button className="bg-foreground text-background hover:bg-foreground/90">
