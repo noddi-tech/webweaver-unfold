@@ -130,8 +130,10 @@ export type Database = {
         Row: {
           active: boolean
           author_avatar_url: string | null
+          author_employee_id: string | null
           author_name: string | null
           author_title: string | null
+          canonical_url: string | null
           category: string | null
           content: string | null
           created_at: string
@@ -139,6 +141,11 @@ export type Database = {
           featured: boolean
           featured_image_url: string | null
           id: string
+          meta_description: string | null
+          meta_title: string | null
+          og_description: string | null
+          og_image_url: string | null
+          og_title: string | null
           published_at: string | null
           reading_time_minutes: number | null
           slug: string
@@ -150,8 +157,10 @@ export type Database = {
         Insert: {
           active?: boolean
           author_avatar_url?: string | null
+          author_employee_id?: string | null
           author_name?: string | null
           author_title?: string | null
+          canonical_url?: string | null
           category?: string | null
           content?: string | null
           created_at?: string
@@ -159,6 +168,11 @@ export type Database = {
           featured?: boolean
           featured_image_url?: string | null
           id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
           published_at?: string | null
           reading_time_minutes?: number | null
           slug: string
@@ -170,8 +184,10 @@ export type Database = {
         Update: {
           active?: boolean
           author_avatar_url?: string | null
+          author_employee_id?: string | null
           author_name?: string | null
           author_title?: string | null
+          canonical_url?: string | null
           category?: string | null
           content?: string | null
           created_at?: string
@@ -179,6 +195,11 @@ export type Database = {
           featured?: boolean
           featured_image_url?: string | null
           id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
           published_at?: string | null
           reading_time_minutes?: number | null
           slug?: string
@@ -187,7 +208,29 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "blog_posts_author_employee_id_fkey"
+            columns: ["author_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_posts_author_employee_id_fkey"
+            columns: ["author_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_posts_author_employee_id_fkey"
+            columns: ["author_employee_id"]
+            isOneToOne: false
+            referencedRelation: "public_employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       brand_settings: {
         Row: {

@@ -12,9 +12,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Edit, Star, Eye, EyeOff } from "lucide-react";
+import { Trash2, Edit, Star, Eye, EyeOff, ExternalLink, Users } from "lucide-react";
 import { ImageFieldEditor } from "./ImageFieldEditor";
 import { format } from "date-fns";
+import BlogRichTextEditor from "./BlogRichTextEditor";
+import BlogPostPreview from "./BlogPostPreview";
 
 interface BlogPost {
   id: string;
@@ -26,6 +28,7 @@ interface BlogPost {
   author_name: string | null;
   author_avatar_url: string | null;
   author_title: string | null;
+  author_employee_id: string | null;
   category: string | null;
   tags: string[];
   reading_time_minutes: number;
@@ -33,6 +36,19 @@ interface BlogPost {
   active: boolean;
   featured: boolean;
   sort_order: number;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image_url: string | null;
+  og_title: string | null;
+  og_description: string | null;
+  canonical_url: string | null;
+}
+
+interface Employee {
+  id: string;
+  name: string;
+  title: string | null;
+  image_url: string | null;
 }
 
 const CATEGORIES = [
@@ -52,13 +68,20 @@ const emptyPost: Omit<BlogPost, "id"> = {
   author_name: null,
   author_avatar_url: null,
   author_title: null,
+  author_employee_id: null,
   category: null,
   tags: [],
-  reading_time_minutes: 5,
+  reading_time_minutes: 1,
   published_at: null,
   active: false,
   featured: false,
   sort_order: 0,
+  meta_title: null,
+  meta_description: null,
+  og_image_url: null,
+  og_title: null,
+  og_description: null,
+  canonical_url: null,
 };
 
 const generateSlug = (title: string): string => {
@@ -70,14 +93,23 @@ const generateSlug = (title: string): string => {
     .trim();
 };
 
+const calculateReadingTime = (content: string | null): number => {
+  if (!content) return 1;
+  const text = content.replace(/<[^>]*>/g, " ");
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+};
+
 const BlogManager = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [creating, setCreating] = useState(false);
   const [newPost, setNewPost] = useState<Omit<BlogPost, "id">>(emptyPost);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -96,7 +128,7 @@ const BlogManager = () => {
         (data || []).map((p) => ({
           ...p,
           tags: Array.isArray(p.tags) ? (p.tags as string[]) : [],
-          reading_time_minutes: p.reading_time_minutes || 5,
+          reading_time_minutes: p.reading_time_minutes || 1,
           sort_order: p.sort_order || 0,
         })) as BlogPost[]
       );
@@ -104,9 +136,44 @@ const BlogManager = () => {
     setLoading(false);
   };
 
+  const fetchEmployees = async () => {
+    const { data, error } = await supabase
+      .from("employees")
+      .select("id, name, title, image_url")
+      .eq("active", true)
+      .order("sort_order", { ascending: true });
+
+    if (!error && data) {
+      setEmployees(data);
+    }
+  };
+
   useEffect(() => {
     fetchPosts();
+    fetchEmployees();
   }, []);
+
+  const handleEmployeeSelect = (employeeId: string, post: Omit<BlogPost, "id"> | BlogPost, setter: (p: any) => void) => {
+    if (employeeId === "custom") {
+      setter({ ...post, author_employee_id: null });
+    } else {
+      const employee = employees.find((e) => e.id === employeeId);
+      if (employee) {
+        setter({
+          ...post,
+          author_employee_id: employee.id,
+          author_name: employee.name,
+          author_title: employee.title,
+          author_avatar_url: employee.image_url,
+        });
+      }
+    }
+  };
+
+  const handleContentChange = (content: string, post: Omit<BlogPost, "id"> | BlogPost, setter: (p: any) => void) => {
+    const readingTime = calculateReadingTime(content);
+    setter({ ...post, content, reading_time_minutes: readingTime });
+  };
 
   const createPost = async () => {
     if (!newPost.title.trim()) {
@@ -116,6 +183,7 @@ const BlogManager = () => {
 
     setCreating(true);
     const slug = newPost.slug.trim() || generateSlug(newPost.title.trim());
+    const readingTime = calculateReadingTime(newPost.content);
 
     const { error } = await supabase.from("blog_posts").insert({
       slug,
@@ -126,13 +194,20 @@ const BlogManager = () => {
       author_name: newPost.author_name?.trim() || null,
       author_avatar_url: newPost.author_avatar_url?.trim() || null,
       author_title: newPost.author_title?.trim() || null,
+      author_employee_id: newPost.author_employee_id || null,
       category: newPost.category || null,
       tags: newPost.tags,
-      reading_time_minutes: newPost.reading_time_minutes,
+      reading_time_minutes: readingTime,
       published_at: newPost.published_at || null,
       active: newPost.active,
       featured: newPost.featured,
       sort_order: newPost.sort_order,
+      meta_title: newPost.meta_title?.trim() || null,
+      meta_description: newPost.meta_description?.trim() || null,
+      og_image_url: newPost.og_image_url?.trim() || null,
+      og_title: newPost.og_title?.trim() || null,
+      og_description: newPost.og_description?.trim() || null,
+      canonical_url: newPost.canonical_url?.trim() || null,
     });
 
     setCreating(false);
@@ -147,6 +222,8 @@ const BlogManager = () => {
 
   const savePost = async (post: BlogPost) => {
     setSavingId(post.id);
+    const readingTime = calculateReadingTime(post.content);
+
     const { error } = await supabase
       .from("blog_posts")
       .update({
@@ -158,13 +235,20 @@ const BlogManager = () => {
         author_name: post.author_name?.trim() || null,
         author_avatar_url: post.author_avatar_url?.trim() || null,
         author_title: post.author_title?.trim() || null,
+        author_employee_id: post.author_employee_id || null,
         category: post.category || null,
         tags: post.tags,
-        reading_time_minutes: post.reading_time_minutes,
+        reading_time_minutes: readingTime,
         published_at: post.published_at || null,
         active: post.active,
         featured: post.featured,
         sort_order: post.sort_order,
+        meta_title: post.meta_title?.trim() || null,
+        meta_description: post.meta_description?.trim() || null,
+        og_image_url: post.og_image_url?.trim() || null,
+        og_title: post.og_title?.trim() || null,
+        og_description: post.og_description?.trim() || null,
+        canonical_url: post.canonical_url?.trim() || null,
       })
       .eq("id", post.id);
 
@@ -226,18 +310,28 @@ const BlogManager = () => {
 
   return (
     <div className="space-y-8">
+      {/* Preview Modal */}
+      {editingPost && (
+        <BlogPostPreview
+          open={showPreview}
+          onOpenChange={setShowPreview}
+          post={editingPost}
+        />
+      )}
+
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Blog Post</DialogTitle>
           </DialogHeader>
 
           {editingPost && (
             <Tabs defaultValue="content" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-4">
+              <TabsList className="grid w-full grid-cols-4 mb-4">
                 <TabsTrigger value="content">Content</TabsTrigger>
                 <TabsTrigger value="author">Author</TabsTrigger>
+                <TabsTrigger value="seo">SEO</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
 
@@ -271,27 +365,48 @@ const BlogManager = () => {
                 </div>
 
                 <div>
-                  <Label>Content (HTML/Markdown)</Label>
-                  <Textarea
+                  <Label>Content</Label>
+                  <BlogRichTextEditor
                     value={editingPost.content || ""}
-                    onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })}
-                    placeholder="Full blog post content..."
-                    rows={12}
-                    className="font-mono text-sm"
+                    onChange={(content) => handleContentChange(content, editingPost, setEditingPost)}
                   />
                 </div>
 
                 <div>
-                  <Label>Featured Image URL</Label>
-                  <Input
-                    value={editingPost.featured_image_url || ""}
-                    onChange={(e) => setEditingPost({ ...editingPost, featured_image_url: e.target.value })}
-                    placeholder="https://..."
+                  <Label>Featured Image</Label>
+                  <ImageFieldEditor
+                    value={editingPost.featured_image_url}
+                    onChange={(url) => setEditingPost({ ...editingPost, featured_image_url: url })}
                   />
                 </div>
               </TabsContent>
 
               <TabsContent value="author" className="space-y-4">
+                <div>
+                  <Label>Select Team Member</Label>
+                  <Select
+                    value={editingPost.author_employee_id || "custom"}
+                    onValueChange={(v) => handleEmployeeSelect(v, editingPost, setEditingPost)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an employee..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="custom">
+                        <span className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Custom author...
+                        </span>
+                      </SelectItem>
+                      {employees.map((emp) => (
+                        <SelectItem key={emp.id} value={emp.id}>
+                          {emp.name} {emp.title ? `(${emp.title})` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Author Name</Label>
@@ -305,17 +420,114 @@ const BlogManager = () => {
                     <Input
                       value={editingPost.author_title || ""}
                       onChange={(e) => setEditingPost({ ...editingPost, author_title: e.target.value })}
-                      placeholder="Product Manager"
+                      placeholder="CEO, Product Manager..."
                     />
                   </div>
                 </div>
                 <div>
-                  <Label>Author Avatar URL</Label>
+                  <Label>Author Avatar</Label>
+                  <ImageFieldEditor
+                    value={editingPost.author_avatar_url}
+                    onChange={(url) => setEditingPost({ ...editingPost, author_avatar_url: url })}
+                    bucket="site-images"
+                    folder="authors"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="seo" className="space-y-4">
+                <div>
+                  <Label>Meta Title (60 chars recommended)</Label>
                   <Input
-                    value={editingPost.author_avatar_url || ""}
-                    onChange={(e) => setEditingPost({ ...editingPost, author_avatar_url: e.target.value })}
+                    value={editingPost.meta_title || ""}
+                    onChange={(e) => setEditingPost({ ...editingPost, meta_title: e.target.value })}
+                    placeholder={editingPost.title}
+                  />
+                  <p className={`text-xs mt-1 ${(editingPost.meta_title?.length || 0) > 60 ? "text-destructive" : "text-muted-foreground"}`}>
+                    {editingPost.meta_title?.length || 0}/60 characters
+                  </p>
+                </div>
+
+                <div>
+                  <Label>Meta Description (156 chars recommended)</Label>
+                  <Textarea
+                    value={editingPost.meta_description || ""}
+                    onChange={(e) => setEditingPost({ ...editingPost, meta_description: e.target.value })}
+                    placeholder={editingPost.excerpt || "Brief description for search engines..."}
+                    rows={3}
+                  />
+                  <p className={`text-xs mt-1 ${(editingPost.meta_description?.length || 0) > 156 ? "text-destructive" : "text-muted-foreground"}`}>
+                    {editingPost.meta_description?.length || 0}/156 characters
+                  </p>
+                </div>
+
+                <div className="border-t pt-4">
+                  <h4 className="font-medium mb-3">Open Graph (Social Sharing)</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>OG Image</Label>
+                        {editingPost.featured_image_url && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditingPost({ ...editingPost, og_image_url: editingPost.featured_image_url })}
+                            type="button"
+                          >
+                            Use Featured Image
+                          </Button>
+                        )}
+                      </div>
+                      <ImageFieldEditor
+                        value={editingPost.og_image_url}
+                        onChange={(url) => setEditingPost({ ...editingPost, og_image_url: url })}
+                        bucket="site-images"
+                        folder="og-images"
+                      />
+                    </div>
+                    <div>
+                      <Label>OG Title (optional)</Label>
+                      <Input
+                        value={editingPost.og_title || ""}
+                        onChange={(e) => setEditingPost({ ...editingPost, og_title: e.target.value })}
+                        placeholder="Defaults to meta title"
+                      />
+                    </div>
+                    <div>
+                      <Label>OG Description (optional)</Label>
+                      <Textarea
+                        value={editingPost.og_description || ""}
+                        onChange={(e) => setEditingPost({ ...editingPost, og_description: e.target.value })}
+                        placeholder="Defaults to meta description"
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Canonical URL (optional)</Label>
+                  <Input
+                    value={editingPost.canonical_url || ""}
+                    onChange={(e) => setEditingPost({ ...editingPost, canonical_url: e.target.value })}
                     placeholder="https://..."
                   />
+                </div>
+
+                {/* SEO Preview */}
+                <div className="border rounded-lg p-4 bg-muted/30">
+                  <h4 className="text-sm font-medium mb-3">Google Search Preview</h4>
+                  <div className="space-y-1">
+                    <p className="text-primary text-lg truncate">
+                      {editingPost.meta_title || editingPost.title || "Page Title"}
+                    </p>
+                    <p className="text-sm text-green-600 truncate">
+                      navio.no/blog/{editingPost.slug || generateSlug(editingPost.title) || "post-slug"}
+                    </p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {editingPost.meta_description || editingPost.excerpt || "Add a meta description to control how this page appears in search results."}
+                    </p>
+                  </div>
                 </div>
               </TabsContent>
 
@@ -340,17 +552,11 @@ const BlogManager = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label>Reading Time (minutes)</Label>
-                    <Input
-                      type="number"
-                      value={editingPost.reading_time_minutes}
-                      onChange={(e) =>
-                        setEditingPost({
-                          ...editingPost,
-                          reading_time_minutes: parseInt(e.target.value) || 5,
-                        })
-                      }
-                    />
+                    <Label>Reading Time</Label>
+                    <div className="flex items-center gap-2 h-10 px-3 border rounded-md bg-muted/50">
+                      <span className="text-muted-foreground">{editingPost.reading_time_minutes} min read</span>
+                      <span className="text-xs text-muted-foreground">(auto-calculated)</span>
+                    </div>
                   </div>
                 </div>
 
@@ -400,7 +606,11 @@ const BlogManager = () => {
             </Tabs>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowPreview(true)}>
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Preview
+            </Button>
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>
               Cancel
             </Button>
