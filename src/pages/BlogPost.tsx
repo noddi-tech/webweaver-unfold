@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, User, Facebook, Linkedin, Mail } from 'lucide-react';
+import { parseBlogMarkdown } from '@/lib/markdownUtils';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
@@ -146,7 +147,7 @@ const BlogPost = () => {
           {post.content && (
             <div 
               className="prose prose-lg max-w-none dark:prose-invert"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: parseBlogMarkdown(post.content) }}
             />
           )}
 

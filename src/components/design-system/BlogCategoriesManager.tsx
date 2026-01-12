@@ -9,6 +9,16 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Plus, Edit, Trash2, GripVertical } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -38,6 +48,7 @@ const BlogCategoriesManager = () => {
   
   const [showDialog, setShowDialog] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Partial<BlogCategory> | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<BlogCategory | null>(null);
   const [newCategory, setNewCategory] = useState({
     name: '',
     slug: '',
@@ -90,15 +101,20 @@ const BlogCategoriesManager = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this category?')) return;
+  const openDeleteConfirm = (category: BlogCategory) => {
+    setDeletingCategory(category);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingCategory) return;
     
     try {
-      await deleteCategory.mutateAsync(id);
+      await deleteCategory.mutateAsync(deletingCategory.id);
       toast({ title: 'Category deleted' });
     } catch (error: any) {
       toast({ title: 'Failed to delete category', description: error.message, variant: 'destructive' });
     }
+    setDeletingCategory(null);
   };
 
   const openEditDialog = (category: BlogCategory) => {
@@ -112,6 +128,32 @@ const BlogCategoriesManager = () => {
 
   return (
     <div className="space-y-6">
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletingCategory} onOpenChange={(open) => !open && setDeletingCategory(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Category</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{deletingCategory?.name}"?
+              {deletingCategory && deletingCategory.post_count > 0 && (
+                <span className="block mt-2 font-medium text-destructive">
+                  ⚠️ This category has {deletingCategory.post_count} post(s) that will become uncategorized.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Edit Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
@@ -308,7 +350,7 @@ const BlogCategoriesManager = () => {
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      onClick={() => handleDelete(category.id)}
+                      onClick={() => openDeleteConfirm(category)}
                       disabled={deleteCategory.isPending}
                     >
                       <Trash2 className="w-4 h-4 text-destructive" />
