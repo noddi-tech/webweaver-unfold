@@ -126,6 +126,48 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_categories: {
+        Row: {
+          active: boolean | null
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          post_count: number | null
+          slug: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          post_count?: number | null
+          slug: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          post_count?: number | null
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           active: boolean
@@ -135,6 +177,7 @@ export type Database = {
           author_title: string | null
           canonical_url: string | null
           category: string | null
+          category_id: string | null
           content: string | null
           created_at: string
           excerpt: string | null
@@ -150,6 +193,7 @@ export type Database = {
           reading_time_minutes: number | null
           slug: string
           sort_order: number | null
+          status: string | null
           tags: Json | null
           title: string
           updated_at: string
@@ -162,6 +206,7 @@ export type Database = {
           author_title?: string | null
           canonical_url?: string | null
           category?: string | null
+          category_id?: string | null
           content?: string | null
           created_at?: string
           excerpt?: string | null
@@ -177,6 +222,7 @@ export type Database = {
           reading_time_minutes?: number | null
           slug: string
           sort_order?: number | null
+          status?: string | null
           tags?: Json | null
           title: string
           updated_at?: string
@@ -189,6 +235,7 @@ export type Database = {
           author_title?: string | null
           canonical_url?: string | null
           category?: string | null
+          category_id?: string | null
           content?: string | null
           created_at?: string
           excerpt?: string | null
@@ -204,6 +251,7 @@ export type Database = {
           reading_time_minutes?: number | null
           slug?: string
           sort_order?: number | null
+          status?: string | null
           tags?: Json | null
           title?: string
           updated_at?: string
@@ -230,7 +278,38 @@ export type Database = {
             referencedRelation: "public_employees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "blog_posts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "blog_categories"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      blog_tags: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          post_count: number | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          post_count?: number | null
+          slug: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          post_count?: number | null
+          slug?: string
+        }
+        Relationships: []
       }
       brand_settings: {
         Row: {
