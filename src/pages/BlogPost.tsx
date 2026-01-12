@@ -1,5 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
+import { useRef } from 'react';
 import { ArrowLeft, Calendar, Clock, User, Facebook, Linkedin, Mail } from 'lucide-react';
+import ReadingProgressBar from '@/components/ReadingProgressBar';
 import { parseBlogMarkdown } from '@/lib/markdownUtils';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -75,12 +77,15 @@ const BlogPost = () => {
     );
   }
 
+  const contentRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className="min-h-screen bg-background">
+      <ReadingProgressBar contentRef={contentRef} />
       <Header />
       
       <article className="pt-32 pb-24 px-4">
-        <div className="container mx-auto max-w-3xl">
+        <div ref={contentRef} className="container mx-auto max-w-3xl">
           {/* Back Link */}
           <Link 
             to={`/${i18n.language}/blog`}
