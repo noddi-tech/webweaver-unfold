@@ -11,6 +11,7 @@ export interface BlogPost {
   author_name: string | null;
   author_avatar_url: string | null;
   author_title: string | null;
+  author_employee_id: string | null;
   category: string | null;
   tags: string[];
   reading_time_minutes: number;
@@ -20,6 +21,13 @@ export interface BlogPost {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  // SEO fields
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image_url: string | null;
+  og_title: string | null;
+  og_description: string | null;
+  canonical_url: string | null;
 }
 
 export function useBlogPosts(includeInactive = false) {
