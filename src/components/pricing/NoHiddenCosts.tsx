@@ -26,13 +26,13 @@ export const NoHiddenCosts = ({ textContent, onOpenCalculator }: NoHiddenCostsPr
   const items = [
     {
       icon: UserX,
-      title: getContent('item_1_title', 'No seat cost'),
-      description: getContent('item_1_desc', 'Pay for usage, not headcount'),
+      title: getContent('item_1_title', 'No seat fees'),
+      description: getContent('item_1_desc', 'Pay for revenue, not users'),
     },
     {
       icon: MapPinOff,
-      title: getContent('item_2_title', 'No cost per location'),
-      description: getContent('item_2_desc', 'Same rate across all branches'),
+      title: getContent('item_2_title', 'Transparent tiers'),
+      description: getContent('item_2_desc', 'Clear pricing at every level'),
     },
     {
       icon: ShieldCheck,
