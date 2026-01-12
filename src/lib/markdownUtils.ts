@@ -77,6 +77,18 @@ export function parseBlogMarkdown(text: string | null): string {
         listType = null;
       }
       const level = headingMatch[1].length;
+      const headingText = headingMatch[2];
+      // Generate ID for anchor navigation (only for H2 and H3)
+      const headingId = (level === 2 || level === 3) 
+        ? headingText
+            .toLowerCase()
+            .replace(/\*\*(.+?)\*\*/g, '$1') // Strip bold
+            .replace(/\*(.+?)\*/g, '$1') // Strip italic
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim()
+        : '';
       const headingClasses: Record<number, string> = {
         1: 'text-3xl font-bold text-foreground mt-8 mb-4',
         2: 'text-2xl font-bold text-foreground mt-8 mb-4',
@@ -85,7 +97,8 @@ export function parseBlogMarkdown(text: string | null): string {
         5: 'text-base font-semibold text-foreground mt-4 mb-2',
         6: 'text-sm font-semibold text-foreground mt-4 mb-2',
       };
-      result.push(`<h${level} class="${headingClasses[level]}">${processInlineMarkdown(headingMatch[2])}</h${level}>`);
+      const idAttr = headingId ? ` id="${headingId}"` : '';
+      result.push(`<h${level}${idAttr} class="${headingClasses[level]}">${processInlineMarkdown(headingText)}</h${level}>`);
       continue;
     }
     

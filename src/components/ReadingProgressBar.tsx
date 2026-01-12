@@ -2,9 +2,10 @@ import { useEffect, useState, RefObject } from 'react';
 
 interface ReadingProgressBarProps {
   contentRef: RefObject<HTMLElement>;
+  readingTimeMinutes?: number;
 }
 
-const ReadingProgressBar = ({ contentRef }: ReadingProgressBarProps) => {
+const ReadingProgressBar = ({ contentRef, readingTimeMinutes }: ReadingProgressBarProps) => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -36,6 +37,11 @@ const ReadingProgressBar = ({ contentRef }: ReadingProgressBarProps) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [contentRef]);
 
+  // Calculate remaining time
+  const remainingMinutes = readingTimeMinutes 
+    ? Math.ceil(readingTimeMinutes * (1 - progress / 100))
+    : null;
+
   // Don't render if no progress
   if (progress === 0) return null;
 
@@ -52,6 +58,15 @@ const ReadingProgressBar = ({ contentRef }: ReadingProgressBarProps) => {
         className="h-full bg-primary transition-[width] duration-150 ease-out motion-reduce:transition-none"
         style={{ width: `${progress}%` }}
       />
+      
+      {/* Time remaining indicator */}
+      {remainingMinutes !== null && (
+        <div className="absolute right-4 top-2 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-2 py-1 rounded-full border border-border/50 shadow-sm">
+          {remainingMinutes > 0 
+            ? `${remainingMinutes} min left`
+            : '✓ Done'}
+        </div>
+      )}
     </div>
   );
 };
