@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { type LaunchConfig } from '@/config/newPricing';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface LaunchTierCardProps {
   config: LaunchConfig;
@@ -11,6 +12,8 @@ interface LaunchTierCardProps {
 }
 
 export function LaunchTierCard({ config, onSelect, isSelected }: LaunchTierCardProps) {
+  const { formatAmount } = useCurrency();
+  
   const features = [
     'Single location setup',
     'Full platform access',
@@ -40,7 +43,7 @@ export function LaunchTierCard({ config, onSelect, isSelected }: LaunchTierCardP
         {/* Pricing */}
         <div className="space-y-2">
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-bold">€{config.fixedMonthly}</span>
+            <span className="text-4xl font-bold">{formatAmount(config.fixedMonthly)}</span>
             <span className="text-muted-foreground">/month</span>
           </div>
           <div className="flex items-center gap-2">

@@ -14,6 +14,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import { CurrencySwitcher } from "@/components/pricing/CurrencySwitcher";
 
 const PricingDetailed = () => {
   const [showAllTiers, setShowAllTiers] = useState(false);
@@ -53,119 +55,126 @@ const PricingDetailed = () => {
   }, []);
 
   return (
-    <div className="min-h-screen">
-      <HreflangTags pageSlug="/pricing" />
-      <Header />
-      <main>
-        {/* Hero Section */}
-        <PricingHeroNew textContent={textContent} />
+    <CurrencyProvider>
+      <div className="min-h-screen">
+        <HreflangTags pageSlug="/pricing" />
+        <Header />
+        <main>
+          {/* Hero Section */}
+          <PricingHeroNew textContent={textContent} />
 
-        {/* Tier Cards - Launch vs Scale */}
-        <section className="py-16 animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <div className="container max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 gap-8">
+          {/* Tier Cards - Launch vs Scale */}
+          <section className="py-16 animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <div className="container max-w-5xl px-4 sm:px-6 lg:px-8">
+              {/* Currency Switcher above cards */}
+              <div className="flex justify-end mb-6">
+                <CurrencySwitcher />
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-8">
+                {!isLoading && (
+                  <>
+                    <LaunchTierCard config={launch} />
+                    <ScaleTierCard config={scale} tiers={scaleTiers} />
+                  </>
+                )}
+                {isLoading && (
+                  <>
+                    <div className="h-96 rounded-lg bg-muted animate-pulse" />
+                    <div className="h-96 rounded-lg bg-muted animate-pulse" />
+                  </>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* Scale Tier Breakdown Table */}
+          <section className="py-16 bg-muted/30 animate-fade-in" style={{ animationDelay: '150ms' }}>
+            <div className="container max-w-5xl px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold mb-2">Scale Tier Breakdown</h2>
+                <p className="text-muted-foreground">
+                  Your rate decreases automatically as your business grows
+                </p>
+              </div>
+              
               {!isLoading && (
                 <>
-                  <LaunchTierCard config={launch} />
-                  <ScaleTierCard config={scale} tiers={scaleTiers} />
+                  <ScaleTierTable 
+                    tiers={showAllTiers ? scaleTiers : scaleTiers.slice(0, 5)} 
+                  />
+                  
+                  {scaleTiers.length > 5 && (
+                    <div className="mt-4 text-center">
+                      <Button
+                        variant="ghost"
+                        onClick={() => setShowAllTiers(!showAllTiers)}
+                        className="gap-2"
+                      >
+                        {showAllTiers ? (
+                          <>
+                            Show Less <ChevronUp className="w-4 h-4" />
+                          </>
+                        ) : (
+                          <>
+                            Show All {scaleTiers.length} Tiers <ChevronDown className="w-4 h-4" />
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </>
               )}
               {isLoading && (
-                <>
-                  <div className="h-96 rounded-lg bg-muted animate-pulse" />
-                  <div className="h-96 rounded-lg bg-muted animate-pulse" />
-                </>
+                <div className="h-64 rounded-lg bg-muted animate-pulse" />
               )}
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Scale Tier Breakdown Table */}
-        <section className="py-16 bg-muted/30 animate-fade-in" style={{ animationDelay: '150ms' }}>
-          <div className="container max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">Scale Tier Breakdown</h2>
-              <p className="text-muted-foreground">
-                Your rate decreases automatically as your business grows
-              </p>
+          {/* Interactive Calculator */}
+          <section className="py-16 animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <div className="container max-w-3xl px-4 sm:px-6 lg:px-8">
+              <PricingComparisonCalculator />
             </div>
-            
-            {!isLoading && (
-              <>
-                <ScaleTierTable 
-                  tiers={showAllTiers ? scaleTiers : scaleTiers.slice(0, 5)} 
-                />
-                
-                {scaleTiers.length > 5 && (
-                  <div className="mt-4 text-center">
-                    <Button
-                      variant="ghost"
-                      onClick={() => setShowAllTiers(!showAllTiers)}
-                      className="gap-2"
-                    >
-                      {showAllTiers ? (
-                        <>
-                          Show Less <ChevronUp className="w-4 h-4" />
-                        </>
-                      ) : (
-                        <>
-                          Show All {scaleTiers.length} Tiers <ChevronDown className="w-4 h-4" />
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
-            {isLoading && (
-              <div className="h-64 rounded-lg bg-muted animate-pulse" />
-            )}
-          </div>
-        </section>
+          </section>
 
-        {/* Interactive Calculator */}
-        <section className="py-16 animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <div className="container max-w-3xl px-4 sm:px-6 lg:px-8">
-            <PricingComparisonCalculator />
-          </div>
-        </section>
+          {/* No Hidden Costs Banner */}
+          <section className="py-16 animate-fade-in" style={{ animationDelay: '250ms' }}>
+            <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+              <NoHiddenCosts textContent={textContent} />
+            </div>
+          </section>
 
-        {/* No Hidden Costs Banner */}
-        <section className="py-16 animate-fade-in" style={{ animationDelay: '250ms' }}>
-          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
-            <NoHiddenCosts textContent={textContent} />
-          </div>
-        </section>
+          {/* FAQ Section */}
+          <section className="py-16 bg-muted/30 animate-fade-in" style={{ animationDelay: '300ms' }}>
+            <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+              <PricingFAQ />
+            </div>
+          </section>
 
-        {/* FAQ Section */}
-        <section className="py-16 bg-muted/30 animate-fade-in" style={{ animationDelay: '300ms' }}>
-          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
-            <PricingFAQ />
-          </div>
-        </section>
+          {/* Book a Demo CTA */}
+          <section className="py-16 text-center animate-fade-in" style={{ animationDelay: '350ms' }}>
+            <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+              <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to get started?</h2>
+              <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
+                Book a demo to see how our platform can help your business grow.
+              </p>
+              <Button size="lg" className="text-lg px-8" asChild>
+                <a 
+                  href="https://calendly.com/joachim-noddi/30min"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {getCMSContent('button_book_demo', 'Book a Demo')}
+                </a>
+              </Button>
+            </div>
+          </section>
+        </main>
 
-        {/* Book a Demo CTA */}
-        <section className="py-16 text-center animate-fade-in" style={{ animationDelay: '350ms' }}>
-          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to get started?</h2>
-            <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Book a demo to see how our platform can help your business grow.
-            </p>
-            <Button size="lg" className="text-lg px-8" asChild>
-              <a 
-                href="https://calendly.com/joachim-noddi/30min"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {getCMSContent('button_book_demo', 'Book a Demo')}
-              </a>
-            </Button>
-          </div>
-        </section>
-      </main>
-
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </CurrencyProvider>
   );
 };
 
