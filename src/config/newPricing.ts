@@ -50,8 +50,11 @@ export function generateScaleTiers(): ScaleTier[] {
     } else if (i === 3) {
       multiplier = 1.5;
       reduction = 0.001; // -0.1%
-    } else if (i > 3) {
+    } else if (i >= 4 && i <= 8) {
       multiplier = 1.5;
+      reduction = 0.0005; // -0.05%
+    } else if (i >= 9) {
+      multiplier = 1.25;  // Tiers 9-15: 1.25x multiplier
       reduction = 0.0005; // -0.05%
     }
     
@@ -67,8 +70,11 @@ export function generateScaleTiers(): ScaleTier[] {
     if (i === 1) {
       revenue *= 2;        // Tier 1→2: ×2
       rate -= 0.001;       // -0.1%
+    } else if (i >= 8) {
+      revenue *= 1.25;     // Tiers 9+: ×1.25
+      rate -= 0.0005;
     } else {
-      revenue *= 1.5;      // Subsequent: ×1.5
+      revenue *= 1.5;      // Tiers 3-8: ×1.5
       rate -= (i === 2) ? 0.001 : 0.0005;
     }
     
