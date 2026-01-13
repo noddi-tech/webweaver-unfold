@@ -219,8 +219,8 @@ export function OfferGeneratorPanel({
     <Card className="border border-border bg-card">
       <CardHeader className="pb-4 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-t-lg border-b border-border">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <FileText className="h-5 w-5 text-primary" />
+          <CardTitle className="flex items-center gap-2 text-xl text-primary-foreground">
+            <FileText className="h-5 w-5 text-primary-foreground" />
             Generate Pricing Offer
           </CardTitle>
           <div className="flex items-center gap-3">
@@ -229,7 +229,7 @@ export function OfferGeneratorPanel({
                 variant="outline" 
                 size="sm" 
                 onClick={handleCopyFromCalculator}
-                className="gap-2"
+                className="gap-2 border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10"
               >
                 <Copy className="h-4 w-4" />
                 Copy from Calculator
