@@ -247,10 +247,10 @@ export function OfferGeneratorPanel({
       <CardContent className="space-y-6 pt-6">
         {/* Customer Details */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-primary uppercase tracking-wide">Customer Details</h3>
+          <h3 className="font-semibold text-sm text-primary-foreground uppercase tracking-wide">Customer Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="companyName">Company Name</Label>
+              <Label htmlFor="companyName" className="text-primary-foreground">Company Name</Label>
               <Input
                 id="companyName"
                 placeholder="Acme Inc."
@@ -259,7 +259,7 @@ export function OfferGeneratorPanel({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="customerName">Contact Name</Label>
+              <Label htmlFor="customerName" className="text-primary-foreground">Contact Name</Label>
               <Input
                 id="customerName"
                 placeholder="John Doe"
@@ -268,7 +268,7 @@ export function OfferGeneratorPanel({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="customerEmail">Email</Label>
+              <Label htmlFor="customerEmail" className="text-primary-foreground">Email</Label>
               <Input
                 id="customerEmail"
                 type="email"
@@ -488,7 +488,7 @@ export function OfferGeneratorPanel({
         {/* Notes and Validity */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2 space-y-2">
-            <Label>Notes for Customer</Label>
+            <Label className="text-primary-foreground">Notes for Customer</Label>
             <Textarea
               placeholder="Any special terms, conditions, or notes..."
               value={notes}
@@ -497,7 +497,7 @@ export function OfferGeneratorPanel({
             />
           </div>
           <div className="space-y-2">
-            <Label>Valid for (days)</Label>
+            <Label className="text-primary-foreground">Valid for (days)</Label>
             <Select value={validDays.toString()} onValueChange={(v) => setValidDays(parseInt(v))}>
               <SelectTrigger>
                 <SelectValue />
@@ -509,7 +509,7 @@ export function OfferGeneratorPanel({
                 <SelectItem value="60">60 days</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-primary-foreground/70">
               Expires: {validUntil.toLocaleDateString('nb-NO')}
             </p>
           </div>
@@ -521,7 +521,7 @@ export function OfferGeneratorPanel({
             variant="outline"
             onClick={handleSaveOffer}
             disabled={isSaving || isSending}
-            className="flex-1"
+            className="flex-1 border-primary-foreground/50 text-primary-foreground hover:bg-primary-foreground/10"
           >
             {isSaving ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</>
