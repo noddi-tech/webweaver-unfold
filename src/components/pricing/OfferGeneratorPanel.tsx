@@ -226,12 +226,15 @@ export function OfferGeneratorPanel({
   return (
     <Card className="border border-border bg-card">
       <CardHeader className="pb-4 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-t-lg border-b border-border">
-        <div className="flex items-center justify-between">
+        <div className="grid grid-cols-3 items-center gap-4">
+          {/* Left: Title */}
           <CardTitle className="flex items-center gap-2 text-xl text-primary-foreground">
             <FileText className="h-5 w-5 text-primary-foreground" />
             Generate Pricing Offer
           </CardTitle>
-          <div className="flex items-center gap-3">
+          
+          {/* Center: Copy button */}
+          <div className="flex justify-center">
             {calculatorValues && (
               <Button 
                 variant="outline" 
@@ -243,6 +246,10 @@ export function OfferGeneratorPanel({
                 Copy from Calculator
               </Button>
             )}
+          </div>
+          
+          {/* Right: Currency switcher + badge */}
+          <div className="flex items-center justify-end gap-3">
             <CurrencySwitcher variant="compact" darkMode showLabel />
             {savedOfferId && (
               <Badge variant="secondary" className="gap-1">
