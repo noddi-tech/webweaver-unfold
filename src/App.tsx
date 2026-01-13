@@ -8,6 +8,7 @@ import { LanguageSync } from "./components/LanguageSync";
 import { TranslationProvider } from "./components/TranslationProvider";
 import { EditModeProvider } from "@/contexts/EditModeContext";
 import { SiteStylesProvider } from "@/contexts/SiteStylesContext";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { useTypographySettings } from "@/hooks/useTypographySettings";
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
@@ -47,6 +48,7 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <TranslationProvider>
+        <CurrencyProvider>
         <SiteStylesProvider>
           <EditModeProvider>
             <Toaster />
@@ -115,6 +117,7 @@ const App = () => {
           </BrowserRouter>
           </EditModeProvider>
         </SiteStylesProvider>
+        </CurrencyProvider>
       </TranslationProvider>
     </TooltipProvider>
   </QueryClientProvider>
