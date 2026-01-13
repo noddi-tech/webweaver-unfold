@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -13,13 +14,16 @@ import { usePricingConfig } from "@/hooks/usePricingConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { CurrencySwitcher } from "@/components/pricing/CurrencySwitcher";
+import { useUserRole } from "@/hooks/useUserRole";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const PricingDetailed = () => {
   const [showAllTiers, setShowAllTiers] = useState(false);
   const { launch, scale, scaleTiers, isLoading } = usePricingConfig();
+  const { isAdmin, isEditor, loading: roleLoading } = useUserRole();
   
   // Fetch CMS content for pricing page
   const { textContent } = useTextContent('pricing');
@@ -40,7 +44,7 @@ const PricingDetailed = () => {
         .maybeSingle();
 
       if (page) {
-        document.title = page.title;
+        document.title = page.title + ' (Internal)';
         
         if (page.meta_description) {
           const metaDescription = document.querySelector('meta[name="description"]');
@@ -54,12 +58,47 @@ const PricingDetailed = () => {
     loadPage();
   }, []);
 
+  // Show loading state while checking auth
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="pt-32 pb-16">
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <Skeleton className="h-12 w-64" />
+              <Skeleton className="h-6 w-96" />
+              <div className="grid md:grid-cols-2 gap-8 mt-8 w-full max-w-4xl">
+                <Skeleton className="h-96" />
+                <Skeleton className="h-96" />
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Redirect non-admin/editor users to public pricing page
+  if (!isAdmin && !isEditor) {
+    return <Navigate to="/pricing" replace />;
+  }
+
   return (
     <CurrencyProvider>
       <div className="min-h-screen">
-        <HreflangTags pageSlug="/pricing" />
+        <HreflangTags pageSlug="/pricing_detailed" />
         <Header />
         <main>
+          {/* Internal Access Banner */}
+          <div className="bg-primary text-primary-foreground py-2 text-center text-sm">
+            <div className="container flex items-center justify-center gap-2">
+              <Lock className="w-4 h-4" />
+              <span>Internal Sales Tool — Not visible to public</span>
+            </div>
+          </div>
+
           {/* Hero Section */}
           <PricingHeroNew textContent={textContent} />
 
@@ -75,7 +114,7 @@ const PricingDetailed = () => {
                 {!isLoading && (
                   <>
                     <LaunchTierCard config={launch} />
-                    <ScaleTierCard config={scale} tiers={scaleTiers} />
+                    <ScaleTierCard config={scale} tiers={scaleTiers} showDetailedRates />
                   </>
                 )}
                 {isLoading && (
