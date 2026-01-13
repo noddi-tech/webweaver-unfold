@@ -3,17 +3,78 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, Send, Clock, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { FileText, Send, Clock, CheckCircle, XCircle, ExternalLink, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { nb } from 'date-fns/locale';
 
 const statusConfig = {
-  draft: { label: 'Draft', icon: FileText, variant: 'secondary' as const, color: 'text-muted-foreground' },
-  sent: { label: 'Sent', icon: Send, variant: 'default' as const, color: 'text-blue-600' },
-  accepted: { label: 'Accepted', icon: CheckCircle, variant: 'default' as const, color: 'text-green-600' },
-  expired: { label: 'Expired', icon: Clock, variant: 'destructive' as const, color: 'text-red-600' },
-  rejected: { label: 'Rejected', icon: XCircle, variant: 'destructive' as const, color: 'text-red-600' },
+  draft: { 
+    label: 'Draft', 
+    icon: FileText, 
+    variant: 'secondary' as const, 
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted'
+  },
+  sent: { 
+    label: 'Sent', 
+    icon: Send, 
+    variant: 'outline' as const, 
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50 dark:bg-blue-950/30'
+  },
+  viewed: { 
+    label: 'Viewed', 
+    icon: Eye, 
+    variant: 'outline' as const, 
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50 dark:bg-purple-950/30'
+  },
+  accepted: { 
+    label: 'Accepted', 
+    icon: CheckCircle, 
+    variant: 'default' as const, 
+    color: 'text-green-600',
+    bgColor: 'bg-green-50 dark:bg-green-950/30'
+  },
+  expired: { 
+    label: 'Expired', 
+    icon: Clock, 
+    variant: 'outline' as const, 
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50 dark:bg-amber-950/30'
+  },
+  rejected: { 
+    label: 'Rejected', 
+    icon: XCircle, 
+    variant: 'destructive' as const, 
+    color: 'text-red-600',
+    bgColor: 'bg-red-50 dark:bg-red-950/30'
+  },
+};
+
+// Visual progress indicator for offer status journey
+const StatusProgress = ({ status }: { status: string }) => {
+  const stages = ['draft', 'sent', 'viewed', 'accepted'];
+  const currentIndex = stages.indexOf(status);
+  const isRejectedOrExpired = status === 'rejected' || status === 'expired';
+  
+  return (
+    <div className="flex items-center gap-0.5 mt-1.5">
+      {stages.map((stage, index) => (
+        <div
+          key={stage}
+          className={`h-1 w-5 rounded-full transition-colors ${
+            isRejectedOrExpired
+              ? index <= 1 ? 'bg-muted-foreground/40' : 'bg-muted'
+              : index <= currentIndex 
+                ? 'bg-primary' 
+                : 'bg-muted'
+          }`}
+        />
+      ))}
+    </div>
+  );
 };
 
 export function OffersHistory() {
@@ -107,7 +168,7 @@ export function OffersHistory() {
                       {offer.tier}
                     </Badge>
                     {(offer.discount_percentage || 0) > 0 && (
-                      <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700">
+                      <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400">
                         -{offer.discount_percentage}%
                       </Badge>
                     )}
@@ -116,10 +177,27 @@ export function OffersHistory() {
                     {formatCurrency(offer.total_monthly_estimate || totalMonthly)}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={status.variant} className={`gap-1 ${status.color}`}>
-                      <StatusIcon className="h-3 w-3" />
-                      {status.label}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <div className={`p-1.5 rounded-full ${status.bgColor}`}>
+                        <StatusIcon className={`h-3.5 w-3.5 ${status.color}`} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className={`text-sm font-medium ${status.color}`}>
+                          {status.label}
+                        </span>
+                        {offer.sent_at && offer.status !== 'draft' && (
+                          <span className="text-xs text-muted-foreground">
+                            Sent {formatDistanceToNow(new Date(offer.sent_at), { addSuffix: false, locale: nb })} ago
+                          </span>
+                        )}
+                        {offer.viewed_at && (
+                          <span className="text-xs text-purple-500">
+                            Viewed {formatDistanceToNow(new Date(offer.viewed_at), { addSuffix: false, locale: nb })} ago
+                          </span>
+                        )}
+                        <StatusProgress status={offer.status || 'draft'} />
+                      </div>
+                    </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {formatDistanceToNow(new Date(offer.created_at), { addSuffix: true, locale: nb })}

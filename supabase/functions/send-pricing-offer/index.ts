@@ -189,7 +189,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "Navio <onboarding@resend.dev>",
+      from: "Navio Sales <sales@navio.no>",
       to: [customerEmail],
       subject: `Your Pricing Proposal from Navio - ${tierLabel} Plan`,
       html: emailHtml,
