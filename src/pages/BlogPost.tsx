@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const { t, i18n } = useAppTranslation();
+  const contentRef = useRef<HTMLDivElement>(null);
   
   const { data: post, isLoading, error } = useBlogPost(slug || '');
   const { data: allPosts } = useBlogPosts();
@@ -77,8 +78,6 @@ const BlogPost = () => {
       </div>
     );
   }
-
-  const contentRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="min-h-screen bg-background">
