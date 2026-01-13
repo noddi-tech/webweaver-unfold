@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FileText, Send, Loader2, Check, Calculator } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { CurrencySwitcher } from './CurrencySwitcher';
+import { LAUNCH_CONFIG, SCALE_CONFIG } from '@/config/newPricing';
 import { toast } from 'sonner';
 
 interface OfferGeneratorPanelProps {
@@ -17,18 +19,14 @@ interface OfferGeneratorPanelProps {
   initialTier?: 'launch' | 'scale';
   initialRevenue?: number;
   initialLocations?: number;
-  initialFixedMonthly?: number;
-  initialRevenuePercentage?: number;
 }
 
 export function OfferGeneratorPanel({
   initialTier = 'launch',
   initialRevenue = 5000000,
-  initialLocations = 1,
-  initialFixedMonthly = 4900,
-  initialRevenuePercentage = 2.9
+  initialLocations = 1
 }: OfferGeneratorPanelProps) {
-  const { formatAmount } = useCurrency();
+  const { formatAmountWithSpaces, currency, config } = useCurrency();
   
   // Customer info
   const [customerName, setCustomerName] = useState('');
@@ -39,8 +37,7 @@ export function OfferGeneratorPanel({
   const [tier, setTier] = useState<'launch' | 'scale'>(initialTier);
   const [annualRevenue, setAnnualRevenue] = useState(initialRevenue);
   const [locations, setLocations] = useState(initialLocations);
-  const [fixedMonthly, setFixedMonthly] = useState(initialFixedMonthly);
-  const [revenuePercentage, setRevenuePercentage] = useState(initialRevenuePercentage);
+  const [revenuePercentage, setRevenuePercentage] = useState(tier === 'launch' ? LAUNCH_CONFIG.revenuePercentage * 100 : SCALE_CONFIG.baseTakeRate * 100);
   const [discountPercentage, setDiscountPercentage] = useState(0);
   
   // Notes and state
@@ -50,15 +47,39 @@ export function OfferGeneratorPanel({
   const [isSending, setIsSending] = useState(false);
   const [savedOfferId, setSavedOfferId] = useState<string | null>(null);
 
-  // Calculate costs
+  // Auto-calculate fixed monthly based on tier and locations
+  const fixedMonthly = tier === 'launch' 
+    ? LAUNCH_CONFIG.fixedMonthly 
+    : SCALE_CONFIG.fixedMonthly + (locations * SCALE_CONFIG.perDepartment);
+
+  // Update revenue percentage when tier changes
+  useEffect(() => {
+    if (tier === 'launch') {
+      setRevenuePercentage(LAUNCH_CONFIG.revenuePercentage * 100);
+      setLocations(1);
+    } else {
+      setRevenuePercentage(SCALE_CONFIG.baseTakeRate * 100);
+    }
+  }, [tier]);
+
+  // Calculate costs - discount now applies to yearly total
   const monthlyRevenue = annualRevenue / 12;
-  const effectivePercentage = revenuePercentage * (1 - discountPercentage / 100);
-  const revenueCost = monthlyRevenue * (effectivePercentage / 100);
-  const totalMonthly = fixedMonthly + revenueCost;
-  const effectiveRate = (totalMonthly / monthlyRevenue) * 100;
+  const revenueCost = monthlyRevenue * (revenuePercentage / 100);
+  const totalMonthlyBeforeDiscount = fixedMonthly + revenueCost;
+  const totalYearlyBeforeDiscount = totalMonthlyBeforeDiscount * 12;
+  const totalYearlyAfterDiscount = totalYearlyBeforeDiscount * (1 - discountPercentage / 100);
+  const totalMonthlyAfterDiscount = totalYearlyAfterDiscount / 12;
+  const effectiveRate = (totalMonthlyAfterDiscount / monthlyRevenue) * 100;
 
   const validUntil = new Date();
   validUntil.setDate(validUntil.getDate() + validDays);
+
+  // Format number with spaces as thousands separator
+  const formatNumber = (num: number): string => {
+    return new Intl.NumberFormat('fr-FR', {
+      maximumFractionDigits: 0
+    }).format(Math.round(num));
+  };
 
   const handleSaveOffer = async () => {
     if (!customerName || !customerEmail || !companyName) {
@@ -69,9 +90,6 @@ export function OfferGeneratorPanel({
     setIsSaving(true);
     try {
       const { data: userData } = await supabase.auth.getUser();
-      
-      const monthlyEstimate = fixedMonthly + (annualRevenue / 12) * (effectivePercentage / 100);
-      const yearlyEstimate = monthlyEstimate * 12;
 
       const { data, error } = await supabase
         .from('pricing_offers')
@@ -83,10 +101,10 @@ export function OfferGeneratorPanel({
           annual_revenue: annualRevenue,
           locations,
           fixed_monthly: fixedMonthly,
-          revenue_percentage: effectivePercentage,
+          revenue_percentage: revenuePercentage,
           discount_percentage: discountPercentage,
-          total_monthly_estimate: monthlyEstimate,
-          total_yearly_estimate: yearlyEstimate,
+          total_monthly_estimate: totalMonthlyAfterDiscount,
+          total_yearly_estimate: totalYearlyAfterDiscount,
           notes,
           expires_at: validUntil.toISOString(),
           created_by: userData.user?.id,
@@ -127,7 +145,7 @@ export function OfferGeneratorPanel({
           customerCompany: companyName,
           tier,
           fixedMonthly,
-          revenuePercentage: effectivePercentage,
+          revenuePercentage,
           discountPercentage,
           estimatedAnnualRevenue: annualRevenue,
           locations,
@@ -148,21 +166,24 @@ export function OfferGeneratorPanel({
   };
 
   return (
-    <Card className="border-2 border-primary/20 bg-gradient-to-br from-card to-muted/30">
-      <CardHeader className="pb-4">
+    <Card className="border border-border bg-card">
+      <CardHeader className="pb-4 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-t-lg border-b border-border">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-xl">
             <FileText className="h-5 w-5 text-primary" />
             Generate Pricing Offer
           </CardTitle>
-          {savedOfferId && (
-            <Badge variant="secondary" className="gap-1">
-              <Check className="h-3 w-3" /> Draft Saved
-            </Badge>
-          )}
+          <div className="flex items-center gap-3">
+            <CurrencySwitcher variant="compact" />
+            {savedOfferId && (
+              <Badge variant="secondary" className="gap-1">
+                <Check className="h-3 w-3" /> Draft Saved
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6">
         {/* Customer Details */}
         <div className="space-y-4">
           <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Customer Details</h3>
@@ -199,14 +220,14 @@ export function OfferGeneratorPanel({
         </div>
 
         {/* Pricing Configuration */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Pricing Configuration</h3>
+        <div className="space-y-4 p-4 rounded-lg bg-muted/30 border border-border">
+          <h3 className="font-semibold text-sm text-foreground uppercase tracking-wide">Pricing Configuration</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Tier</Label>
               <Select value={tier} onValueChange={(v) => setTier(v as 'launch' | 'scale')}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -223,26 +244,43 @@ export function OfferGeneratorPanel({
                 value={locations}
                 onChange={(e) => setLocations(parseInt(e.target.value) || 1)}
                 disabled={tier === 'launch'}
+                className="bg-background"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Annual Revenue (NOK)</Label>
+              <Label>Annual Revenue ({currency})</Label>
               <Input
-                type="number"
-                value={annualRevenue}
-                onChange={(e) => setAnnualRevenue(parseInt(e.target.value) || 0)}
+                type="text"
+                value={formatNumber(annualRevenue * config.conversionRate)}
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/[^\d]/g, '');
+                  const numericValue = parseInt(cleaned) || 0;
+                  setAnnualRevenue(Math.round(numericValue / config.conversionRate));
+                }}
+                className="bg-background"
               />
             </div>
             <div className="space-y-2">
-              <Label>Fixed Monthly (NOK)</Label>
-              <Input
-                type="number"
-                value={fixedMonthly}
-                onChange={(e) => setFixedMonthly(parseInt(e.target.value) || 0)}
-              />
+              <Label>Fixed Monthly ({currency})</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  value={formatAmountWithSpaces(fixedMonthly)}
+                  disabled
+                  className="bg-muted"
+                />
+                <Badge variant="outline" className="whitespace-nowrap">
+                  Auto-calculated
+                </Badge>
+              </div>
+              {tier === 'scale' && (
+                <p className="text-xs text-muted-foreground">
+                  €{formatNumber(SCALE_CONFIG.fixedMonthly)} base + {locations} × €{formatNumber(SCALE_CONFIG.perDepartment)}/location
+                </p>
+              )}
             </div>
           </div>
 
@@ -260,10 +298,10 @@ export function OfferGeneratorPanel({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Discount: {discountPercentage}%</Label>
+              <Label>Yearly Discount: {discountPercentage}%</Label>
               {discountPercentage > 0 && (
-                <Badge variant="secondary" className="bg-green-100 text-green-700">
-                  -{discountPercentage}% off
+                <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  -{discountPercentage}% off yearly total
                 </Badge>
               )}
             </div>
@@ -271,8 +309,8 @@ export function OfferGeneratorPanel({
               value={[discountPercentage]}
               onValueChange={([v]) => setDiscountPercentage(v)}
               min={0}
-              max={30}
-              step={5}
+              max={20}
+              step={1}
               className="py-2"
             />
           </div>
@@ -287,20 +325,47 @@ export function OfferGeneratorPanel({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Fixed Monthly</p>
-              <p className="font-semibold">{formatAmount(fixedMonthly)}</p>
+              <p className="font-semibold">{formatAmountWithSpaces(fixedMonthly)}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Revenue Share</p>
-              <p className="font-semibold">{effectivePercentage.toFixed(2)}%</p>
+              <p className="font-semibold">{revenuePercentage.toFixed(2)}%</p>
             </div>
             <div>
               <p className="text-muted-foreground">Est. Monthly</p>
-              <p className="font-semibold text-primary">{formatAmount(totalMonthly)}</p>
+              <p className="font-semibold text-primary">{formatAmountWithSpaces(totalMonthlyAfterDiscount)}</p>
+              {discountPercentage > 0 && (
+                <p className="text-xs text-muted-foreground line-through">
+                  {formatAmountWithSpaces(totalMonthlyBeforeDiscount)}
+                </p>
+              )}
             </div>
             <div>
               <p className="text-muted-foreground">Effective Rate</p>
               <p className="font-semibold">{effectiveRate.toFixed(2)}%</p>
             </div>
+          </div>
+          
+          {/* Yearly totals with discount breakdown */}
+          <div className="pt-3 border-t border-primary/20 mt-3">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Yearly Total</span>
+              <div className="text-right">
+                <span className="font-bold text-lg text-primary">
+                  {formatAmountWithSpaces(totalYearlyAfterDiscount)}
+                </span>
+                {discountPercentage > 0 && (
+                  <span className="ml-2 text-muted-foreground line-through">
+                    {formatAmountWithSpaces(totalYearlyBeforeDiscount)}
+                  </span>
+                )}
+              </div>
+            </div>
+            {discountPercentage > 0 && (
+              <p className="text-xs text-green-600 dark:text-green-400 text-right mt-1">
+                Saving {formatAmountWithSpaces(totalYearlyBeforeDiscount - totalYearlyAfterDiscount)}/year
+              </p>
+            )}
           </div>
         </div>
 

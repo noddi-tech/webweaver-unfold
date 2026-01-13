@@ -14,6 +14,7 @@ interface CurrencyContextType {
   config: CurrencyConfig;
   convertAmount: (amountEUR: number) => number;
   formatAmount: (amountEUR: number, showDecimals?: boolean) => string;
+  formatAmountWithSpaces: (amountEUR: number, showDecimals?: boolean) => string;
   formatRevenue: (amountEUR: number) => string;
 }
 
@@ -68,6 +69,19 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     return formatter.format(converted);
   };
 
+  // Format with space as thousands separator (European style: 7 000 000)
+  const formatAmountWithSpaces = (amountEUR: number, showDecimals: boolean = false): string => {
+    const converted = convertAmount(amountEUR);
+    
+    // Use fr-FR locale which uses space as thousands separator
+    const numberPart = new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: showDecimals ? 2 : 0,
+      maximumFractionDigits: showDecimals ? 2 : 0
+    }).format(converted);
+    
+    return `${numberPart} ${config.symbol}`;
+  };
+
   const formatRevenue = (amountEUR: number): string => {
     const converted = convertAmount(amountEUR);
     const symbol = config.symbol;
@@ -90,6 +104,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     config,
     convertAmount,
     formatAmount,
+    formatAmountWithSpaces,
     formatRevenue
   };
 
