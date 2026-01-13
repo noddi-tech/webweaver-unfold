@@ -1,4 +1,4 @@
-import { TrendingUp, Check, Building2 } from 'lucide-react';
+import { TrendingUp, Check, Building2, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,9 +10,11 @@ interface ScaleTierCardProps {
   tiers: ScaleTier[];
   onSelect?: () => void;
   isSelected?: boolean;
+  /** When true, shows detailed rate information (for internal sales page) */
+  showDetailedRates?: boolean;
 }
 
-export function ScaleTierCard({ config, tiers, onSelect, isSelected }: ScaleTierCardProps) {
+export function ScaleTierCard({ config, tiers, onSelect, isSelected, showDetailedRates = false }: ScaleTierCardProps) {
   const { formatAmount, formatRevenue } = useCurrency();
   
   const minRate = tiers.length > 0 ? Math.min(...tiers.map(t => t.takeRate)) * 100 : 0.7;
@@ -64,21 +66,42 @@ export function ScaleTierCard({ config, tiers, onSelect, isSelected }: ScaleTier
             <Building2 className="w-4 h-4" />
             <span>+ {formatAmount(config.perDepartment)}/location/month</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-primary">
-              {minRate.toFixed(1)}% – {maxRate.toFixed(1)}%
-            </span>
-            <span className="text-muted-foreground">tiered revenue</span>
-          </div>
+          
+          {/* Conditional rate display */}
+          {showDetailedRates ? (
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold text-primary">
+                {minRate.toFixed(1)}% – {maxRate.toFixed(1)}%
+              </span>
+              <span className="text-muted-foreground">tiered revenue</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-primary">
+              <ArrowRight className="w-4 h-4" />
+              <span className="font-medium">Volume-based rates — discuss in meeting</span>
+            </div>
+          )}
         </div>
         
-        {/* Tier preview */}
-        <div className="p-3 rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20">
-          <p className="text-xs font-medium text-primary mb-2">{tiers.length} Revenue Tiers</p>
-          <p className="text-sm text-muted-foreground">
-            Rate decreases as your revenue grows, from {maxRate.toFixed(1)}% at {firstTier ? formatRevenue(firstTier.revenueThreshold) : '€1M'} to {minRate.toFixed(1)}% at {lastTier ? formatRevenue(lastTier.revenueThreshold) : '€389M'}+
-          </p>
-        </div>
+        {/* Tier preview - only show in detailed mode */}
+        {showDetailedRates && (
+          <div className="p-3 rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20">
+            <p className="text-xs font-medium text-primary mb-2">{tiers.length} Revenue Tiers</p>
+            <p className="text-sm text-muted-foreground">
+              Rate decreases as your revenue grows, from {maxRate.toFixed(1)}% at {firstTier ? formatRevenue(firstTier.revenueThreshold) : '€1M'} to {minRate.toFixed(1)}% at {lastTier ? formatRevenue(lastTier.revenueThreshold) : '€389M'}+
+            </p>
+          </div>
+        )}
+        
+        {/* Public mode: simpler message */}
+        {!showDetailedRates && (
+          <div className="p-3 rounded-lg bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20">
+            <p className="text-sm font-medium text-primary mb-1">Custom pricing that grows with you</p>
+            <p className="text-sm text-muted-foreground">
+              Your rate decreases as your revenue grows. Let's find the perfect fit for your business.
+            </p>
+          </div>
+        )}
         
         {/* Divider */}
         <div className="border-t border-border" />

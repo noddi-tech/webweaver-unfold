@@ -4,17 +4,16 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { NoHiddenCosts } from "@/components/pricing/NoHiddenCosts";
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
-import { PricingHeroNew } from "@/components/pricing/PricingHeroNew";
-import { LaunchTierCard } from "@/components/pricing/LaunchTierCard";
-import { ScaleTierCard } from "@/components/pricing/ScaleTierCard";
 import { usePricingConfig } from "@/hooks/usePricingConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
-import { LockedText } from "@/components/LockedText";
+import { Check, Rocket, TrendingUp, Calendar, ArrowRight, Sparkles, Building2, Shield } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const Pricing = () => {
-  const { launch, scale, scaleTiers, isLoading } = usePricingConfig();
+  const { launch, scale, isLoading } = usePricingConfig();
   
   // Fetch CMS content for pricing page
   const { textContent, loading: contentLoading } = useTextContent('pricing');
@@ -49,58 +48,248 @@ const Pricing = () => {
     loadPage();
   }, []);
 
+  const valueProps = [
+    {
+      icon: Shield,
+      title: "No hidden fees",
+      description: "What you see is what you pay. No surprise charges."
+    },
+    {
+      icon: TrendingUp,
+      title: "Scales with you",
+      description: "Your rate decreases as your business grows."
+    },
+    {
+      icon: Building2,
+      title: "One platform",
+      description: "Every function. No integration headaches."
+    },
+    {
+      icon: Sparkles,
+      title: "Launch in days",
+      description: "Not months. We handle the complexity."
+    }
+  ];
+
   return (
     <div className="min-h-screen">
       <HreflangTags pageSlug="/pricing" />
       <Header />
       <main>
-        {/* Hero Section */}
-        <PricingHeroNew textContent={textContent} />
+        {/* Hero Section - Navio Brand Gradient */}
+        <section className="relative pt-32 pb-20 overflow-hidden">
+          {/* Gradient background */}
+          <div 
+            className="absolute inset-0 -z-10" 
+            style={{ background: 'var(--gradient-hero)' }}
+          />
+          {/* Mesh overlay for depth */}
+          <div 
+            className="absolute inset-0 -z-10 opacity-30" 
+            style={{ background: 'var(--gradient-mesh-cosmic)' }}
+          />
+          
+          <div className="container max-w-container px-4 sm:px-6 lg:px-8 text-center">
+            <Badge variant="secondary" className="mb-6 bg-white/10 text-white border-white/20 backdrop-blur-sm">
+              Transparent Pricing
+            </Badge>
+            
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
+              Pricing that scales with you
+            </h1>
+            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-10">
+              No surprises. No hidden fees. Just simple pricing that grows with your business.
+            </p>
+            
+            {/* Tier pills */}
+            <div className="flex flex-wrap justify-center gap-4 max-w-lg mx-auto mb-12">
+              <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white">
+                <Rocket className="w-5 h-5" />
+                <span className="font-semibold">Launch</span>
+                <span className="text-white/70">Single location</span>
+              </div>
+              <div className="flex items-center gap-2 px-5 py-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white">
+                <TrendingUp className="w-5 h-5" />
+                <span className="font-semibold">Scale</span>
+                <span className="text-white/70">Multi-location</span>
+              </div>
+            </div>
+            
+            {/* Primary CTA */}
+            <Button 
+              size="lg" 
+              className="text-lg px-8 bg-white text-primary hover:bg-white/90 gap-2"
+              asChild
+            >
+              <a 
+                href="https://calendly.com/joachim-noddi/30min"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Calendar className="w-5 h-5" />
+                Book a Meeting
+              </a>
+            </Button>
+            <p className="text-white/60 text-sm mt-4">
+              We'll create a custom proposal for you
+            </p>
+          </div>
+        </section>
 
-        {/* Tier Cards */}
-        <section className="py-16 animate-fade-in" style={{ animationDelay: '100ms' }}>
+        {/* Value Propositions */}
+        <section className="py-20 animate-fade-in" style={{ animationDelay: '100ms' }}>
           <div className="container max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 gap-8">
-              {!isLoading && (
-                <>
-                  <LaunchTierCard config={launch} />
-                  <ScaleTierCard config={scale} tiers={scaleTiers} />
-                </>
-              )}
-              {isLoading && (
-                <>
-                  <div className="h-96 rounded-lg bg-muted animate-pulse" />
-                  <div className="h-96 rounded-lg bg-muted animate-pulse" />
-                </>
-              )}
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                One platform. Every function.
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                From booking to backend automation. No integrations. No waiting.
+              </p>
+            </div>
+            
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {valueProps.map((prop, index) => (
+                <Card key={index} className="border-0 shadow-sm bg-muted/30 hover:bg-muted/50 transition-colors">
+                  <CardContent className="pt-6">
+                    <div className="p-3 rounded-xl bg-primary/10 w-fit mb-4">
+                      <prop.icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">{prop.title}</h3>
+                    <p className="text-muted-foreground text-sm">{prop.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Simple Tier Overview */}
+        <section className="py-20 bg-muted/30 animate-fade-in" style={{ animationDelay: '150ms' }}>
+          <div className="container max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Two plans. Simple choice.
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Pick the one that fits your business. Upgrade anytime.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              {/* Launch Card */}
+              <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors">
+                <CardContent className="pt-8 pb-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Rocket className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold">Launch</h3>
+                      <p className="text-muted-foreground text-sm">Get started fast</p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-muted-foreground mb-6">
+                    Perfect for single-location businesses ready to modernize their operations.
+                  </p>
+                  
+                  <ul className="space-y-3 mb-8">
+                    {['Single location setup', 'Full platform access', 'Standard support', 'Basic analytics'].map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm">
+                        <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <div className="p-4 rounded-lg bg-muted/50 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Fixed monthly + small revenue share
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Scale Card */}
+              <Card className="relative overflow-hidden border-2 border-primary shadow-lg">
+                <div className="absolute top-0 right-0">
+                  <Badge className="rounded-none rounded-bl-lg bg-primary text-primary-foreground">
+                    Most Popular
+                  </Badge>
+                </div>
+                
+                <CardContent className="pt-8 pb-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <TrendingUp className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold">Scale</h3>
+                      <p className="text-muted-foreground text-sm">Grow without limits</p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-muted-foreground mb-6">
+                    Built for multi-location businesses ready to scale operations across sites.
+                  </p>
+                  
+                  <ul className="space-y-3 mb-8">
+                    {['Unlimited locations', 'Priority support', 'Advanced analytics', 'API access', 'Custom integrations'].map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm">
+                        <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 text-center">
+                    <p className="text-sm font-medium text-primary">
+                      Volume-based rates — better value as you grow
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
 
         {/* No Hidden Costs Banner */}
-        <section className="pt-0 pb-section animate-fade-in" style={{ animationDelay: '175ms' }}>
+        <section className="py-20 animate-fade-in" style={{ animationDelay: '175ms' }}>
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <NoHiddenCosts textContent={textContent} />
           </div>
         </section>
 
         {/* FAQ Section */}
-        <section className="py-12 animate-fade-in" style={{ animationDelay: '600ms' }}>
+        <section className="py-16 bg-muted/30 animate-fade-in" style={{ animationDelay: '200ms' }}>
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <PricingFAQ />
           </div>
         </section>
 
-        {/* Book a Demo CTA - After FAQ */}
-        <section className="py-section text-center animate-fade-in" style={{ animationDelay: '650ms' }}>
+        {/* Final CTA */}
+        <section className="py-24 text-center animate-fade-in" style={{ animationDelay: '250ms' }}>
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
-            <Button size="lg" className="text-lg px-8 accessible-focus" asChild>
-              <a href="/contact">
-                <LockedText reason="CTA button text">
-                  {getCMSContent('button_book_demo', 'Contact us')}
-                </LockedText>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Let's find your perfect plan
+            </h2>
+            <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+              Book a 30-minute call. We'll discuss your needs and create a custom proposal.
+            </p>
+            <Button size="lg" className="text-lg px-8 gap-2" asChild>
+              <a 
+                href="https://calendly.com/joachim-noddi/30min"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Book a Meeting
+                <ArrowRight className="w-5 h-5" />
               </a>
             </Button>
+            <p className="text-muted-foreground text-sm mt-4">
+              No commitment. No pressure. Just a conversation.
+            </p>
           </div>
         </section>
       </main>
