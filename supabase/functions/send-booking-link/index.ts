@@ -10,7 +10,45 @@ interface BookingLinkRequest {
   applicationId: string;
   interviewType: string;
   expiresInDays?: number;
-  slotIds?: string[]; // Optional: specific slots to include
+  slotIds?: string[];
+}
+
+// Check domain verification - prioritize naviosolutions.com
+async function getFromAddress(apiKey: string): Promise<string> {
+  try {
+    const res = await fetch("https://api.resend.com/domains", {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+
+    if (res.ok) {
+      const domains = await res.json();
+      
+      // Check naviosolutions.com first
+      const navioSolutionsVerified = domains.data?.some(
+        (d: { name: string; status: string }) => 
+          d.name === "naviosolutions.com" && d.status === "verified"
+      );
+      if (navioSolutionsVerified) {
+        console.log("Using verified naviosolutions.com domain");
+        return "Navio Careers <careers@naviosolutions.com>";
+      }
+      
+      // Fallback to navio.no
+      const navioVerified = domains.data?.some(
+        (d: { name: string; status: string }) => 
+          d.name === "navio.no" && d.status === "verified"
+      );
+      if (navioVerified) {
+        console.log("Using verified navio.no domain");
+        return "Navio Careers <careers@navio.no>";
+      }
+    }
+  } catch (e) {
+    console.log("Domain check failed:", e);
+  }
+
+  console.log("Using Resend test domain as fallback");
+  return "Navio Careers <onboarding@resend.dev>";
 }
 
 serve(async (req) => {
@@ -86,13 +124,14 @@ serve(async (req) => {
       throw new Error("Failed to update slots with booking token");
     }
 
-    // Generate booking URL
-    const baseUrl = Deno.env.get("SITE_URL") || "https://noddi.tech";
+    // Generate booking URL - use naviosolutions.com
+    const baseUrl = "https://naviosolutions.com";
     const bookingUrl = `${baseUrl}/book/${bookingToken}`;
 
     // Send email if Resend is configured
     if (resendApiKey) {
       const jobTitle = (application.job_listings as any)?.title || "the position";
+      const fromAddress = await getFromAddress(resendApiKey);
       
       const emailHtml = `
         <!DOCTYPE html>
@@ -121,7 +160,7 @@ serve(async (req) => {
               </p>
               <p>This link will expire in ${expiresInDays} days.</p>
               <p>If you have any questions, please don't hesitate to reach out.</p>
-              <p>Best regards,<br>The Hiring Team</p>
+              <p>Best regards,<br>The Navio Team</p>
             </div>
             <div class="footer">
               <p>If the button doesn't work, copy and paste this link: ${bookingUrl}</p>
@@ -138,7 +177,7 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "Careers <careers@noddi.tech>",
+          from: fromAddress,
           to: [application.applicant_email],
           subject: `Schedule Your Interview - ${jobTitle}`,
           html: emailHtml,

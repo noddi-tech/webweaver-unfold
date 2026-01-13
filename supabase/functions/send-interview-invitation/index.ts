@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Check if navio.no domain is verified in Resend, fallback to test domain
+// Check domain verification - prioritize naviosolutions.com
 const getFromAddress = async (apiKey: string): Promise<string> => {
   try {
     const res = await fetch("https://api.resend.com/domains", {
@@ -14,18 +14,30 @@ const getFromAddress = async (apiKey: string): Promise<string> => {
     });
     const domains = await res.json();
     
+    // Check naviosolutions.com first
+    const navioSolutionsVerified = domains.data?.some(
+      (d: { name: string; status: string }) => 
+        d.name === "naviosolutions.com" && d.status === "verified"
+    );
+    if (navioSolutionsVerified) {
+      console.log("Using verified naviosolutions.com domain");
+      return "Navio Careers <careers@naviosolutions.com>";
+    }
+    
+    // Fallback to navio.no
     const navioVerified = domains.data?.some(
       (d: { name: string; status: string }) => d.name === "navio.no" && d.status === "verified"
     );
-    
     if (navioVerified) {
+      console.log("Using verified navio.no domain");
       return "Navio Careers <careers@navio.no>";
     }
   } catch (e) {
     console.log("Domain check failed, using fallback:", e);
   }
   
-  return "Navio <onboarding@resend.dev>";
+  console.log("Using Resend test domain as fallback");
+  return "Navio Careers <onboarding@resend.dev>";
 };
 
 const replaceVariables = (text: string, vars: Record<string, string>): string => {
@@ -50,7 +62,7 @@ const generateICS = (
     return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
   };
   
-  const uid = `${Date.now()}-interview@navio.no`;
+  const uid = `${Date.now()}-interview@naviosolutions.com`;
   const locationStr = meetingUrl || location;
   const descWithUrl = meetingUrl ? `${description}\n\nJoin: ${meetingUrl}` : description;
   
@@ -115,7 +127,7 @@ serve(async (req) => {
       .eq("is_active", true)
       .single();
 
-    const siteUrl = "https://navio.no";
+    const siteUrl = "https://naviosolutions.com";
     const currentYear = new Date().getFullYear().toString();
     
     const variables: Record<string, string> = {
@@ -132,7 +144,6 @@ serve(async (req) => {
       interview_notes: notes || "",
     };
 
-    // Use template or defaults
     const subject = replaceVariables(
       template?.subject || "Interview Scheduled: {{job_title}} at Navio",
       variables
@@ -142,7 +153,6 @@ serve(async (req) => {
       variables
     );
     
-    // Build body with meeting link conditionally
     let bodyHtml = template?.body_html || `
 <p>Hi {{applicant_name}},</p>
 <p>We're excited to invite you to an interview for the <strong>{{job_title}}</strong> position at Navio!</p>
@@ -167,7 +177,6 @@ ${notes ? `<p>${notes}</p>` : ""}
     const headerBgStart = template?.header_bg_start || "#8b5cf6";
     const headerBgEnd = template?.header_bg_end || "#6d28d9";
 
-    // Build email HTML
     const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -228,8 +237,6 @@ ${notes ? `<p>${notes}</p>` : ""}
     );
 
     const fromAddress = await getFromAddress(RESEND_API_KEY);
-
-    // Convert ICS to base64
     const icsBase64 = btoa(icsContent);
 
     const res = await fetch("https://api.resend.com/emails", {

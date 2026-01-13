@@ -25,7 +25,6 @@ interface EmailTemplate {
   header_bg_end: string;
 }
 
-// Map application status to template key
 const STATUS_TO_TEMPLATE: Record<string, string> = {
   under_review: "status_under_review",
   interview_scheduled: "status_interview_scheduled",
@@ -36,7 +35,7 @@ const STATUS_TO_TEMPLATE: Record<string, string> = {
   withdrawn: "status_withdrawn",
 };
 
-// Check if navio.no is verified, fallback to resend test domain
+// Check domain verification - prioritize naviosolutions.com
 async function getFromAddress(apiKey: string): Promise<string> {
   try {
     const res = await fetch("https://api.resend.com/domains", {
@@ -45,11 +44,22 @@ async function getFromAddress(apiKey: string): Promise<string> {
     
     if (res.ok) {
       const domains = await res.json();
+      
+      // Check naviosolutions.com first
+      const navioSolutionsVerified = domains.data?.some(
+        (d: { name: string; status: string }) => 
+          d.name === "naviosolutions.com" && d.status === "verified"
+      );
+      if (navioSolutionsVerified) {
+        console.log("Using verified naviosolutions.com domain");
+        return "Navio Careers <careers@naviosolutions.com>";
+      }
+      
+      // Fallback to navio.no
       const navioVerified = domains.data?.some(
         (d: { name: string; status: string }) => 
           d.name === "navio.no" && d.status === "verified"
       );
-      
       if (navioVerified) {
         console.log("Using verified navio.no domain");
         return "Navio Careers <careers@navio.no>";
@@ -109,7 +119,6 @@ function buildEmailHtml(template: EmailTemplate, vars: Record<string, string>): 
   `;
 }
 
-// Default templates for each status (fallback if DB template not found)
 const DEFAULT_TEMPLATES: Record<string, EmailTemplate> = {
   status_under_review: {
     subject: "Application Update - {{job_title}} at Navio",
@@ -200,9 +209,8 @@ serve(async (req) => {
 
     const { applicantName, applicantEmail, jobTitle, newStatus, applicationId }: StatusUpdateRequest = await req.json();
 
-    const siteUrl = Deno.env.get("SITE_URL") || "https://navio.no";
+    const siteUrl = "https://naviosolutions.com";
     
-    // Template variables
     const vars: Record<string, string> = {
       applicant_name: applicantName,
       job_title: jobTitle,
@@ -211,7 +219,6 @@ serve(async (req) => {
       status: newStatus.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
     };
 
-    // Get template key for this status
     const templateKey = STATUS_TO_TEMPLATE[newStatus];
     if (!templateKey) {
       console.log(`No template for status: ${newStatus}, skipping email`);
@@ -221,7 +228,6 @@ serve(async (req) => {
       );
     }
 
-    // Fetch template from database
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
