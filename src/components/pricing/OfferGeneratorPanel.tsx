@@ -343,7 +343,7 @@ export function OfferGeneratorPanel({
               </div>
               {tier === 'scale' && (
                 <p className="text-xs text-primary-foreground/80">
-                  €{formatNumber(SCALE_CONFIG.fixedMonthly)} base + {locations} × €{formatNumber(SCALE_CONFIG.perDepartment)}/location
+                  {config.symbol}{formatNumber(SCALE_CONFIG.fixedMonthly * config.conversionRate)} base + {locations} × {config.symbol}{formatNumber(SCALE_CONFIG.perDepartment * config.conversionRate)}/location
                 </p>
               )}
             </div>
@@ -386,7 +386,7 @@ export function OfferGeneratorPanel({
                         value={index.toString()}
                         className={autoDetectedTierIndex === index ? 'font-bold bg-primary/10' : ''}
                       >
-                        Tier {t.tier}: {(t.takeRate * 100).toFixed(2)}% (€{formatNumber(t.revenueThreshold)}+)
+                        Tier {t.tier}: {(t.takeRate * 100).toFixed(2)}% ({config.symbol}{formatNumber(t.revenueThreshold * config.conversionRate)}+)
                         {autoDetectedTierIndex === index && ' ← Auto'}
                       </SelectItem>
                     ))}
