@@ -131,10 +131,10 @@ export function OfferGeneratorPanel({
     }).format(Math.round(num));
   };
 
-  const handleSaveOffer = async () => {
+  const handleSaveOffer = async (): Promise<string | null> => {
     if (!customerName || !customerEmail || !companyName) {
       toast.error('Please fill in customer details');
-      return;
+      return null;
     }
 
     setIsSaving(true);
@@ -167,17 +167,25 @@ export function OfferGeneratorPanel({
       
       setSavedOfferId(data.id);
       toast.success('Offer saved as draft');
+      return data.id;
     } catch (error: any) {
       console.error('Error saving offer:', error);
       toast.error('Failed to save offer');
+      return null;
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleSendOffer = async () => {
-    if (!savedOfferId) {
-      await handleSaveOffer();
+    let offerIdToSend = savedOfferId;
+    
+    if (!offerIdToSend) {
+      offerIdToSend = await handleSaveOffer();
+      if (!offerIdToSend) {
+        toast.error('Failed to save offer before sending');
+        return;
+      }
     }
 
     if (!customerEmail) {
@@ -189,7 +197,7 @@ export function OfferGeneratorPanel({
     try {
       const response = await supabase.functions.invoke('send-pricing-offer', {
         body: {
-          offerId: savedOfferId,
+          offerId: offerIdToSend,
           customerEmail,
           customerName,
           customerCompany: companyName,
