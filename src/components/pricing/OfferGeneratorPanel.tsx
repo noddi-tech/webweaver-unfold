@@ -235,7 +235,7 @@ export function OfferGeneratorPanel({
                 Copy from Calculator
               </Button>
             )}
-            <CurrencySwitcher variant="compact" />
+            <CurrencySwitcher variant="compact" darkMode showLabel />
             {savedOfferId && (
               <Badge variant="secondary" className="gap-1">
                 <Check className="h-3 w-3" /> Draft Saved
