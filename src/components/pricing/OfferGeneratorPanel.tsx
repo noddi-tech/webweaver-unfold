@@ -7,24 +7,32 @@ import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Send, Loader2, Check, Calculator, RotateCcw } from 'lucide-react';
+import { FileText, Send, Loader2, Check, Calculator, RotateCcw, Copy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { CurrencySwitcher } from './CurrencySwitcher';
 import { LAUNCH_CONFIG, SCALE_CONFIG, generateScaleTiers } from '@/config/newPricing';
 import { toast } from 'sonner';
 
+export interface CalculatorValues {
+  annualRevenue: number;
+  locations: number;
+  recommendation: 'launch' | 'scale';
+}
+
 interface OfferGeneratorPanelProps {
   // Pre-filled from calculator
   initialTier?: 'launch' | 'scale';
   initialRevenue?: number;
   initialLocations?: number;
+  calculatorValues?: CalculatorValues;
 }
 
 export function OfferGeneratorPanel({
   initialTier = 'launch',
   initialRevenue = 5000000,
-  initialLocations = 1
+  initialLocations = 1,
+  calculatorValues
 }: OfferGeneratorPanelProps) {
   const { formatAmountWithSpaces, currency, config } = useCurrency();
   
@@ -101,6 +109,20 @@ export function OfferGeneratorPanel({
 
   const validUntil = new Date();
   validUntil.setDate(validUntil.getDate() + validDays);
+
+  // Copy values from calculator
+  const handleCopyFromCalculator = () => {
+    if (!calculatorValues) {
+      toast.error('No calculator values available');
+      return;
+    }
+    
+    setAnnualRevenue(calculatorValues.annualRevenue);
+    setLocations(calculatorValues.locations);
+    setTier(calculatorValues.recommendation);
+    setManualTierOverride(false);
+    toast.success('Values copied from calculator');
+  };
 
   // Format number with spaces as thousands separator
   const formatNumber = (num: number): string => {
@@ -202,6 +224,17 @@ export function OfferGeneratorPanel({
             Generate Pricing Offer
           </CardTitle>
           <div className="flex items-center gap-3">
+            {calculatorValues && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleCopyFromCalculator}
+                className="gap-2"
+              >
+                <Copy className="h-4 w-4" />
+                Copy from Calculator
+              </Button>
+            )}
             <CurrencySwitcher variant="compact" />
             {savedOfferId && (
               <Badge variant="secondary" className="gap-1">
