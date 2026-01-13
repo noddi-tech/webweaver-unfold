@@ -8,7 +8,8 @@ interface DomainInfo {
 }
 
 const DOMAIN_PRIORITY: DomainInfo[] = [
-  { name: 'naviosolutions.com', prefix: 'Navio' },
+  { name: 'info.naviosolutions.com', prefix: 'Navio' },
+  { name: 'career.naviosolutions.com', prefix: 'Navio' },
   { name: 'navio.no', prefix: 'Navio' },
 ];
 
