@@ -24,8 +24,14 @@ interface OfferEmailRequest {
   notes?: string;
 }
 
-// Check domain verification - prioritize naviosolutions.com
+// Check domain verification - prioritize info.naviosolutions.com
 async function getFromAddress(apiKey: string): Promise<string> {
+  const domainPriority = [
+    'info.naviosolutions.com',
+    'career.naviosolutions.com',
+    'navio.no',
+  ];
+
   try {
     const res = await fetch("https://api.resend.com/domains", {
       headers: { Authorization: `Bearer ${apiKey}` },
@@ -34,24 +40,16 @@ async function getFromAddress(apiKey: string): Promise<string> {
     if (res.ok) {
       const domains = await res.json();
       
-      // Check naviosolutions.com first
-      const navioSolutionsVerified = domains.data?.some(
-        (d: { name: string; status: string }) => 
-          d.name === "naviosolutions.com" && d.status === "verified"
-      );
-      if (navioSolutionsVerified) {
-        console.log("Using verified naviosolutions.com domain");
-        return "Navio Sales <sales@naviosolutions.com>";
-      }
-      
-      // Fallback to navio.no
-      const navioVerified = domains.data?.some(
-        (d: { name: string; status: string }) => 
-          d.name === "navio.no" && d.status === "verified"
-      );
-      if (navioVerified) {
-        console.log("Using verified navio.no domain");
-        return "Navio Sales <sales@navio.no>";
+      for (const domain of domainPriority) {
+        const isVerified = domains.data?.some(
+          (d: { name: string; status: string }) => 
+            d.name === domain && d.status === "verified"
+        );
+        
+        if (isVerified) {
+          console.log(`Using verified ${domain} domain`);
+          return `Navio Sales <sales@${domain}>`;
+        }
       }
     }
   } catch (e) {
