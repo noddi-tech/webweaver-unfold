@@ -214,7 +214,7 @@ export function OfferGeneratorPanel({
       <CardContent className="space-y-6 pt-6">
         {/* Customer Details */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Customer Details</h3>
+          <h3 className="font-semibold text-sm text-primary uppercase tracking-wide">Customer Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="companyName">Company Name</Label>
@@ -400,22 +400,22 @@ export function OfferGeneratorPanel({
         </div>
 
         {/* Calculated Summary */}
-        <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-3">
+        <div className="rounded-lg bg-muted border border-border p-4 space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium text-primary">
             <Calculator className="h-4 w-4" />
             Offer Summary
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <p className="text-muted-foreground">Fixed Monthly</p>
-              <p className="font-semibold">{formatAmountWithSpaces(fixedMonthly)}</p>
+              <p className="text-foreground font-medium">Fixed Monthly</p>
+              <p className="font-semibold text-foreground">{formatAmountWithSpaces(fixedMonthly)}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Revenue Share</p>
-              <p className="font-semibold">{revenuePercentage.toFixed(2)}%</p>
+              <p className="text-foreground font-medium">Revenue Share</p>
+              <p className="font-semibold text-foreground">{revenuePercentage.toFixed(2)}%</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Est. Monthly</p>
+              <p className="text-foreground font-medium">Est. Monthly</p>
               <p className="font-semibold text-primary">{formatAmountWithSpaces(totalMonthlyAfterDiscount)}</p>
               {discountPercentage > 0 && (
                 <p className="text-xs text-muted-foreground line-through">
@@ -424,15 +424,15 @@ export function OfferGeneratorPanel({
               )}
             </div>
             <div>
-              <p className="text-muted-foreground">Effective Rate</p>
-              <p className="font-semibold">{effectiveRate.toFixed(2)}%</p>
+              <p className="text-foreground font-medium">Effective Rate</p>
+              <p className="font-semibold text-foreground">{effectiveRate.toFixed(2)}%</p>
             </div>
           </div>
           
           {/* Yearly totals with discount breakdown */}
-          <div className="pt-3 border-t border-primary/20 mt-3">
+          <div className="pt-3 border-t border-border mt-3">
             <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">Yearly Total</span>
+              <span className="text-foreground font-medium">Yearly Total</span>
               <div className="text-right">
                 <span className="font-bold text-lg text-primary">
                   {formatAmountWithSpaces(totalYearlyAfterDiscount)}

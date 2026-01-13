@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Calculator, Rocket, TrendingUp, ArrowRight, Building2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -9,7 +9,17 @@ import { comparePricing, formatPercentage } from '@/utils/newPricingCalculator';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { CurrencySwitcher } from '@/components/pricing/CurrencySwitcher';
 
-export function PricingComparisonCalculator() {
+export interface CalculatorValues {
+  annualRevenue: number;
+  locations: number;
+  recommendation: 'launch' | 'scale';
+}
+
+interface PricingComparisonCalculatorProps {
+  onValuesChange?: (values: CalculatorValues) => void;
+}
+
+export function PricingComparisonCalculator({ onValuesChange }: PricingComparisonCalculatorProps) {
   const { formatAmount, formatRevenue, config: currencyConfig } = useCurrency();
   const { launch, scale, scaleTiers, isLoading } = usePricingConfig();
   
@@ -33,6 +43,17 @@ export function PricingComparisonCalculator() {
   const comparison = useMemo(() => {
     return comparePricing(annualRevenue, departments, launch, scale, scaleTiers, isLaunchAvailable);
   }, [annualRevenue, departments, launch, scale, scaleTiers, isLaunchAvailable]);
+  
+  // Notify parent when values change
+  useEffect(() => {
+    if (onValuesChange && comparison) {
+      onValuesChange({
+        annualRevenue,
+        locations: departments,
+        recommendation: comparison.recommendation,
+      });
+    }
+  }, [annualRevenue, departments, comparison, onValuesChange]);
   
   if (isLoading) {
     return (

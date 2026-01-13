@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,7 +8,7 @@ import { PricingHeroNew } from "@/components/pricing/PricingHeroNew";
 import { LaunchTierCard } from "@/components/pricing/LaunchTierCard";
 import { ScaleTierCard } from "@/components/pricing/ScaleTierCard";
 import { ScaleTierTable } from "@/components/pricing/ScaleTierTable";
-import { PricingComparisonCalculator } from "@/components/pricing/PricingComparisonCalculator";
+import { PricingComparisonCalculator, CalculatorValues } from "@/components/pricing/PricingComparisonCalculator";
 import { NoHiddenCosts } from "@/components/pricing/NoHiddenCosts";
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
 import { OfferGeneratorPanel } from "@/components/pricing/OfferGeneratorPanel";
@@ -27,6 +27,17 @@ const PricingDetailed = () => {
   const [showAllTiers, setShowAllTiers] = useState(false);
   const { launch, scale, scaleTiers, isLoading } = usePricingConfig();
   const { isAdmin, isEditor, loading: roleLoading } = useUserRole();
+  
+  // Shared state for calculator values
+  const [calculatorValues, setCalculatorValues] = useState<CalculatorValues>({
+    annualRevenue: 1_000_000,
+    locations: 1,
+    recommendation: 'launch',
+  });
+  
+  const handleCalculatorChange = useCallback((values: CalculatorValues) => {
+    setCalculatorValues(values);
+  }, []);
   
   // Fetch CMS content for pricing page
   const { textContent } = useTextContent('pricing');
@@ -193,11 +204,13 @@ const PricingDetailed = () => {
                 </TabsList>
                 
                 <TabsContent value="calculator">
-                  <PricingComparisonCalculator />
+                  <PricingComparisonCalculator onValuesChange={handleCalculatorChange} />
                 </TabsContent>
                 
                 <TabsContent value="offer">
-                  <OfferGeneratorPanel />
+                  <OfferGeneratorPanel 
+                    calculatorValues={calculatorValues}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="history">
