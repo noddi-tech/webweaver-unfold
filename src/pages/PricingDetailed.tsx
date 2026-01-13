@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PricingHeroNew } from "@/components/pricing/PricingHeroNew";
 import { LaunchTierCard } from "@/components/pricing/LaunchTierCard";
 import { ScaleTierCard } from "@/components/pricing/ScaleTierCard";
@@ -10,11 +11,13 @@ import { ScaleTierTable } from "@/components/pricing/ScaleTierTable";
 import { PricingComparisonCalculator } from "@/components/pricing/PricingComparisonCalculator";
 import { NoHiddenCosts } from "@/components/pricing/NoHiddenCosts";
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
+import { OfferGeneratorPanel } from "@/components/pricing/OfferGeneratorPanel";
+import { OffersHistory } from "@/components/pricing/OffersHistory";
 import { usePricingConfig } from "@/hooks/usePricingConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
-import { ChevronDown, ChevronUp, Lock } from 'lucide-react';
+import { ChevronDown, ChevronUp, Lock, Calculator, FileText, Users } from 'lucide-react';
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { CurrencySwitcher } from "@/components/pricing/CurrencySwitcher";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -170,10 +173,37 @@ const PricingDetailed = () => {
             </div>
           </section>
 
-          {/* Interactive Calculator */}
+          {/* Sales Tools Section */}
           <section className="py-16 animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <div className="container max-w-3xl px-4 sm:px-6 lg:px-8">
-              <PricingComparisonCalculator />
+            <div className="container max-w-5xl px-4 sm:px-6 lg:px-8">
+              <Tabs defaultValue="calculator" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 mb-8">
+                  <TabsTrigger value="calculator" className="gap-2">
+                    <Calculator className="h-4 w-4" />
+                    Calculator
+                  </TabsTrigger>
+                  <TabsTrigger value="offer" className="gap-2">
+                    <FileText className="h-4 w-4" />
+                    Create Offer
+                  </TabsTrigger>
+                  <TabsTrigger value="history" className="gap-2">
+                    <Users className="h-4 w-4" />
+                    Offers History
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="calculator">
+                  <PricingComparisonCalculator />
+                </TabsContent>
+                
+                <TabsContent value="offer">
+                  <OfferGeneratorPanel />
+                </TabsContent>
+                
+                <TabsContent value="history">
+                  <OffersHistory />
+                </TabsContent>
+              </Tabs>
             </div>
           </section>
 
