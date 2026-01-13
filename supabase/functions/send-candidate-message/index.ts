@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Check if navio.no domain is verified in Resend, fallback to test domain
+// Check domain verification - prioritize naviosolutions.com
 const getFromAddress = async (apiKey: string): Promise<string> => {
   try {
     const res = await fetch("https://api.resend.com/domains", {
@@ -14,11 +14,22 @@ const getFromAddress = async (apiKey: string): Promise<string> => {
     });
     const domains = await res.json();
     
+    // Check naviosolutions.com first
+    const navioSolutionsVerified = domains.data?.some(
+      (d: { name: string; status: string }) => 
+        d.name === "naviosolutions.com" && d.status === "verified"
+    );
+    if (navioSolutionsVerified) {
+      console.log("Using verified naviosolutions.com domain");
+      return "Navio Careers <careers@naviosolutions.com>";
+    }
+    
+    // Fallback to navio.no
     const navioVerified = domains.data?.some(
       (d: { name: string; status: string }) => d.name === "navio.no" && d.status === "verified"
     );
-    
     if (navioVerified) {
+      console.log("Using verified navio.no domain");
       return "Navio Careers <careers@navio.no>";
     }
   } catch (e) {
@@ -26,7 +37,7 @@ const getFromAddress = async (apiKey: string): Promise<string> => {
   }
   
   console.log("Using Resend test domain as fallback");
-  return "Navio <onboarding@resend.dev>";
+  return "Navio Careers <onboarding@resend.dev>";
 };
 
 const replaceVariables = (text: string, vars: Record<string, string>): string => {
@@ -66,7 +77,7 @@ serve(async (req) => {
       .eq("is_active", true)
       .single();
 
-    const siteUrl = "https://navio.no";
+    const siteUrl = "https://naviosolutions.com";
     const currentYear = new Date().getFullYear().toString();
     
     const variables: Record<string, string> = {
@@ -77,7 +88,6 @@ serve(async (req) => {
       message_body: messageBody,
     };
 
-    // Use template or defaults
     const subject = replaceVariables(
       template?.subject || "Re: Your Application for {{job_title}} at Navio",
       variables
@@ -96,7 +106,6 @@ serve(async (req) => {
     const headerBgStart = template?.header_bg_start || "#3b82f6";
     const headerBgEnd = template?.header_bg_end || "#1d4ed8";
 
-    // Build email HTML
     const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -150,7 +159,7 @@ serve(async (req) => {
     const fromAddress = await getFromAddress(RESEND_API_KEY);
 
     // Generate reply-to address for candidate replies
-    const replyToAddress = `application+${applicationId}@replies.navio.no`;
+    const replyToAddress = `application+${applicationId}@replies.naviosolutions.com`;
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

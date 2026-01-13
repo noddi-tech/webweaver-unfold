@@ -13,7 +13,45 @@ interface ReminderRequest {
   interview_id?: string;
   interviewer_email?: string;
   interviewer_name?: string;
-  process_pending?: boolean; // Process all pending reminders
+  process_pending?: boolean;
+}
+
+// Check domain verification - prioritize naviosolutions.com
+async function getFromAddress(apiKey: string): Promise<string> {
+  try {
+    const res = await fetch("https://api.resend.com/domains", {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+
+    if (res.ok) {
+      const domains = await res.json();
+      
+      // Check naviosolutions.com first
+      const navioSolutionsVerified = domains.data?.some(
+        (d: { name: string; status: string }) => 
+          d.name === "naviosolutions.com" && d.status === "verified"
+      );
+      if (navioSolutionsVerified) {
+        console.log("Using verified naviosolutions.com domain");
+        return "Navio Careers <careers@naviosolutions.com>";
+      }
+      
+      // Fallback to navio.no
+      const navioVerified = domains.data?.some(
+        (d: { name: string; status: string }) => 
+          d.name === "navio.no" && d.status === "verified"
+      );
+      if (navioVerified) {
+        console.log("Using verified navio.no domain");
+        return "Navio Careers <careers@navio.no>";
+      }
+    }
+  } catch (e) {
+    console.log("Domain check failed:", e);
+  }
+
+  console.log("Using Resend test domain as fallback");
+  return "Navio Careers <onboarding@resend.dev>";
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -24,6 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { interview_id, interviewer_email, interviewer_name, process_pending }: ReminderRequest = await req.json();
@@ -43,7 +82,6 @@ const handler = async (req: Request): Promise<Response> => {
     let remindersToSend: any[] = [];
 
     if (process_pending) {
-      // Get all pending reminders that are due
       const { data: pendingReminders, error: fetchError } = await supabase
         .from("interview_reminders")
         .select(`
@@ -69,7 +107,6 @@ const handler = async (req: Request): Promise<Response> => {
       if (fetchError) throw fetchError;
       remindersToSend = pendingReminders || [];
     } else if (interview_id) {
-      // Send reminder for specific interview
       const { data: interview, error: interviewError } = await supabase
         .from("interviews")
         .select(`
@@ -93,7 +130,6 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (interviewError) throw interviewError;
 
-      // Create ad-hoc reminder entries
       if (interviewer_email) {
         remindersToSend = [{
           interviewer_email,
@@ -101,10 +137,8 @@ const handler = async (req: Request): Promise<Response> => {
           interviews: interview,
         }];
       } else if (interview.interviewer_names && interview.interviewer_names.length > 0) {
-        // Note: We don't have interviewer emails stored, so this is a placeholder
-        // In real implementation, you'd need to store interviewer emails or look them up
         remindersToSend = interview.interviewer_names.map((name: string, index: number) => ({
-          interviewer_email: null, // Would need to be fetched from user profiles
+          interviewer_email: null,
           interviewer_name: name,
           interviews: interview,
         }));
@@ -113,6 +147,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const sentReminders: string[] = [];
     const failedReminders: { email: string; error: string }[] = [];
+    const fromAddress = await getFromAddress(resendApiKey);
 
     for (const reminder of remindersToSend) {
       const interview = reminder.interviews;
@@ -128,17 +163,15 @@ const handler = async (req: Request): Promise<Response> => {
         minute: "2-digit",
       });
 
-      // Skip if no email
       if (!reminder.interviewer_email) {
         console.log(`Skipping reminder for ${reminder.interviewer_name} - no email address`);
         continue;
       }
 
-      // Build email content from template
       const subject = template.subject
         .replace(/\{\{candidate_name\}\}/g, candidateName);
 
-      const evaluationUrl = `https://navio.no/cms?tab=applications&application=${application.id}`;
+      const evaluationUrl = `https://naviosolutions.com/cms?tab=applications&application=${application.id}`;
 
       let bodyHtml = template.body_html
         .replace(/\{\{interviewer_name\}\}/g, reminder.interviewer_name || "Team Member")
@@ -150,7 +183,6 @@ const handler = async (req: Request): Promise<Response> => {
       const buttonUrl = (template.button_url || evaluationUrl)
         .replace(/\{\{evaluation_url\}\}/g, evaluationUrl);
 
-      // Build full HTML email
       const fullHtml = `
         <!DOCTYPE html>
         <html>
@@ -179,7 +211,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       try {
         const emailResponse = await resend.emails.send({
-          from: "Navio Careers <careers@navio.no>",
+          from: fromAddress,
           to: [reminder.interviewer_email],
           subject: subject,
           html: fullHtml,
@@ -188,7 +220,6 @@ const handler = async (req: Request): Promise<Response> => {
         console.log("Feedback reminder sent:", emailResponse);
         sentReminders.push(reminder.interviewer_email);
 
-        // Update reminder status if it has an ID
         if (reminder.id) {
           await supabase
             .from("interview_reminders")

@@ -34,7 +34,7 @@ interface EmailTemplate {
   header_bg_end: string;
 }
 
-// Check if navio.no is verified, fallback to resend test domain
+// Check domain verification - prioritize naviosolutions.com
 async function getFromAddress(apiKey: string): Promise<string> {
   try {
     const res = await fetch("https://api.resend.com/domains", {
@@ -43,11 +43,22 @@ async function getFromAddress(apiKey: string): Promise<string> {
     
     if (res.ok) {
       const domains = await res.json();
+      
+      // Check naviosolutions.com first
+      const navioSolutionsVerified = domains.data?.some(
+        (d: { name: string; status: string }) => 
+          d.name === "naviosolutions.com" && d.status === "verified"
+      );
+      if (navioSolutionsVerified) {
+        console.log("Using verified naviosolutions.com domain");
+        return "Navio Careers <careers@naviosolutions.com>";
+      }
+      
+      // Fallback to navio.no
       const navioVerified = domains.data?.some(
         (d: { name: string; status: string }) => 
           d.name === "navio.no" && d.status === "verified"
       );
-      
       if (navioVerified) {
         console.log("Using verified navio.no domain");
         return "Navio Careers <careers@navio.no>";
@@ -125,7 +136,7 @@ serve(async (req) => {
 
     const { applicantName, applicantEmail, jobTitle, applicationId, templateOverride }: ApplicationConfirmationRequest = await req.json();
 
-    const siteUrl = Deno.env.get("SITE_URL") || "https://navio.no";
+    const siteUrl = "https://naviosolutions.com";
     
     // Template variables
     const vars: Record<string, string> = {
@@ -139,7 +150,6 @@ serve(async (req) => {
     let template: EmailTemplate;
     
     if (templateOverride) {
-      // For test emails from CMS
       template = {
         subject: templateOverride.subject || "Application Received - {{job_title}} at Navio",
         heading: templateOverride.heading || "🎉 Application Received!",
@@ -151,7 +161,6 @@ serve(async (req) => {
         header_bg_end: templateOverride.header_bg_end || "#764ba2",
       };
     } else {
-      // Fetch from database
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const supabase = createClient(supabaseUrl, supabaseKey);

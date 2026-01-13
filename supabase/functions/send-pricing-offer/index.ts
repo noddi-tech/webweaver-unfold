@@ -24,6 +24,44 @@ interface OfferEmailRequest {
   notes?: string;
 }
 
+// Check domain verification - prioritize naviosolutions.com
+async function getFromAddress(apiKey: string): Promise<string> {
+  try {
+    const res = await fetch("https://api.resend.com/domains", {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+
+    if (res.ok) {
+      const domains = await res.json();
+      
+      // Check naviosolutions.com first
+      const navioSolutionsVerified = domains.data?.some(
+        (d: { name: string; status: string }) => 
+          d.name === "naviosolutions.com" && d.status === "verified"
+      );
+      if (navioSolutionsVerified) {
+        console.log("Using verified naviosolutions.com domain");
+        return "Navio Sales <sales@naviosolutions.com>";
+      }
+      
+      // Fallback to navio.no
+      const navioVerified = domains.data?.some(
+        (d: { name: string; status: string }) => 
+          d.name === "navio.no" && d.status === "verified"
+      );
+      if (navioVerified) {
+        console.log("Using verified navio.no domain");
+        return "Navio Sales <sales@navio.no>";
+      }
+    }
+  } catch (e) {
+    console.log("Domain check failed:", e);
+  }
+
+  console.log("Using Resend test domain as fallback");
+  return "Navio Sales <onboarding@resend.dev>";
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -32,6 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const data: OfferEmailRequest = await req.json();
@@ -50,6 +89,18 @@ const handler = async (req: Request): Promise<Response> => {
       validUntil,
       notes
     } = data;
+
+    // Get offer token for the view tracking link
+    const { data: offerData } = await supabase
+      .from("pricing_offers")
+      .select("offer_token")
+      .eq("id", offerId)
+      .single();
+
+    const offerToken = offerData?.offer_token;
+    const offerViewUrl = offerToken 
+      ? `https://naviosolutions.com/offer/${offerToken}`
+      : "https://calendly.com/navio/demo";
 
     // Calculate costs
     const monthlyRevenue = estimatedAnnualRevenue / 12;
@@ -159,8 +210,8 @@ const handler = async (req: Request): Promise<Response> => {
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center">
-                    <a href="https://calendly.com/navio/demo" style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 8px; font-size: 16px; font-weight: 600;">
-                      Schedule a Call
+                    <a href="${offerViewUrl}" style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                      View Your Proposal
                     </a>
                   </td>
                 </tr>
@@ -172,7 +223,7 @@ const handler = async (req: Request): Promise<Response> => {
           <tr>
             <td style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
               <p style="color: #64748b; font-size: 12px; margin: 0;">
-                Questions? Reply to this email or reach us at hello@navio.no
+                Questions? Reply to this email or reach us at hello@naviosolutions.com
               </p>
               <p style="color: #94a3b8; font-size: 11px; margin: 12px 0 0 0;">
                 © ${new Date().getFullYear()} Navio. All rights reserved.
@@ -187,9 +238,12 @@ const handler = async (req: Request): Promise<Response> => {
 </html>
     `;
 
+    // Get verified domain
+    const fromAddress = await getFromAddress(resendApiKey);
+
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "Navio Sales <sales@navio.no>",
+      from: fromAddress,
       to: [customerEmail],
       subject: `Your Pricing Proposal from Navio - ${tierLabel} Plan`,
       html: emailHtml,
