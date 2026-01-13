@@ -319,7 +319,7 @@ export function OfferGeneratorPanel({
                 onChange={(e) => {
                   const cleaned = e.target.value.replace(/[^\d]/g, '');
                   const numericValue = parseInt(cleaned) || 0;
-                  setAnnualRevenue(Math.round(numericValue / config.conversionRate));
+                  setAnnualRevenue(numericValue / config.conversionRate);
                   // Reset manual override when revenue changes
                   if (tier === 'scale') {
                     setManualTierOverride(false);
