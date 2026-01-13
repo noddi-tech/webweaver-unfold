@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,11 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Send, Loader2, Check, Calculator } from 'lucide-react';
+import { FileText, Send, Loader2, Check, Calculator, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { CurrencySwitcher } from './CurrencySwitcher';
-import { LAUNCH_CONFIG, SCALE_CONFIG } from '@/config/newPricing';
+import { LAUNCH_CONFIG, SCALE_CONFIG, generateScaleTiers } from '@/config/newPricing';
 import { toast } from 'sonner';
 
 interface OfferGeneratorPanelProps {
@@ -28,6 +28,9 @@ export function OfferGeneratorPanel({
 }: OfferGeneratorPanelProps) {
   const { formatAmountWithSpaces, currency, config } = useCurrency();
   
+  // Generate scale tiers for dropdown
+  const scaleTiers = useMemo(() => generateScaleTiers(), []);
+  
   // Customer info
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
@@ -39,6 +42,8 @@ export function OfferGeneratorPanel({
   const [locations, setLocations] = useState(initialLocations);
   const [revenuePercentage, setRevenuePercentage] = useState(tier === 'launch' ? LAUNCH_CONFIG.revenuePercentage * 100 : SCALE_CONFIG.baseTakeRate * 100);
   const [discountPercentage, setDiscountPercentage] = useState(0);
+  const [selectedTierIndex, setSelectedTierIndex] = useState<number>(0);
+  const [manualTierOverride, setManualTierOverride] = useState(false);
   
   // Notes and state
   const [notes, setNotes] = useState('');
@@ -52,15 +57,38 @@ export function OfferGeneratorPanel({
     ? LAUNCH_CONFIG.fixedMonthly 
     : SCALE_CONFIG.fixedMonthly + (locations * SCALE_CONFIG.perDepartment);
 
-  // Update revenue percentage when tier changes
+  // Auto-detect tier based on annual revenue
+  const autoDetectedTierIndex = useMemo(() => {
+    if (tier === 'launch') return 0;
+    
+    // Find the highest tier where revenue meets threshold
+    for (let i = scaleTiers.length - 1; i >= 0; i--) {
+      if (annualRevenue >= scaleTiers[i].revenueThreshold) {
+        return i;
+      }
+    }
+    return 0; // Default to tier 1
+  }, [annualRevenue, tier, scaleTiers]);
+
+  // Update tier when revenue changes (if not manually overridden)
+  useEffect(() => {
+    if (tier === 'scale' && !manualTierOverride) {
+      setSelectedTierIndex(autoDetectedTierIndex);
+      setRevenuePercentage(scaleTiers[autoDetectedTierIndex].takeRate * 100);
+    }
+  }, [autoDetectedTierIndex, tier, manualTierOverride, scaleTiers]);
+
+  // Update revenue percentage when tier type changes
   useEffect(() => {
     if (tier === 'launch') {
       setRevenuePercentage(LAUNCH_CONFIG.revenuePercentage * 100);
       setLocations(1);
+      setManualTierOverride(false);
     } else {
-      setRevenuePercentage(SCALE_CONFIG.baseTakeRate * 100);
+      setSelectedTierIndex(autoDetectedTierIndex);
+      setRevenuePercentage(scaleTiers[autoDetectedTierIndex].takeRate * 100);
     }
-  }, [tier]);
+  }, [tier, autoDetectedTierIndex, scaleTiers]);
 
   // Calculate costs - discount now applies to yearly total
   const monthlyRevenue = annualRevenue / 12;
@@ -220,14 +248,14 @@ export function OfferGeneratorPanel({
         </div>
 
         {/* Pricing Configuration */}
-        <div className="space-y-4 p-4 rounded-lg bg-muted/30 border border-border">
-          <h3 className="font-semibold text-sm text-foreground uppercase tracking-wide">Pricing Configuration</h3>
+        <div className="space-y-4 p-4 rounded-lg bg-gradient-to-br from-primary/80 to-primary/90 border border-primary-foreground/20">
+          <h3 className="font-semibold text-sm text-primary-foreground uppercase tracking-wide">Pricing Configuration</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Tier</Label>
+              <Label className="text-primary-foreground">Tier</Label>
               <Select value={tier} onValueChange={(v) => setTier(v as 'launch' | 'scale')}>
-                <SelectTrigger className="bg-background">
+                <SelectTrigger className="bg-background text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -237,21 +265,21 @@ export function OfferGeneratorPanel({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Locations</Label>
+              <Label className="text-primary-foreground">Locations</Label>
               <Input
                 type="number"
                 min={1}
                 value={locations}
                 onChange={(e) => setLocations(parseInt(e.target.value) || 1)}
                 disabled={tier === 'launch'}
-                className="bg-background"
+                className="bg-background text-foreground"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Annual Revenue ({currency})</Label>
+              <Label className="text-primary-foreground">Annual Revenue ({currency})</Label>
               <Input
                 type="text"
                 value={formatNumber(annualRevenue * config.conversionRate)}
@@ -259,48 +287,103 @@ export function OfferGeneratorPanel({
                   const cleaned = e.target.value.replace(/[^\d]/g, '');
                   const numericValue = parseInt(cleaned) || 0;
                   setAnnualRevenue(Math.round(numericValue / config.conversionRate));
+                  // Reset manual override when revenue changes
+                  if (tier === 'scale') {
+                    setManualTierOverride(false);
+                  }
                 }}
-                className="bg-background"
+                className="bg-background text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label>Fixed Monthly ({currency})</Label>
+              <Label className="text-primary-foreground">Fixed Monthly ({currency})</Label>
               <div className="flex items-center gap-2">
                 <Input
                   type="text"
                   value={formatAmountWithSpaces(fixedMonthly)}
                   disabled
-                  className="bg-muted"
+                  className="bg-white/20 text-primary-foreground border-primary-foreground/30"
                 />
-                <Badge variant="outline" className="whitespace-nowrap">
-                  Auto-calculated
+                <Badge variant="outline" className="whitespace-nowrap text-primary-foreground border-primary-foreground/50">
+                  Auto
                 </Badge>
               </div>
               {tier === 'scale' && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-primary-foreground/80">
                   €{formatNumber(SCALE_CONFIG.fixedMonthly)} base + {locations} × €{formatNumber(SCALE_CONFIG.perDepartment)}/location
                 </p>
               )}
             </div>
           </div>
 
+          {/* Revenue Tier Dropdown */}
           <div className="space-y-2">
-            <Label>Revenue Percentage: {revenuePercentage.toFixed(1)}%</Label>
-            <Slider
-              value={[revenuePercentage]}
-              onValueChange={([v]) => setRevenuePercentage(v)}
-              min={0.5}
-              max={5}
-              step={0.1}
-              className="py-2"
-            />
+            <div className="flex items-center justify-between">
+              <Label className="text-primary-foreground">Revenue Tier</Label>
+              {tier === 'scale' && manualTierOverride && (
+                <Badge variant="outline" className="text-xs text-amber-200 border-amber-200/50 bg-amber-500/20">
+                  Manual Override
+                </Badge>
+              )}
+            </div>
+            
+            {tier === 'launch' ? (
+              <div className="p-3 rounded-lg bg-white/20 text-primary-foreground">
+                <span className="font-semibold">Fixed rate: {(LAUNCH_CONFIG.revenuePercentage * 100).toFixed(1)}%</span>
+                <span className="text-primary-foreground/70 ml-2">of platform revenue</span>
+              </div>
+            ) : (
+              <>
+                <Select 
+                  value={selectedTierIndex.toString()} 
+                  onValueChange={(v) => {
+                    const index = parseInt(v);
+                    setSelectedTierIndex(index);
+                    setManualTierOverride(true);
+                    setRevenuePercentage(scaleTiers[index].takeRate * 100);
+                  }}
+                >
+                  <SelectTrigger className="bg-background text-foreground">
+                    <SelectValue placeholder="Select revenue tier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {scaleTiers.map((t, index) => (
+                      <SelectItem 
+                        key={t.tier} 
+                        value={index.toString()}
+                        className={autoDetectedTierIndex === index ? 'font-bold bg-primary/10' : ''}
+                      >
+                        Tier {t.tier}: {(t.takeRate * 100).toFixed(2)}% (€{formatNumber(t.revenueThreshold)}+)
+                        {autoDetectedTierIndex === index && ' ← Auto'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {manualTierOverride && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-primary-foreground hover:bg-white/20 gap-1"
+                    onClick={() => {
+                      setManualTierOverride(false);
+                      setSelectedTierIndex(autoDetectedTierIndex);
+                      setRevenuePercentage(scaleTiers[autoDetectedTierIndex].takeRate * 100);
+                    }}
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    Reset to auto-detected (Tier {scaleTiers[autoDetectedTierIndex].tier})
+                  </Button>
+                )}
+              </>
+            )}
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Yearly Discount: {discountPercentage}%</Label>
+              <Label className="text-primary-foreground">Yearly Discount: {discountPercentage}%</Label>
               {discountPercentage > 0 && (
-                <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                <Badge className="bg-green-500/30 text-green-200 border border-green-300/50">
                   -{discountPercentage}% off yearly total
                 </Badge>
               )}
