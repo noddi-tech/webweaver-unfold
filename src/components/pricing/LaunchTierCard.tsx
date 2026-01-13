@@ -23,7 +23,7 @@ export function LaunchTierCard({ config, onSelect, isSelected }: LaunchTierCardP
   ];
 
   return (
-    <Card className={`relative overflow-hidden transition-all duration-300 ${isSelected ? 'ring-2 ring-primary shadow-lg' : 'hover:shadow-md'}`}>
+    <Card className={`relative overflow-hidden transition-all duration-300 border-2 border-emerald-500 ${isSelected ? 'ring-2 ring-emerald-500 shadow-lg shadow-emerald-500/20' : 'hover:shadow-md hover:border-emerald-400'}`}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
