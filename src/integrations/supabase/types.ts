@@ -2002,6 +2002,110 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          lead_id: string
+          metadata: Json | null
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          lead_id: string
+          metadata?: Json | null
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          lead_id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          assigned_to: string | null
+          company_name: string
+          contact_name: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          estimated_locations: number | null
+          estimated_revenue: number | null
+          id: string
+          industry: string | null
+          last_contacted_at: string | null
+          next_follow_up_at: string | null
+          notes: string | null
+          phone: string | null
+          source: string | null
+          source_detail: string | null
+          status: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          company_name: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          estimated_locations?: number | null
+          estimated_revenue?: number | null
+          id?: string
+          industry?: string | null
+          last_contacted_at?: string | null
+          next_follow_up_at?: string | null
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          source_detail?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          company_name?: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          estimated_locations?: number | null
+          estimated_revenue?: number | null
+          id?: string
+          industry?: string | null
+          last_contacted_at?: string | null
+          next_follow_up_at?: string | null
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          source_detail?: string | null
+          status?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           confirmed: boolean | null
@@ -2208,6 +2312,104 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      pricing_offers: {
+        Row: {
+          annual_revenue: number | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          customer_company: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          discount_percentage: number | null
+          discount_reason: string | null
+          expires_at: string | null
+          fixed_monthly: number
+          id: string
+          internal_notes: string | null
+          lead_id: string | null
+          locations: number | null
+          notes: string | null
+          offer_token: string | null
+          per_location_cost: number | null
+          revenue_percentage: number
+          sent_at: string | null
+          status: string
+          tier: string
+          total_monthly_estimate: number | null
+          total_yearly_estimate: number | null
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          annual_revenue?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          customer_company?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          discount_percentage?: number | null
+          discount_reason?: string | null
+          expires_at?: string | null
+          fixed_monthly: number
+          id?: string
+          internal_notes?: string | null
+          lead_id?: string | null
+          locations?: number | null
+          notes?: string | null
+          offer_token?: string | null
+          per_location_cost?: number | null
+          revenue_percentage: number
+          sent_at?: string | null
+          status?: string
+          tier: string
+          total_monthly_estimate?: number | null
+          total_yearly_estimate?: number | null
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          annual_revenue?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          customer_company?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          discount_percentage?: number | null
+          discount_reason?: string | null
+          expires_at?: string | null
+          fixed_monthly?: number
+          id?: string
+          internal_notes?: string | null
+          lead_id?: string | null
+          locations?: number | null
+          notes?: string | null
+          offer_token?: string | null
+          per_location_cost?: number | null
+          revenue_percentage?: number
+          sent_at?: string | null
+          status?: string
+          tier?: string
+          total_monthly_estimate?: number | null
+          total_yearly_estimate?: number | null
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_offers_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pricing_scale_tiers: {
         Row: {
