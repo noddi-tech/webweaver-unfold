@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getSalesConfig } from "../_shared/sales-config.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -96,6 +97,9 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Offer not found: ${offerId}`);
     }
 
+    // Get sales configuration from database
+    const salesConfig = await getSalesConfig(supabase);
+
     // Use DB values as authoritative source
     const customerEmail = offer.customer_email;
     const customerName = offer.customer_name;
@@ -114,7 +118,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const offerViewUrl = offerToken 
       ? `https://naviosolutions.com/offer/${offerToken}`
-      : "https://calendly.com/navio/demo";
+      : salesConfig.bookingUrl;
 
     // Convert EUR base values to display currency
     const displayFixedMonthly = fixedMonthly * conversionRate;
@@ -251,7 +255,7 @@ const handler = async (req: Request): Promise<Response> => {
           <tr>
             <td style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
               <p style="color: #64748b; font-size: 12px; margin: 0;">
-                Questions? Reply to this email or reach us at hello@naviosolutions.com
+                Questions? Reply to this email or <a href="${salesConfig.bookingUrl}" style="color: #3b82f6; text-decoration: none;">book a meeting</a>
               </p>
               <p style="color: #94a3b8; font-size: 11px; margin: 12px 0 0 0;">
                 © ${new Date().getFullYear()} Navio. All rights reserved.
@@ -273,7 +277,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: fromAddress,
       to: [customerEmail],
-      reply_to: "sales@info.naviosolutions.com",
+      reply_to: salesConfig.salesEmail,
       subject: `Your Pricing Proposal from Navio - ${tierLabel} Plan`,
       html: emailHtml,
     });
@@ -315,9 +319,13 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Error updating offer status:", updateError);
     }
 
-    // Send Slack notification
+    // Send Slack notification with primary contact info
     const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
     if (slackWebhookUrl) {
+      const assignedText = salesConfig.primaryContactName 
+        ? `Assigned to: ${salesConfig.primaryContactName}`
+        : '';
+      
       try {
         await fetch(slackWebhookUrl, {
           method: "POST",
@@ -358,7 +366,7 @@ const handler = async (req: Request): Promise<Response> => {
                 elements: [
                   {
                     type: "mrkdwn",
-                    text: `Valid until: ${formattedValidUntil}`,
+                    text: `Valid until: ${formattedValidUntil}${assignedText ? ` | 👤 ${assignedText}` : ''}`,
                   },
                 ],
               },

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getSalesConfig } from "../_shared/sales-config.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -99,6 +100,9 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Get sales configuration from database
+    const salesConfig = await getSalesConfig(supabase);
+
     const customerEmail = offer.customer_email;
     const customerName = offer.customer_name;
     const customerCompany = offer.customer_company;
@@ -109,7 +113,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const offerViewUrl = offerToken 
       ? `https://naviosolutions.com/offer/${offerToken}`
-      : "https://calendly.com/navio/demo";
+      : salesConfig.bookingUrl;
 
     // Format currency
     const locale = CURRENCY_LOCALES[currency] || 'en-US';
@@ -215,7 +219,7 @@ const handler = async (req: Request): Promise<Response> => {
               </table>
               
               <p style="color: #64748b; font-size: 14px; text-align: center; margin: 32px 0 0 0;">
-                Questions about the changes? Reply to this email or book a call with us.
+                Questions about the changes? Reply to this email or <a href="${salesConfig.bookingUrl}" style="color: #3b82f6; text-decoration: none;">book a call</a> with us.
               </p>
             </td>
           </tr>
@@ -239,11 +243,11 @@ const handler = async (req: Request): Promise<Response> => {
     // Get verified domain
     const fromAddress = await getFromAddress(resendApiKey);
 
-    // Send email
+    // Send email with dynamic reply-to
     const emailResponse = await resend.emails.send({
       from: fromAddress,
       to: [customerEmail],
-      reply_to: "sales@info.naviosolutions.com",
+      reply_to: salesConfig.salesEmail,
       subject: `Your Navio Offer Has Been Updated`,
       html: emailHtml,
     });
@@ -269,9 +273,13 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
 
-    // Send Slack notification
+    // Send Slack notification with primary contact info
     const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
     if (slackWebhookUrl) {
+      const assignedText = salesConfig.primaryContactName 
+        ? `Assigned to: ${salesConfig.primaryContactName}`
+        : '';
+      
       try {
         await fetch(slackWebhookUrl, {
           method: "POST",
@@ -296,6 +304,15 @@ const handler = async (req: Request): Promise<Response> => {
                   {
                     type: "mrkdwn",
                     text: `*Monthly Cost:*\n${formatCurrency(offer.total_monthly_estimate || 0)}`,
+                  },
+                ],
+              },
+              {
+                type: "context",
+                elements: [
+                  {
+                    type: "mrkdwn",
+                    text: assignedText ? `👤 ${assignedText}` : 'No primary contact assigned',
                   },
                 ],
               },

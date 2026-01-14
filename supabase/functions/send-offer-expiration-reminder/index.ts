@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getSalesConfig } from "../_shared/sales-config.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -67,6 +68,9 @@ const handler = async (req: Request): Promise<Response> => {
     const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Get sales configuration from database
+    const salesConfig = await getSalesConfig(supabase);
+
     const now = new Date();
     const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
@@ -110,7 +114,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       const offerViewUrl = offer.offer_token 
         ? `https://naviosolutions.com/offer/${offer.offer_token}`
-        : "https://calendly.com/navio/demo";
+        : salesConfig.bookingUrl;
 
       const tierLabel = offer.tier === 'launch' ? 'Launch' : 'Scale';
       const formattedExpiry = expiresAt.toLocaleDateString('nb-NO', { 
@@ -184,7 +188,7 @@ const handler = async (req: Request): Promise<Response> => {
               </table>
               
               <p style="color: #64748b; font-size: 14px; text-align: center; margin: 32px 0 0 0;">
-                Need more time or have questions? Reply to this email.
+                Need more time or have questions? Reply to this email or <a href="${salesConfig.bookingUrl}" style="color: #3b82f6; text-decoration: none;">book a call</a>.
               </p>
             </td>
           </tr>
@@ -207,7 +211,7 @@ const handler = async (req: Request): Promise<Response> => {
         const emailResponse = await resend.emails.send({
           from: fromAddress,
           to: [offer.customer_email],
-          reply_to: "sales@info.naviosolutions.com",
+          reply_to: salesConfig.salesEmail,
           subject: reminder.subject,
           html: emailHtml,
         });

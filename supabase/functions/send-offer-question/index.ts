@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@2.0.0";
+import { getSalesConfig } from "../_shared/sales-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,32 +13,6 @@ interface QuestionRequest {
   name: string;
   email: string;
   question: string;
-}
-
-interface SalesContactInfo {
-  salesEmail: string;
-  primaryContactName: string | null;
-}
-
-async function getSalesContactInfo(supabase: any): Promise<SalesContactInfo> {
-  // Get sales email
-  const { data: emailSetting } = await supabase
-    .from('sales_contact_settings')
-    .select('value')
-    .eq('setting_key', 'sales_email')
-    .single();
-
-  // Get primary contact with employee details
-  const { data: contactSetting } = await supabase
-    .from('sales_contact_settings')
-    .select('employee_id, employees(name)')
-    .eq('setting_key', 'primary_contact')
-    .single();
-
-  return {
-    salesEmail: emailSetting?.value || 'sales@info.naviosolutions.com',
-    primaryContactName: contactSetting?.employees?.name || null,
-  };
 }
 
 serve(async (req: Request): Promise<Response> => {
@@ -62,15 +37,15 @@ serve(async (req: Request): Promise<Response> => {
     const { data: offer, error: offerError } = await supabase
       .from("pricing_offers")
       .select("*")
-      .eq("token", offer_token)
+      .eq("offer_token", offer_token)
       .single();
 
     if (offerError || !offer) {
       throw new Error("Offer not found");
     }
 
-    // Get sales contact info from database
-    const salesContactInfo = await getSalesContactInfo(supabase);
+    // Get sales contact info from database using shared utility
+    const salesConfig = await getSalesConfig(supabase);
 
     // Update the offer with last question timestamp
     await supabase
@@ -84,9 +59,9 @@ serve(async (req: Request): Promise<Response> => {
     // Send email to sales team using dynamic email
     const emailResponse = await resend.emails.send({
       from: fromAddress,
-      to: [salesContactInfo.salesEmail],
+      to: [salesConfig.salesEmail],
       replyTo: email,
-      subject: `Question about pricing offer - ${offer.company_name}`,
+      subject: `Question about pricing offer - ${offer.customer_company}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #1a1a2e;">New Question About Pricing Offer</h2>
@@ -96,13 +71,13 @@ serve(async (req: Request): Promise<Response> => {
             <p><strong>${name}</strong> (${email})</p>
             
             <h3>Company:</h3>
-            <p>${offer.company_name}</p>
+            <p>${offer.customer_company}</p>
             
             <h3>Offer Details:</h3>
             <p>
               Tier: ${offer.tier}<br>
-              Monthly Cost: ${offer.fixed_monthly_cost?.toLocaleString("nb-NO")} NOK + ${offer.revenue_percentage}% revenue<br>
-              Locations: ${offer.locations_included}
+              Monthly Cost: ${offer.total_monthly_estimate?.toLocaleString("nb-NO")} EUR<br>
+              Locations: ${offer.locations || 1}
             </p>
           </div>
           
@@ -124,10 +99,10 @@ serve(async (req: Request): Promise<Response> => {
     await supabase.from("email_logs").insert({
       email_type: "offer_question",
       related_id: offer.id,
-      to_email: salesContactInfo.salesEmail,
+      to_email: salesConfig.salesEmail,
       to_name: "Navio Sales",
       from_address: fromAddress,
-      subject: `Question about pricing offer - ${offer.company_name}`,
+      subject: `Question about pricing offer - ${offer.customer_company}`,
       resend_id: emailResponse.data?.id,
       status: "sent",
       metadata: { question, from_name: name, from_email: email },
@@ -136,21 +111,21 @@ serve(async (req: Request): Promise<Response> => {
     // Send Slack notification with primary contact info
     const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
     if (slackWebhookUrl) {
-      const assignedText = salesContactInfo.primaryContactName 
-        ? `👤 Assigned to: ${salesContactInfo.primaryContactName}`
+      const assignedText = salesConfig.primaryContactName 
+        ? `👤 Assigned to: ${salesConfig.primaryContactName}`
         : '';
       
       await fetch(slackWebhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: `❓ New question about pricing offer from ${offer.company_name}`,
+          text: `❓ New question about pricing offer from ${offer.customer_company}`,
           blocks: [
             {
               type: "section",
               text: {
                 type: "mrkdwn",
-                text: `❓ *${name}* from *${offer.company_name}* has a question about their pricing offer`,
+                text: `❓ *${name}* from *${offer.customer_company}* has a question about their pricing offer`,
               },
             },
             {
