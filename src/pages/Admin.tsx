@@ -55,6 +55,13 @@ import { CandidatePipeline } from "@/components/design-system/CandidatePipeline"
 import { SlotManager } from "@/components/design-system/SlotManager";
 import { CandidateComparison } from "@/components/design-system/CandidateComparison";
 import { SourceTrackingManager } from "@/components/design-system/SourceTrackingManager";
+// Sales components
+import { OffersHistory } from "@/components/pricing/OffersHistory";
+import { OfferGeneratorPanel } from "@/components/pricing/OfferGeneratorPanel";
+import { PricingComparisonCalculator } from "@/components/pricing/PricingComparisonCalculator";
+// Communications components
+import { SlackSettingsManager } from "@/components/design-system/SlackSettingsManager";
+import { LeadsManager } from "@/components/design-system/LeadsManager";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -70,7 +77,17 @@ const Admin = () => {
     if (sectionParam && careerTabs.includes(sectionParam)) {
       return { main: "career", career: sectionParam };
     }
-    return { main: "cms", cms: "content", config: "header", career: "applications" };
+    // Sales section tabs
+    const salesTabs = ["offers", "create-offer", "calculator", "pricing-config", "leads"];
+    if (sectionParam && salesTabs.includes(sectionParam)) {
+      return { main: "sales", sales: sectionParam };
+    }
+    // Communications section tabs
+    const commTabs = ["newsletter", "slack"];
+    if (sectionParam && commTabs.includes(sectionParam)) {
+      return { main: "communications", communications: sectionParam };
+    }
+    return { main: "cms", cms: "content", config: "header", career: "applications", sales: "offers", communications: "newsletter" };
   };
   const defaults = getDefaultTabs();
 
@@ -149,17 +166,19 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue={defaults.main} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-12">
+          <TabsList className="grid w-full grid-cols-6 mb-12">
             <TabsTrigger value="cms">CMS</TabsTrigger>
             <TabsTrigger value="translations">Translations & SEO</TabsTrigger>
             <TabsTrigger value="design">Design System</TabsTrigger>
             <TabsTrigger value="career">Career</TabsTrigger>
+            <TabsTrigger value="sales">Sales</TabsTrigger>
+            <TabsTrigger value="communications">Communications</TabsTrigger>
           </TabsList>
 
           {/* CMS Section with nested tabs */}
           <TabsContent value="cms" className="space-y-8">
             <Tabs defaultValue={defaults.cms} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-8">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
                 <TabsTrigger value="content">Content Management</TabsTrigger>
                 <TabsTrigger value="media">Media Assets</TabsTrigger>
                 <TabsTrigger value="config">Configuration</TabsTrigger>
@@ -222,7 +241,7 @@ const Admin = () => {
               </TabsContent>
 
               {/* Media Assets Tab */}
-  <TabsContent value="media">
+              <TabsContent value="media">
                 <Tabs defaultValue="images">
                   <TabsList className="flex flex-wrap gap-2 mb-6">
                     <TabsTrigger value="images">Images</TabsTrigger>
@@ -249,16 +268,14 @@ const Admin = () => {
                 </Tabs>
               </TabsContent>
 
-              {/* Configuration Tab */}
+              {/* Configuration Tab - Newsletter moved to Communications */}
               <TabsContent value="config">
                 <Tabs defaultValue={defaults.config}>
                   <TabsList className="flex flex-wrap gap-2 mb-6">
                     <TabsTrigger value="header">Header</TabsTrigger>
                     <TabsTrigger value="footer">Footer</TabsTrigger>
                     <TabsTrigger value="social">Social Meta</TabsTrigger>
-                    <TabsTrigger value="pricing">Pricing</TabsTrigger>
                     <TabsTrigger value="employees">Team</TabsTrigger>
-                    <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
                     <TabsTrigger value="techstack">Tech Stack</TabsTrigger>
                   </TabsList>
                   <TabsContent value="header" className="space-y-8">
@@ -270,14 +287,8 @@ const Admin = () => {
                   <TabsContent value="social" className="space-y-8">
                     <SocialMetaManager />
                   </TabsContent>
-                  <TabsContent value="pricing" className="space-y-8">
-                    <NewPricingManager />
-                  </TabsContent>
                   <TabsContent value="employees" className="space-y-8">
                     <EmployeesManager />
-                  </TabsContent>
-                  <TabsContent value="newsletter" className="space-y-8">
-                    <NewsletterManager />
                   </TabsContent>
                   <TabsContent value="techstack" className="space-y-8">
                     <TechStackManager />
@@ -352,6 +363,57 @@ const Admin = () => {
                     <SourceTrackingManager />
                   </TabsContent>
                 </Tabs>
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          {/* Sales Section - NEW */}
+          <TabsContent value="sales" className="space-y-8">
+            <Tabs defaultValue={defaults.sales} className="w-full">
+              <TabsList className="flex flex-wrap gap-2 mb-8">
+                <TabsTrigger value="offers">Offers</TabsTrigger>
+                <TabsTrigger value="create-offer">Create Offer</TabsTrigger>
+                <TabsTrigger value="calculator">Calculator</TabsTrigger>
+                <TabsTrigger value="leads">Leads</TabsTrigger>
+                <TabsTrigger value="pricing-config">Pricing Config</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="offers" className="space-y-8">
+                <OffersHistory />
+              </TabsContent>
+
+              <TabsContent value="create-offer" className="space-y-8">
+                <OfferGeneratorPanel />
+              </TabsContent>
+
+              <TabsContent value="calculator" className="space-y-8">
+                <PricingComparisonCalculator />
+              </TabsContent>
+
+              <TabsContent value="leads" className="space-y-8">
+                <LeadsManager />
+              </TabsContent>
+
+              <TabsContent value="pricing-config" className="space-y-8">
+                <NewPricingManager />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          {/* Communications Section - NEW */}
+          <TabsContent value="communications" className="space-y-8">
+            <Tabs defaultValue={defaults.communications} className="w-full">
+              <TabsList className="flex flex-wrap gap-2 mb-8">
+                <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
+                <TabsTrigger value="slack">Slack Notifications</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="newsletter" className="space-y-8">
+                <NewsletterManager />
+              </TabsContent>
+
+              <TabsContent value="slack" className="space-y-8">
+                <SlackSettingsManager />
               </TabsContent>
             </Tabs>
           </TabsContent>
