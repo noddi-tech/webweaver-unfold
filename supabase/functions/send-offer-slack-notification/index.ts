@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { getSlackWebhookUrl, sendSlackMessage } from "../_shared/slack-utils.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,6 +15,63 @@ interface OfferNotification {
   monthly_cost?: number;
   question_text?: string;
   offer_url?: string;
+}
+
+async function getSlackWebhookUrl(category: string, notificationType?: string): Promise<string | null> {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data, error } = await supabase
+      .from("slack_settings")
+      .select("webhook_url, enabled, notification_types")
+      .eq("category", category)
+      .single();
+
+    if (error || !data) {
+      console.log(`No Slack settings found for category: ${category}, falling back to env var`);
+      return Deno.env.get("SLACK_WEBHOOK_URL") || null;
+    }
+
+    if (!data.enabled) {
+      console.log(`Slack notifications disabled for category: ${category}`);
+      return null;
+    }
+
+    if (notificationType && data.notification_types) {
+      const types = data.notification_types as string[];
+      if (!types.includes(notificationType)) {
+        console.log(`Notification type ${notificationType} not enabled for category: ${category}`);
+        return null;
+      }
+    }
+
+    return data.webhook_url || Deno.env.get("SLACK_WEBHOOK_URL") || null;
+  } catch (err) {
+    console.error("Error fetching Slack settings:", err);
+    return Deno.env.get("SLACK_WEBHOOK_URL") || null;
+  }
+}
+
+async function sendSlackMessage(webhookUrl: string, payload: Record<string, unknown>): Promise<boolean> {
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      console.error("Slack API error:", response.status, await response.text());
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error("Failed to send Slack message:", err);
+    return false;
+  }
 }
 
 serve(async (req: Request): Promise<Response> => {
@@ -78,7 +135,6 @@ serve(async (req: Request): Promise<Response> => {
       },
     ];
 
-    // Add details based on event type
     const contextElements: unknown[] = [
       {
         type: "mrkdwn",
