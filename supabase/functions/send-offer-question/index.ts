@@ -14,6 +14,32 @@ interface QuestionRequest {
   question: string;
 }
 
+interface SalesContactInfo {
+  salesEmail: string;
+  primaryContactName: string | null;
+}
+
+async function getSalesContactInfo(supabase: any): Promise<SalesContactInfo> {
+  // Get sales email
+  const { data: emailSetting } = await supabase
+    .from('sales_contact_settings')
+    .select('value')
+    .eq('setting_key', 'sales_email')
+    .single();
+
+  // Get primary contact with employee details
+  const { data: contactSetting } = await supabase
+    .from('sales_contact_settings')
+    .select('employee_id, employees(name)')
+    .eq('setting_key', 'primary_contact')
+    .single();
+
+  return {
+    salesEmail: emailSetting?.value || 'sales@info.naviosolutions.com',
+    primaryContactName: contactSetting?.employees?.name || null,
+  };
+}
+
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -43,6 +69,9 @@ serve(async (req: Request): Promise<Response> => {
       throw new Error("Offer not found");
     }
 
+    // Get sales contact info from database
+    const salesContactInfo = await getSalesContactInfo(supabase);
+
     // Update the offer with last question timestamp
     await supabase
       .from("pricing_offers")
@@ -52,10 +81,10 @@ serve(async (req: Request): Promise<Response> => {
     // Determine the best from address
     const fromAddress = await getFromAddress(resendApiKey);
 
-    // Send email to sales team
+    // Send email to sales team using dynamic email
     const emailResponse = await resend.emails.send({
       from: fromAddress,
-      to: ["sales@info.naviosolutions.com"],
+      to: [salesContactInfo.salesEmail],
       replyTo: email,
       subject: `Question about pricing offer - ${offer.company_name}`,
       html: `
@@ -95,7 +124,7 @@ serve(async (req: Request): Promise<Response> => {
     await supabase.from("email_logs").insert({
       email_type: "offer_question",
       related_id: offer.id,
-      to_email: "sales@info.naviosolutions.com",
+      to_email: salesContactInfo.salesEmail,
       to_name: "Navio Sales",
       from_address: fromAddress,
       subject: `Question about pricing offer - ${offer.company_name}`,
@@ -104,9 +133,13 @@ serve(async (req: Request): Promise<Response> => {
       metadata: { question, from_name: name, from_email: email },
     });
 
-    // Send Slack notification
+    // Send Slack notification with primary contact info
     const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
     if (slackWebhookUrl) {
+      const assignedText = salesContactInfo.primaryContactName 
+        ? `👤 Assigned to: ${salesContactInfo.primaryContactName}`
+        : '';
+      
       await fetch(slackWebhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,7 +165,7 @@ serve(async (req: Request): Promise<Response> => {
               elements: [
                 {
                   type: "mrkdwn",
-                  text: `📧 Reply to: ${email}`,
+                  text: `📧 Reply to: ${email}${assignedText ? ` | ${assignedText}` : ''}`,
                 },
               ],
             },
