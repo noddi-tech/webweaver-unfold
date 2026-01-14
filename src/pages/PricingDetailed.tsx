@@ -9,7 +9,7 @@ import { LaunchTierCard } from "@/components/pricing/LaunchTierCard";
 import { ScaleTierCard } from "@/components/pricing/ScaleTierCard";
 import { ScaleTierTable } from "@/components/pricing/ScaleTierTable";
 import { PricingComparisonCalculator, CalculatorValues } from "@/components/pricing/PricingComparisonCalculator";
-import { NoHiddenCosts } from "@/components/pricing/NoHiddenCosts";
+
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
 import { OfferGeneratorPanel } from "@/components/pricing/OfferGeneratorPanel";
 import { OffersHistory } from "@/components/pricing/OffersHistory";
@@ -235,12 +235,6 @@ const PricingDetailed = () => {
             </div>
           </section>
 
-          {/* No Hidden Costs Banner */}
-          <section className="py-16 animate-fade-in" style={{ animationDelay: '250ms' }}>
-            <div className="container max-w-container px-4 sm:px-6 lg:px-8">
-              <NoHiddenCosts textContent={textContent} />
-            </div>
-          </section>
 
           {/* FAQ Section */}
           <section className="py-16 bg-muted/30 animate-fade-in" style={{ animationDelay: '300ms' }}>
