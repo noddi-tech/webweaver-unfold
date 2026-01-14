@@ -41,88 +41,92 @@ import OfferView from "./pages/OfferView";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  // Load and apply typography settings from database
+// Separate component for typography loading - must be inside React tree
+const TypographyLoader = () => {
   useTypographySettings();
-  
+  return null;
+};
+
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <TranslationProvider>
-        <CurrencyProvider>
-        <SiteStylesProvider>
-          <EditModeProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-          <Routes>
-            {/* Language-prefixed routes */}
-            <Route path="/:lang" element={<LanguageSync><Index /></LanguageSync>} />
-            <Route path="/:lang/functions" element={<LanguageSync><Functions /></LanguageSync>} />
-            <Route path="/:lang/features" element={<LanguageSync><FeaturesPage /></LanguageSync>} />
-            <Route path="/:lang/solutions" element={<LanguageSync><Solutions /></LanguageSync>} />
-            <Route path="/:lang/solutions/:slug" element={<LanguageSync><SolutionDetail /></LanguageSync>} />
-            <Route path="/:lang/stories" element={<LanguageSync><Stories /></LanguageSync>} />
-            <Route path="/:lang/stories/:slug" element={<LanguageSync><CustomerStory /></LanguageSync>} />
-            <Route path="/:lang/partners" element={<LanguageSync><Partners /></LanguageSync>} />
-            <Route path="/:lang/architecture" element={<LanguageSync><Architecture /></LanguageSync>} />
-            <Route path="/:lang/pricing" element={<LanguageSync><Pricing /></LanguageSync>} />
-            <Route path="/:lang/pricing_detailed" element={<LanguageSync><PricingDetailed /></LanguageSync>} />
-            <Route path="/:lang/contact" element={<LanguageSync><Contact /></LanguageSync>} />
-            <Route path="/:lang/demo" element={<LanguageSync><Demo /></LanguageSync>} />
-            <Route path="/:lang/team" element={<LanguageSync><Team /></LanguageSync>} />
-            <Route path="/:lang/about-us" element={<LanguageSync><AboutUs /></LanguageSync>} />
-            <Route path="/:lang/newsroom" element={<LanguageSync><Newsroom /></LanguageSync>} />
-            <Route path="/:lang/careers" element={<LanguageSync><Careers /></LanguageSync>} />
-            <Route path="/:lang/careers/:slug" element={<LanguageSync><JobListing /></LanguageSync>} />
-            <Route path="/:lang/my-applications" element={<LanguageSync><MyApplications /></LanguageSync>} />
-            <Route path="/:lang/blog" element={<LanguageSync><Blog /></LanguageSync>} />
-            <Route path="/:lang/blog/:slug" element={<LanguageSync><BlogPost /></LanguageSync>} />
-            
-            {/* CMS and special routes (no language prefix) */}
-            <Route path="/cms-login" element={<Auth />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/cms" element={<Admin />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/cms/translations" element={<Navigate to="/cms" replace />} />
-            <Route path="/book/:token" element={<CandidateBooking />} />
-            <Route path="/offer/:token" element={<OfferView />} />
-            <Route path="/llms.txt" element={<LlmsTxt />} />
-            
-            {/* Redirect root to default language */}
-            <Route path="/" element={<LanguageRedirect />} />
-            
-            {/* Redirect all non-prefixed routes to language-prefixed versions */}
-            <Route path="/functions" element={<LanguageRedirect />} />
-            <Route path="/features" element={<LanguageRedirect />} />
-            <Route path="/solutions" element={<LanguageRedirect />} />
-            <Route path="/solutions/:slug" element={<LanguageRedirect />} />
-            <Route path="/stories" element={<LanguageRedirect />} />
-            <Route path="/stories/:slug" element={<LanguageRedirect />} />
-            <Route path="/partners" element={<LanguageRedirect />} />
-            <Route path="/architecture" element={<LanguageRedirect />} />
-            <Route path="/pricing" element={<LanguageRedirect />} />
-            <Route path="/pricing_detailed" element={<LanguageRedirect />} />
-            <Route path="/contact" element={<LanguageRedirect />} />
-            <Route path="/demo" element={<LanguageRedirect />} />
-            <Route path="/team" element={<LanguageRedirect />} />
-            <Route path="/about-us" element={<LanguageRedirect />} />
-            <Route path="/newsroom" element={<LanguageRedirect />} />
-            <Route path="/careers" element={<LanguageRedirect />} />
-            <Route path="/careers/:slug" element={<LanguageRedirect />} />
-            <Route path="/blog" element={<LanguageRedirect />} />
-            <Route path="/blog/:slug" element={<LanguageRedirect />} />
-            
-            {/* Catch-all for 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          </BrowserRouter>
-          </EditModeProvider>
-        </SiteStylesProvider>
-        </CurrencyProvider>
-      </TranslationProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+      <TypographyLoader />
+      <TooltipProvider>
+        <TranslationProvider>
+          <CurrencyProvider>
+            <SiteStylesProvider>
+              <EditModeProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    {/* Language-prefixed routes */}
+                    <Route path="/:lang" element={<LanguageSync><Index /></LanguageSync>} />
+                    <Route path="/:lang/functions" element={<LanguageSync><Functions /></LanguageSync>} />
+                    <Route path="/:lang/features" element={<LanguageSync><FeaturesPage /></LanguageSync>} />
+                    <Route path="/:lang/solutions" element={<LanguageSync><Solutions /></LanguageSync>} />
+                    <Route path="/:lang/solutions/:slug" element={<LanguageSync><SolutionDetail /></LanguageSync>} />
+                    <Route path="/:lang/stories" element={<LanguageSync><Stories /></LanguageSync>} />
+                    <Route path="/:lang/stories/:slug" element={<LanguageSync><CustomerStory /></LanguageSync>} />
+                    <Route path="/:lang/partners" element={<LanguageSync><Partners /></LanguageSync>} />
+                    <Route path="/:lang/architecture" element={<LanguageSync><Architecture /></LanguageSync>} />
+                    <Route path="/:lang/pricing" element={<LanguageSync><Pricing /></LanguageSync>} />
+                    <Route path="/:lang/pricing_detailed" element={<LanguageSync><PricingDetailed /></LanguageSync>} />
+                    <Route path="/:lang/contact" element={<LanguageSync><Contact /></LanguageSync>} />
+                    <Route path="/:lang/demo" element={<LanguageSync><Demo /></LanguageSync>} />
+                    <Route path="/:lang/team" element={<LanguageSync><Team /></LanguageSync>} />
+                    <Route path="/:lang/about-us" element={<LanguageSync><AboutUs /></LanguageSync>} />
+                    <Route path="/:lang/newsroom" element={<LanguageSync><Newsroom /></LanguageSync>} />
+                    <Route path="/:lang/careers" element={<LanguageSync><Careers /></LanguageSync>} />
+                    <Route path="/:lang/careers/:slug" element={<LanguageSync><JobListing /></LanguageSync>} />
+                    <Route path="/:lang/my-applications" element={<LanguageSync><MyApplications /></LanguageSync>} />
+                    <Route path="/:lang/blog" element={<LanguageSync><Blog /></LanguageSync>} />
+                    <Route path="/:lang/blog/:slug" element={<LanguageSync><BlogPost /></LanguageSync>} />
+                    
+                    {/* CMS and special routes (no language prefix) */}
+                    <Route path="/cms-login" element={<Auth />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/cms" element={<Admin />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/cms/translations" element={<Navigate to="/cms" replace />} />
+                    <Route path="/book/:token" element={<CandidateBooking />} />
+                    <Route path="/offer/:token" element={<OfferView />} />
+                    <Route path="/llms.txt" element={<LlmsTxt />} />
+                    
+                    {/* Redirect root to default language */}
+                    <Route path="/" element={<LanguageRedirect />} />
+                    
+                    {/* Redirect all non-prefixed routes to language-prefixed versions */}
+                    <Route path="/functions" element={<LanguageRedirect />} />
+                    <Route path="/features" element={<LanguageRedirect />} />
+                    <Route path="/solutions" element={<LanguageRedirect />} />
+                    <Route path="/solutions/:slug" element={<LanguageRedirect />} />
+                    <Route path="/stories" element={<LanguageRedirect />} />
+                    <Route path="/stories/:slug" element={<LanguageRedirect />} />
+                    <Route path="/partners" element={<LanguageRedirect />} />
+                    <Route path="/architecture" element={<LanguageRedirect />} />
+                    <Route path="/pricing" element={<LanguageRedirect />} />
+                    <Route path="/pricing_detailed" element={<LanguageRedirect />} />
+                    <Route path="/contact" element={<LanguageRedirect />} />
+                    <Route path="/demo" element={<LanguageRedirect />} />
+                    <Route path="/team" element={<LanguageRedirect />} />
+                    <Route path="/about-us" element={<LanguageRedirect />} />
+                    <Route path="/newsroom" element={<LanguageRedirect />} />
+                    <Route path="/careers" element={<LanguageRedirect />} />
+                    <Route path="/careers/:slug" element={<LanguageRedirect />} />
+                    <Route path="/blog" element={<LanguageRedirect />} />
+                    <Route path="/blog/:slug" element={<LanguageRedirect />} />
+                    
+                    {/* Catch-all for 404 */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </EditModeProvider>
+            </SiteStylesProvider>
+          </CurrencyProvider>
+        </TranslationProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 
