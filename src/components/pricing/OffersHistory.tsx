@@ -77,13 +77,21 @@ const StatusProgress = ({ status }: { status: string }) => {
   );
 };
 
+const CURRENCY_LOCALES: Record<string, string> = {
+  EUR: 'de-DE',
+  NOK: 'nb-NO',
+  SEK: 'sv-SE',
+  USD: 'en-US',
+  GBP: 'en-GB',
+};
+
 export function OffersHistory() {
   const { data: offers, isLoading } = useQuery({
     queryKey: ['pricing-offers'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('pricing_offers')
-        .select('*')
+        .select('*, offer_token, currency, conversion_rate')
         .order('created_at', { ascending: false })
         .limit(20);
       
@@ -92,8 +100,21 @@ export function OffersHistory() {
     }
   });
 
-  const formatCurrency = (amount: number) => 
-    new Intl.NumberFormat('nb-NO', { style: 'currency', currency: 'NOK', maximumFractionDigits: 0 }).format(amount);
+  const formatOfferCurrency = (amount: number, currency: string = 'EUR', conversionRate: number = 1) => {
+    const convertedAmount = amount * conversionRate;
+    const locale = CURRENCY_LOCALES[currency] || 'en-US';
+    return new Intl.NumberFormat(locale, { 
+      style: 'currency', 
+      currency: currency, 
+      maximumFractionDigits: 0 
+    }).format(convertedAmount);
+  };
+
+  const handleViewOffer = (offerToken: string | null) => {
+    if (offerToken) {
+      window.open(`/offer/${offerToken}`, '_blank');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -154,9 +175,15 @@ export function OffersHistory() {
               const monthlyRevenue = (offer.annual_revenue || 0) / 12;
               const revenueCost = monthlyRevenue * ((offer.revenue_percentage || 0) / 100);
               const totalMonthly = (offer.fixed_monthly || 0) + revenueCost;
+              const offerCurrency = offer.currency || 'EUR';
+              const offerConversionRate = offer.conversion_rate || 1;
 
               return (
-                <TableRow key={offer.id}>
+                <TableRow 
+                  key={offer.id}
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => handleViewOffer(offer.offer_token)}
+                >
                   <TableCell>
                     <div>
                       <p className="font-medium">{offer.customer_company}</p>
@@ -174,7 +201,11 @@ export function OffersHistory() {
                     )}
                   </TableCell>
                   <TableCell className="font-medium">
-                    {formatCurrency(offer.total_monthly_estimate || totalMonthly)}
+                    {formatOfferCurrency(
+                      offer.total_monthly_estimate || totalMonthly, 
+                      offerCurrency, 
+                      offerConversionRate
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -203,7 +234,14 @@ export function OffersHistory() {
                     {formatDistanceToNow(new Date(offer.created_at), { addSuffix: true, locale: nb })}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewOffer(offer.offer_token);
+                      }}
+                    >
                       <ExternalLink className="h-4 w-4" />
                     </Button>
                   </TableCell>
