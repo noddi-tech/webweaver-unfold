@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { getSlackWebhookUrl, sendSlackMessage } from "../_shared/slack-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,10 +23,10 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
+    const slackWebhookUrl = await getSlackWebhookUrl("careers", "application_received");
     if (!slackWebhookUrl) {
-      console.log("SLACK_WEBHOOK_URL not configured, skipping notification");
-      return new Response(JSON.stringify({ skipped: true }), {
+      console.log("Slack not configured or application_received notification disabled");
+      return new Response(JSON.stringify({ skipped: true, reason: "Slack not configured or disabled" }), {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
@@ -75,7 +76,7 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    const blocks: any[] = [
+    const blocks: unknown[] = [
       {
         type: "header",
         text: { type: "plain_text", text: "📋 New Job Application", emoji: true },
@@ -118,18 +119,10 @@ serve(async (req: Request): Promise<Response> => {
       }
     );
 
-    const slackPayload = { blocks };
+    const success = await sendSlackMessage(slackWebhookUrl, { blocks });
 
-    const slackResponse = await fetch(slackWebhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(slackPayload),
-    });
-
-    if (!slackResponse.ok) {
-      const errorText = await slackResponse.text();
-      console.error("Slack webhook error:", errorText);
-      throw new Error(`Slack webhook failed: ${slackResponse.status}`);
+    if (!success) {
+      throw new Error("Failed to send Slack notification");
     }
 
     console.log("Slack notification sent successfully for:", applicantName);
@@ -138,9 +131,10 @@ serve(async (req: Request): Promise<Response> => {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error sending Slack notification:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });

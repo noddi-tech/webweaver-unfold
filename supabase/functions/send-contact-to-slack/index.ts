@@ -1,4 +1,5 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { getSlackWebhookUrl, sendSlackMessage } from "../_shared/slack-utils.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -39,14 +40,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const slackWebhookUrl = Deno.env.get('SLACK_WEBHOOK_URL');
+    const slackWebhookUrl = await getSlackWebhookUrl("general", "contact_form");
     
     if (!slackWebhookUrl) {
-      console.error('SLACK_WEBHOOK_URL not found in environment variables');
+      console.log('Slack not configured or contact_form notification disabled');
       return new Response(
-        JSON.stringify({ error: 'Slack webhook not configured' }),
+        JSON.stringify({ success: true, message: 'Message received (Slack notifications disabled)' }),
         { 
-          status: 500, 
+          status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
@@ -122,17 +123,10 @@ Deno.serve(async (req) => {
       ]
     };
 
-    // Send to Slack
-    const slackResponse = await fetch(slackWebhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(slackMessage),
-    });
+    const success = await sendSlackMessage(slackWebhookUrl, slackMessage);
 
-    if (!slackResponse.ok) {
-      console.error('Failed to send message to Slack:', slackResponse.status, slackResponse.statusText);
+    if (!success) {
+      console.error('Failed to send message to Slack');
       return new Response(
         JSON.stringify({ error: 'Failed to send message to Slack' }),
         { 

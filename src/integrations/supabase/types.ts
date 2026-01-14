@@ -2769,6 +2769,39 @@ export type Database = {
         }
         Relationships: []
       }
+      slack_settings: {
+        Row: {
+          category: string
+          channel_name: string | null
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+          notification_types: Json | null
+          updated_at: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          category: string
+          channel_name?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          notification_types?: Json | null
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          category?: string
+          channel_name?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          notification_types?: Json | null
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
       solutions: {
         Row: {
           active: boolean

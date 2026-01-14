@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getSlackWebhookUrl, sendSlackMessage } from "../_shared/slack-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -101,7 +102,7 @@ serve(async (req: Request): Promise<Response> => {
     });
   } catch (error) {
     console.error("Error processing webhook:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -118,36 +119,39 @@ async function notifySlack(supabase: ReturnType<typeof createClient>, offerId: s
 
     if (!offer) return;
 
-    const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
-    if (!slackWebhookUrl) return;
+    // Use configurable Slack settings
+    const notificationType = eventType === "viewed" ? "offer_viewed" : "email_bounced";
+    const category = eventType === "viewed" ? "sales" : "general";
+    const slackWebhookUrl = await getSlackWebhookUrl(category, notificationType);
+    
+    if (!slackWebhookUrl) {
+      console.log(`Slack not configured for ${category}/${notificationType}`);
+      return;
+    }
 
     const emoji = eventType === "viewed" ? "👀" : "⚠️";
     const action = eventType === "viewed" ? "viewed their pricing offer" : "email bounced";
 
-    await fetch(slackWebhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: `${emoji} *${offer.company_name || "A customer"}* ${action}`,
-        blocks: [
-          {
-            type: "section",
-            text: {
+    await sendSlackMessage(slackWebhookUrl, {
+      text: `${emoji} *${offer.company_name || "A customer"}* ${action}`,
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `${emoji} *${offer.company_name || "A customer"}* ${action}`,
+          },
+        },
+        {
+          type: "context",
+          elements: [
+            {
               type: "mrkdwn",
-              text: `${emoji} *${offer.company_name || "A customer"}* ${action}`,
+              text: `Contact: ${offer.contact_name} (${offer.contact_email})`,
             },
-          },
-          {
-            type: "context",
-            elements: [
-              {
-                type: "mrkdwn",
-                text: `Contact: ${offer.contact_name} (${offer.contact_email})`,
-              },
-            ],
-          },
-        ],
-      }),
+          ],
+        },
+      ],
     });
   } catch (e) {
     console.error("Error sending Slack notification:", e);
