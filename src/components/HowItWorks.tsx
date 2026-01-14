@@ -43,7 +43,7 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section ref={ref as any} className="py-12 md:py-16 lg:py-section">
+    <section ref={ref as any} className="py-12 md:py-16 lg:py-section" data-header-color="dark">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8" key={refreshKey}>
         <div className="text-center mb-16">
           <EditableTranslation translationKey="how_it_works.title" onSave={() => setRefreshKey(prev => prev + 1)}>

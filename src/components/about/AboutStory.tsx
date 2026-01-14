@@ -58,7 +58,7 @@ export function AboutStory() {
   }, [api, onSelect]);
 
   return (
-    <section id="story" className="py-20 md:py-28 bg-muted/30">
+    <section id="story" className="py-20 md:py-28 bg-muted/30" data-header-color="dark">
       <div className="max-w-5xl mx-auto px-4">
         <motion.div
           ref={ref as React.RefObject<HTMLDivElement>}

@@ -28,7 +28,7 @@ export function AboutMission() {
   const { ref, isVisible } = useScrollAnimation();
 
   return (
-    <section id="mission" className="py-20 md:py-28">
+    <section id="mission" className="py-20 md:py-28" data-header-color="dark">
       <div className="max-w-4xl mx-auto px-4 text-center">
         <motion.div
           ref={ref as React.RefObject<HTMLDivElement>}

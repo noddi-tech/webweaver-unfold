@@ -626,6 +626,7 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
       <section
         ref={sectionRef}
         className="relative py-12 md:py-16 lg:py-section"
+        data-header-color="dark"
         style={isXlScreen ? { minHeight: `${100 + (cards.length * 20)}vh` } : undefined}
       >
         {/* Edge-hugging container */}

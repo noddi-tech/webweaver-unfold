@@ -38,7 +38,7 @@ const Newsroom = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <main className="container mx-auto px-6 pt-32 pb-20">
+      <main className="container mx-auto px-6 pt-32 pb-20" data-header-color="dark">
         {/* Hero Section */}
         <section className="text-center max-w-4xl mx-auto mb-16">
           <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">

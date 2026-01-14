@@ -260,7 +260,7 @@ const Team = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <main className="container mx-auto px-6 pt-32 pb-20">
+      <main className="container mx-auto px-6 pt-32 pb-20" data-header-color="dark">
         <header className="text-center max-w-3xl mx-auto mb-12">
           {(() => {
             const h1Heading = headings.find(h => h.element_type === 'h1');

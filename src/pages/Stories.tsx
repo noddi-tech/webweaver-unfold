@@ -67,7 +67,7 @@ export default function Stories() {
       
       <main>
         {/* Hero Section */}
-        <section className="py-section bg-muted">
+        <section className="py-section bg-muted" data-header-color="dark">
           <div className="container max-w-container px-4 sm:px-6 lg:px-8 text-center">
             <p className="text-sm font-semibold uppercase tracking-widest text-primary mb-4">
               Customer Stories
@@ -82,7 +82,7 @@ export default function Stories() {
         </section>
 
         {/* Stories Grid */}
-        <section className="py-section bg-background">
+        <section className="py-section bg-background" data-header-color="dark">
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

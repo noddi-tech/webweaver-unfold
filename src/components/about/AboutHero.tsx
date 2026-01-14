@@ -3,7 +3,7 @@ import { EditableTranslation } from "@/components/EditableTranslation";
 
 export function AboutHero() {
   return (
-    <section className="relative py-20 md:py-32 overflow-hidden">
+    <section className="relative py-20 md:py-32 overflow-hidden" data-header-color="dark">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
       

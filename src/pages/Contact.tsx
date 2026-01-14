@@ -154,7 +154,7 @@ const Contact = () => {
       <main>
         <ContactHero />
 
-        <section className="py-12 md:py-16 lg:py-section px-2.5">
+        <section className="py-12 md:py-16 lg:py-section px-2.5" data-header-color="dark">
           <div className="container max-w-container">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}

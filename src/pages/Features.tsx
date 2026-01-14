@@ -115,7 +115,7 @@ const FeaturesPage = () => {
       <HreflangTags pageSlug="/features" />
       <Header />
       
-      <main className="container mx-auto px-6 py-12 pt-32">
+      <main className="container mx-auto px-6 py-12 pt-32" data-header-color="dark">
         <div className="text-center mb-16">
           {(() => {
             const h1Heading = headings.find(h => h.element_type === 'h1');

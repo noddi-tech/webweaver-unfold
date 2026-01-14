@@ -146,7 +146,7 @@ const Pricing = () => {
         </section>
 
         {/* Value Propositions */}
-        <section className="py-20 animate-fade-in" style={{ animationDelay: '100ms' }}>
+        <section className="py-20 animate-fade-in" data-header-color="dark" style={{ animationDelay: '100ms' }}>
           <div className="container max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -174,7 +174,7 @@ const Pricing = () => {
         </section>
 
         {/* Simple Tier Overview */}
-        <section className="py-20 bg-muted/30 animate-fade-in" style={{ animationDelay: '150ms' }}>
+        <section className="py-20 bg-muted/30 animate-fade-in" data-header-color="dark" style={{ animationDelay: '150ms' }}>
           <div className="container max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -274,14 +274,14 @@ const Pricing = () => {
 
 
         {/* FAQ Section */}
-        <section className="py-16 bg-muted/30 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <section className="py-16 bg-muted/30 animate-fade-in" data-header-color="dark" style={{ animationDelay: '200ms' }}>
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <PricingFAQ />
           </div>
         </section>
 
         {/* Final CTA */}
-        <section className="py-24 text-center animate-fade-in" style={{ animationDelay: '250ms' }}>
+        <section className="py-24 text-center animate-fade-in" data-header-color="dark" style={{ animationDelay: '250ms' }}>
           <div className="container max-w-container px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Let's find your perfect plan

@@ -90,7 +90,7 @@ const Blog = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="pt-32 pb-16 px-4">
+      <section className="pt-32 pb-16 px-4" data-header-color="dark">
         <div className="container mx-auto max-w-4xl text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             <EditableTranslation translationKey="blog.hero.title">
@@ -107,7 +107,7 @@ const Blog = () => {
 
       {/* Featured Post */}
       {featuredPost && !editMode && (
-        <section className="pb-16 px-4">
+        <section className="pb-16 px-4" data-header-color="dark">
           <div className="container mx-auto max-w-6xl">
             <Link to={`/${i18n.language}/blog/${featuredPost.slug}`}>
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -160,7 +160,7 @@ const Blog = () => {
       )}
 
       {/* Category Filter */}
-      <section className="pb-8 px-4">
+      <section className="pb-8 px-4" data-header-color="dark">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-wrap gap-2">
             <Button
@@ -195,7 +195,7 @@ const Blog = () => {
       </section>
 
       {/* Blog Grid */}
-      <section className="pb-24 px-4">
+      <section className="pb-24 px-4" data-header-color="dark">
         <div className="container mx-auto max-w-6xl">
           {isLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -323,7 +323,7 @@ const Blog = () => {
       </section>
 
       {/* Newsletter Section */}
-      <section className="pb-24 px-4">
+      <section className="pb-24 px-4" data-header-color="dark">
         <div className="container mx-auto max-w-2xl">
           <NewsletterSignup />
         </div>

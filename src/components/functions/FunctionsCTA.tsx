@@ -10,7 +10,7 @@ export default function FunctionsCTA() {
   const { t } = useAppTranslation();
   
   return (
-    <section className="py-section">
+    <section className="py-section" data-header-color="dark">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           <EditableTranslation translationKey="functions_cta.title">
