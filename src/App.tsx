@@ -1,3 +1,4 @@
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +10,7 @@ import { TranslationProvider } from "./components/TranslationProvider";
 import { EditModeProvider } from "@/contexts/EditModeContext";
 import { SiteStylesProvider } from "@/contexts/SiteStylesContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
-import { useTypographySettings } from "@/hooks/useTypographySettings";
+import { TypographyLoader } from "@/components/TypographyLoader";
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
 import FeaturesPage from "./pages/Features";
@@ -40,13 +41,6 @@ import CandidateBooking from "./pages/CandidateBooking";
 import OfferView from "./pages/OfferView";
 
 const queryClient = new QueryClient();
-
-// Separate component for typography loading - must be inside React tree
-const TypographyLoader = () => {
-  useTypographySettings();
-  return null;
-};
-
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
