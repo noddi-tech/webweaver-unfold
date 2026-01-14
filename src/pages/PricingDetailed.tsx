@@ -18,7 +18,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
 import { ChevronDown, ChevronUp, Lock, Calculator, FileText, Users } from 'lucide-react';
-import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { CurrencySwitcher } from "@/components/pricing/CurrencySwitcher";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -100,8 +99,7 @@ const PricingDetailed = () => {
   }
 
   return (
-    <CurrencyProvider>
-      <div className="min-h-screen">
+    <div className="min-h-screen">
         <HreflangTags pageSlug="/pricing_detailed" />
         <Header />
         <main>
@@ -256,7 +254,6 @@ const PricingDetailed = () => {
 
         <Footer />
       </div>
-    </CurrencyProvider>
   );
 };
 

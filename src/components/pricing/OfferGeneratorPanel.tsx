@@ -168,7 +168,7 @@ export function OfferGeneratorPanel({
       if (error) throw error;
       
       setSavedOfferId(data.id);
-      toast.success('Offer saved as draft');
+      toast.success(`Offer saved as draft in ${currency} (rate ${config.conversionRate})`);
       return data.id;
     } catch (error: any) {
       console.error('Error saving offer:', error);
