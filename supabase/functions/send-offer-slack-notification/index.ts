@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { getSlackWebhookUrl, sendSlackMessage } from "../_shared/slack-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,16 +23,18 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
+    const notification: OfferNotification = await req.json();
+    const notificationType = `offer_${notification.event_type}`;
+    
+    const slackWebhookUrl = await getSlackWebhookUrl("sales", notificationType);
     if (!slackWebhookUrl) {
-      console.log("SLACK_WEBHOOK_URL not configured");
-      return new Response(JSON.stringify({ error: "Slack not configured" }), {
+      console.log(`Slack not configured or notification type ${notificationType} disabled`);
+      return new Response(JSON.stringify({ skipped: true, reason: "Slack not configured or disabled" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const notification: OfferNotification = await req.json();
     console.log("Sending offer Slack notification:", notification.event_type);
 
     let emoji: string;
@@ -121,24 +124,18 @@ serve(async (req: Request): Promise<Response> => {
       });
     }
 
-    const slackResponse = await fetch(slackWebhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: `${emoji} ${message}`,
-        attachments: [
-          {
-            color,
-            blocks,
-          },
-        ],
-      }),
+    const success = await sendSlackMessage(slackWebhookUrl, {
+      text: `${emoji} ${message}`,
+      attachments: [
+        {
+          color,
+          blocks,
+        },
+      ],
     });
 
-    if (!slackResponse.ok) {
-      const errorText = await slackResponse.text();
-      console.error("Slack API error:", errorText);
-      throw new Error(`Slack API error: ${errorText}`);
+    if (!success) {
+      throw new Error("Failed to send Slack message");
     }
 
     console.log("Slack notification sent successfully");
