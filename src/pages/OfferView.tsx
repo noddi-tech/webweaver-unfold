@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -18,11 +19,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2, Globe, RefreshCw, Download } from "lucide-react";
+import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2, Globe, RefreshCw, Download, Mail, Linkedin } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { nb } from "date-fns/locale";
 import { toast } from "sonner";
 import { CURRENCY_RATES, CURRENCY_SYMBOLS } from "@/config/newPricing";
+import { useSalesContacts } from "@/hooks/useSalesContacts";
 
 // Currency locale mapping
 const CURRENCY_LOCALES: Record<string, string> = {
@@ -41,6 +43,9 @@ const OfferView = () => {
   const [questionForm, setQuestionForm] = useState({ name: "", email: "", question: "" });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  
+  // Fetch sales contacts configuration
+  const { data: salesContacts } = useSalesContacts();
   
   // Display currency state - defaults to offer's currency
   const [displayCurrency, setDisplayCurrency] = useState<string | null>(null);
@@ -382,7 +387,7 @@ const OfferView = () => {
             </Button>
             <div className="grid grid-cols-2 gap-4">
               <Button size="lg" variant="outline" asChild>
-                <a href="https://calendly.com/navio/demo" target="_blank" rel="noopener noreferrer">
+                <a href={salesContacts?.bookingUrl || "https://calendly.com/navio/demo"} target="_blank" rel="noopener noreferrer">
                   <Calendar className="mr-2 h-4 w-4" />
                   Book møte
                 </a>
@@ -436,12 +441,83 @@ const OfferView = () => {
                 Last ned PDF
               </Button>
               <Button size="lg" variant="ghost" asChild>
-                <a href="tel:+4792249953">
+                <a href={`tel:${salesContacts?.primaryContact?.phone || salesContacts?.salesPhone || '+4792249953'}`}>
                   <Phone className="mr-2 h-4 w-4" />
                   Ring oss
                 </a>
               </Button>
             </div>
+            
+            {/* Sales Contacts Section */}
+            {(salesContacts?.primaryContact || salesContacts?.secondaryContact) && (
+              <Card className="mt-6">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Dine kontaktpersoner</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    {salesContacts.primaryContact && (
+                      <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={salesContacts.primaryContact.image_url || ''} alt={salesContacts.primaryContact.name} />
+                          <AvatarFallback>{salesContacts.primaryContact.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{salesContacts.primaryContact.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{salesContacts.primaryContact.title}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            {salesContacts.primaryContact.phone && (
+                              <a href={`tel:${salesContacts.primaryContact.phone}`} className="text-primary hover:underline">
+                                <Phone className="h-3 w-3" />
+                              </a>
+                            )}
+                            {salesContacts.primaryContact.email && (
+                              <a href={`mailto:${salesContacts.primaryContact.email}`} className="text-primary hover:underline">
+                                <Mail className="h-3 w-3" />
+                              </a>
+                            )}
+                            {salesContacts.primaryContact.linkedin_url && (
+                              <a href={salesContacts.primaryContact.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                <Linkedin className="h-3 w-3" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {salesContacts.secondaryContact && (
+                      <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={salesContacts.secondaryContact.image_url || ''} alt={salesContacts.secondaryContact.name} />
+                          <AvatarFallback>{salesContacts.secondaryContact.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{salesContacts.secondaryContact.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{salesContacts.secondaryContact.title}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            {salesContacts.secondaryContact.phone && (
+                              <a href={`tel:${salesContacts.secondaryContact.phone}`} className="text-primary hover:underline">
+                                <Phone className="h-3 w-3" />
+                              </a>
+                            )}
+                            {salesContacts.secondaryContact.email && (
+                              <a href={`mailto:${salesContacts.secondaryContact.email}`} className="text-primary hover:underline">
+                                <Mail className="h-3 w-3" />
+                              </a>
+                            )}
+                            {salesContacts.secondaryContact.linkedin_url && (
+                              <a href={salesContacts.secondaryContact.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                <Linkedin className="h-3 w-3" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 
@@ -467,7 +543,7 @@ const OfferView = () => {
 
         {/* Footer */}
         <div className="mt-12 text-center text-sm text-muted-foreground">
-          <p>Spørsmål? Svar på e-posten du mottok eller kontakt oss på sales@info.naviosolutions.com</p>
+          <p>Spørsmål? Svar på e-posten du mottok eller kontakt oss på {salesContacts?.salesEmail || 'sales@info.naviosolutions.com'}</p>
           <p className="mt-2">© {new Date().getFullYear()} Navio. Alle rettigheter reservert.</p>
         </div>
       </div>

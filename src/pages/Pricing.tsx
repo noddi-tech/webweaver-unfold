@@ -8,12 +8,14 @@ import { usePricingConfig } from "@/hooks/usePricingConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
+import { useBookingLink } from "@/hooks/useSalesContacts";
 import { Check, Rocket, TrendingUp, Calendar, ArrowRight, Sparkles, Building2, Shield } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const Pricing = () => {
   const { launch, scale, isLoading } = usePricingConfig();
+  const { url: bookingUrl, label: bookingLabel } = useBookingLink();
   
   // Fetch CMS content for pricing page
   const { textContent, loading: contentLoading } = useTextContent('pricing');
@@ -122,12 +124,12 @@ const Pricing = () => {
               asChild
             >
               <a 
-                href="https://calendly.com/joachim-noddi/30min"
+                href={bookingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Calendar className="w-5 h-5" />
-                Book a Meeting
+                {bookingLabel}
               </a>
             </Button>
             <p className="text-white/60 text-sm mt-4">
@@ -279,11 +281,11 @@ const Pricing = () => {
             </p>
             <Button size="lg" className="text-lg px-8 gap-2" asChild>
               <a 
-                href="https://calendly.com/joachim-noddi/30min"
+                href={bookingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Book a Meeting
+                {bookingLabel}
                 <ArrowRight className="w-5 h-5" />
               </a>
             </Button>

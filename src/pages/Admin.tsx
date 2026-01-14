@@ -62,6 +62,7 @@ import { PricingComparisonCalculator } from "@/components/pricing/PricingCompari
 // Communications components
 import { SlackSettingsManager } from "@/components/design-system/SlackSettingsManager";
 import { LeadsManager } from "@/components/design-system/LeadsManager";
+import { SalesContactManager } from "@/components/design-system/SalesContactManager";
 import ActivityDashboard from "@/components/design-system/ActivityDashboard";
 
 const Admin = () => {
@@ -377,6 +378,7 @@ const Admin = () => {
                 <TabsTrigger value="calculator">Calculator</TabsTrigger>
                 <TabsTrigger value="leads">Leads</TabsTrigger>
                 <TabsTrigger value="pricing-config">Pricing Config</TabsTrigger>
+                <TabsTrigger value="contacts">Sales Contacts</TabsTrigger>
               </TabsList>
 
               <TabsContent value="offers" className="space-y-8">
@@ -397,6 +399,10 @@ const Admin = () => {
 
               <TabsContent value="pricing-config" className="space-y-8">
                 <NewPricingManager />
+              </TabsContent>
+
+              <TabsContent value="contacts" className="space-y-8">
+                <SalesContactManager />
               </TabsContent>
             </Tabs>
           </TabsContent>
