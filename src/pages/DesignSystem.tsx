@@ -15,7 +15,6 @@ import FontManager from "@/components/design-system/FontManager";
 import BulkCardStyleUpdater from "@/components/design-system/BulkCardStyleUpdater";
 import { CardStylePresetPicker } from "@/components/design-system/CardStylePresetPicker";
 import EmailAnalyticsDashboard from "@/components/design-system/EmailAnalyticsDashboard";
-import { SlackSettingsManager } from "@/components/design-system/SlackSettingsManager";
 
 const DesignSystem = () => {
   return (
@@ -34,7 +33,7 @@ const DesignSystem = () => {
         </div>
 
         <Tabs defaultValue="colors" className="w-full">
-          <TabsList className="grid w-full grid-cols-15 mb-12">
+          <TabsList className="grid w-full grid-cols-14 mb-12">
             <TabsTrigger value="colors">Colors</TabsTrigger>
             <TabsTrigger value="fonts">Fonts</TabsTrigger>
             <TabsTrigger value="typography">Typography</TabsTrigger>
@@ -49,7 +48,6 @@ const DesignSystem = () => {
             <TabsTrigger value="patterns">Patterns</TabsTrigger>
             <TabsTrigger value="videos">Videos</TabsTrigger>
             <TabsTrigger value="emails">Emails</TabsTrigger>
-            <TabsTrigger value="slack">Slack</TabsTrigger>
           </TabsList>
 
           <TabsContent value="colors" className="space-y-8">
@@ -113,10 +111,6 @@ const DesignSystem = () => {
 
           <TabsContent value="emails" className="space-y-8">
             <EmailAnalyticsDashboard />
-          </TabsContent>
-
-          <TabsContent value="slack" className="space-y-8">
-            <SlackSettingsManager />
           </TabsContent>
         </Tabs>
       </main>

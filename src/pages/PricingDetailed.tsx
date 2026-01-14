@@ -24,6 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const PricingDetailed = () => {
   const [showAllTiers, setShowAllTiers] = useState(false);
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const { launch, scale, scaleTiers, isLoading } = usePricingConfig();
   const { isAdmin, isEditor, loading: roleLoading } = useUserRole();
   
@@ -46,6 +47,15 @@ const PricingDetailed = () => {
     const item = textContent.find(tc => tc.element_type === elementType);
     return item?.content || fallback;
   };
+
+  useEffect(() => {
+    // Check auth state
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthenticated(!!session?.user);
+    });
+    supabase.auth.getSession().then(({ data }) => setAuthenticated(!!data.session?.user));
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const loadPage = async () => {
@@ -72,7 +82,7 @@ const PricingDetailed = () => {
   }, []);
 
   // Show loading state while checking auth
-  if (roleLoading) {
+  if (authenticated === null || roleLoading) {
     return (
       <div className="min-h-screen">
         <Header />
@@ -93,7 +103,12 @@ const PricingDetailed = () => {
     );
   }
 
-  // Redirect non-admin/editor users to public pricing page
+  // Not logged in at all - redirect to auth
+  if (!authenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  // Logged in but no admin/editor role - redirect to public pricing
   if (!isAdmin && !isEditor) {
     return <Navigate to="/pricing" replace />;
   }
