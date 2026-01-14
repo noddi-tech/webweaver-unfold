@@ -179,7 +179,7 @@ const Hero = () => {
                      (mediaSettings.displayType === 'image' && mediaSettings.imageUrl);
 
   return (
-    <section className="pt-20 sm:pt-24 lg:pt-32 pb-8 sm:pb-12 px-2.5">
+    <section className="pt-20 sm:pt-24 lg:pt-32 pb-8 sm:pb-12 px-2.5" data-header-color="dark">
       {/* Card-encapsulated gradient section */}
       <div className="rounded-3xl overflow-hidden relative">
         {/* Gradient background inside card */}

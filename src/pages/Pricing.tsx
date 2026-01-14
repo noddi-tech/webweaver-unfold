@@ -81,7 +81,7 @@ const Pricing = () => {
       <Header />
       <main>
         {/* Hero Section - Navio Brand Gradient */}
-        <section className="relative pt-32 pb-20 overflow-hidden">
+        <section className="relative pt-32 pb-20 overflow-hidden" data-header-color="light">
           {/* Gradient background */}
           <div 
             className="absolute inset-0 -z-10" 

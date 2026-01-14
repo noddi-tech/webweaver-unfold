@@ -9,6 +9,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LanguageLink } from "@/components/LanguageLink";
 import { UserMenuDropdown } from "@/components/UserMenuDropdown";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { useHeaderColorMode } from "@/hooks/useHeaderColorMode";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -63,6 +64,8 @@ const Header = () => {
   const isHome = location.pathname === "/";
   const HeadingTag = (isHome ? "h1" : "h2") as keyof JSX.IntrinsicElements;
   const { t } = useAppTranslation();
+  const headerColorMode = useHeaderColorMode();
+  const isLightText = headerColorMode === 'light';
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -225,9 +228,11 @@ const Header = () => {
   if (!brand.logo_text && !brand.logo_image_url) return null;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isLightText ? 'bg-transparent' : 'glass-card shadow-sm'
+    }`}>
       <div className="container mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
+        <div className={`flex items-center justify-between transition-colors duration-300 ${isLightText ? 'text-white' : ''}`}>
           <HeadingTag className="m-0">
             <LanguageLink to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
               {brand.logo_variant === 'image' && brand.logo_image_url ? (
@@ -273,7 +278,11 @@ const Header = () => {
                       {((link.type === 'static-dropdown' || link.type === 'dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0) ? (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <button className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none">
+                            <button className={`group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium transition-colors focus:outline-none ${
+                              isLightText 
+                                ? 'text-white/90 hover:text-white hover:bg-white/10' 
+                                : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                            }`}>
                               {getTranslatedNavTitle(link)}
                               <ChevronDown className="relative top-[1px] ml-1 h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                             </button>
@@ -307,7 +316,11 @@ const Header = () => {
                         <NavigationMenuLink asChild>
                           <LanguageLink 
                             to={link.url || '#'} 
-                            className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+                            className={`group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
+                              isLightText 
+                                ? 'text-white/90 hover:text-white hover:bg-white/10' 
+                                : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                            }`}
                           >
                             {getTranslatedNavTitle(link)}
                           </LanguageLink>
@@ -325,7 +338,7 @@ const Header = () => {
 {headerSettings?.show_auth_buttons && (
                   <>
                     {headerSettings.show_sign_in_button && (
-                      <Button asChild variant="ghost" size="sm">
+                      <Button asChild variant="ghost" size="sm" className={isLightText ? 'text-white hover:bg-white/10 hover:text-white' : ''}>
                         <a href={headerSettings.sign_in_url || '/auth'}>
                           {t('header.sign_in', headerSettings.sign_in_text || 'Sign In')}
                         </a>
@@ -346,7 +359,11 @@ const Header = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-foreground hover:text-primary transition-colors"
+            className={`md:hidden p-2 transition-colors ${
+              isLightText 
+                ? 'text-white hover:text-white/80' 
+                : 'text-foreground hover:text-primary'
+            }`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
