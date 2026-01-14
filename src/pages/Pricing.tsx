@@ -9,6 +9,7 @@ import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
 import { useBookingLink } from "@/hooks/useSalesContacts";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { CurrencySwitcher } from "@/components/pricing/CurrencySwitcher";
 import { Check, Rocket, TrendingUp, Calendar, ArrowRight, Sparkles, Building2, Shield } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -136,6 +137,11 @@ const Pricing = () => {
             <p className="text-white/60 text-sm mt-4">
               We'll create a custom proposal for you
             </p>
+            
+            {/* Currency Switcher */}
+            <div className="mt-6">
+              <CurrencySwitcher darkMode showLabel />
+            </div>
           </div>
         </section>
 
@@ -253,6 +259,9 @@ const Pricing = () => {
                       <span className="text-2xl font-bold">{formatAmount(scale.fixedMonthly)}</span>
                       <span className="text-muted-foreground text-sm">/month</span>
                     </div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      +{formatAmount(scale.perDepartment)}/department/month
+                    </p>
                     <p className="text-sm font-medium text-primary">
                       Volume-based rates — better value as you grow
                     </p>
