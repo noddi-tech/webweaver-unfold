@@ -17,6 +17,7 @@ import { usePricingConfig } from "@/hooks/usePricingConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
+import { useBookingLink } from "@/hooks/useSalesContacts";
 import { ChevronDown, ChevronUp, Lock, Calculator, FileText, Users } from 'lucide-react';
 import { CurrencySwitcher } from "@/components/pricing/CurrencySwitcher";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -27,6 +28,7 @@ const PricingDetailed = () => {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const { launch, scale, scaleTiers, isLoading } = usePricingConfig();
   const { isAdmin, isEditor, loading: roleLoading } = useUserRole();
+  const { url: bookingUrl, label: bookingLabel } = useBookingLink();
   
   // Shared state for calculator values
   const [calculatorValues, setCalculatorValues] = useState<CalculatorValues>({
@@ -256,11 +258,11 @@ const PricingDetailed = () => {
               </p>
               <Button size="lg" className="text-lg px-8" asChild>
                 <a 
-                  href="https://calendly.com/joachim-noddi/30min"
+                  href={bookingUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {getCMSContent('button_book_demo', 'Book a Demo')}
+                  {getCMSContent('button_book_demo', bookingLabel)}
                 </a>
               </Button>
             </div>
