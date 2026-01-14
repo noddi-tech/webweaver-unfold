@@ -141,6 +141,44 @@ export function OfferGeneratorPanel({
     try {
       const { data: userData } = await supabase.auth.getUser();
 
+      // Step 1: Check if lead already exists with same email, otherwise create one
+      let leadId: string | null = null;
+      
+      const { data: existingLead } = await supabase
+        .from('leads')
+        .select('id')
+        .eq('email', customerEmail)
+        .maybeSingle();
+
+      if (existingLead) {
+        // Link to existing lead
+        leadId = existingLead.id;
+      } else {
+        // Create new lead
+        const { data: newLead, error: leadError } = await supabase
+          .from('leads')
+          .insert({
+            company_name: companyName,
+            contact_name: customerName,
+            email: customerEmail,
+            status: 'proposal_sent',
+            estimated_revenue: annualRevenue,
+            estimated_locations: locations,
+            source: 'pricing_offer',
+            notes: `Auto-created from pricing offer`
+          })
+          .select('id')
+          .single();
+
+        if (leadError) {
+          console.error('Error creating lead:', leadError);
+          // Continue without lead - offer is more important
+        } else {
+          leadId = newLead.id;
+        }
+      }
+
+      // Step 2: Create the pricing offer
       const { data, error } = await supabase
         .from('pricing_offers')
         .insert({
@@ -160,7 +198,8 @@ export function OfferGeneratorPanel({
           created_by: userData.user?.id,
           status: 'draft',
           currency: currency,
-          conversion_rate: config.conversionRate
+          conversion_rate: config.conversionRate,
+          lead_id: leadId
         })
         .select()
         .single();
@@ -168,7 +207,7 @@ export function OfferGeneratorPanel({
       if (error) throw error;
       
       setSavedOfferId(data.id);
-      toast.success(`Offer saved as draft in ${currency} (rate ${config.conversionRate})`);
+      toast.success(`Offer saved as draft in ${currency} (rate ${config.conversionRate})${leadId ? ' - Lead linked' : ''}`);
       return data.id;
     } catch (error: any) {
       console.error('Error saving offer:', error);

@@ -69,6 +69,24 @@ serve(async (req: Request): Promise<Response> => {
       throw updateError;
     }
 
+    // Update linked lead status to 'won' if exists
+    if (offer.lead_id) {
+      const { error: leadError } = await supabase
+        .from("leads")
+        .update({ 
+          status: "won",
+          notes: `Offer accepted on ${new Date().toLocaleDateString()}`
+        })
+        .eq("id", offer.lead_id);
+
+      if (leadError) {
+        console.error("Error updating lead status:", leadError);
+        // Don't throw - offer acceptance is more important
+      } else {
+        console.log("Lead status updated to 'won':", offer.lead_id);
+      }
+    }
+
     // Send Slack notification
     const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
     if (slackWebhookUrl) {
