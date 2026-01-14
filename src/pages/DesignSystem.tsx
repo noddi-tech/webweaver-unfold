@@ -14,6 +14,7 @@ import { ColorPaletteTab } from "@/components/design-system/ColorPaletteTab";
 import FontManager from "@/components/design-system/FontManager";
 import BulkCardStyleUpdater from "@/components/design-system/BulkCardStyleUpdater";
 import { CardStylePresetPicker } from "@/components/design-system/CardStylePresetPicker";
+import EmailAnalyticsDashboard from "@/components/design-system/EmailAnalyticsDashboard";
 
 const DesignSystem = () => {
   return (
@@ -32,7 +33,7 @@ const DesignSystem = () => {
         </div>
 
         <Tabs defaultValue="colors" className="w-full">
-          <TabsList className="grid w-full grid-cols-13 mb-12">
+          <TabsList className="grid w-full grid-cols-14 mb-12">
             <TabsTrigger value="colors">Colors</TabsTrigger>
             <TabsTrigger value="fonts">Fonts</TabsTrigger>
             <TabsTrigger value="typography">Typography</TabsTrigger>
@@ -46,6 +47,7 @@ const DesignSystem = () => {
             <TabsTrigger value="usps">USPs</TabsTrigger>
             <TabsTrigger value="patterns">Patterns</TabsTrigger>
             <TabsTrigger value="videos">Videos</TabsTrigger>
+            <TabsTrigger value="emails">Emails</TabsTrigger>
           </TabsList>
 
           <TabsContent value="colors" className="space-y-8">
@@ -105,6 +107,10 @@ const DesignSystem = () => {
 
           <TabsContent value="videos" className="space-y-8">
             <VideoManager />
+          </TabsContent>
+
+          <TabsContent value="emails" className="space-y-8">
+            <EmailAnalyticsDashboard />
           </TabsContent>
         </Tabs>
       </main>
