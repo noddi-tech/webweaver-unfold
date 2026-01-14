@@ -62,6 +62,7 @@ import { PricingComparisonCalculator } from "@/components/pricing/PricingCompari
 // Communications components
 import { SlackSettingsManager } from "@/components/design-system/SlackSettingsManager";
 import { LeadsManager } from "@/components/design-system/LeadsManager";
+import ActivityDashboard from "@/components/design-system/ActivityDashboard";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -400,13 +401,18 @@ const Admin = () => {
             </Tabs>
           </TabsContent>
 
-          {/* Communications Section - NEW */}
+          {/* Communications Section */}
           <TabsContent value="communications" className="space-y-8">
             <Tabs defaultValue={defaults.communications} className="w-full">
               <TabsList className="flex flex-wrap gap-2 mb-8">
+                <TabsTrigger value="activity">Activity Feed</TabsTrigger>
                 <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
                 <TabsTrigger value="slack">Slack Notifications</TabsTrigger>
               </TabsList>
+
+              <TabsContent value="activity" className="space-y-8">
+                <ActivityDashboard />
+              </TabsContent>
 
               <TabsContent value="newsletter" className="space-y-8">
                 <NewsletterManager />

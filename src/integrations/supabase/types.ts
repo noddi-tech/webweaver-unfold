@@ -2400,6 +2400,9 @@ export type Database = {
           notes: string | null
           offer_token: string | null
           per_location_cost: number | null
+          reminder_1_sent_at: string | null
+          reminder_3_sent_at: string | null
+          reminder_7_sent_at: string | null
           resend_id: string | null
           revenue_percentage: number
           sent_at: string | null
@@ -2433,6 +2436,9 @@ export type Database = {
           notes?: string | null
           offer_token?: string | null
           per_location_cost?: number | null
+          reminder_1_sent_at?: string | null
+          reminder_3_sent_at?: string | null
+          reminder_7_sent_at?: string | null
           resend_id?: string | null
           revenue_percentage: number
           sent_at?: string | null
@@ -2466,6 +2472,9 @@ export type Database = {
           notes?: string | null
           offer_token?: string | null
           per_location_cost?: number | null
+          reminder_1_sent_at?: string | null
+          reminder_3_sent_at?: string | null
+          reminder_7_sent_at?: string | null
           resend_id?: string | null
           revenue_percentage?: number
           sent_at?: string | null

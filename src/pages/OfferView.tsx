@@ -18,8 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2, Globe } from "lucide-react";
-import { format } from "date-fns";
+import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2, Globe, RefreshCw, Download } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
 import { nb } from "date-fns/locale";
 import { toast } from "sonner";
 import { CURRENCY_RATES, CURRENCY_SYMBOLS } from "@/config/newPricing";
@@ -39,6 +39,8 @@ const OfferView = () => {
   const [showAcceptDialog, setShowAcceptDialog] = useState(false);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [questionForm, setQuestionForm] = useState({ name: "", email: "", question: "" });
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   
   // Display currency state - defaults to offer's currency
   const [displayCurrency, setDisplayCurrency] = useState<string | null>(null);
@@ -213,8 +215,34 @@ const OfferView = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-3xl">
-        {/* Currency Switcher */}
-        <div className="mb-6 flex justify-end">
+        {/* Last Updated & Currency Switcher */}
+        <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
+          {/* Last Updated Indicator */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <span>
+              Sist oppdatert: {format(new Date(offer.updated_at || offer.created_at), "d. MMMM yyyy 'kl.' HH:mm", { locale: nb })}
+              <span className="text-xs ml-1">
+                ({formatDistanceToNow(new Date(offer.updated_at || offer.created_at), { addSuffix: true, locale: nb })})
+              </span>
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2"
+              onClick={async () => {
+                setIsRefreshing(true);
+                await refetch();
+                setIsRefreshing(false);
+                toast.success("Tilbudet er oppdatert");
+              }}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+
+          {/* Currency Switcher */}
           <div className="flex items-center gap-2">
             <Globe className="h-4 w-4 text-muted-foreground" />
             <Select value={currentDisplayCurrency} onValueChange={setDisplayCurrency}>
@@ -267,7 +295,8 @@ const OfferView = () => {
           </div>
         )}
 
-        {/* Customer Info */}
+        {/* Customer Info - Start of PDF content */}
+        <div id="offer-content" className="bg-background">
         <Card className="mb-6">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
@@ -337,6 +366,8 @@ const OfferView = () => {
             </CardContent>
           </Card>
         )}
+        </div>
+        {/* End of PDF content */}
 
         {/* CTA Buttons */}
         {!isExpired && !isAccepted && (
@@ -361,12 +392,56 @@ const OfferView = () => {
                 Still spørsmål
               </Button>
             </div>
-            <Button size="lg" variant="ghost" className="w-full" asChild>
-              <a href="tel:+4792249953">
-                <Phone className="mr-2 h-5 w-5" />
-                Ring oss: +47 922 49 953
-              </a>
-            </Button>
+            <div className="grid grid-cols-2 gap-4">
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={async () => {
+                  setIsGeneratingPDF(true);
+                  try {
+                    const { default: jsPDF } = await import('jspdf');
+                    const { default: html2canvas } = await import('html2canvas');
+                    
+                    const element = document.getElementById('offer-content');
+                    if (!element) throw new Error('Offer content not found');
+                    
+                    const canvas = await html2canvas(element, {
+                      scale: 2,
+                      useCORS: true,
+                      backgroundColor: '#ffffff'
+                    });
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const imgWidth = 210;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                    pdf.save(`Navio-Tilbud-${offer.customer_company || 'Kunde'}.pdf`);
+                    toast.success("PDF lastet ned");
+                  } catch (error) {
+                    console.error('PDF generation error:', error);
+                    toast.error("Kunne ikke laste ned PDF");
+                  } finally {
+                    setIsGeneratingPDF(false);
+                  }
+                }}
+                disabled={isGeneratingPDF}
+              >
+                {isGeneratingPDF ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="mr-2 h-4 w-4" />
+                )}
+                Last ned PDF
+              </Button>
+              <Button size="lg" variant="ghost" asChild>
+                <a href="tel:+4792249953">
+                  <Phone className="mr-2 h-4 w-4" />
+                  Ring oss
+                </a>
+              </Button>
+            </div>
           </div>
         )}
 
