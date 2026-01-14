@@ -486,6 +486,8 @@ export function OfferGeneratorPanel({
               max={20}
               step={1}
               className="py-2"
+              trackClassName="bg-white/30"
+              rangeClassName="bg-white"
             />
           </div>
         </div>
