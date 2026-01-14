@@ -158,7 +158,9 @@ export function OfferGeneratorPanel({
           notes,
           expires_at: validUntil.toISOString(),
           created_by: userData.user?.id,
-          status: 'draft'
+          status: 'draft',
+          currency: currency,
+          conversion_rate: config.conversionRate
         })
         .select()
         .single();
@@ -208,7 +210,9 @@ export function OfferGeneratorPanel({
           estimatedAnnualRevenue: annualRevenue,
           locations,
           validUntil: validUntil.toISOString(),
-          notes
+          notes,
+          currency: currency,
+          conversionRate: config.conversionRate
         }
       });
 

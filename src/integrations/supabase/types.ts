@@ -2380,6 +2380,7 @@ export type Database = {
         Row: {
           accepted_at: string | null
           annual_revenue: number | null
+          conversion_rate: number | null
           created_at: string
           created_by: string | null
           currency: string | null
@@ -2412,6 +2413,7 @@ export type Database = {
         Insert: {
           accepted_at?: string | null
           annual_revenue?: number | null
+          conversion_rate?: number | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -2444,6 +2446,7 @@ export type Database = {
         Update: {
           accepted_at?: string | null
           annual_revenue?: number | null
+          conversion_rate?: number | null
           created_at?: string
           created_by?: string | null
           currency?: string | null

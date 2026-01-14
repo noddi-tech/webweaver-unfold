@@ -22,7 +22,18 @@ interface OfferEmailRequest {
   locations: number;
   validUntil: string;
   notes?: string;
+  currency?: string;
+  conversionRate?: number;
 }
+
+// Currency locale mapping
+const CURRENCY_LOCALES: Record<string, string> = {
+  EUR: 'de-DE',
+  NOK: 'nb-NO',
+  SEK: 'sv-SE',
+  USD: 'en-US',
+  GBP: 'en-GB'
+};
 
 // Check domain verification - prioritize info.naviosolutions.com
 async function getFromAddress(apiKey: string): Promise<string> {
@@ -85,7 +96,9 @@ const handler = async (req: Request): Promise<Response> => {
       estimatedAnnualRevenue,
       locations,
       validUntil,
-      notes
+      notes,
+      currency = 'EUR',
+      conversionRate = 1
     } = data;
 
     // Get offer token for the view tracking link
@@ -100,15 +113,20 @@ const handler = async (req: Request): Promise<Response> => {
       ? `https://naviosolutions.com/offer/${offerToken}`
       : "https://calendly.com/navio/demo";
 
-    // Calculate costs
-    const monthlyRevenue = estimatedAnnualRevenue / 12;
-    const revenueCost = monthlyRevenue * (revenuePercentage / 100);
-    const totalMonthly = fixedMonthly + revenueCost;
-    const effectiveRate = ((totalMonthly / monthlyRevenue) * 100).toFixed(2);
+    // Convert EUR base values to display currency
+    const displayFixedMonthly = fixedMonthly * conversionRate;
+    const displayAnnualRevenue = estimatedAnnualRevenue * conversionRate;
 
-    // Format currency
+    // Calculate costs (in display currency)
+    const displayMonthlyRevenue = displayAnnualRevenue / 12;
+    const displayRevenueCost = displayMonthlyRevenue * (revenuePercentage / 100);
+    const displayTotalMonthly = displayFixedMonthly + displayRevenueCost;
+    const effectiveRate = ((displayTotalMonthly / displayMonthlyRevenue) * 100).toFixed(2);
+
+    // Format currency with proper locale
+    const locale = CURRENCY_LOCALES[currency] || 'en-US';
     const formatCurrency = (amount: number) => 
-      new Intl.NumberFormat('nb-NO', { style: 'currency', currency: 'NOK', maximumFractionDigits: 0 }).format(amount);
+      new Intl.NumberFormat(locale, { style: 'currency', currency: currency, maximumFractionDigits: 0 }).format(amount);
 
     const tierLabel = tier === 'launch' ? 'Launch' : 'Scale';
     const formattedValidUntil = new Date(validUntil).toLocaleDateString('nb-NO', { 
@@ -160,7 +178,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <tr>
                   <td style="padding: 16px; background-color: #f8fafc; border-radius: 8px 8px 0 0; border-bottom: 1px solid #e2e8f0;">
                     <span style="color: #64748b; font-size: 14px;">Fixed Monthly Fee</span>
-                    <span style="color: #0f172a; font-size: 18px; font-weight: 600; float: right;">${formatCurrency(fixedMonthly)}</span>
+                    <span style="color: #0f172a; font-size: 18px; font-weight: 600; float: right;">${formatCurrency(displayFixedMonthly)}</span>
                   </td>
                 </tr>
                 <tr>
@@ -188,8 +206,8 @@ const handler = async (req: Request): Promise<Response> => {
               <!-- Estimated Cost -->
               <div style="background-color: #0f172a; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
                 <p style="color: #94a3b8; margin: 0; font-size: 14px;">Estimated Monthly Cost</p>
-                <p style="color: #ffffff; margin: 8px 0 0 0; font-size: 36px; font-weight: 700;">${formatCurrency(totalMonthly)}</p>
-                <p style="color: #64748b; margin: 8px 0 0 0; font-size: 12px;">Based on ${formatCurrency(estimatedAnnualRevenue)} annual revenue</p>
+                <p style="color: #ffffff; margin: 8px 0 0 0; font-size: 36px; font-weight: 700;">${formatCurrency(displayTotalMonthly)}</p>
+                <p style="color: #64748b; margin: 8px 0 0 0; font-size: 12px;">Based on ${formatCurrency(displayAnnualRevenue)} annual revenue</p>
               </div>
               
               ${notes ? `
@@ -319,7 +337,7 @@ const handler = async (req: Request): Promise<Response> => {
                   },
                   {
                     type: "mrkdwn",
-                    text: `*Monthly Cost:*\n${formatCurrency(totalMonthly)}`,
+                    text: `*Monthly Cost:*\n${formatCurrency(displayTotalMonthly)}`,
                   },
                 ],
               },
