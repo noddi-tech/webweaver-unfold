@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 type HeaderColorMode = 'light' | 'dark'; // light = white text, dark = dark text
 
@@ -6,22 +6,22 @@ export function useHeaderColorMode(): HeaderColorMode {
   const [colorMode, setColorMode] = useState<HeaderColorMode>('dark');
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastModeRef = useRef<HeaderColorMode>('dark');
-  const debounceRef = useRef<number | null>(null);
-
-  // Debounced setter to prevent rapid changes during fast scrolling
-  const debouncedSetMode = useCallback((mode: HeaderColorMode) => {
-    if (debounceRef.current) {
-      cancelAnimationFrame(debounceRef.current);
-    }
-    debounceRef.current = requestAnimationFrame(() => {
-      if (lastModeRef.current !== mode) {
-        lastModeRef.current = mode;
-        setColorMode(mode);
-      }
-    });
-  }, []);
+  const debounceRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
 
   useEffect(() => {
+    // Debounced setter to prevent rapid changes during fast scrolling
+    const debouncedSetMode = (mode: HeaderColorMode) => {
+      if (debounceRef.current) {
+        cancelAnimationFrame(debounceRef.current);
+      }
+      debounceRef.current = requestAnimationFrame(() => {
+        if (lastModeRef.current !== mode) {
+          lastModeRef.current = mode;
+          setColorMode(mode);
+        }
+      });
+    };
+
     // Direct scroll-based detection for immediate feedback
     const detectColorMode = () => {
       const sections = document.querySelectorAll('[data-header-color]');
@@ -113,7 +113,7 @@ export function useHeaderColorMode(): HeaderColorMode {
       mutationObserver.disconnect();
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [debouncedSetMode]);
+  }, []);
 
   return colorMode;
 }
