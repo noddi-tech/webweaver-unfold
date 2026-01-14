@@ -31,7 +31,7 @@ export default function FunctionsHero() {
   }, []);
   
   return (
-    <section className="pt-20 sm:pt-24 lg:pt-32 pb-12 md:pb-16 lg:pb-section">
+    <section className="pt-20 sm:pt-24 lg:pt-32 pb-12 md:pb-16 lg:pb-section" data-header-color="dark">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         {/* Hero Text Content */}
         <div className="text-center max-w-4xl mx-auto">

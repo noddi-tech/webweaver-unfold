@@ -181,7 +181,7 @@ const Solutions = () => {
       <Header />
       
       {/* Hero Section - responsive padding for header clearance */}
-      <section className="pt-20 sm:pt-24 lg:pt-32 pb-12 px-6">
+      <section className="pt-20 sm:pt-24 lg:pt-32 pb-12 px-6" data-header-color="dark">
         <div className="container mx-auto max-w-4xl text-center">
           <EditableTranslation
             translationKey="solutions.page.title"
@@ -207,7 +207,7 @@ const Solutions = () => {
       </section>
 
       {/* Solutions Grid */}
-      <section className="py-12 px-6 pb-32">
+      <section className="py-12 px-6 pb-32" data-header-color="dark">
         <div className="container mx-auto max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {solutions.map((solution) => {

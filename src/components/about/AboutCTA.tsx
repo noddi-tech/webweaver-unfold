@@ -9,7 +9,7 @@ export function AboutCTA() {
   const { ref, isVisible } = useScrollAnimation();
 
   return (
-    <section className="py-20 md:py-28 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+    <section className="py-20 md:py-28 bg-gradient-to-br from-primary/5 via-background to-accent/5" data-header-color="dark">
       <div className="max-w-4xl mx-auto px-4 text-center">
         <motion.div
           ref={ref as React.RefObject<HTMLDivElement>}

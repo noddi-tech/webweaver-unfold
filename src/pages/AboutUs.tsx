@@ -95,7 +95,7 @@ const AboutUs = () => {
         
         {/* Team Section */}
         {employees.length > 0 && (
-          <section id="team" className="py-20 md:py-28 bg-muted/30">
+          <section id="team" className="py-20 md:py-28 bg-muted/30" data-header-color="dark">
             <div className="max-w-6xl mx-auto px-4">
               <div className="text-center mb-12">
                 <EditableTranslation translationKey="about.team.title" fallbackText="Our Team">

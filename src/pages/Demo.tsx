@@ -153,7 +153,7 @@ const Demo = () => {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="pt-32 pb-20 px-6">
+      <main className="pt-32 pb-20 px-6" data-header-color="dark">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             {(() => {
