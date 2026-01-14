@@ -187,8 +187,8 @@ const Pricing = () => {
             
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {/* Launch Card */}
-              <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors">
-                <CardContent className="pt-8 pb-8">
+              <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-colors flex flex-col">
+                <CardContent className="pt-8 pb-8 flex flex-col flex-grow">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 rounded-lg bg-primary/10">
                       <Rocket className="w-6 h-6 text-primary" />
@@ -203,7 +203,7 @@ const Pricing = () => {
                     Perfect for single-location businesses ready to modernize their operations.
                   </p>
                   
-                  <ul className="space-y-3 mb-8">
+                  <ul className="space-y-3 mb-8 flex-grow">
                     {['Single location setup', 'Full platform access', 'Standard support', 'Basic analytics'].map((feature, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm">
                         <Check className="w-4 h-4 text-primary flex-shrink-0" />
@@ -212,7 +212,7 @@ const Pricing = () => {
                     ))}
                   </ul>
                   
-                  <div className="p-4 rounded-lg bg-muted/50 text-center">
+                  <div className="p-4 rounded-lg bg-muted/50 text-center mt-auto">
                     <div className="flex items-baseline justify-center gap-1 mb-1">
                       <span className="text-2xl font-bold">{formatAmount(launch.fixedMonthly)}</span>
                       <span className="text-muted-foreground text-sm">/month</span>
@@ -225,12 +225,12 @@ const Pricing = () => {
               </Card>
               
               {/* Scale Card */}
-              <Card className="relative overflow-hidden border-2 border-primary shadow-lg">
+              <Card className="relative overflow-hidden border-2 border-primary shadow-lg flex flex-col">
                 <Badge className="absolute -top-[2px] -right-[2px] rounded-none rounded-bl-lg rounded-tr-lg bg-primary text-primary-foreground">
                   Most Popular
                 </Badge>
                 
-                <CardContent className="pt-8 pb-8">
+                <CardContent className="pt-8 pb-8 flex flex-col flex-grow">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 rounded-lg bg-primary/10">
                       <TrendingUp className="w-6 h-6 text-primary" />
@@ -245,7 +245,7 @@ const Pricing = () => {
                     Built for multi-location businesses ready to scale operations across sites.
                   </p>
                   
-                  <ul className="space-y-3 mb-8">
+                  <ul className="space-y-3 mb-8 flex-grow">
                     {['Unlimited locations', 'Priority support', 'Advanced analytics', 'API access', 'Custom integrations'].map((feature, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm">
                         <Check className="w-4 h-4 text-primary flex-shrink-0" />
@@ -254,7 +254,7 @@ const Pricing = () => {
                     ))}
                   </ul>
                   
-                  <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 text-center">
+                  <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 text-center mt-auto">
                     <div className="flex items-baseline justify-center gap-1 mb-1">
                       <span className="text-2xl font-bold">{formatAmount(scale.fixedMonthly)}</span>
                       <span className="text-muted-foreground text-sm">/month</span>
