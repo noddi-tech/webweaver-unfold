@@ -37,11 +37,9 @@ export function ScaleTierCard({ config, tiers, onSelect, isSelected, showDetaile
   return (
     <Card className={`relative overflow-hidden transition-all duration-300 border-2 border-primary ${isSelected ? 'ring-2 ring-primary shadow-lg shadow-primary/20' : 'hover:shadow-md hover:border-primary/80'}`}>
       {/* Popular badge */}
-      <div className="absolute top-0 right-0">
-        <Badge className="rounded-none rounded-bl-lg bg-primary text-primary-foreground">
-          Most Popular
-        </Badge>
-      </div>
+      <Badge className="absolute top-0 right-0 rounded-none rounded-bl-lg rounded-tr-lg bg-primary text-primary-foreground">
+        Most Popular
+      </Badge>
       
       <CardHeader className="pb-4">
         <div className="flex items-center gap-3">
