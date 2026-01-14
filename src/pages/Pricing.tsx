@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { NoHiddenCosts } from "@/components/pricing/NoHiddenCosts";
 import { PricingFAQ } from "@/components/pricing/PricingFAQ";
 import { usePricingConfig } from "@/hooks/usePricingConfig";
 import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
 import { useBookingLink } from "@/hooks/useSalesContacts";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Check, Rocket, TrendingUp, Calendar, ArrowRight, Sparkles, Building2, Shield } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 const Pricing = () => {
   const { launch, scale, isLoading } = usePricingConfig();
   const { url: bookingUrl, label: bookingLabel } = useBookingLink();
+  const { formatAmount } = useCurrency();
   
   // Fetch CMS content for pricing page
   const { textContent, loading: contentLoading } = useTextContent('pricing');
@@ -206,8 +207,12 @@ const Pricing = () => {
                   </ul>
                   
                   <div className="p-4 rounded-lg bg-muted/50 text-center">
+                    <div className="flex items-baseline justify-center gap-1 mb-1">
+                      <span className="text-2xl font-bold">{formatAmount(launch.fixedMonthly)}</span>
+                      <span className="text-muted-foreground text-sm">/month</span>
+                    </div>
                     <p className="text-sm text-muted-foreground">
-                      Fixed monthly + small revenue share
+                      +{(launch.revenuePercentage * 100).toFixed(0)}% of platform revenue
                     </p>
                   </div>
                 </CardContent>
@@ -215,11 +220,9 @@ const Pricing = () => {
               
               {/* Scale Card */}
               <Card className="relative overflow-hidden border-2 border-primary shadow-lg">
-                <div className="absolute top-0 right-0">
-                  <Badge className="rounded-none rounded-bl-lg bg-primary text-primary-foreground">
-                    Most Popular
-                  </Badge>
-                </div>
+                <Badge className="absolute -top-[2px] -right-[2px] rounded-none rounded-bl-lg rounded-tr-lg bg-primary text-primary-foreground">
+                  Most Popular
+                </Badge>
                 
                 <CardContent className="pt-8 pb-8">
                   <div className="flex items-center gap-3 mb-6">
@@ -246,6 +249,10 @@ const Pricing = () => {
                   </ul>
                   
                   <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 text-center">
+                    <div className="flex items-baseline justify-center gap-1 mb-1">
+                      <span className="text-2xl font-bold">{formatAmount(scale.fixedMonthly)}</span>
+                      <span className="text-muted-foreground text-sm">/month</span>
+                    </div>
                     <p className="text-sm font-medium text-primary">
                       Volume-based rates — better value as you grow
                     </p>
@@ -256,12 +263,6 @@ const Pricing = () => {
           </div>
         </section>
 
-        {/* No Hidden Costs Banner */}
-        <section className="py-20 animate-fade-in" style={{ animationDelay: '175ms' }}>
-          <div className="container max-w-container px-4 sm:px-6 lg:px-8">
-            <NoHiddenCosts textContent={textContent} />
-          </div>
-        </section>
 
         {/* FAQ Section */}
         <section className="py-16 bg-muted/30 animate-fade-in" style={{ animationDelay: '200ms' }}>
