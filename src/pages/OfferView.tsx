@@ -387,7 +387,7 @@ const OfferView = () => {
             </Button>
             <div className="grid grid-cols-2 gap-4">
               <Button size="lg" variant="outline" asChild>
-                <a href={salesContacts?.bookingUrl || "https://calendly.com/navio/demo"} target="_blank" rel="noopener noreferrer">
+                <a href={salesContacts?.bookingUrl} target="_blank" rel="noopener noreferrer">
                   <Calendar className="mr-2 h-4 w-4" />
                   Book møte
                 </a>

@@ -80,7 +80,7 @@ const Admin = () => {
       return { main: "career", career: sectionParam };
     }
     // Sales section tabs
-    const salesTabs = ["offers", "create-offer", "calculator", "pricing-config", "leads"];
+    const salesTabs = ["offers", "create-offer", "calculator", "pricing-config", "leads", "contacts"];
     if (sectionParam && salesTabs.includes(sectionParam)) {
       return { main: "sales", sales: sectionParam };
     }
