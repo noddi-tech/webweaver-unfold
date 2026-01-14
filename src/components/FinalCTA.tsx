@@ -187,7 +187,7 @@ export default function FinalCTA() {
   };
 
   return (
-    <section className="py-12 md:py-16 lg:py-section">
+    <section className="py-12 md:py-16 lg:py-section" data-header-color="light">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8">
         <div 
           className="relative overflow-hidden rounded-2xl p-12 md:p-16 text-center"
