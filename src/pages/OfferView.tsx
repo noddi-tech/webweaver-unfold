@@ -114,13 +114,29 @@ const OfferView = () => {
     },
   });
 
-  // Format currency
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat("nb-NO", {
+  // Currency locale mapping
+  const CURRENCY_LOCALES: Record<string, string> = {
+    EUR: 'de-DE',
+    NOK: 'nb-NO',
+    SEK: 'sv-SE',
+    USD: 'en-US',
+    GBP: 'en-GB',
+  };
+
+  // Get currency info from offer - values in DB are stored in EUR base
+  const offerCurrency = offer?.currency || 'EUR';
+  const offerConversionRate = offer?.conversion_rate || 1;
+
+  // Format currency using the offer's stored currency
+  const formatCurrency = (amountEUR: number) => {
+    const displayAmount = amountEUR * offerConversionRate;
+    const locale = CURRENCY_LOCALES[offerCurrency] || 'en-US';
+    return new Intl.NumberFormat(locale, {
       style: "currency",
-      currency: "NOK",
+      currency: offerCurrency,
       maximumFractionDigits: 0,
-    }).format(amount);
+    }).format(displayAmount);
+  };
 
   if (isLoading) {
     return (
@@ -163,10 +179,13 @@ const OfferView = () => {
   const isExpired = offer.expires_at && new Date(offer.expires_at) < new Date();
   const isAccepted = !!offer.accepted_at;
 
-  // Calculate estimated monthly cost
+  // Calculate estimated monthly cost (all values in DB are EUR base)
   const monthlyRevenue = (offer.annual_revenue || 0) / 12;
   const revenueCost = monthlyRevenue * ((offer.revenue_percentage || 0) / 100);
-  const totalMonthly = (offer.fixed_monthly || 0) + revenueCost;
+  const totalMonthlyBeforeDiscount = (offer.fixed_monthly || 0) + revenueCost;
+  
+  // Use stored discounted total if available, otherwise calculate
+  const totalMonthly = offer.total_monthly_estimate || totalMonthlyBeforeDiscount;
   const effectiveRate = monthlyRevenue > 0 ? ((totalMonthly / monthlyRevenue) * 100).toFixed(2) : "0";
 
   return (
