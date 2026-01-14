@@ -82,33 +82,36 @@ const handler = async (req: Request): Promise<Response> => {
     const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const data: OfferEmailRequest = await req.json();
-    
-    const {
-      offerId,
-      customerEmail,
-      customerName,
-      customerCompany,
-      tier,
-      fixedMonthly,
-      revenuePercentage,
-      discountPercentage,
-      estimatedAnnualRevenue,
-      locations,
-      validUntil,
-      notes,
-      currency = 'EUR',
-      conversionRate = 1
-    } = data;
+    const requestData: OfferEmailRequest = await req.json();
+    const { offerId } = requestData;
 
-    // Get offer token for the view tracking link
-    const { data: offerData } = await supabase
+    // Fetch the FULL offer from database - this is the single source of truth
+    const { data: offer, error: offerError } = await supabase
       .from("pricing_offers")
-      .select("offer_token")
+      .select("*")
       .eq("id", offerId)
       .single();
 
-    const offerToken = offerData?.offer_token;
+    if (offerError || !offer) {
+      throw new Error(`Offer not found: ${offerId}`);
+    }
+
+    // Use DB values as authoritative source
+    const customerEmail = offer.customer_email;
+    const customerName = offer.customer_name;
+    const customerCompany = offer.customer_company;
+    const tier = offer.tier;
+    const fixedMonthly = offer.fixed_monthly || 0;
+    const revenuePercentage = offer.revenue_percentage || 0;
+    const discountPercentage = offer.discount_percentage || 0;
+    const estimatedAnnualRevenue = offer.annual_revenue || 0;
+    const locations = offer.locations || 1;
+    const validUntil = offer.expires_at;
+    const notes = offer.notes;
+    const currency = offer.currency || 'EUR';
+    const conversionRate = offer.conversion_rate || 1;
+    const offerToken = offer.offer_token;
+
     const offerViewUrl = offerToken 
       ? `https://naviosolutions.com/offer/${offerToken}`
       : "https://calendly.com/navio/demo";
@@ -120,8 +123,15 @@ const handler = async (req: Request): Promise<Response> => {
     // Calculate costs (in display currency)
     const displayMonthlyRevenue = displayAnnualRevenue / 12;
     const displayRevenueCost = displayMonthlyRevenue * (revenuePercentage / 100);
-    const displayTotalMonthly = displayFixedMonthly + displayRevenueCost;
-    const effectiveRate = ((displayTotalMonthly / displayMonthlyRevenue) * 100).toFixed(2);
+    
+    // Use stored discounted total if available, otherwise calculate
+    const displayTotalMonthly = offer.total_monthly_estimate 
+      ? offer.total_monthly_estimate * conversionRate 
+      : displayFixedMonthly + displayRevenueCost;
+    
+    const effectiveRate = displayMonthlyRevenue > 0 
+      ? ((displayTotalMonthly / displayMonthlyRevenue) * 100).toFixed(2) 
+      : "0";
 
     // Format currency with proper locale
     const locale = CURRENCY_LOCALES[currency] || 'en-US';
@@ -129,11 +139,13 @@ const handler = async (req: Request): Promise<Response> => {
       new Intl.NumberFormat(locale, { style: 'currency', currency: currency, maximumFractionDigits: 0 }).format(amount);
 
     const tierLabel = tier === 'launch' ? 'Launch' : 'Scale';
-    const formattedValidUntil = new Date(validUntil).toLocaleDateString('nb-NO', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+    const formattedValidUntil = validUntil 
+      ? new Date(validUntil).toLocaleDateString('nb-NO', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        })
+      : 'Videre beskjed';
 
     const emailHtml = `
 <!DOCTYPE html>
