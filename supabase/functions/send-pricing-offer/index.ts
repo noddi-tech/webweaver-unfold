@@ -239,27 +239,105 @@ const handler = async (req: Request): Promise<Response> => {
     // Get verified domain
     const fromAddress = await getFromAddress(resendApiKey);
 
-    // Send email
+    // Send email with reply-to for easy customer response
     const emailResponse = await resend.emails.send({
       from: fromAddress,
       to: [customerEmail],
+      reply_to: "sales@info.naviosolutions.com",
       subject: `Your Pricing Proposal from Navio - ${tierLabel} Plan`,
       html: emailHtml,
     });
 
     console.log("Offer email sent successfully:", emailResponse);
 
+    const resendId = emailResponse.data?.id;
+
+    // Log the email to email_logs
+    await supabase.from("email_logs").insert({
+      email_type: "pricing_offer",
+      related_id: offerId,
+      to_email: customerEmail,
+      to_name: customerName,
+      from_address: fromAddress,
+      subject: `Your Pricing Proposal from Navio - ${tierLabel} Plan`,
+      resend_id: resendId,
+      status: "sent",
+      metadata: {
+        tier,
+        fixed_monthly: fixedMonthly,
+        revenue_percentage: revenuePercentage,
+        discount_percentage: discountPercentage,
+        company: customerCompany,
+      },
+    });
+
     // Update offer status in database
     const { error: updateError } = await supabase
       .from('pricing_offers')
       .update({ 
         status: 'sent',
-        sent_at: new Date().toISOString()
+        sent_at: new Date().toISOString(),
+        resend_id: resendId,
       })
       .eq('id', offerId);
 
     if (updateError) {
       console.error("Error updating offer status:", updateError);
+    }
+
+    // Send Slack notification
+    const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
+    if (slackWebhookUrl) {
+      try {
+        await fetch(slackWebhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: `📧 Pricing offer sent to ${customerCompany}`,
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `📧 *Pricing offer sent* to *${customerCompany}*`,
+                },
+              },
+              {
+                type: "section",
+                fields: [
+                  {
+                    type: "mrkdwn",
+                    text: `*Contact:*\n${customerName}`,
+                  },
+                  {
+                    type: "mrkdwn",
+                    text: `*Email:*\n${customerEmail}`,
+                  },
+                  {
+                    type: "mrkdwn",
+                    text: `*Plan:*\n${tierLabel}`,
+                  },
+                  {
+                    type: "mrkdwn",
+                    text: `*Monthly Cost:*\n${formatCurrency(totalMonthly)}`,
+                  },
+                ],
+              },
+              {
+                type: "context",
+                elements: [
+                  {
+                    type: "mrkdwn",
+                    text: `Valid until: ${formattedValidUntil}`,
+                  },
+                ],
+              },
+            ],
+          }),
+        });
+      } catch (slackError) {
+        console.error("Error sending Slack notification:", slackError);
+      }
     }
 
     return new Response(JSON.stringify({ success: true, emailResponse }), {

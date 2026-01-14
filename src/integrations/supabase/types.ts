@@ -769,6 +769,69 @@ export type Database = {
         }
         Relationships: []
       }
+      email_logs: {
+        Row: {
+          bounced_at: string | null
+          clicked_at: string | null
+          created_at: string | null
+          delivered_at: string | null
+          email_type: string
+          error_message: string | null
+          from_address: string
+          id: string
+          metadata: Json | null
+          opened_at: string | null
+          related_id: string | null
+          resend_id: string | null
+          sent_at: string | null
+          status: string | null
+          subject: string
+          to_email: string
+          to_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bounced_at?: string | null
+          clicked_at?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          email_type: string
+          error_message?: string | null
+          from_address: string
+          id?: string
+          metadata?: Json | null
+          opened_at?: string | null
+          related_id?: string | null
+          resend_id?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          to_email: string
+          to_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bounced_at?: string | null
+          clicked_at?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          email_type?: string
+          error_message?: string | null
+          from_address?: string
+          id?: string
+          metadata?: Json | null
+          opened_at?: string | null
+          related_id?: string | null
+          resend_id?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          to_email?: string
+          to_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
           body_html: string
@@ -2315,6 +2378,7 @@ export type Database = {
       }
       pricing_offers: {
         Row: {
+          accepted_at: string | null
           annual_revenue: number | null
           created_at: string
           created_by: string | null
@@ -2329,11 +2393,13 @@ export type Database = {
           fixed_monthly: number
           id: string
           internal_notes: string | null
+          last_question_at: string | null
           lead_id: string | null
           locations: number | null
           notes: string | null
           offer_token: string | null
           per_location_cost: number | null
+          resend_id: string | null
           revenue_percentage: number
           sent_at: string | null
           status: string
@@ -2344,6 +2410,7 @@ export type Database = {
           viewed_at: string | null
         }
         Insert: {
+          accepted_at?: string | null
           annual_revenue?: number | null
           created_at?: string
           created_by?: string | null
@@ -2358,11 +2425,13 @@ export type Database = {
           fixed_monthly: number
           id?: string
           internal_notes?: string | null
+          last_question_at?: string | null
           lead_id?: string | null
           locations?: number | null
           notes?: string | null
           offer_token?: string | null
           per_location_cost?: number | null
+          resend_id?: string | null
           revenue_percentage: number
           sent_at?: string | null
           status?: string
@@ -2373,6 +2442,7 @@ export type Database = {
           viewed_at?: string | null
         }
         Update: {
+          accepted_at?: string | null
           annual_revenue?: number | null
           created_at?: string
           created_by?: string | null
@@ -2387,11 +2457,13 @@ export type Database = {
           fixed_monthly?: number
           id?: string
           internal_notes?: string | null
+          last_question_at?: string | null
           lead_id?: string | null
           locations?: number | null
           notes?: string | null
           offer_token?: string | null
           per_location_cost?: number | null
+          resend_id?: string | null
           revenue_percentage?: number
           sent_at?: string | null
           status?: string
