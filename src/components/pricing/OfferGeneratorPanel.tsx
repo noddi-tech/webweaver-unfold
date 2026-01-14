@@ -161,7 +161,7 @@ export function OfferGeneratorPanel({
             company_name: companyName,
             contact_name: customerName,
             email: customerEmail,
-            status: 'proposal_sent',
+            status: 'offer_sent',
             estimated_revenue: annualRevenue,
             estimated_locations: locations,
             source: 'pricing_offer',
