@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -17,10 +18,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2 } from "lucide-react";
+import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { nb } from "date-fns/locale";
 import { toast } from "sonner";
+import { CURRENCY_RATES, CURRENCY_SYMBOLS } from "@/config/newPricing";
+
+// Currency locale mapping
+const CURRENCY_LOCALES: Record<string, string> = {
+  EUR: 'de-DE',
+  NOK: 'nb-NO',
+  SEK: 'sv-SE',
+  USD: 'en-US',
+  GBP: 'en-GB',
+};
 
 const OfferView = () => {
   const { token } = useParams<{ token: string }>();
@@ -28,6 +39,9 @@ const OfferView = () => {
   const [showAcceptDialog, setShowAcceptDialog] = useState(false);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [questionForm, setQuestionForm] = useState({ name: "", email: "", question: "" });
+  
+  // Display currency state - defaults to offer's currency
+  const [displayCurrency, setDisplayCurrency] = useState<string | null>(null);
 
   // Fetch offer by token
   const { data: offer, isLoading, error, refetch } = useQuery({
@@ -44,6 +58,13 @@ const OfferView = () => {
     },
     enabled: !!token,
   });
+
+  // Set display currency to offer's currency when offer loads
+  useEffect(() => {
+    if (offer && !displayCurrency) {
+      setDisplayCurrency(offer.currency || 'EUR');
+    }
+  }, [offer, displayCurrency]);
 
   // Track view on mount (once)
   useEffect(() => {
@@ -114,26 +135,19 @@ const OfferView = () => {
     },
   });
 
-  // Currency locale mapping
-  const CURRENCY_LOCALES: Record<string, string> = {
-    EUR: 'de-DE',
-    NOK: 'nb-NO',
-    SEK: 'sv-SE',
-    USD: 'en-US',
-    GBP: 'en-GB',
-  };
+  // Get the current display currency info
+  const currentDisplayCurrency = displayCurrency || offer?.currency || 'EUR';
+  const displayConversionRate = CURRENCY_RATES[currentDisplayCurrency] || 1;
+  const displaySymbol = CURRENCY_SYMBOLS[currentDisplayCurrency] || '€';
 
-  // Get currency info from offer - values in DB are stored in EUR base
-  const offerCurrency = offer?.currency || 'EUR';
-  const offerConversionRate = offer?.conversion_rate || 1;
-
-  // Format currency using the offer's stored currency
+  // Format currency using the selected display currency
+  // DB values are stored in EUR base, so we convert from EUR to display currency
   const formatCurrency = (amountEUR: number) => {
-    const displayAmount = amountEUR * offerConversionRate;
-    const locale = CURRENCY_LOCALES[offerCurrency] || 'en-US';
+    const displayAmount = amountEUR * displayConversionRate;
+    const locale = CURRENCY_LOCALES[currentDisplayCurrency] || 'en-US';
     return new Intl.NumberFormat(locale, {
       style: "currency",
-      currency: offerCurrency,
+      currency: currentDisplayCurrency,
       maximumFractionDigits: 0,
     }).format(displayAmount);
   };
@@ -199,6 +213,33 @@ const OfferView = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-3xl">
+        {/* Currency Switcher */}
+        <div className="mb-6 flex justify-end">
+          <div className="flex items-center gap-2">
+            <Globe className="h-4 w-4 text-muted-foreground" />
+            <Select value={currentDisplayCurrency} onValueChange={setDisplayCurrency}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(CURRENCY_RATES).map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {CURRENCY_SYMBOLS[code]} {code}
+                    {code === offer.currency && ' ✓'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Show note if viewing in different currency */}
+        {currentDisplayCurrency !== offer.currency && (
+          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg text-center text-sm text-blue-700 dark:text-blue-300">
+            Viser beløp i {currentDisplayCurrency}. Tilbudet ble opprettet i {offer.currency}.
+          </div>
+        )}
+
         {/* Status Badges */}
         {isAccepted ? (
           <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-center">
@@ -453,9 +494,9 @@ const OfferView = () => {
             <Button variant="outline" onClick={() => setShowQuestionForm(false)}>
               Avbryt
             </Button>
-            <Button 
+            <Button
               onClick={() => questionMutation.mutate()}
-              disabled={questionMutation.isPending || !questionForm.question.trim()}
+              disabled={questionMutation.isPending || !questionForm.question}
             >
               {questionMutation.isPending ? (
                 <>
@@ -463,10 +504,7 @@ const OfferView = () => {
                   Sender...
                 </>
               ) : (
-                <>
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Send spørsmål
-                </>
+                'Send spørsmål'
               )}
             </Button>
           </DialogFooter>

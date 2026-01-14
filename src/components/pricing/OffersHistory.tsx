@@ -3,18 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { nb } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { OfferEditModal } from './OfferEditModal';
 
 const statusConfig = {
   draft: { 
@@ -126,6 +116,7 @@ interface OfferData {
   revenue_percentage: number | null;
   total_monthly_estimate: number | null;
   total_yearly_estimate: number | null;
+  locations: number | null;
   created_at: string;
   sent_at: string | null;
   viewed_at: string | null;
@@ -135,14 +126,6 @@ export function OffersHistory() {
   const queryClient = useQueryClient();
   const [editingOffer, setEditingOffer] = useState<OfferData | null>(null);
   const [deleteOffer, setDeleteOffer] = useState<OfferData | null>(null);
-  const [editForm, setEditForm] = useState({
-    customer_company: '',
-    customer_name: '',
-    customer_email: '',
-    notes: '',
-    expires_at: '',
-    discount_percentage: 0,
-  });
 
   const { data: offers, isLoading } = useQuery({
     queryKey: ['pricing-offers'],
@@ -155,40 +138,6 @@ export function OffersHistory() {
       
       if (error) throw error;
       return data as OfferData[];
-    }
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: async (updates: Partial<OfferData> & { id: string }) => {
-      const { id, ...updateData } = updates;
-      
-      // If discount changed, recalculate totals
-      if (updateData.discount_percentage !== undefined && editingOffer) {
-        const monthlyRevenue = (editingOffer.annual_revenue || 0) / 12;
-        const revenueCost = monthlyRevenue * ((editingOffer.revenue_percentage || 0) / 100);
-        const totalMonthlyBeforeDiscount = (editingOffer.fixed_monthly || 0) + revenueCost;
-        const totalYearlyBeforeDiscount = totalMonthlyBeforeDiscount * 12;
-        const totalYearlyAfterDiscount = totalYearlyBeforeDiscount * (1 - (updateData.discount_percentage || 0) / 100);
-        const totalMonthlyAfterDiscount = totalYearlyAfterDiscount / 12;
-        
-        updateData.total_monthly_estimate = totalMonthlyAfterDiscount;
-        updateData.total_yearly_estimate = totalYearlyAfterDiscount;
-      }
-
-      const { error } = await supabase
-        .from('pricing_offers')
-        .update(updateData)
-        .eq('id', id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pricing-offers'] });
-      setEditingOffer(null);
-      toast.success('Offer updated successfully');
-    },
-    onError: (error: Error) => {
-      toast.error('Failed to update offer: ' + error.message);
     }
   });
 
@@ -229,14 +178,6 @@ export function OffersHistory() {
 
   const handleEditClick = (offer: OfferData, e: React.MouseEvent) => {
     e.stopPropagation();
-    setEditForm({
-      customer_company: offer.customer_company || '',
-      customer_name: offer.customer_name || '',
-      customer_email: offer.customer_email || '',
-      notes: offer.notes || '',
-      expires_at: offer.expires_at ? offer.expires_at.split('T')[0] : '',
-      discount_percentage: offer.discount_percentage || 0,
-    });
     setEditingOffer(offer);
   };
 
@@ -245,26 +186,14 @@ export function OffersHistory() {
     setDeleteOffer(offer);
   };
 
-  const handleSaveEdit = () => {
-    if (!editingOffer) return;
-    
-    updateMutation.mutate({
-      id: editingOffer.id,
-      customer_company: editForm.customer_company,
-      customer_name: editForm.customer_name,
-      customer_email: editForm.customer_email,
-      notes: editForm.notes,
-      expires_at: editForm.expires_at ? new Date(editForm.expires_at).toISOString() : null,
-      discount_percentage: editForm.discount_percentage,
-    });
-  };
-
   const canEdit = (status: string | null) => {
-    return !status || ['draft', 'sent', 'viewed'].includes(status);
+    // Allow editing for all statuses except accepted
+    return !status || !['accepted'].includes(status);
   };
 
   const canDelete = (status: string | null) => {
-    return !status || status === 'draft';
+    // Allow deleting draft and sent offers (admin tool flexibility)
+    return !status || ['draft', 'sent'].includes(status);
   };
 
   if (isLoading) {
@@ -324,11 +253,15 @@ export function OffersHistory() {
               {offers.map((offer) => {
                 const status = statusConfig[offer.status as keyof typeof statusConfig] || statusConfig.draft;
                 const StatusIcon = status.icon;
-                const monthlyRevenue = (offer.annual_revenue || 0) / 12;
-                const revenueCost = monthlyRevenue * ((offer.revenue_percentage || 0) / 100);
-                const totalMonthly = (offer.fixed_monthly || 0) + revenueCost;
                 const offerCurrency = offer.currency || 'EUR';
                 const offerConversionRate = offer.conversion_rate || 1;
+                
+                // Use stored total_monthly_estimate if available (already includes discount)
+                const displayMonthly = offer.total_monthly_estimate || (() => {
+                  const monthlyRevenue = (offer.annual_revenue || 0) / 12;
+                  const revenueCost = monthlyRevenue * ((offer.revenue_percentage || 0) / 100);
+                  return (offer.fixed_monthly || 0) + revenueCost;
+                })();
 
                 return (
                   <TableRow 
@@ -354,7 +287,7 @@ export function OffersHistory() {
                     </TableCell>
                     <TableCell className="font-medium">
                       {formatOfferCurrency(
-                        offer.total_monthly_estimate || totalMonthly, 
+                        displayMonthly, 
                         offerCurrency, 
                         offerConversionRate
                       )}
@@ -429,92 +362,11 @@ export function OffersHistory() {
         </CardContent>
       </Card>
 
-      {/* Edit Dialog */}
-      <Dialog open={!!editingOffer} onOpenChange={(open) => !open && setEditingOffer(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Offer</DialogTitle>
-            <DialogDescription>
-              Update the offer details for {editingOffer?.customer_company}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="company">Company Name</Label>
-              <Input
-                id="company"
-                value={editForm.customer_company}
-                onChange={(e) => setEditForm(prev => ({ ...prev, customer_company: e.target.value }))}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Contact Name</Label>
-                <Input
-                  id="name"
-                  value={editForm.customer_name}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, customer_name: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={editForm.customer_email}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, customer_email: e.target.value }))}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="expires">Valid Until</Label>
-                <Input
-                  id="expires"
-                  type="date"
-                  value={editForm.expires_at}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, expires_at: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="discount">Discount %</Label>
-                <Input
-                  id="discount"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={editForm.discount_percentage}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, discount_percentage: parseInt(e.target.value) || 0 }))}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                value={editForm.notes}
-                onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingOffer(null)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEdit} disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save Changes'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Edit Modal with full create-offer parity */}
+      <OfferEditModal 
+        offer={editingOffer} 
+        onClose={() => setEditingOffer(null)} 
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteOffer} onOpenChange={(open) => !open && setDeleteOffer(null)}>
@@ -522,7 +374,7 @@ export function OffersHistory() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Offer?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the draft offer for {deleteOffer?.customer_company}. 
+              This will permanently delete the offer for {deleteOffer?.customer_company}. 
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
