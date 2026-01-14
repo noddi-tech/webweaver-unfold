@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTextContent } from "@/hooks/useTextContent";
 import { HreflangTags } from "@/components/HreflangTags";
 import { useBookingLink } from "@/hooks/useSalesContacts";
-import { ChevronDown, ChevronUp, Lock, Calculator, FileText, Users } from 'lucide-react';
+import { ChevronDown, ChevronUp, Lock, Calculator, FileText, Users, Copy, Check } from 'lucide-react';
 import { CurrencySwitcher } from "@/components/pricing/CurrencySwitcher";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,6 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const PricingDetailed = () => {
   const [showAllTiers, setShowAllTiers] = useState(false);
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [copied, setCopied] = useState(false);
   const { launch, scale, scaleTiers, isLoading } = usePricingConfig();
   const { isAdmin, isEditor, loading: roleLoading } = useUserRole();
   const { url: bookingUrl, label: bookingLabel } = useBookingLink();
@@ -40,6 +41,16 @@ const PricingDetailed = () => {
   const handleCalculatorChange = useCallback((values: CalculatorValues) => {
     setCalculatorValues(values);
   }, []);
+
+  const handleCopyBookingLink = async () => {
+    try {
+      await navigator.clipboard.writeText(bookingUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy booking link:', err);
+    }
+  };
   
   // Fetch CMS content for pricing page
   const { textContent } = useTextContent('pricing');
@@ -121,10 +132,30 @@ const PricingDetailed = () => {
         <Header />
         <main>
           {/* Internal Access Banner */}
-          <div className="bg-primary text-primary-foreground py-2 text-center text-sm">
-            <div className="container flex items-center justify-center gap-2">
-              <Lock className="w-4 h-4" />
-              <span>Internal Sales Tool — Not visible to public</span>
+          <div className="bg-primary text-primary-foreground py-2 text-sm">
+            <div className="container flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4" />
+                <span>Internal Sales Tool — Not visible to public</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyBookingLink}
+                className="h-7 gap-2 text-primary-foreground hover:bg-primary-foreground/10"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Booking Link</span>
+                  </>
+                )}
+              </Button>
             </div>
           </div>
 
