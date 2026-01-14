@@ -159,9 +159,30 @@ export function OfferEditModal({ offer, onClose }: OfferEditModalProps) {
         .eq('id', offer.id);
 
       if (error) throw error;
+
+      // If offer has a linked lead, sync lead data
+      const { data: updatedOffer } = await supabase
+        .from('pricing_offers')
+        .select('lead_id')
+        .eq('id', offer.id)
+        .single();
+
+      if (updatedOffer?.lead_id) {
+        await supabase
+          .from('leads')
+          .update({
+            company_name: customerCompany,
+            contact_name: customerName,
+            email: customerEmail,
+            estimated_revenue: annualRevenueEUR,
+            estimated_locations: locations,
+          })
+          .eq('id', updatedOffer.lead_id);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pricing-offers'] });
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
       toast.success(`Offer updated in ${currency} (rate ${conversionRate})`);
       onClose();
     },
