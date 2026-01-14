@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, RotateCcw } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Loader2, RotateCcw, Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { LAUNCH_CONFIG, SCALE_CONFIG, generateScaleTiers, CURRENCY_RATES, CURRENCY_SYMBOLS } from '@/config/newPricing';
@@ -58,6 +59,7 @@ export function OfferEditModal({ offer, onClose }: OfferEditModalProps) {
   const [currency, setCurrency] = useState('EUR');
   const [selectedTierIndex, setSelectedTierIndex] = useState(0);
   const [manualTierOverride, setManualTierOverride] = useState(false);
+  const [notifyCustomer, setNotifyCustomer] = useState(true);
 
   const conversionRate = CURRENCY_RATES[currency] || 1;
   const currencySymbol = CURRENCY_SYMBOLS[currency] || '€';
@@ -179,11 +181,22 @@ export function OfferEditModal({ offer, onClose }: OfferEditModalProps) {
           })
           .eq('id', updatedOffer.lead_id);
       }
+      // Send update notification if enabled and offer was already sent
+      if (notifyCustomer && (offer.status === 'sent' || offer.status === 'viewed')) {
+        try {
+          await supabase.functions.invoke('send-offer-update', {
+            body: { offerId: offer.id }
+          });
+        } catch (notifyError) {
+          console.error('Failed to send update notification:', notifyError);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pricing-offers'] });
       queryClient.invalidateQueries({ queryKey: ['leads'] });
-      toast.success(`Offer updated in ${currency} (rate ${conversionRate})`);
+      const notified = notifyCustomer && (offer?.status === 'sent' || offer?.status === 'viewed');
+      toast.success(`Offer updated${notified ? ' - customer notified' : ''}`);
       onClose();
     },
     onError: (error: Error) => {
@@ -437,6 +450,24 @@ export function OfferEditModal({ offer, onClose }: OfferEditModalProps) {
               />
             </div>
           </div>
+
+          {/* Notification Toggle - only show for sent/viewed offers */}
+          {(offer.status === 'sent' || offer.status === 'viewed') && (
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+              <Checkbox
+                id="notify"
+                checked={notifyCustomer}
+                onCheckedChange={(checked) => setNotifyCustomer(checked === true)}
+              />
+              <div className="flex-1">
+                <Label htmlFor="notify" className="flex items-center gap-2 cursor-pointer">
+                  <Bell className="h-4 w-4" />
+                  Notify customer of changes
+                </Label>
+                <p className="text-xs text-muted-foreground">Send an email to {customerEmail} about the updated offer</p>
+              </div>
+            </div>
+          )}
         </div>
 
         <DialogFooter>
