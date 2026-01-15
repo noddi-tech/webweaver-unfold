@@ -279,11 +279,7 @@ const Header = () => {
                       {((link.type === 'static-dropdown' || link.type === 'dropdown' || link.type === 'dynamic-dropdown') && dropdownItems.length > 0) ? (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <button className={`group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium transition-colors focus:outline-none ${
-                              isLightText 
-                                ? 'text-white/90 hover:text-white hover:bg-white/10' 
-                                : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-                            }`}>
+                          <button className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium transition-colors focus:outline-none text-foreground hover:bg-accent hover:text-accent-foreground">
                               {getTranslatedNavTitle(link)}
                               <ChevronDown className="relative top-[1px] ml-1 h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                             </button>
@@ -317,11 +313,7 @@ const Header = () => {
                         <NavigationMenuLink asChild>
                           <LanguageLink 
                             to={link.url || '#'} 
-                            className={`group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-                              isLightText 
-                                ? 'text-white/90 hover:text-white hover:bg-white/10' 
-                                : 'text-foreground hover:bg-accent hover:text-accent-foreground'
-                            }`}
+                            className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50 text-foreground hover:bg-accent hover:text-accent-foreground"
                           >
                             {getTranslatedNavTitle(link)}
                           </LanguageLink>
@@ -339,7 +331,7 @@ const Header = () => {
 {headerSettings?.show_auth_buttons && (
                   <>
                     {headerSettings.show_sign_in_button && (
-                      <Button asChild variant="ghost" size="sm" className={isLightText ? 'text-white hover:bg-white/10 hover:text-white' : ''}>
+                      <Button asChild variant="ghost" size="sm">
                         <a href={headerSettings.sign_in_url || '/auth'}>
                           {t('header.sign_in', headerSettings.sign_in_text || 'Sign In')}
                         </a>
@@ -360,11 +352,7 @@ const Header = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className={`md:hidden p-2 transition-colors ${
-              isLightText 
-                ? 'text-white hover:text-white/80' 
-                : 'text-foreground hover:text-primary'
-            }`}
+            className="md:hidden p-2 transition-colors text-foreground hover:text-primary"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
