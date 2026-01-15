@@ -233,7 +233,7 @@ const Header = () => {
       data-over-dark={isLightText}
     >
       <div className="container mx-auto px-6 py-4">
-        <div className={`flex items-center justify-between transition-colors duration-300 ${isLightText ? 'text-white' : ''}`}>
+        <div className="flex items-center justify-between transition-colors duration-300">
           <HeadingTag className="m-0">
             <LanguageLink to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
               {brand.logo_variant === 'image' && brand.logo_image_url ? (
