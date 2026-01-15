@@ -317,6 +317,25 @@ All colors MUST be HSL.
     border-radius: inherit;
   }
 
+  /* Header-specific glass - enhanced visibility on all backgrounds */
+  .glass-header {
+    background: hsl(var(--card-background) / 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid hsl(var(--border) / 0.3);
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.05),
+      0 4px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Enhanced shadow when over dark sections for better separation */
+  .glass-header[data-over-dark="true"] {
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.1),
+      0 4px 16px rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid hsl(var(--border) / 0.15);
+  }
+
   /* Legacy glass utility (deprecated - use glass-card instead) */
   .glass {
     background: hsl(var(--card-background) / 0.1);
