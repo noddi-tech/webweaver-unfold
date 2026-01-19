@@ -7,7 +7,51 @@ import HowItWorks from "@/components/HowItWorks";
 import FinalCTA from "@/components/FinalCTA";
 import { HreflangTags } from "@/components/HreflangTags";
 import { ScrollingFeatureCards } from "@/components/ScrollingFeatureCards";
+import { StructuredData } from "@/components/StructuredData";
 import { supabase } from '@/integrations/supabase/client';
+
+// Organization schema for site-wide SEO
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Navio",
+  "url": "https://noddi.tech",
+  "logo": "https://noddi.tech/favicon.ico",
+  "sameAs": [
+    "https://www.linkedin.com/company/navio"
+  ],
+  "description": "Unified Booking & ERP for Auto Services",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "sales",
+    "email": "hello@noddi.tech"
+  }
+};
+
+// WebSite schema for search features
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Navio",
+  "url": "https://noddi.tech",
+  "description": "Unified Booking & ERP for Auto Services"
+};
+
+// SoftwareApplication schema
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Navio",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "description": "Unified Booking & ERP platform for auto service businesses",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "NOK",
+    "description": "Free tier available"
+  }
+};
 
 interface SocialMetaSettings {
   og_title: string;
@@ -141,6 +185,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <StructuredData data={organizationSchema} />
+      <StructuredData data={websiteSchema} />
+      <StructuredData data={softwareSchema} />
       <HreflangTags pageSlug="/" />
       <Header />
       <main>

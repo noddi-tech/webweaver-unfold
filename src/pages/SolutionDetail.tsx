@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -16,6 +16,7 @@ import { EditableBackground } from "@/components/EditableBackground";
 import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { toast } from "sonner";
+import { BreadcrumbJsonLd } from "@/components/BreadcrumbJsonLd";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -251,11 +252,18 @@ const SolutionDetail = () => {
     return IconComponent ? <IconComponent className="ml-2 h-4 w-4" /> : null;
   };
 
+  // Breadcrumb items for JSON-LD
+  const breadcrumbItems = useMemo(() => [
+    { name: 'Home', url: '/' },
+    { name: 'Solutions', url: '/solutions' },
+    { name: t(`solutions.${slugKey}.title`, solution.title) }
+  ], [slugKey, solution.title, t]);
+
   return (
     <div className="min-h-screen bg-background">
+      <BreadcrumbJsonLd items={breadcrumbItems} />
       <Header />
       
-      {/* Breadcrumb */}
       <div className="container mx-auto max-w-7xl px-6 pt-24 pb-4">
         <Breadcrumb>
           <BreadcrumbList>

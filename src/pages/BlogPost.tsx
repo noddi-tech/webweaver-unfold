@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { ArrowLeft, Calendar, Clock, User, Facebook, Linkedin, Mail } from 'lucide-react';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import TableOfContents from '@/components/blog/TableOfContents';
@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { StructuredData } from '@/components/StructuredData';
+import { BreadcrumbJsonLd } from '@/components/BreadcrumbJsonLd';
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -35,6 +37,42 @@ const BlogPost = () => {
       day: 'numeric'
     });
   };
+
+  // Article JSON-LD schema
+  const articleSchema = useMemo(() => {
+    if (!post) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": post.title,
+      "description": post.excerpt || post.meta_description || '',
+      "image": post.featured_image_url || undefined,
+      "author": post.author_name ? {
+        "@type": "Person",
+        "name": post.author_name
+      } : undefined,
+      "publisher": {
+        "@type": "Organization",
+        "name": "Navio",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://noddi.tech/favicon.ico"
+        }
+      },
+      "datePublished": post.published_at || post.created_at,
+      "dateModified": post.updated_at
+    };
+  }, [post]);
+
+  // Breadcrumb items
+  const breadcrumbItems = useMemo(() => {
+    if (!post) return [];
+    return [
+      { name: 'Home', url: '/' },
+      { name: 'Blog', url: `/${i18n.language}/blog` },
+      { name: post.title }
+    ];
+  }, [post, i18n.language]);
 
   if (isLoading) {
     return (
@@ -81,6 +119,8 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {articleSchema && <StructuredData data={articleSchema} />}
+      <BreadcrumbJsonLd items={breadcrumbItems} />
       <ReadingProgressBar contentRef={contentRef} readingTimeMinutes={post.reading_time_minutes} />
       <Header />
       

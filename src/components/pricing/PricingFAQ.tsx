@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { useFAQs } from "@/hooks/useFAQs";
 import { EditableFAQ } from "@/components/EditableFAQ";
+import { StructuredData } from "@/components/StructuredData";
 
 export function PricingFAQ() {
   const { t } = useAppTranslation();
@@ -10,6 +12,23 @@ export function PricingFAQ() {
   const refetchFAQs = () => {
     window.location.reload();
   };
+
+  // FAQPage JSON-LD schema
+  const faqSchema = useMemo(() => {
+    if (!faqs || faqs.length === 0) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    };
+  }, [faqs]);
 
   if (loading) {
     return (
@@ -26,7 +45,9 @@ export function PricingFAQ() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <>
+      {faqSchema && <StructuredData data={faqSchema} />}
+      <div className="max-w-3xl mx-auto space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground mb-2">{t('pricing_faq.title', 'Frequently Asked Questions')}</h2>
         <p className="text-sm text-muted-foreground">
@@ -56,6 +77,7 @@ export function PricingFAQ() {
           </EditableFAQ>
         ))}
       </Accordion>
-    </div>
+      </div>
+    </>
   );
 }

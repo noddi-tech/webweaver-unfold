@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useTypography } from "@/hooks/useTypography";
@@ -15,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useState } from "react";
+import { BreadcrumbJsonLd } from "@/components/BreadcrumbJsonLd";
 
 // Icon mapping for dynamic icons from database
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -72,8 +73,16 @@ export default function CustomerStory() {
     );
   }
 
+  // Breadcrumb items for JSON-LD
+  const breadcrumbItems = useMemo(() => [
+    { name: 'Home', url: '/' },
+    { name: 'Stories', url: '/stories' },
+    { name: story.company_name }
+  ], [story.company_name]);
+
   return (
     <div className="min-h-screen bg-background">
+      <BreadcrumbJsonLd items={breadcrumbItems} />
       <Header />
       
       <main>
