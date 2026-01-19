@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
@@ -10,6 +10,7 @@ import { ArrowLeft, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { JobEditModal } from "@/components/JobEditModal";
+import { BreadcrumbJsonLd } from "@/components/BreadcrumbJsonLd";
 
 // New components
 import { JobHero } from "@/components/jobs/JobHero";
@@ -174,6 +175,13 @@ const JobListing = () => {
     );
   }
 
+  // Breadcrumb items for JSON-LD
+  const breadcrumbItems = useMemo(() => [
+    { name: 'Home', url: '/' },
+    { name: 'Careers', url: `/${i18n.language}/careers` },
+    { name: job.title }
+  ], [job.title, i18n.language]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Helmet>
@@ -194,6 +202,7 @@ const JobListing = () => {
         )}
       </Helmet>
 
+      <BreadcrumbJsonLd items={breadcrumbItems} />
       <Header />
       
       <main className="container mx-auto px-6 pt-32 pb-20 max-w-5xl">
