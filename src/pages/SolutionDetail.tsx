@@ -73,6 +73,13 @@ const SolutionDetail = () => {
   // Get the translation key from slug
   const slugKey = slug ? slugToKey(slug) : '';
 
+  // Breadcrumb items for JSON-LD - must be before early returns to maintain hook order
+  const breadcrumbItems = useMemo(() => [
+    { name: 'Home', url: '/' },
+    { name: 'Solutions', url: '/solutions' },
+    { name: solution ? t(`solutions.${slugKey}.title`, solution.title) : '' }
+  ], [slugKey, solution, t]);
+
   useEffect(() => {
     const loadSolution = async () => {
       if (!slug) return;
@@ -251,13 +258,6 @@ const SolutionDetail = () => {
     const IconComponent = (icons as Record<string, any>)[name];
     return IconComponent ? <IconComponent className="ml-2 h-4 w-4" /> : null;
   };
-
-  // Breadcrumb items for JSON-LD
-  const breadcrumbItems = useMemo(() => [
-    { name: 'Home', url: '/' },
-    { name: 'Solutions', url: '/solutions' },
-    { name: t(`solutions.${slugKey}.title`, solution.title) }
-  ], [slugKey, solution.title, t]);
 
   return (
     <div className="min-h-screen bg-background">
