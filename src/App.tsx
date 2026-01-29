@@ -78,6 +78,7 @@ const App = () => {
                     <Route path="/:lang/blog/:slug" element={<LanguageSync><BlogPost /></LanguageSync>} />
                     
                     {/* CMS and special routes (no language prefix) */}
+                    <Route path="/auth" element={<Auth />} />
                     <Route path="/cms-login" element={<Auth />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/cms" element={<Admin />} />
