@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Navigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -125,8 +125,7 @@ const Admin = () => {
   }
 
   if (!authenticated) {
-    window.location.href = "/auth";
-    return null;
+    return <Navigate to="/auth" replace />;
   }
 
   // Check if user has admin role
