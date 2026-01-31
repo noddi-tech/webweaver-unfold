@@ -1980,6 +1980,13 @@ export type Database = {
             foreignKeyName: "language_settings_default_language_code_fkey"
             columns: ["default_language_code"]
             isOneToOne: false
+            referencedRelation: "live_translation_stats"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "language_settings_default_language_code_fkey"
+            columns: ["default_language_code"]
+            isOneToOne: false
             referencedRelation: "page_meta_stats"
             referencedColumns: ["code"]
           },
@@ -2002,6 +2009,13 @@ export type Database = {
             columns: ["fallback_language_code"]
             isOneToOne: false
             referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "language_settings_fallback_language_code_fkey"
+            columns: ["fallback_language_code"]
+            isOneToOne: false
+            referencedRelation: "live_translation_stats"
             referencedColumns: ["code"]
           },
           {
@@ -3249,6 +3263,13 @@ export type Database = {
             foreignKeyName: "translations_language_code_fkey"
             columns: ["language_code"]
             isOneToOne: false
+            referencedRelation: "live_translation_stats"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
             referencedRelation: "page_meta_stats"
             referencedColumns: ["code"]
           },
@@ -3562,6 +3583,13 @@ export type Database = {
             foreignKeyName: "translations_language_code_fkey"
             columns: ["language_code"]
             isOneToOne: false
+            referencedRelation: "live_translation_stats"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
             referencedRelation: "page_meta_stats"
             referencedColumns: ["code"]
           },
@@ -3588,6 +3616,25 @@ export type Database = {
           needs_review_count: number | null
           sort_order: number | null
           total_translations: number | null
+        }
+        Relationships: []
+      }
+      live_translation_stats: {
+        Row: {
+          actual_translations: number | null
+          approved_count: number | null
+          avg_quality_score: number | null
+          code: string | null
+          empty_count: number | null
+          enabled: boolean | null
+          english_key_count: number | null
+          evaluated_count: number | null
+          missing_rows: number | null
+          name: string | null
+          show_in_switcher: boolean | null
+          sort_order: number | null
+          stale_count: number | null
+          total_rows: number | null
         }
         Relationships: []
       }
