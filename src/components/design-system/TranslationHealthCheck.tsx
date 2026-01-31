@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertCircle, CheckCircle2, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
+import FixAllButton from './FixAllButton';
 
 interface HealthCheckStats {
   brokenCount: number;
@@ -514,7 +515,7 @@ export default function TranslationHealthCheck() {
         )}
 
         {hasIssues && !fixing && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {stats.orphanedCount > 0 && (
               <Alert variant="default" className="mb-4">
                 <AlertCircle className="h-4 w-4" />
@@ -525,23 +526,32 @@ export default function TranslationHealthCheck() {
                 </AlertDescription>
               </Alert>
             )}
-            <Button
-              onClick={handleFixAll}
-              disabled={fixing}
-              className="w-full"
-            >
-              <CheckCircle2 className="w-4 h-4 mr-2" />
-              Fix All Issues ({stats.brokenCount + stats.staleCount} items)
-            </Button>
-            <Button
-              onClick={handleRetranslateAll}
-              disabled={fixing}
-              variant="outline"
-              className="w-full"
-            >
-              <AlertTriangle className="w-4 h-4 mr-2" />
-              Re-translate All (Slow, ~5 min)
-            </Button>
+            
+            {/* New Pipeline Button */}
+            <FixAllButton 
+              onComplete={loadHealthStats} 
+              className="w-full" 
+              size="lg"
+            />
+            
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                onClick={handleFixAll}
+                disabled={fixing}
+                variant="outline"
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Quick Fix ({stats.brokenCount + stats.staleCount})
+              </Button>
+              <Button
+                onClick={handleRetranslateAll}
+                disabled={fixing}
+                variant="outline"
+              >
+                <AlertTriangle className="w-4 h-4 mr-2" />
+                Re-translate All
+              </Button>
+            </div>
           </div>
         )}
 

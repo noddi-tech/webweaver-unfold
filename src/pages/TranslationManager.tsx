@@ -4,6 +4,7 @@ import PageMetaManager from '@/components/design-system/PageMetaManager';
 import SitemapGenerator from '@/components/design-system/SitemapGenerator';
 import UnifiedDashboard from '@/components/design-system/UnifiedDashboard';
 import LanguageVisibilityManager from '@/components/design-system/LanguageVisibilityManager';
+import TranslationWizard from '@/components/design-system/TranslationWizard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslationStats } from '@/hooks/useTranslationStats';
 
@@ -17,14 +18,19 @@ export default function TranslationManager() {
       
       <main className="py-section">
         <div className="container max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+          <Tabs defaultValue="wizard" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="wizard">✨ Wizard</TabsTrigger>
               <TabsTrigger value="overview">📊 Overview</TabsTrigger>
               <TabsTrigger value="translations">🌍 Translations</TabsTrigger>
               <TabsTrigger value="seo">🚀 SEO & Meta</TabsTrigger>
               <TabsTrigger value="sitemap">🗺️ Sitemap</TabsTrigger>
               <TabsTrigger value="settings">⚙️ Settings</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="wizard">
+              <TranslationWizard />
+            </TabsContent>
 
             <TabsContent value="overview">
               <UnifiedDashboard />
