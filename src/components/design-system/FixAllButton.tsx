@@ -14,6 +14,7 @@ interface PipelineStep {
   description: string;
   status: 'pending' | 'running' | 'success' | 'error';
   result?: any;
+  detail?: string;
 }
 
 interface FixAllButtonProps {
@@ -33,6 +34,7 @@ export default function FixAllButton({
   const [isOpen, setIsOpen] = useState(false);
   const [running, setRunning] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [currentLanguage, setCurrentLanguage] = useState<string>('');
   const [steps, setSteps] = useState<PipelineStep[]>([
     { id: 'sync', name: 'Sync Keys', description: 'Create missing translation entries', status: 'pending' },
     { id: 'translate', name: 'Translate', description: 'Fill empty translations with AI', status: 'pending' },
@@ -40,9 +42,9 @@ export default function FixAllButton({
     { id: 'approve', name: 'Approve', description: 'Auto-approve high-quality translations', status: 'pending' },
   ]);
 
-  const updateStepStatus = (stepId: string, status: PipelineStep['status'], result?: any) => {
+  const updateStepStatus = (stepId: string, status: PipelineStep['status'], result?: any, detail?: string) => {
     setSteps(prev => prev.map(s => 
-      s.id === stepId ? { ...s, status, result } : s
+      s.id === stepId ? { ...s, status, result, detail } : s
     ));
   };
 
@@ -52,9 +54,9 @@ export default function FixAllButton({
 
     try {
       // Reset all steps
-      setSteps(prev => prev.map(s => ({ ...s, status: 'pending', result: undefined })));
+      setSteps(prev => prev.map(s => ({ ...s, status: 'pending', result: undefined, detail: undefined })));
 
-      // Step 1: Sync
+      // Step 1: Sync (fast, single call)
       setCurrentStep(1);
       updateStepStatus('sync', 'running');
       
@@ -65,29 +67,102 @@ export default function FixAllButton({
       if (syncError) throw syncError;
       updateStepStatus('sync', 'success', syncResult?.steps?.[0]);
 
-      // Step 2: Translate
+      // Step 2: Translate - process each language individually in frontend
       setCurrentStep(2);
       updateStepStatus('translate', 'running');
 
-      const { data: translateResult, error: translateError } = await supabase.functions.invoke('sync-and-translate', {
-        body: { action: 'translate' }
+      // Get all enabled non-English languages
+      const { data: languages, error: langError } = await supabase
+        .from('languages')
+        .select('code, name')
+        .eq('enabled', true)
+        .neq('code', 'en');
+
+      if (langError) throw langError;
+
+      let totalTranslated = 0;
+      const failedLanguages: string[] = [];
+
+      for (let i = 0; i < (languages?.length || 0); i++) {
+        const lang = languages![i];
+        setCurrentLanguage(`${lang.name} (${i + 1}/${languages!.length})`);
+        updateStepStatus('translate', 'running', undefined, `Translating ${lang.name}...`);
+
+        // Get empty translations for this language
+        const { data: emptyTranslations, error: fetchError } = await supabase
+          .from('translations')
+          .select('translation_key')
+          .eq('language_code', lang.code)
+          .or('translated_text.is.null,translated_text.eq.');
+
+        if (fetchError) {
+          console.error(`Error fetching empty translations for ${lang.code}:`, fetchError);
+          failedLanguages.push(lang.code);
+          continue;
+        }
+
+        const keys = emptyTranslations?.map(t => t.translation_key) || [];
+
+        if (keys.length > 0) {
+          try {
+            const { data, error: translateError } = await supabase.functions.invoke('translate-content', {
+              body: {
+                translationKeys: keys,
+                targetLanguage: lang.code,
+                sourceLanguage: 'en',
+              },
+            });
+
+            if (translateError) {
+              console.error(`Translation failed for ${lang.code}:`, translateError);
+              failedLanguages.push(lang.code);
+            } else {
+              totalTranslated += data?.translated || keys.length;
+            }
+          } catch (err) {
+            console.error(`Translation error for ${lang.code}:`, err);
+            failedLanguages.push(lang.code);
+          }
+        }
+      }
+
+      setCurrentLanguage('');
+      updateStepStatus('translate', failedLanguages.length > 0 ? 'error' : 'success', { 
+        translated: totalTranslated,
+        failed: failedLanguages 
       });
 
-      if (translateError) throw translateError;
-      updateStepStatus('translate', 'success', translateResult?.steps?.[0]);
-
-      // Step 3: Evaluate
+      // Step 3: Evaluate - process each language individually
       setCurrentStep(3);
       updateStepStatus('evaluate', 'running');
 
-      const { data: evalResult, error: evalError } = await supabase.functions.invoke('sync-and-translate', {
-        body: { action: 'evaluate', options: { batchSize: 50 } }
-      });
+      let totalEvaluated = 0;
 
-      if (evalError) throw evalError;
-      updateStepStatus('evaluate', 'success', evalResult?.steps?.[0]);
+      for (let i = 0; i < (languages?.length || 0); i++) {
+        const lang = languages![i];
+        setCurrentLanguage(`${lang.name} (${i + 1}/${languages!.length})`);
+        updateStepStatus('evaluate', 'running', undefined, `Evaluating ${lang.name}...`);
 
-      // Step 4: Approve
+        try {
+          const { data, error: evalError } = await supabase.functions.invoke('evaluate-translation-quality', {
+            body: {
+              languageCode: lang.code,
+              batchSize: 50,
+            },
+          });
+
+          if (!evalError && data?.evaluated) {
+            totalEvaluated += data.evaluated;
+          }
+        } catch (err) {
+          console.error(`Evaluation error for ${lang.code}:`, err);
+        }
+      }
+
+      setCurrentLanguage('');
+      updateStepStatus('evaluate', 'success', { evaluated: totalEvaluated });
+
+      // Step 4: Approve (single database update, fast)
       setCurrentStep(4);
       updateStepStatus('approve', 'running');
 
@@ -100,7 +175,7 @@ export default function FixAllButton({
 
       toast({
         title: '🎉 Fix All Complete!',
-        description: 'All translation issues have been resolved.',
+        description: `Translated ${totalTranslated}, evaluated ${totalEvaluated} translations.`,
       });
 
       onComplete?.();
@@ -120,6 +195,7 @@ export default function FixAllButton({
       });
     } finally {
       setRunning(false);
+      setCurrentLanguage('');
     }
   };
 
@@ -171,12 +247,15 @@ export default function FixAllButton({
                   <span>{progress}%</span>
                 </div>
                 <Progress value={progress} className="h-2" />
+                {currentLanguage && (
+                  <p className="text-sm text-muted-foreground">Processing: {currentLanguage}</p>
+                )}
               </div>
             )}
 
             {/* Steps */}
             <div className="space-y-3">
-              {steps.map((step, index) => (
+              {steps.map((step) => (
                 <div
                   key={step.id}
                   className={`p-4 rounded-lg border transition-all ${
@@ -194,7 +273,9 @@ export default function FixAllButton({
                       {getStepIcon(step)}
                       <div>
                         <p className="font-medium">{step.name}</p>
-                        <p className="text-sm text-muted-foreground">{step.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {step.detail || step.description}
+                        </p>
                       </div>
                     </div>
                     {step.result && step.status === 'success' && (
@@ -215,8 +296,8 @@ export default function FixAllButton({
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  This will process all languages and may take several minutes. 
-                  The page will update automatically when complete.
+                  This processes each language individually to avoid timeouts. 
+                  Progress updates in real-time as each language completes.
                 </AlertDescription>
               </Alert>
             )}
