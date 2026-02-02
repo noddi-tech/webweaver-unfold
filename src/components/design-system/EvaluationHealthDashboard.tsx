@@ -25,6 +25,7 @@ export default function EvaluationHealthDashboard() {
   const { allProgress, loading, refresh } = useEvaluationProgress();
   const [stats, setStats] = useState<any[]>([]);
   const [isResuming, setIsResuming] = useState(false);
+  const [currentlyStarting, setCurrentlyStarting] = useState<string>('');
   const [systemHealth, setSystemHealth] = useState({
     activeEvaluations: 0,
     averageTime: 0,
@@ -42,6 +43,17 @@ export default function EvaluationHealthDashboard() {
   useEffect(() => {
     calculateSystemHealth();
   }, [allProgress, stats]);
+
+  // ✅ Auto-refresh when evaluations are active
+  useEffect(() => {
+    if (systemHealth.activeEvaluations > 0) {
+      const interval = setInterval(() => {
+        refresh();
+        loadStats();
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [systemHealth.activeEvaluations]);
 
   async function loadStats() {
     const { data } = await supabase.from('translation_stats' as any).select('*');
@@ -151,45 +163,32 @@ export default function EvaluationHealthDashboard() {
     }
     
     setIsResuming(true);
-    let successCount = 0;
-    let failCount = 0;
     
     try {
       for (const incomplete of incompleteEvals) {
-        toast.loading(`Resuming ${incomplete.language_code.toUpperCase()}...`, {
-          id: `resume-${incomplete.language_code}`
-        });
+        setCurrentlyStarting(incomplete.language_code.toUpperCase());
         
-        const { error } = await supabase.functions.invoke('evaluate-translation-quality', {
+        // Update status to in_progress in database FIRST
+        await supabase.from('evaluation_progress')
+          .update({ status: 'in_progress', updated_at: new Date().toISOString() })
+          .eq('language_code', incomplete.language_code);
+        
+        // Fire edge function but DON'T await it (fire-and-forget)
+        supabase.functions.invoke('evaluate-translation-quality', {
           body: {
             targetLanguage: incomplete.language_code,
             startFromKey: incomplete.last_evaluated_key
           }
-        });
+        }).catch(err => console.error(`Resume failed for ${incomplete.language_code}:`, err));
         
-        if (error) {
-          failCount++;
-          toast.error(`Failed to resume ${incomplete.language_code.toUpperCase()}`, {
-            id: `resume-${incomplete.language_code}`
-          });
-          console.error(`Failed to resume ${incomplete.language_code}:`, error);
-        } else {
-          successCount++;
-          toast.success(`Started ${incomplete.language_code.toUpperCase()}`, {
-            id: `resume-${incomplete.language_code}`
-          });
-        }
+        toast.success(`Started ${incomplete.language_code.toUpperCase()}`);
       }
       
       // Summary toast
-      if (successCount > 0) {
-        toast.success(`Resumed ${successCount} evaluation(s)`);
-      }
-      if (failCount > 0) {
-        toast.error(`${failCount} evaluation(s) failed to start`);
-      }
+      toast.info(`${incompleteEvals.length} evaluation(s) started - see Active Evaluations for progress`);
     } finally {
       setIsResuming(false);
+      setCurrentlyStarting('');
       refresh();
     }
   }
@@ -443,7 +442,7 @@ export default function EvaluationHealthDashboard() {
                 {isResuming ? (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Resuming...
+                    Starting {currentlyStarting || '...'}
                   </>
                 ) : (
                   <>
