@@ -36,6 +36,7 @@ import TranslationManagerContent from "@/components/design-system/TranslationMan
 import PageMetaManager from "@/components/design-system/PageMetaManager";
 import SitemapGenerator from "@/components/design-system/SitemapGenerator";
 import UnifiedDashboard from "@/components/design-system/UnifiedDashboard";
+import LanguageVisibilityManager from "@/components/design-system/LanguageVisibilityManager";
 import SEOSetupWizard from "@/components/design-system/SEOSetupWizard";
 import EvaluationHealthDashboard from "@/components/design-system/EvaluationHealthDashboard";
 import { RotatingTermsManager } from "@/components/design-system/RotatingTermsManager";
@@ -432,11 +433,12 @@ const Admin = () => {
           {/* Translations & SEO Section */}
           <TabsContent value="translations" className="space-y-8">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-8">
+              <TabsList className="grid w-full grid-cols-5 mb-8">
                 <TabsTrigger value="overview">📊 Overview</TabsTrigger>
                 <TabsTrigger value="translations">🌍 Translations</TabsTrigger>
                 <TabsTrigger value="seo">🚀 SEO & Meta</TabsTrigger>
                 <TabsTrigger value="sitemap">🗺️ Sitemap</TabsTrigger>
+                <TabsTrigger value="settings">⚙️ Settings</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
@@ -454,6 +456,10 @@ const Admin = () => {
 
               <TabsContent value="sitemap">
                 <SitemapGenerator />
+              </TabsContent>
+
+              <TabsContent value="settings">
+                <LanguageVisibilityManager />
               </TabsContent>
             </Tabs>
           </TabsContent>
