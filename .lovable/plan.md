@@ -1,137 +1,92 @@
 
 
-## Fix Evaluation Resume UI: Progress Visibility & Timeout Issues
+# Legal Documents CMS Feature
 
-### Root Cause
+## Overview
 
-The "Resuming..." button spins indefinitely because:
+Add a full Legal section to the CMS where you can create and manage Privacy Policy, Terms of Service, Cookie Policy, and Data Processor Agreement (DPA). The Privacy Policy and Terms of Service support versioning with editable dates. The DPA is linked from within the ToS, not as a separate footer link. Public-facing legal pages will render the content with proper formatting.
 
-1. **Sequential Processing with Long Timeouts**: The function waits for ALL 12 languages to complete before releasing the button, but each language takes ~90-150 seconds
-2. **No Per-Language Progress Updates**: The UI doesn't show which language is currently being processed
-3. **Real-time Subscription Not Triggering Refreshes**: The dashboard doesn't visually update as evaluations progress
+## What You'll Get
 
-**Good news**: The backend IS working - the edge function logs show evaluations completing successfully. The issue is purely UI/UX.
+- **CMS > Content Management > Legal** tab with editors for all 4 document types
+- **Privacy Policy & Terms of Service** with version history (last updated dates, ability to create new versions)
+- **Cookie Policy** as a single editable document
+- **Data Processor Agreement (DPA)** as a single editable document, linked from within the ToS content
+- **Public pages** at `/:lang/privacy`, `/:lang/terms`, `/:lang/cookies` rendering the latest published version
+- **Footer links** updated to point to the correct routes (no separate DPA link in footer)
 
-### Solution Architecture
+## Database Design
 
-```text
-CURRENT (BROKEN):
-┌─────────────────────────────────────┐
-│ Click "Resume All Incomplete"       │
-│ ↓                                   │
-│ For each of 12 languages:           │
-│   → Call edge function              │
-│   → Wait 90+ seconds                │
-│ ↓                                   │
-│ Total: 12 × 90s = 18+ MINUTES       │
-│ Button says "Resuming..." entire    │
-│ time with no progress indication    │
-└─────────────────────────────────────┘
+### New table: `legal_documents`
 
-FIXED:
-┌─────────────────────────────────────┐
-│ Click "Resume All Incomplete"       │
-│ ↓                                   │
-│ For each language:                  │
-│   → Show "Resuming Italian..."      │
-│   → Fire edge function (fire & forget)
-│   → Immediately proceed to next     │
-│ ↓                                   │
-│ Button releases after ALL STARTED   │
-│ Active Evaluations card shows live  │
-│ progress with auto-refresh          │
-└─────────────────────────────────────┘
-```
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid (PK) | Auto-generated |
+| document_type | text | `privacy_policy`, `terms_of_service`, `cookie_policy`, `data_processor_agreement` |
+| title | text | Document title |
+| content | text | Rich text / markdown content |
+| version_label | text | e.g. "v2.0", "January 2026" |
+| effective_date | date | When this version takes effect |
+| last_updated | timestamptz | Last modified date (editable) |
+| published | boolean | Whether this version is the active/public one |
+| sort_order | integer | For ordering versions |
+| created_at | timestamptz | Auto |
+| updated_at | timestamptz | Auto |
 
-### Implementation Plan
+RLS: Public SELECT for published documents, admin ALL.
 
-#### 1. Change Resume to "Fire and Forget" Pattern
+## Implementation Steps
 
-Instead of awaiting each edge function call, start them and let the Active Evaluations section show progress:
+### 1. Database Migration
+Create the `legal_documents` table with RLS policies and seed initial empty documents for all 4 types.
 
-**File: `src/components/design-system/EvaluationHealthDashboard.tsx`**
+### 2. CMS Component: `LegalDocumentsManager.tsx`
+New component under `src/components/design-system/` with:
+- Tabs for each document type (Privacy Policy, Terms of Service, Cookie Policy, DPA)
+- For Privacy Policy & ToS: version list showing effective dates, ability to add new version, mark one as published
+- For Cookie Policy & DPA: single document editor
+- Rich text editor using the existing `BlogRichTextEditor` pattern (markdown/HTML)
+- Editable "last updated" date field and "effective date" field
 
-```typescript
-async function handleResumeAllIncomplete() {
-  setIsResuming(true);
-  
-  for (const incomplete of incompleteEvals) {
-    // Update status to in_progress in database FIRST
-    await supabase.from('evaluation_progress')
-      .update({ status: 'in_progress', updated_at: new Date().toISOString() })
-      .eq('language_code', incomplete.language_code);
-    
-    // Fire edge function but DON'T await it
-    supabase.functions.invoke('evaluate-translation-quality', {
-      body: {
-        targetLanguage: incomplete.language_code,
-        startFromKey: incomplete.last_evaluated_key
-      }
-    }).catch(err => console.error(`Resume failed for ${incomplete.language_code}:`, err));
-    
-    toast.success(`Started ${incomplete.language_code.toUpperCase()}`);
-  }
-  
-  // Release button immediately after all are STARTED
-  setIsResuming(false);
-  toast.info(`${incompleteEvals.length} evaluations started - see Active Evaluations for progress`);
-  refresh();
-}
-```
+### 3. Admin Integration
+Add "Legal" tab trigger to the Content Management sub-tabs in `Admin.tsx`.
 
-#### 2. Add Auto-Refresh to Active Evaluations Section
+### 4. Public Legal Pages
+Create `src/pages/LegalPage.tsx` - a single reusable page component that:
+- Takes a `documentType` prop
+- Fetches the latest published version from `legal_documents`
+- Renders with Header, formatted content, version date, and Footer
+- For ToS page: includes a link to the DPA
 
-**Current**: Only refreshes on button click or real-time subscription
-**Fixed**: Add polling every 5 seconds when evaluations are active
+### 5. Routes
+Add routes to `App.tsx`:
+- `/:lang/privacy` -> LegalPage (privacy_policy)
+- `/:lang/terms` -> LegalPage (terms_of_service)  
+- `/:lang/cookies` -> LegalPage (cookie_policy)
+- Redirect routes for non-prefixed paths
 
-```typescript
-useEffect(() => {
-  if (systemHealth.activeEvaluations > 0) {
-    const interval = setInterval(() => {
-      refresh();
-      loadStats(); // Also refresh actual translation counts
-    }, 5000);
-    return () => clearInterval(interval);
-  }
-}, [systemHealth.activeEvaluations]);
-```
+### 6. Footer Links Update
+Update the footer_settings legal_links in the database to point to `/privacy`, `/terms`, `/cookies` instead of `#`. Remove any DPA link from footer (DPA is accessed via ToS only).
 
-#### 3. Show Currently Processing Language in Button
+## Technical Details
 
-While resuming, show which language is being started:
-
-```typescript
-const [currentlyStarting, setCurrentlyStarting] = useState<string>('');
-
-// In the button:
-{isResuming ? (
-  <>
-    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-    Starting {currentlyStarting || '...'}
-  </>
-) : (
-  // ...
-)}
-```
+### Files to Create
+| File | Purpose |
+|------|---------|
+| `src/components/design-system/LegalDocumentsManager.tsx` | CMS editor for all legal documents |
+| `src/pages/LegalPage.tsx` | Public-facing legal page renderer |
 
 ### Files to Modify
+| File | Change |
+|------|--------|
+| `src/pages/Admin.tsx` | Add "Legal" tab to Content Management |
+| `src/App.tsx` | Add `/:lang/privacy`, `/:lang/terms`, `/:lang/cookies` routes |
 
-| File | Changes |
-|------|---------|
-| `src/components/design-system/EvaluationHealthDashboard.tsx` | Fire-and-forget pattern, auto-refresh, progress indication |
-
-### Expected Outcome
-
-After implementation:
-1. **Instant button release**: "Resume All" starts all evaluations and immediately releases
-2. **Visual progress**: Active Evaluations section shows all running evaluations with live updates
-3. **Per-language status**: Toast notifications show which languages started
-4. **Auto-refresh**: Dashboard updates every 5 seconds while evaluations are running
-
-### Workaround for Right Now
-
-While waiting for the fix, you can:
-1. **Refresh the page** - the evaluations are running in the background
-2. **Click "Refresh" button** in the Language Evaluation Status section
-3. The evaluations will complete in the background (they're already running based on the edge function logs)
+### Version Management (Privacy Policy & ToS)
+- Each document type can have multiple rows (versions)
+- Only one version per type can be `published = true` at a time
+- Publishing a new version automatically unpublishes the previous one
+- The public page always shows the version where `published = true`
+- Version list shows effective_date, last_updated, and published status
+- Old versions are kept for audit trail but not displayed publicly
 
