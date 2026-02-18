@@ -68,7 +68,9 @@ const BlogRichTextEditor = ({ value, onChange, defaultTab = "edit" }: BlogRichTe
       setTimeout(() => {
         const textarea = textareaRef.current;
         if (textarea) {
-          textarea.focus();
+          const scrollTop = textarea.scrollTop;
+          textarea.focus({ preventScroll: true });
+          textarea.scrollTop = scrollTop;
           const newCursorPos = start + before.length + selectedText.length;
           textarea.setSelectionRange(newCursorPos, newCursorPos);
           selectionRef.current = { start: newCursorPos, end: newCursorPos };
@@ -98,7 +100,9 @@ const BlogRichTextEditor = ({ value, onChange, defaultTab = "edit" }: BlogRichTe
       setTimeout(() => {
         const textarea = textareaRef.current;
         if (textarea) {
-          textarea.focus();
+          const scrollTop = textarea.scrollTop;
+          textarea.focus({ preventScroll: true });
+          textarea.scrollTop = scrollTop;
           const newPos = start + prefix.length;
           textarea.setSelectionRange(newPos, newPos);
           selectionRef.current = { start: newPos, end: newPos };
