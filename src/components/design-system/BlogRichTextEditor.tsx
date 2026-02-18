@@ -28,12 +28,13 @@ import {
 interface BlogRichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
+  defaultTab?: "edit" | "preview" | "html";
 }
 
-const BlogRichTextEditor = ({ value, onChange }: BlogRichTextEditorProps) => {
+const BlogRichTextEditor = ({ value, onChange, defaultTab = "edit" }: BlogRichTextEditorProps) => {
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [activeTab, setActiveTab] = useState("edit");
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkText, setLinkText] = useState("");
   const [showLinkPopover, setShowLinkPopover] = useState(false);
@@ -293,7 +294,7 @@ const BlogRichTextEditor = ({ value, onChange }: BlogRichTextEditorProps) => {
       </div>
 
       {/* Editor Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "edit" | "preview" | "html")}>
         <TabsList className="w-full justify-start rounded-none border-b bg-muted/30 h-auto p-0">
           <TabsTrigger value="edit" className="rounded-none data-[state=active]:bg-background">
             Edit

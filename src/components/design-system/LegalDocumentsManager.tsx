@@ -218,6 +218,7 @@ const LegalDocumentsManager = () => {
               <BlogRichTextEditor
                 value={editingDoc.content}
                 onChange={(val) => setEditingDoc({ ...editingDoc, content: val })}
+                defaultTab="preview"
               />
             </div>
             <div className="flex gap-2">
