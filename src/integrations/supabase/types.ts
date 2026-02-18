@@ -2183,6 +2183,48 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_documents: {
+        Row: {
+          content: string
+          created_at: string
+          document_type: string
+          effective_date: string | null
+          id: string
+          last_updated: string
+          published: boolean
+          sort_order: number
+          title: string
+          updated_at: string
+          version_label: string | null
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          document_type: string
+          effective_date?: string | null
+          id?: string
+          last_updated?: string
+          published?: boolean
+          sort_order?: number
+          title: string
+          updated_at?: string
+          version_label?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          document_type?: string
+          effective_date?: string | null
+          id?: string
+          last_updated?: string
+          published?: boolean
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          version_label?: string | null
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           confirmed: boolean | null

@@ -39,6 +39,7 @@ import JobListing from "./pages/JobListing";
 import MyApplications from "./pages/MyApplications";
 import CandidateBooking from "./pages/CandidateBooking";
 import OfferView from "./pages/OfferView";
+import LegalPage from "./pages/LegalPage";
 
 const queryClient = new QueryClient();
 const App = () => {
@@ -76,6 +77,10 @@ const App = () => {
                     <Route path="/:lang/my-applications" element={<LanguageSync><MyApplications /></LanguageSync>} />
                     <Route path="/:lang/blog" element={<LanguageSync><Blog /></LanguageSync>} />
                     <Route path="/:lang/blog/:slug" element={<LanguageSync><BlogPost /></LanguageSync>} />
+                    <Route path="/:lang/privacy" element={<LanguageSync><LegalPage documentType="privacy_policy" /></LanguageSync>} />
+                    <Route path="/:lang/terms" element={<LanguageSync><LegalPage documentType="terms_of_service" /></LanguageSync>} />
+                    <Route path="/:lang/cookies" element={<LanguageSync><LegalPage documentType="cookie_policy" /></LanguageSync>} />
+                    <Route path="/:lang/dpa" element={<LanguageSync><LegalPage documentType="data_processor_agreement" /></LanguageSync>} />
                     
                     {/* CMS and special routes (no language prefix) */}
                     <Route path="/auth" element={<Auth />} />
@@ -111,6 +116,10 @@ const App = () => {
                     <Route path="/careers/:slug" element={<LanguageRedirect />} />
                     <Route path="/blog" element={<LanguageRedirect />} />
                     <Route path="/blog/:slug" element={<LanguageRedirect />} />
+                    <Route path="/privacy" element={<LanguageRedirect />} />
+                    <Route path="/terms" element={<LanguageRedirect />} />
+                    <Route path="/cookies" element={<LanguageRedirect />} />
+                    <Route path="/dpa" element={<LanguageRedirect />} />
                     
                     {/* Catch-all for 404 */}
                     <Route path="*" element={<NotFound />} />

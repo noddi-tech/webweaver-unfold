@@ -65,6 +65,7 @@ import { SlackSettingsManager } from "@/components/design-system/SlackSettingsMa
 import { LeadsManager } from "@/components/design-system/LeadsManager";
 import { SalesContactManager } from "@/components/design-system/SalesContactManager";
 import ActivityDashboard from "@/components/design-system/ActivityDashboard";
+import LegalDocumentsManager from "@/components/design-system/LegalDocumentsManager";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -202,6 +203,7 @@ const Admin = () => {
                     <TabsTrigger value="usps">USPs</TabsTrigger>
                     <TabsTrigger value="contact">Contact</TabsTrigger>
                     <TabsTrigger value="faqs">FAQs</TabsTrigger>
+                    <TabsTrigger value="legal">Legal</TabsTrigger>
                   </TabsList>
                   <TabsContent value="pages" className="space-y-8">
                     <PagesManager />
@@ -238,6 +240,9 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="faqs" className="space-y-8">
                     <FAQManager />
+                  </TabsContent>
+                  <TabsContent value="legal" className="space-y-8">
+                    <LegalDocumentsManager />
                   </TabsContent>
                 </Tabs>
               </TabsContent>
