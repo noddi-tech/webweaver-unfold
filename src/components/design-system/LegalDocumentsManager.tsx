@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { Plus, Save, Eye, EyeOff, Trash2, FileText, Calendar } from "lucide-react";
 import BlogRichTextEditor from "./BlogRichTextEditor";
+import { parseBlogMarkdown } from "@/lib/markdownUtils";
 
 type DocumentType = "privacy_policy" | "terms_of_service" | "cookie_policy" | "data_processor_agreement";
 
@@ -227,9 +228,19 @@ const LegalDocumentsManager = () => {
             </div>
           </div>
         ) : (
-          <Button variant="outline" size="sm" onClick={() => setEditingDoc({ ...doc })}>
-            Edit Content
-          </Button>
+          <div className="space-y-4">
+            <Button variant="outline" size="sm" onClick={() => setEditingDoc({ ...doc })}>
+              Edit Content
+            </Button>
+            {doc.content && (
+              <div className="border rounded-lg p-6 bg-background">
+                <div
+                  className="prose prose-lg max-w-none dark:prose-invert"
+                  dangerouslySetInnerHTML={{ __html: parseBlogMarkdown(doc.content) }}
+                />
+              </div>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>
