@@ -34,6 +34,7 @@ interface BlogRichTextEditorProps {
 const BlogRichTextEditor = ({ value, onChange, defaultTab = "edit" }: BlogRichTextEditorProps) => {
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const selectionRef = useRef<{ start: number; end: number }>({ start: 0, end: 0 });
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkText, setLinkText] = useState("");
@@ -43,13 +44,16 @@ const BlogRichTextEditor = ({ value, onChange, defaultTab = "edit" }: BlogRichTe
   const [showImagePopover, setShowImagePopover] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  const trackSelection = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      selectionRef.current = { start: textarea.selectionStart, end: textarea.selectionEnd };
+    }
+  }, []);
+
   const insertAtCursor = useCallback(
     (before: string, after: string = "") => {
-      const textarea = textareaRef.current;
-      if (!textarea) return;
-
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
+      const { start, end } = selectionRef.current;
       const selectedText = value.substring(start, end);
 
       const newValue =
@@ -61,11 +65,14 @@ const BlogRichTextEditor = ({ value, onChange, defaultTab = "edit" }: BlogRichTe
 
       onChange(newValue);
 
-      // Restore cursor position
       setTimeout(() => {
-        textarea.focus();
-        const newCursorPos = start + before.length + selectedText.length;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
+        const textarea = textareaRef.current;
+        if (textarea) {
+          textarea.focus();
+          const newCursorPos = start + before.length + selectedText.length;
+          textarea.setSelectionRange(newCursorPos, newCursorPos);
+          selectionRef.current = { start: newCursorPos, end: newCursorPos };
+        }
       }, 0);
     },
     [value, onChange]
@@ -80,10 +87,7 @@ const BlogRichTextEditor = ({ value, onChange, defaultTab = "edit" }: BlogRichTe
 
   const insertLine = useCallback(
     (prefix: string) => {
-      const textarea = textareaRef.current;
-      if (!textarea) return;
-
-      const start = textarea.selectionStart;
+      const { start } = selectionRef.current;
       const lineStart = value.lastIndexOf("\n", start - 1) + 1;
       const beforeLine = value.substring(0, lineStart);
       const afterStart = value.substring(lineStart);
@@ -92,8 +96,13 @@ const BlogRichTextEditor = ({ value, onChange, defaultTab = "edit" }: BlogRichTe
       onChange(newValue);
 
       setTimeout(() => {
-        textarea.focus();
-        textarea.setSelectionRange(start + prefix.length, start + prefix.length);
+        const textarea = textareaRef.current;
+        if (textarea) {
+          textarea.focus();
+          const newPos = start + prefix.length;
+          textarea.setSelectionRange(newPos, newPos);
+          selectionRef.current = { start: newPos, end: newPos };
+        }
       }, 0);
     },
     [value, onChange]
@@ -313,6 +322,9 @@ const BlogRichTextEditor = ({ value, onChange, defaultTab = "edit" }: BlogRichTe
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
+            onSelect={trackSelection}
+            onMouseUp={trackSelection}
+            onKeyUp={trackSelection}
             placeholder="Write your blog post content here... Use markdown for formatting."
             className="min-h-[400px] border-0 rounded-none focus-visible:ring-0 font-mono text-sm resize-y"
           />
