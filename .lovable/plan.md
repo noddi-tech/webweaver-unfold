@@ -1,92 +1,60 @@
 
 
-# Legal Documents CMS Feature
+# Fix: Stale Auth Session Causing "Failed to Fetch" Error Loop
 
-## Overview
+## Problem
 
-Add a full Legal section to the CMS where you can create and manage Privacy Policy, Terms of Service, Cookie Policy, and Data Processor Agreement (DPA). The Privacy Policy and Terms of Service support versioning with editable dates. The DPA is linked from within the ToS, not as a separate footer link. Public-facing legal pages will render the content with proper formatting.
+The only errors in the application are repeated `TypeError: Failed to fetch` originating from Supabase's `_refreshAccessToken`. The user has an expired JWT session stored in `localStorage`. When the Supabase client tries to refresh it and fails (because the refresh token is also expired or invalid), it produces a cascade of identical errors without clearing the bad session.
 
-## What You'll Get
+## Root Cause
 
-- **CMS > Content Management > Legal** tab with editors for all 4 document types
-- **Privacy Policy & Terms of Service** with version history (last updated dates, ability to create new versions)
-- **Cookie Policy** as a single editable document
-- **Data Processor Agreement (DPA)** as a single editable document, linked from within the ToS content
-- **Public pages** at `/:lang/privacy`, `/:lang/terms`, `/:lang/cookies` rendering the latest published version
-- **Footer links** updated to point to the correct routes (no separate DPA link in footer)
+The Supabase client is configured with `autoRefreshToken: true` and `persistSession: true`, but there is no error handling for when the refresh itself fails. The app never listens for the `TOKEN_REFRESHED` failure event or catches the `SIGNED_OUT` event triggered by an expired refresh token.
 
-## Database Design
+## Solution
 
-### New table: `legal_documents`
+Add an auth state change listener at the app level that detects when a session becomes invalid and cleans up gracefully, preventing the error loop.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| document_type | text | `privacy_policy`, `terms_of_service`, `cookie_policy`, `data_processor_agreement` |
-| title | text | Document title |
-| content | text | Rich text / markdown content |
-| version_label | text | e.g. "v2.0", "January 2026" |
-| effective_date | date | When this version takes effect |
-| last_updated | timestamptz | Last modified date (editable) |
-| published | boolean | Whether this version is the active/public one |
-| sort_order | integer | For ordering versions |
-| created_at | timestamptz | Auto |
-| updated_at | timestamptz | Auto |
+## Changes
 
-RLS: Public SELECT for published documents, admin ALL.
+### 1. Update `src/App.tsx` -- Add auth error recovery
 
-## Implementation Steps
+Add a `useEffect` at the top of the `App` component that listens for Supabase auth state changes. When the event is `TOKEN_REFRESHED` with a `null` session, or `SIGNED_OUT`, clear any stale session state. This prevents the retry loop.
 
-### 1. Database Migration
-Create the `legal_documents` table with RLS policies and seed initial empty documents for all 4 types.
+```typescript
+useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+      // Session expired or refresh failed -- no action needed,
+      // just let the app continue in unauthenticated state
+    }
+  });
+  return () => subscription.unsubscribe();
+}, []);
+```
 
-### 2. CMS Component: `LegalDocumentsManager.tsx`
-New component under `src/components/design-system/` with:
-- Tabs for each document type (Privacy Policy, Terms of Service, Cookie Policy, DPA)
-- For Privacy Policy & ToS: version list showing effective dates, ability to add new version, mark one as published
-- For Cookie Policy & DPA: single document editor
-- Rich text editor using the existing `BlogRichTextEditor` pattern (markdown/HTML)
-- Editable "last updated" date field and "effective date" field
+Additionally, add an initial check that attempts `getSession()` and, if it returns an error, calls `signOut()` to clear the corrupt localStorage tokens:
 
-### 3. Admin Integration
-Add "Legal" tab trigger to the Content Management sub-tabs in `Admin.tsx`.
+```typescript
+useEffect(() => {
+  const cleanupStaleSession = async () => {
+    const { error } = await supabase.auth.getSession();
+    if (error) {
+      console.warn('[Auth] Stale session detected, signing out:', error.message);
+      await supabase.auth.signOut();
+    }
+  };
+  cleanupStaleSession();
+}, []);
+```
 
-### 4. Public Legal Pages
-Create `src/pages/LegalPage.tsx` - a single reusable page component that:
-- Takes a `documentType` prop
-- Fetches the latest published version from `legal_documents`
-- Renders with Header, formatted content, version date, and Footer
-- For ToS page: includes a link to the DPA
+### 2. No other files need changes
 
-### 5. Routes
-Add routes to `App.tsx`:
-- `/:lang/privacy` -> LegalPage (privacy_policy)
-- `/:lang/terms` -> LegalPage (terms_of_service)  
-- `/:lang/cookies` -> LegalPage (cookie_policy)
-- Redirect routes for non-prefixed paths
+The `@tailwindcss/typography` plugin is already installed and configured. The `BlogRichTextEditor` formatting and scroll preservation fixes from previous edits are in place. The markdown rendering pipeline (`parseBlogMarkdown`) is working correctly.
 
-### 6. Footer Links Update
-Update the footer_settings legal_links in the database to point to `/privacy`, `/terms`, `/cookies` instead of `#`. Remove any DPA link from footer (DPA is accessed via ToS only).
+## Impact Assessment
 
-## Technical Details
-
-### Files to Create
-| File | Purpose |
-|------|---------|
-| `src/components/design-system/LegalDocumentsManager.tsx` | CMS editor for all legal documents |
-| `src/pages/LegalPage.tsx` | Public-facing legal page renderer |
-
-### Files to Modify
-| File | Change |
-|------|--------|
-| `src/pages/Admin.tsx` | Add "Legal" tab to Content Management |
-| `src/App.tsx` | Add `/:lang/privacy`, `/:lang/terms`, `/:lang/cookies` routes |
-
-### Version Management (Privacy Policy & ToS)
-- Each document type can have multiple rows (versions)
-- Only one version per type can be `published = true` at a time
-- Publishing a new version automatically unpublishes the previous one
-- The public page always shows the version where `published = true`
-- Version list shows effective_date, last_updated, and published status
-- Old versions are kept for audit trail but not displayed publicly
+- **No functionality is broken** -- this only adds graceful handling for expired sessions
+- Public pages continue to work without authentication
+- Authenticated users with valid sessions are unaffected
+- Users with expired sessions will simply be signed out instead of seeing console error spam
 
