@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +11,7 @@ import { EditModeProvider } from "@/contexts/EditModeContext";
 import { SiteStylesProvider } from "@/contexts/SiteStylesContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { TypographyLoader } from "@/components/TypographyLoader";
+import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Demo from "./pages/Demo";
 import FeaturesPage from "./pages/Features";
@@ -43,6 +44,26 @@ import LegalPage from "./pages/LegalPage";
 
 const queryClient = new QueryClient();
 const App = () => {
+  // Clean up stale auth sessions to prevent "Failed to fetch" error loops
+  useEffect(() => {
+    const cleanupStaleSession = async () => {
+      const { error } = await supabase.auth.getSession();
+      if (error) {
+        console.warn('[Auth] Stale session detected, signing out:', error.message);
+        await supabase.auth.signOut();
+      }
+    };
+    cleanupStaleSession();
+  }, []);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+        // Session expired or refresh failed — continue in unauthenticated state
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <TypographyLoader />
