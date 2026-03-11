@@ -341,6 +341,21 @@ export function OffersHistory() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
+                        {offer.status === 'draft' && offer.customer_email && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); sendMutation.mutate(offer); }}
+                            title="Send offer"
+                            disabled={sendingOfferId === offer.id}
+                          >
+                            {sendingOfferId === offer.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Send className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
                         {canEdit(offer.status) && (
                           <Button 
                             variant="ghost" 
