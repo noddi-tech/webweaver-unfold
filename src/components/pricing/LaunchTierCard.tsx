@@ -45,7 +45,7 @@ export function LaunchTierCard({ config, onSelect, isSelected, isCustomerTier, s
           </div>
         </div>
         {isCustomerTier && savingsLabel && (
-          <div className="mt-2 flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400 font-medium">
+          <div className="mt-2 flex items-center gap-1.5 text-sm text-primary font-medium">
             <Check className="w-4 h-4" />
             <span>Du sparer {savingsLabel}</span>
           </div>
