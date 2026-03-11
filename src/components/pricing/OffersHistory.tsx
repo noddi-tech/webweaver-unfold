@@ -126,7 +126,28 @@ export function OffersHistory() {
   const queryClient = useQueryClient();
   const [editingOffer, setEditingOffer] = useState<OfferData | null>(null);
   const [deleteOffer, setDeleteOffer] = useState<OfferData | null>(null);
+  const [sendingOfferId, setSendingOfferId] = useState<string | null>(null);
 
+  const sendMutation = useMutation({
+    mutationFn: async (offer: OfferData) => {
+      setSendingOfferId(offer.id);
+      const { data, error } = await supabase.functions.invoke('send-pricing-offer', {
+        body: { offerId: offer.id }
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pricing-offers'] });
+      toast.success('Offer sent to customer');
+      setSendingOfferId(null);
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to send offer: ' + error.message);
+      setSendingOfferId(null);
+    }
+  });
   const { data: offers, isLoading } = useQuery({
     queryKey: ['pricing-offers'],
     queryFn: async () => {
@@ -320,6 +341,21 @@ export function OffersHistory() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
+                        {offer.status === 'draft' && offer.customer_email && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); sendMutation.mutate(offer); }}
+                            title="Send offer"
+                            disabled={sendingOfferId === offer.id}
+                          >
+                            {sendingOfferId === offer.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Send className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
                         {canEdit(offer.status) && (
                           <Button 
                             variant="ghost" 
