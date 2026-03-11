@@ -1,60 +1,31 @@
 
 
-# Fix: Stale Auth Session Causing "Failed to Fetch" Error Loop
+# Add "Send" Action to Draft Offers in History Table
 
 ## Problem
-
-The only errors in the application are repeated `TypeError: Failed to fetch` originating from Supabase's `_refreshAccessToken`. The user has an expired JWT session stored in `localStorage`. When the Supabase client tries to refresh it and fails (because the refresh token is also expired or invalid), it produces a cascade of identical errors without clearing the bad session.
-
-## Root Cause
-
-The Supabase client is configured with `autoRefreshToken: true` and `persistSession: true`, but there is no error handling for when the refresh itself fails. The app never listens for the `TOKEN_REFRESHED` failure event or catches the `SIGNED_OUT` event triggered by an expired refresh token.
+Draft offers in the Recent Offers table have no way to be sent to the customer. The only actions are Edit, Delete, and View. You have to go back to the generator to send.
 
 ## Solution
+Add a **Send button** (envelope/send icon) to the actions column for offers with `status === 'draft'`. Clicking it invokes the existing `send-pricing-offer` edge function (same one used by `OfferGeneratorPanel.handleSendOffer`), updates status to `sent`, and shows a success toast.
 
-Add an auth state change listener at the app level that detects when a session becomes invalid and cleans up gracefully, preventing the error loop.
+## Technical Details
 
-## Changes
+**File: `src/components/pricing/OffersHistory.tsx`**
 
-### 1. Update `src/App.tsx` -- Add auth error recovery
+1. Add a `sendMutation` using `useMutation` that calls `supabase.functions.invoke('send-pricing-offer', { body: { offerId } })` and invalidates `pricing-offers` query on success.
 
-Add a `useEffect` at the top of the `App` component that listens for Supabase auth state changes. When the event is `TOKEN_REFRESHED` with a `null` session, or `SIGNED_OUT`, clear any stale session state. This prevents the retry loop.
+2. Add a Send button in the actions cell, shown when `offer.status === 'draft'` and `offer.customer_email` exists:
+   ```tsx
+   {offer.status === 'draft' && offer.customer_email && (
+     <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); sendMutation.mutate(offer); }}>
+       <Send className="h-4 w-4" />
+     </Button>
+   )}
+   ```
 
-```typescript
-useEffect(() => {
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
-      // Session expired or refresh failed -- no action needed,
-      // just let the app continue in unauthenticated state
-    }
-  });
-  return () => subscription.unsubscribe();
-}, []);
-```
+3. While sending, show a `Loader2` spinner on that row's send button (track `sendingOfferId` state).
 
-Additionally, add an initial check that attempts `getSession()` and, if it returns an error, calls `signOut()` to clear the corrupt localStorage tokens:
+4. `Send` icon is already imported in the file.
 
-```typescript
-useEffect(() => {
-  const cleanupStaleSession = async () => {
-    const { error } = await supabase.auth.getSession();
-    if (error) {
-      console.warn('[Auth] Stale session detected, signing out:', error.message);
-      await supabase.auth.signOut();
-    }
-  };
-  cleanupStaleSession();
-}, []);
-```
-
-### 2. No other files need changes
-
-The `@tailwindcss/typography` plugin is already installed and configured. The `BlogRichTextEditor` formatting and scroll preservation fixes from previous edits are in place. The markdown rendering pipeline (`parseBlogMarkdown`) is working correctly.
-
-## Impact Assessment
-
-- **No functionality is broken** -- this only adds graceful handling for expired sessions
-- Public pages continue to work without authentication
-- Authenticated users with valid sessions are unaffected
-- Users with expired sessions will simply be signed out instead of seeing console error spam
+**No other files changed** -- the `send-pricing-offer` edge function already handles everything (email delivery, status update to 'sent', Slack notification).
 
