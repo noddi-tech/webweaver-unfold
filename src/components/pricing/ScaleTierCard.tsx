@@ -44,15 +44,26 @@ export function ScaleTierCard({ config, tiers, onSelect, isSelected, showDetaile
       </Badge>
       
       <CardHeader className="pb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <TrendingUp className="w-6 h-6 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <TrendingUp className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl">Scale</CardTitle>
+              <CardDescription>For growing businesses</CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-2xl">Scale</CardTitle>
-            <CardDescription>For growing businesses</CardDescription>
-          </div>
+          {isCustomerTier && (
+            <Badge variant="default" className="text-xs">Du</Badge>
+          )}
         </div>
+        {isCustomerTier && savingsLabel && (
+          <div className="mt-2 flex items-center gap-1.5 text-sm font-medium text-primary">
+            <Check className="w-4 h-4" />
+            <span>Du sparer {savingsLabel}</span>
+          </div>
+        )}
       </CardHeader>
       
       <CardContent className="space-y-6">

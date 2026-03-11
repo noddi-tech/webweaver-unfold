@@ -25,7 +25,7 @@ import { nb } from "date-fns/locale";
 import { toast } from "sonner";
 import { CURRENCY_RATES, CURRENCY_SYMBOLS, LAUNCH_CONFIG, SCALE_CONFIG, generateScaleTiers } from "@/config/newPricing";
 import { useSalesContacts } from "@/hooks/useSalesContacts";
-import { detectScaleTier } from "@/utils/newPricingCalculator";
+import { comparePricing, detectScaleTier } from "@/utils/newPricingCalculator";
 import { LaunchTierCard } from "@/components/pricing/LaunchTierCard";
 import { ScaleTierCard } from "@/components/pricing/ScaleTierCard";
 import { ScaleTierTable } from "@/components/pricing/ScaleTierTable";
