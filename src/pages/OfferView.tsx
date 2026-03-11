@@ -519,8 +519,9 @@ const OfferView = () => {
             )}
           </div>
         </CurrencyProvider>
+        </div>
+        {/* End of PDF content */}
 
-        {/* CTA Buttons */}
         {!isExpired && !isAccepted && (
           <div className="space-y-4">
             <Button 
