@@ -19,12 +19,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2, Globe, RefreshCw, Download, Mail, Linkedin, TrendingUp, Wallet, Percent, Tag, CalendarDays, Gauge } from "lucide-react";
+import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2, Globe, RefreshCw, Download, Mail, Linkedin, TrendingUp, Wallet, Percent, Tag, CalendarDays, Gauge, Layers } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { nb } from "date-fns/locale";
 import { toast } from "sonner";
-import { CURRENCY_RATES, CURRENCY_SYMBOLS } from "@/config/newPricing";
+import { CURRENCY_RATES, CURRENCY_SYMBOLS, LAUNCH_CONFIG, SCALE_CONFIG, generateScaleTiers } from "@/config/newPricing";
 import { useSalesContacts } from "@/hooks/useSalesContacts";
+import { detectScaleTier } from "@/utils/newPricingCalculator";
+import { LaunchTierCard } from "@/components/pricing/LaunchTierCard";
+import { ScaleTierCard } from "@/components/pricing/ScaleTierCard";
+import { ScaleTierTable } from "@/components/pricing/ScaleTierTable";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 
 // Currency locale mapping
 const CURRENCY_LOCALES: Record<string, string> = {
@@ -209,6 +214,25 @@ const OfferView = () => {
   const totalMonthly = offer.total_monthly_estimate || totalMonthlyBeforeDiscount;
   const effectiveRate = monthlyRevenue > 0 ? ((totalMonthly / monthlyRevenue) * 100).toFixed(2) : "0";
 
+  // Detailed breakdown calculations
+  const discountPct = offer.discount_percentage || 0;
+  const perLocationCost = offer.per_location_cost || 0;
+  const locationCount = offer.locations || 1;
+  const basePlatformFee = perLocationCost > 0 
+    ? (offer.fixed_monthly || 0) - (perLocationCost * locationCount)
+    : (offer.fixed_monthly || 0);
+  const totalFixedBeforeDiscount = offer.fixed_monthly || 0;
+  const totalFixedAfterDiscount = totalFixedBeforeDiscount * (1 - discountPct / 100);
+  
+  const baseTakeRate = offer.revenue_percentage || 0;
+  const discountedTakeRate = baseTakeRate * (1 - discountPct / 100);
+  const monthlyRevenueCost = monthlyRevenue * (discountedTakeRate / 100);
+
+  // Scale tiers
+  const scaleTiers = generateScaleTiers();
+  const { tier: currentTierNumber } = detectScaleTier(offer.annual_revenue || 0, scaleTiers);
+  const nextTier = scaleTiers.find(t => t.tier === currentTierNumber + 1);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
       {/* Header */}
@@ -335,60 +359,83 @@ const OfferView = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Metrics Grid */}
-            <div className={`grid ${offer.locations && offer.locations > 1 ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'} gap-4`}>
-              <div className="p-4 bg-muted/50 rounded-lg border border-border/50">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Årlig omsetning</p>
-                </div>
-                <p className="text-lg font-semibold">{formatCurrency(offer.annual_revenue || 0)}</p>
+            {/* Annual Revenue */}
+            <div className="p-4 bg-muted/50 rounded-lg border border-border/50">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Årlig omsetning</p>
               </div>
-              <div className="p-4 bg-muted/50 rounded-lg border border-border/50">
-                <div className="flex items-center gap-2 mb-2">
-                  <Wallet className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Fast månedlig</p>
-                </div>
-                <p className="text-lg font-semibold">{formatCurrency(offer.fixed_monthly || 0)}</p>
-              </div>
-              <div className="p-4 bg-muted/50 rounded-lg border border-border/50">
-                <div className="flex items-center gap-2 mb-2">
-                  <Percent className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Omsetningsandel</p>
-                </div>
-                <p className="text-lg font-semibold">{(offer.revenue_percentage || 0).toFixed(1)}%</p>
-              </div>
-              {offer.locations && offer.locations > 1 && (
-                <div className="p-4 bg-muted/50 rounded-lg border border-border/50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Lokasjoner</p>
-                  </div>
-                  <p className="text-lg font-semibold">{offer.locations}</p>
-                </div>
-              )}
+              <p className="text-lg font-semibold">{formatCurrency(offer.annual_revenue || 0)}</p>
             </div>
 
-            {/* Discount Breakdown */}
-            {offer.discount_percentage > 0 && (
-              <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Pris før rabatt</span>
-                  <span className="text-lg line-through text-muted-foreground">{formatCurrency(totalMonthlyBeforeDiscount)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-green-700 dark:text-green-400 flex items-center gap-1.5">
-                    <Tag className="h-4 w-4" />
-                    Din rabatt
-                  </span>
-                  <span className="text-lg font-semibold text-green-700 dark:text-green-400">-{offer.discount_percentage}%</span>
-                </div>
-                <div className="border-t border-green-200 dark:border-green-800 pt-3 flex items-center justify-between">
-                  <span className="text-sm font-medium">Din pris</span>
-                  <span className="text-2xl font-bold text-primary">{formatCurrency(totalMonthly)}/mnd</span>
-                </div>
+            {/* Fixed Cost Breakdown */}
+            <div className="p-5 bg-muted/30 rounded-lg border border-border/50 space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <Wallet className="h-4 w-4 text-primary" />
+                <p className="text-sm font-semibold">Fast månedlig kostnad</p>
               </div>
-            )}
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Plattformavgift</span>
+                  <span>{formatCurrency(basePlatformFee)}</span>
+                </div>
+                {perLocationCost > 0 && locationCount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Lokasjonskostnad ({formatCurrency(perLocationCost)} × {locationCount})</span>
+                    <span>{formatCurrency(perLocationCost * locationCount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between border-t border-border/50 pt-1.5">
+                  <span className="font-medium">Subtotal</span>
+                  <span className="font-medium">{formatCurrency(totalFixedBeforeDiscount)}/mnd</span>
+                </div>
+                {discountPct > 0 && (
+                  <>
+                    <div className="flex justify-between text-green-700 dark:text-green-400">
+                      <span className="flex items-center gap-1"><Tag className="h-3 w-3" /> {discountPct}% rabatt</span>
+                      <span>-{formatCurrency(totalFixedBeforeDiscount - totalFixedAfterDiscount)}</span>
+                    </div>
+                    <div className="flex justify-between border-t border-border/50 pt-1.5">
+                      <span className="font-semibold">Din fast kostnad</span>
+                      <span className="font-bold text-primary">{formatCurrency(totalFixedAfterDiscount)}/mnd</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Take Rate Breakdown */}
+            <div className="p-5 bg-muted/30 rounded-lg border border-border/50 space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <Percent className="h-4 w-4 text-primary" />
+                <p className="text-sm font-semibold">Omsetningsbasert kostnad</p>
+              </div>
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Base take rate</span>
+                  <span>{baseTakeRate.toFixed(2)}%</span>
+                </div>
+                {discountPct > 0 && (
+                  <>
+                    <div className="flex justify-between text-green-700 dark:text-green-400">
+                      <span className="flex items-center gap-1"><Tag className="h-3 w-3" /> {discountPct}% rabatt</span>
+                      <span>-{(baseTakeRate - discountedTakeRate).toFixed(2)}%</span>
+                    </div>
+                    <div className="flex justify-between border-t border-border/50 pt-1.5">
+                      <span className="font-semibold">Din take rate</span>
+                      <span className="font-bold text-primary">{discountedTakeRate.toFixed(2)}%</span>
+                    </div>
+                  </>
+                )}
+                <div className="flex justify-between border-t border-border/50 pt-1.5 text-muted-foreground">
+                  <span>Månedlig omsetningskostnad</span>
+                  <span>{formatCurrency(monthlyRevenueCost)}/mnd</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {formatCurrency(offer.annual_revenue || 0)} × {discountedTakeRate.toFixed(2)}% / 12
+                </p>
+              </div>
+            </div>
 
             {/* Cost Summary */}
             <div className="p-5 bg-primary/5 border border-primary/20 rounded-lg space-y-4">
@@ -429,10 +476,52 @@ const OfferView = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Tier Comparison Section */}
+        <CurrencyProvider>
+          <div className="mb-6 space-y-6">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Layers className="h-5 w-5 text-primary" />
+                <h2 className="text-xl font-bold">Prismodeller</h2>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Vi har valgt {offer.tier === 'launch' ? 'Launch' : 'Scale'}-modellen for deg — {offer.tier === 'scale' ? 'den mest kostnadseffektive løsningen for din størrelse' : 'perfekt for å komme i gang'}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <LaunchTierCard 
+                config={LAUNCH_CONFIG} 
+                isSelected={offer.tier === 'launch'} 
+              />
+              <ScaleTierCard 
+                config={SCALE_CONFIG} 
+                tiers={scaleTiers}
+                isSelected={offer.tier === 'scale'}
+                showDetailedRates={true}
+              />
+            </div>
+
+            {/* Scale Tier Table */}
+            {offer.tier === 'scale' && (
+              <div className="space-y-3">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold mb-1">Ditt volumnivå</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Din omsetning plasserer deg i <span className="font-semibold text-primary">tier {currentTierNumber}</span>.
+                    {nextTier && (
+                      <> Ved omsetning over {formatCurrency(nextTier.revenueThreshold)} får du lavere rate ({(nextTier.takeRate * 100).toFixed(2)}%).</>
+                    )}
+                  </p>
+                </div>
+                <ScaleTierTable tiers={scaleTiers} currentTier={currentTierNumber} />
+              </div>
+            )}
+          </div>
+        </CurrencyProvider>
         </div>
         {/* End of PDF content */}
 
-        {/* CTA Buttons */}
         {!isExpired && !isAccepted && (
           <div className="space-y-4">
             <Button 
@@ -624,21 +713,31 @@ const OfferView = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Fast månedlig:</span>
-                <span className="font-medium">{formatCurrency(offer.fixed_monthly || 0)}</span>
+                <span className="font-medium">
+                  {discountPct > 0 && <span className="line-through text-muted-foreground mr-1">{formatCurrency(totalFixedBeforeDiscount)}</span>}
+                  {formatCurrency(totalFixedAfterDiscount)}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Omsetningsandel:</span>
-                <span className="font-medium">{(offer.revenue_percentage || 0).toFixed(1)}%</span>
+                <span className="text-muted-foreground">Take rate:</span>
+                <span className="font-medium">
+                  {discountPct > 0 && <span className="line-through text-muted-foreground mr-1">{baseTakeRate.toFixed(2)}%</span>}
+                  {discountedTakeRate.toFixed(2)}%
+                </span>
               </div>
-              {offer.discount_percentage > 0 && (
+              {discountPct > 0 && (
                 <div className="flex justify-between text-green-700 dark:text-green-400">
                   <span className="flex items-center gap-1"><Tag className="h-3 w-3" /> Rabatt:</span>
-                  <span className="font-medium">-{offer.discount_percentage}%</span>
+                  <span className="font-medium">-{discountPct}%</span>
                 </div>
               )}
               <div className="border-t border-border pt-2 flex justify-between">
                 <span className="font-medium">Estimert månedlig:</span>
                 <span className="font-bold text-primary">{formatCurrency(totalMonthly)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Estimert årlig:</span>
+                <span className="font-semibold">{formatCurrency(totalMonthly * 12)}</span>
               </div>
             </div>
           </div>
