@@ -497,13 +497,17 @@ const OfferView = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <LaunchTierCard 
                 config={LAUNCH_CONFIG} 
-                isSelected={offer.tier === 'launch'} 
+                isSelected={offer.tier === 'launch'}
+                isCustomerTier={offer.tier === 'launch'}
+                savingsLabel={offer.tier === 'launch' ? savingsLabel : undefined}
               />
               <ScaleTierCard 
                 config={SCALE_CONFIG} 
                 tiers={scaleTiers}
                 isSelected={offer.tier === 'scale'}
                 showDetailedRates={true}
+                isCustomerTier={offer.tier === 'scale'}
+                savingsLabel={offer.tier === 'scale' ? savingsLabel : undefined}
               />
             </div>
 
