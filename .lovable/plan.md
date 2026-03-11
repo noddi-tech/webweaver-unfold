@@ -1,60 +1,38 @@
 
 
-# Fix: Stale Auth Session Causing "Failed to Fetch" Error Loop
+# Improve Tier Card Visual Hierarchy on Offer Page
 
 ## Problem
-
-The only errors in the application are repeated `TypeError: Failed to fetch` originating from Supabase's `_refreshAccessToken`. The user has an expired JWT session stored in `localStorage`. When the Supabase client tries to refresh it and fails (because the refresh token is also expired or invalid), it produces a cascade of identical errors without clearing the bad session.
-
-## Root Cause
-
-The Supabase client is configured with `autoRefreshToken: true` and `persistSession: true`, but there is no error handling for when the refresh itself fails. The app never listens for the `TOKEN_REFRESHED` failure event or catches the `SIGNED_OUT` event triggered by an expired refresh token.
+The "Du" badge and savings label are too subtle — small badge in the corner, savings text blends in. The non-selected card looks identical in prominence to the selected one.
 
 ## Solution
 
-Add an auth state change listener at the app level that detects when a session becomes invalid and cleans up gracefully, preventing the error loop.
+### 1. Grey out the non-selected card
+- Add an `isGreyedOut?: boolean` prop to both `LaunchTierCard` and `ScaleTierCard`
+- When greyed out: reduce opacity (`opacity-60`), use `border-muted` instead of colored border, no hover effects
+- Pass `isGreyedOut={offer.tier !== 'launch'}` to LaunchTierCard and vice versa in OfferView
 
-## Changes
+### 2. Move savings banner ABOVE the card (outside the card)
+- Instead of showing "Du" badge + savings inside the card header, render a prominent banner **above** the selected card in `OfferView.tsx`
+- Banner: full-width green/primary background strip with `CheckCircle` icon + "Valgt modell — Du sparer X kr/mnd" in bold white text
+- Remove `isCustomerTier`/`savingsLabel` rendering from inside the card components (keep props for other use cases, but in OfferView use the external banner instead)
 
-### 1. Update `src/App.tsx` -- Add auth error recovery
+### 3. Implementation
 
-Add a `useEffect` at the top of the `App` component that listens for Supabase auth state changes. When the event is `TOKEN_REFRESHED` with a `null` session, or `SIGNED_OUT`, clear any stale session state. This prevents the retry loop.
-
-```typescript
-useEffect(() => {
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
-      // Session expired or refresh failed -- no action needed,
-      // just let the app continue in unauthenticated state
-    }
-  });
-  return () => subscription.unsubscribe();
-}, []);
+**`OfferView.tsx`** (~lines 497-511): Wrap each card in a div. Above the selected card, render the savings banner:
+```
+<div className="space-y-2">
+  <div className="bg-primary text-primary-foreground rounded-lg px-4 py-2.5 flex items-center gap-2 text-sm font-semibold">
+    <CheckCircle /> Valgt modell · Du sparer {savingsLabel}
+  </div>
+  <ScaleTierCard ... />
+</div>
 ```
 
-Additionally, add an initial check that attempts `getSession()` and, if it returns an error, calls `signOut()` to clear the corrupt localStorage tokens:
+**`LaunchTierCard.tsx`** + **`ScaleTierCard.tsx`**: Add `isGreyedOut` prop. When true, apply `opacity-50 border-muted` and remove colored border styling.
 
-```typescript
-useEffect(() => {
-  const cleanupStaleSession = async () => {
-    const { error } = await supabase.auth.getSession();
-    if (error) {
-      console.warn('[Auth] Stale session detected, signing out:', error.message);
-      await supabase.auth.signOut();
-    }
-  };
-  cleanupStaleSession();
-}, []);
-```
-
-### 2. No other files need changes
-
-The `@tailwindcss/typography` plugin is already installed and configured. The `BlogRichTextEditor` formatting and scroll preservation fixes from previous edits are in place. The markdown rendering pipeline (`parseBlogMarkdown`) is working correctly.
-
-## Impact Assessment
-
-- **No functionality is broken** -- this only adds graceful handling for expired sessions
-- Public pages continue to work without authentication
-- Authenticated users with valid sessions are unaffected
-- Users with expired sessions will simply be signed out instead of seeing console error spam
+## Files Changed
+- `src/components/pricing/LaunchTierCard.tsx` — add `isGreyedOut` prop
+- `src/components/pricing/ScaleTierCard.tsx` — add `isGreyedOut` prop  
+- `src/pages/OfferView.tsx` — add external savings banner above selected card, pass `isGreyedOut` to non-selected card
 
