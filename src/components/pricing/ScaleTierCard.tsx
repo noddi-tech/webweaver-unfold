@@ -14,9 +14,10 @@ interface ScaleTierCardProps {
   showDetailedRates?: boolean;
   isCustomerTier?: boolean;
   savingsLabel?: string;
+  isGreyedOut?: boolean;
 }
 
-export function ScaleTierCard({ config, tiers, onSelect, isSelected, showDetailedRates = false, isCustomerTier, savingsLabel }: ScaleTierCardProps) {
+export function ScaleTierCard({ config, tiers, onSelect, isSelected, showDetailedRates = false, isCustomerTier, savingsLabel, isGreyedOut }: ScaleTierCardProps) {
   const { formatAmount, formatRevenue } = useCurrency();
   
   const minRate = tiers.length > 0 ? Math.min(...tiers.map(t => t.takeRate)) * 100 : 0.7;
@@ -37,7 +38,7 @@ export function ScaleTierCard({ config, tiers, onSelect, isSelected, showDetaile
   ];
 
   return (
-    <Card className={`relative overflow-hidden transition-all duration-300 border-2 border-primary ${isSelected ? 'ring-2 ring-primary shadow-lg shadow-primary/20' : 'hover:shadow-md hover:border-primary/80'}`}>
+    <Card className={`relative overflow-hidden transition-all duration-300 border-2 ${isGreyedOut ? 'opacity-50 border-muted' : `border-primary ${isSelected ? 'ring-2 ring-primary shadow-lg shadow-primary/20' : 'hover:shadow-md hover:border-primary/80'}`}`}>
       {/* Popular badge */}
       <Badge className="absolute -top-[2px] -right-[2px] rounded-none rounded-bl-lg rounded-tr-lg bg-primary text-primary-foreground">
         Most Popular
