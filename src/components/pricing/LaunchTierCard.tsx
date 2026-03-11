@@ -50,7 +50,6 @@ export function LaunchTierCard({ config, onSelect, isSelected, isCustomerTier, s
             <span>Du sparer {savingsLabel}</span>
           </div>
         )}
-        </div>
       </CardHeader>
       
       <CardContent className="space-y-6">
