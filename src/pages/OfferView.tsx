@@ -19,12 +19,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2, Globe, RefreshCw, Download, Mail, Linkedin, TrendingUp, Wallet, Percent, Tag, CalendarDays, Gauge } from "lucide-react";
+import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2, Globe, RefreshCw, Download, Mail, Linkedin, TrendingUp, Wallet, Percent, Tag, CalendarDays, Gauge, Layers } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { nb } from "date-fns/locale";
 import { toast } from "sonner";
-import { CURRENCY_RATES, CURRENCY_SYMBOLS } from "@/config/newPricing";
+import { CURRENCY_RATES, CURRENCY_SYMBOLS, LAUNCH_CONFIG, SCALE_CONFIG, generateScaleTiers } from "@/config/newPricing";
 import { useSalesContacts } from "@/hooks/useSalesContacts";
+import { detectScaleTier } from "@/utils/newPricingCalculator";
+import { LaunchTierCard } from "@/components/pricing/LaunchTierCard";
+import { ScaleTierCard } from "@/components/pricing/ScaleTierCard";
+import { ScaleTierTable } from "@/components/pricing/ScaleTierTable";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 
 // Currency locale mapping
 const CURRENCY_LOCALES: Record<string, string> = {
