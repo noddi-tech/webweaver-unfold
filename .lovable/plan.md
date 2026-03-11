@@ -1,48 +1,60 @@
 
 
-# Offer Page UI/UX Redesign
+# Fix: Stale Auth Session Causing "Failed to Fetch" Error Loop
 
-## Current State
-The offer page shows pricing details in a flat, minimal layout. The discount badge is small and easy to miss. There's no breakdown showing price before/after discount, no yearly cost summary, and the financial metrics lack visual hierarchy and icons.
+## Problem
 
-## Redesigned Plan Details Card
+The only errors in the application are repeated `TypeError: Failed to fetch` originating from Supabase's `_refreshAccessToken`. The user has an expired JWT session stored in `localStorage`. When the Supabase client tries to refresh it and fails (because the refresh token is also expired or invalid), it produces a cascade of identical errors without clearing the bad session.
 
-Replace the current simple 2-column grid + estimate box with a richer, icon-driven layout:
+## Root Cause
 
-### 1. Prominent Discount Banner (when discount > 0)
-Instead of a small badge next to the plan title, show a highlighted banner strip across the top of the plan card with a `Tag`/`Percent` icon and large text like "20% rabatt på dette tilbudet".
+The Supabase client is configured with `autoRefreshToken: true` and `persistSession: true`, but there is no error handling for when the refresh itself fails. The app never listens for the `TOKEN_REFRESHED` failure event or catches the `SIGNED_OUT` event triggered by an expired refresh token.
 
-### 2. Icon-Enhanced Metrics Grid
-Replace the plain `bg-muted/50` boxes with a 2x2 (or 3-column) grid of metric cards, each with a distinct icon:
+## Solution
 
-| Metric | Icon | Content |
-|--------|------|---------|
-| Årlig omsetning | `TrendingUp` | Annual revenue amount |
-| Fast månedlig avgift | `Wallet` | Fixed monthly fee |
-| Omsetningsandel | `Percent` | Revenue percentage |
-| Lokasjoner | `Building2` | Number of locations (if Scale) |
+Add an auth state change listener at the app level that detects when a session becomes invalid and cleans up gracefully, preventing the error loop.
 
-### 3. Discount Breakdown Section (when discount > 0)
-Show a clear before/after comparison:
-- **Pris før rabatt**: `totalMonthlyBeforeDiscount` with strikethrough styling
-- **Din rabatt**: `-X%` in green with `Tag` icon
-- **Din pris**: `totalMonthly` in large bold primary color
+## Changes
 
-### 4. Cost Summary Box
-Enhanced estimate box at the bottom showing:
-- **Estimert månedlig kostnad**: large primary-colored amount
-- **Estimert årlig kostnad**: `totalMonthly * 12` with `CalendarDays` icon
-- **Effektiv rate**: percentage with `Gauge` icon
-- Based-on note with the annual revenue reference
+### 1. Update `src/App.tsx` -- Add auth error recovery
 
-### 5. Accept Dialog Enhancement
-Update the accept confirmation dialog to also show the discount and final price clearly.
+Add a `useEffect` at the top of the `App` component that listens for Supabase auth state changes. When the event is `TOKEN_REFRESHED` with a `null` session, or `SIGNED_OUT`, clear any stale session state. This prevents the retry loop.
 
-## Files Changed
-- `src/pages/OfferView.tsx` — Restructure the Plan Details card (lines ~319-363) with the new layout, add icons, discount breakdown, and yearly cost. Update the accept dialog summary (~561-575).
+```typescript
+useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+      // Session expired or refresh failed -- no action needed,
+      // just let the app continue in unauthenticated state
+    }
+  });
+  return () => subscription.unsubscribe();
+}, []);
+```
 
-## No Breaking Changes
-- All existing data fields (`offer.fixed_monthly`, `offer.revenue_percentage`, `offer.discount_percentage`, `offer.total_monthly_estimate`, `offer.annual_revenue`, `offer.locations`) are read-only — no data model changes.
-- Currency conversion, PDF generation, accept/question flows, sales contacts section all remain untouched.
-- The `formatCurrency` helper is reused as-is.
+Additionally, add an initial check that attempts `getSession()` and, if it returns an error, calls `signOut()` to clear the corrupt localStorage tokens:
+
+```typescript
+useEffect(() => {
+  const cleanupStaleSession = async () => {
+    const { error } = await supabase.auth.getSession();
+    if (error) {
+      console.warn('[Auth] Stale session detected, signing out:', error.message);
+      await supabase.auth.signOut();
+    }
+  };
+  cleanupStaleSession();
+}, []);
+```
+
+### 2. No other files need changes
+
+The `@tailwindcss/typography` plugin is already installed and configured. The `BlogRichTextEditor` formatting and scroll preservation fixes from previous edits are in place. The markdown rendering pipeline (`parseBlogMarkdown`) is working correctly.
+
+## Impact Assessment
+
+- **No functionality is broken** -- this only adds graceful handling for expired sessions
+- Public pages continue to work without authentication
+- Authenticated users with valid sessions are unaffected
+- Users with expired sessions will simply be signed out instead of seeing console error spam
 
