@@ -11,9 +11,10 @@ interface LaunchTierCardProps {
   isSelected?: boolean;
   isCustomerTier?: boolean;
   savingsLabel?: string;
+  isGreyedOut?: boolean;
 }
 
-export function LaunchTierCard({ config, onSelect, isSelected, isCustomerTier, savingsLabel }: LaunchTierCardProps) {
+export function LaunchTierCard({ config, onSelect, isSelected, isCustomerTier, savingsLabel, isGreyedOut }: LaunchTierCardProps) {
   const { formatAmount } = useCurrency();
   
   const features = [
