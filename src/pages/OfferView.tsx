@@ -317,48 +317,106 @@ const OfferView = () => {
         </Card>
 
         {/* Plan Details */}
-        <Card className="mb-6">
+        <Card className="mb-6 overflow-hidden">
+          {/* Discount Banner */}
+          {offer.discount_percentage > 0 && (
+            <div className="bg-green-600 text-white px-6 py-3 flex items-center justify-center gap-2">
+              <Tag className="h-5 w-5" />
+              <span className="font-semibold text-lg">{offer.discount_percentage}% rabatt på dette tilbudet</span>
+            </div>
+          )}
+          
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-blue-500/10">
-                  <FileText className="h-5 w-5 text-blue-600" />
-                </div>
-                <CardTitle>{offer.tier === "launch" ? "Launch" : "Scale"} Plan</CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-primary/10">
+                <FileText className="h-5 w-5 text-primary" />
               </div>
-              {offer.discount_percentage > 0 && (
-                <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                  {offer.discount_percentage}% rabatt
-                </Badge>
-              )}
+              <CardTitle>{offer.tier === "launch" ? "Launch" : "Scale"} Plan</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-1">Fast månedlig avgift</p>
-                <p className="text-xl font-semibold">{formatCurrency(offer.fixed_monthly || 0)}</p>
+          <CardContent className="space-y-6">
+            {/* Metrics Grid */}
+            <div className={`grid ${offer.locations && offer.locations > 1 ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'} gap-4`}>
+              <div className="p-4 bg-muted/50 rounded-lg border border-border/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Årlig omsetning</p>
+                </div>
+                <p className="text-lg font-semibold">{formatCurrency(offer.annual_revenue || 0)}</p>
               </div>
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-1">Omsetningsandel</p>
-                <p className="text-xl font-semibold">{(offer.revenue_percentage || 0).toFixed(1)}%</p>
+              <div className="p-4 bg-muted/50 rounded-lg border border-border/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <Wallet className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Fast månedlig</p>
+                </div>
+                <p className="text-lg font-semibold">{formatCurrency(offer.fixed_monthly || 0)}</p>
               </div>
+              <div className="p-4 bg-muted/50 rounded-lg border border-border/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <Percent className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Omsetningsandel</p>
+                </div>
+                <p className="text-lg font-semibold">{(offer.revenue_percentage || 0).toFixed(1)}%</p>
+              </div>
+              {offer.locations && offer.locations > 1 && (
+                <div className="p-4 bg-muted/50 rounded-lg border border-border/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Lokasjoner</p>
+                  </div>
+                  <p className="text-lg font-semibold">{offer.locations}</p>
+                </div>
+              )}
             </div>
 
-            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-1">Estimert månedlig kostnad</p>
-              <p className="text-3xl font-bold text-primary">{formatCurrency(totalMonthly)}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Effektiv rate: {effectiveRate}% • Basert på {formatCurrency(offer.annual_revenue || 0)} årlig omsetning
-              </p>
-            </div>
-
-            {offer.locations && offer.locations > 1 && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Building2 className="h-4 w-4" />
-                <span>{offer.locations} lokasjoner inkludert</span>
+            {/* Discount Breakdown */}
+            {offer.discount_percentage > 0 && (
+              <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Pris før rabatt</span>
+                  <span className="text-lg line-through text-muted-foreground">{formatCurrency(totalMonthlyBeforeDiscount)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-green-700 dark:text-green-400 flex items-center gap-1.5">
+                    <Tag className="h-4 w-4" />
+                    Din rabatt
+                  </span>
+                  <span className="text-lg font-semibold text-green-700 dark:text-green-400">-{offer.discount_percentage}%</span>
+                </div>
+                <div className="border-t border-green-200 dark:border-green-800 pt-3 flex items-center justify-between">
+                  <span className="text-sm font-medium">Din pris</span>
+                  <span className="text-2xl font-bold text-primary">{formatCurrency(totalMonthly)}/mnd</span>
+                </div>
               </div>
             )}
+
+            {/* Cost Summary */}
+            <div className="p-5 bg-primary/5 border border-primary/20 rounded-lg space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Estimert månedlig kostnad</span>
+                </div>
+                <span className="text-3xl font-bold text-primary">{formatCurrency(totalMonthly)}</span>
+              </div>
+              <div className="flex items-center justify-between border-t border-primary/10 pt-3">
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-5 w-5 text-primary/70" />
+                  <span className="text-sm text-muted-foreground">Estimert årlig kostnad</span>
+                </div>
+                <span className="text-xl font-semibold text-foreground">{formatCurrency(totalMonthly * 12)}</span>
+              </div>
+              <div className="flex items-center justify-between border-t border-primary/10 pt-3">
+                <div className="flex items-center gap-2">
+                  <Gauge className="h-5 w-5 text-primary/70" />
+                  <span className="text-sm text-muted-foreground">Effektiv rate</span>
+                </div>
+                <span className="text-sm font-medium text-foreground">{effectiveRate}%</span>
+              </div>
+              <p className="text-xs text-muted-foreground text-center pt-1">
+                Basert på {formatCurrency(offer.annual_revenue || 0)} i årlig omsetning
+              </p>
+            </div>
           </CardContent>
         </Card>
 
