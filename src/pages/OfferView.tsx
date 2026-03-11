@@ -713,21 +713,31 @@ const OfferView = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Fast månedlig:</span>
-                <span className="font-medium">{formatCurrency(offer.fixed_monthly || 0)}</span>
+                <span className="font-medium">
+                  {discountPct > 0 && <span className="line-through text-muted-foreground mr-1">{formatCurrency(totalFixedBeforeDiscount)}</span>}
+                  {formatCurrency(totalFixedAfterDiscount)}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Omsetningsandel:</span>
-                <span className="font-medium">{(offer.revenue_percentage || 0).toFixed(1)}%</span>
+                <span className="text-muted-foreground">Take rate:</span>
+                <span className="font-medium">
+                  {discountPct > 0 && <span className="line-through text-muted-foreground mr-1">{baseTakeRate.toFixed(2)}%</span>}
+                  {discountedTakeRate.toFixed(2)}%
+                </span>
               </div>
-              {offer.discount_percentage > 0 && (
+              {discountPct > 0 && (
                 <div className="flex justify-between text-green-700 dark:text-green-400">
                   <span className="flex items-center gap-1"><Tag className="h-3 w-3" /> Rabatt:</span>
-                  <span className="font-medium">-{offer.discount_percentage}%</span>
+                  <span className="font-medium">-{discountPct}%</span>
                 </div>
               )}
               <div className="border-t border-border pt-2 flex justify-between">
                 <span className="font-medium">Estimert månedlig:</span>
                 <span className="font-bold text-primary">{formatCurrency(totalMonthly)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Estimert årlig:</span>
+                <span className="font-semibold">{formatCurrency(totalMonthly * 12)}</span>
               </div>
             </div>
           </div>
