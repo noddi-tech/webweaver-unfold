@@ -214,6 +214,25 @@ const OfferView = () => {
   const totalMonthly = offer.total_monthly_estimate || totalMonthlyBeforeDiscount;
   const effectiveRate = monthlyRevenue > 0 ? ((totalMonthly / monthlyRevenue) * 100).toFixed(2) : "0";
 
+  // Detailed breakdown calculations
+  const discountPct = offer.discount_percentage || 0;
+  const perLocationCost = offer.per_location_cost || 0;
+  const locationCount = offer.locations || 1;
+  const basePlatformFee = perLocationCost > 0 
+    ? (offer.fixed_monthly || 0) - (perLocationCost * locationCount)
+    : (offer.fixed_monthly || 0);
+  const totalFixedBeforeDiscount = offer.fixed_monthly || 0;
+  const totalFixedAfterDiscount = totalFixedBeforeDiscount * (1 - discountPct / 100);
+  
+  const baseTakeRate = offer.revenue_percentage || 0;
+  const discountedTakeRate = baseTakeRate * (1 - discountPct / 100);
+  const monthlyRevenueCost = monthlyRevenue * (discountedTakeRate / 100);
+
+  // Scale tiers
+  const scaleTiers = generateScaleTiers();
+  const { tier: currentTierNumber } = detectScaleTier(offer.annual_revenue || 0, scaleTiers);
+  const nextTier = scaleTiers.find(t => t.tier === currentTierNumber + 1);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
       {/* Header */}
