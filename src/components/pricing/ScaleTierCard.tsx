@@ -16,7 +16,7 @@ interface ScaleTierCardProps {
   savingsLabel?: string;
 }
 
-export function ScaleTierCard({ config, tiers, onSelect, isSelected, showDetailedRates = false }: ScaleTierCardProps) {
+export function ScaleTierCard({ config, tiers, onSelect, isSelected, showDetailedRates = false, isCustomerTier, savingsLabel }: ScaleTierCardProps) {
   const { formatAmount, formatRevenue } = useCurrency();
   
   const minRate = tiers.length > 0 ? Math.min(...tiers.map(t => t.takeRate)) * 100 : 0.7;
