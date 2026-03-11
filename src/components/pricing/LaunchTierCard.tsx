@@ -13,7 +13,7 @@ interface LaunchTierCardProps {
   savingsLabel?: string;
 }
 
-export function LaunchTierCard({ config, onSelect, isSelected }: LaunchTierCardProps) {
+export function LaunchTierCard({ config, onSelect, isSelected, isCustomerTier, savingsLabel }: LaunchTierCardProps) {
   const { formatAmount } = useCurrency();
   
   const features = [
