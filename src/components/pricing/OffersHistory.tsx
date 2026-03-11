@@ -126,7 +126,28 @@ export function OffersHistory() {
   const queryClient = useQueryClient();
   const [editingOffer, setEditingOffer] = useState<OfferData | null>(null);
   const [deleteOffer, setDeleteOffer] = useState<OfferData | null>(null);
+  const [sendingOfferId, setSendingOfferId] = useState<string | null>(null);
 
+  const sendMutation = useMutation({
+    mutationFn: async (offer: OfferData) => {
+      setSendingOfferId(offer.id);
+      const { data, error } = await supabase.functions.invoke('send-pricing-offer', {
+        body: { offerId: offer.id }
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pricing-offers'] });
+      toast.success('Offer sent to customer');
+      setSendingOfferId(null);
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to send offer: ' + error.message);
+      setSendingOfferId(null);
+    }
+  });
   const { data: offers, isLoading } = useQuery({
     queryKey: ['pricing-offers'],
     queryFn: async () => {
