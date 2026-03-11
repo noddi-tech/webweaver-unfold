@@ -228,10 +228,15 @@ const OfferView = () => {
   const discountedTakeRate = baseTakeRate * (1 - discountPct / 100);
   const monthlyRevenueCost = monthlyRevenue * (discountedTakeRate / 100);
 
-  // Scale tiers
+  // Scale tiers & savings comparison
   const scaleTiers = generateScaleTiers();
   const { tier: currentTierNumber } = detectScaleTier(offer.annual_revenue || 0, scaleTiers);
   const nextTier = scaleTiers.find(t => t.tier === currentTierNumber + 1);
+  const locationCount = offer.locations || 1;
+  const isLaunchAvailable = locationCount === 1;
+  const comparison = comparePricing(offer.annual_revenue || 0, locationCount, LAUNCH_CONFIG, SCALE_CONFIG, scaleTiers, isLaunchAvailable);
+  const monthlySavings = Math.round(comparison.savingsAmount / 12);
+  const savingsLabel = monthlySavings > 0 ? `${formatCurrency(monthlySavings)}/mnd` : undefined;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
