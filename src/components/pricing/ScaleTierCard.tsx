@@ -12,6 +12,8 @@ interface ScaleTierCardProps {
   isSelected?: boolean;
   /** When true, shows detailed rate information (for internal sales page) */
   showDetailedRates?: boolean;
+  isCustomerTier?: boolean;
+  savingsLabel?: string;
 }
 
 export function ScaleTierCard({ config, tiers, onSelect, isSelected, showDetailedRates = false }: ScaleTierCardProps) {

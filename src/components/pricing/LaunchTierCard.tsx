@@ -9,6 +9,8 @@ interface LaunchTierCardProps {
   config: LaunchConfig;
   onSelect?: () => void;
   isSelected?: boolean;
+  isCustomerTier?: boolean;
+  savingsLabel?: string;
 }
 
 export function LaunchTierCard({ config, onSelect, isSelected }: LaunchTierCardProps) {
