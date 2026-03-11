@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2, Globe, RefreshCw, Download, Mail, Linkedin } from "lucide-react";
+import { Calendar, Clock, Building2, CheckCircle, FileText, Phone, MessageCircle, Check, Loader2, Globe, RefreshCw, Download, Mail, Linkedin, TrendingUp, Wallet, Percent, Tag, CalendarDays, Gauge } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { nb } from "date-fns/locale";
 import { toast } from "sonner";
