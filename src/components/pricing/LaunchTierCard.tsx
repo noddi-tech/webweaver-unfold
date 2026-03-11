@@ -9,9 +9,11 @@ interface LaunchTierCardProps {
   config: LaunchConfig;
   onSelect?: () => void;
   isSelected?: boolean;
+  isCustomerTier?: boolean;
+  savingsLabel?: string;
 }
 
-export function LaunchTierCard({ config, onSelect, isSelected }: LaunchTierCardProps) {
+export function LaunchTierCard({ config, onSelect, isSelected, isCustomerTier, savingsLabel }: LaunchTierCardProps) {
   const { formatAmount } = useCurrency();
   
   const features = [
@@ -35,8 +37,19 @@ export function LaunchTierCard({ config, onSelect, isSelected }: LaunchTierCardP
               <CardDescription>For getting started</CardDescription>
             </div>
           </div>
-          <Badge variant="secondary">Simple</Badge>
+          <div className="flex items-center gap-2">
+            {isCustomerTier && (
+              <Badge variant="default" className="text-xs">Du</Badge>
+            )}
+            <Badge variant="secondary">Simple</Badge>
+          </div>
         </div>
+        {isCustomerTier && savingsLabel && (
+          <div className="mt-2 flex items-center gap-1.5 text-sm text-primary font-medium">
+            <Check className="w-4 h-4" />
+            <span>Du sparer {savingsLabel}</span>
+          </div>
+        )}
       </CardHeader>
       
       <CardContent className="space-y-6">

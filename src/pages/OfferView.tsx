@@ -25,7 +25,7 @@ import { nb } from "date-fns/locale";
 import { toast } from "sonner";
 import { CURRENCY_RATES, CURRENCY_SYMBOLS, LAUNCH_CONFIG, SCALE_CONFIG, generateScaleTiers } from "@/config/newPricing";
 import { useSalesContacts } from "@/hooks/useSalesContacts";
-import { detectScaleTier } from "@/utils/newPricingCalculator";
+import { comparePricing, detectScaleTier } from "@/utils/newPricingCalculator";
 import { LaunchTierCard } from "@/components/pricing/LaunchTierCard";
 import { ScaleTierCard } from "@/components/pricing/ScaleTierCard";
 import { ScaleTierTable } from "@/components/pricing/ScaleTierTable";
@@ -228,10 +228,15 @@ const OfferView = () => {
   const discountedTakeRate = baseTakeRate * (1 - discountPct / 100);
   const monthlyRevenueCost = monthlyRevenue * (discountedTakeRate / 100);
 
-  // Scale tiers
+  // Scale tiers & savings comparison
   const scaleTiers = generateScaleTiers();
   const { tier: currentTierNumber } = detectScaleTier(offer.annual_revenue || 0, scaleTiers);
   const nextTier = scaleTiers.find(t => t.tier === currentTierNumber + 1);
+  const compLocationCount = offer.locations || 1;
+  const isLaunchAvailable = compLocationCount === 1;
+  const comparison = comparePricing(offer.annual_revenue || 0, compLocationCount, LAUNCH_CONFIG, SCALE_CONFIG, scaleTiers, isLaunchAvailable);
+  const monthlySavings = Math.round(comparison.savingsAmount / 12);
+  const savingsLabel = monthlySavings > 0 ? `${formatCurrency(monthlySavings)}/mnd` : undefined;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
@@ -492,13 +497,17 @@ const OfferView = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <LaunchTierCard 
                 config={LAUNCH_CONFIG} 
-                isSelected={offer.tier === 'launch'} 
+                isSelected={offer.tier === 'launch'}
+                isCustomerTier={offer.tier === 'launch'}
+                savingsLabel={offer.tier === 'launch' ? savingsLabel : undefined}
               />
               <ScaleTierCard 
                 config={SCALE_CONFIG} 
                 tiers={scaleTiers}
                 isSelected={offer.tier === 'scale'}
                 showDetailedRates={true}
+                isCustomerTier={offer.tier === 'scale'}
+                savingsLabel={offer.tier === 'scale' ? savingsLabel : undefined}
               />
             </div>
 

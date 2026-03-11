@@ -1,37 +1,60 @@
 
 
-# Add "You" Badge + Savings to Tier Cards on Offer Page
+# Fix: Stale Auth Session Causing "Failed to Fetch" Error Loop
 
-## What We're Building
+## Problem
 
-Add a "You" badge and savings calculation to the `LaunchTierCard` and `ScaleTierCard` on the offer page, similar to how the ScaleTierTable already marks the customer's current tier with a "You" badge.
+The only errors in the application are repeated `TypeError: Failed to fetch` originating from Supabase's `_refreshAccessToken`. The user has an expired JWT session stored in `localStorage`. When the Supabase client tries to refresh it and fails (because the refresh token is also expired or invalid), it produces a cascade of identical errors without clearing the bad session.
 
-## Approach
+## Root Cause
 
-### 1. Add optional props to both tier card components
+The Supabase client is configured with `autoRefreshToken: true` and `persistSession: true`, but there is no error handling for when the refresh itself fails. The app never listens for the `TOKEN_REFRESHED` failure event or catches the `SIGNED_OUT` event triggered by an expired refresh token.
 
-**`LaunchTierCard`** and **`ScaleTierCard`** -- add two new optional props:
-- `savingsLabel?: string` -- e.g. "Du sparer 4 200 kr/mnd" or null
-- `isCustomerTier?: boolean` -- when true, show a "You" badge next to the plan name
+## Solution
 
-### 2. Calculate savings in `OfferView.tsx`
+Add an auth state change listener at the app level that detects when a session becomes invalid and cleans up gracefully, preventing the error loop.
 
-Use `comparePricing` (already exists in calculator) to compute Launch vs Scale yearly cost for the customer's revenue and location count. Then derive the monthly savings for the cheaper tier:
+## Changes
+
+### 1. Update `src/App.tsx` -- Add auth error recovery
+
+Add a `useEffect` at the top of the `App` component that listens for Supabase auth state changes. When the event is `TOKEN_REFRESHED` with a `null` session, or `SIGNED_OUT`, clear any stale session state. This prevents the retry loop.
 
 ```typescript
-const comparison = comparePricing(offer.annual_revenue, locationCount);
-const monthlySavings = comparison.savingsAmount / 12;
+useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+      // Session expired or refresh failed -- no action needed,
+      // just let the app continue in unauthenticated state
+    }
+  });
+  return () => subscription.unsubscribe();
+}, []);
 ```
 
-Pass `isCustomerTier={true}` and `savingsLabel={formatCurrency(monthlySavings) + '/mnd'}` to the selected tier card.
+Additionally, add an initial check that attempts `getSession()` and, if it returns an error, calls `signOut()` to clear the corrupt localStorage tokens:
 
-### 3. Visual treatment
+```typescript
+useEffect(() => {
+  const cleanupStaleSession = async () => {
+    const { error } = await supabase.auth.getSession();
+    if (error) {
+      console.warn('[Auth] Stale session detected, signing out:', error.message);
+      await supabase.auth.signOut();
+    }
+  };
+  cleanupStaleSession();
+}, []);
+```
 
-On the selected card, render a small green `Badge` below the title: **"Din plan · Du sparer X kr/mnd"** with a checkmark icon. Keep it subtle but visible -- similar to how the ScaleTierTable uses `<Badge variant="default">You</Badge>`.
+### 2. No other files need changes
 
-## Files Changed
+The `@tailwindcss/typography` plugin is already installed and configured. The `BlogRichTextEditor` formatting and scroll preservation fixes from previous edits are in place. The markdown rendering pipeline (`parseBlogMarkdown`) is working correctly.
 
-- **`src/components/pricing/LaunchTierCard.tsx`** -- Add `isCustomerTier` and `savingsLabel` props. When `isCustomerTier`, show a "You" badge next to title and a savings note.
-- **`src/components/pricing/ScaleTierCard.tsx`** -- Same: add `isCustomerTier` and `savingsLabel` props with badge rendering.
-- **`src/pages/OfferView.tsx`** -- Import `comparePricing`, calculate savings, pass new props to the tier cards (~lines 492-502).
+## Impact Assessment
+
+- **No functionality is broken** -- this only adds graceful handling for expired sessions
+- Public pages continue to work without authentication
+- Authenticated users with valid sessions are unaffected
+- Users with expired sessions will simply be signed out instead of seeing console error spam
 
