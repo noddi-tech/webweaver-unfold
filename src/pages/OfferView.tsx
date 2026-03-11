@@ -630,6 +630,16 @@ const OfferView = () => {
                 <span className="text-muted-foreground">Omsetningsandel:</span>
                 <span className="font-medium">{(offer.revenue_percentage || 0).toFixed(1)}%</span>
               </div>
+              {offer.discount_percentage > 0 && (
+                <div className="flex justify-between text-green-700 dark:text-green-400">
+                  <span className="flex items-center gap-1"><Tag className="h-3 w-3" /> Rabatt:</span>
+                  <span className="font-medium">-{offer.discount_percentage}%</span>
+                </div>
+              )}
+              <div className="border-t border-border pt-2 flex justify-between">
+                <span className="font-medium">Estimert månedlig:</span>
+                <span className="font-bold text-primary">{formatCurrency(totalMonthly)}</span>
+              </div>
             </div>
           </div>
           <DialogFooter>
