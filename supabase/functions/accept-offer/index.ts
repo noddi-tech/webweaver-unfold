@@ -26,7 +26,7 @@ serve(async (req: Request): Promise<Response> => {
     const { data: offer, error: offerError } = await supabase
       .from("pricing_offers")
       .select("*")
-      .eq("token", offer_token)
+      .eq("offer_token", offer_token)
       .single();
 
     if (offerError || !offer) {
