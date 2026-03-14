@@ -141,6 +141,17 @@ serve(async (req: Request): Promise<Response> => {
                 },
               ],
             },
+            {
+              type: "actions",
+              elements: [
+                {
+                  type: "button",
+                  text: { type: "plain_text", text: "View Offer" },
+                  url: `https://naviosolutions.com/offer/${offer.offer_token}`,
+                  style: "primary" as const,
+                },
+              ],
+            },
           ],
         }),
       });
