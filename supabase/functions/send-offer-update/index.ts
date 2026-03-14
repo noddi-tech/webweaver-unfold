@@ -316,6 +316,17 @@ const handler = async (req: Request): Promise<Response> => {
                   },
                 ],
               },
+              {
+                type: "actions",
+                elements: [
+                  {
+                    type: "button",
+                    text: { type: "plain_text", text: "View Offer" },
+                    url: offerViewUrl,
+                    style: "primary" as const,
+                  },
+                ],
+              },
             ],
           }),
         });
