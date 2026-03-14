@@ -1,24 +1,60 @@
 
 
-# Fix Monthly Cost in Accept-Offer Slack Notification
+# Fix: Stale Auth Session Causing "Failed to Fetch" Error Loop
 
 ## Problem
 
-The `accept-offer` Slack notification shows "2 404,348 NOK" instead of the correct "22 120 kr". Three bugs:
+The only errors in the application are repeated `TypeError: Failed to fetch` originating from Supabase's `_refreshAccessToken`. The user has an expired JWT session stored in `localStorage`. When the Supabase client tries to refresh it and fails (because the refresh token is also expired or invalid), it produces a cascade of identical errors without clearing the bad session.
 
-1. **No currency conversion** — `total_monthly_estimate` is stored in EUR base, but the Slack message labels it "NOK" without multiplying by the conversion rate (11.5)
-2. **Wrong calculation** — Instead of using the pre-calculated `total_monthly_estimate` (which includes discounts), it manually recalculates and gets it wrong
-3. **No proper formatting** — Uses raw `toLocaleString("nb-NO")` + hardcoded "NOK" instead of `Intl.NumberFormat` with the offer's actual currency
+## Root Cause
 
-## Fix
+The Supabase client is configured with `autoRefreshToken: true` and `persistSession: true`, but there is no error handling for when the refresh itself fails. The app never listens for the `TOKEN_REFRESHED` failure event or catches the `SIGNED_OUT` event triggered by an expired refresh token.
 
-In `supabase/functions/accept-offer/index.ts`, replicate the same pattern used in `send-pricing-offer`:
+## Solution
 
-1. Read `offer.currency`, `offer.conversion_rate`, and `offer.total_monthly_estimate` from the DB row
-2. Compute `displayTotalMonthly = total_monthly_estimate * conversionRate` (with fallback calculation)
-3. Format using `Intl.NumberFormat` with the offer's currency and locale
-4. Display the correctly converted and formatted amount in the Slack message
+Add an auth state change listener at the app level that detects when a session becomes invalid and cleans up gracefully, preventing the error loop.
 
-## Files Changed
-- `supabase/functions/accept-offer/index.ts` — fix monthly cost calculation and currency formatting in the Slack block
+## Changes
+
+### 1. Update `src/App.tsx` -- Add auth error recovery
+
+Add a `useEffect` at the top of the `App` component that listens for Supabase auth state changes. When the event is `TOKEN_REFRESHED` with a `null` session, or `SIGNED_OUT`, clear any stale session state. This prevents the retry loop.
+
+```typescript
+useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+      // Session expired or refresh failed -- no action needed,
+      // just let the app continue in unauthenticated state
+    }
+  });
+  return () => subscription.unsubscribe();
+}, []);
+```
+
+Additionally, add an initial check that attempts `getSession()` and, if it returns an error, calls `signOut()` to clear the corrupt localStorage tokens:
+
+```typescript
+useEffect(() => {
+  const cleanupStaleSession = async () => {
+    const { error } = await supabase.auth.getSession();
+    if (error) {
+      console.warn('[Auth] Stale session detected, signing out:', error.message);
+      await supabase.auth.signOut();
+    }
+  };
+  cleanupStaleSession();
+}, []);
+```
+
+### 2. No other files need changes
+
+The `@tailwindcss/typography` plugin is already installed and configured. The `BlogRichTextEditor` formatting and scroll preservation fixes from previous edits are in place. The markdown rendering pipeline (`parseBlogMarkdown`) is working correctly.
+
+## Impact Assessment
+
+- **No functionality is broken** -- this only adds graceful handling for expired sessions
+- Public pages continue to work without authentication
+- Authenticated users with valid sessions are unaffected
+- Users with expired sessions will simply be signed out instead of seeing console error spam
 

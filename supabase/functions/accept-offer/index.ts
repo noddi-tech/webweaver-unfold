@@ -90,9 +90,23 @@ serve(async (req: Request): Promise<Response> => {
     // Send Slack notification
     const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
     if (slackWebhookUrl) {
-      const monthlyRevenue = (offer.annual_revenue || 0) / 12;
-      const revenueCost = monthlyRevenue * ((offer.revenue_percentage || 0) / 100);
-      const monthlyCost = (offer.fixed_monthly || 0) + revenueCost;
+      const currency = offer.currency || 'EUR';
+      const conversionRate = offer.conversion_rate || 1;
+      
+      // Use pre-calculated total (includes discounts), converted to display currency
+      const displayFixedMonthly = (offer.fixed_monthly || 0) * conversionRate;
+      const displayMonthlyRevenue = ((offer.annual_revenue || 0) / 12) * conversionRate;
+      const displayRevenueCost = displayMonthlyRevenue * ((offer.revenue_percentage || 0) / 100);
+      const displayTotalMonthly = offer.total_monthly_estimate 
+        ? offer.total_monthly_estimate * conversionRate 
+        : displayFixedMonthly + displayRevenueCost;
+
+      const CURRENCY_LOCALES: Record<string, string> = {
+        EUR: 'de-DE', NOK: 'nb-NO', SEK: 'sv-SE', USD: 'en-US', GBP: 'en-GB'
+      };
+      const locale = CURRENCY_LOCALES[currency] || 'en-US';
+      const formatCurrency = (amount: number) =>
+        new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount);
 
       await fetch(slackWebhookUrl, {
         method: "POST",
@@ -124,7 +138,7 @@ serve(async (req: Request): Promise<Response> => {
                 },
                 {
                   type: "mrkdwn",
-                  text: `*Monthly Cost:*\n${monthlyCost.toLocaleString("nb-NO")} NOK`,
+                  text: `*Monthly Cost:*\n${formatCurrency(displayTotalMonthly)}`,
                 },
                 {
                   type: "mrkdwn",
