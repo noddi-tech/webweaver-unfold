@@ -214,7 +214,7 @@ export function OffersHistory() {
 
   const canDelete = (status: string | null) => {
     // Allow deleting draft and sent offers (admin tool flexibility)
-    return !status || ['draft', 'sent'].includes(status);
+    return !status || ['draft', 'sent', 'accepted', 'viewed', 'expired', 'rejected'].includes(status);
   };
 
   if (isLoading) {
