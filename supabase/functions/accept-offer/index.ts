@@ -90,20 +90,21 @@ serve(async (req: Request): Promise<Response> => {
     // Send Slack notification
     const slackWebhookUrl = Deno.env.get("SLACK_WEBHOOK_URL");
     if (slackWebhookUrl) {
-      const monthlyCost = (offer.fixed_monthly_cost || 0) + 
-        ((offer.estimated_monthly_revenue || 0) * (offer.revenue_percentage || 0) / 100);
+      const monthlyRevenue = (offer.annual_revenue || 0) / 12;
+      const revenueCost = monthlyRevenue * ((offer.revenue_percentage || 0) / 100);
+      const monthlyCost = (offer.fixed_monthly || 0) + revenueCost;
 
       await fetch(slackWebhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: `🎉 ${offer.company_name} accepted the pricing offer!`,
+          text: `🎉 ${offer.customer_company} accepted the pricing offer!`,
           blocks: [
             {
               type: "section",
               text: {
                 type: "mrkdwn",
-                text: `🎉 *${offer.company_name}* accepted the pricing offer!`,
+                text: `🎉 *${offer.customer_company}* accepted the pricing offer!`,
               },
             },
             {
@@ -111,11 +112,11 @@ serve(async (req: Request): Promise<Response> => {
               fields: [
                 {
                   type: "mrkdwn",
-                  text: `*Contact:*\n${offer.contact_name}`,
+                  text: `*Contact:*\n${offer.customer_name}`,
                 },
                 {
                   type: "mrkdwn",
-                  text: `*Email:*\n${offer.contact_email}`,
+                  text: `*Email:*\n${offer.customer_email}`,
                 },
                 {
                   type: "mrkdwn",
@@ -127,7 +128,7 @@ serve(async (req: Request): Promise<Response> => {
                 },
                 {
                   type: "mrkdwn",
-                  text: `*Locations:*\n${offer.locations_included}`,
+                  text: `*Locations:*\n${offer.locations}`,
                 },
               ],
             },
@@ -136,7 +137,7 @@ serve(async (req: Request): Promise<Response> => {
               elements: [
                 {
                   type: "mrkdwn",
-                  text: `✅ Next step: Contact ${offer.contact_name} to finalize the agreement`,
+                  text: `✅ Next step: Contact ${offer.customer_name} to finalize the agreement`,
                 },
               ],
             },
