@@ -1,60 +1,34 @@
 
 
-# Fix: Stale Auth Session Causing "Failed to Fetch" Error Loop
+# Fix "undefined" in Slack Notifications + Allow Deleting Accepted Offers
 
-## Problem
+## Issue 1: Slack shows "undefined"
 
-The only errors in the application are repeated `TypeError: Failed to fetch` originating from Supabase's `_refreshAccessToken`. The user has an expired JWT session stored in `localStorage`. When the Supabase client tries to refresh it and fails (because the refresh token is also expired or invalid), it produces a cascade of identical errors without clearing the bad session.
+The `accept-offer` edge function references column names that don't exist in the `pricing_offers` table:
 
-## Root Cause
+| Code references | Actual DB column |
+|---|---|
+| `offer.company_name` | `offer.customer_company` |
+| `offer.contact_name` | `offer.customer_name` |
+| `offer.contact_email` | `offer.customer_email` |
+| `offer.locations_included` | `offer.locations` |
+| `offer.fixed_monthly_cost` | `offer.fixed_monthly` |
+| `offer.estimated_monthly_revenue` | `offer.annual_revenue` |
 
-The Supabase client is configured with `autoRefreshToken: true` and `persistSession: true`, but there is no error handling for when the refresh itself fails. The app never listens for the `TOKEN_REFRESHED` failure event or catches the `SIGNED_OUT` event triggered by an expired refresh token.
+Every field in the Slack message resolves to `undefined` because the property names are wrong.
 
-## Solution
+**Fix in `supabase/functions/accept-offer/index.ts`**: Replace all incorrect column references with the actual DB column names throughout the Slack notification block (lines 93-137). Also fix the monthly cost calculation to use `fixed_monthly` and `annual_revenue`.
 
-Add an auth state change listener at the app level that detects when a session becomes invalid and cleans up gracefully, preventing the error loop.
+## Issue 2: Can't delete accepted offers
 
-## Changes
-
-### 1. Update `src/App.tsx` -- Add auth error recovery
-
-Add a `useEffect` at the top of the `App` component that listens for Supabase auth state changes. When the event is `TOKEN_REFRESHED` with a `null` session, or `SIGNED_OUT`, clear any stale session state. This prevents the retry loop.
-
-```typescript
-useEffect(() => {
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
-      // Session expired or refresh failed -- no action needed,
-      // just let the app continue in unauthenticated state
-    }
-  });
-  return () => subscription.unsubscribe();
-}, []);
+In `src/components/pricing/OffersHistory.tsx`, the `canDelete` function only allows `draft` and `sent`:
+```ts
+const canDelete = (status) => !status || ['draft', 'sent'].includes(status);
 ```
 
-Additionally, add an initial check that attempts `getSession()` and, if it returns an error, calls `signOut()` to clear the corrupt localStorage tokens:
+**Fix**: Add `'accepted'` to the allowed statuses (or remove the restriction entirely for admin flexibility).
 
-```typescript
-useEffect(() => {
-  const cleanupStaleSession = async () => {
-    const { error } = await supabase.auth.getSession();
-    if (error) {
-      console.warn('[Auth] Stale session detected, signing out:', error.message);
-      await supabase.auth.signOut();
-    }
-  };
-  cleanupStaleSession();
-}, []);
-```
-
-### 2. No other files need changes
-
-The `@tailwindcss/typography` plugin is already installed and configured. The `BlogRichTextEditor` formatting and scroll preservation fixes from previous edits are in place. The markdown rendering pipeline (`parseBlogMarkdown`) is working correctly.
-
-## Impact Assessment
-
-- **No functionality is broken** -- this only adds graceful handling for expired sessions
-- Public pages continue to work without authentication
-- Authenticated users with valid sessions are unaffected
-- Users with expired sessions will simply be signed out instead of seeing console error spam
+## Files Changed
+- `supabase/functions/accept-offer/index.ts` — fix all column name references
+- `src/components/pricing/OffersHistory.tsx` — allow deleting accepted offers
 
