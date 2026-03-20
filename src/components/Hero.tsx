@@ -219,7 +219,7 @@ const Hero = () => {
           </div>
 
           {/* Product Image with USP Section */}
-          <div className="w-full px-0 sm:px-2 lg:px-4 max-w-7xl mx-auto space-y-12">
+          <div className="w-full px-0 sm:px-2 lg:px-4 max-w-7xl mx-auto space-y-6">
             {/* Image/Carousel container with FIXED dimensions - prevents layout shift */}
             <EditableUniversalMedia
               locationId="homepage-hero"
