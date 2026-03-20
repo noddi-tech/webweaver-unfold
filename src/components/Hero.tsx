@@ -201,7 +201,7 @@ const Hero = () => {
             />
 
             <EditableTranslation translationKey="hero.subtitle">
-              <p className={`${body} text-muted-foreground text-center`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
+              <p className={`${body} text-foreground/80 text-center`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
             </EditableTranslation>
 
 
@@ -219,7 +219,7 @@ const Hero = () => {
           </div>
 
           {/* Product Image with USP Section */}
-          <div className="w-full px-0 sm:px-2 lg:px-4 max-w-7xl mx-auto space-y-12">
+          <div className="w-full px-0 sm:px-2 lg:px-4 max-w-7xl mx-auto space-y-6">
             {/* Image/Carousel container with FIXED dimensions - prevents layout shift */}
             <EditableUniversalMedia
               locationId="homepage-hero"
@@ -331,7 +331,7 @@ const Hero = () => {
                       <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Capacity opens itself. Teams stay in flow.</h3>
                     </EditableTranslation>
                     <EditableTranslation translationKey="hero.usp1.description" fallbackText="Automatic slotting and crew scheduling — no more bottlenecks.">
-                      <p className="text-sm text-white/70">Automatic slotting and crew scheduling — no more bottlenecks.</p>
+                      <p className="text-sm text-white/80">Automatic slotting and crew scheduling — no more bottlenecks.</p>
                     </EditableTranslation>
                   </div>
                 </div>
@@ -344,7 +344,7 @@ const Hero = () => {
                       <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Schedules adapt. Every job starts on time.</h3>
                     </EditableTranslation>
                     <EditableTranslation translationKey="hero.usp2.description" fallbackText="Intelligent planning and live re-sequencing for mobile and garage services.">
-                      <p className="text-sm text-white/70">Intelligent planning and live re-sequencing for mobile and garage services.</p>
+                      <p className="text-sm text-white/80">Intelligent planning and live re-sequencing for mobile and garage services.</p>
                     </EditableTranslation>
                   </div>
                 </div>
@@ -357,7 +357,7 @@ const Hero = () => {
                       <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Customers in control. Loved by end users.</h3>
                     </EditableTranslation>
                     <EditableTranslation translationKey="hero.usp3.description" fallbackText="Self-service booking, inspection, payment transparency — NPS ≈ 90.">
-                      <p className="text-sm text-white/70">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
+                      <p className="text-sm text-white/80">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
                     </EditableTranslation>
                   </div>
                 </div>
