@@ -69,7 +69,7 @@ export function LogoMarquee() {
             loading="lazy"
             decoding="async"
             className={cn(
-              "h-6 transition-opacity duration-300",
+              "h-8 transition-opacity duration-300",
               isLoading ? "opacity-0" : "opacity-100"
             )}
           />
