@@ -69,7 +69,7 @@ export function LogoMarquee() {
             loading="lazy"
             decoding="async"
             className={cn(
-              "h-6 transition-opacity duration-300",
+              "h-8 transition-opacity duration-300",
               isLoading ? "opacity-0" : "opacity-100"
             )}
           />
@@ -93,7 +93,7 @@ export function LogoMarquee() {
         {isLoading ? (
           <div className="flex justify-center gap-14 px-8">
             {baseLogos.map((_, i) => (
-              <div key={i} className="h-6 w-24 bg-muted/20 rounded animate-pulse" />
+              <div key={i} className="h-8 w-28 bg-muted/20 rounded animate-pulse" />
             ))}
           </div>
         ) : (
@@ -105,7 +105,7 @@ export function LogoMarquee() {
                   alt={logo.alt}
                   loading="lazy"
                   decoding="async"
-                  className="h-6"
+                  className="h-8"
                 />
               </div>
             ))}
@@ -130,7 +130,7 @@ export function LogoMarquee() {
       {isLoading && (
         <div className="flex justify-around gap-14 px-8">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-6 w-24 bg-muted/20 rounded animate-pulse" />
+            <div key={i} className="h-8 w-28 bg-muted/20 rounded animate-pulse" />
           ))}
         </div>
       )}

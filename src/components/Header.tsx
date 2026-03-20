@@ -258,7 +258,7 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           {headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
-            <NavigationMenu className="hidden md:flex">
+            <NavigationMenu className="hidden lg:flex">
               <NavigationMenuList>
                 {headerSettings.navigation_links.map((link: any, originalIndex: number) => link.active ? { link, originalIndex } : null).filter(Boolean).map(({ link, originalIndex }: any) => {
                 const dropdownItems = (link.type === 'static-dropdown' || link.type === 'dropdown')
@@ -327,7 +327,7 @@ const Header = () => {
           )}
 
           {/* Auth Buttons, Language switcher, CTA and user menu */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-4">
             {headerSettings?.show_auth_buttons && (
               <>
                 {headerSettings.show_sign_in_button && (
@@ -351,7 +351,7 @@ const Header = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 transition-colors text-foreground hover:text-primary"
+            className="lg:hidden p-2 transition-colors text-foreground hover:text-primary"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -360,7 +360,7 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
-          <div className="md:hidden mt-4 pb-4">
+          <div className="lg:hidden mt-4 pb-4">
             <nav className="flex flex-col space-y-2">
               {headerSettings.navigation_links.map((link: any, originalIndex: number) => link.active ? { link, originalIndex } : null).filter(Boolean).map(({ link, originalIndex }: any) => {
                 const dropdownItems = (link.type === 'static-dropdown' || link.type === 'dropdown')
