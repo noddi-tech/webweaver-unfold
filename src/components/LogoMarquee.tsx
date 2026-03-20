@@ -60,7 +60,7 @@ export function LogoMarquee() {
       : baseLogos;
 
   const Strip = ({ prefix }: { prefix: string }) => (
-    <div className="flex flex-none min-w-full items-center justify-around gap-14">
+    <div className="flex shrink-0 items-center gap-14">
       {stripLogos.map((logo, i) => (
         <div key={`${prefix}-${i}`} className="flex-shrink-0">
           <img
@@ -136,7 +136,7 @@ export function LogoMarquee() {
       )}
       
       <div className={cn(
-        "flex animate-marquee transition-opacity duration-300",
+        "flex gap-14 animate-marquee transition-opacity duration-300",
         isLoading ? "opacity-0 absolute" : "opacity-100"
       )}>
         <Strip prefix="a" />
