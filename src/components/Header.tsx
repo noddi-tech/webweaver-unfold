@@ -326,28 +326,27 @@ const Header = () => {
             </NavigationMenu>
           )}
 
-          {/* Auth Buttons, Language switcher and user menu */}
+          {/* Auth Buttons, Language switcher, CTA and user menu */}
           <div className="hidden md:flex items-center space-x-4">
-{headerSettings?.show_auth_buttons && (
-                  <>
-                    {headerSettings.show_sign_in_button && (
-                      <Button asChild variant="ghost" size="sm">
-                        <a href={headerSettings.sign_in_url || '/auth'}>
-                          {t('header.sign_in', headerSettings.sign_in_text || 'Sign In')}
-                        </a>
-                      </Button>
-                    )}
-                    {headerSettings.show_sign_up_button && (
-                      <Button asChild variant="default" size="sm">
-                        <a href={headerSettings.sign_up_url || '/auth?tab=signup'}>
-                          {t('header.sign_up', headerSettings.get_started_text || 'Sign Up')}
-                        </a>
-                      </Button>
-                    )}
-                  </>
+            {headerSettings?.show_auth_buttons && (
+              <>
+                {headerSettings.show_sign_in_button && (
+                  <Button asChild variant="ghost" size="sm">
+                    <a href={headerSettings.sign_in_url || '/auth'}>
+                      {t('header.sign_in', headerSettings.sign_in_text || 'Sign In')}
+                    </a>
+                  </Button>
                 )}
+              </>
+            )}
             <LanguageSwitcher variant="header" />
             {user && <UserMenuDropdown user={user} />}
+            {/* Persistent "Book a Demo" CTA — always visible regardless of CMS settings */}
+            <Button asChild variant="default" size="sm">
+              <LanguageLink to="/contact">
+                {t('header.book_demo', 'Book a Demo')}
+              </LanguageLink>
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
