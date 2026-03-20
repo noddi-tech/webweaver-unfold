@@ -1,60 +1,86 @@
 
 
-# Fix: Stale Auth Session Causing "Failed to Fetch" Error Loop
+# Design Overhaul: Navio Homepage — Curbee-Inspired Polish
 
-## Problem
+Based on the design critique comparing naviosolutions.com against curbee.com, this plan addresses the highest-impact issues in priority order.
 
-The only errors in the application are repeated `TypeError: Failed to fetch` originating from Supabase's `_refreshAccessToken`. The user has an expired JWT session stored in `localStorage`. When the Supabase client tries to refresh it and fails (because the refresh token is also expired or invalid), it produces a cascade of identical errors without clearing the bad session.
+## Summary of Changes
 
-## Root Cause
+Five workstreams targeting the critical and moderate findings. Each is independently deployable.
 
-The Supabase client is configured with `autoRefreshToken: true` and `persistSession: true`, but there is no error handling for when the refresh itself fails. The app never listens for the `TOKEN_REFRESHED` failure event or catches the `SIGNED_OUT` event triggered by an expired refresh token.
+---
 
-## Solution
+## 1. Add "Book a Demo" CTA to Navigation (Critical)
 
-Add an auth state change listener at the app level that detects when a session becomes invalid and cleans up gracefully, preventing the error loop.
+**Problem**: No persistent conversion CTA in the header. Curbee has a prominent dark "Book Demo" button always visible.
 
-## Changes
+**Change**: In `src/components/Header.tsx`, add a persistent "Book a Demo" button in the desktop nav (right side, next to language switcher) that links to `/contact`. This should render regardless of `headerSettings.show_auth_buttons` — it's always visible.
 
-### 1. Update `src/App.tsx` -- Add auth error recovery
+- Filled primary button style, `variant="default"` with `size="sm"`
+- Also add to mobile menu as a prominent top item
+- Translation key: `header.book_demo`
 
-Add a `useEffect` at the top of the `App` component that listens for Supabase auth state changes. When the event is `TOKEN_REFRESHED` with a `null` session, or `SIGNED_OUT`, clear any stale session state. This prevents the retry loop.
+---
 
-```typescript
-useEffect(() => {
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
-      // Session expired or refresh failed -- no action needed,
-      // just let the app continue in unauthenticated state
-    }
-  });
-  return () => subscription.unsubscribe();
-}, []);
-```
+## 2. Fix Vertical Spacing & Eliminate Dead Zones (Critical)
 
-Additionally, add an initial check that attempts `getSession()` and, if it returns an error, calls `signOut()` to clear the corrupt localStorage tokens:
+**Problem**: Inconsistent gaps between sections — some 40px, others 200px+.
 
-```typescript
-useEffect(() => {
-  const cleanupStaleSession = async () => {
-    const { error } = await supabase.auth.getSession();
-    if (error) {
-      console.warn('[Auth] Stale session detected, signing out:', error.message);
-      await supabase.auth.signOut();
-    }
-  };
-  cleanupStaleSession();
-}, []);
-```
+**Changes**:
+- **`src/components/Hero.tsx`**: Tighten bottom padding. The hero currently has `pb-8 sm:pb-12` which is fine, but the internal `space-y-12` between the image and logo marquee creates excessive gaps. Reduce to `space-y-6`.
+- **`src/components/ScrollingFeatureCards.tsx`**: Audit section padding — ensure it uses the standard `py-12 md:py-16 lg:py-section` pattern.
+- **`src/index.css`**: Verify `--section-spacing` value. If `lg:py-section` resolves to something larger than 120px, cap it. Add a comment documenting the 80-120px target range.
+- Remove any `mb-16` on section headers that creates excessive internal gaps — standardize to `mb-8 md:mb-12`.
 
-### 2. No other files need changes
+---
 
-The `@tailwindcss/typography` plugin is already installed and configured. The `BlogRichTextEditor` formatting and scroll preservation fixes from previous edits are in place. The markdown rendering pipeline (`parseBlogMarkdown`) is working correctly.
+## 3. Strengthen Text Contrast (Moderate → High Impact)
 
-## Impact Assessment
+**Problem**: Hero subtitle uses `text-muted-foreground` which is too light against the gradient. Step cards have pale text on gradient backgrounds.
 
-- **No functionality is broken** -- this only adds graceful handling for expired sessions
-- Public pages continue to work without authentication
-- Authenticated users with valid sessions are unaffected
-- Users with expired sessions will simply be signed out instead of seeing console error spam
+**Changes**:
+- **`src/components/Hero.tsx`**: Change hero subtitle from `text-muted-foreground` to `text-foreground/80` for stronger contrast while keeping it secondary.
+- **`src/components/HowItWorks.tsx`**: Audit step card text colors. Ensure text on gradient/colored card backgrounds meets WCAG AA (4.5:1 for body text). Use `text-white` with sufficient background darkness.
+- **USP section in Hero**: The USP titles already use `text-white` which is good, but descriptions use `text-white/70` — increase to `text-white/80` minimum.
+
+---
+
+## 4. Add Persistent "Book a Demo" Button to Header (via CMS)
+
+Since the header is CMS-driven (`header_settings`), the code change adds a **hardcoded CTA** that renders independently of CMS settings, ensuring it's always present. This is the Curbee pattern — the demo CTA is never optional.
+
+---
+
+## 5. Logo Marquee: Static Display for Small Sets (Moderate)
+
+**Problem**: 3 logos looping in a marquee looks thin.
+
+**Change in `src/components/LogoMarquee.tsx`**:
+- If `logos.length <= 4`, render statically in a centered flex row with a "Trusted by" label above
+- Only use the scrolling marquee animation when there are 5+ logos
+- Add a "Trusted by leading Nordic service providers" label above the logos (translation key: `hero.trusted_by`)
+
+---
+
+## Files to Modify
+
+| File | Change |
+|---|---|
+| `src/components/Header.tsx` | Add persistent "Book a Demo" CTA button |
+| `src/components/Hero.tsx` | Fix subtitle contrast, tighten spacing, improve USP text opacity |
+| `src/components/LogoMarquee.tsx` | Static display for ≤4 logos, add "Trusted by" label |
+| `src/components/HowItWorks.tsx` | Audit step card text contrast |
+| `src/components/WhyNavio.tsx` | Standardize section header margins |
+| `src/components/ScrollingFeatureCards.tsx` | Standardize section padding |
+
+---
+
+## Out of Scope (Future Iterations)
+
+- Button style consolidation (requires CMS-wide audit)
+- Card design unification (affects multiple CMS-driven components)
+- Full WCAG accessibility audit
+- Feature card "scannable overview" like Curbee's 4-card summary
+
+These are larger systemic changes better handled as separate workstreams.
 
