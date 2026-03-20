@@ -130,7 +130,7 @@ export function LogoMarquee() {
       {isLoading && (
         <div className="flex justify-around gap-14 px-8">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-6 w-24 bg-muted/20 rounded animate-pulse" />
+            <div key={i} className="h-8 w-28 bg-muted/20 rounded animate-pulse" />
           ))}
         </div>
       )}

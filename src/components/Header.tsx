@@ -360,7 +360,7 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
-          <div className="md:hidden mt-4 pb-4">
+          <div className="lg:hidden mt-4 pb-4">
             <nav className="flex flex-col space-y-2">
               {headerSettings.navigation_links.map((link: any, originalIndex: number) => link.active ? { link, originalIndex } : null).filter(Boolean).map(({ link, originalIndex }: any) => {
                 const dropdownItems = (link.type === 'static-dropdown' || link.type === 'dropdown')
