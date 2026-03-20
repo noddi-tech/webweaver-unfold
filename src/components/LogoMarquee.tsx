@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { useAppTranslation } from '@/hooks/useAppTranslation';
 
 interface Logo {
   src: string;
@@ -10,6 +11,7 @@ interface Logo {
 export function LogoMarquee() {
   const [logos, setLogos] = useState<Logo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useAppTranslation();
 
   useEffect(() => {
     loadLogos();
@@ -18,7 +20,6 @@ export function LogoMarquee() {
   const loadLogos = async () => {
     setIsLoading(true);
     try {
-      // Try to load from images table with section 'logo-marquee'
       const { data: imageData } = await supabase
         .from('images')
         .select('file_url, alt, title')
@@ -32,7 +33,6 @@ export function LogoMarquee() {
           alt: img.alt || img.title
         })));
       } else {
-        // Fallback placeholder logos
         setLogos([
           { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+1', alt: 'Partner 1' },
           { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+2', alt: 'Partner 2' },
@@ -47,8 +47,10 @@ export function LogoMarquee() {
     }
   };
 
-  // Ensure we have enough logos to fill a full viewport-wide strip
   const baseLogos = logos.length > 0 ? logos : [];
+  const useStaticDisplay = baseLogos.length > 0 && baseLogos.length <= 4;
+
+  // For marquee: ensure enough logos to fill strip
   const stripLogos = baseLogos.length >= 6
     ? baseLogos
     : baseLogos.length > 0
@@ -76,6 +78,44 @@ export function LogoMarquee() {
     </div>
   );
 
+  // "Trusted by" label
+  const TrustedLabel = () => (
+    <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground text-center mb-4">
+      {t('hero.trusted_by', 'Trusted by leading Nordic service providers')}
+    </p>
+  );
+
+  // Static display for ≤4 logos
+  if (useStaticDisplay) {
+    return (
+      <section className="w-full py-8">
+        <TrustedLabel />
+        {isLoading ? (
+          <div className="flex justify-center gap-14 px-8">
+            {baseLogos.map((_, i) => (
+              <div key={i} className="h-6 w-24 bg-muted/20 rounded animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-10 sm:gap-14 px-8">
+            {baseLogos.map((logo, i) => (
+              <div key={i} className="flex-shrink-0">
+                <img
+                  src={logo.src}
+                  alt={logo.alt}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-6"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  // Scrolling marquee for 5+ logos
   return (
     <section 
       className="w-full overflow-hidden py-8"
@@ -84,6 +124,8 @@ export function LogoMarquee() {
         WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 12.5%, black 87.5%, transparent 100%)'
       }}
     >
+      <TrustedLabel />
+      
       {/* Skeleton while loading */}
       {isLoading && (
         <div className="flex justify-around gap-14 px-8">
@@ -93,14 +135,11 @@ export function LogoMarquee() {
         </div>
       )}
       
-      {/* Actual marquee content - removed will-change-transform to prevent GPU memory issues */}
       <div className={cn(
         "flex animate-marquee transition-opacity duration-300",
         isLoading ? "opacity-0 absolute" : "opacity-100"
       )}>
-        {/* First strip */}
         <Strip prefix="a" />
-        {/* Duplicate strip for seamless loop */}
         <Strip prefix="b" />
       </div>
     </section>
