@@ -201,7 +201,7 @@ const Hero = () => {
             />
 
             <EditableTranslation translationKey="hero.subtitle">
-              <p className={`${body} text-muted-foreground text-center`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
+              <p className={`${body} text-foreground/80 text-center`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
             </EditableTranslation>
 
 
