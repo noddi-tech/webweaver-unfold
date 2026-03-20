@@ -1,27 +1,23 @@
 
 
-# Fix Logo Sizes & Header Breakpoint
+# Fix Logo Marquee: Spacing & Infinite Loop
 
-## 1. Increase Logo Marquee Size
+## Problems
+1. **Uneven spacing** between last and first logo — the Strip uses `justify-around` which distributes space unevenly, and there's no gap between the two strips
+2. **Visible reset** — the animation translates `-50%` but the two strips don't perfectly tile because `min-w-full` + `justify-around` doesn't guarantee seamless wrapping
 
-**Problem**: Logos use `h-6` (24px) which is too small to read, especially for text-heavy logos like "Hurtigruta Carglass."
+## Fix
 
-**Change in `src/components/LogoMarquee.tsx`**:
-- Increase logo height from `h-6` to `h-8` (32px) across all three render paths (Strip, static display, skeleton)
-- Update skeleton placeholder width from `w-24` to `w-28` to match
+**`src/components/LogoMarquee.tsx`** — Replace the Strip layout:
+- Change from `min-w-full justify-around gap-14` to a fixed `gap-14` with no `min-w-full` or `justify-around`
+- Each strip should just be a simple flex row with consistent `gap-14` spacing
+- Add `gap-14` on the outer `animate-marquee` container too, so the gap between strip A's last logo and strip B's first logo matches the internal gaps
+- This makes the two strips tile seamlessly, creating a true infinite loop
 
-## 2. Raise Header Responsive Breakpoint
+**`src/index.css`** — No changes needed; the `translateX(-50%)` animation is correct for two identical strips.
 
-**Problem**: The desktop nav uses `md:` (768px) breakpoint but at ~825px the nav items + CTA + language switcher + avatar are too cramped, making the logo area look squished.
-
-**Change in `src/components/Header.tsx`**:
-- Change all `md:hidden` / `hidden md:flex` / `md:hidden` breakpoints to `lg:hidden` / `hidden lg:flex` so the hamburger menu kicks in below 1024px instead of 768px
-- This affects: desktop nav container, right-side buttons container, mobile menu button, and mobile menu panel
-
-## Files to Modify
-
+## Files
 | File | Change |
 |---|---|
-| `src/components/LogoMarquee.tsx` | `h-6` → `h-8` for logos, `w-24` → `w-28` for skeletons |
-| `src/components/Header.tsx` | `md:` → `lg:` breakpoint for nav desktop/mobile toggle (~6 occurrences) |
+| `src/components/LogoMarquee.tsx` | Strip: remove `min-w-full justify-around`, use consistent `gap-14` only. Outer marquee div: add `gap-14`. |
 
