@@ -327,7 +327,7 @@ const Header = () => {
           )}
 
           {/* Auth Buttons, Language switcher, CTA and user menu */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-4">
             {headerSettings?.show_auth_buttons && (
               <>
                 {headerSettings.show_sign_in_button && (
