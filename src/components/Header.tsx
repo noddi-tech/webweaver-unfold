@@ -258,7 +258,7 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           {headerSettings?.navigation_links && headerSettings.navigation_links.length > 0 && (
-            <NavigationMenu className="hidden md:flex">
+            <NavigationMenu className="hidden lg:flex">
               <NavigationMenuList>
                 {headerSettings.navigation_links.map((link: any, originalIndex: number) => link.active ? { link, originalIndex } : null).filter(Boolean).map(({ link, originalIndex }: any) => {
                 const dropdownItems = (link.type === 'static-dropdown' || link.type === 'dropdown')
