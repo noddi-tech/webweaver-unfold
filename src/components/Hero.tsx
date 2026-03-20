@@ -331,7 +331,7 @@ const Hero = () => {
                       <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Capacity opens itself. Teams stay in flow.</h3>
                     </EditableTranslation>
                     <EditableTranslation translationKey="hero.usp1.description" fallbackText="Automatic slotting and crew scheduling — no more bottlenecks.">
-                      <p className="text-sm text-white/70">Automatic slotting and crew scheduling — no more bottlenecks.</p>
+                      <p className="text-sm text-white/80">Automatic slotting and crew scheduling — no more bottlenecks.</p>
                     </EditableTranslation>
                   </div>
                 </div>
