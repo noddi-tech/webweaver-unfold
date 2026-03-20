@@ -136,7 +136,7 @@ export function LogoMarquee() {
       )}
       
       <div className={cn(
-        "flex animate-marquee transition-opacity duration-300",
+        "flex gap-14 animate-marquee transition-opacity duration-300",
         isLoading ? "opacity-0 absolute" : "opacity-100"
       )}>
         <Strip prefix="a" />
