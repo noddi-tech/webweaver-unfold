@@ -357,7 +357,7 @@ const Hero = () => {
                       <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Customers in control. Loved by end users.</h3>
                     </EditableTranslation>
                     <EditableTranslation translationKey="hero.usp3.description" fallbackText="Self-service booking, inspection, payment transparency — NPS ≈ 90.">
-                      <p className="text-sm text-white/70">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
+                      <p className="text-sm text-white/80">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
                     </EditableTranslation>
                   </div>
                 </div>
