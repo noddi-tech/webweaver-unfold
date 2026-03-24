@@ -81,7 +81,7 @@ export function LogoMarquee() {
   // "Trusted by" label
   const TrustedLabel = () => (
     <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground text-center mb-4">
-      {t('hero.trusted_by', 'Trusted by leading Nordic service providers')}
+      {t('hero.trusted_by', 'Trusted by leading service providers')}
     </p>
   );
 
