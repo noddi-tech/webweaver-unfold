@@ -6,6 +6,7 @@ import WhyNavio from "@/components/WhyNavio";
 import HowItWorks from "@/components/HowItWorks";
 import FinalCTA from "@/components/FinalCTA";
 import Integrations from "@/components/Integrations";
+import { LogoMarquee } from "@/components/LogoMarquee";
 import { HreflangTags } from "@/components/HreflangTags";
 import { ScrollingFeatureCards } from "@/components/ScrollingFeatureCards";
 import { StructuredData } from "@/components/StructuredData";
@@ -193,6 +194,15 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
+        <LogoMarquee
+          section="trust-bar"
+          labelKey="trust_bar.label"
+          labelFallback="Trusted by service companies across Scandinavia"
+          compact
+          grayscale
+          pauseOnHover
+          className="bg-muted/30 border-y border-border/50"
+        />
         <ScrollingFeatureCards />
         <WhyNavio />
         <HowItWorks />
