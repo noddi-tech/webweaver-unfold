@@ -10,7 +10,6 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
 import { supabase } from "@/integrations/supabase/client";
-import { supabase } from "@/integrations/supabase/client";
 
 import { RotatingHeadline } from "@/components/RotatingHeadline";
 import {
@@ -32,7 +31,6 @@ const Hero = () => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [mediaKey, setMediaKey] = useState(0);
-  const { allowedBackgrounds } = useAllowedBackgrounds();
   const [translationKey, setTranslationKey] = useState(0);
   
   const [isLoading, setIsLoading] = useState(true);
