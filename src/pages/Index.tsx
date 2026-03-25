@@ -208,6 +208,7 @@ const Index = () => {
         <WhyNavio />
         <HowItWorks />
         <IntegrationStrip />
+        <CustomerTestimonial />
         <FinalCTA />
       </main>
       <Footer />
