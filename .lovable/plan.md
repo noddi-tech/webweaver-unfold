@@ -1,22 +1,24 @@
 
 
-# Final CTA Update
+# Replace HowItWorks Steps with Core Loop Illustration
 
-## Changes in `src/components/FinalCTA.tsx`
+## What
+Replace the 4 step cards in the HowItWorks section with the same Core Loop illustration + 5-step stepper used on the Functions page. Keep the section heading and subtitle, keep the bottom caption block.
 
-1. **Update headline fallback**: Change `"Let's build your digital workshop"` → `"See how Navio fits your operation"`
+## Changes in `src/components/HowItWorks.tsx`
 
-2. **Remove subtitle**: Remove the `EditableTranslation` block for `final_cta.subtitle` (lines 221-228) — the new headline is self-sufficient and the section should be tighter.
+1. **Add imports**: `EditableUniversalMedia`, `supabase`, `coreLoopIllustration` asset (same as FunctionsHero)
+2. **Add state + effect** for loading the CMS image URL from `image_carousel_settings` where `location_id = 'functions-core-loop'` (reuses the same CMS entry)
+3. **Replace the desktop horizontal card grid and mobile vertical card list** with:
+   - The Core Loop illustration via `EditableUniversalMedia` (same markup as FunctionsHero)
+   - Mobile: ultra-compact inline stepper (1. Book — 2. Plan — 3. Execute — 4. Analyze — 5. Re-engage)
+   - Desktop/Tablet: 5-column numbered step grid with gradient connecting lines, editable titles and descriptions using `core_loop.step_X` translation keys
+4. **Remove**: `Card`, `CardContent`, `EditableBackground`, `EditableIcon`, `useAllowedBackgrounds` imports (no longer needed). Remove the old `steps` array and both desktop/mobile card renderings.
+5. **Keep**: Section heading, subtitle, bottom caption block, scroll animation, `data-header-color="dark"`, all existing spacing patterns.
 
-3. **Replace secondary outline button with a text link**: Remove the outline `Button` (lines 246-258) and replace it with a subtle text link styled as an `<a>`/`LanguageLink` with `underline` and `opacity-80 hover:opacity-100` — pointing to `/features` with text "Or explore features →". Wrap in `EditableTranslation` with key `final_cta.link_secondary`.
+## Files
 
-4. **Restructure CTA area**: Stack the primary button and secondary text link vertically with the text link below the button (not side-by-side), using `flex-col items-center gap-4`.
-
-5. **Keep**: Primary button, footer text, all spacing/styling, edit mode behavior, background system — unchanged.
-
-## Technical detail
-
-- The secondary link uses `LanguageLink` for i18n routing consistency
-- Styled with `text-sm underline underline-offset-4` + dynamic color from `ctaData.secondaryCtaTextColor` to match the section's color scheme
-- `ArrowRight` icon inline after text for the "→" feel
+| File | Change |
+|---|---|
+| `src/components/HowItWorks.tsx` | Replace card-based steps with illustration + stepper from FunctionsHero |
 
