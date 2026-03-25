@@ -1,23 +1,38 @@
 
 
-# Make Logo Marquee Logos Clickable
+# Fix: Edit Button Not Working in Image Manager
 
-## What
-Logos in the trust bar become clickable links. Each logo links to the URL stored in the CMS `images.link_url` field. Logos without a `link_url` remain as plain images.
+## Root Cause
 
-## Changes
+In `ImageEditModalFull.tsx` (line 54), the component uses `useState` instead of `useEffect` to sync the `editedImage` state when the `image` prop changes:
 
-### `src/components/LogoMarquee.tsx`
+```tsx
+// BUG: useState callback only runs once on mount, not on prop changes
+useState(() => {
+  setEditedImage(image);
+});
+```
 
-1. **Add `link` to the `Logo` interface**: Include the `link_url` from the CMS query.
-2. **Update the CMS query**: Already fetches `file_url, alt, title` — just needs to also select `link_url`.
-3. **Map `link_url` into logo data**: `link: img.link_url || null`.
-4. **Wrap `<img>` in `<a>` when `link` exists**: In both the `Strip` component (marquee) and the static display, wrap the image in an anchor tag with `target="_blank"` and `rel="noopener noreferrer"`. When no link, render the `<img>` directly.
+This means when you click the edit button, `editedImage` stays `null` (its initial value from line 51), so the modal either renders nothing or shows stale data.
 
-No new dependencies. The `link_url` field already exists on the `images` table — just populate it in the CMS Image Manager for each logo.
+## Fix
 
-### Files
+**`src/components/design-system/ImageEditModalFull.tsx`**
+
+1. Add `useEffect` to the imports (already imports `useState`)
+2. Replace the broken `useState` call (lines 54-56) with a proper `useEffect`:
+
+```tsx
+useEffect(() => {
+  setEditedImage(image);
+}, [image]);
+```
+
+This ensures `editedImage` updates every time a new image is passed to the modal.
+
+## Files
+
 | File | Change |
 |---|---|
-| `src/components/LogoMarquee.tsx` | Fetch `link_url`, wrap logos in `<a>` when URL exists |
+| `src/components/design-system/ImageEditModalFull.tsx` | Replace `useState` sync with `useEffect`; add `useEffect` import |
 
