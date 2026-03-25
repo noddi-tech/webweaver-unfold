@@ -83,7 +83,7 @@ export default function FinalCTA() {
     };
     
     loadCtaData();
-  }, [stylesLoaded, backgroundStyles, textStyles, t]);
+  }, [stylesLoaded, backgroundStyles, textStyles]);
 
   // Also fetch directly from DB to ensure latest data
   useEffect(() => {
