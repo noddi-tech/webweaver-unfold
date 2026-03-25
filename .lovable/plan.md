@@ -2,93 +2,46 @@
 
 # Fix Three Security Findings
 
-## 1. Restrict `interview_reminders` SELECT Policy
+## 1. Restrict `icon_styles` and `image_sections` Write Access
 
-**Current state:** Two policies exist:
-- `"Admins can manage interview reminders"` (ALL, `is_admin()`) -- good
-- `"Anyone can view interview reminders"` (SELECT, `USING true`) -- bad
+**Current state:** Both tables have an overly permissive ALL policy (`auth.uid() IS NOT NULL`) alongside the admin ALL policy. Any authenticated user can write to these tables.
 
-**Fix:** Drop the public SELECT policy and replace it with one restricted to admins or the interviewer themselves. The `interviewer_id` column exists on this table.
+**Fix:** Drop the permissive ALL policies. The admin ALL policy already covers legitimate writes. Public SELECT policies remain for reads.
 
 ```sql
-DROP POLICY "Anyone can view interview reminders" ON public.interview_reminders;
-
-CREATE POLICY "Admins or interviewer can view reminders"
-ON public.interview_reminders
-FOR SELECT TO authenticated
-USING (is_admin() OR interviewer_id = auth.uid());
+DROP POLICY "Icon styles manageable by authenticated users" ON public.icon_styles;
+DROP POLICY "Image sections can be managed by authenticated users" ON public.image_sections;
 ```
 
-**Impact:** No frontend code reads this table publicly. Only admin dashboards and edge functions (which use service role) access it.
+**Impact:** `useIconStyle.ts`, `UnifiedStyleModal.tsx`, and `SiteStylesContext.tsx` only read `icon_styles` publicly (covered by existing SELECT policy). Writes happen in edit mode which requires admin. `SectionsManager.tsx` reads `image_sections` and is admin-only. No breakage.
 
 ---
 
-## 2. Restrict `interview_slots` Write Access
+## 2. Restrict `referral_sources` Write Access
 
-**Current state:** Two policies:
-- `"Anyone can view available slots with valid token"` (SELECT, `USING true`) -- needed for candidate booking page (unauthenticated candidates query by `booking_token`)
-- `"Authenticated users can manage slots"` (ALL, `USING true`, `WITH CHECK true`) -- overly permissive
+**Current state:** An ALL policy with `USING true` / `WITH CHECK true` lets any authenticated user modify referral sources.
 
-**Fix:** Keep the public SELECT policy (candidates need it for self-booking). Drop the ALL policy and replace with admin-only write policies.
+**Fix:** Drop the permissive policy and replace with admin-only write + public SELECT for reads (the `ApplicationForm.tsx` needs to read active sources for the dropdown).
 
 ```sql
-DROP POLICY "Authenticated users can manage slots" ON public.interview_slots;
+DROP POLICY "Authenticated users can manage referral sources" ON public.referral_sources;
 
-CREATE POLICY "Admins can insert slots"
-ON public.interview_slots FOR INSERT TO authenticated
-WITH CHECK (is_admin());
+CREATE POLICY "Admins can manage referral sources"
+ON public.referral_sources FOR ALL TO authenticated
+USING (public.is_admin()) WITH CHECK (public.is_admin());
 
-CREATE POLICY "Admins can update slots"
-ON public.interview_slots FOR UPDATE TO authenticated
-USING (is_admin()) WITH CHECK (is_admin());
-
-CREATE POLICY "Admins can delete slots"
-ON public.interview_slots FOR DELETE TO authenticated
-USING (is_admin());
+CREATE POLICY "Referral sources are viewable by everyone"
+ON public.referral_sources FOR SELECT TO public
+USING (true);
 ```
 
-Note: The candidate booking flow updates `is_available` on a slot, but this happens via the `booking_token` match. We need to allow that. Looking at the booking page, it uses the anon client. We should add a policy allowing updates when matching a valid booking token:
-
-```sql
-CREATE POLICY "Candidates can book via valid token"
-ON public.interview_slots FOR UPDATE TO anon, authenticated
-USING (booking_token IS NOT NULL AND is_available = true)
-WITH CHECK (is_available = false);
-```
-
-**Impact:** SlotManager.tsx only runs for admins. CandidateBooking.tsx continues working via the token-based update policy.
+**Impact:** `SourceTrackingManager.tsx` is admin-only UI — writes continue working. `ApplicationForm.tsx` only reads active sources — covered by the new SELECT policy.
 
 ---
 
-## 3. Remove SECURITY DEFINER from Views
+## 3. Security Definer View (Residual Finding)
 
-Three views are flagged: `public_employees`, `employees_public`, `live_translation_stats`.
-
-These are simple read-only views over public tables. They don't need SECURITY DEFINER. Replace them with SECURITY INVOKER (the default).
-
-```sql
--- Recreate public_employees without SECURITY DEFINER
-CREATE OR REPLACE VIEW public.public_employees
-WITH (security_invoker = true) AS
-SELECT id, name, title, image_url, image_object_position,
-       section, section_id, sort_order, active, created_at, updated_at
-FROM employees WHERE active = true;
-
--- Recreate employees_public without SECURITY DEFINER
-CREATE OR REPLACE VIEW public.employees_public
-WITH (security_invoker = true) AS
-SELECT id, name, title, image_url, image_object_position,
-       section, section_id, sort_order, active, created_at, updated_at
-FROM employees WHERE active = true;
-
--- Recreate live_translation_stats without SECURITY DEFINER
--- (uses same definition, just without security definer)
-CREATE OR REPLACE VIEW public.live_translation_stats
-WITH (security_invoker = true) AS
-<existing definition>;
-```
-
-**Impact:** These views query tables that already have permissive SELECT policies for public/authenticated users, so switching to SECURITY INVOKER won't break reads. The `language_translation_stats` materialized view is unaffected (materialized views don't have SECURITY DEFINER concerns in the same way).
+The previous migration already recreated all three views (`public_employees`, `employees_public`, `live_translation_stats`) with `security_invoker = true` and excluded sensitive columns (email, phone, linkedin_url). The Supabase linter may need a re-scan to clear this finding. No additional migration needed unless the scanner still flags them after re-scan — in which case we'll investigate further.
 
 ---
 
@@ -96,9 +49,9 @@ WITH (security_invoker = true) AS
 
 | Finding | Fix | Risk |
 |---|---|---|
-| interview_reminders public read | Replace with admin+interviewer policy | None -- only admin UI reads it |
-| interview_slots unrestricted write | Admin-only write + token-based booking update | Low -- verify candidate booking flow |
-| SECURITY DEFINER views | Recreate with `security_invoker = true` | None -- underlying tables have correct RLS |
+| icon_styles / image_sections open write | Drop permissive ALL policies | None — admin policy covers writes |
+| referral_sources open write | Replace with admin-only write + public read | None — admin UI writes, form reads |
+| Security Definer View | Already fixed in prior migration | None |
 
-**No frontend code changes needed.** All fixes are database migrations only.
+**Single migration file. No frontend code changes needed.**
 
