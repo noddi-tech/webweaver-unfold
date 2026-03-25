@@ -67,7 +67,7 @@ export default function WhyNavio() {
             <CardContent className="p-8">
               <div className="mb-6">
                 <EditableTranslation translationKey="why_noddi.before.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-                  <h3 className="text-2xl font-bold text-muted-foreground">{t('why_noddi.before.title', 'Without Navio')}</h3>
+                  <h3 className="text-2xl font-bold">{t('why_noddi.before.title', 'Without Navio')}</h3>
                 </EditableTranslation>
               </div>
               <ul className="space-y-4">
@@ -80,7 +80,7 @@ export default function WhyNavio() {
                       className="w-5 h-5 flex-shrink-0 mt-0.5"
                     />
                     <EditableTranslation translationKey={`why_noddi.before.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <span className="text-muted-foreground/80">{item}</span>
+                      <span>{item}</span>
                     </EditableTranslation>
                   </li>
                 ))}
@@ -102,7 +102,7 @@ export default function WhyNavio() {
             <CardContent className="p-8 relative z-[1]">
               <div className="mb-6">
                 <EditableTranslation translationKey="why_noddi.after.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-                  <h3 className="text-2xl font-bold text-primary">{t('why_noddi.after.title', 'With Navio')}</h3>
+                  <h3 className="text-2xl font-bold">{t('why_noddi.after.title', 'With Navio')}</h3>
                 </EditableTranslation>
               </div>
               <ul className="space-y-4">
@@ -115,7 +115,7 @@ export default function WhyNavio() {
                       className="w-5 h-5 flex-shrink-0 mt-0.5"
                     />
                     <EditableTranslation translationKey={`why_noddi.after.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <span className="font-medium text-foreground">{item}</span>
+                      <span className="font-medium">{item}</span>
                     </EditableTranslation>
                   </li>
                 ))}
