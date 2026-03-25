@@ -65,7 +65,7 @@ All colors MUST be HSL.
     --glass-solid: hsl(0 0% 98% / 1.0);
     --glass-card: hsl(0 0% 98% / 0.95);
     --glass-prominent: hsl(0 0% 98% / 0.98);
-    --muted: 0 0% 96%;                         /* Light gray surfaces | Used in: Disabled states, secondary sections */
+    --muted: 34 10% 85%;                        /* Warm muted #DBD8D2 | Used in: Disabled states, secondary sections */
     --muted-foreground: 0 0% 35%;              /* Darker gray for AAA contrast (7:1) | Used in: Descriptions, labels, helper text */
     
     /* Secondary & Accent - Distinct surface colors */
