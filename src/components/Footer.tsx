@@ -50,14 +50,7 @@ const Footer = () => {
   return (
     <footer className="pt-16 pb-2.5 px-2.5">
       {/* Card-encapsulated gradient section */}
-      <div className="rounded-3xl overflow-hidden relative">
-        {/* Gradient background inside card - reversed (gradient to white at top) */}
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'linear-gradient(to top, hsl(266 85% 58% / 0.85) 0%, hsl(321 59% 85% / 0.5) 45%, white 100%)'
-          }}
-        />
+      <div className="rounded-3xl overflow-hidden relative bg-card">
         
         <div className="container mx-auto relative z-10 py-16 px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
