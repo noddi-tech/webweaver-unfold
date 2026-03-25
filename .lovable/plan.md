@@ -1,11 +1,22 @@
 
 
-# Change Navio Card Text to Federal Blue
+# Change Linen Background to Bright Snow (#F8F7F4)
 
-The Navio card text (lines 132-136) currently uses `fill-primary-foreground` (white). Change both `<text>` elements to use Federal Blue (`hsl(249, 67%, 24%)`) via direct `fill` attribute, matching the "Your system" box text style.
+## Change
 
-## File: `src/components/IntegrationStrip.tsx`
+In `src/index.css`, update the `--background` CSS variable from the current "Soft Linen" value (`36 12% 90%` = `#EAE7E1`) to "Bright Snow" (`#F8F7F4`).
 
-- Line 132: Replace `className="fill-primary-foreground"` with `fill="hsl(249, 67%, 24%)"` 
-- Line 135: Replace `className="fill-primary-foreground"` with `fill="hsl(249, 67%, 24%)"` and remove `opacity="0.8"` (use `opacity="0.7"` to match left box style)
+`#F8F7F4` in HSL is approximately `40 18% 96%`.
+
+### File: `src/index.css` (line 58)
+
+```css
+/* Before */
+--background: 36 12% 90%;                   /* Soft Linen #EAE7E1 */
+
+/* After */
+--background: 40 18% 96%;                   /* Bright Snow #F8F7F4 */
+```
+
+This single token change propagates everywhere `bg-background` is used across the site.
 
