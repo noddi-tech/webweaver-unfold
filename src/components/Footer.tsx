@@ -48,11 +48,8 @@ const Footer = () => {
   if (!footerSettings) return null;
 
   return (
-    <footer className="pt-16 pb-2.5 px-2.5">
-      {/* Card-encapsulated gradient section */}
-      <div className="rounded-3xl overflow-hidden relative bg-card">
-        
-        <div className="container mx-auto relative z-10 py-16 px-6">
+    <footer className="pt-16 pb-8">
+        <div className="container mx-auto py-16 px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
@@ -155,7 +152,6 @@ const Footer = () => {
             </EditableTranslation>
           </div>
         )}
-      </div>
       </div>
     </footer>
   );

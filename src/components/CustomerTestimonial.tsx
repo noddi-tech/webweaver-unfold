@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { EditableTranslation } from './EditableTranslation';
+import { EditableBackground } from './EditableBackground';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -55,7 +56,8 @@ export default function CustomerTestimonial() {
   const avatarSrc = story?.quote_author_image_url || story?.company_logo_url || '/placeholder.svg';
 
   return (
-    <section className="bg-muted/30 py-16 md:py-20 lg:py-24">
+    <EditableBackground elementId="testimonial-section" defaultBackground="bg-muted/30">
+    <section className="py-16 md:py-20 lg:py-24">
       <div className="container max-w-4xl mx-auto px-4 text-center">
         <EditableTranslation translationKey="testimonial.eyebrow">
           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -122,5 +124,6 @@ export default function CustomerTestimonial() {
         ) : null}
       </div>
     </section>
+    </EditableBackground>
   );
 }
