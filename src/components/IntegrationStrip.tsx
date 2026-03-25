@@ -24,7 +24,7 @@ export default function IntegrationStrip() {
   return (
     <EditableBackground elementId="integrations-strip-section" defaultBackground="bg-muted/50">
       <section
-        ref={ref as React.RefObject<HTMLDivElement>}
+        ref={ref}
         className="py-10 md:py-16 border-y border-border/40"
         data-header-color="dark"
       >
