@@ -1,50 +1,45 @@
-import React, { useState } from "react";
-import { Calendar, Zap, Smartphone, RefreshCw, ArrowRight } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
-import { LockedText } from "@/components/LockedText";
-import { EditableBackground } from "@/components/EditableBackground";
-import { EditableIcon } from "@/components/EditableIcon";
-import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
+import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
+import { supabase } from "@/integrations/supabase/client";
+import coreLoopIllustration from "@/assets/core-loop-illustration.png";
 
 export default function HowItWorks() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const { t } = useAppTranslation();
   const [refreshKey, setRefreshKey] = useState(0);
-  const { allowedBackgrounds } = useAllowedBackgrounds();
+  const [imageUrl, setImageUrl] = useState<string>(coreLoopIllustration);
 
-  const steps = [
-    {
-      icon: Calendar,
-      title: t('how_it_works.step_1.title', 'Customer books service'),
-      description: t('how_it_works.step_1.description', 'Online booking or in-garage entry'),
-      details: t('how_it_works.step_1.details', 'Mobile + desktop support with one-minute funnel')
-    },
-    {
-      icon: Zap,
-      title: t('how_it_works.step_2.title', 'Platform auto-plans routes & capacity'),
-      description: t('how_it_works.step_2.description', 'Proprietary optimization algorithms'),
-      details: t('how_it_works.step_2.details', 'Real-time resource allocation and workforce dispatch')
-    },
-    {
-      icon: Smartphone,
-      title: t('how_it_works.step_3.title', 'Technicians execute with Navio Worker app'),
-      description: t('how_it_works.step_3.description', 'Native app for mobile + garage workflows'),
-      details: t('how_it_works.step_3.details', 'Standardized inspection capture and tire sales')
-    },
-    {
-      icon: RefreshCw,
-      title: t('how_it_works.step_4.title', 'System captures data → triggers actions'),
-      description: t('how_it_works.step_4.description', 'Auto-recall campaigns, tire sales, inventory updates'),
-      details: t('how_it_works.step_4.details', 'No manual follow-up needed—fully automated')
+  const loadMediaSettings = async () => {
+    const { data: settings } = await supabase
+      .from('image_carousel_settings')
+      .select('image_url')
+      .eq('location_id', 'functions-core-loop')
+      .maybeSingle();
+    
+    if (settings?.image_url) {
+      setImageUrl(settings.image_url);
     }
+  };
+
+  useEffect(() => {
+    loadMediaSettings();
+  }, []);
+
+  const coreLoopSteps = [
+    { number: 1, titleKey: 'core_loop.step_1.title', descKey: 'core_loop.step_1.description', defaultTitle: 'Book.', defaultDesc: 'The customer picks a time — Navio handles the rest.' },
+    { number: 2, titleKey: 'core_loop.step_2.title', descKey: 'core_loop.step_2.description', defaultTitle: 'Plan.', defaultDesc: 'Routes and lanes auto-optimize in real time.' },
+    { number: 3, titleKey: 'core_loop.step_3.title', descKey: 'core_loop.step_3.description', defaultTitle: 'Execute.', defaultDesc: 'Technicians get clear, connected workflows.' },
+    { number: 4, titleKey: 'core_loop.step_4.title', descKey: 'core_loop.step_4.description', defaultTitle: 'Analyze.', defaultDesc: 'Data flows instantly into insights.' },
+    { number: 5, titleKey: 'core_loop.step_5.title', descKey: 'core_loop.step_5.description', defaultTitle: 'Re-engage.', defaultDesc: 'Customers return before they even think to.' },
   ];
 
   return (
     <section ref={ref as any} className="py-12 md:py-16 lg:py-section" data-header-color="dark">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8" key={refreshKey}>
+        {/* Section Heading */}
         <div className="text-center mb-8 md:mb-12">
           <EditableTranslation translationKey="how_it_works.title" onSave={() => setRefreshKey(prev => prev + 1)}>
             <h2 className="text-4xl font-bold mb-6 text-foreground">
@@ -58,141 +53,100 @@ export default function HowItWorks() {
           </EditableTranslation>
         </div>
 
-        {/* Desktop: Horizontal Flow */}
-        <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 mb-12 items-stretch">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <React.Fragment key={index}>
-                <div 
-                  className={`h-full transition-all duration-500 ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                  }`}
-                  style={{ transitionDelay: `${index * 100}ms` }}
-                >
-                  <EditableBackground
-                    elementId={`how-it-works-step-${index}`}
-                    defaultBackground="bg-card"
-                    allowedBackgrounds={allowedBackgrounds}
-                  >
-                    <Card className="hover-scale h-full shadow-xl">
-                      <CardContent className="p-6 h-full flex flex-col overflow-visible">
-                        <EditableIcon
-                          elementId={`how-it-works-icon-${index}`}
-                          icon={Icon}
-                          defaultBackground="bg-gradient-primary"
-                          className="mb-8"
-                        />
-                        <EditableTranslation 
-                          translationKey={`how_it_works.step_${index + 1}.label`} 
-                          onSave={() => setRefreshKey(prev => prev + 1)}
-                        >
-                          <div className="text-sm font-bold text-primary mb-2">
-                            {t(`how_it_works.step_${index + 1}.label`, `Step ${index + 1}`)}
-                          </div>
-                        </EditableTranslation>
-                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                          <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                        </EditableTranslation>
-                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                          <p className="text-sm mb-2 flex-grow">{step.description}</p>
-                        </EditableTranslation>
-                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                          <p className="text-xs">{step.details}</p>
-                        </EditableTranslation>
-                      </CardContent>
-                    </Card>
-                  </EditableBackground>
-                </div>
-                {index < steps.length - 1 && (
-                  <div className="flex items-center justify-center">
-                    <ArrowRight className="w-6 h-6 text-primary" />
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
+        {/* Core Loop Illustration */}
+        <div className="flex justify-center mb-8 sm:mb-12">
+          <div className="w-full max-w-6xl px-0 sm:px-4 lg:px-8">
+            <EditableUniversalMedia
+              locationId="functions-core-loop"
+              onSave={loadMediaSettings}
+              placeholder="Click to upload Core Loop illustration"
+            >
+              <img 
+                src={imageUrl}
+                alt="The Core Loop: 1. Book, 2. Plan, 3. Execute, 4. Analyze, 5. Re-engage"
+                className={`w-full h-auto rounded-lg sm:rounded-xl transition-all duration-700 ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+              />
+            </EditableUniversalMedia>
+          </div>
         </div>
 
-        {/* Mobile: Vertical Flow */}
-        <div className="lg:hidden space-y-6 mb-12">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            return (
+        {/* Mobile: Ultra-compact inline stepper */}
+        <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 sm:hidden mb-12 px-4">
+          {coreLoopSteps.map((step, index) => (
+            <span key={step.number} className="flex items-center">
+              <span className="text-sm font-bold text-primary">{step.number}.</span>
+              <span className="text-sm font-medium text-foreground ml-1">{step.defaultTitle.replace('.', '')}</span>
+              {index < 4 && (
+                <span 
+                  className="mx-2 w-4 h-0.5 inline-block"
+                  style={{ 
+                    backgroundImage: 'linear-gradient(to right, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))',
+                    backgroundSize: '400% 100%',
+                    backgroundPosition: `${(index / 3) * 100}% 0`
+                  }}
+                />
+              )}
+            </span>
+          ))}
+        </div>
+
+        {/* Desktop/Tablet: Full Core Loop Steps */}
+        <div className="hidden sm:block mb-12">
+          <div className="relative grid grid-cols-5 gap-6 lg:gap-8 max-w-6xl mx-auto px-4">
+            {coreLoopSteps.map((step, index) => (
               <div 
-                key={index} 
-                className={`relative transition-all duration-500 ${
+                key={step.number} 
+                className={`text-center relative p-4 rounded-xl transition-all duration-500 ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                <EditableBackground
-                  elementId={`how-it-works-step-${index}`}
-                  defaultBackground="bg-card"
-                  allowedBackgrounds={allowedBackgrounds}
-                >
-                  <Card className="hover-scale h-full shadow-xl">
-                    <CardContent className="p-6 h-full flex flex-col overflow-visible">
-                      <div className="flex items-start gap-4">
-                        <EditableIcon
-                          elementId={`how-it-works-icon-${index}`}
-                          icon={Icon}
-                          defaultBackground="bg-gradient-primary"
-                          className="flex-shrink-0"
-                        />
-                        <div className="flex-1">
-                          <EditableTranslation 
-                            translationKey={`how_it_works.step_${index + 1}.label`} 
-                            onSave={() => setRefreshKey(prev => prev + 1)}
-                          >
-                            <div className="text-sm font-bold text-primary mb-2">
-                              {t(`how_it_works.step_${index + 1}.label`, `Step ${index + 1}`)}
-                            </div>
-                          </EditableTranslation>
-                          <EditableTranslation translationKey={`how_it_works.step_${index + 1}.title`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                            <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                          </EditableTranslation>
-                        <EditableTranslation translationKey={`how_it_works.step_${index + 1}.description`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                          <p className="text-sm mb-2 flex-grow">{step.description}</p>
-                        </EditableTranslation>
-                          <EditableTranslation translationKey={`how_it_works.step_${index + 1}.details`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                            <p className="text-xs">{step.details}</p>
-                          </EditableTranslation>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </EditableBackground>
-                {index < steps.length - 1 && (
-                  <div className="flex justify-center py-2">
-                    <div className="w-0.5 h-8 bg-gradient-primary" />
-                  </div>
+                {/* Connecting line to next step */}
+                {index < 4 && (
+                  <div 
+                    className="hidden lg:block absolute top-10 left-[calc(50%+24px)] w-[calc(100%-8px)] h-0.5 z-0"
+                    style={{ 
+                      backgroundImage: 'linear-gradient(to right, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))',
+                      backgroundSize: '400% 100%',
+                      backgroundPosition: `${(index / 3) * 100}% 0`
+                    }}
+                  />
                 )}
+                <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-background flex items-center justify-center relative z-10">
+                  <div className="absolute inset-0 rounded-full bg-primary/10" />
+                  <span className="text-lg font-bold text-primary relative">{step.number}</span>
+                </div>
+                <EditableTranslation translationKey={step.titleKey} onSave={() => setRefreshKey(prev => prev + 1)}>
+                  <h3 className="text-lg font-bold text-foreground mb-2">
+                    {t(step.titleKey, step.defaultTitle)}
+                  </h3>
+                </EditableTranslation>
+                <EditableTranslation translationKey={step.descKey} onSave={() => setRefreshKey(prev => prev + 1)}>
+                  <p className="text-sm text-muted-foreground leading-relaxed hidden sm:block">
+                    {t(step.descKey, step.defaultDesc)}
+                  </p>
+                </EditableTranslation>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
 
         {/* Caption */}
         <div className="text-center">
-          <EditableBackground
-            elementId="how-it-works-caption"
-            defaultBackground="bg-primary/10"
-            allowedBackgrounds={allowedBackgrounds}
-          >
-            <div className="inline-block px-8 py-4 border-2 border-primary/20 rounded-xl">
-              <EditableTranslation translationKey="how_it_works.caption_main" onSave={() => setRefreshKey(prev => prev + 1)}>
-                <p className="text-base md:text-lg font-semibold text-foreground mb-1">
-                  {t('how_it_works.caption_main', "It's not automation. It's orchestration.")}
-                </p>
-              </EditableTranslation>
-              <EditableTranslation translationKey="how_it_works.caption_sub" onSave={() => setRefreshKey(prev => prev + 1)}>
-                <p className="text-sm text-foreground font-medium">
-                  {t('how_it_works.caption_sub', 'One platform. Every function. Zero friction.')}
-                </p>
-              </EditableTranslation>
-            </div>
-          </EditableBackground>
+          <div className="inline-block px-8 py-4 bg-primary/10 border-2 border-primary/20 rounded-xl">
+            <EditableTranslation translationKey="how_it_works.caption_main" onSave={() => setRefreshKey(prev => prev + 1)}>
+              <p className="text-base md:text-lg font-semibold text-foreground mb-1">
+                {t('how_it_works.caption_main', "It's not automation. It's orchestration.")}
+              </p>
+            </EditableTranslation>
+            <EditableTranslation translationKey="how_it_works.caption_sub" onSave={() => setRefreshKey(prev => prev + 1)}>
+              <p className="text-sm text-foreground font-medium">
+                {t('how_it_works.caption_sub', 'One platform. Every function. Zero friction.')}
+              </p>
+            </EditableTranslation>
+          </div>
         </div>
       </div>
     </section>
