@@ -1,67 +1,70 @@
 
 
-# Redesign WhyNavio: Sanna-Inspired Before/After Comparison
+# Fix WhyNavio: Remove Hardcoded Colors, Let CMS Control Everything
 
-## What changes
-Redesign the Before/After cards in `WhyNavio.tsx` to create a clear visual "winner" (With Navio) vs a deliberately muted "loser" (Without Navio), add a floating VS badge, remove the subtitle paragraph, and tighten section padding.
+## Problem
+The "Before" and "After" cards look identical because hardcoded Tailwind text-color classes on child elements (e.g. `text-muted-foreground`, `text-primary`, `text-foreground`) override the CMS-driven colors from `EditableCard` and `EditableTranslation`. The visual differentiation needs to come from the database, not hardcoded classes.
 
-## Single file: `src/components/WhyNavio.tsx`
+## What's already CMS-driven (no changes needed)
+- **Card backgrounds**: `EditableCard` reads from `background_styles` table
+- **Card text color**: `BackgroundTextColorProvider` cascades from `EditableCard`
+- **Icon colors**: `EditableListIcon` reads from `icon_styles` table via inline styles
+- **All text content**: `EditableTranslation` with per-key styling from `translations` table
+- **Border color tokens** like `border-primary` use `var(--primary)` which is CMS-managed in `color_tokens`
 
-### 1. Remove subtitle paragraph
-Delete the `EditableTranslation` block wrapping the `<p>` subtitle (lines 45-49). Keep eyebrow + heading only.
+## What's broken: hardcoded overrides on children
+These hardcoded classes prevent the CMS values from showing:
+- `text-muted-foreground` on Before card's `<h3>` and `<span>` elements
+- `text-primary` on After card's `<h3>`
+- `text-foreground` on After card's `<span>` elements
+- `text-muted-foreground/80` on Before list items
 
-### 2. Reduce section padding
-Change `py-12 md:py-16 lg:py-section` to `py-8 md:py-12 lg:py-16` for tighter vertical rhythm.
+Per the project's own architecture rule: *"hardcoded Tailwind text-color classes must be removed from child elements so CMS-provided inline styles take precedence."*
 
-### 3. "Without Navio" card — muted, flat, unappealing
-- Background: `bg-muted/50` (gray, washed out)
-- Border: `border border-border/50` (subtle, nearly invisible)
-- Title text: `text-muted-foreground` (faded)
-- List item text: `text-muted-foreground/80` (subdued)
-- X icons stay `text-destructive` but at reduced opacity: `text-destructive/60`
-- No shadow, no elevation — intentionally flat
+## Changes
 
-### 4. "With Navio" card — the clear winner
-- Border: `border-2 border-primary` (bold brand border)
-- Background: `bg-card` with a decorative gradient glow element in top-right corner using `bg-gradient-to-br from-primary/10 via-transparent to-transparent` as a pseudo-element overlay
-- Slight scale lift: `lg:scale-105` with `shadow-lg` for elevation
-- Title: `text-primary font-bold`
-- Checkmarks: `text-primary` (vibrant brand green/primary)
-- List text: `text-foreground font-medium`
-- Add `relative overflow-hidden` for the gradient accent blob
+### 1. `src/components/WhyNavio.tsx` — Remove hardcoded text color classes
 
-### 5. Floating "VS" badge
-- Absolute-positioned circular badge centered between the two cards
-- `absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10`
-- Styled: `w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center shadow-lg`
-- The grid wrapper gets `relative` to contain it
-- On mobile (stacked), hide or reposition vertically between cards
+Remove all hardcoded `text-*` color classes from child elements inside both cards:
 
-### 6. Reduce gap between cards
-Change `gap-8` to `gap-6` to bring cards closer (VS badge bridges them).
+- **Before card title** (`h3`): Remove `text-muted-foreground` — let `EditableTranslation` + `BackgroundTextColorContext` handle it
+- **Before card list items** (`span`): Remove `text-muted-foreground/80` — same reason
+- **After card title** (`h3`): Remove `text-primary` — let CMS handle it
+- **After card list items** (`span`): Remove `text-foreground` — let CMS handle it
 
-### 7. Reduce bottom margin
-Change `mb-12` on the grid to `mb-8`.
+Keep all structural/layout classes (`font-bold`, `font-medium`, `text-2xl`, etc.) — those aren't colors.
 
-## Visual result
+### 2. Database migration — Set correct initial CMS values
 
-```text
-┌─────────────────────┐         ┌──────────────────────────┐
-│  Without Navio      │         │  With Navio        ✦glow │
-│  (muted gray bg)    │  [VS]   │  (bold primary border)   │
-│  ✕ Disconnected...  │         │  ✓ One unified...        │
-│  ✕ Manual data...   │         │  ✓ Automatic sync...     │
-│  ✕ Spreadsheet...   │         │  ✓ Real-time...          │
-│  ✕ Lost follow...   │         │  ✓ Automated...          │
-│  flat, no shadow    │         │  elevated, shadow-lg     │
-└─────────────────────┘         └──────────────────────────┘
-```
+Update `background_styles` rows so the two cards have visually distinct CMS-driven styling:
 
-## Technical notes
-- Keep `EditableCard` wrapper for CMS card styling — override defaults via props
-- Keep all `EditableTranslation` wrappers for bullet text
-- Keep `EditableListIcon` for icon customization
-- VS badge uses only design system tokens (`bg-primary`, `text-primary-foreground`)
-- Gradient glow is a `div` with `absolute inset-0` and gradient classes, not hardcoded colors
-- Mobile: VS badge shown between stacked cards with `lg:absolute lg:top-1/2` positioning
+**Before card** (`why-noddi-before-card-background`):
+- `background_class` → `bg-muted/50` (muted gray)
+- `text_color_class` → `muted-foreground` (faded text)
+
+**After card** (`why-noddi-after-card-background`):
+- `background_class` → `bg-card` (clean card surface)
+- `text_color_class` → `foreground` (full contrast text)
+
+This makes the differentiation editable via the CMS pencil button on each card — admins can change it anytime without code changes.
+
+### 3. Keep structural (non-color) differentiation in code
+
+These stay because they define layout/structure, not color:
+- `border-2 border-primary` on the After card (uses design token `--primary`)
+- `shadow-lg`, `lg:scale-105` on the After card (elevation, not color)
+- `border border-border/50` on the Before card (uses design token `--border`)
+- The decorative gradient overlay (`from-primary/10`) references the `--primary` token
+
+## Result
+- Both cards' text colors become fully CMS-editable via the pencil button
+- The visual "winner vs. loser" difference comes from distinct database entries
+- Admins can adjust the contrast between cards at any time without developer involvement
+- Border and shadow tokens still reference the design system CSS variables
+
+## Files changed
+| File | Change |
+|---|---|
+| `src/components/WhyNavio.tsx` | Remove hardcoded `text-*` color classes from children |
+| New migration | Update `background_styles` rows for both cards |
 
