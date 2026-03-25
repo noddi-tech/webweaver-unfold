@@ -31,7 +31,7 @@ export default function CustomerTestimonial() {
 
       if (!settings?.customer_story_id) return null;
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('customer_stories')
         .select('quote_text, quote_author, quote_author_title, quote_author_image_url, company_name, company_logo_url, slug')
         .eq('id', settings.customer_story_id)
