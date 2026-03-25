@@ -1,47 +1,49 @@
 
 
-# Mobile Carousel for ScrollingFeatureCards
+# Add Eyebrow Labels to All Homepage Sections (except Hero)
 
 ## What
-On mobile (below `xl` breakpoint), convert the vertically stacked feature cards into a horizontal swipeable carousel with dot indicators. Desktop stays exactly as-is.
+Add an uppercase eyebrow label (like "INTEGRATIONS" on IntegrationStrip) above the heading of each homepage section. This creates visual consistency and helps users scan the page.
 
-## Current State
-- `ScrollingFeatureCards.tsx` (892 lines) has a two-column layout: sticky left text + scrolling cards right
-- Below `xl`, the left text becomes a static centered block above the cards — already handled (lines 728-739)
-- Below `xl`, cards render in a `grid-cols-1 md:grid-cols-2` vertical/grid layout (line 742)
-- Each card is a white rounded box with content left + image right (on xl) or stacked (below xl)
+## Sections to update
 
-## Changes in `src/components/ScrollingFeatureCards.tsx`
+| Section | Component | Eyebrow text | Translation key |
+|---|---|---|---|
+| ScrollingFeatureCards | `ScrollingFeatureCards.tsx` | "FEATURES" | `scrolling_features.eyebrow` |
+| WhyNavio | `WhyNavio.tsx` | "WHY NAVIO" | `why_noddi.eyebrow` |
+| HowItWorks | `HowItWorks.tsx` | "HOW IT WORKS" | `how_it_works.eyebrow` |
+| CustomerTestimonial | `CustomerTestimonial.tsx` | "TESTIMONIAL" | `testimonial.eyebrow` |
+| FinalCTA | `FinalCTA.tsx` | "GET STARTED" | `final_cta.eyebrow` |
 
-### 1. Add mobile carousel state
-- Add `activeSlide` state and a `scrollContainerRef` for the snap container
-- Add an `IntersectionObserver` to track which card is centered (updates dot indicator)
+**Already has eyebrow:** IntegrationStrip (no change needed)
+**Excluded:** Hero, LogoMarquee
 
-### 2. Split the card grid into two render paths
+## Pattern
+Reuse the exact same markup from IntegrationStrip:
 
-**Mobile (`md:hidden`)**: Horizontal scroll-snap carousel
-- Container: `flex overflow-x-auto snap-x snap-mandatory` with `scrollbar-hide` styling
-- Each card: `snap-center flex-shrink-0 w-[85vw]` — full-width slides with slight peek of next card
-- Card layout: image on top (aspect-square), then number badge + icon + title + description + CTA below
-- Dot indicators below: filled circle for active, outlined for others, using `bg-primary` / `border-primary`
-- Hide scrollbar via inline style `scrollbarWidth: 'none', msOverflowStyle: 'none'` plus a `[&::-webkit-scrollbar]` utility
+```tsx
+<EditableTranslation translationKey="[section].eyebrow" onSave={onSave}>
+  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+    {t("[section].eyebrow", "LABEL TEXT")}
+  </span>
+</EditableTranslation>
+```
 
-**Tablet (`hidden md:grid xl:hidden`)**: Keep existing 2-column grid (unchanged)
+Place it as the first child inside the section header `div`, above the `<h2>`.
 
-**Desktop (`hidden xl:grid`)**: Keep existing single-column scroll-animated layout (unchanged)
-
-### 3. Dot indicators component
-- Simple `div` with `flex gap-2 justify-center mt-6`
-- 5 dots, each `w-2.5 h-2.5 rounded-full transition-colors`
-- Active: `bg-primary`, inactive: `border border-primary/50 bg-transparent`
-
-### 4. Card order in mobile slides
-- Image on top (using existing `renderMedia`)
-- Below: badge number + icon row, title, description, CTA button
+## Notes
+- For ScrollingFeatureCards, add to both the desktop sidebar heading area and the tablet/mobile heading block (line ~755)
+- For CustomerTestimonial, place above the quote icon
+- For FinalCTA, adapt color to match the dark/gradient background (use the existing `ctaData.footerColor` or similar light color token)
+- All eyebrow text is CMS-editable via `EditableTranslation`
 
 ## Files
 
 | File | Change |
 |---|---|
-| `src/components/ScrollingFeatureCards.tsx` | Add mobile carousel render path with scroll-snap + dot indicators |
+| `src/components/ScrollingFeatureCards.tsx` | Add eyebrow above heading in sidebar + mobile header |
+| `src/components/WhyNavio.tsx` | Add eyebrow above h2 |
+| `src/components/HowItWorks.tsx` | Add eyebrow above h2 |
+| `src/components/CustomerTestimonial.tsx` | Add eyebrow above quote icon |
+| `src/components/FinalCTA.tsx` | Add eyebrow above title |
 
