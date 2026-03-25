@@ -1,10 +1,17 @@
 import { useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Globe, Webhook, Wrench, FileJson } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { LanguageLink } from "@/components/LanguageLink";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
+
+const techKeys = [
+  { key: "integrations_strip.tech_rest_api", fallback: "REST API", icon: Globe },
+  { key: "integrations_strip.tech_webhooks", fallback: "Webhooks", icon: Webhook },
+  { key: "integrations_strip.tech_custom", fallback: "Custom integrations", icon: Wrench },
+  { key: "integrations_strip.tech_export", fallback: "CSV / JSON export", icon: FileJson },
+];
 
 export default function IntegrationStrip() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 });
@@ -12,17 +19,10 @@ export default function IntegrationStrip() {
   const [refreshKey, setRefreshKey] = useState(0);
   const onSave = () => setRefreshKey((k) => k + 1);
 
-  const techKeys = [
-    { key: "integrations_strip.tech_rest_api", fallback: "REST API" },
-    { key: "integrations_strip.tech_webhooks", fallback: "Webhooks" },
-    { key: "integrations_strip.tech_custom", fallback: "Custom integrations" },
-    { key: "integrations_strip.tech_export", fallback: "CSV / JSON export" },
-  ];
-
   return (
     <section
       ref={ref as React.RefObject<HTMLDivElement>}
-      className="py-10 md:py-16 bg-muted/30 border-y border-border/40"
+      className="py-10 md:py-16 bg-muted/50 border-y border-border/40"
       data-header-color="dark"
     >
       <div
@@ -55,25 +55,29 @@ export default function IntegrationStrip() {
               </p>
             </EditableTranslation>
 
-            {/* Partner logo placeholder */}
+            {/* Partner pill */}
             <div className="flex items-center gap-3">
               <EditableTranslation translationKey="integrations_strip.partner_eontyre" onSave={onSave}>
-                <div className="border border-border rounded-md px-4 py-2 text-sm font-medium bg-card">
+                <div className="bg-card border border-border/60 shadow-sm rounded-lg px-5 py-2.5 text-sm font-semibold text-foreground">
                   {t("integrations_strip.partner_eontyre", "Eontyre")}
                 </div>
               </EditableTranslation>
               <EditableTranslation translationKey="integrations_strip.partner_more" onSave={onSave}>
-                <span className="text-sm">
+                <span className="text-sm text-muted-foreground">
                   {t("integrations_strip.partner_more", "+ more coming")}
                 </span>
               </EditableTranslation>
             </div>
 
-            {/* Tech badges */}
+            {/* Tech badges with icons */}
             <div className="flex flex-wrap gap-2">
-              {techKeys.map(({ key, fallback }) => (
+              {techKeys.map(({ key, fallback, icon: Icon }) => (
                 <EditableTranslation key={key} translationKey={key} onSave={onSave}>
-                  <Badge variant="outline" className="text-sm px-3 py-1">
+                  <Badge
+                    variant="outline"
+                    className="text-sm px-3 py-1.5 bg-card border-border shadow-sm gap-1.5"
+                  >
+                    <Icon className="w-3.5 h-3.5 text-muted-foreground" />
                     {t(key, fallback)}
                   </Badge>
                 </EditableTranslation>
@@ -104,14 +108,54 @@ export default function IntegrationStrip() {
               role="img"
               aria-label="Integration diagram showing two-way data sync between your system and Navio"
             >
-              {/* Left box — Your system */}
+              {/* Defs: gradient + markers + animation */}
+              <defs>
+                <linearGradient id="navioGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" />
+                  <stop offset="50%" stopColor="hsl(var(--accent))" />
+                  <stop offset="100%" stopColor="hsl(var(--brand-orange, var(--primary)))" />
+                </linearGradient>
+                <marker
+                  id="arrowRight"
+                  markerWidth="8"
+                  markerHeight="8"
+                  refX="7"
+                  refY="4"
+                  orient="auto"
+                >
+                  <path d="M0 0 L8 4 L0 8 Z" className="fill-primary" />
+                </marker>
+                <marker
+                  id="arrowLeft"
+                  markerWidth="8"
+                  markerHeight="8"
+                  refX="1"
+                  refY="4"
+                  orient="auto"
+                >
+                  <path d="M8 0 L0 4 L8 8 Z" className="fill-primary" />
+                </marker>
+              </defs>
+
+              <style>{`
+                @keyframes dash-flow {
+                  to { stroke-dashoffset: -20; }
+                }
+                @keyframes gentle-pulse {
+                  0%, 100% { transform-origin: 250px 140px; transform: scale(1); opacity: 1; }
+                  50% { transform-origin: 250px 140px; transform: scale(1.08); opacity: 0.85; }
+                }
+              `}</style>
+
+              {/* Left box — Your system (warm muted fill) */}
               <rect
                 x="10"
                 y="60"
                 width="160"
                 height="160"
-                rx="12"
-                className="fill-background stroke-border"
+                rx="20"
+                fill="hsl(var(--muted))"
+                className="stroke-border"
                 strokeWidth="2"
               />
               <text
@@ -134,14 +178,14 @@ export default function IntegrationStrip() {
                 {t("integrations_strip.diagram_your_system_subtitle", "Eontyre, ERP, CRM…")}
               </text>
 
-              {/* Right box — Navio */}
+              {/* Right box — Navio (brand gradient) */}
               <rect
                 x="330"
                 y="60"
                 width="160"
                 height="160"
-                rx="12"
-                className="fill-primary"
+                rx="20"
+                fill="url(#navioGrad)"
               />
               <text
                 x="410"
@@ -164,14 +208,16 @@ export default function IntegrationStrip() {
                 {t("integrations_strip.diagram_navio_subtitle", "Booking · Routing · Capacity")}
               </text>
 
-              {/* Top arrow → right */}
+              {/* Top arrow → right (animated dash flow) */}
               <line
                 x1="175"
                 y1="115"
                 x2="220"
                 y2="115"
                 className="stroke-primary"
-                strokeWidth="2"
+                strokeWidth="2.5"
+                strokeDasharray="6 4"
+                style={{ animation: "dash-flow 1.5s linear infinite" }}
                 markerEnd="url(#arrowRight)"
               />
               <line
@@ -180,7 +226,9 @@ export default function IntegrationStrip() {
                 x2="325"
                 y2="115"
                 className="stroke-primary"
-                strokeWidth="2"
+                strokeWidth="2.5"
+                strokeDasharray="6 4"
+                style={{ animation: "dash-flow 1.5s linear infinite" }}
                 markerEnd="url(#arrowRight)"
               />
               <text
@@ -194,14 +242,16 @@ export default function IntegrationStrip() {
                 {t("integrations_strip.diagram_data_outbound", "Bookings · Customers")}
               </text>
 
-              {/* Bottom arrow ← left */}
+              {/* Bottom arrow ← left (animated dash flow, reversed) */}
               <line
                 x1="325"
                 y1="165"
                 x2="280"
                 y2="165"
                 className="stroke-primary"
-                strokeWidth="2"
+                strokeWidth="2.5"
+                strokeDasharray="6 4"
+                style={{ animation: "dash-flow 1.5s linear infinite", animationDirection: "reverse" }}
                 markerEnd="url(#arrowLeft)"
               />
               <line
@@ -210,7 +260,9 @@ export default function IntegrationStrip() {
                 x2="175"
                 y2="165"
                 className="stroke-primary"
-                strokeWidth="2"
+                strokeWidth="2.5"
+                strokeDasharray="6 4"
+                style={{ animation: "dash-flow 1.5s linear infinite", animationDirection: "reverse" }}
                 markerEnd="url(#arrowLeft)"
               />
               <text
@@ -224,13 +276,14 @@ export default function IntegrationStrip() {
                 {t("integrations_strip.diagram_data_inbound", "Services · Reports")}
               </text>
 
-              {/* Sync icon circle — prominent */}
+              {/* Sync icon circle — gentle pulse */}
               <circle
                 cx="250"
                 cy="140"
                 r="26"
                 className="fill-primary/10 stroke-primary"
                 strokeWidth="2.5"
+                style={{ animation: "gentle-pulse 3s ease-in-out infinite" }}
               />
               {/* Sync arrows inside circle */}
               <path
@@ -240,7 +293,6 @@ export default function IntegrationStrip() {
                 strokeLinecap="round"
                 fill="none"
               />
-              {/* Small arrowheads on sync */}
               <path d="M258 134l-2-4 4 2z" className="fill-primary" />
               <path d="M242 146l2 4-4-2z" className="fill-primary" />
 
@@ -256,30 +308,6 @@ export default function IntegrationStrip() {
               >
                 {t("integrations_strip.diagram_sync_label", "TWO-WAY SYNC")}
               </text>
-
-              {/* Arrowhead markers */}
-              <defs>
-                <marker
-                  id="arrowRight"
-                  markerWidth="8"
-                  markerHeight="8"
-                  refX="7"
-                  refY="4"
-                  orient="auto"
-                >
-                  <path d="M0 0 L8 4 L0 8 Z" className="fill-primary" />
-                </marker>
-                <marker
-                  id="arrowLeft"
-                  markerWidth="8"
-                  markerHeight="8"
-                  refX="1"
-                  refY="4"
-                  orient="auto"
-                >
-                  <path d="M8 0 L0 4 L8 8 Z" className="fill-primary" />
-                </marker>
-              </defs>
             </svg>
           </div>
         </div>
