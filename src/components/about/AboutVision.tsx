@@ -10,7 +10,7 @@ export function AboutVision() {
     <section className="py-20 md:py-28" data-header-color="dark">
       <div className="max-w-4xl mx-auto px-4">
         <motion.div
-          ref={ref as React.RefObject<HTMLDivElement>}
+          ref={ref}
           initial={{ opacity: 0, y: 30 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
