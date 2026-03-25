@@ -1,37 +1,33 @@
 
 
-# New Customer Testimonial Section
+# Hero Tightening
 
-## What
-A new `CustomerTestimonial.tsx` component placed between `IntegrationStrip` and `FinalCTA` on the homepage. Full-width, center-aligned, single-column testimonial with generous breathing room.
+## Changes
 
-## Layout and content
-- Decorative oversized `Quote` icon (lucide-react) at top, muted opacity (~15-20%)
-- Large centered quote text styled as a pullquote (text-2xl md:text-3xl lg:text-4xl, font-medium, italic or serif-like weight)
-- Attribution: circular avatar with "TD" initials, placeholder name "[Name]", title "Operations Manager, Trønderdekk"
-- Small muted company name badge below attribution
-- No card wrapper — section background is the container
-- Background: `bg-background` (white/light) to alternate with the `bg-muted/30` of IntegrationStrip above
+### 1. Fix headline grammar in `index.html`
+"Software that transform car maintenance" → "Software that **transforms** car maintenance" in:
+- `<title>`
+- `og:title`
+- `og:image:alt`
+- `twitter:title`
 
-## CMS integration
-All text wrapped in `EditableTranslation` with keys:
-| Key | Fallback |
-|---|---|
-| `testimonial.quote` | "We kept Eontyre for what it does well..." |
-| `testimonial.author_name` | "[Name]" |
-| `testimonial.author_title` | "Operations Manager, Trønderdekk" |
-| `testimonial.company_name` | "Trønderdekk" |
+Note: The rotating headline on the page itself comes from the database (rotating_terms table), not from code. If the grammar issue also appears there, it needs to be fixed in the CMS/Translation Manager — not in code. I'll flag this.
 
-## Spacing
-Extra generous: `py-20 md:py-28 lg:py-36` — noticeably more than standard sections to create a "pause" feel.
+### 2. Tighten the subtitle fallback in `src/components/Hero.tsx`
+Current fallback: "Booking to billing. Built for automotive services."
+This is already short (1 line). The actual displayed text may come from the CMS `hero.subtitle` translation key. I'll update the fallback to a tighter version that captures the full message the user wants:
 
-## Mobile
-Same layout, scaled down. Quote stays prominent. Avatar + attribution stack remains centered.
+**New fallback**: "Booking, capacity, scheduling, routing, and communication — one platform, zero handoffs."
+
+This keeps it to 1-2 lines on desktop and conveys the core message.
+
+### 3. Skip the product screenshot addition
+The hero already has a full image/carousel section below the text. Adding a side-by-side layout would be a significant restructure. Skipping per the "only if straightforward" instruction.
 
 ## Files
 
 | File | Change |
 |---|---|
-| `src/components/CustomerTestimonial.tsx` | **New** — testimonial section component |
-| `src/pages/Index.tsx` | Import and place `<CustomerTestimonial />` between `<IntegrationStrip />` and `<FinalCTA />` |
+| `index.html` | Fix "transform" → "transforms" in 4 meta tags |
+| `src/components/Hero.tsx` | Update subtitle fallback text |
 
