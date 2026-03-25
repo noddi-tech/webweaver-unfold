@@ -8,14 +8,39 @@ interface Logo {
   alt: string;
 }
 
-export function LogoMarquee() {
+interface LogoMarqueeProps {
+  /** CMS images.section filter (default: 'logo-marquee') */
+  section?: string;
+  /** Translation key for the label above logos */
+  labelKey?: string;
+  /** Fallback text for the label */
+  labelFallback?: string;
+  /** Extra classes on the outer section */
+  className?: string;
+  /** Render logos in grayscale, full-color on hover */
+  grayscale?: boolean;
+  /** Pause the marquee animation on hover */
+  pauseOnHover?: boolean;
+  /** Compact padding (py-4 instead of py-8) */
+  compact?: boolean;
+}
+
+export function LogoMarquee({
+  section = 'logo-marquee',
+  labelKey = 'hero.trusted_by',
+  labelFallback = 'Trusted by leading service providers',
+  className,
+  grayscale = false,
+  pauseOnHover = false,
+  compact = false,
+}: LogoMarqueeProps) {
   const [logos, setLogos] = useState<Logo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { t } = useAppTranslation();
 
   useEffect(() => {
     loadLogos();
-  }, []);
+  }, [section]);
 
   const loadLogos = async () => {
     setIsLoading(true);
@@ -23,7 +48,7 @@ export function LogoMarquee() {
       const { data: imageData } = await supabase
         .from('images')
         .select('file_url, alt, title')
-        .eq('section', 'logo-marquee')
+        .eq('section', section)
         .eq('active', true)
         .order('sort_order', { ascending: true });
 
@@ -59,6 +84,12 @@ export function LogoMarquee() {
           .slice(0, 6)
       : baseLogos;
 
+  const imgClasses = cn(
+    "h-8 transition-all duration-300",
+    isLoading ? "opacity-0" : "opacity-100",
+    grayscale && "grayscale opacity-60 hover:grayscale-0 hover:opacity-100"
+  );
+
   const Strip = ({ prefix }: { prefix: string }) => (
     <div className="flex shrink-0 items-center gap-14">
       {stripLogos.map((logo, i) => (
@@ -68,27 +99,25 @@ export function LogoMarquee() {
             alt={logo.alt}
             loading="lazy"
             decoding="async"
-            className={cn(
-              "h-8 transition-opacity duration-300",
-              isLoading ? "opacity-0" : "opacity-100"
-            )}
+            className={imgClasses}
           />
         </div>
       ))}
     </div>
   );
 
-  // "Trusted by" label
   const TrustedLabel = () => (
     <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground text-center mb-4">
-      {t('hero.trusted_by', 'Trusted by leading service providers')}
+      {t(labelKey, labelFallback)}
     </p>
   );
+
+  const sectionPadding = compact ? 'py-4 md:py-5' : 'py-8';
 
   // Static display for ≤4 logos
   if (useStaticDisplay) {
     return (
-      <section className="w-full py-8">
+      <section className={cn("w-full", sectionPadding, className)}>
         <TrustedLabel />
         {isLoading ? (
           <div className="flex justify-center gap-14 px-8">
@@ -105,7 +134,7 @@ export function LogoMarquee() {
                   alt={logo.alt}
                   loading="lazy"
                   decoding="async"
-                  className="h-8"
+                  className={cn("h-8", grayscale && "grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300")}
                 />
               </div>
             ))}
@@ -118,7 +147,7 @@ export function LogoMarquee() {
   // Scrolling marquee for 5+ logos
   return (
     <section 
-      className="w-full overflow-hidden py-8"
+      className={cn("w-full overflow-hidden", sectionPadding, pauseOnHover && "group", className)}
       style={{
         maskImage: 'linear-gradient(to right, transparent 0%, black 12.5%, black 87.5%, transparent 100%)',
         WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 12.5%, black 87.5%, transparent 100%)'
@@ -126,7 +155,6 @@ export function LogoMarquee() {
     >
       <TrustedLabel />
       
-      {/* Skeleton while loading */}
       {isLoading && (
         <div className="flex justify-around gap-14 px-8">
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -137,7 +165,8 @@ export function LogoMarquee() {
       
       <div className={cn(
         "flex gap-14 animate-marquee transition-opacity duration-300",
-        isLoading ? "opacity-0 absolute" : "opacity-100"
+        isLoading ? "opacity-0 absolute" : "opacity-100",
+        pauseOnHover && "group-hover:[animation-play-state:paused]"
       )}>
         <Strip prefix="a" />
         <Strip prefix="b" />

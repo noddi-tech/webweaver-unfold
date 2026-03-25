@@ -193,6 +193,15 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
+        <LogoMarquee
+          section="trust-bar"
+          labelKey="trust_bar.label"
+          labelFallback="Trusted by service companies across Scandinavia"
+          compact
+          grayscale
+          pauseOnHover
+          className="bg-muted/30 border-y border-border/50"
+        />
         <ScrollingFeatureCards />
         <WhyNavio />
         <HowItWorks />
