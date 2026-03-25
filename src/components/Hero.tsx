@@ -14,7 +14,7 @@ import { EditableBackground } from "@/components/EditableBackground";
 import { EditableIcon } from "@/components/EditableIcon";
 import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
 import { supabase } from "@/integrations/supabase/client";
-import { LogoMarquee } from "@/components/LogoMarquee";
+
 import { RotatingHeadline } from "@/components/RotatingHeadline";
 import {
   Carousel,

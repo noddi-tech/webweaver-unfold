@@ -58,14 +58,7 @@ export function LogoMarquee({
           alt: img.alt || img.title
         })));
       } else {
-        setLogos([
-          { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+1', alt: 'Partner 1' },
-          { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+2', alt: 'Partner 2' },
-          { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+3', alt: 'Partner 3' },
-          { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+4', alt: 'Partner 4' },
-          { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+5', alt: 'Partner 5' },
-          { src: 'https://via.placeholder.com/120x40/000000/FFFFFF?text=Logo+6', alt: 'Partner 6' },
-        ]);
+        setLogos([]);
       }
     } finally {
       setIsLoading(false);
