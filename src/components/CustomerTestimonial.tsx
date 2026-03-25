@@ -1,10 +1,47 @@
-import { Quote } from 'lucide-react';
+import { Quote, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { EditableTranslation } from './EditableTranslation';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function CustomerTestimonial() {
-  const { t } = useAppTranslation();
+  const { t, currentLanguage } = useAppTranslation();
+
+  const { data: story, isLoading } = useQuery({
+    queryKey: ['homepage-testimonial'],
+    queryFn: async () => {
+      // Get testimonial_settings → customer_stories join
+      const { data: settings } = await supabase
+        .from('testimonial_settings')
+        .select('customer_story_id')
+        .limit(1)
+        .maybeSingle();
+
+      if (!settings?.customer_story_id) return null;
+
+      const { data, error } = await supabase
+        .from('customer_stories')
+        .select('quote_text, quote_author, quote_author_title, company_name, company_logo_url, slug')
+        .eq('id', settings.customer_story_id)
+        .eq('active', true)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching testimonial story:', error);
+        return null;
+      }
+      return data;
+    },
+  });
+
+  // Don't render section if no story is configured
+  if (!isLoading && !story) return null;
+
+  const initials = story?.company_name?.slice(0, 2).toUpperCase() ?? '';
+  const lang = currentLanguage || 'en';
 
   return (
     <section className="bg-background py-20 md:py-28 lg:py-36">
@@ -14,50 +51,58 @@ export default function CustomerTestimonial() {
             {t('testimonial.eyebrow', 'TESTIMONIAL')}
           </span>
         </EditableTranslation>
-        {/* Decorative quote icon */}
+
         <Quote className="mx-auto h-12 w-12 text-muted-foreground/15 mb-8 mt-4" strokeWidth={1.5} />
 
-        {/* Quote text */}
-        <EditableTranslation translationKey="testimonial.quote">
-          <blockquote className="text-2xl md:text-3xl lg:text-4xl font-medium leading-relaxed italic tracking-tight">
-            {t('testimonial.quote', 'We kept Eontyre for what it does well and added Navio for booking and routing. The integration means our team works in one flow — no double entry, no switching between systems.')}
-          </blockquote>
-        </EditableTranslation>
-
-        {/* Attribution */}
-        <div className="mt-10 flex flex-col items-center gap-3">
-          <Avatar className="h-14 w-14">
-            <AvatarImage 
-              src={t('testimonial.company_logo_url', '/placeholder.svg')} 
-              alt={t('testimonial.company_name', 'Trønderdekk')}
-              className="object-contain p-1"
-            />
-            <AvatarFallback className="bg-muted text-muted-foreground text-lg font-semibold">
-              TD
-            </AvatarFallback>
-          </Avatar>
-
-          <div className="flex flex-col items-center gap-0.5">
-            <EditableTranslation translationKey="testimonial.author_name">
-              <span className="text-base font-semibold">
-                {t('testimonial.author_name', '[Name]')}
-              </span>
-            </EditableTranslation>
-
-            <EditableTranslation translationKey="testimonial.author_title">
-              <span className="text-sm text-muted-foreground">
-                {t('testimonial.author_title', 'Operations Manager, Trønderdekk')}
-              </span>
-            </EditableTranslation>
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-3/4 mx-auto" />
+            <Skeleton className="h-8 w-2/3 mx-auto" />
+            <Skeleton className="h-14 w-14 rounded-full mx-auto mt-10" />
           </div>
+        ) : story ? (
+          <>
+            <blockquote className="text-2xl md:text-3xl lg:text-4xl font-medium leading-relaxed italic tracking-tight text-foreground">
+              {story.quote_text}
+            </blockquote>
 
-          {/* Company badge */}
-          <EditableTranslation translationKey="testimonial.company_name">
-            <span className="mt-1 text-xs text-muted-foreground/60 tracking-wide uppercase">
-              {t('testimonial.company_name', 'Trønderdekk')}
-            </span>
-          </EditableTranslation>
-        </div>
+            <div className="mt-10 flex flex-col items-center gap-3">
+              <Avatar className="h-14 w-14">
+                <AvatarImage
+                  src={story.company_logo_url || '/placeholder.svg'}
+                  alt={story.company_name}
+                  className="object-contain p-1"
+                />
+                <AvatarFallback className="bg-muted text-muted-foreground text-lg font-semibold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="text-base font-semibold text-foreground">
+                  {story.quote_author || ''}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {story.quote_author_title || ''}
+                </span>
+              </div>
+
+              <span className="mt-1 text-xs text-muted-foreground/60 tracking-wide uppercase">
+                {story.company_name}
+              </span>
+
+              {story.slug && (
+                <Link
+                  to={`/${lang}/stories/${story.slug}`}
+                  className="inline-flex items-center gap-1.5 mt-4 text-sm font-medium text-primary hover:underline transition-colors"
+                >
+                  {t('testimonial.read_more', 'Read the full story')}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              )}
+            </div>
+          </>
+        ) : null}
       </div>
     </section>
   );
