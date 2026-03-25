@@ -199,6 +199,7 @@ const Admin = () => {
                     <TabsTrigger value="features">Features</TabsTrigger>
                     <TabsTrigger value="solutions">Solutions</TabsTrigger>
                     <TabsTrigger value="stories">Stories</TabsTrigger>
+                    <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
                     <TabsTrigger value="blog">Blog</TabsTrigger>
                     <TabsTrigger value="press">Press</TabsTrigger>
                     <TabsTrigger value="usps">USPs</TabsTrigger>
@@ -226,6 +227,9 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="stories" className="space-y-8">
                     <StoriesManager />
+                  </TabsContent>
+                  <TabsContent value="testimonials" className="space-y-8">
+                    <TestimonialManager />
                   </TabsContent>
                   <TabsContent value="blog" className="space-y-8">
                     <BlogManager />
