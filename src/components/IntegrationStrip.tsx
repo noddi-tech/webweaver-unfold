@@ -84,12 +84,12 @@ export default function IntegrationStrip() {
           {/* Right column — SVG diagram */}
           <div className="flex justify-center lg:justify-end">
             <svg
-              viewBox="0 0 480 280"
+              viewBox="0 0 500 310"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               className="w-full max-w-md"
               role="img"
-              aria-label="Integration diagram showing data flowing between your system and Navio"
+              aria-label="Integration diagram showing two-way data sync between your system and Navio"
             >
               {/* Left box — Your system */}
               <rect
@@ -98,16 +98,16 @@ export default function IntegrationStrip() {
                 width="160"
                 height="160"
                 rx="12"
-                className="fill-card stroke-border"
-                strokeWidth="1.5"
+                className="fill-card stroke-foreground/20"
+                strokeWidth="2"
               />
               <text
                 x="90"
                 y="128"
                 textAnchor="middle"
                 className="fill-foreground"
-                fontSize="15"
-                fontWeight="600"
+                fontSize="17"
+                fontWeight="700"
               >
                 Your system
               </text>
@@ -115,15 +115,16 @@ export default function IntegrationStrip() {
                 x="90"
                 y="152"
                 textAnchor="middle"
-                className="fill-muted-foreground"
-                fontSize="11"
+                className="fill-foreground"
+                fontSize="12"
+                opacity="0.6"
               >
                 Eontyre, ERP, CRM…
               </text>
 
               {/* Right box — Navio */}
               <rect
-                x="310"
+                x="330"
                 y="60"
                 width="160"
                 height="160"
@@ -131,21 +132,21 @@ export default function IntegrationStrip() {
                 className="fill-primary"
               />
               <text
-                x="390"
+                x="410"
                 y="128"
                 textAnchor="middle"
                 className="fill-primary-foreground"
-                fontSize="15"
-                fontWeight="600"
+                fontSize="17"
+                fontWeight="700"
               >
                 Navio
               </text>
               <text
-                x="390"
+                x="410"
                 y="152"
                 textAnchor="middle"
                 className="fill-primary-foreground"
-                fontSize="11"
+                fontSize="12"
                 opacity="0.8"
               >
                 Booking · Routing · Capacity
@@ -155,61 +156,94 @@ export default function IntegrationStrip() {
               <line
                 x1="175"
                 y1="115"
-                x2="305"
+                x2="220"
                 y2="115"
                 className="stroke-primary"
-                strokeWidth="1.5"
+                strokeWidth="2"
+                markerEnd="url(#arrowRight)"
+              />
+              <line
+                x1="280"
+                y1="115"
+                x2="325"
+                y2="115"
+                className="stroke-primary"
+                strokeWidth="2"
                 markerEnd="url(#arrowRight)"
               />
               <text
-                x="240"
-                y="107"
+                x="250"
+                y="100"
                 textAnchor="middle"
-                className="fill-muted-foreground"
-                fontSize="10"
+                className="fill-foreground"
+                fontSize="12"
+                fontWeight="500"
               >
                 Bookings · Customers
               </text>
 
               {/* Bottom arrow ← left */}
               <line
-                x1="305"
+                x1="325"
+                y1="165"
+                x2="280"
+                y2="165"
+                className="stroke-primary"
+                strokeWidth="2"
+                markerEnd="url(#arrowLeft)"
+              />
+              <line
+                x1="220"
                 y1="165"
                 x2="175"
                 y2="165"
                 className="stroke-primary"
-                strokeWidth="1.5"
+                strokeWidth="2"
                 markerEnd="url(#arrowLeft)"
               />
               <text
-                x="240"
-                y="185"
+                x="250"
+                y="192"
                 textAnchor="middle"
-                className="fill-muted-foreground"
-                fontSize="10"
+                className="fill-foreground"
+                fontSize="12"
+                fontWeight="500"
               >
                 Services · Reports
               </text>
 
-              {/* Sync icon circle */}
+              {/* Sync icon circle — prominent */}
               <circle
-                cx="240"
+                cx="250"
                 cy="140"
-                r="16"
-                className="fill-background stroke-primary"
-                strokeWidth="1.5"
+                r="26"
+                className="fill-primary/10 stroke-primary"
+                strokeWidth="2.5"
               />
               {/* Sync arrows inside circle */}
               <path
-                d="M234 136a7 7 0 0 1 12 0M246 144a7 7 0 0 1-12 0"
+                d="M242 134a10 10 0 0 1 16 0M258 146a10 10 0 0 1-16 0"
                 className="stroke-primary"
-                strokeWidth="1.5"
+                strokeWidth="2"
                 strokeLinecap="round"
                 fill="none"
               />
               {/* Small arrowheads on sync */}
-              <path d="M246 136l-1.5-3 3 1.5z" className="fill-primary" />
-              <path d="M234 144l1.5 3-3-1.5z" className="fill-primary" />
+              <path d="M258 134l-2-4 4 2z" className="fill-primary" />
+              <path d="M242 146l2 4-4-2z" className="fill-primary" />
+
+              {/* Two-way sync label */}
+              <text
+                x="250"
+                y="218"
+                textAnchor="middle"
+                className="fill-primary"
+                fontSize="11"
+                fontWeight="700"
+                letterSpacing="0.05em"
+              >
+                TWO-WAY SYNC
+              </text>
 
               {/* Arrowhead markers */}
               <defs>
