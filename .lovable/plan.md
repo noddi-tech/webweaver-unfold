@@ -1,37 +1,41 @@
 
 
-# Fix Integration Strip SVG: Readability and Two-Way Sync Prominence
+# Fix Integration Strip: Text Contrast and CMS Integration
 
-## Problems (from screenshot)
-1. The left box ("Your system") has no visible title text -- the `fill-card` background makes "Your system" text invisible against a similar-colored background
-2. The "Eontyre, ERP, CRM..." subtitle is barely readable (too light)
-3. The two-way sync circle is small and not prominent enough -- the key selling point of bidirectional sync gets lost
-4. Arrow labels are tiny (fontSize 10) and hard to read
+## Problems (from screenshots)
+1. **Left box "Your system"** -- `fill-card` resolves to dark, making dark text invisible. Need light/white background or white text.
+2. **All SVG text is hardcoded** -- "Your system", "Eontyre, ERP, CRM...", "Navio", "Booking . Routing . Capacity", "Bookings . Customers", "Services . Reports", "TWO-WAY SYNC", "Eontyre" partner placeholder, and "+ more coming" are not in the translation system.
 
 ## Changes to `src/components/IntegrationStrip.tsx`
 
-### SVG diagram fixes
+### 1. Fix left box contrast
+Change the left box from `fill-card` (dark) to `fill-background` with a clear border, so text is readable. Use `stroke-border` for visible border.
 
-1. **Left box text readability**: Add a visible border to the left box (`strokeWidth="2"`) and ensure text uses `fill-foreground` with larger font size (17px for title, 12px for subtitle)
+### 2. Make all text CMS-editable
+Wrap every hardcoded string in `EditableTranslation` with translation keys:
 
-2. **Make sync icon bigger and more prominent**: 
-   - Increase sync circle radius from 16 to 24
-   - Add a "Two-way sync" label below the circle
-   - Make the sync arrows inside the circle larger and bolder (strokeWidth 2)
-   - Add a subtle pulsing animation class to draw attention
+| Text | Translation key |
+|---|---|
+| "Your system" | `integrations_strip.diagram_your_system` |
+| "Eontyre, ERP, CRM..." | `integrations_strip.diagram_your_system_subtitle` |
+| "Navio" | `integrations_strip.diagram_navio` |
+| "Booking . Routing . Capacity" | `integrations_strip.diagram_navio_subtitle` |
+| "Bookings . Customers" | `integrations_strip.diagram_data_outbound` |
+| "Services . Reports" | `integrations_strip.diagram_data_inbound` |
+| "TWO-WAY SYNC" | `integrations_strip.diagram_sync_label` |
+| "Eontyre" (partner) | `integrations_strip.partner_eontyre` |
+| "+ more coming" | `integrations_strip.partner_more` |
 
-3. **Increase arrow label font sizes** from 10px to 12px for readability
+**SVG text limitation**: SVG `<text>` elements cannot be wrapped in React components directly. Solution: use `t()` calls for the SVG text content (making them translatable via CMS), and place separate `EditableTranslation` wrappers outside the SVG as invisible edit triggers, or simply use `t()` with fallbacks inside SVG (which already makes them editable via the Translation Manager CMS page, even without inline edit buttons).
 
-4. **Increase arrow stroke width** from 1.5 to 2 for visibility
+For the partner name and "+ more coming" text (HTML, not SVG), wrap with `EditableTranslation` directly.
 
-5. **Add "Your system" title above the left box** or increase the font size inside it to 17px to match Navio box
+### 3. Tech badges from translations
+Replace hardcoded `techItems` array with individual `t()` calls so each badge text is translatable.
 
-### Layout adjustment
-- Widen the viewBox slightly if needed to accommodate the larger sync element
-- Keep the same responsive behavior
+## Files
 
-### Files
 | File | Change |
 |---|---|
-| `src/components/IntegrationStrip.tsx` | Fix SVG text readability, enlarge sync icon, add "Two-way sync" label, increase font sizes and stroke widths |
+| `src/components/IntegrationStrip.tsx` | Fix left box fill to `fill-background`, replace all hardcoded strings with `t()` calls, wrap HTML text in `EditableTranslation` |
 
