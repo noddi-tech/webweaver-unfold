@@ -9,8 +9,13 @@ export default function CustomerTestimonial() {
   return (
     <section className="bg-background py-20 md:py-28 lg:py-36">
       <div className="container max-w-4xl mx-auto px-4 text-center">
+        <EditableTranslation translationKey="testimonial.eyebrow">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            {t('testimonial.eyebrow', 'TESTIMONIAL')}
+          </span>
+        </EditableTranslation>
         {/* Decorative quote icon */}
-        <Quote className="mx-auto h-12 w-12 text-muted-foreground/15 mb-8" strokeWidth={1.5} />
+        <Quote className="mx-auto h-12 w-12 text-muted-foreground/15 mb-8 mt-4" strokeWidth={1.5} />
 
         {/* Quote text */}
         <EditableTranslation translationKey="testimonial.quote">

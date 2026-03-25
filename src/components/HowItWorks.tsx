@@ -41,8 +41,13 @@ export default function HowItWorks() {
       <div className="container max-w-container px-4 sm:px-6 lg:px-8" key={refreshKey}>
         {/* Section Heading */}
         <div className="text-center mb-8 md:mb-12">
+          <EditableTranslation translationKey="how_it_works.eyebrow" onSave={() => setRefreshKey(prev => prev + 1)}>
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              {t('how_it_works.eyebrow', 'HOW IT WORKS')}
+            </span>
+          </EditableTranslation>
           <EditableTranslation translationKey="how_it_works.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-            <h2 className="text-4xl font-bold mb-6 text-foreground">
+            <h2 className="text-4xl font-bold mb-6 text-foreground mt-3">
               {t('how_it_works.title', 'How Navio Powers Your Operations')}
             </h2>
           </EditableTranslation>
