@@ -36,7 +36,7 @@ export default function IntegrationStrip() {
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left column — text */}
-            <div className="space-y-6">
+            <div className="space-y-6 order-2 lg:order-1">
               <EditableTranslation translationKey="integrations_strip.eyebrow" onSave={onSave}>
                 <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t("integrations_strip.eyebrow", "Integrations")}
@@ -102,7 +102,7 @@ export default function IntegrationStrip() {
             </div>
 
             {/* Right column — SVG diagram */}
-            <div className="flex justify-center lg:justify-end">
+            <div className="flex justify-center lg:justify-end order-1 lg:order-2">
               <svg
                 viewBox="0 0 500 310"
                 fill="none"
