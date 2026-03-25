@@ -4,15 +4,12 @@ import { LanguageLink } from "@/components/LanguageLink";
 import navioLocationScreen from "@/assets/navio-location-screen.png";
 import tiamatLocationScreen from "@/assets/tiamat-location-screen.png";
 import hurtigrutaLocationScreen from "@/assets/hurtigruta-location-screen.png";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
-import { LockedText } from "@/components/LockedText";
 import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
-import { EditableBackground } from "@/components/EditableBackground";
-import { EditableIcon } from "@/components/EditableIcon";
-import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
+import { supabase } from "@/integrations/supabase/client";
 import { supabase } from "@/integrations/supabase/client";
 
 import { RotatingHeadline } from "@/components/RotatingHeadline";
