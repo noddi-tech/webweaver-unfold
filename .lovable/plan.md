@@ -1,49 +1,32 @@
 
 
-# Add Eyebrow Labels to All Homepage Sections (except Hero)
+# Implement Mobile Carousel for ScrollingFeatureCards
 
-## What
-Add an uppercase eyebrow label (like "INTEGRATIONS" on IntegrationStrip) above the heading of each homepage section. This creates visual consistency and helps users scan the page.
+## Problem
+The mobile carousel code (state, refs, IntersectionObserver) was added but the actual carousel JSX was never rendered. The cards still use a single `grid` layout for all breakpoints.
 
-## Sections to update
+## Plan
 
-| Section | Component | Eyebrow text | Translation key |
-|---|---|---|---|
-| ScrollingFeatureCards | `ScrollingFeatureCards.tsx` | "FEATURES" | `scrolling_features.eyebrow` |
-| WhyNavio | `WhyNavio.tsx` | "WHY NAVIO" | `why_noddi.eyebrow` |
-| HowItWorks | `HowItWorks.tsx` | "HOW IT WORKS" | `how_it_works.eyebrow` |
-| CustomerTestimonial | `CustomerTestimonial.tsx` | "TESTIMONIAL" | `testimonial.eyebrow` |
-| FinalCTA | `FinalCTA.tsx` | "GET STARTED" | `final_cta.eyebrow` |
+### In `src/components/ScrollingFeatureCards.tsx`
 
-**Already has eyebrow:** IntegrationStrip (no change needed)
-**Excluded:** Hero, LogoMarquee
+**Split the cards grid (line 778-923) into two render paths:**
 
-## Pattern
-Reuse the exact same markup from IntegrationStrip:
+1. **Mobile carousel (`md:hidden`)** — new block before the existing grid:
+   - Horizontal scroll container: `flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-4 px-4` with `ref={mobileScrollRef}` and inline styles to hide scrollbar
+   - Each card: `data-slide-index={index}`, `snap-center flex-shrink-0 w-[85vw] rounded-3xl overflow-hidden bg-white shadow-lg`
+   - Card layout: image on top (aspect-square with gradient background), then content below (badge + icon, title, description, CTA)
+   - Reuse existing `renderMedia`, `EditableTranslation`, `EditableUniversalMedia`, card styling
+   - Dot indicators below: `flex md:hidden gap-2 justify-center mt-4` with clickable dots that `scrollIntoView`
 
-```tsx
-<EditableTranslation translationKey="[section].eyebrow" onSave={onSave}>
-  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-    {t("[section].eyebrow", "LABEL TEXT")}
-  </span>
-</EditableTranslation>
-```
+2. **Tablet + Desktop (`hidden md:grid`)** — wrap the existing grid with `hidden md:grid` instead of `grid`:
+   - Change line 779 from `"relative grid gap-6"` to `"relative hidden md:grid gap-6"`
+   - Everything else stays exactly the same
 
-Place it as the first child inside the section header `div`, above the `<h2>`.
-
-## Notes
-- For ScrollingFeatureCards, add to both the desktop sidebar heading area and the tablet/mobile heading block (line ~755)
-- For CustomerTestimonial, place above the quote icon
-- For FinalCTA, adapt color to match the dark/gradient background (use the existing `ctaData.footerColor` or similar light color token)
-- All eyebrow text is CMS-editable via `EditableTranslation`
+This approach reuses all existing card data, styling, and edit mode functionality.
 
 ## Files
 
 | File | Change |
 |---|---|
-| `src/components/ScrollingFeatureCards.tsx` | Add eyebrow above heading in sidebar + mobile header |
-| `src/components/WhyNavio.tsx` | Add eyebrow above h2 |
-| `src/components/HowItWorks.tsx` | Add eyebrow above h2 |
-| `src/components/CustomerTestimonial.tsx` | Add eyebrow above quote icon |
-| `src/components/FinalCTA.tsx` | Add eyebrow above title |
+| `src/components/ScrollingFeatureCards.tsx` | Add mobile carousel JSX before existing grid; hide grid on mobile |
 
