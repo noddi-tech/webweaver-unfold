@@ -775,8 +775,118 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
               </p>
             </div>
 
-            {/* RIGHT COLUMN - Scrolling Cards Grid */}
-            <div className={cn("relative grid gap-6", "grid-cols-1 md:grid-cols-2 xl:grid-cols-1")}>
+            {/* MOBILE CAROUSEL - visible only on small screens */}
+            <div
+              ref={mobileScrollRef}
+              className="md:hidden flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-4 px-4"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+            >
+              {cards.map((card, index) => {
+                const Icon = card.icon;
+                return (
+                  <div
+                    key={card.number}
+                    data-slide-index={index}
+                    className="snap-center flex-shrink-0 w-[85vw] rounded-3xl overflow-hidden bg-white shadow-lg"
+                  >
+                    {/* Image area */}
+                    <div
+                      className="relative aspect-square overflow-hidden"
+                      style={{ backgroundImage: 'var(--gradient-warmth)' }}
+                    >
+                      <div className="absolute inset-0 pt-2 pr-2 pb-0 pl-0 flex items-start justify-end">
+                        <div className="relative w-full h-full rounded-tr-xl overflow-hidden bg-white -left-[3px] -bottom-[3px]" style={{ width: 'calc(100% + 3px)', height: 'calc(100% + 3px)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
+                          <EditableUniversalMedia
+                            locationId={`scrolling-card-${index + 1}`}
+                            onSave={() => loadImageSettings()}
+                            placeholder={`Click to set image for ${card.title}`}
+                          >
+                            {renderMedia(index, card)}
+                          </EditableUniversalMedia>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Content area */}
+                    <div className="p-5">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Badge
+                          className="px-2 py-1 text-xs font-normal tracking-wide"
+                          style={{
+                            backgroundColor: 'rgba(120, 86, 255, 0.1)',
+                            border: '1px solid rgba(120, 86, 255, 0.5)',
+                            color: 'rgb(46, 22, 112)',
+                            borderRadius: '4px',
+                          }}
+                        >
+                          {String(index + 1).padStart(2, '0')}
+                        </Badge>
+                        <div className={cn('p-2.5 rounded-lg backdrop-blur-sm', cardData[index]?.iconCardBg || 'bg-white/10')}>
+                          <Icon className="h-5 w-5" style={{ color: `hsl(var(--${normalizeColorToken(cardData[index]?.iconColor || 'foreground')}))` }} />
+                        </div>
+                      </div>
+                      <h3 className="text-base font-bold leading-tight mb-2" style={{ color: 'rgb(31, 32, 35)' }}>
+                        <EditableTranslation translationKey={card.titleKey}>
+                          {cardData[index]?.title || card.title}
+                        </EditableTranslation>
+                      </h3>
+                      <p className="text-sm leading-relaxed opacity-80 mb-4" style={{ color: 'rgba(0, 0, 0, 0.7)' }}>
+                        <EditableTranslation translationKey={card.descriptionKey}>
+                          {cardData[index]?.description || card.description}
+                        </EditableTranslation>
+                      </p>
+                      <Button
+                        variant="secondary"
+                        className="rounded-full px-5 py-2.5 group text-sm"
+                        style={{
+                          ...(cardData[index]?.ctaBgColor && cardData[index].ctaBgColor.includes('gradient')
+                            ? { backgroundImage: `var(--${toCssVar(cardData[index].ctaBgColor)})` }
+                            : { backgroundColor: cardData[index]?.ctaBgColor
+                                ? `hsl(var(--${toCssVar(cardData[index].ctaBgColor)}))`
+                                : 'rgba(0, 0, 0, 0.07)' }),
+                          color: cardData[index]?.ctaTextColor
+                            ? `hsl(var(--${toCssVar(cardData[index].ctaTextColor)}))`
+                            : 'rgb(31, 32, 35)',
+                        }}
+                        asChild
+                      >
+                        <a href={cardData[index]?.ctaUrl || card.ctaUrl || '#'}>
+                          <EditableTranslation translationKey={card.ctaKey}>
+                            {cardData[index]?.ctaText || card.ctaText}
+                          </EditableTranslation>
+                          {(() => {
+                            const IconComponent = (icons as Record<string, any>)['ArrowRight'];
+                            return IconComponent ? (
+                              <IconComponent className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            ) : null;
+                          })()}
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Mobile dot indicators */}
+            <div className="flex md:hidden gap-2 justify-center mt-2">
+              {cards.map((_, i) => (
+                <button
+                  key={i}
+                  className={cn(
+                    "h-2 rounded-full transition-all duration-300",
+                    activeSlide === i ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"
+                  )}
+                  onClick={() => {
+                    const container = mobileScrollRef.current;
+                    if (!container) return;
+                    const slide = container.querySelector(`[data-slide-index="${i}"]`);
+                    slide?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* RIGHT COLUMN - Scrolling Cards Grid (tablet + desktop) */}
+            <div className={cn("relative hidden md:grid gap-6", "grid-cols-1 md:grid-cols-2 xl:grid-cols-1")}>
             {cards.map((card, index) => {
               const state = cardStates[index] || { opacity: 0, translateY: 20, scale: 1 };
               const Icon = card.icon;
