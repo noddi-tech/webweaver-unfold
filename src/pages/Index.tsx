@@ -5,7 +5,7 @@ import Hero from "@/components/Hero";
 import WhyNavio from "@/components/WhyNavio";
 import HowItWorks from "@/components/HowItWorks";
 import FinalCTA from "@/components/FinalCTA";
-import Integrations from "@/components/Integrations";
+import IntegrationStrip from "@/components/IntegrationStrip";
 import { LogoMarquee } from "@/components/LogoMarquee";
 import { HreflangTags } from "@/components/HreflangTags";
 import { ScrollingFeatureCards } from "@/components/ScrollingFeatureCards";
@@ -206,7 +206,7 @@ const Index = () => {
         <ScrollingFeatureCards />
         <WhyNavio />
         <HowItWorks />
-        <Integrations />
+        <IntegrationStrip />
         <FinalCTA />
       </main>
       <Footer />
