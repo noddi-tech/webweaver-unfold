@@ -710,6 +710,7 @@ export type Database = {
           impact_statement: string | null
           product_screenshot_url: string | null
           quote_author: string | null
+          quote_author_image_url: string | null
           quote_author_title: string | null
           quote_text: string | null
           results: Json | null
@@ -734,6 +735,7 @@ export type Database = {
           impact_statement?: string | null
           product_screenshot_url?: string | null
           quote_author?: string | null
+          quote_author_image_url?: string | null
           quote_author_title?: string | null
           quote_text?: string | null
           results?: Json | null
@@ -758,6 +760,7 @@ export type Database = {
           impact_statement?: string | null
           product_screenshot_url?: string | null
           quote_author?: string | null
+          quote_author_image_url?: string | null
           quote_author_title?: string | null
           quote_text?: string | null
           results?: Json | null
