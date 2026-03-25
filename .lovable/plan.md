@@ -1,26 +1,23 @@
 
 
-# Fix: Trust Bar Not Showing Logos
+# Make Logo Marquee Logos Clickable
 
-## Root Cause
+## What
+Logos in the trust bar become clickable links. Each logo links to the URL stored in the CMS `images.link_url` field. Logos without a `link_url` remain as plain images.
 
-The logos in the CMS are assigned to section `logo-marquee`, but the `<LogoMarquee>` instance on the homepage is configured with `section="trust-bar"`. No images exist with `section = 'trust-bar'`, so the component returns `null`.
+## Changes
 
-## Fix
+### `src/components/LogoMarquee.tsx`
 
-**`src/pages/Index.tsx`** — Change the trust bar's `section` prop from `"trust-bar"` to `"logo-marquee"` so it reads from the same section where the logos are stored:
+1. **Add `link` to the `Logo` interface**: Include the `link_url` from the CMS query.
+2. **Update the CMS query**: Already fetches `file_url, alt, title` — just needs to also select `link_url`.
+3. **Map `link_url` into logo data**: `link: img.link_url || null`.
+4. **Wrap `<img>` in `<a>` when `link` exists**: In both the `Strip` component (marquee) and the static display, wrap the image in an anchor tag with `target="_blank"` and `rel="noopener noreferrer"`. When no link, render the `<img>` directly.
 
-```tsx
-<LogoMarquee
-  section="logo-marquee"          // was "trust-bar"
-  labelKey="trust_bar.label"
-  labelFallback="Trusted by service companies across Scandinavia"
-  compact
-  grayscale
-  pauseOnHover
-  className="bg-muted/30 border-y border-border/50"
-/>
-```
+No new dependencies. The `link_url` field already exists on the `images` table — just populate it in the CMS Image Manager for each logo.
 
-One line change. The 7 logos already in the CMS (Noddi, Carglass, Tronderdekk, BestDrive, Dekkfix, Shine, Elitebilvask) will immediately appear in the trust bar with grayscale styling and marquee scroll.
+### Files
+| File | Change |
+|---|---|
+| `src/components/LogoMarquee.tsx` | Fetch `link_url`, wrap logos in `<a>` when URL exists |
 
