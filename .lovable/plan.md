@@ -1,49 +1,35 @@
 
+Root cause: the issue is not the integrations content itself. `IntegrationStrip` renders inside `EditableBackground`, and `EditableBackground` swaps the actual `<section>` DOM node once style data finishes loading. `useScrollAnimation` currently observes only the first mounted node (`ref.current` once in `useEffect`). After the DOM swap, the observer stays attached to the old node, the new live node is never observed, and `isVisible` can remain `false` forever. Because the content container is gated by `opacity-0 translate-y-8`, the user sees a blank section background with no content. That is why it appears to “randomly disappear” and why it can work in one session/browser but fail in another.
 
-# Fix: FinalCTA Infinite Re-render Loop Causing Page Crash
+Implementation plan:
 
-## Root Cause
+1. Harden `useScrollAnimation` at the hook level
+- Refactor `src/hooks/useScrollAnimation.ts` to observe the current live element, not just the initial `ref.current`.
+- Use a callback ref or tracked node state so the observer re-attaches whenever the DOM element changes.
+- Keep the public API the same (`{ ref, isVisible }`) so existing sections do not break.
 
-In `src/components/FinalCTA.tsx` line 86, the first `useEffect` has `t` in its dependency array:
+2. Make the hook resilient to wrapper-driven remounts
+- Recreate/cleanup the observer whenever the target node changes.
+- Preserve existing behavior for `threshold`, `rootMargin`, `triggerOnce`, and reduced-motion users.
+- Add a safe fallback for environments where `IntersectionObserver` is unavailable so content never stays hidden permanently.
 
-```ts
-}, [stylesLoaded, backgroundStyles, textStyles, t]);
-```
+3. Remove the integrations section’s dependency on a brittle cast
+- Update `src/components/IntegrationStrip.tsx` to use the hook ref directly on the `<section>` instead of the current manual cast.
+- Keep the existing mobile ordering, editable background, SVG, badges, and translations unchanged.
 
-The `t` function from `useAppTranslation` gets a **new reference on every render**. This causes:
+4. Audit for the same failure pattern
+- Check other sections using `useScrollAnimation` to ensure they still work with the hardened hook.
+- Specifically confirm there are no other components combining animated “hidden until visible” content with wrappers that can swap DOM nodes after mount.
 
-1. Component renders
-2. `useEffect` fires (because `t` changed)
-3. Calls `setCtaData` inside the effect
-4. State update triggers re-render
-5. `t` has a new reference again → goto step 2
-6. **Infinite loop** → React bails out → page sections stop rendering
+5. Verify the real failure mode is gone
+- Test `/en/` from a fresh load, not just after hot reload.
+- Confirm the integrations section appears consistently on first load, after refresh, and after CMS style/background data finishes loading.
+- Confirm no regressions in other animated sections like `WhyNavio` and `HowItWorks`.
 
-The console confirms this: `"Maximum update depth exceeded"` at `FinalCTA.tsx`.
+Files expected:
+- `src/hooks/useScrollAnimation.ts`
+- `src/components/IntegrationStrip.tsx`
 
-## Fix
-
-**File: `src/components/FinalCTA.tsx`** (line 86)
-
-Remove `t` from the dependency array. The `t` function is only used to set default fallback text for `ctaText` / `secondaryCtaText` in the initial state (lines 43, 47), not inside this effect. The effect only reads from `backgroundStyles` and `textStyles` context.
-
-```ts
-// Before
-}, [stylesLoaded, backgroundStyles, textStyles, t]);
-
-// After
-}, [stylesLoaded, backgroundStyles, textStyles]);
-```
-
-## Impact
-
-- Eliminates the infinite render loop
-- All homepage sections (IntegrationStrip, CustomerTestimonial, etc.) render reliably
-- No functionality change -- the CTA data loading logic is unchanged
-
-## Files Changed
-
-| File | Change |
-|---|---|
-| `src/components/FinalCTA.tsx` | Remove `t` from useEffect dependency array (line 86) |
-
+Result:
+- Fixes the actual race condition instead of patching the integrations section only.
+- Prevents this class of “blank section with background but no content” bugs from recurring when components are wrapped in editable/styled CMS containers.
