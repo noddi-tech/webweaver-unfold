@@ -111,35 +111,10 @@ export default function IntegrationStrip() {
                 role="img"
                 aria-label="Integration diagram showing two-way data sync between your system and Navio"
               >
-                <defs>
-                  <linearGradient id="navioGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" />
-                    <stop offset="50%" stopColor="hsl(var(--accent))" />
-                    <stop offset="100%" stopColor="hsl(var(--brand-orange, var(--primary)))" />
-                  </linearGradient>
-                </defs>
-
-                <style>{`
-                  @keyframes dash-flow {
-                    to { stroke-dashoffset: -20; }
-                  }
-                  @keyframes gentle-pulse {
-                    0%, 100% { transform-origin: 250px 140px; transform: scale(1); opacity: 1; }
-                    50% { transform-origin: 250px 140px; transform: scale(1.08); opacity: 0.85; }
-                  }
-                `}</style>
-
-                {/* Left box — Your system */}
-                <rect x="10" y="60" width="160" height="160" rx="20" fill="hsl(var(--muted))" className="stroke-border" strokeWidth="2" />
-                <text x="90" y="128" textAnchor="middle" className="fill-foreground" fontSize="17" fontWeight="700">
-                  {t("integrations_strip.diagram_your_system", "Your system")}
-                </text>
-                <text x="90" y="152" textAnchor="middle" className="fill-muted-foreground" fontSize="12">
-                  {t("integrations_strip.diagram_your_system_subtitle", "Eontyre, ERP, CRM…")}
-                </text>
-
                 {/* Right box — Navio */}
-                <rect x="330" y="60" width="160" height="160" rx="20" fill="url(#navioGrad)" />
+                <foreignObject x="330" y="60" width="160" height="160">
+                  <div className="w-full h-full rounded-[20px] bg-gradient-mesh-velvet" />
+                </foreignObject>
                 <text x="410" y="128" textAnchor="middle" className="fill-primary-foreground" fontSize="17" fontWeight="700">
                   {t("integrations_strip.diagram_navio", "Navio")}
                 </text>
