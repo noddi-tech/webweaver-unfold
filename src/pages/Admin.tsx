@@ -41,6 +41,7 @@ import SEOSetupWizard from "@/components/design-system/SEOSetupWizard";
 import EvaluationHealthDashboard from "@/components/design-system/EvaluationHealthDashboard";
 import { RotatingTermsManager } from "@/components/design-system/RotatingTermsManager";
 import StoriesManager from "@/components/design-system/StoriesManager";
+import TestimonialManager from "@/components/design-system/TestimonialManager";
 import BlogManager from "@/components/design-system/BlogManager";
 import JobsManager from "@/components/design-system/JobsManager";
 import NewsletterManager from "@/components/design-system/NewsletterManager";
@@ -198,6 +199,7 @@ const Admin = () => {
                     <TabsTrigger value="features">Features</TabsTrigger>
                     <TabsTrigger value="solutions">Solutions</TabsTrigger>
                     <TabsTrigger value="stories">Stories</TabsTrigger>
+                    <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
                     <TabsTrigger value="blog">Blog</TabsTrigger>
                     <TabsTrigger value="press">Press</TabsTrigger>
                     <TabsTrigger value="usps">USPs</TabsTrigger>
@@ -225,6 +227,9 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="stories" className="space-y-8">
                     <StoriesManager />
+                  </TabsContent>
+                  <TabsContent value="testimonials" className="space-y-8">
+                    <TestimonialManager />
                   </TabsContent>
                   <TabsContent value="blog" className="space-y-8">
                     <BlogManager />
