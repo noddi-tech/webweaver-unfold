@@ -1,35 +1,38 @@
 
 
-# Add Soft Linen Background Color
+# Fix IntegrationStrip Arrows & Update Soft Linen Color
 
-## What we're doing
-1. Add #F3F0E2 ("Soft Linen") as a color token in the database via migration
-2. Change the `--background` CSS variable from pure white (`0 0% 100%`) to soft linen (`49 41% 92%`) so the entire page body uses this warm tone
+## 1. SVG arrows — remove arrowhead markers, fix text spacing
 
-## Changes
+Remove the `markerEnd` arrowhead markers from both curved paths. The dashed lines alone communicate the flow well (as seen in the screenshot). Adjust the text `y` positions to add more spacing between the dotted paths and their labels:
+- Top label ("Bookings · Customers"): move from `y="88"` to `y="75"` — more clearance above the curve
+- Bottom label ("Services · Reports"): move from `y="215"` to `y="225"` — more clearance below the curve
 
-### 1. Database migration — insert color token
-Insert into `color_tokens` table:
-- `css_var`: `--color-soft-linen`
-- `label`: `Soft Linen`
-- `value`: `49 41% 92%` (HSL conversion of #F3F0E2)
-- `color_type`: `solid`
-- `category`: `surfaces`
-- `preview_class`: `bg-soft-linen`
-- `optimal_text_color`: `dark`
-- `description`: `Warm linen background — #F3F0E2`
+Remove the `<marker>` definitions from `<defs>` since they're no longer used.
 
-### 2. Update `src/index.css`
-Change line 58:
-```css
---background: 49 41% 92%;    /* Soft Linen #F3F0E2 - warm page background */
-```
+**File**: `src/components/IntegrationStrip.tsx`
 
-This single change makes every page use the soft linen tone since `html { background: hsl(var(--background)); }` is already set on line 251.
+## 2. Update Soft Linen to #EAE7E1
 
-### Files changed
-| Target | Change |
+Convert #EAE7E1 to HSL: approximately `36 12% 90%`.
+
+Update `--background` in `src/index.css` line 58 from `49 41% 92%` to `36 12% 90%`.
+
+Also update the database migration to use the corrected value.
+
+**File**: `src/index.css`
+
+## 3. Update database color token
+
+New migration to update the existing `--color-soft-linen` token value from `49 41% 92%` to `36 12% 90%` and description to reference `#EAE7E1`.
+
+**File**: New migration SQL
+
+## Files changed
+
+| File | Change |
 |---|---|
-| Database migration | Insert soft linen into `color_tokens` |
-| `src/index.css` | Update `--background` from `0 0% 100%` to `49 41% 92%` |
+| `src/components/IntegrationStrip.tsx` | Remove arrow markers, adjust text spacing |
+| `src/index.css` | Update `--background` to `36 12% 90%` (#EAE7E1) |
+| New migration | Update soft linen color token value |
 
