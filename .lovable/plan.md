@@ -1,28 +1,37 @@
 
 
-# Audit: IntegrationStrip CMS Editing Compatibility
+# New Customer Testimonial Section
 
-## Findings
+## What
+A new `CustomerTestimonial.tsx` component placed between `IntegrationStrip` and `FinalCTA` on the homepage. Full-width, center-aligned, single-column testimonial with generous breathing room.
 
-### Working correctly
-- **Eyebrow, headline, description, CTA link**: All wrapped in `EditableTranslation` without `disableStyling` — text and color edits will persist and render.
-- **SVG text**: Uses `t()` calls, editable via Translation Manager CMS page. Cannot have inline edit buttons (SVG limitation) but translations work.
-- **Save flow**: `RichTextEditModal` correctly upserts to `translations` table with style settings (color, font size, weight, italic, underline).
+## Layout and content
+- Decorative oversized `Quote` icon (lucide-react) at top, muted opacity (~15-20%)
+- Large centered quote text styled as a pullquote (text-2xl md:text-3xl lg:text-4xl, font-medium, italic or serif-like weight)
+- Attribution: circular avatar with "TD" initials, placeholder name "[Name]", title "Operations Manager, Trønderdekk"
+- Small muted company name badge below attribution
+- No card wrapper — section background is the container
+- Background: `bg-background` (white/light) to alternate with the `bg-muted/30` of IntegrationStrip above
 
-### Broken — needs fixing
+## CMS integration
+All text wrapped in `EditableTranslation` with keys:
+| Key | Fallback |
+|---|---|
+| `testimonial.quote` | "We kept Eontyre for what it does well..." |
+| `testimonial.author_name` | "[Name]" |
+| `testimonial.author_title` | "Operations Manager, Trønderdekk" |
+| `testimonial.company_name` | "Trønderdekk" |
 
-| Element | Problem | Fix |
-|---|---|---|
-| **"Eontyre"** (line 60) | `disableStyling` prevents CMS color from applying; hardcoded `text-foreground` class overrides any inline style | Remove `disableStyling`, remove `text-foreground` from className |
-| **"+ more coming"** (line 65) | `disableStyling` prevents CMS color from applying; hardcoded `text-muted-foreground/60` class overrides any inline style | Remove `disableStyling`, remove `text-muted-foreground/60` from className |
-| **Tech badges** (lines 73-78) | Use `t()` for translation but not wrapped in `EditableTranslation` — no inline edit button, no CMS color/style control | Wrap each badge in `EditableTranslation` with individual keys |
+## Spacing
+Extra generous: `py-20 md:py-28 lg:py-36` — noticeably more than standard sections to create a "pause" feel.
 
-### Root cause for user's issue
-The user set "Eontyre" to white text in the CMS editor. The `disableStyling` prop explicitly tells `EditableTranslation` to skip all inline styles (including color). Additionally, the hardcoded `text-foreground` Tailwind class would override any inline color even if styling were enabled. Both must be removed.
+## Mobile
+Same layout, scaled down. Quote stays prominent. Avatar + attribution stack remains centered.
 
-## Changes — `src/components/IntegrationStrip.tsx`
+## Files
 
-1. **Eontyre wrapper**: Remove `disableStyling`, remove `text-foreground` from inner div
-2. **"+ more coming" wrapper**: Remove `disableStyling`, remove `text-muted-foreground/60` from inner span
-3. **Tech badges**: Wrap each badge individually in `EditableTranslation` with its own translation key, so inline editing works for each badge
+| File | Change |
+|---|---|
+| `src/components/CustomerTestimonial.tsx` | **New** — testimonial section component |
+| `src/pages/Index.tsx` | Import and place `<CustomerTestimonial />` between `<IntegrationStrip />` and `<FinalCTA />` |
 
