@@ -1,7 +1,7 @@
 import { Quote } from 'lucide-react';
 import { EditableTranslation } from './EditableTranslation';
 import { useAppTranslation } from '@/hooks/useAppTranslation';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function CustomerTestimonial() {
   const { t } = useAppTranslation();
@@ -27,6 +27,11 @@ export default function CustomerTestimonial() {
         {/* Attribution */}
         <div className="mt-10 flex flex-col items-center gap-3">
           <Avatar className="h-14 w-14">
+            <AvatarImage 
+              src={t('testimonial.company_logo_url', '/placeholder.svg')} 
+              alt={t('testimonial.company_name', 'Trønderdekk')}
+              className="object-contain p-1"
+            />
             <AvatarFallback className="bg-muted text-muted-foreground text-lg font-semibold">
               TD
             </AvatarFallback>
