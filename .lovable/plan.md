@@ -1,42 +1,50 @@
 
 
-# Polish the Integration Strip Design
+# Fix IntegrationStrip: Arrows, Badge Contrast, and CMS Editability
 
-## Changes to `src/components/IntegrationStrip.tsx`
+## Problems identified from screenshot
 
-### 1. SVG diagram — Navio box uses brand gradient
-Replace the flat `fill-primary` rect with an SVG `linearGradient` definition using the existing brand gradient tokens (`--gradient-sunset`: federal blue → vibrant purple → brand orange). Add `rx="20"` for rounder corners on both boxes.
+1. **SVG arrows are broken**: The split two-segment arrow lines (175→220 gap 280→325) create a visual mess — the gap between segments is too wide and the marker arrowheads look disconnected. The arrows need to be single continuous lines that route around the center sync circle.
 
-The "Your system" box gets a warmer fill using `hsl(var(--muted))` instead of `fill-background`.
+2. **Tech badges have no visible text**: The badges render as solid dark purple pills with invisible text. The `bg-card` class combined with the current theme creates dark backgrounds where text disappears. Need proper contrast.
 
-### 2. SVG arrows — thicker with animated dash flow
-- Increase `strokeWidth` from `2` to `2.5`
-- Add `strokeDasharray="6 4"` to the connecting lines
-- Add a CSS `@keyframes dash-flow` animation that offsets `stroke-dashoffset` continuously, creating a flowing-dots effect on the arrows
-- Apply via inline `style={{ animation: 'dash-flow 1.5s linear infinite' }}`
+3. **No CMS editability**: The tech badges and partner pill are not wrapped in `EditableCard` — they can't be styled via the CMS. The section background itself also lacks CMS background editing.
 
-### 3. SVG sync circle — subtle pulse
-Add a slow `animate-pulse` (or a custom gentle scale pulse) on the center sync circle to make it feel alive.
+## Changes
 
-### 4. Tech badges — more visual weight
-Change from `Badge variant="outline"` to a custom class with `bg-card border border-border shadow-sm` for a filled look that stands out against the `bg-muted/30` section background. Add small icons (lucide: `Globe`, `Webhook`, `Wrench`, `FileJson`) before each badge label.
+### 1. Fix SVG arrows — `src/components/IntegrationStrip.tsx`
 
-### 5. Partner pill — bolder styling
-Give the "Eontyre" pill slightly more visual weight: `bg-card border border-border/60 shadow-sm rounded-lg px-5 py-2.5 font-semibold`. Keep as text since no partner logo image is available in the project.
+Replace the broken 4-segment arrow approach with 2 clean curved paths that arc above and below the sync circle:
 
-### 6. Section background — strengthen visibility
-Change `bg-muted/30` to `bg-muted/50` for a more visible differentiation from surrounding white sections. Keep `border-y border-border/40`.
+- **Top path** (→ right): Single path from left box (x=170) curving slightly above the sync circle to right box (x=330), with `markerEnd` arrowhead
+- **Bottom path** (← left): Single path from right box curving below the sync circle back to left box, with `markerEnd` arrowhead
+- Keep the animated `strokeDasharray` + `dash-flow` animation
+- Position the "Bookings · Customers" and "Services · Reports" labels above/below the paths
+- Increase the viewBox slightly if needed for breathing room
 
-### 7. Add dash-flow keyframes
-Add a small CSS animation in the component (via `<style>` tag in SVG defs or inline) for the flowing dash effect:
-```css
-@keyframes dash-flow {
-  to { stroke-dashoffset: -20; }
-}
-```
+### 2. Fix tech badge contrast — `src/components/IntegrationStrip.tsx`
+
+Replace the Badge components with proper styling that ensures readable text:
+- Use `variant="outline"` with explicit classes: `bg-background border-border text-foreground shadow-sm`
+- Remove `bg-card` which resolves to a dark fill in this theme
+- Keep icons with `text-muted-foreground`
+
+### 3. Add CMS editability for badges — `src/components/IntegrationStrip.tsx`
+
+Wrap each tech badge in an `EditableCard` so background and icon can be styled via CMS:
+- Each badge gets `elementIdPrefix="integrations-badge-{index}"`
+- Use `EditableIcon` for the badge icons so they're individually styleable
+- Wrap the partner "Eontyre" pill in `EditableCard` as well (`elementIdPrefix="integrations-partner-eontyre"`)
+
+Add imports: `EditableCard`, `EditableIcon`
+
+### 4. Add CMS background editing for the section
+
+Wrap the section in `EditableBackground` so the section background (currently `bg-muted/50`) can be changed via CMS. Import `EditableBackground` and wrap the outer `<section>`.
 
 ## Files changed
+
 | File | Change |
 |---|---|
-| `src/components/IntegrationStrip.tsx` | SVG gradient, rounder corners, animated arrows, pulse sync, beefier badges with icons, stronger bg |
+| `src/components/IntegrationStrip.tsx` | Fix SVG arrows to use curved single-line paths, fix badge contrast, add EditableCard/EditableIcon wrapping for CMS editability |
 
