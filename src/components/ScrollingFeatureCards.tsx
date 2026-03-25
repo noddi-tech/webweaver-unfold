@@ -230,6 +230,10 @@ export function ScrollingFeatureCards() {
   const [cardBorderRadii, setCardBorderRadii] = useState<Record<number, string>>({});
   const [cardGap, setCardGap] = useState<string>('gap-8');
   const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Mobile carousel state
+  const [activeSlide, setActiveSlide] = useState(0);
+  const mobileScrollRef = useRef<HTMLDivElement>(null);
   const [isXlScreen, setIsXlScreen] = useState(false);
   const [carouselData, setCarouselData] = useState<Record<number, {
     display_type: 'image' | 'carousel';
@@ -255,6 +259,29 @@ export function ScrollingFeatureCards() {
     checkWidth();
     window.addEventListener('resize', checkWidth);
     return () => window.removeEventListener('resize', checkWidth);
+  }, []);
+
+  // Mobile carousel: track active slide via IntersectionObserver
+  useEffect(() => {
+    const container = mobileScrollRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number(entry.target.getAttribute('data-slide-index'));
+            if (!isNaN(idx)) setActiveSlide(idx);
+          }
+        });
+      },
+      { root: container, threshold: 0.6 }
+    );
+
+    const slides = container.querySelectorAll('[data-slide-index]');
+    slides.forEach((s) => observer.observe(s));
+
+    return () => observer.disconnect();
   }, []);
 
   const loadImageSettings = async () => {
