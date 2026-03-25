@@ -40,6 +40,13 @@ export default function CustomerStory() {
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
 
+  // Breadcrumb items for JSON-LD — must be before early returns to respect Rules of Hooks
+  const breadcrumbItems = useMemo(() => [
+    { name: 'Home', url: '/' },
+    { name: 'Stories', url: '/stories' },
+    { name: story?.company_name ?? '' }
+  ], [story?.company_name]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -72,13 +79,6 @@ export default function CustomerStory() {
       </div>
     );
   }
-
-  // Breadcrumb items for JSON-LD
-  const breadcrumbItems = useMemo(() => [
-    { name: 'Home', url: '/' },
-    { name: 'Stories', url: '/stories' },
-    { name: story.company_name }
-  ], [story.company_name]);
 
   return (
     <div className="min-h-screen bg-background">
