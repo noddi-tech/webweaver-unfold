@@ -40,11 +40,11 @@ export function RotatingHeadline({
     return (
       <div className={`${className} text-center`}>
         <div className="overflow-hidden" style={{ minHeight: '1.2em' }}>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
             <span>ERP</span>
           </h1>
         </div>
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
           <EditableTranslation 
             translationKey="hero.rotating.suffix"
             fallbackText="for mobile & workshop car services."
@@ -64,7 +64,7 @@ export function RotatingHeadline({
       {/* Line 1: Rotating Term - Large, prominent */}
       <div className="overflow-hidden" style={{ minHeight: '1.2em' }}>
         <h1 
-          className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold"
+          className="text-3xl md:text-4xl lg:text-5xl font-bold"
           aria-live="polite" 
           aria-atomic="true"
         >
@@ -79,7 +79,7 @@ export function RotatingHeadline({
       </div>
       
       {/* Line 2: Static suffix */}
-      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold">
+      <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
         <EditableTranslation 
           translationKey="hero.rotating.suffix"
           fallbackText="for mobile & workshop car services."
