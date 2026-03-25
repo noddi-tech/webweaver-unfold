@@ -206,7 +206,7 @@ const Index = () => {
         <ScrollingFeatureCards />
         <WhyNavio />
         <HowItWorks />
-        <Integrations />
+        <IntegrationStrip />
         <FinalCTA />
       </main>
       <Footer />
