@@ -1,50 +1,35 @@
 
 
-# Fix IntegrationStrip: Arrows, Badge Contrast, and CMS Editability
+# Add Soft Linen Background Color
 
-## Problems identified from screenshot
-
-1. **SVG arrows are broken**: The split two-segment arrow lines (175→220 gap 280→325) create a visual mess — the gap between segments is too wide and the marker arrowheads look disconnected. The arrows need to be single continuous lines that route around the center sync circle.
-
-2. **Tech badges have no visible text**: The badges render as solid dark purple pills with invisible text. The `bg-card` class combined with the current theme creates dark backgrounds where text disappears. Need proper contrast.
-
-3. **No CMS editability**: The tech badges and partner pill are not wrapped in `EditableCard` — they can't be styled via the CMS. The section background itself also lacks CMS background editing.
+## What we're doing
+1. Add #F3F0E2 ("Soft Linen") as a color token in the database via migration
+2. Change the `--background` CSS variable from pure white (`0 0% 100%`) to soft linen (`49 41% 92%`) so the entire page body uses this warm tone
 
 ## Changes
 
-### 1. Fix SVG arrows — `src/components/IntegrationStrip.tsx`
+### 1. Database migration — insert color token
+Insert into `color_tokens` table:
+- `css_var`: `--color-soft-linen`
+- `label`: `Soft Linen`
+- `value`: `49 41% 92%` (HSL conversion of #F3F0E2)
+- `color_type`: `solid`
+- `category`: `surfaces`
+- `preview_class`: `bg-soft-linen`
+- `optimal_text_color`: `dark`
+- `description`: `Warm linen background — #F3F0E2`
 
-Replace the broken 4-segment arrow approach with 2 clean curved paths that arc above and below the sync circle:
+### 2. Update `src/index.css`
+Change line 58:
+```css
+--background: 49 41% 92%;    /* Soft Linen #F3F0E2 - warm page background */
+```
 
-- **Top path** (→ right): Single path from left box (x=170) curving slightly above the sync circle to right box (x=330), with `markerEnd` arrowhead
-- **Bottom path** (← left): Single path from right box curving below the sync circle back to left box, with `markerEnd` arrowhead
-- Keep the animated `strokeDasharray` + `dash-flow` animation
-- Position the "Bookings · Customers" and "Services · Reports" labels above/below the paths
-- Increase the viewBox slightly if needed for breathing room
+This single change makes every page use the soft linen tone since `html { background: hsl(var(--background)); }` is already set on line 251.
 
-### 2. Fix tech badge contrast — `src/components/IntegrationStrip.tsx`
-
-Replace the Badge components with proper styling that ensures readable text:
-- Use `variant="outline"` with explicit classes: `bg-background border-border text-foreground shadow-sm`
-- Remove `bg-card` which resolves to a dark fill in this theme
-- Keep icons with `text-muted-foreground`
-
-### 3. Add CMS editability for badges — `src/components/IntegrationStrip.tsx`
-
-Wrap each tech badge in an `EditableCard` so background and icon can be styled via CMS:
-- Each badge gets `elementIdPrefix="integrations-badge-{index}"`
-- Use `EditableIcon` for the badge icons so they're individually styleable
-- Wrap the partner "Eontyre" pill in `EditableCard` as well (`elementIdPrefix="integrations-partner-eontyre"`)
-
-Add imports: `EditableCard`, `EditableIcon`
-
-### 4. Add CMS background editing for the section
-
-Wrap the section in `EditableBackground` so the section background (currently `bg-muted/50`) can be changed via CMS. Import `EditableBackground` and wrap the outer `<section>`.
-
-## Files changed
-
-| File | Change |
+### Files changed
+| Target | Change |
 |---|---|
-| `src/components/IntegrationStrip.tsx` | Fix SVG arrows to use curved single-line paths, fix badge contrast, add EditableCard/EditableIcon wrapping for CMS editability |
+| Database migration | Insert soft linen into `color_tokens` |
+| `src/index.css` | Update `--background` from `0 0% 100%` to `49 41% 92%` |
 
