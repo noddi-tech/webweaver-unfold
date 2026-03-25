@@ -1,42 +1,37 @@
 
 
-# Replace Integration Card Grid with Integration Confidence Strip
+# Fix Integration Strip SVG: Readability and Two-Way Sync Prominence
 
-## What changes
-Remove the existing 3-card integration grid (`Integrations.tsx`) and replace it with a two-column confidence strip featuring text content on the left and an inline SVG diagram on the right.
+## Problems (from screenshot)
+1. The left box ("Your system") has no visible title text -- the `fill-card` background makes "Your system" text invisible against a similar-colored background
+2. The "Eontyre, ERP, CRM..." subtitle is barely readable (too light)
+3. The two-way sync circle is small and not prominent enough -- the key selling point of bidirectional sync gets lost
+4. Arrow labels are tiny (fontSize 10) and hard to read
 
-## Files
+## Changes to `src/components/IntegrationStrip.tsx`
 
-### 1. `src/components/IntegrationStrip.tsx` (new file)
-New component with the following structure:
+### SVG diagram fixes
 
-**Layout**: `bg-muted/30` background (subtly different from adjacent sections). Two-column grid on desktop (`lg:grid-cols-2`), stacked on mobile. Columns vertically centered.
+1. **Left box text readability**: Add a visible border to the left box (`strokeWidth="2"`) and ensure text uses `fill-foreground` with larger font size (17px for title, 12px for subtitle)
 
-**Left column**:
-- Eyebrow: `text-xs font-medium uppercase tracking-wider text-muted-foreground` -- "Integrations"
-- Headline: `text-3xl md:text-4xl font-bold` -- "Works with the systems you already use"
-- Paragraph: `text-muted-foreground` -- condensed integration pitch
-- Partner logo row: bordered container with "Eontyre" text placeholder + muted "+ more coming" text
-- Tech badge row: 4 `Badge variant="outline"` pills (REST API, Webhooks, Custom integrations, CSV / JSON export)
-- CTA text link (not a button): `LanguageLink` to `/architecture` or `/contact` with arrow, styled as `text-primary font-medium hover:underline`
+2. **Make sync icon bigger and more prominent**: 
+   - Increase sync circle radius from 16 to 24
+   - Add a "Two-way sync" label below the circle
+   - Make the sync arrows inside the circle larger and bolder (strokeWidth 2)
+   - Add a subtle pulsing animation class to draw attention
 
-**Right column**:
-- Inline SVG diagram with two rounded boxes connected by bidirectional arrows
-  - Left box: "Your system" / "Eontyre, ERP, CRM..." -- `stroke-border fill-card` (light/white)
-  - Right box: "Navio" / "Booking . Routing . Capacity" -- `fill-primary text-primary-foreground`
-  - Two horizontal arrows with data labels: "Bookings . Customers" (top), "Services . Reports" (bottom)
-  - Centered circular sync icon (RefreshCw from lucide or SVG circle with arrows)
-- All SVG colors use CSS variables via `currentColor`, `hsl(var(--primary))`, `hsl(var(--border))`, etc.
+3. **Increase arrow label font sizes** from 10px to 12px for readability
 
-**CMS pattern**: Uses `EditableTranslation` wrappers for all text with `integrations_strip.*` translation keys, `useAppTranslation` hook, and `useScrollAnimation` for entrance animation.
+4. **Increase arrow stroke width** from 1.5 to 2 for visibility
 
-### 2. `src/pages/Index.tsx` (edit)
-- Replace `import Integrations` with `import IntegrationStrip`
-- Replace `<Integrations />` with `<IntegrationStrip />`
+5. **Add "Your system" title above the left box** or increase the font size inside it to 17px to match Navio box
 
-### 3. `src/components/Integrations.tsx` (keep file, no longer imported on homepage)
-The old component stays in the codebase in case it's used elsewhere (e.g. architecture page), but is removed from the homepage render.
+### Layout adjustment
+- Widen the viewBox slightly if needed to accommodate the larger sync element
+- Keep the same responsive behavior
 
-## Mobile behavior
-Text block first, SVG diagram below, then logos/badges at the bottom -- natural stacking from the grid layout.
+### Files
+| File | Change |
+|---|---|
+| `src/components/IntegrationStrip.tsx` | Fix SVG text readability, enlarge sync icon, add "Two-way sync" label, increase font sizes and stroke widths |
 
