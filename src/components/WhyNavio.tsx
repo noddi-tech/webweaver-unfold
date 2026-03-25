@@ -29,7 +29,7 @@ export default function WhyNavio() {
   ];
 
   return (
-    <section ref={ref as any} className="py-12 md:py-16 lg:py-section" data-header-color="dark">
+    <section ref={ref as any} className="py-8 md:py-12 lg:py-16" data-header-color="dark">
       <div className="container max-w-5xl px-4 sm:px-6 lg:px-8" key={refreshKey}>
         <div className="text-center mb-8 md:mb-12">
           <EditableTranslation translationKey="why_noddi.eyebrow" onSave={() => setRefreshKey(prev => prev + 1)}>
@@ -39,30 +39,35 @@ export default function WhyNavio() {
           </EditableTranslation>
           <EditableTranslation translationKey="why_noddi.title" onSave={() => setRefreshKey(prev => prev + 1)}>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground mt-3">
-              {t('why_noddi.title', 'Stop chasing problems. Start maximizing profits')}
+              {t('why_noddi.title', 'Before Navio vs. with Navio')}
             </h2>
-          </EditableTranslation>
-          <EditableTranslation translationKey="why_noddi.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              {t('why_noddi.subtitle', 'Most automotive service providers patch together 5+ tools. Navio replaces them all.')}
-            </p>
           </EditableTranslation>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
-          {/* Before Card */}
+        <div className="relative grid lg:grid-cols-2 gap-6 mb-8">
+          {/* Floating VS Badge - Desktop */}
+          <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-sm items-center justify-center shadow-lg border-4 border-background">
+            VS
+          </div>
+
+          {/* Mobile VS Badge */}
+          <div className="flex lg:hidden w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-xs items-center justify-center shadow-md mx-auto -my-3 relative z-10 border-4 border-background">
+            VS
+          </div>
+
+          {/* Before Card — muted, flat, unappealing */}
           <EditableCard
             elementIdPrefix="why-noddi-before-card"
-            defaultBackground="bg-card"
-            defaultTextColor="foreground"
-            className={`border-2 border-destructive/20 transition-all duration-700 ${
+            defaultBackground="bg-muted/50"
+            defaultTextColor="muted-foreground"
+            className={`border border-border/50 transition-all duration-700 order-first ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
           >
             <CardContent className="p-8">
               <div className="mb-6">
                 <EditableTranslation translationKey="why_noddi.before.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-                  <h3 className="text-2xl font-bold">{t('why_noddi.before.title', 'Before Navio')}</h3>
+                  <h3 className="text-2xl font-bold text-muted-foreground">{t('why_noddi.before.title', 'Without Navio')}</h3>
                 </EditableTranslation>
               </div>
               <ul className="space-y-4">
@@ -71,11 +76,11 @@ export default function WhyNavio() {
                     <EditableListIcon
                       elementId="why-noddi-before-list-icon"
                       icon={X}
-                      defaultColor="text-destructive"
+                      defaultColor="text-destructive/60"
                       className="w-5 h-5 flex-shrink-0 mt-0.5"
                     />
                     <EditableTranslation translationKey={`why_noddi.before.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <span>{item}</span>
+                      <span className="text-muted-foreground/80">{item}</span>
                     </EditableTranslation>
                   </li>
                 ))}
@@ -83,19 +88,21 @@ export default function WhyNavio() {
             </CardContent>
           </EditableCard>
 
-          {/* After Card */}
+          {/* After Card — the clear winner */}
           <EditableCard
             elementIdPrefix="why-noddi-after-card"
-            defaultBackground="bg-primary/5"
+            defaultBackground="bg-card"
             defaultTextColor="foreground"
-            className={`border-2 border-primary/30 transition-all duration-700 delay-200 ${
+            className={`relative overflow-hidden border-2 border-primary shadow-lg lg:scale-105 transition-all duration-700 delay-200 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
           >
-            <CardContent className="p-8">
+            {/* Decorative gradient glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent pointer-events-none" />
+            <CardContent className="p-8 relative z-[1]">
               <div className="mb-6">
                 <EditableTranslation translationKey="why_noddi.after.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-                  <h3 className="text-2xl font-bold">{t('why_noddi.after.title', 'With Navio')}</h3>
+                  <h3 className="text-2xl font-bold text-primary">{t('why_noddi.after.title', 'With Navio')}</h3>
                 </EditableTranslation>
               </div>
               <ul className="space-y-4">
@@ -104,11 +111,11 @@ export default function WhyNavio() {
                     <EditableListIcon
                       elementId="why-noddi-after-list-icon"
                       icon={Check}
-                      defaultColor="text-success"
+                      defaultColor="text-primary"
                       className="w-5 h-5 flex-shrink-0 mt-0.5"
                     />
                     <EditableTranslation translationKey={`why_noddi.after.item_${index + 1}`} onSave={() => setRefreshKey(prev => prev + 1)}>
-                      <span className="font-medium">{item}</span>
+                      <span className="font-medium text-foreground">{item}</span>
                     </EditableTranslation>
                   </li>
                 ))}
