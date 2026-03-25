@@ -1,33 +1,22 @@
 
 
-# Hero Tightening
+# Final CTA Update
 
-## Changes
+## Changes in `src/components/FinalCTA.tsx`
 
-### 1. Fix headline grammar in `index.html`
-"Software that transform car maintenance" → "Software that **transforms** car maintenance" in:
-- `<title>`
-- `og:title`
-- `og:image:alt`
-- `twitter:title`
+1. **Update headline fallback**: Change `"Let's build your digital workshop"` → `"See how Navio fits your operation"`
 
-Note: The rotating headline on the page itself comes from the database (rotating_terms table), not from code. If the grammar issue also appears there, it needs to be fixed in the CMS/Translation Manager — not in code. I'll flag this.
+2. **Remove subtitle**: Remove the `EditableTranslation` block for `final_cta.subtitle` (lines 221-228) — the new headline is self-sufficient and the section should be tighter.
 
-### 2. Tighten the subtitle fallback in `src/components/Hero.tsx`
-Current fallback: "Booking to billing. Built for automotive services."
-This is already short (1 line). The actual displayed text may come from the CMS `hero.subtitle` translation key. I'll update the fallback to a tighter version that captures the full message the user wants:
+3. **Replace secondary outline button with a text link**: Remove the outline `Button` (lines 246-258) and replace it with a subtle text link styled as an `<a>`/`LanguageLink` with `underline` and `opacity-80 hover:opacity-100` — pointing to `/features` with text "Or explore features →". Wrap in `EditableTranslation` with key `final_cta.link_secondary`.
 
-**New fallback**: "Booking, capacity, scheduling, routing, and communication — one platform, zero handoffs."
+4. **Restructure CTA area**: Stack the primary button and secondary text link vertically with the text link below the button (not side-by-side), using `flex-col items-center gap-4`.
 
-This keeps it to 1-2 lines on desktop and conveys the core message.
+5. **Keep**: Primary button, footer text, all spacing/styling, edit mode behavior, background system — unchanged.
 
-### 3. Skip the product screenshot addition
-The hero already has a full image/carousel section below the text. Adding a side-by-side layout would be a significant restructure. Skipping per the "only if straightforward" instruction.
+## Technical detail
 
-## Files
-
-| File | Change |
-|---|---|
-| `index.html` | Fix "transform" → "transforms" in 4 meta tags |
-| `src/components/Hero.tsx` | Update subtitle fallback text |
+- The secondary link uses `LanguageLink` for i18n routing consistency
+- Styled with `text-sm underline underline-offset-4` + dynamic color from `ctaData.secondaryCtaTextColor` to match the section's color scheme
+- `ArrowRight` icon inline after text for the "→" feel
 
