@@ -1,0 +1,2 @@
+INSERT INTO color_tokens (css_var, label, value, color_type, category, preview_class, optimal_text_color, description, sort_order, active)
+VALUES ('--color-soft-linen', 'Soft Linen', '49 41% 92%', 'solid', 'surfaces', 'bg-soft-linen', 'dark', 'Warm linen background — #F3F0E2', 5, true);
