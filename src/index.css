@@ -55,7 +55,7 @@ All colors MUST be HSL.
        ======================================== */
 
     /* Surface Colors - Backgrounds and containers */
-    --background: 36 12% 90%;                   /* Soft Linen #EAE7E1 - warm page background */
+    --background: 40 18% 96%;                   /* Bright Snow #F8F7F4 - warm page background */
     --card: 249 67% 24%;                       /* Federal Blue cards | Used in: Feature cards, Hero, Metrics */
     --card-foreground: 0 0% 100%;              /* White text on cards | Used in: Card content, Hero text */
     --card-background: 0 0% 98%;               /* Light surface for glass cards | Used in: Glass card backgrounds */
