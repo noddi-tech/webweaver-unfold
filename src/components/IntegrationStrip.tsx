@@ -34,9 +34,9 @@ export default function IntegrationStrip() {
           }`}
           key={refreshKey}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left column — text */}
-            <div className="space-y-6 order-2 lg:order-1">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            {/* 1: Eyebrow + headline + description — always first */}
+            <div className="space-y-6 order-1 lg:col-start-1">
               <EditableTranslation translationKey="integrations_strip.eyebrow" onSave={onSave}>
                 <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t("integrations_strip.eyebrow", "Integrations")}
@@ -57,7 +57,89 @@ export default function IntegrationStrip() {
                   )}
                 </p>
               </EditableTranslation>
+            </div>
 
+            {/* 2: SVG diagram — second on mobile, right column on desktop */}
+            <div className="order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 flex justify-center lg:justify-end items-center">
+              <svg
+                viewBox="0 0 500 310"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-full max-w-md"
+                role="img"
+                aria-label="Integration diagram showing two-way data sync between your system and Navio"
+              >
+              {/* Left box — Your system */}
+                <rect x="10" y="60" width="160" height="160" rx="20" 
+                  fill="white" stroke="hsl(249, 67%, 24%)" strokeWidth="2" />
+                <text x="90" y="128" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="17" fontWeight="700">
+                  {t("integrations_strip.diagram_your_system", "Your system")}
+                </text>
+                <text x="90" y="152" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="12" opacity="0.7">
+                  {t("integrations_strip.diagram_your_system_subtitle", "ERP · CRM · DMS")}
+                </text>
+
+                {/* Right box — Navio */}
+                <foreignObject x="330" y="60" width="160" height="160">
+                  <div className="w-full h-full rounded-[20px]" 
+                    style={{ 
+                      backgroundImage: 'var(--gradient-warmth)', 
+                      border: '2px solid hsl(249 67% 24%)' 
+                    }} />
+                </foreignObject>
+                <text x="410" y="128" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="17" fontWeight="700">
+                  {t("integrations_strip.diagram_navio", "Navio")}
+                </text>
+                <text x="410" y="152" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="12" opacity="0.7">
+                  {t("integrations_strip.diagram_navio_subtitle", "Booking · Routing · Capacity")}
+                </text>
+
+                {/* Top arrow → right */}
+                <path
+                  d="M170 120 C210 80, 290 80, 330 120"
+                  className="stroke-primary"
+                  strokeWidth="2.5"
+                  strokeDasharray="6 4"
+                  fill="none"
+                  style={{ animation: "dash-flow 1.5s linear infinite" }}
+                />
+                <text x="250" y="75" textAnchor="middle" className="fill-foreground" fontSize="12" fontWeight="500">
+                  {t("integrations_strip.diagram_data_outbound", "Bookings · Customers")}
+                </text>
+
+                {/* Bottom arrow ← left */}
+                <path
+                  d="M330 160 C290 200, 210 200, 170 160"
+                  className="stroke-primary"
+                  strokeWidth="2.5"
+                  strokeDasharray="6 4"
+                  fill="none"
+                  style={{ animation: "dash-flow 1.5s linear infinite", animationDirection: "reverse" }}
+                />
+                <text x="250" y="225" textAnchor="middle" className="fill-foreground" fontSize="12" fontWeight="500">
+                  {t("integrations_strip.diagram_data_inbound", "Services · Reports")}
+                </text>
+
+                {/* Sync icon circle */}
+                <circle
+                  cx="250" cy="140" r="26"
+                  className="fill-primary/10 stroke-primary"
+                  strokeWidth="2.5"
+                  style={{ animation: "gentle-pulse 3s ease-in-out infinite" }}
+                />
+                <path d="M242 134a10 10 0 0 1 16 0M258 146a10 10 0 0 1-16 0" className="stroke-primary" strokeWidth="2" strokeLinecap="round" fill="none" />
+                <path d="M258 134l-2-4 4 2z" className="fill-primary" />
+                <path d="M242 146l2 4-4-2z" className="fill-primary" />
+
+                {/* Two-way sync label */}
+                <text x="250" y="240" textAnchor="middle" className="fill-primary" fontSize="11" fontWeight="700" letterSpacing="0.05em">
+                  {t("integrations_strip.diagram_sync_label", "TWO-WAY SYNC")}
+                </text>
+              </svg>
+            </div>
+
+            {/* 3: Partner pill + badges + CTA — third on mobile, continues left column on desktop */}
+            <div className="space-y-6 order-3 lg:col-start-1">
               {/* Partner pill */}
               <div className="flex items-center gap-3">
                 <div className="rounded-lg border border-border bg-white px-5 py-2.5 text-sm font-semibold text-foreground">
@@ -99,85 +181,6 @@ export default function IntegrationStrip() {
                 </EditableTranslation>
                 <ArrowRight className="w-4 h-4" />
               </LanguageLink>
-            </div>
-
-            {/* Right column — SVG diagram */}
-            <div className="flex justify-center lg:justify-end order-1 lg:order-2">
-              <svg
-                viewBox="0 0 500 310"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-full max-w-md"
-                role="img"
-                aria-label="Integration diagram showing two-way data sync between your system and Navio"
-              >
-              {/* Left box — Your system */}
-                <rect x="10" y="60" width="160" height="160" rx="20" 
-                  fill="white" stroke="hsl(249, 67%, 24%)" strokeWidth="2" />
-                <text x="90" y="128" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="17" fontWeight="700">
-                  {t("integrations_strip.diagram_your_system", "Your system")}
-                </text>
-                <text x="90" y="152" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="12" opacity="0.7">
-                  {t("integrations_strip.diagram_your_system_subtitle", "ERP · CRM · DMS")}
-                </text>
-
-                {/* Right box — Navio */}
-                <foreignObject x="330" y="60" width="160" height="160">
-                  <div className="w-full h-full rounded-[20px]" 
-                    style={{ 
-                      backgroundImage: 'var(--gradient-warmth)', 
-                      border: '2px solid hsl(249 67% 24%)' 
-                    }} />
-                </foreignObject>
-                <text x="410" y="128" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="17" fontWeight="700">
-                  {t("integrations_strip.diagram_navio", "Navio")}
-                </text>
-                <text x="410" y="152" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="12" opacity="0.7">
-                  {t("integrations_strip.diagram_navio_subtitle", "Booking · Routing · Capacity")}
-                </text>
-
-                {/* Top arrow → right: single curved path arcing above sync circle */}
-                <path
-                  d="M170 120 C210 80, 290 80, 330 120"
-                  className="stroke-primary"
-                  strokeWidth="2.5"
-                  strokeDasharray="6 4"
-                  fill="none"
-                  style={{ animation: "dash-flow 1.5s linear infinite" }}
-                />
-                <text x="250" y="75" textAnchor="middle" className="fill-foreground" fontSize="12" fontWeight="500">
-                  {t("integrations_strip.diagram_data_outbound", "Bookings · Customers")}
-                </text>
-
-                {/* Bottom arrow ← left: single curved path arcing below sync circle */}
-                <path
-                  d="M330 160 C290 200, 210 200, 170 160"
-                  className="stroke-primary"
-                  strokeWidth="2.5"
-                  strokeDasharray="6 4"
-                  fill="none"
-                  style={{ animation: "dash-flow 1.5s linear infinite", animationDirection: "reverse" }}
-                />
-                <text x="250" y="225" textAnchor="middle" className="fill-foreground" fontSize="12" fontWeight="500">
-                  {t("integrations_strip.diagram_data_inbound", "Services · Reports")}
-                </text>
-
-                {/* Sync icon circle — gentle pulse */}
-                <circle
-                  cx="250" cy="140" r="26"
-                  className="fill-primary/10 stroke-primary"
-                  strokeWidth="2.5"
-                  style={{ animation: "gentle-pulse 3s ease-in-out infinite" }}
-                />
-                <path d="M242 134a10 10 0 0 1 16 0M258 146a10 10 0 0 1-16 0" className="stroke-primary" strokeWidth="2" strokeLinecap="round" fill="none" />
-                <path d="M258 134l-2-4 4 2z" className="fill-primary" />
-                <path d="M242 146l2 4-4-2z" className="fill-primary" />
-
-                {/* Two-way sync label */}
-                <text x="250" y="240" textAnchor="middle" className="fill-primary" fontSize="11" fontWeight="700" letterSpacing="0.05em">
-                  {t("integrations_strip.diagram_sync_label", "TWO-WAY SYNC")}
-                </text>
-              </svg>
             </div>
           </div>
         </div>
