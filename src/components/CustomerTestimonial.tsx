@@ -22,6 +22,8 @@ export default function CustomerTestimonial() {
 
   const { data: story, isLoading } = useQuery({
     queryKey: ['homepage-testimonial'],
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
     queryFn: async (): Promise<TestimonialStory | null> => {
       const { data: settings } = await (supabase as any)
         .from('testimonial_settings')

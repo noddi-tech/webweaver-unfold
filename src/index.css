@@ -319,7 +319,7 @@ All colors MUST be HSL.
 
   /* Header-specific glass - enhanced visibility on all backgrounds */
   .glass-header {
-    background: hsl(var(--card-background) / 0.85);
+    background: hsl(var(--background) / 0.85);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid hsl(var(--border) / 0.3);

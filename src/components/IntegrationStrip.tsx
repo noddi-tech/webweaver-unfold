@@ -6,7 +6,7 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { EditableBackground } from "@/components/EditableBackground";
-import { EditableCard } from "@/components/EditableCard";
+
 
 const techKeys = [
   { key: "integrations_strip.tech_rest_api", fallback: "REST API", icon: Globe },
@@ -60,13 +60,11 @@ export default function IntegrationStrip() {
 
               {/* Partner pill */}
               <div className="flex items-center gap-3">
-                <EditableCard elementIdPrefix="integrations-partner-eontyre" className="inline-block">
-                  <div className="rounded-lg px-5 py-2.5 text-sm font-semibold">
-                    <EditableTranslation translationKey="integrations_strip.partner_eontyre" onSave={onSave}>
-                      <span>{t("integrations_strip.partner_eontyre", "Eontyre")}</span>
-                    </EditableTranslation>
-                  </div>
-                </EditableCard>
+                <div className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-foreground">
+                  <EditableTranslation translationKey="integrations_strip.partner_eontyre" onSave={onSave}>
+                    <span>{t("integrations_strip.partner_eontyre", "Eontyre")}</span>
+                  </EditableTranslation>
+                </div>
                 <EditableTranslation translationKey="integrations_strip.partner_more" onSave={onSave}>
                   <span className="text-sm text-muted-foreground">
                     {t("integrations_strip.partner_more", "+ more coming")}
@@ -76,18 +74,16 @@ export default function IntegrationStrip() {
 
               {/* Tech badges with icons */}
               <div className="flex flex-wrap gap-2">
-                {techKeys.map(({ key, fallback, icon: Icon }, index) => (
-                  <EditableCard key={key} elementIdPrefix={`integrations-badge-${index}`} className="inline-block">
-                    <EditableTranslation translationKey={key} onSave={onSave}>
-                      <Badge
-                        variant="outline"
-                        className="text-sm px-3 py-1.5 bg-background border-border text-foreground shadow-sm gap-1.5"
-                      >
-                        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-                        {t(key, fallback)}
-                      </Badge>
-                    </EditableTranslation>
-                  </EditableCard>
+                {techKeys.map(({ key, fallback, icon: Icon }) => (
+                  <EditableTranslation key={key} translationKey={key} onSave={onSave}>
+                    <Badge
+                      variant="outline"
+                      className="text-sm px-3 py-1.5 border-border text-foreground shadow-sm gap-1.5"
+                    >
+                      <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+                      {t(key, fallback)}
+                    </Badge>
+                  </EditableTranslation>
                 ))}
               </div>
 
