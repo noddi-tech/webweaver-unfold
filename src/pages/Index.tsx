@@ -195,7 +195,7 @@ const Index = () => {
       <main>
         <Hero />
         <LogoMarquee
-          section="trust-bar"
+          section="logo-marquee"
           labelKey="trust_bar.label"
           labelFallback="Trusted by service companies across Scandinavia"
           compact
