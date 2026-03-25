@@ -32,8 +32,13 @@ export default function WhyNavio() {
     <section ref={ref as any} className="py-12 md:py-16 lg:py-section" data-header-color="dark">
       <div className="container max-w-5xl px-4 sm:px-6 lg:px-8" key={refreshKey}>
         <div className="text-center mb-8 md:mb-12">
+          <EditableTranslation translationKey="why_noddi.eyebrow" onSave={() => setRefreshKey(prev => prev + 1)}>
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              {t('why_noddi.eyebrow', 'WHY NAVIO')}
+            </span>
+          </EditableTranslation>
           <EditableTranslation translationKey="why_noddi.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground mt-3">
               {t('why_noddi.title', 'Stop chasing problems. Start maximizing profits')}
             </h2>
           </EditableTranslation>

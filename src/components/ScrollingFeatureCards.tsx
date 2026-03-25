@@ -663,7 +663,12 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
             
             {/* LEFT COLUMN - Sticky Header - Hidden below xl */}
             <div className="hidden xl:block xl:sticky xl:top-32 xl:self-start">
-              <h2 className={headingStyles.h2}>
+              <EditableTranslation translationKey="scrolling_features.eyebrow">
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {t('scrolling_features.eyebrow', 'FEATURES')}
+                </span>
+              </EditableTranslation>
+              <h2 className={cn(headingStyles.h2, "mt-3")}>
                 <EditableTranslation translationKey="scrolling_features.title">
                   Turn insights into action — at every stage
                 </EditableTranslation>
@@ -753,7 +758,12 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
 
             {/* Section heading for tablet/phone - hidden on desktop where sidebar shows */}
             <div className="xl:hidden mb-8 md:mb-10 text-center px-4">
-              <h2 className={headingStyles.h2}>
+              <EditableTranslation translationKey="scrolling_features.eyebrow">
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {t('scrolling_features.eyebrow', 'FEATURES')}
+                </span>
+              </EditableTranslation>
+              <h2 className={cn(headingStyles.h2, "mt-3")}>
                 <EditableTranslation translationKey="scrolling_features.title">
                   Turn insights into action — at every stage
                 </EditableTranslation>

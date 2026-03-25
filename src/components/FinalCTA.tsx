@@ -209,9 +209,17 @@ export default function FinalCTA() {
           
           <BackgroundTextColorProvider textColor={ctaData.titleColor}>
             <div className="relative z-10">
+              <EditableTranslation translationKey="final_cta.eyebrow">
+                <span 
+                  className="text-xs font-medium uppercase tracking-wider opacity-70"
+                  style={{ color: resolveTextColor(ctaData.footerColor) }}
+                >
+                  {t('final_cta.eyebrow', 'GET STARTED')}
+                </span>
+              </EditableTranslation>
               <EditableTranslation translationKey="final_cta.title">
                <h2 
-                  className="text-4xl md:text-5xl font-bold mb-8"
+                  className="text-4xl md:text-5xl font-bold mb-8 mt-3"
                   style={{ color: resolveTextColor(ctaData.titleColor) }}
                 >
                   {t('final_cta.title', 'See how Navio fits your operation')}
