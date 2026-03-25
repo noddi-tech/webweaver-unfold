@@ -6,6 +6,7 @@ import WhyNavio from "@/components/WhyNavio";
 import HowItWorks from "@/components/HowItWorks";
 import FinalCTA from "@/components/FinalCTA";
 import Integrations from "@/components/Integrations";
+import { LogoMarquee } from "@/components/LogoMarquee";
 import { HreflangTags } from "@/components/HreflangTags";
 import { ScrollingFeatureCards } from "@/components/ScrollingFeatureCards";
 import { StructuredData } from "@/components/StructuredData";
