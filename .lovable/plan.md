@@ -1,31 +1,26 @@
 
 
-# Fix Trust Bar & Simplify Hero
+# Fix: Trust Bar Not Showing Logos
 
-## Issues
-1. **Broken images in trust bar**: The `LogoMarquee` shows broken image icons because the CMS `images` table has no entries with `section = 'trust-bar'`, so it falls back to `via.placeholder.com` URLs which are broken. The fallback placeholder URLs need to be removed — show nothing (or a subtle empty state) when no CMS logos exist yet.
-2. **Duplicate LogoMarquee**: There's a `<LogoMarquee />` inside `Hero.tsx` (line 314) AND one in `Index.tsx`. Remove the one inside Hero.
-3. **Hero gradient card**: The hero wraps content in a `rounded-3xl` card with a purple gradient background (lines 184-191). Remove this card wrapper and gradient — use plain white/background color instead.
+## Root Cause
 
-## Changes
+The logos in the CMS are assigned to section `logo-marquee`, but the `<LogoMarquee>` instance on the homepage is configured with `section="trust-bar"`. No images exist with `section = 'trust-bar'`, so the component returns `null`.
 
-### 1. `src/components/Hero.tsx`
-- **Remove the LogoMarquee import and usage** (line 17, line 314)
-- **Remove the gradient card wrapper**: Delete the `rounded-3xl` div (line 184) and the gradient `div` (lines 186-191). Keep the content but render it directly on the page background.
-- **Fix USP text colors**: The USPs currently use `text-white` (lines 331-360) because they sat on a purple gradient. Change these to `text-foreground` and `text-muted-foreground` to work on white background.
-- **Remove the purple glow effect** behind the USPs (lines 319-323)
-- **Remove the outer `px-2.5` padding** on the section since there's no card anymore — use standard section padding
+## Fix
 
-### 2. `src/components/LogoMarquee.tsx`
-- **Remove placeholder fallback logos** (lines 61-68). When no CMS images exist for the section, set logos to an empty array and render nothing (return `null` early).
+**`src/pages/Index.tsx`** — Change the trust bar's `section` prop from `"trust-bar"` to `"logo-marquee"` so it reads from the same section where the logos are stored:
 
-### 3. `src/pages/Index.tsx`
-- No changes needed — already has the trust bar `<LogoMarquee />` in the right position between Hero and ScrollingFeatureCards.
+```tsx
+<LogoMarquee
+  section="logo-marquee"          // was "trust-bar"
+  labelKey="trust_bar.label"
+  labelFallback="Trusted by service companies across Scandinavia"
+  compact
+  grayscale
+  pauseOnHover
+  className="bg-muted/30 border-y border-border/50"
+/>
+```
 
-## Files
-
-| File | Change |
-|---|---|
-| `src/components/Hero.tsx` | Remove LogoMarquee, gradient card, purple glow; fix text colors to work on white bg |
-| `src/components/LogoMarquee.tsx` | Remove placeholder fallback; return null when no CMS logos |
+One line change. The 7 logos already in the CMS (Noddi, Carglass, Tronderdekk, BestDrive, Dekkfix, Shine, Elitebilvask) will immediately appear in the trust bar with grayscale styling and marquee scroll.
 
