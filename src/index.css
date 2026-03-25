@@ -747,3 +747,12 @@ All colors MUST be HSL.
 .animate-marquee {
   animation: marquee 30s linear infinite;
 }
+
+/* Integration diagram animations */
+@keyframes dash-flow {
+  to { stroke-dashoffset: -20; }
+}
+@keyframes gentle-pulse {
+  0%, 100% { transform-origin: center; transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+}
