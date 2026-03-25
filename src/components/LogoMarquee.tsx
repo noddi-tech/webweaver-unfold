@@ -66,6 +66,9 @@ export function LogoMarquee({
   };
 
   const baseLogos = logos.length > 0 ? logos : [];
+  
+  if (!isLoading && baseLogos.length === 0) return null;
+  
   const useStaticDisplay = baseLogos.length > 0 && baseLogos.length <= 4;
 
   // For marquee: ensure enough logos to fill strip
