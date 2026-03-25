@@ -1,24 +1,25 @@
 
 
-# Replace HowItWorks Steps with Core Loop Illustration
+# Fix Final CTA: Update Database Translations
 
-## What
-Replace the 4 step cards in the HowItWorks section with the same Core Loop illustration + 5-step stepper used on the Functions page. Keep the section heading and subtitle, keep the bottom caption block.
+## Problem
+The code fallbacks were updated correctly, but the CMS translations in the `translations` table still contain the old values. Since the CMS values take precedence over code fallbacks, the old text still displays.
 
-## Changes in `src/components/HowItWorks.tsx`
+## Solution
+Run SQL updates against the `translations` table to update the English values for:
 
-1. **Add imports**: `EditableUniversalMedia`, `supabase`, `coreLoopIllustration` asset (same as FunctionsHero)
-2. **Add state + effect** for loading the CMS image URL from `image_carousel_settings` where `location_id = 'functions-core-loop'` (reuses the same CMS entry)
-3. **Replace the desktop horizontal card grid and mobile vertical card list** with:
-   - The Core Loop illustration via `EditableUniversalMedia` (same markup as FunctionsHero)
-   - Mobile: ultra-compact inline stepper (1. Book — 2. Plan — 3. Execute — 4. Analyze — 5. Re-engage)
-   - Desktop/Tablet: 5-column numbered step grid with gradient connecting lines, editable titles and descriptions using `core_loop.step_X` translation keys
-4. **Remove**: `Card`, `CardContent`, `EditableBackground`, `EditableIcon`, `useAllowedBackgrounds` imports (no longer needed). Remove the old `steps` array and both desktop/mobile card renderings.
-5. **Keep**: Section heading, subtitle, bottom caption block, scroll animation, `data-header-color="dark"`, all existing spacing patterns.
+1. `final_cta.title` → "See how Navio fits your operation"
+2. `final_cta.footer_text` → "No credit card required · Free consultation · See results in 30 days"
+3. Insert `final_cta.link_secondary` → "Or explore features" (new key, likely doesn't exist yet)
+
+Also delete the `final_cta.subtitle` row if it exists (since we removed that block).
+
+## Technical Detail
+Use `supabase--read_query` to check current values, then create a migration to update/insert the translation rows for `language_code = 'en'`.
 
 ## Files
-
-| File | Change |
+| Target | Change |
 |---|---|
-| `src/components/HowItWorks.tsx` | Replace card-based steps with illustration + stepper from FunctionsHero |
+| `translations` table | Update `final_cta.title`, `final_cta.footer_text`; insert `final_cta.link_secondary`; delete `final_cta.subtitle` |
+| New migration file | SQL migration with the updates |
 
