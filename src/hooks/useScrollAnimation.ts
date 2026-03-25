@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface UseScrollAnimationOptions {
   threshold?: number;
@@ -13,17 +13,27 @@ export function useScrollAnimation(options: UseScrollAnimationOptions = {}) {
     triggerOnce = true,
   } = options;
 
-  const ref = useRef<HTMLElement>(null);
+  const [node, setNode] = useState<HTMLElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
+  // Callback ref — re-runs whenever the DOM element changes (e.g. after
+  // EditableBackground swaps the node once CMS styles load).
+  const ref = useCallback((el: HTMLElement | null) => {
+    setNode(el);
+  }, []);
 
-    // Check for reduced motion preference
+  useEffect(() => {
+    if (!node) return;
+
+    // Respect reduced-motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
     if (prefersReducedMotion) {
+      setIsVisible(true);
+      return;
+    }
+
+    // Fallback for environments without IntersectionObserver
+    if (typeof IntersectionObserver === 'undefined') {
       setIsVisible(true);
       return;
     }
@@ -33,24 +43,21 @@ export function useScrollAnimation(options: UseScrollAnimationOptions = {}) {
         if (entry.isIntersecting) {
           setIsVisible(true);
           if (triggerOnce) {
-            observer.unobserve(element);
+            observer.unobserve(node);
           }
         } else if (!triggerOnce) {
           setIsVisible(false);
         }
       },
-      {
-        threshold,
-        rootMargin,
-      }
+      { threshold, rootMargin }
     );
 
-    observer.observe(element);
+    observer.observe(node);
 
     return () => {
       observer.disconnect();
     };
-  }, [threshold, rootMargin, triggerOnce]);
+  }, [node, threshold, rootMargin, triggerOnce]);
 
   return { ref, isVisible };
 }
