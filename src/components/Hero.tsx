@@ -4,17 +4,13 @@ import { LanguageLink } from "@/components/LanguageLink";
 import navioLocationScreen from "@/assets/navio-location-screen.png";
 import tiamatLocationScreen from "@/assets/tiamat-location-screen.png";
 import hurtigrutaLocationScreen from "@/assets/hurtigruta-location-screen.png";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTypography } from "@/hooks/useTypography";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
-import { LockedText } from "@/components/LockedText";
 import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
-import { EditableBackground } from "@/components/EditableBackground";
-import { EditableIcon } from "@/components/EditableIcon";
-import { useAllowedBackgrounds } from "@/hooks/useAllowedBackgrounds";
 import { supabase } from "@/integrations/supabase/client";
-import { LogoMarquee } from "@/components/LogoMarquee";
+
 import { RotatingHeadline } from "@/components/RotatingHeadline";
 import {
   Carousel,
@@ -35,7 +31,6 @@ const Hero = () => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [mediaKey, setMediaKey] = useState(0);
-  const { allowedBackgrounds } = useAllowedBackgrounds();
   const [translationKey, setTranslationKey] = useState(0);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -179,19 +174,8 @@ const Hero = () => {
                      (mediaSettings.displayType === 'image' && mediaSettings.imageUrl);
 
   return (
-    <section className="pt-20 sm:pt-24 lg:pt-32 pb-8 sm:pb-12 px-2.5" data-header-color="dark">
-      {/* Card-encapsulated gradient section */}
-      <div className="rounded-3xl overflow-hidden relative">
-        {/* Gradient background inside card */}
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'linear-gradient(to bottom, white 0%, white 10%, hsl(266 85% 58% / 0.15) 30%, hsl(321 59% 85% / 0.5) 55%, hsl(266 85% 58% / 0.85) 100%)'
-          }}
-        />
-
-        {/* Content constrained to container */}
-        <div className="container max-w-container px-4 sm:px-6 lg:px-8 relative z-10 py-8 sm:py-12 lg:py-16">
+    <section className="pt-20 sm:pt-24 lg:pt-32 pb-8 sm:pb-12" data-header-color="dark">
+      <div className="container max-w-container px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
         <div className="flex flex-col items-center text-center gap-6 sm:gap-8 lg:gap-12">
           {/* Text Content */}
           <div className="space-y-4 sm:space-y-6 lg:space-y-8">
@@ -203,7 +187,6 @@ const Hero = () => {
             <EditableTranslation translationKey="hero.subtitle">
               <p className={`${body} text-foreground/80 text-center`}>{t('hero.subtitle', 'Booking to billing. Built for automotive services.')}</p>
             </EditableTranslation>
-
 
             {/* CTA Button */}
             <div className="flex justify-center">
@@ -218,17 +201,14 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Product Image with USP Section */}
+          {/* Product Image Section */}
           <div className="w-full px-0 sm:px-2 lg:px-4 max-w-7xl mx-auto space-y-6">
-            {/* Image/Carousel container with FIXED dimensions - prevents layout shift */}
             <EditableUniversalMedia
               locationId="homepage-hero"
               onSave={handleMediaSave}
               placeholder="Add hero image or carousel"
             >
-              {/* Fixed aspect-ratio container - ALWAYS reserves exact space */}
               <div className="relative w-full aspect-[2/1] max-h-[640px]">
-                {/* Skeleton layer - absolutely positioned, fades out */}
                 <div className={cn(
                   "absolute inset-0 z-10 transition-opacity duration-500 ease-out pointer-events-none",
                   !showSkeleton ? "opacity-0" : "opacity-100"
@@ -236,7 +216,6 @@ const Hero = () => {
                   <div className="w-full h-full bg-muted/30 rounded-xl animate-pulse" />
                 </div>
 
-                {/* Content layer - absolutely positioned, fades in */}
                 <div className={cn(
                   "absolute inset-0 z-20 transition-opacity duration-500 ease-out",
                   !showSkeleton ? "opacity-100" : "opacity-0"
@@ -292,7 +271,6 @@ const Hero = () => {
                   ) : null}
                 </div>
 
-                {/* Carousel dots - positioned at bottom of fixed container */}
                 {!showSkeleton && mediaSettings.showDots && mediaSettings.displayType === 'carousel' && carouselImages.length > 1 && (
                   <div className="absolute bottom-4 left-0 right-0 z-30 flex justify-center gap-2">
                     {carouselImages.map((_, index) => (
@@ -310,54 +288,41 @@ const Hero = () => {
               </div>
             </EditableUniversalMedia>
 
-            {/* Logo Marquee - ALWAYS renders, outside loading conditional */}
-            <LogoMarquee />
-
-            {/* USP section - ALWAYS renders, outside loading conditional */}
-            <div className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4 md:px-6 relative">
-              {/* Glow effect */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-64 h-64 rounded-full" style={{ 
-                  background: 'radial-gradient(circle, hsl(var(--vibrant-purple) / 0.25) 0%, transparent 70%)'
-                }} />
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
-                {/* Capacity USP */}
+            {/* USP section */}
+            <div className="py-4 sm:py-6 lg:py-8 px-2 sm:px-4 md:px-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div className="flex flex-col items-center text-center space-y-2">
-                  <CheckCircle2 className="w-5 h-5 text-foreground" />
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
                   <div>
                     <EditableTranslation translationKey="hero.usp1.title" fallbackText="Capacity opens itself. Teams stay in flow.">
-                      <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Capacity opens itself. Teams stay in flow.</h3>
+                      <h3 className="font-semibold text-foreground mb-1 text-sm sm:text-base lg:text-lg">Capacity opens itself. Teams stay in flow.</h3>
                     </EditableTranslation>
                     <EditableTranslation translationKey="hero.usp1.description" fallbackText="Automatic slotting and crew scheduling — no more bottlenecks.">
-                      <p className="text-sm text-white/80">Automatic slotting and crew scheduling — no more bottlenecks.</p>
+                      <p className="text-sm text-muted-foreground">Automatic slotting and crew scheduling — no more bottlenecks.</p>
                     </EditableTranslation>
                   </div>
                 </div>
 
-                {/* Schedules USP */}
                 <div className="flex flex-col items-center text-center space-y-2">
-                  <CheckCircle2 className="w-5 h-5 text-foreground" />
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
                   <div>
                     <EditableTranslation translationKey="hero.usp2.title" fallbackText="Schedules adapt. Every job starts on time.">
-                      <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Schedules adapt. Every job starts on time.</h3>
+                      <h3 className="font-semibold text-foreground mb-1 text-sm sm:text-base lg:text-lg">Schedules adapt. Every job starts on time.</h3>
                     </EditableTranslation>
                     <EditableTranslation translationKey="hero.usp2.description" fallbackText="Intelligent planning and live re-sequencing for mobile and garage services.">
-                      <p className="text-sm text-white/80">Intelligent planning and live re-sequencing for mobile and garage services.</p>
+                      <p className="text-sm text-muted-foreground">Intelligent planning and live re-sequencing for mobile and garage services.</p>
                     </EditableTranslation>
                   </div>
                 </div>
 
-                {/* Customers USP */}
                 <div className="flex flex-col items-center text-center space-y-2">
-                  <CheckCircle2 className="w-5 h-5 text-foreground" />
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
                   <div>
                     <EditableTranslation translationKey="hero.usp3.title" fallbackText="Customers in control. Loved by end users.">
-                      <h3 className="font-semibold text-white mb-1 text-sm sm:text-base lg:text-lg">Customers in control. Loved by end users.</h3>
+                      <h3 className="font-semibold text-foreground mb-1 text-sm sm:text-base lg:text-lg">Customers in control. Loved by end users.</h3>
                     </EditableTranslation>
                     <EditableTranslation translationKey="hero.usp3.description" fallbackText="Self-service booking, inspection, payment transparency — NPS ≈ 90.">
-                      <p className="text-sm text-white/80">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
+                      <p className="text-sm text-muted-foreground">Self-service booking, inspection, payment transparency — NPS ≈ 90.</p>
                     </EditableTranslation>
                   </div>
                 </div>
@@ -365,7 +330,6 @@ const Hero = () => {
             </div>
           </div>
         </div>
-      </div>
       </div>
     </section>
   );
