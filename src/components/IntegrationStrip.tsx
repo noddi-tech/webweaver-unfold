@@ -60,7 +60,7 @@ export default function IntegrationStrip() {
 
               {/* Partner pill */}
               <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold text-foreground">
+                <div className="rounded-lg border border-border bg-white px-5 py-2.5 text-sm font-semibold text-foreground">
                   <EditableTranslation translationKey="integrations_strip.partner_eontyre" onSave={onSave}>
                     <span>{t("integrations_strip.partner_eontyre", "Eontyre")}</span>
                   </EditableTranslation>
@@ -78,7 +78,7 @@ export default function IntegrationStrip() {
                   <EditableTranslation key={key} translationKey={key} onSave={onSave}>
                     <Badge
                       variant="outline"
-                      className="text-sm px-3 py-1.5 border-border text-foreground shadow-sm gap-1.5"
+                      className="text-sm px-3 py-1.5 border-border bg-white text-foreground shadow-sm gap-1.5"
                     >
                       <Icon className="w-3.5 h-3.5 text-muted-foreground" />
                       {t(key, fallback)}
@@ -111,9 +111,23 @@ export default function IntegrationStrip() {
                 role="img"
                 aria-label="Integration diagram showing two-way data sync between your system and Navio"
               >
+              {/* Left box — Your system */}
+                <rect x="10" y="60" width="160" height="160" rx="20" 
+                  fill="white" stroke="hsl(249, 67%, 24%)" strokeWidth="2" />
+                <text x="90" y="128" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="17" fontWeight="700">
+                  {t("integrations_strip.diagram_your_system", "Your system")}
+                </text>
+                <text x="90" y="152" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="12" opacity="0.7">
+                  {t("integrations_strip.diagram_your_system_subtitle", "ERP · CRM · DMS")}
+                </text>
+
                 {/* Right box — Navio */}
                 <foreignObject x="330" y="60" width="160" height="160">
-                  <div className="w-full h-full rounded-[20px] bg-gradient-mesh-velvet" />
+                  <div className="w-full h-full rounded-[20px]" 
+                    style={{ 
+                      backgroundImage: 'var(--gradient-warmth)', 
+                      border: '2px solid hsl(249 67% 24%)' 
+                    }} />
                 </foreignObject>
                 <text x="410" y="128" textAnchor="middle" className="fill-primary-foreground" fontSize="17" fontWeight="700">
                   {t("integrations_strip.diagram_navio", "Navio")}
