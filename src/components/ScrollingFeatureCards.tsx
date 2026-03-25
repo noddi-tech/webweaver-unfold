@@ -261,6 +261,29 @@ export function ScrollingFeatureCards() {
     return () => window.removeEventListener('resize', checkWidth);
   }, []);
 
+  // Mobile carousel: track active slide via IntersectionObserver
+  useEffect(() => {
+    const container = mobileScrollRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number(entry.target.getAttribute('data-slide-index'));
+            if (!isNaN(idx)) setActiveSlide(idx);
+          }
+        });
+      },
+      { root: container, threshold: 0.6 }
+    );
+
+    const slides = container.querySelectorAll('[data-slide-index]');
+    slides.forEach((s) => observer.observe(s));
+
+    return () => observer.disconnect();
+  }, []);
+
   const loadImageSettings = async () => {
     const newImageUrls: Record<number, string> = {};
     const newCarouselData: Record<number, any> = {};
