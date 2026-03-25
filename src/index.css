@@ -132,7 +132,7 @@ All colors MUST be HSL.
     --spacing-md: 2rem;     /* 32px */
     --spacing-lg: 3rem;     /* 48px */
     --spacing-xl: 4rem;     /* 64px */
-    --spacing-section: 7.5rem;  /* 120px */
+    --spacing-section: 5rem;  /* 80px */
     
     /* Tier-based colors for pricing calculator */
     --tier-low: var(--color-success); 

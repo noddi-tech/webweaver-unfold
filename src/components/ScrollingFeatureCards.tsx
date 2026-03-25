@@ -652,7 +652,7 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
     >
       <section
         ref={sectionRef}
-        className="relative py-12 md:py-16 lg:py-section"
+        className="relative py-10 md:py-12 lg:py-16"
         data-header-color="dark"
         style={isXlScreen ? { minHeight: `${100 + (cards.length * 20)}vh` } : undefined}
       >
