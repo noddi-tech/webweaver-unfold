@@ -121,12 +121,6 @@ export default function IntegrationStrip() {
                     <stop offset="50%" stopColor="hsl(var(--accent))" />
                     <stop offset="100%" stopColor="hsl(var(--brand-orange, var(--primary)))" />
                   </linearGradient>
-                  <marker id="arrowRight" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-                    <path d="M0 0 L8 4 L0 8 Z" className="fill-primary" />
-                  </marker>
-                  <marker id="arrowLeft" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto">
-                    <path d="M8 0 L0 4 L8 8 Z" className="fill-primary" />
-                  </marker>
                 </defs>
 
                 <style>{`
@@ -164,10 +158,9 @@ export default function IntegrationStrip() {
                   strokeWidth="2.5"
                   strokeDasharray="6 4"
                   fill="none"
-                  markerEnd="url(#arrowRight)"
                   style={{ animation: "dash-flow 1.5s linear infinite" }}
                 />
-                <text x="250" y="88" textAnchor="middle" className="fill-foreground" fontSize="12" fontWeight="500">
+                <text x="250" y="75" textAnchor="middle" className="fill-foreground" fontSize="12" fontWeight="500">
                   {t("integrations_strip.diagram_data_outbound", "Bookings · Customers")}
                 </text>
 
@@ -178,10 +171,9 @@ export default function IntegrationStrip() {
                   strokeWidth="2.5"
                   strokeDasharray="6 4"
                   fill="none"
-                  markerEnd="url(#arrowLeft)"
                   style={{ animation: "dash-flow 1.5s linear infinite", animationDirection: "reverse" }}
                 />
-                <text x="250" y="215" textAnchor="middle" className="fill-foreground" fontSize="12" fontWeight="500">
+                <text x="250" y="225" textAnchor="middle" className="fill-foreground" fontSize="12" fontWeight="500">
                   {t("integrations_strip.diagram_data_inbound", "Services · Reports")}
                 </text>
 
