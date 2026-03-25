@@ -1,35 +1,46 @@
 
-Root cause: the issue is not the integrations content itself. `IntegrationStrip` renders inside `EditableBackground`, and `EditableBackground` swaps the actual `<section>` DOM node once style data finishes loading. `useScrollAnimation` currently observes only the first mounted node (`ref.current` once in `useEffect`). After the DOM swap, the observer stays attached to the old node, the new live node is never observed, and `isVisible` can remain `false` forever. Because the content container is gated by `opacity-0 translate-y-8`, the user sees a blank section background with no content. That is why it appears to “randomly disappear” and why it can work in one session/browser but fail in another.
 
-Implementation plan:
+# Reorder IntegrationStrip Mobile Layout
 
-1. Harden `useScrollAnimation` at the hook level
-- Refactor `src/hooks/useScrollAnimation.ts` to observe the current live element, not just the initial `ref.current`.
-- Use a callback ref or tracked node state so the observer re-attaches whenever the DOM element changes.
-- Keep the public API the same (`{ ref, isVisible }`) so existing sections do not break.
+## Problem
+On mobile (single column), the SVG diagram appears at the very top (order-1) and all text + badges appear below (order-2). The user wants the SVG to sit **between** the description text and the Eontyre badge — not above everything.
 
-2. Make the hook resilient to wrapper-driven remounts
-- Recreate/cleanup the observer whenever the target node changes.
-- Preserve existing behavior for `threshold`, `rootMargin`, `triggerOnce`, and reduced-motion users.
-- Add a safe fallback for environments where `IntersectionObserver` is unavailable so content never stays hidden permanently.
+## Solution
+Split the left column into two parts and move the SVG between them on mobile using CSS order classes.
 
-3. Remove the integrations section’s dependency on a brittle cast
-- Update `src/components/IntegrationStrip.tsx` to use the hook ref directly on the `<section>` instead of the current manual cast.
-- Keep the existing mobile ordering, editable background, SVG, badges, and translations unchanged.
+**File: `src/components/IntegrationStrip.tsx`**
 
-4. Audit for the same failure pattern
-- Check other sections using `useScrollAnimation` to ensure they still work with the hardened hook.
-- Specifically confirm there are no other components combining animated “hidden until visible” content with wrappers that can swap DOM nodes after mount.
+Change the grid from 2 items to 3:
+1. **Text block** (eyebrow + headline + description) — `order-1` always
+2. **SVG diagram** — `order-2` on mobile, `order-2 lg:order-3` on desktop (right column)
+3. **Badges block** (partner pill + tech badges + CTA link) — `order-3` on mobile, `order-1 lg:order-2` stays in left column on desktop
 
-5. Verify the real failure mode is gone
-- Test `/en/` from a fresh load, not just after hot reload.
-- Confirm the integrations section appears consistently on first load, after refresh, and after CMS style/background data finishes loading.
-- Confirm no regressions in other animated sections like `WhyNavio` and `HowItWorks`.
+Use `lg:col-start-1 lg:row-start-1` and `lg:row-span` to keep the two text blocks visually merged in the left column on desktop while the SVG stays in the right column.
 
-Files expected:
-- `src/hooks/useScrollAnimation.ts`
-- `src/components/IntegrationStrip.tsx`
+Simpler approach: keep the 2-column grid for desktop but use 3 grid children with `lg:col-start` / `lg:row` placement:
 
-Result:
-- Fixes the actual race condition instead of patching the integrations section only.
-- Prevents this class of “blank section with background but no content” bugs from recurring when components are wrapped in editable/styled CMS containers.
+```
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+  {/* 1: Eyebrow + headline + description — always first */}
+  <div className="space-y-6 order-1 lg:order-1 lg:col-start-1">
+    ...eyebrow, headline, description...
+  </div>
+
+  {/* 2: SVG diagram — second on mobile, right column on desktop spanning full height */}
+  <div className="order-2 lg:order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 flex justify-center lg:justify-end">
+    <svg .../>
+  </div>
+
+  {/* 3: Partner pill + badges + CTA — third on mobile, continues left column on desktop */}
+  <div className="space-y-6 order-3 lg:order-3 lg:col-start-1">
+    ...partner pill, tech badges, CTA link...
+  </div>
+</div>
+```
+
+This gives the exact mobile order: text → SVG → badges, while on desktop the two left-column blocks stack naturally and the SVG fills the right column.
+
+| File | Change |
+|---|---|
+| `src/components/IntegrationStrip.tsx` | Split left column into two grid children, reorder with CSS grid placement |
+
