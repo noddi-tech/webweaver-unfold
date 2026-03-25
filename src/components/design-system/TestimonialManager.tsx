@@ -14,21 +14,19 @@ export default function TestimonialManager() {
   const queryClient = useQueryClient();
   const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null);
 
-  // Fetch current testimonial settings
   const { data: settings, isLoading: settingsLoading } = useQuery({
     queryKey: ['testimonial-settings'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('testimonial_settings')
         .select('*')
         .limit(1)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data as { id: string; customer_story_id: string | null; active: boolean } | null;
     },
   });
 
-  // Fetch all active customer stories
   const { data: stories, isLoading: storiesLoading } = useQuery({
     queryKey: ['customer-stories-for-testimonial'],
     queryFn: async () => {
@@ -42,7 +40,6 @@ export default function TestimonialManager() {
     },
   });
 
-  // Set initial selection from DB
   useEffect(() => {
     if (settings?.customer_story_id) {
       setSelectedStoryId(settings.customer_story_id);
@@ -52,7 +49,7 @@ export default function TestimonialManager() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!settings?.id) return;
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('testimonial_settings')
         .update({
           customer_story_id: selectedStoryId,
@@ -91,7 +88,6 @@ export default function TestimonialManager() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Story picker */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Customer Story</label>
           <Select
@@ -111,7 +107,6 @@ export default function TestimonialManager() {
           </Select>
         </div>
 
-        {/* Preview */}
         {selectedStory && (
           <div className="rounded-lg border bg-muted/30 p-6 space-y-4">
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Preview</p>

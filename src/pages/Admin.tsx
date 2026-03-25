@@ -41,6 +41,7 @@ import SEOSetupWizard from "@/components/design-system/SEOSetupWizard";
 import EvaluationHealthDashboard from "@/components/design-system/EvaluationHealthDashboard";
 import { RotatingTermsManager } from "@/components/design-system/RotatingTermsManager";
 import StoriesManager from "@/components/design-system/StoriesManager";
+import TestimonialManager from "@/components/design-system/TestimonialManager";
 import BlogManager from "@/components/design-system/BlogManager";
 import JobsManager from "@/components/design-system/JobsManager";
 import NewsletterManager from "@/components/design-system/NewsletterManager";

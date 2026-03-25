@@ -7,14 +7,22 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 
+interface TestimonialStory {
+  quote_text: string | null;
+  quote_author: string | null;
+  quote_author_title: string | null;
+  company_name: string;
+  company_logo_url: string | null;
+  slug: string;
+}
+
 export default function CustomerTestimonial() {
   const { t, currentLanguage } = useAppTranslation();
 
   const { data: story, isLoading } = useQuery({
     queryKey: ['homepage-testimonial'],
-    queryFn: async () => {
-      // Get testimonial_settings → customer_stories join
-      const { data: settings } = await supabase
+    queryFn: async (): Promise<TestimonialStory | null> => {
+      const { data: settings } = await (supabase as any)
         .from('testimonial_settings')
         .select('customer_story_id')
         .limit(1)
@@ -37,7 +45,6 @@ export default function CustomerTestimonial() {
     },
   });
 
-  // Don't render section if no story is configured
   if (!isLoading && !story) return null;
 
   const initials = story?.company_name?.slice(0, 2).toUpperCase() ?? '';
