@@ -1,66 +1,50 @@
 
 
-# Rework "How It Works" into Sanna-Inspired Vertical Alternating Timeline
+# Upgrade Testimonial Section
 
 ## What changes
-Replace the current horizontal 5-step stepper + repeated illustration with a vertical alternating timeline layout inspired by Sanna.no's numbered process steps.
+Enhance the `CustomerTestimonial` component with larger author photos, decorative quotation marks, warm background tint, and more editorial quote styling. Add a `quote_author_image_url` column to `customer_stories` since one doesn't exist yet.
 
-## File: `src/components/HowItWorks.tsx` — Full rewrite of section body
+## Changes
 
-### Remove
-- The `EditableUniversalMedia` illustration block (lines 61-78) — duplicate of hero image
-- The subtitle paragraph (lines 54-58) — repeats hero messaging
-- The horizontal 5-column grid stepper (lines 100-139)
-- The mobile compact inline stepper (lines 80-98)
-- The `imageUrl` state, `loadMediaSettings` function, and related imports (`EditableUniversalMedia`, `supabase`, `coreLoopIllustration` asset)
-
-### Keep
-- Eyebrow ("HOW IT WORKS") via `EditableTranslation`
-- Heading — update default fallback to "How Navio works"
-- The 5 steps data array with existing translation keys (`core_loop.step_X.title/description`)
-- The tagline pill at the bottom ("It's not automation. It's orchestration.")
-- `useScrollAnimation`, `useAppTranslation`, `EditableTranslation`
-- `refreshKey` pattern for CMS updates
-
-### New layout: Vertical alternating timeline
-
-**Desktop (lg+):**
-```text
-       [Text]          |01|         [empty]
-       [empty]         |02|         [Text]
-       [Text]          |03|         [empty]
-       [empty]         |04|         [Text]
-       [Text]          |05|         [empty]
+### 1. Database migration — Add author photo column
+The `customer_stories` table has no field for author photos (only `company_logo_url`). Add:
+```sql
+ALTER TABLE customer_stories ADD COLUMN quote_author_image_url text;
 ```
-- 3-column grid: `grid-cols-[1fr_auto_1fr]`
-- Center column: vertical line (`w-px bg-border`) with step number circles overlaid
-- Step number: large `text-3xl font-bold text-primary` formatted as "01", "02", etc., inside a circle with `bg-primary/10` and `border border-primary/20`
-- Odd steps (1,3,5): content in left column, right column empty
-- Even steps (2,4): content in right column, left column empty
-- Content block: bold title + description paragraph, left-aligned or right-aligned depending on side
-- Staggered scroll animation with delays per step
 
-**Mobile:**
-- Single column with vertical line on the left side
-- Each step: number circle on the left, title + description flowing to the right
-- Natural top-to-bottom reading order, no alternating
-- Layout: `flex` with fixed-width number column + flex-1 content
+### 2. `src/components/CustomerTestimonial.tsx` — Visual upgrade
 
-### Styling approach (all CMS-compatible)
-- Step number circles: `bg-primary/10 border border-primary/20 text-primary` — all reference CSS variable `--primary` from `color_tokens`
-- Vertical line: `bg-border` — uses `--border` token
-- Title text: no hardcoded color class (inherits from section context)
-- Description text: `text-muted-foreground` removed, let CMS context handle it — OR keep as design token reference since `--muted-foreground` is a CSS variable from the design system
-- Tagline pill: keep existing `bg-primary/10 border-primary/20` tokens
+**Warm background tint:**
+- Change section bg from `bg-background` to `bg-muted/30` — uses the `--muted` design token for a subtle warm differentiation from surrounding white sections
 
-### Reduced padding
-- Section: `py-8 md:py-12 lg:py-16` (tighter than current `py-12 md:py-16 lg:py-section`)
-- Heading bottom margin: `mb-8 md:mb-12`
+**Large decorative quotation marks:**
+- Replace the single small `<Quote>` icon with two large decorative `"` characters flanking the quote
+- Positioned as `absolute` elements: opening mark top-left, closing mark bottom-right of the blockquote
+- Styled: `text-7xl md:text-8xl text-primary/10 font-serif select-none` — large, muted, decorative
 
-### Technical notes
-- No new dependencies or database changes needed
-- All translation keys preserved — content stays the same
-- `EditableTranslation` wrappers kept on all text elements
-- Step number formatting: `String(step.number).padStart(2, '0')` for "01" style
-- The gradient connecting lines (hardcoded HSL values) are removed entirely — replaced by simple `bg-border` vertical line using the design token
+**Larger author avatar (80-100px):**
+- Change Avatar from `h-14 w-14` to `h-20 w-20 md:h-24 md:w-24`
+- Fetch `quote_author_image_url` from the query alongside existing fields
+- Use `quote_author_image_url` as the primary avatar source (person photo), fall back to `company_logo_url` (logo)
+- Add `ring-4 ring-background shadow-lg` for a polished frame effect
+
+**Quote text styling:**
+- Already italic — bump size from `text-2xl md:text-3xl lg:text-4xl` to `text-2xl md:text-4xl lg:text-5xl`
+- Add `font-serif` for editorial pullquote feel (falls back to system serif since no custom serif font is loaded — acceptable since it's a stylistic accent)
+- Remove `tracking-tight`, add `leading-relaxed`
+
+**Attribution layout:**
+- Increase gap between avatar and text
+- Author name: `text-lg font-semibold`
+- Keep company name and "Read the full story →" link as-is
+
+### 3. Update query to include new field
+Add `quote_author_image_url` to the `.select()` call and the `TestimonialStory` interface.
+
+## Files changed
+| File | Change |
+|---|---|
+| New migration | Add `quote_author_image_url` column |
+| `src/components/CustomerTestimonial.tsx` | Visual upgrade with larger avatar, decorative quotes, warm bg |
 
