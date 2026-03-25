@@ -210,24 +210,15 @@ export default function FinalCTA() {
           <BackgroundTextColorProvider textColor={ctaData.titleColor}>
             <div className="relative z-10">
               <EditableTranslation translationKey="final_cta.title">
-                <h2 
-                  className="text-4xl md:text-5xl font-bold mb-6"
+               <h2 
+                  className="text-4xl md:text-5xl font-bold mb-8"
                   style={{ color: resolveTextColor(ctaData.titleColor) }}
                 >
-                  {t('final_cta.title', "Let's build your digital workshop")}
+                  {t('final_cta.title', 'See how Navio fits your operation')}
                 </h2>
               </EditableTranslation>
               
-              <EditableTranslation translationKey="final_cta.subtitle">
-                <p 
-                  className="text-xl max-w-2xl mx-auto mb-8"
-                  style={{ color: resolveTextColor(ctaData.descriptionColor) }}
-                >
-                  {t('final_cta.subtitle', 'Schedule a personalized demo or see how your specific use case can be automated with Navio')}
-                </p>
-              </EditableTranslation>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex flex-col items-center gap-4">
                 <Button 
                   size="lg" 
                   className="text-lg px-8 py-6 group" 
@@ -243,19 +234,16 @@ export default function FinalCTA() {
                   </LanguageLink>
                 </Button>
                 
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="text-lg px-8 py-6 border-white/30 hover:bg-white/10" 
-                  style={getButtonStyle(ctaData.secondaryCtaBgColor, ctaData.secondaryCtaTextColor)}
-                  asChild
+                <LanguageLink
+                  to="/features"
+                  className="text-sm underline underline-offset-4 opacity-80 hover:opacity-100 transition-opacity flex items-center gap-1"
+                  style={{ color: resolveTextColor(ctaData.secondaryCtaTextColor) }}
                 >
-                  <LanguageLink to={ctaData.secondaryCtaUrl}>
-                    <EditableTranslation translationKey="final_cta.button_secondary">
-                      <span>{t('final_cta.button_secondary', 'See Technical Overview')}</span>
-                    </EditableTranslation>
-                  </LanguageLink>
-                </Button>
+                  <EditableTranslation translationKey="final_cta.link_secondary">
+                    <span>{t('final_cta.link_secondary', 'Or explore features')}</span>
+                  </EditableTranslation>
+                  <ArrowRight className="h-4 w-4" />
+                </LanguageLink>
               </div>
               
               <EditableTranslation translationKey="final_cta.footer_text">
