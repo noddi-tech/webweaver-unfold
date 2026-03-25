@@ -1,38 +1,25 @@
 
 
-# Fix IntegrationStrip Arrows & Update Soft Linen Color
+# Fix Invisible IntegrationStrip Section
 
-## 1. SVG arrows — remove arrowhead markers, fix text spacing
+## Problem
 
-Remove the `markerEnd` arrowhead markers from both curved paths. The dashed lines alone communicate the flow well (as seen in the screenshot). Adjust the text `y` positions to add more spacing between the dotted paths and their labels:
-- Top label ("Bookings · Customers"): move from `y="88"` to `y="75"` — more clearance above the curve
-- Bottom label ("Services · Reports"): move from `y="215"` to `y="225"` — more clearance below the curve
+The IntegrationStrip uses `bg-muted/50` as its background. With `--muted` at `0 0% 96%` (near-white) and the page background now at `#EAE7E1`, the section has zero visual contrast — it completely blends in.
 
-Remove the `<marker>` definitions from `<defs>` since they're no longer used.
+## Fix
 
-**File**: `src/components/IntegrationStrip.tsx`
+Update the IntegrationStrip's `defaultBackground` and section class to use a slightly darker/warmer tone that creates visible separation from the page background.
 
-## 2. Update Soft Linen to #EAE7E1
+### Change in `src/components/IntegrationStrip.tsx`
 
-Convert #EAE7E1 to HSL: approximately `36 12% 90%`.
+- Change `defaultBackground="bg-muted/50"` to `defaultBackground="bg-muted"` on the `EditableBackground` wrapper
+- Update `--muted` in `src/index.css` from `0 0% 96%` to a warmer value that contrasts with soft linen — approximately `34 10% 85%` (a slightly darker warm gray, like `#DBD8D2`). This gives visible separation while staying in the same warm family.
 
-Update `--background` in `src/index.css` line 58 from `49 41% 92%` to `36 12% 90%`.
-
-Also update the database migration to use the corrected value.
-
-**File**: `src/index.css`
-
-## 3. Update database color token
-
-New migration to update the existing `--color-soft-linen` token value from `49 41% 92%` to `36 12% 90%` and description to reference `#EAE7E1`.
-
-**File**: New migration SQL
-
-## Files changed
+### Files changed
 
 | File | Change |
 |---|---|
-| `src/components/IntegrationStrip.tsx` | Remove arrow markers, adjust text spacing |
-| `src/index.css` | Update `--background` to `36 12% 90%` (#EAE7E1) |
-| New migration | Update soft linen color token value |
+| `src/index.css` | Update `--muted` from `0 0% 96%` to `34 10% 85%` for visible contrast against soft linen background |
+
+This single CSS variable change fixes the IntegrationStrip and any other section using `bg-muted`.
 
