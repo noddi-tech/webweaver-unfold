@@ -230,6 +230,10 @@ export function ScrollingFeatureCards() {
   const [cardBorderRadii, setCardBorderRadii] = useState<Record<number, string>>({});
   const [cardGap, setCardGap] = useState<string>('gap-8');
   const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Mobile carousel state
+  const [activeSlide, setActiveSlide] = useState(0);
+  const mobileScrollRef = useRef<HTMLDivElement>(null);
   const [isXlScreen, setIsXlScreen] = useState(false);
   const [carouselData, setCarouselData] = useState<Record<number, {
     display_type: 'image' | 'carousel';
