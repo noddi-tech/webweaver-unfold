@@ -1,58 +1,31 @@
 
 
-# Trust Bar — Reuse LogoMarquee with New Section Filter
+# Fix Trust Bar & Simplify Hero
 
-## Approach
-
-Rather than creating a new component, make the existing `LogoMarquee` configurable via props so it can be reused for the trust bar with a different CMS section, label, and styling.
+## Issues
+1. **Broken images in trust bar**: The `LogoMarquee` shows broken image icons because the CMS `images` table has no entries with `section = 'trust-bar'`, so it falls back to `via.placeholder.com` URLs which are broken. The fallback placeholder URLs need to be removed — show nothing (or a subtle empty state) when no CMS logos exist yet.
+2. **Duplicate LogoMarquee**: There's a `<LogoMarquee />` inside `Hero.tsx` (line 314) AND one in `Index.tsx`. Remove the one inside Hero.
+3. **Hero gradient card**: The hero wraps content in a `rounded-3xl` card with a purple gradient background (lines 184-191). Remove this card wrapper and gradient — use plain white/background color instead.
 
 ## Changes
 
-### 1. `src/components/LogoMarquee.tsx` — Add props for reusability
+### 1. `src/components/Hero.tsx`
+- **Remove the LogoMarquee import and usage** (line 17, line 314)
+- **Remove the gradient card wrapper**: Delete the `rounded-3xl` div (line 184) and the gradient `div` (lines 186-191). Keep the content but render it directly on the page background.
+- **Fix USP text colors**: The USPs currently use `text-white` (lines 331-360) because they sat on a purple gradient. Change these to `text-foreground` and `text-muted-foreground` to work on white background.
+- **Remove the purple glow effect** behind the USPs (lines 319-323)
+- **Remove the outer `px-2.5` padding** on the section since there's no card anymore — use standard section padding
 
-Add optional props:
-- `section` (default: `'logo-marquee'`) — CMS `images.section` filter
-- `label` / `labelKey` — override the "Trusted by" text and translation key
-- `className` — outer section styling override
-- `grayscale` (default: `false`) — when true, logos render grayscale with full-color on hover
-- `pauseOnHover` (default: `false`) — pauses marquee animation on hover
-- `compact` (default: `false`) — uses tighter padding (`py-4` instead of `py-8`)
+### 2. `src/components/LogoMarquee.tsx`
+- **Remove placeholder fallback logos** (lines 61-68). When no CMS images exist for the section, set logos to an empty array and render nothing (return `null` early).
 
-This keeps one component, one CMS query pattern, one animation system.
-
-### 2. `src/pages/Index.tsx` — Add Trust Bar instance
-
-Insert a `<LogoMarquee>` between `<Hero />` and `<ScrollingFeatureCards />` configured as:
-
-```text
-<LogoMarquee
-  section="trust-bar"
-  labelKey="trust_bar.label"
-  labelFallback="Trusted by service companies across Scandinavia"
-  compact
-  grayscale
-  pauseOnHover
-  className="bg-muted/30 border-y border-border/50"
-/>
-```
-
-The existing `LogoMarquee` (if used elsewhere) continues working with its defaults unchanged.
-
-### 3. Styling additions in `LogoMarquee.tsx`
-
-- **Grayscale**: Each logo `img` gets `grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300`
-- **Pause on hover**: Outer marquee container gets `group` class; animation div gets `group-hover:[animation-play-state:paused]`
-- **Compact**: `py-4 md:py-5` instead of `py-8`
-- **Fade edges**: Already implemented via CSS mask (reused as-is)
-
-### CMS usage
-
-Logos are managed in the existing `images` table with `section = 'trust-bar'`. Upload logos via the existing Image Manager in the admin panel. No DB migration needed.
+### 3. `src/pages/Index.tsx`
+- No changes needed — already has the trust bar `<LogoMarquee />` in the right position between Hero and ScrollingFeatureCards.
 
 ## Files
 
 | File | Change |
 |---|---|
-| `src/components/LogoMarquee.tsx` | Add configurable props (`section`, `labelKey`, `grayscale`, `pauseOnHover`, `compact`, `className`) |
-| `src/pages/Index.tsx` | Add `<LogoMarquee ... />` trust bar instance between Hero and ScrollingFeatureCards |
+| `src/components/Hero.tsx` | Remove LogoMarquee, gradient card, purple glow; fix text colors to work on white bg |
+| `src/components/LogoMarquee.tsx` | Remove placeholder fallback; return null when no CMS logos |
 
