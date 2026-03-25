@@ -6,6 +6,7 @@ import { useAppTranslation } from '@/hooks/useAppTranslation';
 interface Logo {
   src: string;
   alt: string;
+  link: string | null;
 }
 
 interface LogoMarqueeProps {
@@ -47,7 +48,7 @@ export function LogoMarquee({
     try {
       const { data: imageData } = await supabase
         .from('images')
-        .select('file_url, alt, title')
+        .select('file_url, alt, title, link_url')
         .eq('section', section)
         .eq('active', true)
         .order('sort_order', { ascending: true });
@@ -55,7 +56,8 @@ export function LogoMarquee({
       if (imageData && imageData.length > 0) {
         setLogos(imageData.map(img => ({
           src: img.file_url,
-          alt: img.alt || img.title
+          alt: img.alt || img.title,
+          link: img.link_url || null
         })));
       } else {
         setLogos([]);
@@ -86,17 +88,26 @@ export function LogoMarquee({
     grayscale && "grayscale opacity-60 hover:grayscale-0 hover:opacity-100"
   );
 
+  const LogoImg = ({ logo }: { logo: Logo }) => {
+    const img = (
+      <img
+        src={logo.src}
+        alt={logo.alt}
+        loading="lazy"
+        decoding="async"
+        className={imgClasses}
+      />
+    );
+    return logo.link ? (
+      <a href={logo.link} target="_blank" rel="noopener noreferrer">{img}</a>
+    ) : img;
+  };
+
   const Strip = ({ prefix }: { prefix: string }) => (
     <div className="flex shrink-0 items-center gap-14">
       {stripLogos.map((logo, i) => (
         <div key={`${prefix}-${i}`} className="flex-shrink-0">
-          <img
-            src={logo.src}
-            alt={logo.alt}
-            loading="lazy"
-            decoding="async"
-            className={imgClasses}
-          />
+          <LogoImg logo={logo} />
         </div>
       ))}
     </div>
@@ -125,13 +136,7 @@ export function LogoMarquee({
           <div className="flex items-center justify-center gap-10 sm:gap-14 px-8">
             {baseLogos.map((logo, i) => (
               <div key={i} className="flex-shrink-0">
-                <img
-                  src={logo.src}
-                  alt={logo.alt}
-                  loading="lazy"
-                  decoding="async"
-                  className={cn("h-8", grayscale && "grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300")}
-                />
+                <LogoImg logo={logo} />
               </div>
             ))}
           </div>
