@@ -3144,6 +3144,38 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonial_settings: {
+        Row: {
+          active: boolean
+          created_at: string
+          customer_story_id: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          customer_story_id?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          customer_story_id?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "testimonial_settings_customer_story_id_fkey"
+            columns: ["customer_story_id"]
+            isOneToOne: false
+            referencedRelation: "customer_stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       text_content: {
         Row: {
           active: boolean
