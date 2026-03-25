@@ -121,12 +121,6 @@ export default function IntegrationStrip() {
                     <stop offset="50%" stopColor="hsl(var(--accent))" />
                     <stop offset="100%" stopColor="hsl(var(--brand-orange, var(--primary)))" />
                   </linearGradient>
-                  <marker id="arrowRight" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-                    <path d="M0 0 L8 4 L0 8 Z" className="fill-primary" />
-                  </marker>
-                  <marker id="arrowLeft" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto">
-                    <path d="M8 0 L0 4 L8 8 Z" className="fill-primary" />
-                  </marker>
                 </defs>
 
                 <style>{`
