@@ -53,7 +53,7 @@ export default function CustomerTestimonial() {
   const avatarSrc = story?.quote_author_image_url || story?.company_logo_url || '/placeholder.svg';
 
   return (
-    <section className="bg-muted/30 py-20 md:py-28 lg:py-36">
+    <section className="bg-muted/30 py-16 md:py-20 lg:py-24">
       <div className="container max-w-4xl mx-auto px-4 text-center">
         <EditableTranslation translationKey="testimonial.eyebrow">
           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">

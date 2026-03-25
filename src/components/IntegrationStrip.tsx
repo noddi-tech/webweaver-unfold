@@ -22,7 +22,7 @@ export default function IntegrationStrip() {
   return (
     <section
       ref={ref as React.RefObject<HTMLDivElement>}
-      className="py-16 md:py-24 bg-muted/30 border-y border-border/40"
+      className="py-10 md:py-16 bg-muted/30 border-y border-border/40"
       data-header-color="dark"
     >
       <div
