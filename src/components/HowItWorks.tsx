@@ -1,32 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
-import { EditableUniversalMedia } from "@/components/EditableUniversalMedia";
-import { supabase } from "@/integrations/supabase/client";
-import coreLoopIllustration from "@/assets/core-loop-illustration.png";
 
 export default function HowItWorks() {
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.15 });
   const { t } = useAppTranslation();
   const [refreshKey, setRefreshKey] = useState(0);
-  const [imageUrl, setImageUrl] = useState<string>(coreLoopIllustration);
-
-  const loadMediaSettings = async () => {
-    const { data: settings } = await supabase
-      .from('image_carousel_settings')
-      .select('image_url')
-      .eq('location_id', 'functions-core-loop')
-      .maybeSingle();
-    
-    if (settings?.image_url) {
-      setImageUrl(settings.image_url);
-    }
-  };
-
-  useEffect(() => {
-    loadMediaSettings();
-  }, []);
 
   const coreLoopSteps = [
     { number: 1, titleKey: 'core_loop.step_1.title', descKey: 'core_loop.step_1.description', defaultTitle: 'Book.', defaultDesc: 'The customer picks a time — Navio handles the rest.' },
@@ -36,100 +16,121 @@ export default function HowItWorks() {
     { number: 5, titleKey: 'core_loop.step_5.title', descKey: 'core_loop.step_5.description', defaultTitle: 'Re-engage.', defaultDesc: 'Customers return before they even think to.' },
   ];
 
+  const onSave = () => setRefreshKey(prev => prev + 1);
+
   return (
-    <section ref={ref as any} className="py-12 md:py-16 lg:py-section" data-header-color="dark">
+    <section ref={ref as any} className="py-8 md:py-12 lg:py-16" data-header-color="dark">
       <div className="container max-w-container px-4 sm:px-6 lg:px-8" key={refreshKey}>
-        {/* Section Heading */}
+        {/* Heading */}
         <div className="text-center mb-8 md:mb-12">
-          <EditableTranslation translationKey="how_it_works.eyebrow" onSave={() => setRefreshKey(prev => prev + 1)}>
+          <EditableTranslation translationKey="how_it_works.eyebrow" onSave={onSave}>
             <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               {t('how_it_works.eyebrow', 'HOW IT WORKS')}
             </span>
           </EditableTranslation>
-          <EditableTranslation translationKey="how_it_works.title" onSave={() => setRefreshKey(prev => prev + 1)}>
-            <h2 className="text-4xl font-bold mb-6 text-foreground mt-3">
-              {t('how_it_works.title', 'How Navio Powers Your Operations')}
+          <EditableTranslation translationKey="how_it_works.title" onSave={onSave}>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3">
+              {t('how_it_works.title', 'How Navio works')}
             </h2>
-          </EditableTranslation>
-          <EditableTranslation translationKey="how_it_works.subtitle" onSave={() => setRefreshKey(prev => prev + 1)}>
-            <p className="text-xl text-foreground max-w-3xl mx-auto">
-              {t('how_it_works.subtitle', 'From customer booking to back-office automation—all in one unified platform')}
-            </p>
           </EditableTranslation>
         </div>
 
-        {/* Core Loop Illustration */}
-        <div className="flex justify-center mb-8 sm:mb-12">
-          <div className="w-full max-w-6xl px-0 sm:px-4 lg:px-8">
-            <EditableUniversalMedia
-              locationId="functions-core-loop"
-              onSave={loadMediaSettings}
-              placeholder="Click to upload Core Loop illustration"
-            >
-              <img 
-                src={imageUrl}
-                alt="The Core Loop: 1. Book, 2. Plan, 3. Execute, 4. Analyze, 5. Re-engage"
-                className={`w-full h-auto rounded-lg sm:rounded-xl transition-all duration-700 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                }`}
-              />
-            </EditableUniversalMedia>
+        {/* Desktop: Alternating vertical timeline */}
+        <div className="hidden lg:block max-w-4xl mx-auto">
+          <div className="relative">
+            {/* Vertical center line */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border -translate-x-1/2" />
+
+            {coreLoopSteps.map((step, index) => {
+              const isLeft = index % 2 === 0;
+              return (
+                <div
+                  key={step.number}
+                  className={`relative grid grid-cols-[1fr_auto_1fr] gap-x-10 items-center py-8 transition-all duration-700 ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                  }`}
+                  style={{ transitionDelay: `${index * 120}ms` }}
+                >
+                  {/* Left column */}
+                  <div className={isLeft ? 'text-right pr-2' : ''}>
+                    {isLeft && (
+                      <div>
+                        <EditableTranslation translationKey={step.titleKey} onSave={onSave}>
+                          <h3 className="text-xl font-bold mb-1">
+                            {t(step.titleKey, step.defaultTitle)}
+                          </h3>
+                        </EditableTranslation>
+                        <EditableTranslation translationKey={step.descKey} onSave={onSave}>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {t(step.descKey, step.defaultDesc)}
+                          </p>
+                        </EditableTranslation>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Center: number circle */}
+                  <div className="relative z-10 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-background border border-primary/20 flex items-center justify-center">
+                      <div className="absolute inset-0 rounded-full bg-primary/10" />
+                      <span className="relative text-lg font-bold text-primary">
+                        {String(step.number).padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right column */}
+                  <div className={!isLeft ? 'pl-2' : ''}>
+                    {!isLeft && (
+                      <div>
+                        <EditableTranslation translationKey={step.titleKey} onSave={onSave}>
+                          <h3 className="text-xl font-bold mb-1">
+                            {t(step.titleKey, step.defaultTitle)}
+                          </h3>
+                        </EditableTranslation>
+                        <EditableTranslation translationKey={step.descKey} onSave={onSave}>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {t(step.descKey, step.defaultDesc)}
+                          </p>
+                        </EditableTranslation>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Mobile: Ultra-compact inline stepper */}
-        <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 sm:hidden mb-12 px-4">
-          {coreLoopSteps.map((step, index) => (
-            <span key={step.number} className="flex items-center">
-              <span className="text-sm font-bold text-primary">{step.number}.</span>
-              <span className="text-sm font-medium text-foreground ml-1">{step.defaultTitle.replace('.', '')}</span>
-              {index < 4 && (
-                <span 
-                  className="mx-2 w-4 h-0.5 inline-block"
-                  style={{ 
-                    backgroundImage: 'linear-gradient(to right, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))',
-                    backgroundSize: '400% 100%',
-                    backgroundPosition: `${(index / 3) * 100}% 0`
-                  }}
-                />
-              )}
-            </span>
-          ))}
-        </div>
+        {/* Mobile / Tablet: Vertical timeline on left */}
+        <div className="lg:hidden max-w-lg mx-auto">
+          <div className="relative pl-14">
+            {/* Vertical left line */}
+            <div className="absolute left-5 top-0 bottom-0 w-px bg-border" />
 
-        {/* Desktop/Tablet: Full Core Loop Steps */}
-        <div className="hidden sm:block mb-12">
-          <div className="relative grid grid-cols-5 gap-6 lg:gap-8 max-w-6xl mx-auto px-4">
             {coreLoopSteps.map((step, index) => (
-              <div 
-                key={step.number} 
-                className={`text-center relative p-4 rounded-xl transition-all duration-500 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+              <div
+                key={step.number}
+                className={`relative pb-8 last:pb-0 transition-all duration-700 ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                {/* Connecting line to next step */}
-                {index < 4 && (
-                  <div 
-                    className="hidden lg:block absolute top-10 left-[calc(50%+24px)] w-[calc(100%-8px)] h-0.5 z-0"
-                    style={{ 
-                      backgroundImage: 'linear-gradient(to right, hsl(266 85% 58%), hsl(321 59% 85%), hsl(25 95% 70%))',
-                      backgroundSize: '400% 100%',
-                      backgroundPosition: `${(index / 3) * 100}% 0`
-                    }}
-                  />
-                )}
-                <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-background flex items-center justify-center relative z-10">
+                {/* Number circle */}
+                <div className="absolute -left-14 top-0 z-10 w-10 h-10 rounded-full bg-background border border-primary/20 flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full bg-primary/10" />
-                  <span className="text-lg font-bold text-primary relative">{step.number}</span>
+                  <span className="relative text-sm font-bold text-primary">
+                    {String(step.number).padStart(2, '0')}
+                  </span>
                 </div>
-                <EditableTranslation translationKey={step.titleKey} onSave={() => setRefreshKey(prev => prev + 1)}>
-                  <h3 className="text-lg font-bold text-foreground mb-2">
+
+                <EditableTranslation translationKey={step.titleKey} onSave={onSave}>
+                  <h3 className="text-lg font-bold mb-1">
                     {t(step.titleKey, step.defaultTitle)}
                   </h3>
                 </EditableTranslation>
-                <EditableTranslation translationKey={step.descKey} onSave={() => setRefreshKey(prev => prev + 1)}>
-                  <p className="text-sm text-muted-foreground leading-relaxed hidden sm:block">
+                <EditableTranslation translationKey={step.descKey} onSave={onSave}>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {t(step.descKey, step.defaultDesc)}
                   </p>
                 </EditableTranslation>
@@ -138,15 +139,15 @@ export default function HowItWorks() {
           </div>
         </div>
 
-        {/* Caption */}
-        <div className="text-center">
+        {/* Tagline pill */}
+        <div className="text-center mt-8 md:mt-12">
           <div className="inline-block px-8 py-4 bg-primary/10 border-2 border-primary/20 rounded-xl">
-            <EditableTranslation translationKey="how_it_works.caption_main" onSave={() => setRefreshKey(prev => prev + 1)}>
+            <EditableTranslation translationKey="how_it_works.caption_main" onSave={onSave}>
               <p className="text-base md:text-lg font-semibold text-foreground mb-1">
                 {t('how_it_works.caption_main', "It's not automation. It's orchestration.")}
               </p>
             </EditableTranslation>
-            <EditableTranslation translationKey="how_it_works.caption_sub" onSave={() => setRefreshKey(prev => prev + 1)}>
+            <EditableTranslation translationKey="how_it_works.caption_sub" onSave={onSave}>
               <p className="text-sm text-foreground font-medium">
                 {t('how_it_works.caption_sub', 'One platform. Every function. Zero friction.')}
               </p>
