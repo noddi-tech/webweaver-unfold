@@ -12,11 +12,11 @@ export default function IntegrationStrip() {
   const [refreshKey, setRefreshKey] = useState(0);
   const onSave = () => setRefreshKey((k) => k + 1);
 
-  const techItems = [
-    t("integrations_strip.tech_rest_api", "REST API"),
-    t("integrations_strip.tech_webhooks", "Webhooks"),
-    t("integrations_strip.tech_custom", "Custom integrations"),
-    t("integrations_strip.tech_export", "CSV / JSON export"),
+  const techKeys = [
+    { key: "integrations_strip.tech_rest_api", fallback: "REST API" },
+    { key: "integrations_strip.tech_webhooks", fallback: "Webhooks" },
+    { key: "integrations_strip.tech_custom", fallback: "Custom integrations" },
+    { key: "integrations_strip.tech_export", fallback: "CSV / JSON export" },
   ];
 
   return (
@@ -57,13 +57,13 @@ export default function IntegrationStrip() {
 
             {/* Partner logo placeholder */}
             <div className="flex items-center gap-3">
-              <EditableTranslation translationKey="integrations_strip.partner_eontyre" onSave={onSave} disableStyling>
-                <div className="border border-border rounded-md px-4 py-2 text-sm font-medium text-foreground bg-card">
+              <EditableTranslation translationKey="integrations_strip.partner_eontyre" onSave={onSave}>
+                <div className="border border-border rounded-md px-4 py-2 text-sm font-medium bg-card">
                   {t("integrations_strip.partner_eontyre", "Eontyre")}
                 </div>
               </EditableTranslation>
-              <EditableTranslation translationKey="integrations_strip.partner_more" onSave={onSave} disableStyling>
-                <span className="text-sm text-muted-foreground/60">
+              <EditableTranslation translationKey="integrations_strip.partner_more" onSave={onSave}>
+                <span className="text-sm">
                   {t("integrations_strip.partner_more", "+ more coming")}
                 </span>
               </EditableTranslation>
@@ -71,10 +71,12 @@ export default function IntegrationStrip() {
 
             {/* Tech badges */}
             <div className="flex flex-wrap gap-2">
-              {techItems.map((item) => (
-                <Badge key={item} variant="outline" className="text-sm px-3 py-1">
-                  {item}
-                </Badge>
+              {techKeys.map(({ key, fallback }) => (
+                <EditableTranslation key={key} translationKey={key} onSave={onSave}>
+                  <Badge variant="outline" className="text-sm px-3 py-1">
+                    {t(key, fallback)}
+                  </Badge>
+                </EditableTranslation>
               ))}
             </div>
 
