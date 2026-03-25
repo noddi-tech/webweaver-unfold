@@ -12,7 +12,12 @@ export default function IntegrationStrip() {
   const [refreshKey, setRefreshKey] = useState(0);
   const onSave = () => setRefreshKey((k) => k + 1);
 
-  const techItems = ["REST API", "Webhooks", "Custom integrations", "CSV / JSON export"];
+  const techItems = [
+    t("integrations_strip.tech_rest_api", "REST API"),
+    t("integrations_strip.tech_webhooks", "Webhooks"),
+    t("integrations_strip.tech_custom", "Custom integrations"),
+    t("integrations_strip.tech_export", "CSV / JSON export"),
+  ];
 
   return (
     <section
@@ -52,10 +57,16 @@ export default function IntegrationStrip() {
 
             {/* Partner logo placeholder */}
             <div className="flex items-center gap-3">
-              <div className="border border-border rounded-md px-4 py-2 text-sm font-medium text-foreground bg-card">
-                Eontyre
-              </div>
-              <span className="text-sm text-muted-foreground/60">+ more coming</span>
+              <EditableTranslation translationKey="integrations_strip.partner_eontyre" onSave={onSave} disableStyling>
+                <div className="border border-border rounded-md px-4 py-2 text-sm font-medium text-foreground bg-card">
+                  {t("integrations_strip.partner_eontyre", "Eontyre")}
+                </div>
+              </EditableTranslation>
+              <EditableTranslation translationKey="integrations_strip.partner_more" onSave={onSave} disableStyling>
+                <span className="text-sm text-muted-foreground/60">
+                  {t("integrations_strip.partner_more", "+ more coming")}
+                </span>
+              </EditableTranslation>
             </div>
 
             {/* Tech badges */}
@@ -98,7 +109,7 @@ export default function IntegrationStrip() {
                 width="160"
                 height="160"
                 rx="12"
-                className="fill-card stroke-foreground/20"
+                className="fill-background stroke-border"
                 strokeWidth="2"
               />
               <text
@@ -109,17 +120,16 @@ export default function IntegrationStrip() {
                 fontSize="17"
                 fontWeight="700"
               >
-                Your system
+                {t("integrations_strip.diagram_your_system", "Your system")}
               </text>
               <text
                 x="90"
                 y="152"
                 textAnchor="middle"
-                className="fill-foreground"
+                className="fill-muted-foreground"
                 fontSize="12"
-                opacity="0.6"
               >
-                Eontyre, ERP, CRM…
+                {t("integrations_strip.diagram_your_system_subtitle", "Eontyre, ERP, CRM…")}
               </text>
 
               {/* Right box — Navio */}
@@ -139,7 +149,7 @@ export default function IntegrationStrip() {
                 fontSize="17"
                 fontWeight="700"
               >
-                Navio
+                {t("integrations_strip.diagram_navio", "Navio")}
               </text>
               <text
                 x="410"
@@ -149,7 +159,7 @@ export default function IntegrationStrip() {
                 fontSize="12"
                 opacity="0.8"
               >
-                Booking · Routing · Capacity
+                {t("integrations_strip.diagram_navio_subtitle", "Booking · Routing · Capacity")}
               </text>
 
               {/* Top arrow → right */}
@@ -179,7 +189,7 @@ export default function IntegrationStrip() {
                 fontSize="12"
                 fontWeight="500"
               >
-                Bookings · Customers
+                {t("integrations_strip.diagram_data_outbound", "Bookings · Customers")}
               </text>
 
               {/* Bottom arrow ← left */}
@@ -209,7 +219,7 @@ export default function IntegrationStrip() {
                 fontSize="12"
                 fontWeight="500"
               >
-                Services · Reports
+                {t("integrations_strip.diagram_data_inbound", "Services · Reports")}
               </text>
 
               {/* Sync icon circle — prominent */}
@@ -242,7 +252,7 @@ export default function IntegrationStrip() {
                 fontWeight="700"
                 letterSpacing="0.05em"
               >
-                TWO-WAY SYNC
+                {t("integrations_strip.diagram_sync_label", "TWO-WAY SYNC")}
               </text>
 
               {/* Arrowhead markers */}
