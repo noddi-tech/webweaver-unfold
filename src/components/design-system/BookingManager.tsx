@@ -194,6 +194,64 @@ function TeamMembersTab() {
     }
   };
 
+  const saveEventTypeAvail = async (etId: string) => {
+    setSavingEventAvail(etId);
+    const entry = memberEventAvail.find(e => e.eventType.id === etId);
+    if (!entry) { setSavingEventAvail(null); return; }
+
+    // Delete existing
+    await supabase.from("event_type_availability").delete().eq("event_type_id", etId);
+
+    const toInsert: any[] = [];
+    // Recurring
+    entry.recurring.filter(r => r.enabled).forEach(r => {
+      toInsert.push({ event_type_id: etId, type: 'recurring', day_of_week: r.day, start_time: r.start, end_time: r.end });
+    });
+    // Date ranges
+    entry.dateRanges.filter(dr => dr.date_start && dr.date_end).forEach(dr => {
+      toInsert.push({ event_type_id: etId, type: 'date_range', date_start: dr.date_start, date_end: dr.date_end, start_time: dr.start_time, end_time: dr.end_time });
+    });
+
+    if (toInsert.length > 0) {
+      const { error } = await supabase.from("event_type_availability").insert(toInsert);
+      if (error) { toast({ variant: "destructive", title: "Error saving", description: error.message }); }
+      else { toast({ title: `Availability saved for ${entry.eventType.title}` }); }
+    } else {
+      toast({ title: `Availability cleared for ${entry.eventType.title}` });
+    }
+    setSavingEventAvail(null);
+  };
+
+  const updateMemberEventRecurring = (etId: string, dayIdx: number, update: Partial<{ enabled: boolean; start: string; end: string }>) => {
+    setMemberEventAvail(prev => prev.map(e => {
+      if (e.eventType.id !== etId) return e;
+      const recurring = e.recurring.map((r, i) => i === dayIdx ? { ...r, ...update } : r);
+      return { ...e, recurring };
+    }));
+  };
+
+  const updateMemberEventDateRange = (etId: string, drIdx: number, update: Partial<{ date_start: string; date_end: string; start_time: string; end_time: string }>) => {
+    setMemberEventAvail(prev => prev.map(e => {
+      if (e.eventType.id !== etId) return e;
+      const dateRanges = e.dateRanges.map((dr, i) => i === drIdx ? { ...dr, ...update } : dr);
+      return { ...e, dateRanges };
+    }));
+  };
+
+  const addMemberEventDateRange = (etId: string) => {
+    setMemberEventAvail(prev => prev.map(e => {
+      if (e.eventType.id !== etId) return e;
+      return { ...e, dateRanges: [...e.dateRanges, { date_start: "", date_end: "", start_time: "09:00", end_time: "17:00" }] };
+    }));
+  };
+
+  const removeMemberEventDateRange = (etId: string, drIdx: number) => {
+    setMemberEventAvail(prev => prev.map(e => {
+      if (e.eventType.id !== etId) return e;
+      return { ...e, dateRanges: e.dateRanges.filter((_, i) => i !== drIdx) };
+    }));
+  };
+
   const saveAvailability = async () => {
     if (!availMember) return;
     setSavingAvail(true);
