@@ -67,6 +67,7 @@ import { LeadsManager } from "@/components/design-system/LeadsManager";
 import { SalesContactManager } from "@/components/design-system/SalesContactManager";
 import ActivityDashboard from "@/components/design-system/ActivityDashboard";
 import LegalDocumentsManager from "@/components/design-system/LegalDocumentsManager";
+import BookingManager from "@/components/design-system/BookingManager";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -92,7 +93,12 @@ const Admin = () => {
     if (sectionParam && commTabs.includes(sectionParam)) {
       return { main: "communications", communications: sectionParam };
     }
-    return { main: "cms", cms: "content", config: "header", career: "applications", sales: "offers", communications: "newsletter" };
+    // Booking section tabs
+    const bookingTabs = ["team-members", "event-types", "bookings"];
+    if (sectionParam && bookingTabs.includes(sectionParam)) {
+      return { main: "booking", booking: sectionParam };
+    }
+    return { main: "cms", cms: "content", config: "header", career: "applications", sales: "offers", communications: "newsletter", booking: "team-members" };
   };
   const defaults = getDefaultTabs();
 
@@ -170,13 +176,14 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue={defaults.main} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-12">
+          <TabsList className="grid w-full grid-cols-7 mb-12">
             <TabsTrigger value="cms">CMS</TabsTrigger>
             <TabsTrigger value="translations">Translations & SEO</TabsTrigger>
             <TabsTrigger value="design">Design System</TabsTrigger>
             <TabsTrigger value="career">Career</TabsTrigger>
             <TabsTrigger value="sales">Sales</TabsTrigger>
             <TabsTrigger value="communications">Communications</TabsTrigger>
+            <TabsTrigger value="booking">Booking</TabsTrigger>
           </TabsList>
 
           {/* CMS Section with nested tabs */}
@@ -516,6 +523,11 @@ const Admin = () => {
                 <LogoManager />
               </TabsContent>
             </Tabs>
+          </TabsContent>
+
+          {/* Booking Section */}
+          <TabsContent value="booking" className="space-y-8">
+            <BookingManager />
           </TabsContent>
         </Tabs>
 
