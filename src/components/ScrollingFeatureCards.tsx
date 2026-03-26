@@ -861,30 +861,27 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                         }}
                         onBgColorChange={async (color) => {
                           const elementId = `scrolling-card-${index + 1}-cta`;
-                          await supabase.from('text_content').upsert({
-                            element_id: elementId,
-                            page_location: 'homepage',
-                            section: 'scrolling-features',
-                            element_type: 'cta_button',
-                            content: cardData[index]?.ctaText || card.ctaText,
-                            button_bg_color: color,
-                            active: true,
-                          }, { onConflict: 'element_id' });
+                          // Use targeted update instead of upsert to prevent silent failures
+                          const { error } = await supabase.from('text_content')
+                            .update({ button_bg_color: color })
+                            .eq('element_id', elementId);
+                          if (error) {
+                            // Row might not exist yet — insert it
+                            await supabase.from('text_content').insert({
+                              element_id: elementId,
+                              page_location: 'homepage',
+                              section: 'scrolling-features',
+                              element_type: 'cta_button',
+                              content: cardData[index]?.ctaText || card.ctaText,
+                              button_bg_color: color,
+                              active: true,
+                            });
+                          }
                           editedCardsRef.current.add(index);
                           setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaBgColor: color } }));
                           await refreshTextStyles();
                         }}
                         onTextColorChange={async (color) => {
-                          const elementId = `scrolling-card-${index + 1}-cta`;
-                          await supabase.from('text_content').upsert({
-                            element_id: elementId,
-                            page_location: 'homepage',
-                            section: 'scrolling-features',
-                            element_type: 'cta_button',
-                            content: cardData[index]?.ctaText || card.ctaText,
-                            active: true,
-                          }, { onConflict: 'element_id' });
-                          // Also save color_token to translations
                           await supabase.from('translations').upsert([{
                             translation_key: card.ctaKey,
                             language_code: 'en',
@@ -1045,29 +1042,27 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                             }}
                             onBgColorChange={async (color) => {
                               const elementId = `scrolling-card-${index + 1}-cta`;
-                              await supabase.from('text_content').upsert({
-                                element_id: elementId,
-                                page_location: 'homepage',
-                                section: 'scrolling-features',
-                                element_type: 'cta_button',
-                                content: cardData[index]?.ctaText || card.ctaText,
-                                button_bg_color: color,
-                                active: true,
-                              }, { onConflict: 'element_id' });
+                              // Use targeted update instead of upsert to prevent silent failures
+                              const { error } = await supabase.from('text_content')
+                                .update({ button_bg_color: color })
+                                .eq('element_id', elementId);
+                              if (error) {
+                                // Row might not exist yet — insert it
+                                await supabase.from('text_content').insert({
+                                  element_id: elementId,
+                                  page_location: 'homepage',
+                                  section: 'scrolling-features',
+                                  element_type: 'cta_button',
+                                  content: cardData[index]?.ctaText || card.ctaText,
+                                  button_bg_color: color,
+                                  active: true,
+                                });
+                              }
                               editedCardsRef.current.add(index);
                               setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaBgColor: color } }));
                               await refreshTextStyles();
                             }}
                             onTextColorChange={async (color) => {
-                              const elementId = `scrolling-card-${index + 1}-cta`;
-                              await supabase.from('text_content').upsert({
-                                element_id: elementId,
-                                page_location: 'homepage',
-                                section: 'scrolling-features',
-                                element_type: 'cta_button',
-                                content: cardData[index]?.ctaText || card.ctaText,
-                                active: true,
-                              }, { onConflict: 'element_id' });
                               await supabase.from('translations').upsert([{
                                 translation_key: card.ctaKey,
                                 language_code: 'en',
@@ -1133,17 +1128,23 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                     </div>
                   </div>
 
-                  {/* Unified Style Modal for this card */}
+                   {/* Unified Style Modal for this card */}
                   <UnifiedStyleModal
                     isOpen={editingCard === index}
                     onClose={() => setEditingCard(null)}
                     elementIdPrefix={`scrolling-card-${index + 1}`}
                     initialData={cardData[index]}
                     onSave={(data) => {
+                      // Merge modal data with existing card data to prevent
+                      // stale CTA values from overwriting inline EditableButton edits
                       setCardData(prev => ({
                         ...prev,
-                        [index]: data
+                        [index]: {
+                          ...prev[index],
+                          ...data,
+                        }
                       }));
+                      editedCardsRef.current.add(index);
                     }}
                   />
                 </div>
