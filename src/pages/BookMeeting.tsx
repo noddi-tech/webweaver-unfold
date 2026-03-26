@@ -212,7 +212,7 @@ export default function BookMeeting() {
     }).then(({ data, error }) => {
       if (error) {
         console.error('get-availability error:', error);
-        setServerSlots([]);
+        setServerSlots(null);
       } else {
         setServerSlots(data?.slots || []);
       }
