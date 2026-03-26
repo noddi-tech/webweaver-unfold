@@ -496,7 +496,7 @@ export default function BookMeeting() {
                       {members.map(m => (
                         <div key={m.id} className="flex items-center gap-2.5">
                           <Avatar className="w-8 h-8">
-                            {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                            {m.image_url && <AvatarImage src={m.image_url} />}
                             <AvatarFallback className="text-xs bg-primary/10 text-primary">
                               {getInitials(m.name)}
                             </AvatarFallback>
