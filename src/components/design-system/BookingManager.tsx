@@ -115,6 +115,14 @@ function TeamMembersTab() {
   const [availRules, setAvailRules] = useState<{ day: number; enabled: boolean; start: string; end: string }[]>([]);
   const [savingAvail, setSavingAvail] = useState(false);
 
+  // Event-type availability for the member
+  const [memberEventAvail, setMemberEventAvail] = useState<{
+    eventType: EventType;
+    recurring: { day: number; enabled: boolean; start: string; end: string }[];
+    dateRanges: { date_start: string; date_end: string; start_time: string; end_time: string }[];
+  }[]>([]);
+  const [savingEventAvail, setSavingEventAvail] = useState<string | null>(null);
+
   const fetchMembers = async () => {
     const { data } = await supabase.from("employees").select("id, name, email, title, slug, active, google_calendar_connected, timezone").not("email", "is", null).order("name");
     if (data) setMembers(data as TeamMember[]);
@@ -152,12 +160,96 @@ function TeamMembersTab() {
   // Availability
   const openAvailability = async (m: TeamMember) => {
     setAvailMember(m);
+    // General weekly rules
     const { data } = await supabase.from("availability_rules").select("*").eq("team_member_id", m.id);
     const rules = [1, 2, 3, 4, 5].map(day => {
       const existing = (data || []).find((r: AvailabilityRule) => r.day_of_week === day);
       return { day, enabled: !!existing, start: existing?.start_time || "09:00", end: existing?.end_time || "16:00" };
     });
     setAvailRules(rules);
+
+    // Event-type availability
+    const { data: memberships } = await supabase.from("event_type_members").select("event_type_id").eq("team_member_id", m.id);
+    if (memberships && memberships.length > 0) {
+      const etIds = memberships.map(ms => ms.event_type_id);
+      const { data: eventTypes } = await supabase.from("event_types").select("*").in("id", etIds);
+      const { data: etAvail } = await supabase.from("event_type_availability").select("*").in("event_type_id", etIds);
+      const mapped = (eventTypes || []).map((et: EventType) => {
+        const avails = ((etAvail || []) as EventTypeAvailability[]).filter(a => a.event_type_id === et.id);
+        const recurring = ALL_DAYS.map(day => {
+          const existing = avails.find(a => a.type === 'recurring' && a.day_of_week === day);
+          return { day, enabled: !!existing, start: existing?.start_time || "09:00", end: existing?.end_time || "17:00" };
+        });
+        const dateRanges = avails.filter(a => a.type === 'date_range').map(a => ({
+          date_start: a.date_start || "",
+          date_end: a.date_end || "",
+          start_time: a.start_time || "09:00",
+          end_time: a.end_time || "17:00",
+        }));
+        return { eventType: et, recurring, dateRanges };
+      });
+      setMemberEventAvail(mapped);
+    } else {
+      setMemberEventAvail([]);
+    }
+  };
+
+  const saveEventTypeAvail = async (etId: string) => {
+    setSavingEventAvail(etId);
+    const entry = memberEventAvail.find(e => e.eventType.id === etId);
+    if (!entry) { setSavingEventAvail(null); return; }
+
+    // Delete existing
+    await supabase.from("event_type_availability").delete().eq("event_type_id", etId);
+
+    const toInsert: any[] = [];
+    // Recurring
+    entry.recurring.filter(r => r.enabled).forEach(r => {
+      toInsert.push({ event_type_id: etId, type: 'recurring', day_of_week: r.day, start_time: r.start, end_time: r.end });
+    });
+    // Date ranges
+    entry.dateRanges.filter(dr => dr.date_start && dr.date_end).forEach(dr => {
+      toInsert.push({ event_type_id: etId, type: 'date_range', date_start: dr.date_start, date_end: dr.date_end, start_time: dr.start_time, end_time: dr.end_time });
+    });
+
+    if (toInsert.length > 0) {
+      const { error } = await supabase.from("event_type_availability").insert(toInsert);
+      if (error) { toast({ variant: "destructive", title: "Error saving", description: error.message }); }
+      else { toast({ title: `Availability saved for ${entry.eventType.title}` }); }
+    } else {
+      toast({ title: `Availability cleared for ${entry.eventType.title}` });
+    }
+    setSavingEventAvail(null);
+  };
+
+  const updateMemberEventRecurring = (etId: string, dayIdx: number, update: Partial<{ enabled: boolean; start: string; end: string }>) => {
+    setMemberEventAvail(prev => prev.map(e => {
+      if (e.eventType.id !== etId) return e;
+      const recurring = e.recurring.map((r, i) => i === dayIdx ? { ...r, ...update } : r);
+      return { ...e, recurring };
+    }));
+  };
+
+  const updateMemberEventDateRange = (etId: string, drIdx: number, update: Partial<{ date_start: string; date_end: string; start_time: string; end_time: string }>) => {
+    setMemberEventAvail(prev => prev.map(e => {
+      if (e.eventType.id !== etId) return e;
+      const dateRanges = e.dateRanges.map((dr, i) => i === drIdx ? { ...dr, ...update } : dr);
+      return { ...e, dateRanges };
+    }));
+  };
+
+  const addMemberEventDateRange = (etId: string) => {
+    setMemberEventAvail(prev => prev.map(e => {
+      if (e.eventType.id !== etId) return e;
+      return { ...e, dateRanges: [...e.dateRanges, { date_start: "", date_end: "", start_time: "09:00", end_time: "17:00" }] };
+    }));
+  };
+
+  const removeMemberEventDateRange = (etId: string, drIdx: number) => {
+    setMemberEventAvail(prev => prev.map(e => {
+      if (e.eventType.id !== etId) return e;
+      return { ...e, dateRanges: e.dateRanges.filter((_, i) => i !== drIdx) };
+    }));
   };
 
   const saveAvailability = async () => {
@@ -277,8 +369,83 @@ function TeamMembersTab() {
               </div>
             ))}
             <Button onClick={saveAvailability} disabled={savingAvail} className="w-full">
-              {savingAvail && <Loader2 className="w-4 h-4 mr-1 animate-spin" />} Save Availability
+              {savingAvail && <Loader2 className="w-4 h-4 mr-1 animate-spin" />} Save General Availability
             </Button>
+
+            {/* Event-Type Availability */}
+            {memberEventAvail.length > 0 && (
+              <div className="space-y-4 pt-4 border-t border-border">
+                <h4 className="text-sm font-semibold text-foreground">Event-Specific Availability</h4>
+                <p className="text-xs text-muted-foreground">Set availability per event type this member is assigned to.</p>
+
+                {memberEventAvail.map((entry) => {
+                  const etId = entry.eventType.id;
+                  return (
+                    <div key={etId} className="rounded-lg border border-border p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.eventType.color || 'hsl(var(--primary))' }} />
+                        <span className="text-sm font-medium text-foreground">{entry.eventType.title}</span>
+                      </div>
+
+                      {/* Recurring days */}
+                      <div className="space-y-2">
+                        <Label className="text-xs text-muted-foreground">Recurring Days</Label>
+                        {entry.recurring.map((rule, dayIdx) => (
+                          <div key={rule.day} className="flex items-center gap-2">
+                            <Switch checked={rule.enabled} onCheckedChange={checked => updateMemberEventRecurring(etId, dayIdx, { enabled: !!checked })} />
+                            <span className="w-10 text-xs font-medium">{DAY_NAMES_SHORT[rule.day]}</span>
+                            {rule.enabled && (
+                              <>
+                                <Select value={rule.start} onValueChange={v => updateMemberEventRecurring(etId, dayIdx, { start: v })}>
+                                  <SelectTrigger className="w-20 h-8 text-xs"><SelectValue /></SelectTrigger>
+                                  <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                                </Select>
+                                <span className="text-xs text-muted-foreground">–</span>
+                                <Select value={rule.end} onValueChange={v => updateMemberEventRecurring(etId, dayIdx, { end: v })}>
+                                  <SelectTrigger className="w-20 h-8 text-xs"><SelectValue /></SelectTrigger>
+                                  <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                                </Select>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Date ranges */}
+                      <div className="space-y-2">
+                        <Label className="text-xs text-muted-foreground">Date Ranges</Label>
+                        {entry.dateRanges.map((dr, drIdx) => (
+                          <div key={drIdx} className="flex flex-wrap items-center gap-2">
+                            <Input type="date" value={dr.date_start} onChange={e => updateMemberEventDateRange(etId, drIdx, { date_start: e.target.value })} className="w-[130px] h-8 text-xs" />
+                            <span className="text-xs text-muted-foreground">to</span>
+                            <Input type="date" value={dr.date_end} onChange={e => updateMemberEventDateRange(etId, drIdx, { date_end: e.target.value })} className="w-[130px] h-8 text-xs" />
+                            <Select value={dr.start_time} onValueChange={v => updateMemberEventDateRange(etId, drIdx, { start_time: v })}>
+                              <SelectTrigger className="w-20 h-8 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                            </Select>
+                            <span className="text-xs text-muted-foreground">–</span>
+                            <Select value={dr.end_time} onValueChange={v => updateMemberEventDateRange(etId, drIdx, { end_time: v })}>
+                              <SelectTrigger className="w-20 h-8 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                            </Select>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => removeMemberEventDateRange(etId, drIdx)}>
+                              <X className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => addMemberEventDateRange(etId)}>
+                          <Plus className="w-3 h-3 mr-1" /> Add Date Range
+                        </Button>
+                      </div>
+
+                      <Button size="sm" className="w-full" onClick={() => saveEventTypeAvail(etId)} disabled={savingEventAvail === etId}>
+                        {savingEventAvail === etId && <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />} Save {entry.eventType.title}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </SheetContent>
       </Sheet>
