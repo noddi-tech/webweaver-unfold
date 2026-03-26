@@ -1,38 +1,33 @@
 
 
-# Fix: Logo Marquee Empty Gap on Wide Desktops
+# Fix: CTA Button Color Resets After Save
 
 ## Root Cause
 
-In `LogoMarquee.tsx` lines 77-83, the strip is capped at 6 logos:
+Two related problems cause the color reset:
 
-```ts
-const stripLogos = baseLogos.length >= 6
-  ? baseLogos  // uses original array (e.g. 9 logos)
-  : /* pad to 6 */
-```
+1. **Stale context overwrites local state**: The `useEffect` at line 461 depends on `[stylesLoaded, backgroundStyles, textStyles]`. Whenever ANY `EditableCard` on the page saves (calling `refreshBackgroundStyles()`), the `backgroundStyles` reference changes, triggering `loadCardData` for ALL cards. This overwrites the locally-saved CTA color with stale data from `textStyles` (which was loaded once at page mount and never refreshed after CTA saves).
 
-When there are 6+ logos, it uses them as-is. But if there are, say, 9 logos at ~100px each + 56px gaps = ~1400px per strip, that's narrower than a 1952px viewport. The `translateX(-50%)` animation moves the combined container left by half its width, but since each strip is narrower than the viewport, a gap appears before the second strip scrolls in.
+2. **Race condition on save**: `EditableButton` fires three separate async upserts to the same `text_content` row simultaneously (`onSave`, `onBgColorChange`, `onTextColorChange`) without awaiting each other.
 
 ## Fix
 
-**File: `src/components/LogoMarquee.tsx`**
+### File: `src/contexts/SiteStylesContext.tsx`
+Add a `refreshTextStyles` function (similar to `refreshBackgroundStyles`) that reloads `text_content` from the database. Export it from the context.
 
-Replace the strip duplication logic to ensure each strip is wide enough to cover the viewport. Instead of capping at 6, duplicate the base logos enough times so each strip is at least ~2000px wide (accounting for logo width + gap). A safe heuristic: repeat logos until we have at least 12 items per strip.
+### File: `src/components/ScrollingFeatureCards.tsx`
 
-```ts
-// Ensure enough logos per strip to fill wide viewports
-const minLogosPerStrip = Math.max(12, baseLogos.length);
-const stripLogos = baseLogos.length > 0
-  ? Array.from({ length: Math.ceil(minLogosPerStrip / baseLogos.length) }, () => baseLogos)
-      .flat()
-      .slice(0, minLogosPerStrip)
-  : baseLogos;
-```
+**Change 1**: In the CTA save handlers (`onBgColorChange` and `onTextColorChange`), call `refreshTextStyles()` after the upsert so the context stays in sync with the database.
 
-This guarantees at least 12 logo slots per strip (~1800px+), covering even ultrawide displays. With two strips rendered, the seamless `-50%` loop works without gaps.
+**Change 2**: Guard `loadCardData` to avoid overwriting user-edited card data. Track which cards have been locally edited (using a ref like `editedCardsRef`). When the useEffect re-fires, skip `loadCardData` for cards that were just edited.
+
+### File: `src/components/EditableButton.tsx`
+No changes needed — the root cause is in the context staleness and unguarded effect, not in EditableButton itself.
+
+## Summary of Changes
 
 | File | Change |
 |---|---|
-| `src/components/LogoMarquee.tsx` | Lines 77-83: replace strip sizing logic to ensure minimum 12 logos per strip |
+| `src/contexts/SiteStylesContext.tsx` | Add `refreshTextStyles()` function and export it |
+| `src/components/ScrollingFeatureCards.tsx` | (1) Call `refreshTextStyles()` after CTA saves. (2) Guard `loadCardData` with an `editedCardsRef` to prevent stale context from overwriting user changes |
 
