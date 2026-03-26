@@ -95,6 +95,8 @@ function TeamMembersTab() {
   const [editing, setEditing] = useState<TeamMember | null>(null);
   const [form, setForm] = useState({ name: "", email: "", title: "", slug: "" });
   const [saving, setSaving] = useState(false);
+  const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
+  const [disconnectLoading, setDisconnectLoading] = useState(false);
 
   // Availability sheet
   const [availMember, setAvailMember] = useState<TeamMember | null>(null);
@@ -108,6 +110,32 @@ function TeamMembersTab() {
   };
 
   useEffect(() => { fetchMembers(); }, []);
+
+  // Detect OAuth redirect success
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("calendar") === "connected") {
+      toast({ title: "Google Calendar connected successfully!" });
+      window.history.replaceState({}, "", window.location.pathname);
+      fetchMembers();
+    }
+  }, []);
+
+  const handleDisconnect = async () => {
+    if (!disconnectingId) return;
+    setDisconnectLoading(true);
+    const { error } = await supabase.from("team_members").update({ google_calendar_connected: false }).eq("id", disconnectingId);
+    if (error) {
+      toast({ variant: "destructive", title: "Error disconnecting", description: error.message });
+    } else {
+      toast({ title: "Google Calendar disconnected" });
+      fetchMembers();
+    }
+    setDisconnectLoading(false);
+    setDisconnectingId(null);
+  };
+
+  const hasUnconnectedMembers = members.some(m => m.is_active && !m.google_calendar_connected);
 
   const openAdd = () => {
     setEditing(null);
