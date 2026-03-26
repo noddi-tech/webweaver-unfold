@@ -65,6 +65,7 @@ serve(async (req) => {
   try {
     const {
       event_type_id,
+      member_ids: directMemberIds,
       start_time,
       guest_name,
       guest_email,
@@ -74,7 +75,16 @@ serve(async (req) => {
       duration_minutes: requested_duration,
     } = await req.json()
 
-    if (!event_type_id || !start_time || !guest_name || !guest_email || !guest_timezone) {
+    const isDirectMemberBooking = !event_type_id && directMemberIds?.length > 0
+
+    if (!isDirectMemberBooking && !event_type_id) {
+      return new Response(JSON.stringify({ error: 'Missing event_type_id or member_ids' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (!start_time || !guest_name || !guest_email || !guest_timezone) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -87,49 +97,69 @@ serve(async (req) => {
     )
     const encKey = Deno.env.get('FERNET_KEY')!
 
-    // 1. Get event type
-    const { data: eventType } = await supabase
-      .from('event_types')
-      .select('*')
-      .eq('id', event_type_id)
-      .single()
+    let eventType: any = null
+    let memberIds: string[] = []
+    let duration: number
+    let teamMembers: any[] = []
 
-    if (!eventType) {
-      return new Response(JSON.stringify({ error: 'Event type not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    if (isDirectMemberBooking) {
+      // Ad-hoc member booking — no event type
+      duration = requested_duration || 30
+      memberIds = directMemberIds
 
-    // Determine duration: use requested if valid within range, otherwise default
-    let duration = eventType.duration_minutes || 30
-    if (requested_duration && eventType.min_duration_minutes && eventType.max_duration_minutes) {
-      if (requested_duration >= eventType.min_duration_minutes && requested_duration <= eventType.max_duration_minutes) {
-        duration = requested_duration
+      const { data: tm } = await supabase
+        .from('employees')
+        .select('id, name, email')
+        .in('id', memberIds)
+        .eq('active', true)
+
+      teamMembers = tm || []
+    } else {
+      // Event-type booking (existing flow)
+      const { data: et } = await supabase
+        .from('event_types')
+        .select('*')
+        .eq('id', event_type_id)
+        .single()
+
+      if (!et) {
+        return new Response(JSON.stringify({ error: 'Event type not found' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
       }
+      eventType = et
+
+      duration = eventType.duration_minutes || 30
+      if (requested_duration && eventType.min_duration_minutes && eventType.max_duration_minutes) {
+        if (requested_duration >= eventType.min_duration_minutes && requested_duration <= eventType.max_duration_minutes) {
+          duration = requested_duration
+        }
+      }
+
+      const { data: etMembers } = await supabase
+        .from('event_type_members')
+        .select('team_member_id')
+        .eq('event_type_id', event_type_id)
+
+      memberIds = (etMembers || []).map((m: any) => m.team_member_id)
+
+      const { data: tm } = await supabase
+        .from('employees')
+        .select('id, name, email')
+        .in('id', memberIds)
+        .eq('active', true)
+
+      teamMembers = tm || []
     }
+
     const endTime = new Date(new Date(start_time).getTime() + duration * 60000).toISOString()
 
-    // 2. Get assigned members
-    const { data: etMembers } = await supabase
-      .from('event_type_members')
-      .select('team_member_id')
-      .eq('event_type_id', event_type_id)
-
-    const memberIds = (etMembers || []).map((m: any) => m.team_member_id)
-
-    const { data: teamMembers } = await supabase
-      .from('employees')
-      .select('id, name, email')
-      .in('id', memberIds)
-      .eq('active', true)
-
-    // 3. Check for conflicts in DB
+    // Check for conflicts
     const { data: conflicts } = await supabase
       .from('bookings')
       .select('id')
       .eq('status', 'confirmed')
-      .eq('event_type_id', event_type_id)
       .lt('start_time', endTime)
       .gt('end_time', start_time)
 
