@@ -345,7 +345,7 @@ serve(async (req) => {
 </body>
 </html>`
 
-        const fromAddress = await getFromAddress(resendKey, 'hello')
+        const fromAddress = await getFromAddress(resendKey, 'noreply')
         const emailRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
