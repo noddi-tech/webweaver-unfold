@@ -1,60 +1,101 @@
 
-
-# Flexible Duration & Timezone-Compliant Booking
-
 ## Summary
 
-Three changes: (1) confirm availability logic mirrors Google Calendar correctly (it already does — availability_rules define when you're available, Google FreeBusy removes conflicts), (2) add flexible duration ranges so guests can choose meeting length, (3) ensure all timezone math anchors on Navio's timezone (Europe/Oslo).
+The CTA color is reverting because this card section has two competing edit paths, and one of them is still writing the old gradient value back into the database.
 
-## Changes
+The affected section is `src/components/ScrollingFeatureCards.tsx` — the same area as the uploaded screenshot with the “See How” card CTA.
 
-### 1. Database Migration — Add duration range to `event_types`
+## What I found
 
-```sql
-ALTER TABLE event_types ADD COLUMN min_duration_minutes integer;
-ALTER TABLE event_types ADD COLUMN max_duration_minutes integer;
-ALTER TABLE event_types ADD COLUMN duration_step_minutes integer DEFAULT 15;
-```
+- The CTA button color is persisted in `text_content.button_bg_color` using element IDs like:
+  - `scrolling-card-1-cta`
+  - `scrolling-card-2-cta`
+  - etc.
+- In the database right now, all of those rows still store:
+  - `button_bg_color = 'bg-gradient-warmth'`
+- The component also loads card-level styling from:
+  - `background_styles` for `scrolling-card-%-background`
+- Those card backgrounds are also all currently `bg-gradient-warmth`, which matches what you keep seeing visually.
 
-When `min_duration_minutes` and `max_duration_minutes` are both set, the guest picks a duration (in steps of `duration_step_minutes`). When only `duration_minutes` is set (existing behavior), it stays fixed. Example: min=30, max=60, step=15 → guest chooses 30, 45, or 60 min.
+## Root cause
 
-### 2. `src/components/design-system/BookingManager.tsx` — Event type editor
+There are two editing mechanisms on these cards:
 
-Add optional "Min duration" and "Max duration" fields to the event type create/edit form. When both are filled, `duration_minutes` becomes the default/display value. Add "Duration step" field (default 15 min).
+1. The inline `EditableButton` on each CTA
+2. The larger `UnifiedStyleModal` for the whole card
 
-### 3. `src/pages/BookMeeting.tsx` — Guest duration picker + timezone fixes
+Both can save CTA styling, but they are not kept in sync well enough.
 
-**Duration picker**: After selecting an event type with a duration range, show a duration selector (e.g. segmented control or dropdown: "30 min / 45 min / 60 min") before the calendar. The chosen duration is used for slot generation and booking.
+### Specific issue
+In `ScrollingFeatureCards.tsx`:
+- `onBgColorChange` updates local state and writes `button_bg_color`
+- but the card can still later be reloaded from stale/default card data or from the unified modal path
+- the defaults for these cards heavily favor gradient CTA styles
+- this makes the button appear to “go back” to the gradient
 
-**Timezone anchoring**: The current slot generation in `get-availability` uses the first member's timezone for wall-clock conversion. Ensure:
-- Availability rules are always interpreted in the member's own timezone (already correct)
-- Slots are returned as UTC ISO strings (already correct)
-- The guest sees slots formatted in their selected timezone (already correct)
-- The `timezone` parameter sent to get-availability is used for display only, not for slot calculation (already correct — slots are calculated in member timezone)
+There is also an inconsistency in token handling:
+- some places expect values like `primary`
+- some fallback/default values are `bg-gradient-warmth`
+- some rendering logic checks `includes('gradient')`
+- some modal previews strip `bg-`, while some card render paths don’t normalize as consistently
 
-No major timezone fix needed — the current implementation is correct. The member's availability (e.g. 09:00-17:00 Europe/Oslo) is converted to UTC, Google FreeBusy is queried in UTC, and results are returned as UTC. The guest's timezone only affects display formatting.
+That mix makes persistence fragile for CTA backgrounds in this section.
 
-### 4. `supabase/functions/get-availability/index.ts` — Duration from request
+## Plan
 
-Accept `duration_override` parameter. When provided (guest chose a custom duration), use it instead of `eventType.duration_minutes` for slot generation. Validate that it falls within `[min_duration_minutes, max_duration_minutes]`.
+### 1. Make `text_content` the single source of truth for these CTA buttons
+In `src/components/ScrollingFeatureCards.tsx`:
+- ensure CTA render always prefers the saved `text_content.button_bg_color`
+- remove any fallback path that can overwrite a saved CTA color with the card’s default gradient after refresh
 
-### 5. `supabase/functions/create-booking/index.ts` — Custom duration
+### 2. Normalize CTA background token handling
+Standardize CTA background tokens in this section so they are handled the same way everywhere:
+- support both existing values like `bg-gradient-warmth`
+- and solid tokens like `primary`, `secondary`, etc.
+- use one normalization helper before rendering preview/save state
 
-Accept optional `duration_minutes` in the request body. If provided, validate it against the event type's min/max range. Use it to calculate `end_time` instead of the default `duration_minutes`.
+This prevents “purple saved, gradient rendered” mismatches.
 
-## File Summary
+### 3. Keep both editing flows synchronized
+Update the interaction between:
+- inline `EditableButton`
+- `UnifiedStyleModal`
 
-| File | Action |
-|---|---|
-| Migration SQL | Add `min_duration_minutes`, `max_duration_minutes`, `duration_step_minutes` to `event_types` |
-| `BookingManager.tsx` | Add duration range fields to event type editor |
-| `BookMeeting.tsx` | Add duration picker step, pass chosen duration to edge functions |
-| `get-availability/index.ts` | Accept `duration_override`, validate against range |
-| `create-booking/index.ts` | Accept `duration_minutes`, validate against range, use for end_time |
+So when either saves CTA styling:
+- local `cardData[index].ctaBgColor` updates immediately
+- subsequent reloads use the same saved value
+- no stale modal/default state can push the gradient back
 
-## Technical Notes
+### 4. Harden the render logic for card CTAs
+Refactor the CTA button style rendering in `ScrollingFeatureCards.tsx` so it uses one shared rule:
+- gradient token → `backgroundImage`
+- solid token → `backgroundColor`
+- text color → resolved with the existing `resolveTextColor()` pattern
 
-- Availability rules define WHEN team members are bookable (e.g. Mon-Fri 09:00-17:00 in their timezone). Google Calendar FreeBusy removes conflicts. This is already the correct behavior — availability_rules are the "open hours", Google Calendar provides the "busy blocks".
-- All timezone math uses the member's timezone from the `employees.timezone` column (default `Europe/Oslo`). Guest timezone is only used for display formatting.
-- Duration range is optional and backward-compatible — existing event types with only `duration_minutes` continue to work as fixed-duration meetings.
+That will make the visual result deterministic.
 
+### 5. Preserve current database content but stop future regressions
+I would not change the whole card-background system here. I’d limit the fix to CTA buttons only, so:
+- card backgrounds can remain gradient if desired
+- CTA buttons can stay solid purple when you choose that
+- future edits no longer revert
+
+## Files to update
+
+- `src/components/ScrollingFeatureCards.tsx`
+- possibly `src/components/UnifiedStyleModal.tsx` if CTA save/load sync needs a small fix
+- optionally `src/components/ButtonEditModal.tsx` only if token normalization should be shared from there too
+
+## Expected result
+
+After this fix:
+- when you set the CTA inside these cards to the new purple color, it stays purple
+- refreshing or reopening edit mode will not switch it back to the gradient
+- card background and CTA background will behave independently
+- this will remain consistent across desktop, iPad, and mobile because the issue is persistence/state logic, not just layout
+
+## Technical notes
+
+- Current DB rows show `scrolling-card-%-cta.button_bg_color = bg-gradient-warmth`
+- Current card background rows show `scrolling-card-%-background.background_class = bg-gradient-warmth`
+- The bug appears localized to `ScrollingFeatureCards`, not the simpler CTA implementation in `WhyNavio.tsx`, which already follows a cleaner save/render pattern
