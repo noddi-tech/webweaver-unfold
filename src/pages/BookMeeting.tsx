@@ -557,6 +557,29 @@ export default function BookMeeting() {
                   </div>
                 ) : (
                   <>
+                {/* Duration picker for flexible event types */}
+                {durationOptions && (
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-2">
+                      {t('book.choose_duration', 'How long do you need?')}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {durationOptions.map(d => (
+                        <button
+                          key={d}
+                          onClick={() => { setSelectedDuration(d); setSelectedSlot(null); }}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                            effectiveDuration === d
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-card-background text-foreground border-border hover:border-primary"
+                          }`}
+                        >
+                          {d} min
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <Calendar
                   mode="single"
                   selected={selectedDate}
