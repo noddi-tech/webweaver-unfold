@@ -324,10 +324,16 @@ export default function BookMeeting() {
       setBookingResult(result.booking);
       setStep(4);
     } catch (err: any) {
+      const msg = err?.message || '';
+      const is409 = msg.includes('already been booked') || msg.includes('slot');
       toast({
         variant: "destructive",
-        title: t('book.error_slot_taken_title', 'This time slot was just booked.'),
-        description: err?.message || t('book.error_slot_taken_desc', 'Please select another time.'),
+        title: is409
+          ? t('book.error_slot_taken_title', 'That time slot was just booked by someone else.')
+          : t('book.error_booking_failed', 'Booking failed'),
+        description: is409
+          ? t('book.error_slot_taken_desc', 'Please pick another time.')
+          : msg,
       });
       setSelectedSlot(null);
       setStep(2);
@@ -514,6 +520,11 @@ export default function BookMeeting() {
                       <div className="flex gap-2 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible">
                         {availableSlots.map((slot, i) => {
                           const isSelected = selectedSlot?.getTime() === slot.getTime();
+                          const serverSlot = serverSlots?.[i];
+                          const showMembers = serverSlot && !selectedEvent?.requires_all_members && serverSlot.available_members?.length > 0 && serverSlot.available_members.length < members.length;
+                          const memberNames = showMembers
+                            ? serverSlot.available_members.map(id => members.find(m => m.id === id)?.name?.split(' ')[0]).filter(Boolean).join(', ')
+                            : null;
                           return (
                             <button
                               key={i}
@@ -525,6 +536,11 @@ export default function BookMeeting() {
                               }`}
                             >
                               {formatSlotTime(slot, timezone)}
+                              {memberNames && (
+                                <span className="block text-xs font-normal text-muted-foreground mt-0.5">
+                                  with {memberNames}
+                                </span>
+                              )}
                             </button>
                           );
                         })}
@@ -626,9 +642,11 @@ export default function BookMeeting() {
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6 animate-scale-in">
               <CheckCircle2 className="w-8 h-8 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">{t('book.confirmed_title', "You're booked!")}</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">{t('book.confirmed_title', 'Meeting confirmed!')}</h2>
             <p className="text-muted-foreground mb-6">
-              {t('book.confirmed_desc', 'A calendar invite will be sent to your email shortly.')}
+              {bookingResult?.meet_link
+                ? t('book.confirmed_invite_sent', 'A calendar invite has been sent to your email.')
+                : t('book.confirmed_invite_shortly', "Meeting confirmed! We'll send you a calendar invite shortly.")}
             </p>
 
             {bookingResult && selectedEvent && (
