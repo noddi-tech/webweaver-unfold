@@ -44,6 +44,9 @@ interface EventType {
   slug: string;
   description: string | null;
   duration_minutes: number | null;
+  min_duration_minutes: number | null;
+  max_duration_minutes: number | null;
+  duration_step_minutes: number | null;
   buffer_minutes: number | null;
   requires_all_members: boolean | null;
   color: string | null;
@@ -297,7 +300,7 @@ function EventTypesTab() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<EventType | null>(null);
-  const [form, setForm] = useState({ title: "", slug: "", description: "", duration: "30", buffer: "15", requires_all: false, color: "#3b82f6" });
+  const [form, setForm] = useState({ title: "", slug: "", description: "", duration: "30", buffer: "15", requires_all: false, color: "#3b82f6", min_duration: "", max_duration: "", duration_step: "15" });
   const [selectedMembers, setSelectedMembers] = useState<{ memberId: string; required: boolean }[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -317,7 +320,7 @@ function EventTypesTab() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ title: "", slug: "", description: "", duration: "30", buffer: "15", requires_all: false, color: "#3b82f6" });
+    setForm({ title: "", slug: "", description: "", duration: "30", buffer: "15", requires_all: false, color: "#3b82f6", min_duration: "", max_duration: "", duration_step: "15" });
     setSelectedMembers([]);
     setDialogOpen(true);
   };
@@ -332,6 +335,9 @@ function EventTypesTab() {
       buffer: String(et.buffer_minutes || 0),
       requires_all: et.requires_all_members || false,
       color: et.color || "#3b82f6",
+      min_duration: et.min_duration_minutes ? String(et.min_duration_minutes) : "",
+      max_duration: et.max_duration_minutes ? String(et.max_duration_minutes) : "",
+      duration_step: String(et.duration_step_minutes || 15),
     });
     const assigned = assignments.filter(a => a.event_type_id === et.id);
     setSelectedMembers(assigned.map(a => ({ memberId: a.team_member_id, required: a.is_required || false })));
@@ -349,6 +355,9 @@ function EventTypesTab() {
       buffer_minutes: parseInt(form.buffer),
       requires_all_members: form.requires_all,
       color: form.color,
+      min_duration_minutes: form.min_duration ? parseInt(form.min_duration) : null,
+      max_duration_minutes: form.max_duration ? parseInt(form.max_duration) : null,
+      duration_step_minutes: parseInt(form.duration_step) || 15,
     };
 
     let eventId: string;
@@ -429,7 +438,7 @@ function EventTypesTab() {
                   {et.title}
                 </div>
               </TableCell>
-              <TableCell><Badge variant="secondary">{et.duration_minutes} min</Badge></TableCell>
+              <TableCell><Badge variant="secondary">{et.min_duration_minutes && et.max_duration_minutes ? `${et.min_duration_minutes}–${et.max_duration_minutes}` : et.duration_minutes} min</Badge></TableCell>
               <TableCell>{et.buffer_minutes || 0} min</TableCell>
               <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{getMemberNames(et.id)}</TableCell>
               <TableCell><Switch checked={et.is_active ?? true} onCheckedChange={() => toggleActive(et)} /></TableCell>
@@ -450,11 +459,11 @@ function EventTypesTab() {
             <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} /></div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Duration</Label>
+                <Label>Default Duration</Label>
                 <Select value={form.duration} onValueChange={v => setForm(f => ({ ...f, duration: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {[15, 30, 45, 60].map(d => <SelectItem key={d} value={String(d)}>{d} min</SelectItem>)}
+                    {[15, 30, 45, 60, 90, 120].map(d => <SelectItem key={d} value={String(d)}>{d} min</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -464,6 +473,37 @@ function EventTypesTab() {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {[0, 5, 10, 15].map(b => <SelectItem key={b} value={String(b)}>{b} min</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>Min Duration</Label>
+                <Select value={form.min_duration} onValueChange={v => setForm(f => ({ ...f, min_duration: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Fixed" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Fixed (no range)</SelectItem>
+                    {[15, 30, 45, 60].map(d => <SelectItem key={d} value={String(d)}>{d} min</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Max Duration</Label>
+                <Select value={form.max_duration} onValueChange={v => setForm(f => ({ ...f, max_duration: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Fixed" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Fixed (no range)</SelectItem>
+                    {[30, 45, 60, 90, 120].map(d => <SelectItem key={d} value={String(d)}>{d} min</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Step</Label>
+                <Select value={form.duration_step} onValueChange={v => setForm(f => ({ ...f, duration_step: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {[5, 10, 15, 30].map(s => <SelectItem key={s} value={String(s)}>{s} min</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
