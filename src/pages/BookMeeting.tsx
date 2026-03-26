@@ -51,7 +51,7 @@ type EventType = {
 type TeamMember = {
   id: string;
   name: string;
-  avatar_url: string | null;
+  image_url: string | null;
   title: string | null;
   timezone: string;
 };
@@ -187,10 +187,10 @@ export default function BookMeeting() {
         if (!etm?.length) return;
         const ids = etm.map(e => e.team_member_id);
         const { data: tm } = await supabase
-          .from("team_members")
-          .select("id, name, avatar_url, title, timezone")
+      .from("employees")
+          .select("id, name, image_url, title, timezone")
           .in("id", ids)
-          .eq("is_active", true);
+          .eq("active", true);
         setMembers((tm as TeamMember[]) || []);
 
         const { data: rules } = await supabase
@@ -496,7 +496,7 @@ export default function BookMeeting() {
                       {members.map(m => (
                         <div key={m.id} className="flex items-center gap-2.5">
                           <Avatar className="w-8 h-8">
-                            {m.avatar_url && <AvatarImage src={m.avatar_url} />}
+                            {m.image_url && <AvatarImage src={m.image_url} />}
                             <AvatarFallback className="text-xs bg-primary/10 text-primary">
                               {getInitials(m.name)}
                             </AvatarFallback>

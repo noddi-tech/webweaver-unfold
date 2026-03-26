@@ -112,10 +112,10 @@ serve(async (req) => {
     const memberIds = (etMembers || []).map((m: any) => m.team_member_id)
 
     const { data: teamMembers } = await supabase
-      .from('team_members')
+      .from('employees')
       .select('id, name, email')
       .in('id', memberIds)
-      .eq('is_active', true)
+      .eq('active', true)
 
     // 3. Check for conflicts in DB
     const { data: conflicts } = await supabase

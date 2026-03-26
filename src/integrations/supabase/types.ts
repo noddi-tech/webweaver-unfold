@@ -123,7 +123,21 @@ export type Database = {
             foreignKeyName: "availability_rules_team_member_id_fkey"
             columns: ["team_member_id"]
             isOneToOne: false
-            referencedRelation: "team_members"
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "availability_rules_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "employees_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "availability_rules_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "public_employees"
             referencedColumns: ["id"]
           },
         ]
@@ -371,7 +385,21 @@ export type Database = {
             foreignKeyName: "booking_members_team_member_id_fkey"
             columns: ["team_member_id"]
             isOneToOne: false
-            referencedRelation: "team_members"
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_members_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "employees_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_members_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "public_employees"
             referencedColumns: ["id"]
           },
         ]
@@ -1024,6 +1052,7 @@ export type Database = {
           active: boolean
           created_at: string
           email: string | null
+          google_calendar_connected: boolean | null
           id: string
           image_object_position: string
           image_url: string | null
@@ -1032,7 +1061,9 @@ export type Database = {
           phone: string | null
           section: string
           section_id: string | null
+          slug: string | null
           sort_order: number | null
+          timezone: string | null
           title: string
           updated_at: string
         }
@@ -1040,6 +1071,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           email?: string | null
+          google_calendar_connected?: boolean | null
           id?: string
           image_object_position?: string
           image_url?: string | null
@@ -1048,7 +1080,9 @@ export type Database = {
           phone?: string | null
           section?: string
           section_id?: string | null
+          slug?: string | null
           sort_order?: number | null
+          timezone?: string | null
           title: string
           updated_at?: string
         }
@@ -1056,6 +1090,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           email?: string | null
+          google_calendar_connected?: boolean | null
           id?: string
           image_object_position?: string
           image_url?: string | null
@@ -1064,7 +1099,9 @@ export type Database = {
           phone?: string | null
           section?: string
           section_id?: string | null
+          slug?: string | null
           sort_order?: number | null
+          timezone?: string | null
           title?: string
           updated_at?: string
         }
@@ -1340,7 +1377,21 @@ export type Database = {
             foreignKeyName: "event_type_members_team_member_id_fkey"
             columns: ["team_member_id"]
             isOneToOne: false
-            referencedRelation: "team_members"
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_type_members_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "employees_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_type_members_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "public_employees"
             referencedColumns: ["id"]
           },
         ]
@@ -1566,7 +1617,21 @@ export type Database = {
             foreignKeyName: "google_oauth_tokens_team_member_id_fkey"
             columns: ["team_member_id"]
             isOneToOne: true
-            referencedRelation: "team_members"
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "google_oauth_tokens_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: true
+            referencedRelation: "employees_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "google_oauth_tokens_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: true
+            referencedRelation: "public_employees"
             referencedColumns: ["id"]
           },
         ]
@@ -3348,45 +3413,6 @@ export type Database = {
           id?: string
           mime_type?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      team_members: {
-        Row: {
-          avatar_url: string | null
-          created_at: string | null
-          email: string
-          google_calendar_connected: boolean | null
-          id: string
-          is_active: boolean | null
-          name: string
-          slug: string
-          timezone: string | null
-          title: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string | null
-          email: string
-          google_calendar_connected?: boolean | null
-          id?: string
-          is_active?: boolean | null
-          name: string
-          slug: string
-          timezone?: string | null
-          title?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string | null
-          email?: string
-          google_calendar_connected?: boolean | null
-          id?: string
-          is_active?: boolean | null
-          name?: string
-          slug?: string
-          timezone?: string | null
-          title?: string | null
         }
         Relationships: []
       }
