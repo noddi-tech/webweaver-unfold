@@ -43,6 +43,7 @@ import OfferView from "./pages/OfferView";
 import LegalPage from "./pages/LegalPage";
 import BookMeeting from "./pages/BookMeeting";
 import ManageBooking from "./pages/ManageBooking";
+import MeetMembers from "./pages/MeetMembers";
 
 const queryClient = new QueryClient();
 const App = () => {
