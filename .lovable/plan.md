@@ -1,24 +1,23 @@
 
 
-# Fix: Booking Emails Should Send From noreply@info.naviosolutions.com
+# Fix: ManageBooking Page Contrast
 
 ## Problem
-The `getFromAddress('hello')` helper sends from `hello@info.naviosolutions.com`. Booking confirmation emails should come from `noreply@info.naviosolutions.com` instead.
+The ManageBooking page uses `bg-card` for info cards, which resolves to dark purple (Federal Blue). Text uses `text-foreground`, `text-muted-foreground`, and `text-primary` — all dark colors. Result: invisible text and icons on dark backgrounds, as shown in the screenshot.
 
 ## Solution
-Add a `'noreply'` department to the shared email-domain helper, then use it in `create-booking`.
+Replace `bg-card` with a light background and keep existing text colors, matching the site's standard card styling pattern used elsewhere.
 
-### Changes
+### Changes in `src/pages/ManageBooking.tsx`
 
-**`supabase/functions/_shared/email-domain.ts`**
-- Add `'noreply'` to the `EmailDepartment` type
-- Add `noreply: 'noreply'` to `DEPARTMENT_EMAILS`
-- Add `noreply: 'Navio'` to `DEPARTMENT_NAMES`
+1. **Meeting details card (line 197)**: Change `bg-card border border-border` → `bg-white/80 border border-border/50`
+2. **Your Details card (line 237)**: Same change
+3. **Icons inside cards**: Change `text-primary` → `text-primary` (keep, works on light bg) and `text-muted-foreground` icons stay as-is
+4. **Header bar (line 136)**: Change `bg-card` → `bg-white border-b border-border`
 
-**`supabase/functions/create-booking/index.ts`**
-- Change `getFromAddress(resendKey, 'hello')` → `getFromAddress(resendKey, 'noreply')`
+This ensures all text remains readable with proper contrast on light card surfaces, consistent with the rest of the site.
 
-Result: booking emails send from `Navio <noreply@info.naviosolutions.com>`.
-
-Two files, ~3 lines changed. Redeploy after.
+| File | Change |
+|------|--------|
+| `src/pages/ManageBooking.tsx` | Replace dark `bg-card` with light backgrounds on header and info cards |
 
