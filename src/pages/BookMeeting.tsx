@@ -547,21 +547,21 @@ export default function BookMeeting() {
 
                 {members.length > 0 && (
                   <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" /> Team
+                    <p className="text-sm text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                      <Users className="w-4 h-4" /> Team
                     </p>
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       {members.map(m => (
-                        <div key={m.id} className="flex items-center gap-2.5">
-                          <Avatar className="w-8 h-8">
+                        <div key={m.id} className="flex items-center gap-3">
+                          <Avatar className="w-10 h-10">
                             {m.image_url && <AvatarImage src={m.image_url} />}
-                            <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                            <AvatarFallback className="text-sm bg-primary/10 text-primary">
                               {getInitials(m.name)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="text-sm font-medium text-foreground">{m.name}</p>
-                            {m.title && <p className="text-xs text-muted-foreground">{m.title}</p>}
+                            <p className="text-base font-medium text-foreground">{m.name}</p>
+                            {m.title && <p className="text-sm text-muted-foreground">{m.title}</p>}
                           </div>
                         </div>
                       ))}
@@ -615,7 +615,7 @@ export default function BookMeeting() {
                   selected={selectedDate}
                   onSelect={(date) => { setSelectedDate(date); setSelectedSlot(null); }}
                   disabled={isDateDisabled}
-                  className="rounded-lg border bg-card-background p-4 pointer-events-auto w-full [&_table]:w-full [&_.rdp-head_row]:flex [&_.rdp-head_row]:w-full [&_.rdp-row]:flex [&_.rdp-row]:w-full [&_.rdp-head_cell]:flex-1 [&_.rdp-cell]:flex-1 [&_.rdp-day]:w-full [&_.rdp-day]:h-11"
+                  className="rounded-lg border bg-card-background p-4 pointer-events-auto w-full"
                 />
 
                 {/* Timezone */}
