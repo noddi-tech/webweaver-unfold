@@ -287,28 +287,40 @@ export default function BookMeeting() {
       return { memberId: m.id, timezone: m.timezone, rule };
     });
 
-    if (requiresAll && memberWindows.some(w => !w.rule)) return [];
-    const membersWithRules = memberWindows.filter(w => w.rule);
-    if (!membersWithRules.length) return [];
+    // Check for date-range override (overrides general availability entirely)
+    const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+    const matchingDateRange = eventTypeAvailability.find(r => r.type === 'date_range' && dateStr >= (r.date_start || '') && dateStr <= (r.date_end || ''));
+    const hasDateRangeOverride = !!matchingDateRange?.start_time && !!matchingDateRange?.end_time;
 
-    const allStarts = membersWithRules.map(w => timeToMinutes(w.rule!.start_time));
-    const allEnds = membersWithRules.map(w => timeToMinutes(w.rule!.end_time));
+    let membersWithRules: typeof memberWindows;
+    if (hasDateRangeOverride) {
+      membersWithRules = memberWindows; // All members available via override
+    } else {
+      if (requiresAll && memberWindows.some(w => !w.rule)) return [];
+      membersWithRules = memberWindows.filter(w => w.rule);
+      if (!membersWithRules.length) return [];
+    }
 
-    let windowStart = requiresAll ? Math.max(...allStarts) : Math.min(...allStarts);
-    let windowEnd = requiresAll ? Math.min(...allEnds) : Math.max(...allEnds);
+    let windowStart: number;
+    let windowEnd: number;
 
-    // Constrain by event-type availability times (recurring or date-range)
-    if (eventTypeAvailability.length > 0) {
-      const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
-      const matchingRecurring = eventTypeAvailability.find(r => r.type === 'recurring' && r.day_of_week === dbDay);
-      if (matchingRecurring?.start_time && matchingRecurring?.end_time) {
-        windowStart = Math.max(windowStart, timeToMinutes(matchingRecurring.start_time));
-        windowEnd = Math.min(windowEnd, timeToMinutes(matchingRecurring.end_time));
-      }
-      const matchingDateRange = eventTypeAvailability.find(r => r.type === 'date_range' && dateStr >= (r.date_start || '') && dateStr <= (r.date_end || ''));
-      if (matchingDateRange?.start_time && matchingDateRange?.end_time) {
-        windowStart = Math.max(windowStart, timeToMinutes(matchingDateRange.start_time));
-        windowEnd = Math.min(windowEnd, timeToMinutes(matchingDateRange.end_time));
+    if (hasDateRangeOverride) {
+      // Date-range OVERRIDES general availability
+      windowStart = timeToMinutes(matchingDateRange!.start_time!);
+      windowEnd = timeToMinutes(matchingDateRange!.end_time!);
+    } else {
+      const allStarts = membersWithRules.map(w => timeToMinutes(w.rule!.start_time));
+      const allEnds = membersWithRules.map(w => timeToMinutes(w.rule!.end_time));
+      windowStart = requiresAll ? Math.max(...allStarts) : Math.min(...allStarts);
+      windowEnd = requiresAll ? Math.min(...allEnds) : Math.max(...allEnds);
+
+      // Constrain by recurring event-type availability
+      if (eventTypeAvailability.length > 0) {
+        const matchingRecurring = eventTypeAvailability.find(r => r.type === 'recurring' && r.day_of_week === dbDay);
+        if (matchingRecurring?.start_time && matchingRecurring?.end_time) {
+          windowStart = Math.max(windowStart, timeToMinutes(matchingRecurring.start_time));
+          windowEnd = Math.min(windowEnd, timeToMinutes(matchingRecurring.end_time));
+        }
       }
     }
 
@@ -321,7 +333,7 @@ export default function BookMeeting() {
       const slotHour = Math.floor(t / 60);
       const slotMin = t % 60;
 
-      const memberTz = membersWithRules[0].timezone || "Europe/Oslo";
+      const memberTz = membersWithRules[0]?.timezone || "Europe/Oslo";
       const slotUTC = wallClockToUTC(selectedDate, slotHour, slotMin, memberTz);
 
       if (isBefore(slotUTC, now)) continue;
@@ -336,7 +348,7 @@ export default function BookMeeting() {
 
       if (!overlaps) {
         if (requiresAll) {
-          const allFree = memberWindows.every(w => {
+          const allFree = hasDateRangeOverride ? true : memberWindows.every(w => {
             if (!w.rule) return false;
             const mStart = timeToMinutes(w.rule.start_time);
             const mEnd = timeToMinutes(w.rule.end_time);
@@ -344,7 +356,7 @@ export default function BookMeeting() {
           });
           if (allFree) slots.push(slotUTC);
         } else {
-          const anyFree = membersWithRules.some(w => {
+          const anyFree = hasDateRangeOverride ? true : membersWithRules.some(w => {
             const mStart = timeToMinutes(w.rule!.start_time);
             const mEnd = timeToMinutes(w.rule!.end_time);
             return t >= mStart && t + duration <= mEnd;
