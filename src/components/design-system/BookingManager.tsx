@@ -342,6 +342,9 @@ function EventTypesTab() {
     setEditing(null);
     setForm({ title: "", slug: "", description: "", duration: "30", buffer: "15", requires_all: false, color: "#3b82f6", min_duration: "", max_duration: "", duration_step: "15" });
     setSelectedMembers([]);
+    setLimitAvailability(false);
+    setRecurringDays(ALL_DAYS.map(d => ({ day: d, enabled: false, start: "09:00", end: "17:00" })));
+    setDateRanges([]);
     setDialogOpen(true);
   };
 
