@@ -14,6 +14,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { HreflangTags } from "@/components/HreflangTags";
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 const COMMON_TIMEZONES = [
   "Europe/Oslo", "Europe/London", "Europe/Berlin", "Europe/Paris",
@@ -125,6 +129,7 @@ function StepIndicator({ current }: { current: number }) {
 }
 
 export default function BookMeeting() {
+  const { t } = useAppTranslation();
   const [step, setStep] = useState(1);
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
@@ -325,8 +330,8 @@ export default function BookMeeting() {
     } catch {
       toast({
         variant: "destructive",
-        title: "This time slot was just booked.",
-        description: "Please select another time.",
+        title: t('book.error_slot_taken_title', 'This time slot was just booked.'),
+        description: t('book.error_slot_taken_desc', 'Please select another time.'),
       });
       setSelectedSlot(null);
       setStep(2);
@@ -358,20 +363,20 @@ export default function BookMeeting() {
   };
 
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-6">
-            <span className="text-2xl font-bold text-primary font-[var(--font-primary)]">navio</span>
+    <>
+      <HreflangTags pageSlug="/book" />
+      <Header />
+      <div className="min-h-screen bg-background animate-fade-in pt-24 pb-16">
+        <div className="max-w-3xl mx-auto px-4 py-12">
+          {/* Page heading */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 font-[var(--font-primary)]">
+              {t('book.title', 'Book a Meeting')}
+            </h1>
+            <p className="text-muted-foreground">
+              {t('book.subtitle', 'Select a meeting type to schedule time with our team.')}
+            </p>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 font-[var(--font-primary)]">
-            Book a Meeting
-          </h1>
-          <p className="text-muted-foreground">
-            Select a meeting type to schedule time with our team.
-          </p>
-        </div>
 
         <StepIndicator current={step} />
 
@@ -430,7 +435,7 @@ export default function BookMeeting() {
                   onClick={() => { setStep(1); setSelectedDate(undefined); setSelectedSlot(null); }}
                   className="mb-2"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                  <ArrowLeft className="w-4 h-4 mr-1" /> {t('book.back', 'Back')}
                 </Button>
 
                 <div>
@@ -477,7 +482,7 @@ export default function BookMeeting() {
 
                 {/* Timezone */}
                 <div>
-                  <label className="text-xs text-muted-foreground block mb-1.5">Timezone</label>
+                  <label className="text-xs text-muted-foreground block mb-1.5">{t('book.timezone', 'Timezone')}</label>
                   <Select value={timezone} onValueChange={setTimezone}>
                     <SelectTrigger className="bg-card">
                       <SelectValue />
@@ -494,7 +499,7 @@ export default function BookMeeting() {
                 {selectedDate && (
                   <div>
                     <p className="text-sm font-medium text-foreground mb-3">
-                      Available times for {format(selectedDate, "EEEE, MMMM d")}
+                      {t('book.available_times', 'Available times for')} {format(selectedDate, "EEEE, MMMM d")}
                     </p>
                     {loadingSlots ? (
                       <div className="flex gap-2 overflow-x-auto pb-2 md:grid md:grid-cols-3">
@@ -506,7 +511,7 @@ export default function BookMeeting() {
                       <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50 border border-border">
                         <CalendarX2 className="w-5 h-5 text-muted-foreground shrink-0" />
                         <p className="text-sm text-muted-foreground">
-                          No available times on this date. Please try another day.
+                          {t('book.no_available_times', 'No available times on this date. Please try another day.')}
                         </p>
                       </div>
                     ) : (
@@ -546,7 +551,7 @@ export default function BookMeeting() {
                 onClick={() => setStep(2)}
                 className="mb-6"
               >
-                <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                <ArrowLeft className="w-4 h-4 mr-1" /> {t('book.back', 'Back')}
               </Button>
 
               <div className="mb-6 p-4 rounded-lg bg-card-surface/30 border border-border">
@@ -559,10 +564,10 @@ export default function BookMeeting() {
 
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-foreground block mb-1.5">Name *</label>
+                  <label className="text-sm font-medium text-foreground block mb-1.5">{t('book.form_name', 'Name')} *</label>
                   <Input
                     {...form.register("name")}
-                    placeholder="Your full name"
+                    placeholder={t('book.form_name_placeholder', 'Your full name')}
                     className="bg-card"
                   />
                   {form.formState.errors.name && (
@@ -570,10 +575,10 @@ export default function BookMeeting() {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground block mb-1.5">Email *</label>
+                  <label className="text-sm font-medium text-foreground block mb-1.5">{t('book.form_email', 'Email')} *</label>
                   <Input
                     {...form.register("email")}
-                    placeholder="you@company.com"
+                    placeholder={t('book.form_email_placeholder', 'you@company.com')}
                     className="bg-card"
                   />
                   {form.formState.errors.email && (
@@ -581,20 +586,20 @@ export default function BookMeeting() {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground block mb-1.5">Company</label>
+                  <label className="text-sm font-medium text-foreground block mb-1.5">{t('book.form_company', 'Company')}</label>
                   <Input
                     {...form.register("company")}
-                    placeholder="Your company name"
+                    placeholder={t('book.form_company_placeholder', 'Your company name')}
                     className="bg-card"
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-foreground block mb-1.5">
-                    Anything you'd like us to know?
+                    {t('book.form_message', "Anything you'd like us to know?")}
                   </label>
                   <Textarea
                     {...form.register("message")}
-                    placeholder="Optional message..."
+                    placeholder={t('book.form_message_placeholder', 'Optional message...')}
                     rows={3}
                     className="bg-card"
                   />
@@ -608,10 +613,10 @@ export default function BookMeeting() {
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Confirming...
+                      {t('book.confirming', 'Confirming...')}
                     </>
                   ) : (
-                    "Confirm Booking"
+                    t('book.confirm_booking', 'Confirm Booking')
                   )}
                 </Button>
               </form>
@@ -622,12 +627,12 @@ export default function BookMeeting() {
         {/* Step 4: Confirmation */}
         <div className={`transition-all duration-300 ${step === 4 ? "opacity-100" : "opacity-0 hidden"}`}>
           <div className="text-center max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6 animate-scale-in">
-              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6 animate-scale-in">
+              <CheckCircle2 className="w-8 h-8 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">You're booked!</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">{t('book.confirmed_title', "You're booked!")}</h2>
             <p className="text-muted-foreground mb-6">
-              A calendar invite will be sent to your email shortly.
+              {t('book.confirmed_desc', 'A calendar invite will be sent to your email shortly.')}
             </p>
 
             {bookingResult && selectedEvent && (
@@ -647,11 +652,13 @@ export default function BookMeeting() {
             )}
 
             <Button variant="ghost" onClick={reset}>
-              Book another meeting
+              {t('book.book_another', 'Book another meeting')}
             </Button>
           </div>
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 }
