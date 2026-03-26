@@ -44,3 +44,12 @@ verify_jwt = false
 
 [functions.send-offer-expiration-reminder]
 verify_jwt = false
+
+[functions.google-auth-callback]
+verify_jwt = false
+
+[functions.get-availability]
+verify_jwt = false
+
+[functions.create-booking]
+verify_jwt = false

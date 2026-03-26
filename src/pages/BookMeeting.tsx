@@ -140,6 +140,7 @@ export default function BookMeeting() {
   );
   const [availabilityRules, setAvailabilityRules] = useState<AvailabilityRule[]>([]);
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
+  const [serverSlots, setServerSlots] = useState<Array<{ start: string; end: string; available_members: string[] }> | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [bookingResult, setBookingResult] = useState<any>(null);
@@ -198,30 +199,34 @@ export default function BookMeeting() {
       });
   }, [selectedEvent]);
 
-  // Fetch bookings for selected date
+  // Fetch availability from edge function when date selected
   useEffect(() => {
     if (!selectedDate || !selectedEvent) return;
     setLoadingSlots(true);
-    const dayStart = new Date(selectedDate);
-    dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(selectedDate);
-    dayEnd.setHours(23, 59, 59, 999);
+    setServerSlots(null);
 
-    supabase
-      .from("bookings")
-      .select("start_time, end_time")
-      .eq("event_type_id", selectedEvent.id)
-      .eq("status", "confirmed")
-      .gte("start_time", dayStart.toISOString())
-      .lte("start_time", dayEnd.toISOString())
-      .then(({ data }) => {
-        setExistingBookings((data as Booking[]) || []);
-        setLoadingSlots(false);
-      });
-  }, [selectedDate, selectedEvent]);
+    const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
 
-  // Generate available slots
+    supabase.functions.invoke('get-availability', {
+      body: { event_type_id: selectedEvent.id, date: dateStr, timezone },
+    }).then(({ data, error }) => {
+      if (error) {
+        console.error('get-availability error:', error);
+        setServerSlots([]);
+      } else {
+        setServerSlots(data?.slots || []);
+      }
+      setLoadingSlots(false);
+    });
+  }, [selectedDate, selectedEvent, timezone]);
+
+  // Use server slots when available, fall back to client-side
   const availableSlots = useMemo(() => {
+    if (serverSlots !== null) {
+      return serverSlots.map(s => new Date(s.start));
+    }
+
+    // Fallback: client-side slot generation (when edge function not available)
     if (!selectedDate || !selectedEvent || !members.length) return [];
 
     const jsDay = selectedDate.getDay();
@@ -290,48 +295,39 @@ export default function BookMeeting() {
     }
 
     return slots;
-  }, [selectedDate, selectedEvent, members, availabilityRules, existingBookings]);
+  }, [selectedDate, selectedEvent, members, availabilityRules, existingBookings, serverSlots]);
 
   const handleSubmit = async (data: BookingFormData) => {
     if (!selectedSlot || !selectedEvent) return;
     setSubmitting(true);
 
-    const duration = selectedEvent.duration_minutes || 30;
-    const endTime = new Date(selectedSlot.getTime() + duration * 60000);
-
     try {
-      const { data: booking, error } = await supabase
-        .from("bookings")
-        .insert({
+      const { data: result, error } = await supabase.functions.invoke('create-booking', {
+        body: {
           event_type_id: selectedEvent.id,
+          start_time: selectedSlot.toISOString(),
           guest_name: data.name,
           guest_email: data.email,
           guest_company: data.company || null,
           guest_message: data.message || null,
           guest_timezone: timezone,
-          start_time: selectedSlot.toISOString(),
-          end_time: endTime.toISOString(),
-          status: "confirmed",
-        })
-        .select()
-        .single();
+        },
+      });
 
       if (error) throw error;
 
-      // Insert booking members
-      const memberInserts = members.map(m => ({
-        booking_id: booking.id,
-        team_member_id: m.id,
-      }));
-      await supabase.from("booking_members").insert(memberInserts);
+      if (result?.error) {
+        // 409 conflict or other server error
+        throw new Error(result.error);
+      }
 
-      setBookingResult(booking);
+      setBookingResult(result.booking);
       setStep(4);
-    } catch {
+    } catch (err: any) {
       toast({
         variant: "destructive",
         title: t('book.error_slot_taken_title', 'This time slot was just booked.'),
-        description: t('book.error_slot_taken_desc', 'Please select another time.'),
+        description: err?.message || t('book.error_slot_taken_desc', 'Please select another time.'),
       });
       setSelectedSlot(null);
       setStep(2);
@@ -647,6 +643,16 @@ export default function BookMeeting() {
                   <p className="text-sm text-muted-foreground mt-2">
                     With {members.map(m => m.name).join(" & ")}
                   </p>
+                )}
+                {bookingResult.meet_link && (
+                  <a
+                    href={bookingResult.meet_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+                  >
+                    🎥 {t('book.join_meet', 'Join Google Meet')}
+                  </a>
                 )}
               </div>
             )}

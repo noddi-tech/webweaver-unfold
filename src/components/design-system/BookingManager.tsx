@@ -212,7 +212,12 @@ function TeamMembersTab() {
               <TableCell>
                 {m.google_calendar_connected
                   ? <Badge variant="default" className="bg-green-600">Connected</Badge>
-                  : <Button variant="outline" size="sm" onClick={() => toast({ title: "Google Calendar integration coming soon" })}>Connect</Button>
+                  : <Button variant="outline" size="sm" onClick={() => {
+                      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+                      const redirectUri = `https://${projectId}.supabase.co/functions/v1/google-auth-callback`;
+                      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.freebusy')}&access_type=offline&prompt=consent&state=${m.id}`;
+                      window.open(oauthUrl, '_blank');
+                    }}>Connect</Button>
                 }
               </TableCell>
               <TableCell>
