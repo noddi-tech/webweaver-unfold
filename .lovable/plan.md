@@ -1,48 +1,46 @@
 
 
-# Add Time Fields to Date Ranges + Fix Availability Save
+# Add Event-Type Availability to Team Member Sheet
 
-## Summary
+## Problem
+The team member "Availability" sheet only shows general weekly availability (Mon–Fri). There's no way to set a member's availability for a specific event type — e.g., "Joachim is available for the Trade Fair on Mar 29–31, 09:00–17:00."
 
-Date ranges currently only capture dates but not times. For events like trade fairs, you need to specify opening hours (e.g., 09:00–17:00). The recurring days already have time selectors — date ranges need them too.
+Event-type availability already exists in the `event_type_availability` table and is editable from the Event Types dialog. But team members should also be able to see and manage their event-specific schedules from their own availability panel.
 
-## Changes
+## Design
+Extend the team member Availability sheet to show two sections:
 
-### `src/components/design-system/BookingManager.tsx`
+1. **General Weekly Availability** (existing) — the Mon–Fri toggles with time selectors
+2. **Event-Type Availability** (new) — a section below that lists all event types the member is assigned to, with their current event-type availability rules, and lets the admin add/edit per-event availability directly
 
-**1. Extend dateRanges state type** to include `start_time` and `end_time`:
-- Change from `{ date_start: string; date_end: string }[]` to `{ date_start: string; date_end: string; start_time: string; end_time: string }[]`
-- Default new entries to `start_time: "09:00", end_time: "17:00"`
+## Changes to `src/components/design-system/BookingManager.tsx`
 
-**2. Add time selectors to date range UI rows** (lines 640-653):
-- After each date range's date inputs, add two time Select dropdowns (using the existing `TIME_OPTIONS`) for start and end time
-- Layout: `[date_start] to [date_end] | [start_time] – [end_time] [X]`
+### In `TeamMembersTab`, inside `openAvailability`:
+- Fetch event types the member is assigned to via `event_type_members`
+- Fetch corresponding `event_type_availability` rows for those event types
+- Store in new state: `memberEventAvail`
 
-**3. Update save logic** (line 434):
-- Include `start_time` and `end_time` when inserting `date_range` rows:
-  ```
-  { event_type_id, type: 'date_range', date_start, date_end, start_time: dr.start_time, end_time: dr.end_time }
-  ```
+### New state variables:
+```
+memberEventTypes: { eventType: EventType; availability: EventTypeAvailability[] }[]
+```
 
-**4. Update load logic** (line 378):
-- Map `start_time` and `end_time` from existing rows:
-  ```
-  { date_start, date_end, start_time: r.start_time || '09:00', end_time: r.end_time || '17:00' }
-  ```
+### New UI section in the Availability Sheet (below "Save Availability"):
+- **"Event-Specific Availability"** heading
+- For each assigned event type, show a collapsible card:
+  - Event type title + color badge
+  - Recurring days: toggle + time selectors (same pattern as general availability)
+  - Date ranges: date + time inputs with add/remove
+  - Individual "Save" button per event type
+- Save writes to `event_type_availability` table (delete + re-insert for that event type)
 
-### `supabase/functions/get-availability/index.ts`
-
-The edge function already supports `start_time`/`end_time` on date-range rows and constrains the time window. No changes needed — it already reads `matchingEtRecurring?.start_time` and has the date-range matching logic. However, we need to also apply the date-range's time constraints (currently only recurring times constrain the window). Add logic so that when a `date_range` row matches, its `start_time`/`end_time` also constrain `windowStart`/`windowEnd`.
-
-### `src/pages/BookMeeting.tsx`
-
-Update the client-side fallback slot generation to also apply date-range time constraints (mirror the edge function fix).
-
-## Files to change
+### Data flow:
+- Load: query `event_type_members` for the member → get event type IDs → fetch `event_types` and `event_type_availability` for those IDs
+- Save: for each event type, delete existing `event_type_availability` rows for that `event_type_id`, insert new ones
 
 | File | Change |
 |------|--------|
-| `src/components/design-system/BookingManager.tsx` | Add `start_time`/`end_time` to date range state, UI, load, and save |
-| `supabase/functions/get-availability/index.ts` | Apply date-range time constraints to slot window |
-| `src/pages/BookMeeting.tsx` | Same date-range time constraint in client-side fallback |
+| `src/components/design-system/BookingManager.tsx` | Add event-type availability section to team member sheet |
+
+No backend or edge function changes needed — the `event_type_availability` table already supports this data.
 
