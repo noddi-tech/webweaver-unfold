@@ -66,7 +66,7 @@ serve(async (req) => {
   }
 
   try {
-    const { event_type_id, date, timezone } = await req.json()
+    const { event_type_id, date, timezone, duration_override } = await req.json()
 
     if (!event_type_id || !date) {
       return new Response(JSON.stringify({ error: 'Missing event_type_id or date' }), {
@@ -206,7 +206,13 @@ serve(async (req) => {
     }
 
     // 6. Generate slots
-    const duration = eventType.duration_minutes || 30
+    // Use duration_override if provided and valid, otherwise use event type default
+    let duration = eventType.duration_minutes || 30
+    if (duration_override && eventType.min_duration_minutes && eventType.max_duration_minutes) {
+      if (duration_override >= eventType.min_duration_minutes && duration_override <= eventType.max_duration_minutes) {
+        duration = duration_override
+      }
+    }
     const buffer = eventType.buffer_minutes || 0
     const requiresAll = eventType.requires_all_members || false
     const now = Date.now()
