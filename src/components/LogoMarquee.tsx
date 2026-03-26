@@ -74,13 +74,13 @@ export function LogoMarquee({
   const useStaticDisplay = baseLogos.length > 0 && baseLogos.length <= 4;
 
   // For marquee: ensure enough logos to fill strip
-  const stripLogos = baseLogos.length >= 6
-    ? baseLogos
-    : baseLogos.length > 0
-      ? Array.from({ length: Math.ceil(6 / baseLogos.length) }, () => baseLogos)
-          .flat()
-          .slice(0, 6)
-      : baseLogos;
+  // Ensure enough logos per strip to fill wide viewports (minimum 12)
+  const minLogosPerStrip = Math.max(12, baseLogos.length);
+  const stripLogos = baseLogos.length > 0
+    ? Array.from({ length: Math.ceil(minLogosPerStrip / baseLogos.length) }, () => baseLogos)
+        .flat()
+        .slice(0, minLogosPerStrip)
+    : baseLogos;
 
   const imgClasses = cn(
     "h-8 transition-all duration-300",
