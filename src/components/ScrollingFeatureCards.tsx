@@ -1039,7 +1039,9 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                                 content: text,
                                 active: true,
                               }, { onConflict: 'element_id' });
+                              editedCardsRef.current.add(index);
                               setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaText: text, ctaUrl: url } }));
+                              await refreshTextStyles();
                             }}
                             onBgColorChange={async (color) => {
                               const elementId = `scrolling-card-${index + 1}-cta`;
@@ -1052,7 +1054,9 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                                 button_bg_color: color,
                                 active: true,
                               }, { onConflict: 'element_id' });
+                              editedCardsRef.current.add(index);
                               setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaBgColor: color } }));
+                              await refreshTextStyles();
                             }}
                             onTextColorChange={async (color) => {
                               const elementId = `scrolling-card-${index + 1}-cta`;
@@ -1070,7 +1074,9 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                                 translated_text: cardData[index]?.ctaText || card.ctaText,
                                 color_token: color,
                               }], { onConflict: 'translation_key,language_code' });
+                              editedCardsRef.current.add(index);
                               setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaTextColor: color } }));
+                              await refreshTextStyles();
                             }}
                           >
                             <Button 
