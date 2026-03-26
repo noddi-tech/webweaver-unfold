@@ -130,14 +130,18 @@ serve(async (req) => {
 
     const etAvailRows = etAvailability || []
 
-    // Check if this date is allowed by event-type availability
-    if (etAvailRows.length > 0) {
-      const dateObj2 = new Date(date + 'T12:00:00Z')
-      const jsDay2 = dateObj2.getUTCDay()
-      const dbDay2 = jsDay2 === 0 ? 6 : jsDay2 - 1
+    const dateObj = new Date(date + 'T12:00:00Z')
+    const jsDay = dateObj.getUTCDay()
+    const dbDay = jsDay === 0 ? 6 : jsDay - 1 // Convert to Monday=0 format
 
-      const recurringMatch = etAvailRows.some((r: any) => r.type === 'recurring' && r.day_of_week === dbDay2)
-      const dateRangeMatch = etAvailRows.some((r: any) => r.type === 'date_range' && date >= r.date_start && date <= r.date_end)
+    // Check if a date-range override applies (overrides general availability entirely)
+    const matchingDateRange = etAvailRows.find((r: any) => r.type === 'date_range' && date >= r.date_start && date <= r.date_end)
+    const hasDateRangeOverride = !!matchingDateRange?.start_time && !!matchingDateRange?.end_time
+
+    // Check if this date is allowed by event-type availability
+    if (etAvailRows.length > 0 && !hasDateRangeOverride) {
+      const recurringMatch = etAvailRows.some((r: any) => r.type === 'recurring' && r.day_of_week === dbDay)
+      const dateRangeMatch = !!matchingDateRange
 
       if (!recurringMatch && !dateRangeMatch) {
         return new Response(JSON.stringify({ slots: [] }), {
@@ -146,21 +150,22 @@ serve(async (req) => {
       }
     }
 
-    // 3. Get availability rules for the day
-    const dateObj = new Date(date + 'T12:00:00Z')
-    const jsDay = dateObj.getUTCDay()
-    const dbDay = jsDay === 0 ? 6 : jsDay - 1 // Convert to Monday=0 format
+    // 3. Get availability rules for the day (skip if date-range override active)
+    let rules: any[] = []
+    if (!hasDateRangeOverride) {
+      const { data: rulesData } = await supabase
+        .from('availability_rules')
+        .select('*')
+        .in('team_member_id', memberIds)
+        .eq('day_of_week', dbDay)
 
-    const { data: rules } = await supabase
-      .from('availability_rules')
-      .select('*')
-      .in('team_member_id', memberIds)
-      .eq('day_of_week', dbDay)
+      rules = rulesData || []
 
-    if (!rules?.length) {
-      return new Response(JSON.stringify({ slots: [] }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      if (!rules.length) {
+        return new Response(JSON.stringify({ slots: [] }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
     }
 
     // 4. Get existing bookings for the date
@@ -248,17 +253,22 @@ serve(async (req) => {
       return { id: m.id, timezone: m.timezone || 'Europe/Oslo', rule, isRequired: etm?.is_required || false }
     })
 
-    if (requiresAll && memberWindows.some(w => !w.rule)) {
-      return new Response(JSON.stringify({ slots: [] }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    const membersWithRules = memberWindows.filter(w => w.rule)
-    if (!membersWithRules.length) {
-      return new Response(JSON.stringify({ slots: [] }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+    // When date-range override is active, all assigned members are considered available
+    let membersWithRules: typeof memberWindows
+    if (hasDateRangeOverride) {
+      membersWithRules = memberWindows // All members available via override
+    } else {
+      if (requiresAll && memberWindows.some(w => !w.rule)) {
+        return new Response(JSON.stringify({ slots: [] }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      membersWithRules = memberWindows.filter(w => w.rule)
+      if (!membersWithRules.length) {
+        return new Response(JSON.stringify({ slots: [] }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
     }
 
     // Helper: convert wall clock time to UTC timestamp for a given date and timezone
@@ -285,30 +295,28 @@ serve(async (req) => {
     }
 
     // Calculate the slot window
-    // If event-type has recurring availability for this day, use it to further constrain the window
-    const matchingEtRecurring = etAvailRows.find((r: any) => r.type === 'recurring' && r.day_of_week === dbDay)
+    let windowStart: number
+    let windowEnd: number
 
-    const allStarts = membersWithRules.map(w => timeToMinutes(w.rule.start_time))
-    const allEnds = membersWithRules.map(w => timeToMinutes(w.rule.end_time))
+    if (hasDateRangeOverride) {
+      // Date-range OVERRIDES general availability — use its times directly
+      windowStart = timeToMinutes(matchingDateRange.start_time)
+      windowEnd = timeToMinutes(matchingDateRange.end_time)
+    } else {
+      // Normal flow: use general availability rules, optionally constrained by recurring event times
+      const allStarts = membersWithRules.map(w => timeToMinutes(w.rule.start_time))
+      const allEnds = membersWithRules.map(w => timeToMinutes(w.rule.end_time))
 
-    let windowStart = requiresAll ? Math.max(...allStarts) : Math.min(...allStarts)
-    let windowEnd = requiresAll ? Math.min(...allEnds) : Math.max(...allEnds)
+      windowStart = requiresAll ? Math.max(...allStarts) : Math.min(...allStarts)
+      windowEnd = requiresAll ? Math.min(...allEnds) : Math.max(...allEnds)
 
-    // Constrain by event-type recurring times if present
-    if (matchingEtRecurring?.start_time && matchingEtRecurring?.end_time) {
-      const etStart = timeToMinutes(matchingEtRecurring.start_time)
-      const etEnd = timeToMinutes(matchingEtRecurring.end_time)
-      windowStart = Math.max(windowStart, etStart)
-      windowEnd = Math.min(windowEnd, etEnd)
-    }
-
-    // Constrain by matching date-range times if present
-    const matchingDateRange = etAvailRows.find((r: any) => r.type === 'date_range' && date >= r.date_start && date <= r.date_end)
-    if (matchingDateRange?.start_time && matchingDateRange?.end_time) {
-      const drStart = timeToMinutes(matchingDateRange.start_time)
-      const drEnd = timeToMinutes(matchingDateRange.end_time)
-      windowStart = Math.max(windowStart, drStart)
-      windowEnd = Math.min(windowEnd, drEnd)
+      const matchingEtRecurring = etAvailRows.find((r: any) => r.type === 'recurring' && r.day_of_week === dbDay)
+      if (matchingEtRecurring?.start_time && matchingEtRecurring?.end_time) {
+        const etStart = timeToMinutes(matchingEtRecurring.start_time)
+        const etEnd = timeToMinutes(matchingEtRecurring.end_time)
+        windowStart = Math.max(windowStart, etStart)
+        windowEnd = Math.min(windowEnd, etEnd)
+      }
     }
 
     const slots: Array<{ start: string; end: string; available_members: string[] }> = []
@@ -329,9 +337,12 @@ serve(async (req) => {
         // Check which members are available
         const availableMembers: string[] = []
         for (const w of membersWithRules) {
-          const mStart = timeToMinutes(w.rule.start_time)
-          const mEnd = timeToMinutes(w.rule.end_time)
-          if (t < mStart || t + duration > mEnd) continue
+          // When date-range override is active, skip per-member rule check
+          if (!hasDateRangeOverride) {
+            const mStart = timeToMinutes(w.rule.start_time)
+            const mEnd = timeToMinutes(w.rule.end_time)
+            if (t < mStart || t + duration > mEnd) continue
+          }
 
           // Check busy periods
           const isBusy = (busyPerMember[w.id] || []).some(b =>
