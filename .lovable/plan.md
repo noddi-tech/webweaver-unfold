@@ -1,63 +1,43 @@
 
 
-# Create /book Meeting Booking Page
+# Polish /book Page — Loading, Validation, Mobile, Header CTA
 
 ## Summary
 
-Build a new public-facing multi-step booking page at `/book` where external visitors can select an event type, pick a date/time, fill in their details, and confirm a meeting.
+Add skeleton loading states, zod+react-hook-form validation, error handling with toast, mobile-responsive time slots, disabled weekends, entrance animation, and a "Book a Demo" CTA in the header.
 
-## Files to Create
+## File Changes
 
-### 1. `src/pages/BookMeeting.tsx` — Main page component
+### 1. `src/pages/BookMeeting.tsx` — Major rewrite
 
-Single-file page with 4 steps managed via state:
+**Skeletons (Step 1):** Replace spinner with 3 Skeleton cards (import from `@/components/ui/skeleton`) — each mimicking the event card shape.
 
-**Step 1 — Event Type Selection**
-- Fetch `event_types` where `is_active = true`
-- Render as cards with colored left border, title, description, duration badge
-- Click advances to step 2, stores selected event type
+**Skeletons (Step 2 slots):** Add `loadingSlots` state. When a date is selected, show a skeleton grid (6 skeleton rectangles) while bookings are being fetched. Set `loadingSlots = true` before fetch, `false` after.
 
-**Step 2 — Date & Time Selection**
-- Fetch assigned team members via `event_type_members` joined with `team_members`
-- Left panel: event info, member avatars/names, back button
-- Right panel: Shadcn Calendar (tomorrow to +4 weeks), timezone dropdown (auto-detected via `Intl.DateTimeFormat`), time slots
-- Availability logic:
-  - Get `availability_rules` for assigned members for selected day_of_week
-  - Generate slots based on `duration_minutes + buffer_minutes`
-  - Fetch existing confirmed `bookings` for that date range
-  - Filter out overlapping slots
-  - If `requires_all_members`: all members must be free. Otherwise: at least one.
-- Time slots shown in visitor's selected timezone
+**No slots message:** Already exists at line 457 — enhance with a friendly icon and "Please try another day." text.
 
-**Step 3 — Booking Form**
-- Name (required), Email (required), Company (optional), Message textarea (optional)
-- Confirm button with primary styling
-- On submit: insert into `bookings` (UTC times) + `booking_members`
+**Error handling on submit:** Wrap the insert in try/catch. On error, show `toast({ variant: "destructive", title: "This time slot was just booked. Please select another time." })`. Return to step 2 with date preserved (don't clear `selectedDate`).
 
-**Step 4 — Confirmation**
-- Checkmark animation, booking summary in guest timezone
-- "Book another meeting" reset link
+**Form validation with zod + react-hook-form:**
+- Add zod schema: name min 2 chars, email valid, company optional, message optional
+- Use `useForm` with `zodResolver`
+- Replace manual form state with register/errors
+- Show inline error messages
 
-**UI details:**
-- Step indicator dots at top (1-2-3-4)
-- Smooth transitions between steps (CSS transitions)
-- Max-w-3xl centered, bg-background
-- Navio logo at top
-- `pointer-events-auto` on Calendar
+**Loading spinner on submit button:** Show a spinning icon + "Confirming..." text when `submitting` is true.
 
-### 2. `src/App.tsx` — Add route
+**Mobile time slots:** Change the slot grid to `flex overflow-x-auto gap-2 md:grid md:grid-cols-3` — horizontal scroll on mobile, grid on desktop.
 
-Add `/book` route (no language prefix, no auth required):
-```
-<Route path="/book" element={<BookMeeting />} />
-```
+**Disable weekends:** Compute `availableDays` from `availabilityRules` (which day_of_week values have rules). Pass a `disabled` function to Calendar that also disables days with no availability rules (weekends if no Sat/Sun rules exist).
 
-## No database changes needed
+**Entrance animation:** Add `animate-fade-in` class to the outer wrapper div.
 
-Schema and RLS policies already exist from the previous migration.
+### 2. `src/components/Header.tsx` — Already has "Book a Demo" CTA
 
-| File | Action |
+Looking at the existing code (lines ~300-305), there's already a "Book a Demo" button linking to `/contact`. Change it to link to `/book` instead — both the desktop and mobile versions.
+
+| File | Change |
 |---|---|
-| `src/pages/BookMeeting.tsx` | Create — full booking page with 4 steps |
-| `src/App.tsx` | Add `/book` route |
+| `src/pages/BookMeeting.tsx` | Add skeletons, zod validation, toast errors, mobile slots, weekend disable, animation |
+| `src/components/Header.tsx` | Change "Book a Demo" link from `/contact` to `/book` (desktop + mobile) |
 
