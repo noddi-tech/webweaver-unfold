@@ -302,6 +302,15 @@ serve(async (req) => {
       windowEnd = Math.min(windowEnd, etEnd)
     }
 
+    // Constrain by matching date-range times if present
+    const matchingDateRange = etAvailRows.find((r: any) => r.type === 'date_range' && date >= r.date_start && date <= r.date_end)
+    if (matchingDateRange?.start_time && matchingDateRange?.end_time) {
+      const drStart = timeToMinutes(matchingDateRange.start_time)
+      const drEnd = timeToMinutes(matchingDateRange.end_time)
+      windowStart = Math.max(windowStart, drStart)
+      windowEnd = Math.min(windowEnd, drEnd)
+    }
+
     const slots: Array<{ start: string; end: string; available_members: string[] }> = []
 
     if (windowStart < windowEnd) {

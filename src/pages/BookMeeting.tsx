@@ -294,8 +294,23 @@ export default function BookMeeting() {
     const allStarts = membersWithRules.map(w => timeToMinutes(w.rule!.start_time));
     const allEnds = membersWithRules.map(w => timeToMinutes(w.rule!.end_time));
 
-    const windowStart = requiresAll ? Math.max(...allStarts) : Math.min(...allStarts);
-    const windowEnd = requiresAll ? Math.min(...allEnds) : Math.max(...allEnds);
+    let windowStart = requiresAll ? Math.max(...allStarts) : Math.min(...allStarts);
+    let windowEnd = requiresAll ? Math.min(...allEnds) : Math.max(...allEnds);
+
+    // Constrain by event-type availability times (recurring or date-range)
+    if (eventTypeAvailability.length > 0) {
+      const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+      const matchingRecurring = eventTypeAvailability.find(r => r.type === 'recurring' && r.day_of_week === dbDay);
+      if (matchingRecurring?.start_time && matchingRecurring?.end_time) {
+        windowStart = Math.max(windowStart, timeToMinutes(matchingRecurring.start_time));
+        windowEnd = Math.min(windowEnd, timeToMinutes(matchingRecurring.end_time));
+      }
+      const matchingDateRange = eventTypeAvailability.find(r => r.type === 'date_range' && dateStr >= (r.date_start || '') && dateStr <= (r.date_end || ''));
+      if (matchingDateRange?.start_time && matchingDateRange?.end_time) {
+        windowStart = Math.max(windowStart, timeToMinutes(matchingDateRange.start_time));
+        windowEnd = Math.min(windowEnd, timeToMinutes(matchingDateRange.end_time));
+      }
+    }
 
     if (windowStart >= windowEnd) return [];
 
