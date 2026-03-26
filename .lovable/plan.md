@@ -1,46 +1,45 @@
 
-You did add the backend secrets, but that is not the whole requirement for this specific flow.
 
-What’s happening
+# Fix Booking Page: Calendar Connection Check, Layout, and Responsiveness
 
-1. Frontend/client ID mismatch
-- The Connect button in `src/components/design-system/BookingManager.tsx` builds the Google OAuth URL with:
-  `import.meta.env.VITE_GOOGLE_CLIENT_ID`
-- Your screenshot shows these Supabase function secrets:
-  `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URL`
-- Those secrets are available to the edge function, but the browser button is using a different variable name: `VITE_GOOGLE_CLIENT_ID`
-- So the backend can be configured correctly while the browser still opens Google with an empty or missing client ID
+## Summary
 
-2. Preview iframe block
-- Google OAuth is commonly blocked inside the Lovable preview iframe
-- So even with correct credentials, the Connect flow can fail in preview with the blocked-response error
-- This needs to be tested from the published site or a standalone browser tab, not the editor preview
+Three fixes: (1) Don't show availability for members without a connected Google Calendar, (2) make the calendar component fill its container width, (3) ensure the layout works well on iPad and mobile.
 
-3. Redirect URI must match exactly
-- The frontend sends users to:
-  `https://ouhfgazomdmirdazvjys.supabase.co/functions/v1/google-auth-callback`
-- The callback function exchanges the code using `GOOGLE_REDIRECT_URL`
-- Those must be exactly the same value, and that exact URI must also be registered in Google Cloud
+## Changes
 
-What to verify next
+### 1. Only show availability for calendar-connected members
 
-1. Make sure the browser-side value exists as `VITE_GOOGLE_CLIENT_ID`
-2. Make sure `GOOGLE_REDIRECT_URL` is exactly:
-   `https://ouhfgazomdmirdazvjys.supabase.co/functions/v1/google-auth-callback`
-3. In Google Cloud OAuth settings, verify:
-   - Authorized redirect URI = that exact Supabase callback URL
-   - Authorized JavaScript origins include the published site:
-     `https://noddi-tech-website.lovable.app`
-     and your custom domain too, if you use one
-4. Re-test from the published site, not from the Lovable preview iframe
+**`supabase/functions/get-availability/index.ts`**: Add `.eq('google_calendar_connected', true)` to the employees query. If no connected members remain, return empty slots. This ensures no availability is shown unless at least one assigned team member has connected their Google Calendar.
 
-Technical details
+**`src/pages/BookMeeting.tsx`**: In the member fetch (line ~189-194), also add `.eq('google_calendar_connected', true)`. If no connected members are found for the event type, show a friendly message like "Calendar not yet available — please contact us" instead of the calendar/slots UI. The client-side fallback slot generation also depends on `members`, so filtering there prevents fallback slots too.
 
-- Browser code uses: `VITE_GOOGLE_CLIENT_ID`
-- Edge function uses: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URL`
-- Most likely current issue: you added the edge-function secrets, but the frontend still depends on a separate public client ID variable, and preview iframe testing is also blocked by Google
+### 2. Calendar fills its container
 
-Best next implementation
-- Update the Connect flow so the frontend does not depend on `VITE_GOOGLE_CLIENT_ID` directly
-- Instead, generate the Google auth URL from a backend/edge function and open that URL from the UI
-- That removes the frontend env mismatch and makes the setup more reliable
+**`src/pages/BookMeeting.tsx`** (line 517-523): The shadcn Calendar uses fixed `w-9` cells. Override with additional classNames to make it stretch:
+- Add `[&_table]:w-full [&_.rdp-head_cell]:w-auto [&_.rdp-cell]:w-auto` to the Calendar className
+- Wrap in a Card or just ensure the calendar's table uses `w-full` and cells flex/distribute evenly
+- The simplest fix: add `[&_table]:w-full [&_.rdp-head_cell]:flex-1 [&_.rdp-cell]:flex-1 [&_.rdp-row]:w-full [&_.rdp-head_row]:w-full` so the calendar grid stretches to fill
+
+### 3. Mobile and iPad optimization
+
+**`src/pages/BookMeeting.tsx`**:
+- Change the grid from `grid md:grid-cols-[280px_1fr]` to a stacked layout on mobile/tablet: `grid grid-cols-1 lg:grid-cols-[280px_1fr]`
+- This means on iPad (typically ~768-1024px), it stacks vertically instead of cramming a narrow 2-column layout
+- The info panel (event title, team) shows first, then calendar + slots below
+- Time slot grid already uses `grid-cols-2 md:grid-cols-3` which is fine
+
+## File Summary
+
+| File | Action |
+|---|---|
+| `supabase/functions/get-availability/index.ts` | Filter employees by `google_calendar_connected = true` |
+| `src/pages/BookMeeting.tsx` | Filter members by connected calendar, show empty state if none connected, fix calendar width, adjust grid breakpoint to `lg` |
+
+## Technical Details
+
+- The `google_calendar_connected` column was added to `employees` in the unification migration
+- Edge function query changes from `.eq('active', true)` to `.eq('active', true).eq('google_calendar_connected', true)`
+- Calendar CSS overrides target react-day-picker internal elements via Tailwind arbitrary selectors
+- Breakpoint change from `md` (768px) to `lg` (1024px) ensures iPad portrait gets the stacked layout
+
