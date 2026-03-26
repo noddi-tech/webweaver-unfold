@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@2.0.0";
 import { getSalesConfig } from "../_shared/sales-config.ts";
+import { getFromAddress } from "../_shared/email-domain.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,7 +55,7 @@ serve(async (req: Request): Promise<Response> => {
       .eq("id", offer.id);
 
     // Determine the best from address
-    const fromAddress = await getFromAddress(resendApiKey);
+    const fromAddress = await getFromAddress(resendApiKey, 'hello');
 
     // Send email to sales team using dynamic email
     const emailResponse = await resend.emails.send({
@@ -162,35 +163,3 @@ serve(async (req: Request): Promise<Response> => {
   }
 });
 
-async function getFromAddress(apiKey: string): Promise<string> {
-  const domainPriority = [
-    "info.naviosolutions.com",
-    "career.naviosolutions.com",
-    "navio.no",
-  ];
-
-  try {
-    const res = await fetch("https://api.resend.com/domains", {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-
-    if (res.ok) {
-      const domains = await res.json();
-      
-      for (const domain of domainPriority) {
-        const isVerified = domains.data?.some(
-          (d: { name: string; status: string }) => 
-            d.name === domain && d.status === "verified"
-        );
-        
-        if (isVerified) {
-          return `Navio <hello@${domain}>`;
-        }
-      }
-    }
-  } catch (e) {
-    console.log("Domain check failed:", e);
-  }
-
-  return "Navio <onboarding@resend.dev>";
-}
