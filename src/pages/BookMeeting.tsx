@@ -301,42 +301,33 @@ export default function BookMeeting() {
     if (!selectedSlot || !selectedEvent) return;
     setSubmitting(true);
 
-    const duration = selectedEvent.duration_minutes || 30;
-    const endTime = new Date(selectedSlot.getTime() + duration * 60000);
-
     try {
-      const { data: booking, error } = await supabase
-        .from("bookings")
-        .insert({
+      const { data: result, error } = await supabase.functions.invoke('create-booking', {
+        body: {
           event_type_id: selectedEvent.id,
+          start_time: selectedSlot.toISOString(),
           guest_name: data.name,
           guest_email: data.email,
           guest_company: data.company || null,
           guest_message: data.message || null,
           guest_timezone: timezone,
-          start_time: selectedSlot.toISOString(),
-          end_time: endTime.toISOString(),
-          status: "confirmed",
-        })
-        .select()
-        .single();
+        },
+      });
 
       if (error) throw error;
 
-      // Insert booking members
-      const memberInserts = members.map(m => ({
-        booking_id: booking.id,
-        team_member_id: m.id,
-      }));
-      await supabase.from("booking_members").insert(memberInserts);
+      if (result?.error) {
+        // 409 conflict or other server error
+        throw new Error(result.error);
+      }
 
-      setBookingResult(booking);
+      setBookingResult(result.booking);
       setStep(4);
-    } catch {
+    } catch (err: any) {
       toast({
         variant: "destructive",
         title: t('book.error_slot_taken_title', 'This time slot was just booked.'),
-        description: t('book.error_slot_taken_desc', 'Please select another time.'),
+        description: err?.message || t('book.error_slot_taken_desc', 'Please select another time.'),
       });
       setSelectedSlot(null);
       setStep(2);
