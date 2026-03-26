@@ -199,30 +199,34 @@ export default function BookMeeting() {
       });
   }, [selectedEvent]);
 
-  // Fetch bookings for selected date
+  // Fetch availability from edge function when date selected
   useEffect(() => {
     if (!selectedDate || !selectedEvent) return;
     setLoadingSlots(true);
-    const dayStart = new Date(selectedDate);
-    dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(selectedDate);
-    dayEnd.setHours(23, 59, 59, 999);
+    setServerSlots(null);
 
-    supabase
-      .from("bookings")
-      .select("start_time, end_time")
-      .eq("event_type_id", selectedEvent.id)
-      .eq("status", "confirmed")
-      .gte("start_time", dayStart.toISOString())
-      .lte("start_time", dayEnd.toISOString())
-      .then(({ data }) => {
-        setExistingBookings((data as Booking[]) || []);
-        setLoadingSlots(false);
-      });
-  }, [selectedDate, selectedEvent]);
+    const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
 
-  // Generate available slots
+    supabase.functions.invoke('get-availability', {
+      body: { event_type_id: selectedEvent.id, date: dateStr, timezone },
+    }).then(({ data, error }) => {
+      if (error) {
+        console.error('get-availability error:', error);
+        setServerSlots([]);
+      } else {
+        setServerSlots(data?.slots || []);
+      }
+      setLoadingSlots(false);
+    });
+  }, [selectedDate, selectedEvent, timezone]);
+
+  // Use server slots when available, fall back to client-side
   const availableSlots = useMemo(() => {
+    if (serverSlots !== null) {
+      return serverSlots.map(s => new Date(s.start));
+    }
+
+    // Fallback: client-side slot generation (when edge function not available)
     if (!selectedDate || !selectedEvent || !members.length) return [];
 
     const jsDay = selectedDate.getDay();
@@ -291,7 +295,7 @@ export default function BookMeeting() {
     }
 
     return slots;
-  }, [selectedDate, selectedEvent, members, availabilityRules, existingBookings]);
+  }, [selectedDate, selectedEvent, members, availabilityRules, existingBookings, serverSlots]);
 
   const handleSubmit = async (data: BookingFormData) => {
     if (!selectedSlot || !selectedEvent) return;
