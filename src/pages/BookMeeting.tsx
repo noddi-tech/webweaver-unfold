@@ -129,6 +129,7 @@ function StepIndicator({ current }: { current: number }) {
 }
 
 export default function BookMeeting() {
+  const { t } = useAppTranslation();
   const [step, setStep] = useState(1);
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
