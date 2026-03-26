@@ -160,12 +160,38 @@ function TeamMembersTab() {
   // Availability
   const openAvailability = async (m: TeamMember) => {
     setAvailMember(m);
+    // General weekly rules
     const { data } = await supabase.from("availability_rules").select("*").eq("team_member_id", m.id);
     const rules = [1, 2, 3, 4, 5].map(day => {
       const existing = (data || []).find((r: AvailabilityRule) => r.day_of_week === day);
       return { day, enabled: !!existing, start: existing?.start_time || "09:00", end: existing?.end_time || "16:00" };
     });
     setAvailRules(rules);
+
+    // Event-type availability
+    const { data: memberships } = await supabase.from("event_type_members").select("event_type_id").eq("team_member_id", m.id);
+    if (memberships && memberships.length > 0) {
+      const etIds = memberships.map(ms => ms.event_type_id);
+      const { data: eventTypes } = await supabase.from("event_types").select("*").in("id", etIds);
+      const { data: etAvail } = await supabase.from("event_type_availability").select("*").in("event_type_id", etIds);
+      const mapped = (eventTypes || []).map((et: EventType) => {
+        const avails = (etAvail || []).filter((a: EventTypeAvailability) => a.event_type_id === et.id);
+        const recurring = ALL_DAYS.map(day => {
+          const existing = avails.find(a => a.type === 'recurring' && a.day_of_week === day);
+          return { day, enabled: !!existing, start: existing?.start_time || "09:00", end: existing?.end_time || "17:00" };
+        });
+        const dateRanges = avails.filter(a => a.type === 'date_range').map(a => ({
+          date_start: a.date_start || "",
+          date_end: a.date_end || "",
+          start_time: a.start_time || "09:00",
+          end_time: a.end_time || "17:00",
+        }));
+        return { eventType: et, recurring, dateRanges };
+      });
+      setMemberEventAvail(mapped);
+    } else {
+      setMemberEventAvail([]);
+    }
   };
 
   const saveAvailability = async () => {
