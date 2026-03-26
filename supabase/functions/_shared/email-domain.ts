@@ -1,6 +1,6 @@
 // Shared email domain checking utility for all edge functions
 
-export type EmailDepartment = 'sales' | 'careers' | 'hello';
+export type EmailDepartment = 'sales' | 'careers' | 'hello' | 'noreply';
 
 interface DomainInfo {
   name: string;
@@ -17,12 +17,14 @@ const DEPARTMENT_EMAILS: Record<EmailDepartment, string> = {
   sales: 'sales',
   careers: 'careers',
   hello: 'hello',
+  noreply: 'noreply',
 };
 
 const DEPARTMENT_NAMES: Record<EmailDepartment, string> = {
   sales: 'Navio Sales',
   careers: 'Navio Careers',
   hello: 'Navio',
+  noreply: 'Navio',
 };
 
 /**
