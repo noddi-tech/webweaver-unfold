@@ -14,6 +14,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { HreflangTags } from "@/components/HreflangTags";
+import { useAppTranslation } from "@/hooks/useAppTranslation";
 
 const COMMON_TIMEZONES = [
   "Europe/Oslo", "Europe/London", "Europe/Berlin", "Europe/Paris",
