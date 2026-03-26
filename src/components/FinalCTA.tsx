@@ -40,7 +40,7 @@ export default function FinalCTA() {
     descriptionColor: 'white',
     footerColor: 'white',
     ctaText: t('final_cta.button_primary', 'Book a Demo'),
-    ctaUrl: '/contact',
+    ctaUrl: '/book',
     ctaBgColor: 'primary',
     ctaTextColor: 'primary-foreground',
     secondaryCtaText: t('final_cta.button_secondary', 'See Technical Overview'),

@@ -8,16 +8,17 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, ArrowLeft, CheckCircle2, Users, CalendarX2, Loader2 } from "lucide-react";
+import { Clock, ArrowLeft, CheckCircle2, Users, CalendarX2, Loader2, ArrowUpRight } from "lucide-react";
 import { format, addDays, startOfDay, isBefore, isAfter, addWeeks } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { HreflangTags } from "@/components/HreflangTags";
 import { useAppTranslation } from "@/hooks/useAppTranslation";
+import { LanguageLink } from "@/components/LanguageLink";
+import { useParams } from "react-router-dom";
 
 const COMMON_TIMEZONES = [
   "Europe/Oslo", "Europe/London", "Europe/Berlin", "Europe/Paris",
@@ -130,6 +131,7 @@ function StepIndicator({ current }: { current: number }) {
 
 export default function BookMeeting() {
   const { t } = useAppTranslation();
+  const { lang } = useParams<{ lang: string }>();
   const [step, setStep] = useState(1);
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
@@ -364,10 +366,35 @@ export default function BookMeeting() {
     return false;
   };
 
+  // SEO meta tags
+  useEffect(() => {
+    document.title = "Book a Meeting — Navio Solutions";
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'description');
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', 'Schedule a demo or meeting with the Navio team. See available times and book directly into our calendar.');
+    return () => { document.title = 'Navio Solutions'; };
+  }, []);
+
   return (
     <>
       <HreflangTags pageSlug="/book" />
-      <Header />
+      {/* Minimal header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+          <LanguageLink to="/" className="text-xl font-bold text-foreground font-[var(--font-primary)]">
+            Navio
+          </LanguageLink>
+          <LanguageLink to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+            <ArrowLeft className="w-3.5 h-3.5" />
+            {t('book.back_to_site', 'Back to site')}
+          </LanguageLink>
+        </div>
+      </header>
+
       <div className="min-h-screen bg-background animate-fade-in pt-24 pb-16">
         <div className="max-w-3xl mx-auto px-4 py-12">
           {/* Page heading */}
@@ -397,6 +424,19 @@ export default function BookMeeting() {
                   </div>
                 </Card>
               ))}
+            </div>
+          ) : eventTypes.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <CalendarX2 className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                {t('book.no_events_title', "We're not accepting bookings at the moment.")}
+              </h3>
+              <p className="text-muted-foreground">
+                {t('book.no_events_desc', 'Please reach out to')}{' '}
+                <a href="mailto:hello@noddi.tech" className="text-primary hover:underline">hello@noddi.tech</a>
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -479,7 +519,7 @@ export default function BookMeeting() {
                   selected={selectedDate}
                   onSelect={(date) => { setSelectedDate(date); setSelectedSlot(null); }}
                   disabled={isDateDisabled}
-                  className="rounded-lg border bg-card-background p-3 pointer-events-auto"
+                  className="rounded-lg border bg-card-background p-3 pointer-events-auto w-full"
                 />
 
                 {/* Timezone */}
@@ -504,9 +544,9 @@ export default function BookMeeting() {
                       {t('book.available_times', 'Available times for')} {format(selectedDate, "EEEE, MMMM d")}
                     </p>
                     {loadingSlots ? (
-                      <div className="flex gap-2 overflow-x-auto pb-2 md:grid md:grid-cols-3">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                         {[1, 2, 3, 4, 5, 6].map(i => (
-                          <Skeleton key={i} className="h-10 w-20 md:w-full rounded-lg shrink-0" />
+                          <Skeleton key={i} className="h-11 w-full rounded-lg" />
                         ))}
                       </div>
                     ) : availableSlots.length === 0 ? (
@@ -517,7 +557,7 @@ export default function BookMeeting() {
                         </p>
                       </div>
                     ) : (
-                      <div className="flex gap-2 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                         {availableSlots.map((slot, i) => {
                           const isSelected = selectedSlot?.getTime() === slot.getTime();
                           const serverSlot = serverSlots?.[i];
@@ -529,7 +569,7 @@ export default function BookMeeting() {
                             <button
                               key={i}
                               onClick={() => { setSelectedSlot(slot); setStep(3); }}
-                              className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-all border shrink-0 ${
+                              className={`min-h-[44px] px-3 py-2.5 rounded-lg text-sm font-medium transition-all border ${
                                 isSelected
                                   ? "bg-primary text-primary-foreground border-primary"
                                   : "bg-card-background text-foreground border-border hover:border-primary hover:bg-primary/5"
@@ -580,7 +620,7 @@ export default function BookMeeting() {
                   <Input
                     {...form.register("name")}
                     placeholder={t('book.form_name_placeholder', 'Your full name')}
-                    className="bg-card-background"
+                    className="bg-card-background min-h-[44px]"
                   />
                   {form.formState.errors.name && (
                     <p className="text-sm text-destructive mt-1">{form.formState.errors.name.message}</p>
@@ -591,7 +631,7 @@ export default function BookMeeting() {
                   <Input
                     {...form.register("email")}
                     placeholder={t('book.form_email_placeholder', 'you@company.com')}
-                    className="bg-card-background"
+                    className="bg-card-background min-h-[44px]"
                   />
                   {form.formState.errors.email && (
                     <p className="text-sm text-destructive mt-1">{form.formState.errors.email.message}</p>
@@ -602,7 +642,7 @@ export default function BookMeeting() {
                   <Input
                     {...form.register("company")}
                     placeholder={t('book.form_company_placeholder', 'Your company name')}
-                    className="bg-card-background"
+                    className="bg-card-background min-h-[44px]"
                   />
                 </div>
                 <div>
@@ -619,7 +659,7 @@ export default function BookMeeting() {
                 <Button
                   type="submit"
                   disabled={submitting}
-                  className="w-full"
+                  className="w-full min-h-[44px]"
                   size="lg"
                 >
                   {submitting ? (
@@ -675,6 +715,12 @@ export default function BookMeeting() {
               </div>
             )}
 
+            <p className="text-sm text-muted-foreground mb-6">
+              {t('book.calendar_invite_note', "You'll receive a Google Calendar invite at")}{' '}
+              <span className="font-medium text-foreground">{form.getValues('email')}</span>{' '}
+              {t('book.within_minutes', 'within a few minutes.')}
+            </p>
+
             <Button variant="ghost" onClick={reset}>
               {t('book.book_another', 'Book another meeting')}
             </Button>
@@ -682,7 +728,6 @@ export default function BookMeeting() {
         </div>
       </div>
     </div>
-    <Footer />
     </>
   );
 }
