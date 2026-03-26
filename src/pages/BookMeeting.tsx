@@ -560,8 +560,8 @@ export default function BookMeeting() {
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="text-sm font-medium text-foreground">{m.name}</p>
-                            {m.title && <p className="text-xs text-muted-foreground">{m.title}</p>}
+                            <p className="text-base font-medium text-foreground">{m.name}</p>
+                            {m.title && <p className="text-sm text-muted-foreground">{m.title}</p>}
                           </div>
                         </div>
                       ))}
@@ -615,7 +615,7 @@ export default function BookMeeting() {
                   selected={selectedDate}
                   onSelect={(date) => { setSelectedDate(date); setSelectedSlot(null); }}
                   disabled={isDateDisabled}
-                  className="rounded-lg border bg-card-background p-4 pointer-events-auto w-full [&_table]:w-full [&_.rdp-head_row]:flex [&_.rdp-head_row]:w-full [&_.rdp-row]:flex [&_.rdp-row]:w-full [&_.rdp-head_cell]:flex-1 [&_.rdp-cell]:flex-1 [&_.rdp-day]:w-full [&_.rdp-day]:h-11"
+                  className="rounded-lg border bg-card-background p-4 pointer-events-auto w-full"
                 />
 
                 {/* Timezone */}
