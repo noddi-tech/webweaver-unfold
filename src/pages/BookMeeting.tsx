@@ -187,10 +187,11 @@ export default function BookMeeting() {
         if (!etm?.length) return;
         const ids = etm.map(e => e.team_member_id);
         const { data: tm } = await supabase
-      .from("employees")
+          .from("employees")
           .select("id, name, image_url, title, timezone")
           .in("id", ids)
-          .eq("active", true);
+          .eq("active", true)
+          .eq("google_calendar_connected", true);
         setMembers((tm as TeamMember[]) || []);
 
         const { data: rules } = await supabase
@@ -468,7 +469,7 @@ export default function BookMeeting() {
         {/* Step 2: Date & Time */}
         <div className={`transition-all duration-300 ${step === 2 ? "opacity-100" : "opacity-0 hidden"}`}>
           {selectedEvent && (
-            <div className="grid md:grid-cols-[280px_1fr] gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
               {/* Left info panel */}
               <div className="space-y-6">
                 <Button
@@ -514,12 +515,26 @@ export default function BookMeeting() {
 
               {/* Right: Calendar + timezone + slots */}
               <div className="space-y-6">
+                {members.length === 0 ? (
+                  <div className="flex flex-col items-center gap-3 p-8 rounded-lg bg-muted/50 border border-border text-center">
+                    <CalendarX2 className="w-8 h-8 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium text-foreground mb-1">
+                        {t('book.calendar_not_ready_title', 'Calendar not yet available')}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {t('book.calendar_not_ready_desc', 'Please contact us directly at')}{' '}
+                        <a href="mailto:hello@noddi.tech" className="text-primary hover:underline">hello@noddi.tech</a>
+                      </p>
+                    </div>
+                  </div>
+                ) : (
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={(date) => { setSelectedDate(date); setSelectedSlot(null); }}
                   disabled={isDateDisabled}
-                  className="rounded-lg border bg-card-background p-3 pointer-events-auto w-full"
+                  className="rounded-lg border bg-card-background p-4 pointer-events-auto w-full [&_table]:w-full [&_.rdp-head_row]:flex [&_.rdp-head_row]:w-full [&_.rdp-row]:flex [&_.rdp-row]:w-full [&_.rdp-head_cell]:flex-1 [&_.rdp-cell]:flex-1 [&_.rdp-day]:w-full [&_.rdp-day]:h-11"
                 />
 
                 {/* Timezone */}

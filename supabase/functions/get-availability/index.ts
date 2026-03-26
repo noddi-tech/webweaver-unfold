@@ -114,6 +114,7 @@ serve(async (req) => {
       .select('id, name, email, timezone')
       .in('id', memberIds)
       .eq('active', true)
+      .eq('google_calendar_connected', true)
 
     if (!teamMembers?.length) {
       return new Response(JSON.stringify({ slots: [] }), {
