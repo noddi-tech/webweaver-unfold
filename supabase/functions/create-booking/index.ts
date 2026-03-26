@@ -243,6 +243,89 @@ serve(async (req) => {
       }
     }
 
+    // 8. Send confirmation email via Resend
+    const resendKey = Deno.env.get('RESEND_API_KEY')
+    if (resendKey) {
+      try {
+        const startDate = new Date(start_time)
+        const formattedDate = startDate.toLocaleDateString('en-US', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+          timeZone: guest_timezone,
+        })
+        const formattedTime = startDate.toLocaleTimeString('en-US', {
+          hour: '2-digit', minute: '2-digit',
+          timeZone: guest_timezone,
+        })
+
+        const manageUrl = `https://naviosolutions.com/book/manage/${booking.id}?token=${cancelToken}`
+        const meetSection = meetLink
+          ? `<tr><td style="padding:12px 0;border-bottom:1px solid #eee"><strong style="color:#1a1a5e">📹 Video Link</strong><br/><a href="${meetLink}" style="color:#6d28d9;text-decoration:none">${meetLink}</a></td></tr>`
+          : ''
+
+        const teamNames = (teamMembers || []).map((m: any) => m.name).join(', ')
+
+        const emailHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width"/></head>
+<body style="margin:0;padding:0;background:#f4f4f7;font-family:Arial,Helvetica,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:40px 20px">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08)">
+        <tr><td style="background:linear-gradient(135deg,#1a1a5e 0%,#6d28d9 100%);padding:32px 40px;text-align:center">
+          <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700">Meeting Confirmed ✅</h1>
+        </td></tr>
+        <tr><td style="padding:32px 40px">
+          <p style="color:#333;font-size:16px;line-height:1.5;margin:0 0 24px">
+            Hi ${guest_name},<br/><br/>Your meeting has been booked successfully. Here are the details:
+          </p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px">
+            <tr><td style="padding:12px 0;border-bottom:1px solid #eee"><strong style="color:#1a1a5e">📅 Date</strong><br/><span style="color:#555">${formattedDate}</span></td></tr>
+            <tr><td style="padding:12px 0;border-bottom:1px solid #eee"><strong style="color:#1a1a5e">🕐 Time</strong><br/><span style="color:#555">${formattedTime} (${guest_timezone})</span></td></tr>
+            <tr><td style="padding:12px 0;border-bottom:1px solid #eee"><strong style="color:#1a1a5e">📋 Meeting</strong><br/><span style="color:#555">${eventType.title} (${duration} min)</span></td></tr>
+            ${teamNames ? `<tr><td style="padding:12px 0;border-bottom:1px solid #eee"><strong style="color:#1a1a5e">👥 With</strong><br/><span style="color:#555">${teamNames}</span></td></tr>` : ''}
+            ${meetSection}
+          </table>
+          <p style="color:#555;font-size:14px;line-height:1.5;margin:0 0 24px">
+            You'll also receive a Google Calendar invite at <strong>${guest_email}</strong> within a few minutes.
+          </p>
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td align="center" style="padding:8px 0">
+              <a href="${manageUrl}" style="display:inline-block;background:#f4f4f7;color:#1a1a5e;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600">
+                Manage or Cancel Booking
+              </a>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:20px 40px;background:#f9f9fb;text-align:center;border-top:1px solid #eee">
+          <p style="margin:0;color:#999;font-size:12px">Navio Solutions · naviosolutions.com</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Navio Solutions <noreply@naviosolutions.com>',
+            to: [guest_email],
+            subject: `Meeting Confirmed: ${eventType.title} — ${formattedDate}`,
+            html: emailHtml,
+          }),
+        })
+        console.log('Confirmation email sent to', guest_email)
+      } catch (emailErr) {
+        console.error('Failed to send confirmation email:', emailErr)
+        // Don't fail the booking if email fails
+      }
+    }
+
     return new Response(JSON.stringify({
       booking: {
         ...booking,
