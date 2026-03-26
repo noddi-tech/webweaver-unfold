@@ -167,7 +167,10 @@ export function ScrollingFeatureCards() {
   const { editMode } = useEditMode();
   const { GRADIENT_COLORS, GLASS_EFFECTS } = useColorSystem();
   const { allowedBackgrounds } = useAllowedBackgrounds();
-  const { backgroundStyles, textStyles, isLoaded: stylesLoaded } = useSiteStyles();
+  const { backgroundStyles, textStyles, isLoaded: stylesLoaded, refreshTextStyles } = useSiteStyles();
+  
+  // Track which cards have been locally edited to prevent stale context overwrites
+  const editedCardsRef = useRef<Set<number>>(new Set());
   
   // Define unique default styles for each card using CMS colors
   const defaultCardStyles = useMemo(() => [
@@ -455,7 +458,10 @@ export function ScrollingFeatureCards() {
   useEffect(() => {
     if (stylesLoaded) {
       cards.forEach((_, index) => {
-        loadCardData(index);
+        // Skip cards that were just edited locally to prevent stale overwrites
+        if (!editedCardsRef.current.has(index)) {
+          loadCardData(index);
+        }
       });
     }
   }, [stylesLoaded, backgroundStyles, textStyles]);
