@@ -322,7 +322,7 @@ function EventTypesTab() {
   const [recurringDays, setRecurringDays] = useState<{ day: number; enabled: boolean; start: string; end: string }[]>(
     ALL_DAYS.map(d => ({ day: d, enabled: false, start: "09:00", end: "17:00" }))
   );
-  const [dateRanges, setDateRanges] = useState<{ date_start: string; date_end: string }[]>([]);
+  const [dateRanges, setDateRanges] = useState<{ date_start: string; date_end: string; start_time: string; end_time: string }[]>([]);
 
   const fetchData = async () => {
     const [etRes, mRes, aRes] = await Promise.all([
@@ -375,7 +375,7 @@ function EventTypesTab() {
         return { day: d, enabled: !!r, start: r?.start_time || "09:00", end: r?.end_time || "17:00" };
       });
       setRecurringDays(days);
-      setDateRanges(rows.filter(r => r.type === 'date_range').map(r => ({ date_start: r.date_start || '', date_end: r.date_end || '' })));
+      setDateRanges(rows.filter(r => r.type === 'date_range').map(r => ({ date_start: r.date_start || '', date_end: r.date_end || '', start_time: r.start_time || '09:00', end_time: r.end_time || '17:00' })));
     } else {
       setLimitAvailability(false);
       setRecurringDays(ALL_DAYS.map(d => ({ day: d, enabled: false, start: "09:00", end: "17:00" })));
@@ -431,7 +431,7 @@ function EventTypesTab() {
       }
       for (const dr of dateRanges) {
         if (dr.date_start && dr.date_end) {
-          availRows.push({ event_type_id: eventId, type: 'date_range', date_start: dr.date_start, date_end: dr.date_end });
+          availRows.push({ event_type_id: eventId, type: 'date_range', date_start: dr.date_start, date_end: dr.date_end, start_time: dr.start_time, end_time: dr.end_time });
         }
       }
       if (availRows.length > 0) {
@@ -638,20 +638,30 @@ function EventTypesTab() {
                     <Label className="text-xs text-muted-foreground uppercase tracking-wide mb-2 block">Specific date ranges</Label>
                     <div className="space-y-2">
                       {dateRanges.map((dr, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
+                        <div key={idx} className="flex items-center gap-2 flex-wrap">
                           <Input type="date" value={dr.date_start} onChange={e => {
                             const u = [...dateRanges]; u[idx] = { ...dr, date_start: e.target.value }; setDateRanges(u);
-                          }} className="w-40" />
+                          }} className="w-36" />
                           <span className="text-muted-foreground">to</span>
                           <Input type="date" value={dr.date_end} onChange={e => {
                             const u = [...dateRanges]; u[idx] = { ...dr, date_end: e.target.value }; setDateRanges(u);
-                          }} className="w-40" />
+                          }} className="w-36" />
+                          <span className="text-muted-foreground">|</span>
+                          <Select value={dr.start_time} onValueChange={v => { const u = [...dateRanges]; u[idx] = { ...dr, start_time: v }; setDateRanges(u); }}>
+                            <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                            <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                          </Select>
+                          <span className="text-muted-foreground">–</span>
+                          <Select value={dr.end_time} onValueChange={v => { const u = [...dateRanges]; u[idx] = { ...dr, end_time: v }; setDateRanges(u); }}>
+                            <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                            <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                          </Select>
                           <Button variant="ghost" size="icon" onClick={() => setDateRanges(dateRanges.filter((_, i) => i !== idx))}>
                             <X className="w-4 h-4" />
                           </Button>
                         </div>
                       ))}
-                      <Button variant="outline" size="sm" onClick={() => setDateRanges([...dateRanges, { date_start: '', date_end: '' }])}>
+                      <Button variant="outline" size="sm" onClick={() => setDateRanges([...dateRanges, { date_start: '', date_end: '', start_time: '09:00', end_time: '17:00' }])}>
                         <Plus className="w-4 h-4 mr-1" /> Add date range
                       </Button>
                     </div>
