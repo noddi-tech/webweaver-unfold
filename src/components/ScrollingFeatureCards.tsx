@@ -818,9 +818,9 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                         <Badge
                           className="px-2 py-1 text-xs font-normal tracking-wide"
                           style={{
-                            backgroundColor: 'rgba(120, 86, 255, 0.1)',
-                            border: '1px solid rgba(120, 86, 255, 0.5)',
-                            color: 'rgb(46, 22, 112)',
+                            backgroundColor: 'hsl(var(--secondary))',
+                            border: 'none',
+                            color: 'hsl(var(--secondary-foreground))',
                             borderRadius: '4px',
                           }}
                         >
@@ -985,9 +985,9 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                             <Badge 
                               className="px-2 py-1 text-xs font-normal tracking-wide"
                               style={{
-                                backgroundColor: 'rgba(120, 86, 255, 0.1)',
-                                border: '1px solid rgba(120, 86, 255, 0.5)',
-                                color: 'rgb(46, 22, 112)',
+                                backgroundColor: 'hsl(var(--secondary))',
+                                border: 'none',
+                                color: 'hsl(var(--secondary-foreground))',
                                 borderRadius: '4px',
                               }}
                             >

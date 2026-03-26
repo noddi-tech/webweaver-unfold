@@ -144,6 +144,10 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				'card-surface': {
+					DEFAULT: 'hsl(var(--card-surface))',
+					foreground: 'hsl(var(--card-surface-foreground))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -211,6 +215,9 @@ export default {
 			'gradient-warmth': 'var(--gradient-warmth)',
 			'gradient-ocean': 'var(--gradient-ocean)',
 			'gradient-fire': 'var(--gradient-fire)',
+			
+			// Navio Purple Depth Gradient
+			'gradient-purple-depth': 'var(--gradient-purple-depth)',
 			
 			// Navio Experimental Mesh Gradients
 			'gradient-mesh-aurora': 'var(--gradient-mesh-aurora)',

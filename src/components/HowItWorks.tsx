@@ -71,9 +71,8 @@ export default function HowItWorks() {
 
                   {/* Center: number circle */}
                   <div className="relative z-10 flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-full bg-background border border-primary/20 flex items-center justify-center">
-                      <div className="absolute inset-0 rounded-full bg-primary/10" />
-                      <span className="relative text-lg font-bold text-primary">
+                    <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center">
+                      <span className="text-lg font-bold text-secondary-foreground">
                         {String(step.number).padStart(2, '0')}
                       </span>
                     </div>
@@ -117,9 +116,8 @@ export default function HowItWorks() {
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
                 {/* Number circle */}
-                <div className="absolute -left-14 top-0 z-10 w-10 h-10 rounded-full bg-background border border-primary/20 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full bg-primary/10" />
-                  <span className="relative text-sm font-bold text-primary">
+                <div className="absolute -left-14 top-0 z-10 w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                  <span className="text-sm font-bold text-secondary-foreground">
                     {String(step.number).padStart(2, '0')}
                   </span>
                 </div>
