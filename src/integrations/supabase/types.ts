@@ -1403,8 +1403,11 @@ export type Database = {
           created_at: string | null
           description: string | null
           duration_minutes: number | null
+          duration_step_minutes: number | null
           id: string
           is_active: boolean | null
+          max_duration_minutes: number | null
+          min_duration_minutes: number | null
           requires_all_members: boolean | null
           slug: string
           title: string
@@ -1415,8 +1418,11 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
+          duration_step_minutes?: number | null
           id?: string
           is_active?: boolean | null
+          max_duration_minutes?: number | null
+          min_duration_minutes?: number | null
           requires_all_members?: boolean | null
           slug: string
           title: string
@@ -1427,8 +1433,11 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
+          duration_step_minutes?: number | null
           id?: string
           is_active?: boolean | null
+          max_duration_minutes?: number | null
+          min_duration_minutes?: number | null
           requires_all_members?: boolean | null
           slug?: string
           title?: string
