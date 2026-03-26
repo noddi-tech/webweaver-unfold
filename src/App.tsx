@@ -43,6 +43,7 @@ import OfferView from "./pages/OfferView";
 import LegalPage from "./pages/LegalPage";
 import BookMeeting from "./pages/BookMeeting";
 import ManageBooking from "./pages/ManageBooking";
+import RescheduleBooking from "./pages/RescheduleBooking";
 import MeetMembers from "./pages/MeetMembers";
 
 const queryClient = new QueryClient();
@@ -119,6 +120,7 @@ const App = () => {
                     <Route path="/meet/:memberSlugs" element={<LanguageRedirect />} />
                     <Route path="/book/:token" element={<CandidateBooking />} />
                     <Route path="/book/manage/:bookingId" element={<ManageBooking />} />
+                    <Route path="/book/reschedule/:bookingId" element={<RescheduleBooking />} />
                     <Route path="/offer/:token" element={<OfferView />} />
                     <Route path="/llms.txt" element={<LlmsTxt />} />
                     

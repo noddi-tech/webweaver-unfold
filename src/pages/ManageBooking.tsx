@@ -262,7 +262,12 @@ const ManageBooking = () => {
               )}
             </div>
 
-            <div className="pt-4">
+            <div className="pt-4 space-y-3">
+              <a href={`/book/reschedule/${bookingId}?token=${token}`} className="block">
+                <Button variant="outline" className="w-full min-h-[44px]">
+                  Reschedule Meeting
+                </Button>
+              </a>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" className="w-full min-h-[44px]" disabled={cancelling}>
