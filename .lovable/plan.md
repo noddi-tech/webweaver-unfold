@@ -1,28 +1,38 @@
 
 
-# Fix: CTA Button Editing & WhyNavio Card Background
+# Fix: Logo Marquee Empty Gap on Wide Desktops
 
-## Two Issues
+## Root Cause
 
-### Issue 1: ScrollingFeatureCards — Card CTA buttons not editable
-The individual card CTA buttons (e.g., "Learn More", "Explore Features") are plain `<Button>` elements without an `EditableButton` wrapper. They render colors from database (`cardData[index].ctaBgColor`) but provide no edit UI to change them. The main section CTA ("Book a Demo") has `EditableButton` but the per-card CTAs do not.
+In `LogoMarquee.tsx` lines 77-83, the strip is capped at 6 logos:
 
-**Fix**: Wrap each per-card CTA `<Button>` in `<EditableButton>` in both the mobile/tablet view (line ~837) and the desktop/xl view (line ~964). Wire `onBgColorChange` and `onTextColorChange` to save to the `text_content` table using the per-card element IDs (e.g., `scrolling-features-card-0-cta`).
+```ts
+const stripLogos = baseLogos.length >= 6
+  ? baseLogos  // uses original array (e.g. 9 logos)
+  : /* pad to 6 */
+```
 
-### Issue 2: WhyNavio — CTA button not editable for bg color
-The "See How It Works" button (line 130) is a plain `<Button>` inside `EditableTranslation` — text is editable but background color is not. Similarly, the comparison does not use `EditableButton`.
+When there are 6+ logos, it uses them as-is. But if there are, say, 9 logos at ~100px each + 56px gaps = ~1400px per strip, that's narrower than a 1952px viewport. The `translateX(-50%)` animation moves the combined container left by half its width, but since each strip is narrower than the viewport, a gap appears before the second strip scrolls in.
 
-**Fix**: Wrap the CTA in `EditableButton` with `onBgColorChange`/`onTextColorChange` handlers that persist to `text_content`.
+## Fix
 
-### Issue 3: WhyNavio — "With Navio" card background not changing
-The `EditableCard` at line 92 uses `defaultBackground="bg-card"`. When the user selects "brand peach" in the modal, `handleSave` fires, resets local state to null, and calls `refreshBackgroundStyles()`. However, the card has `className` with hardcoded `border-2 border-primary shadow-lg lg:scale-105` and a decorative overlay div (`bg-gradient-to-br from-primary/10`) that covers the background. The overlay with `absolute inset-0` sits on top of the card background, masking any peach color with a primary gradient wash.
+**File: `src/components/LogoMarquee.tsx`**
 
-**Fix**: Make the decorative gradient overlay respect the saved background — if a custom background is saved, hide or reduce the overlay opacity so the chosen background shows through.
+Replace the strip duplication logic to ensure each strip is wide enough to cover the viewport. Instead of capping at 6, duplicate the base logos enough times so each strip is at least ~2000px wide (accounting for logo width + gap). A safe heuristic: repeat logos until we have at least 12 items per strip.
 
-## Files to Change
+```ts
+// Ensure enough logos per strip to fill wide viewports
+const minLogosPerStrip = Math.max(12, baseLogos.length);
+const stripLogos = baseLogos.length > 0
+  ? Array.from({ length: Math.ceil(minLogosPerStrip / baseLogos.length) }, () => baseLogos)
+      .flat()
+      .slice(0, minLogosPerStrip)
+  : baseLogos;
+```
 
-| File | Changes |
+This guarantees at least 12 logo slots per strip (~1800px+), covering even ultrawide displays. With two strips rendered, the seamless `-50%` loop works without gaps.
+
+| File | Change |
 |---|---|
-| `src/components/ScrollingFeatureCards.tsx` | Wrap per-card CTA buttons in `EditableButton` (2 locations: mobile ~line 837, desktop ~line 964) with save handlers |
-| `src/components/WhyNavio.tsx` | (1) Wrap "See How It Works" button in `EditableButton` with persistence. (2) Conditionally hide decorative gradient overlay on "With Navio" card when custom background is applied |
+| `src/components/LogoMarquee.tsx` | Lines 77-83: replace strip sizing logic to ensure minimum 12 logos per strip |
 
