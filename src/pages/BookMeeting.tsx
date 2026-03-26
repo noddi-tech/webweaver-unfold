@@ -337,6 +337,7 @@ export default function BookMeeting() {
           guest_company: data.company || null,
           guest_message: data.message || null,
           guest_timezone: timezone,
+          duration_minutes: durationOptions ? effectiveDuration : undefined,
         },
       });
 
