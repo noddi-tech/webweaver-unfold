@@ -133,7 +133,10 @@ serve(async (req) => {
       })
     }
 
-    // 4. Insert booking
+    // 4. Generate cancel token
+    const cancelToken = crypto.randomUUID()
+
+    // 5. Insert booking
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
@@ -146,6 +149,7 @@ serve(async (req) => {
         start_time,
         end_time: endTime,
         status: 'confirmed',
+        cancel_token: cancelToken,
       })
       .select()
       .single()
