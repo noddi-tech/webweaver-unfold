@@ -140,6 +140,7 @@ export default function BookMeeting() {
   );
   const [availabilityRules, setAvailabilityRules] = useState<AvailabilityRule[]>([]);
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
+  const [serverSlots, setServerSlots] = useState<Array<{ start: string; end: string; available_members: string[] }> | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [bookingResult, setBookingResult] = useState<any>(null);
