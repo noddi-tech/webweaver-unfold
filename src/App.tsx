@@ -102,6 +102,7 @@ const App = () => {
                     <Route path="/:lang/blog" element={<LanguageSync><Blog /></LanguageSync>} />
                     <Route path="/:lang/blog/:slug" element={<LanguageSync><BlogPost /></LanguageSync>} />
                     <Route path="/:lang/book" element={<LanguageSync><BookMeeting /></LanguageSync>} />
+                    <Route path="/:lang/meet/:memberSlugs" element={<LanguageSync><MeetMembers /></LanguageSync>} />
                     <Route path="/:lang/privacy" element={<LanguageSync><LegalPage documentType="privacy_policy" /></LanguageSync>} />
                     <Route path="/:lang/terms" element={<LanguageSync><LegalPage documentType="terms_of_service" /></LanguageSync>} />
                     <Route path="/:lang/cookies" element={<LanguageSync><LegalPage documentType="cookie_policy" /></LanguageSync>} />
@@ -115,6 +116,7 @@ const App = () => {
                     <Route path="/admin" element={<Admin />} />
                     <Route path="/cms/translations" element={<Navigate to="/cms" replace />} />
                     <Route path="/book" element={<LanguageRedirect />} />
+                    <Route path="/meet/:memberSlugs" element={<LanguageRedirect />} />
                     <Route path="/book/:token" element={<CandidateBooking />} />
                     <Route path="/book/manage/:bookingId" element={<ManageBooking />} />
                     <Route path="/offer/:token" element={<OfferView />} />
