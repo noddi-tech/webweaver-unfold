@@ -168,6 +168,20 @@ export default function BookMeeting() {
     return days;
   }, [availabilityRules]);
 
+  // Compute duration options for flexible event types
+  const durationOptions = useMemo(() => {
+    if (!selectedEvent?.min_duration_minutes || !selectedEvent?.max_duration_minutes) return null;
+    const step = selectedEvent.duration_step_minutes || 15;
+    const options: number[] = [];
+    for (let d = selectedEvent.min_duration_minutes; d <= selectedEvent.max_duration_minutes; d += step) {
+      options.push(d);
+    }
+    return options.length > 1 ? options : null;
+  }, [selectedEvent]);
+
+  // Effective duration (chosen or default)
+  const effectiveDuration = selectedDuration || selectedEvent?.duration_minutes || 30;
+
   // Fetch event types
   useEffect(() => {
     supabase
@@ -215,7 +229,12 @@ export default function BookMeeting() {
     const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
 
     supabase.functions.invoke('get-availability', {
-      body: { event_type_id: selectedEvent.id, date: dateStr, timezone },
+      body: {
+        event_type_id: selectedEvent.id,
+        date: dateStr,
+        timezone,
+        duration_override: durationOptions ? effectiveDuration : undefined,
+      },
     }).then(({ data, error }) => {
       if (error) {
         console.error('get-availability error:', error);
@@ -225,7 +244,7 @@ export default function BookMeeting() {
       }
       setLoadingSlots(false);
     });
-  }, [selectedDate, selectedEvent, timezone]);
+  }, [selectedDate, selectedEvent, timezone, effectiveDuration]);
 
   // Use server slots when available, fall back to client-side
   const availableSlots = useMemo(() => {
