@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, Clock, Calendar, Users, X, Loader2, AlertTriangle, Unplug } from "lucide-react";
+import { Plus, Pencil, Clock, Calendar, Users, X, Loader2, AlertTriangle, Unplug, Link2 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { format } from "date-fns";
 
@@ -333,7 +333,19 @@ function TeamMembersTab() {
                 }
               </TableCell>
               <TableCell>
-                <Button variant="ghost" size="sm" onClick={() => openAvailability(m)}><Clock className="w-4 h-4 mr-1" /> Availability</Button>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => openAvailability(m)}><Clock className="w-4 h-4 mr-1" /> Availability</Button>
+                  {m.slug && (
+                    <Button variant="ghost" size="sm" onClick={() => {
+                      const url = `https://naviosolutions.com/en/meet/${m.slug}`;
+                      navigator.clipboard.writeText(url);
+                      toast({ title: "Meeting link copied!", description: url });
+                    }}>
+                      <Link2 className="w-4 h-4 mr-1" /> Copy Link
+                    </Button>
+                  )}
+                </div>
+              </TableCell>
               </TableCell>
             </TableRow>
           ))}
