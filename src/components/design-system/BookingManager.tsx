@@ -175,7 +175,7 @@ function TeamMembersTab() {
       const { data: eventTypes } = await supabase.from("event_types").select("*").in("id", etIds);
       const { data: etAvail } = await supabase.from("event_type_availability").select("*").in("event_type_id", etIds);
       const mapped = (eventTypes || []).map((et: EventType) => {
-        const avails = (etAvail || []).filter((a: EventTypeAvailability) => a.event_type_id === et.id);
+        const avails = ((etAvail || []) as EventTypeAvailability[]).filter(a => a.event_type_id === et.id);
         const recurring = ALL_DAYS.map(day => {
           const existing = avails.find(a => a.type === 'recurring' && a.day_of_week === day);
           return { day, enabled: !!existing, start: existing?.start_time || "09:00", end: existing?.end_time || "17:00" };
