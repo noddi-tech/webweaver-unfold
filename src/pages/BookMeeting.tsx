@@ -43,6 +43,9 @@ type EventType = {
   slug: string;
   description: string | null;
   duration_minutes: number | null;
+  min_duration_minutes: number | null;
+  max_duration_minutes: number | null;
+  duration_step_minutes: number | null;
   buffer_minutes: number | null;
   color: string | null;
   requires_all_members: boolean | null;
@@ -144,6 +147,7 @@ export default function BookMeeting() {
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
   const [serverSlots, setServerSlots] = useState<Array<{ start: string; end: string; available_members: string[] }> | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [bookingResult, setBookingResult] = useState<any>(null);
   const [loading, setLoading] = useState(true);
