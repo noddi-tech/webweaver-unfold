@@ -17,6 +17,10 @@ export default function WhyNavio() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const { t } = useAppTranslation();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [ctaBgColor, setCtaBgColor] = useState('primary');
+  const [ctaTextColor, setCtaTextColor] = useState('primary-foreground');
+  const { background: afterCardBg } = useBackgroundStyle('why-noddi-after-card-background', 'bg-card');
+  const hasCustomAfterBackground = afterCardBg !== 'bg-card';
 
   const beforeItems = [
     t('why_noddi.before.item_1', 'Multiple disconnected tools'),
