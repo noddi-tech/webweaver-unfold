@@ -1,83 +1,32 @@
 
 
-# Event-Type Availability Schedules
+# Full-Width Calendar & Larger Team Member Text
 
-## Summary
-
-Add per-event-type availability so you can control *when* each event type is bookable — either as recurring weekly days (e.g., demos on Tue/Thu) or specific date ranges (e.g., Autotechnica Mar 29–31). The final bookable slots are the intersection of member availability, event-type availability, and Google Calendar free/busy.
-
-## Current behavior
-
-- `availability_rules` table holds weekly schedules per team member (Mon–Fri, start/end times)
-- `get-availability` edge function checks member rules + Google FreeBusy
-- No concept of "this event type is only available on certain days/dates"
+## Problem
+1. Calendar cells use fixed `w-9 h-9` sizing in `calendar.tsx`, preventing the calendar from filling the card width despite the `w-full` and `flex-1` overrides in BookMeeting.
+2. Team member names use `text-sm` and titles use `text-xs` — too small.
 
 ## Changes
 
-### 1. New database table: `event_type_availability`
+### 1. Calendar full-width (`src/components/ui/calendar.tsx`)
+Change the fixed-size classes to flex-based sizing so the calendar stretches to fill its container:
+- `head_cell`: replace `w-9` with `flex-1`
+- `cell`: replace `h-9 w-9` with `flex-1 h-11`
+- `day`: replace `h-9 w-9` with `h-11 w-full`
 
-Supports two modes via a `type` column:
+This makes the calendar respect its container width. The existing `w-full` on table/row already supports this.
 
-```sql
-create table public.event_type_availability (
-  id uuid primary key default gen_random_uuid(),
-  event_type_id uuid references event_types(id) on delete cascade not null,
-  type text not null check (type in ('recurring', 'date_range')),
-  -- For recurring: day_of_week (0=Mon, 6=Sun), start_time, end_time
-  day_of_week integer,
-  start_time text,
-  end_time text,
-  -- For date_range: specific start/end dates
-  date_start date,
-  date_end date,
-  created_at timestamptz default now()
-);
-```
+### 2. Simplify BookMeeting calendar overrides (`src/pages/BookMeeting.tsx`)
+Remove the verbose `[&_...]` override classes on the Calendar since the base component will now handle full-width natively. Keep `rounded-lg border bg-card-background p-4 w-full`.
 
-- `recurring` rows: "Demos available Tue 09:00–17:00 and Thu 09:00–17:00"
-- `date_range` rows: "Autotechnica available Mar 29–31" (uses member's normal start/end times, or optional override times)
-
-RLS: public read, admin write.
-
-### 2. CMS UI in BookingManager EventTypesTab
-
-Add an "Availability" section inside the event type edit dialog:
-
-- Toggle: "Limit availability for this event type" (off = always available when members are available, which is current behavior)
-- When on, show two sub-sections:
-  - **Recurring days**: checkboxes for Mon–Sun with start/end time selectors (like the member availability UI)
-  - **Date ranges**: add specific date ranges with a date picker (start date + end date)
-- Save writes to `event_type_availability` table
-
-### 3. Edge function: `get-availability`
-
-Update slot generation logic:
-
-- After fetching member availability rules, also fetch `event_type_availability` for the requested event type
-- If no rows exist → current behavior (no restriction)
-- If rows exist → the requested date must match either:
-  - A `recurring` row with matching `day_of_week`, AND the slot time falls within `start_time`–`end_time`
-  - A `date_range` row where the date falls between `date_start` and `date_end`
-- This acts as an additional filter on top of member availability + Google FreeBusy
-
-### 4. Client-side fallback in BookMeeting.tsx
-
-- Fetch `event_type_availability` alongside other data
-- Apply same filtering logic in the client-side fallback slot generation
-- Grey out calendar dates that have no event-type availability
-
-## Files to change
+### 3. Larger team member text (`src/pages/BookMeeting.tsx`)
+- Avatar: `w-8 h-8` → `w-10 h-10`
+- Name: `text-sm` → `text-base`
+- Title: `text-xs` → `text-sm`
+- "TEAM" label: `text-xs` → `text-sm`
 
 | File | Change |
 |------|--------|
-| New migration | Create `event_type_availability` table with RLS |
-| `src/components/design-system/BookingManager.tsx` | Add availability UI to event type edit dialog |
-| `supabase/functions/get-availability/index.ts` | Filter slots by event-type availability |
-| `src/pages/BookMeeting.tsx` | Fetch event-type availability, filter calendar dates |
-
-## How it works for your examples
-
-- **Autotechnica**: Add a `date_range` row: Mar 29–31. Only those 3 days show slots for that event type.
-- **Product Demo**: Add `recurring` rows for e.g. Tuesday and Thursday. Only Tue/Thu show slots.
-- **Intro Call**: No event-type availability rows → available any day members are available (current behavior preserved).
+| `src/components/ui/calendar.tsx` | Make cells flex-based instead of fixed w-9 |
+| `src/pages/BookMeeting.tsx` | Remove redundant calendar overrides, enlarge team member text |
 
