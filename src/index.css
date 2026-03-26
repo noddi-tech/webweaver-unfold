@@ -69,10 +69,14 @@ All colors MUST be HSL.
     --muted-foreground: 0 0% 35%;              /* Darker gray for AAA contrast (7:1) | Used in: Descriptions, labels, helper text */
     
     /* Secondary & Accent - Distinct surface colors */
-    --secondary: 210 40% 96.1%;                /* Light blue-gray surface */
-    --secondary-foreground: 222.2 47.4% 11.2%; /* Dark blue-gray text */
+    --secondary: 250 57% 55%;                  /* Vivid Purple #5B4ACF - hover states, badges, accent borders */
+    --secondary-foreground: 0 0% 100%;         /* White text on vivid purple */
     --accent: 270 20% 95%;                     /* Light lavender surface */
     --accent-foreground: 249 50% 20%;          /* Dark purple-blue text */
+    
+    /* Card Surface - Lavender for cards that pop */
+    --card-surface: 258 72% 95%;               /* Soft Lavender #EEEAFC - card backgrounds, section accents */
+    --card-surface-foreground: 250 54% 39%;    /* Dark Purple #3D2E99 - text on card-surface */
     
     /* Borders and dividers */
     --border: 0 0% 90%;                        /* Light gray borders | Used in: Inputs, cards, dividers */
@@ -101,7 +105,7 @@ All colors MUST be HSL.
     
     /* Phase 3: Interactive Text Colors */
     --text-link: 249 67% 50%;                  /* Link text | Used in: Clickable links, anchors */
-    --text-link-hover: 249 67% 40%;            /* Link hover | Used in: Link hover state */
+    --text-link-hover: 250 57% 55%;            /* Link hover (vivid purple) | Used in: Link hover state */
     
     /* Phase 4: Specialized Text Colors */
     --text-code: 266 85% 45%;                  /* Code text | Used in: Code snippets, technical content */
@@ -173,6 +177,9 @@ All colors MUST be HSL.
     --glass-solid: hsl(var(--card));
     --glass-card: hsl(var(--card) / 0.95);
     --glass-prominent: hsl(var(--card) / 0.98);
+    
+    /* Purple Depth Gradient - Three-stop premium gradient */
+    --gradient-purple-depth: linear-gradient(135deg, hsl(250 57% 55%) 0%, hsl(250 54% 39%) 50%, hsl(249 67% 24%) 100%);
     
     /* Legacy gradients for backward compatibility */
     --gradient-background: var(--gradient-hero);
