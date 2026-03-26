@@ -435,7 +435,7 @@ export default function BookMeeting() {
                   onClick={() => { setStep(1); setSelectedDate(undefined); setSelectedSlot(null); }}
                   className="mb-2"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                  <ArrowLeft className="w-4 h-4 mr-1" /> {t('book.back', 'Back')}
                 </Button>
 
                 <div>
@@ -627,8 +627,8 @@ export default function BookMeeting() {
         {/* Step 4: Confirmation */}
         <div className={`transition-all duration-300 ${step === 4 ? "opacity-100" : "opacity-0 hidden"}`}>
           <div className="text-center max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6 animate-scale-in">
-              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6 animate-scale-in">
+              <CheckCircle2 className="w-8 h-8 text-primary" />
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-2">{t('book.confirmed_title', "You're booked!")}</h2>
             <p className="text-muted-foreground mb-6">
