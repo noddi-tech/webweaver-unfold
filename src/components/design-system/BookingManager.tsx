@@ -212,6 +212,17 @@ function TeamMembersTab() {
 
   return (
     <div className="space-y-4">
+      {/* Warning banner for unconnected members */}
+      {!loading && hasUnconnectedMembers && (
+        <Alert className="border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
+          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          <AlertTitle className="text-yellow-800 dark:text-yellow-200">Calendar not connected</AlertTitle>
+          <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+            Some team members haven't connected their Google Calendar yet. Availability may be inaccurate.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Team Members</h3>
         <Button onClick={openAdd} size="sm"><Plus className="w-4 h-4 mr-1" /> Add Team Member</Button>
@@ -240,13 +251,18 @@ function TeamMembersTab() {
               <TableCell>{m.title || "—"}</TableCell>
               <TableCell>
                 {m.google_calendar_connected
-                  ? <Badge variant="default" className="bg-green-600">Connected</Badge>
+                  ? <div className="flex items-center gap-2">
+                      <Badge variant="default" className="bg-green-600">Connected</Badge>
+                      <Button variant="ghost" size="sm" className="text-destructive h-7 px-2" onClick={() => setDisconnectingId(m.id)}>
+                        <Unplug className="w-3.5 h-3.5 mr-1" /> Disconnect
+                      </Button>
+                    </div>
                   : <Button variant="outline" size="sm" onClick={() => {
                       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
                       const redirectUri = `https://${projectId}.supabase.co/functions/v1/google-auth-callback`;
-                      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.freebusy')}&access_type=offline&prompt=consent&state=${m.id}`;
+                      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events')}&access_type=offline&prompt=consent&state=${m.id}`;
                       window.open(oauthUrl, '_blank');
-                    }}>Connect</Button>
+                    }}><Calendar className="w-4 h-4 mr-1" /> Connect</Button>
                 }
               </TableCell>
               <TableCell>
