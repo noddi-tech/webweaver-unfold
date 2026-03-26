@@ -1,51 +1,96 @@
 
 
-# Phase 6: Public Page Polish & CTA Integration
+# Phase 7: Booking Email Notifications & Guest Management Page
 
 ## Summary
 
-Polish the /book page with a minimal focused header, SEO meta tags, empty states, confirmation email copy, and mobile optimization. Also update FinalCTA to link to /book. The Header already has a "Book a Demo" CTA button (added in a previous phase).
+Add a branded confirmation email sent after booking creation, and a public booking management page where guests can view and cancel their meeting without authentication, secured by a hash token.
 
 ## Changes
 
-### 1. `src/pages/BookMeeting.tsx` — Major updates
+### 1. Database Migration
 
-**Minimal header**: Replace `<Header />` with a custom minimal header showing only the Navio logo (fetched from `brand_settings`) linking to `/` and a "Back to site" text link. No full navigation.
+Add `cancel_token` column to `bookings` table — a unique hash generated at booking time for unauthenticated access.
 
-**SEO meta tags**: Add `<Helmet>` (from `react-helmet-async` or a `<title>` + `<meta>` via `document.title` in a `useEffect`) with:
-- Title: "Book a Meeting — Navio Solutions"
-- Description: "Schedule a demo or meeting with the Navio team..."
+```sql
+ALTER TABLE bookings ADD COLUMN cancel_token TEXT UNIQUE;
+```
 
-**Empty state**: After loading completes, if `eventTypes.length === 0`, show a friendly card with `CalendarX2` icon: "We're not accepting bookings at the moment. Please reach out to hello@noddi.tech" with a mailto link.
+Add RLS policy allowing anonymous SELECT on bookings by cancel_token:
+```sql
+CREATE POLICY "Public can view booking by cancel_token"
+  ON bookings FOR SELECT TO anon
+  USING (cancel_token IS NOT NULL AND cancel_token = current_setting('request.headers', true)::json->>'x-cancel-token');
+```
 
-**Confirmation email mention**: In step 4, add below the existing confirmation text: "You'll receive a Google Calendar invite at [guest_email] within a few minutes."
+Actually simpler: the management page will call an edge function (not query directly), so no new RLS needed.
 
-**Mobile optimization**:
-- Calendar: add `w-full` class, remove fixed width constraints
-- Time slots grid: change from `md:grid-cols-3` to `grid-cols-2 md:grid-cols-3` (always 2-col on mobile instead of horizontal scroll)
-- Slot buttons: ensure `min-h-[44px]` for touch targets
-- Form: already single-column, just ensure inputs have `min-h-[44px]`
-- Step 2 grid: change `md:grid-cols-[280px_1fr]` layout to stack on mobile (already does via `grid` without cols on small screens)
+### 2. Edge Function: `cancel-booking`
 
-### 2. `src/components/FinalCTA.tsx` — Update CTA URL
+New file: `supabase/functions/cancel-booking/index.ts`
 
-Change the default `ctaUrl` from `/contact` to `/book` (line 43). This is the fallback when no CMS override exists.
+- Accepts `{ booking_id, cancel_token }`
+- Validates the token matches the booking's `cancel_token`
+- Updates booking status to `cancelled`
+- If `google_calendar_event_id` exists, deletes the Google Calendar event via the Calendar API (using the first connected team member's token, same pattern as create-booking)
+- Returns `{ success: true }`
 
-### 3. `src/components/Header.tsx` — Already done
+Add to `supabase/config.toml`: `[functions.cancel-booking]` with `verify_jwt = false`
 
-The Header already has a persistent "Book a Demo" CTA button linking to `/book` (lines ~280-285 desktop, ~300-305 mobile). No changes needed.
+### 3. Update `create-booking` Edge Function
 
-## File summary
+After successful booking insert:
+- Generate a `cancel_token` (SHA-256 hash of `booking.id + secret`): `crypto.randomUUID()` is sufficient
+- Update the booking row with the cancel_token
+- Send a branded confirmation email via Resend (using existing `RESEND_API_KEY` secret) containing:
+  - Meeting details (title, date/time, attendees)
+  - Google Meet link (if available)
+  - Manage/cancel link: `https://naviosolutions.com/book/manage/{booking_id}?token={cancel_token}`
+
+### 4. New Page: `src/pages/ManageBooking.tsx`
+
+Public page at `/book/manage/:bookingId` (no auth required):
+- Reads `bookingId` from URL params and `token` from query string
+- Calls an edge function to fetch booking details by ID + token validation
+- Shows: event type title, date/time, team members, guest info
+- "Cancel Meeting" button with confirmation dialog
+- On cancel: calls `cancel-booking` edge function, shows "Meeting cancelled. The team has been notified."
+- Error states: invalid token, already cancelled, booking not found
+
+### 5. Edge Function: `get-booking`
+
+New file: `supabase/functions/get-booking/index.ts`
+
+- Accepts `{ booking_id, cancel_token }`
+- Validates token matches
+- Returns booking details with event type and team member names (joined)
+- Returns 404 if not found or token mismatch
+
+Add to `supabase/config.toml`: `[functions.get-booking]` with `verify_jwt = false`
+
+### 6. Route Registration in `App.tsx`
+
+Add route: `<Route path="/book/manage/:bookingId" element={<ManageBooking />} />`
+(No language prefix — this is a token-based link shared via email)
+
+## File Summary
 
 | File | Action |
 |---|---|
-| `src/pages/BookMeeting.tsx` | Edit — minimal header, SEO, empty state, email mention, mobile polish |
-| `src/components/FinalCTA.tsx` | Edit — change default ctaUrl from `/contact` to `/book` |
+| Migration | Add `cancel_token` column to `bookings` |
+| `supabase/functions/create-booking/index.ts` | Edit — generate cancel_token, send confirmation email via Resend |
+| `supabase/functions/get-booking/index.ts` | Create — fetch booking by ID + token |
+| `supabase/functions/cancel-booking/index.ts` | Create — cancel booking + delete Calendar event |
+| `supabase/config.toml` | Add cancel-booking and get-booking functions |
+| `src/pages/ManageBooking.tsx` | Create — public booking management page |
+| `src/App.tsx` | Add route for /book/manage/:bookingId |
 
-## Technical details
+## Technical Details
 
-- For SEO, use `useEffect` to set `document.title` and create/update meta description tag (avoids adding react-helmet dependency)
-- Minimal header: a simple `<header>` with logo from `brand_settings` query (already fetched in Header component pattern) + "Back to site" `LanguageLink`
-- Time slot buttons get `min-h-[44px]` and grid changes from `flex overflow-x-auto md:grid md:grid-cols-3` to `grid grid-cols-2 md:grid-cols-3 gap-2`
-- Input/Button elements get explicit `min-h-[44px]` for WCAG touch targets
+- Cancel token: `crypto.randomUUID()` stored on booking row at creation time
+- Email uses existing Resend integration (RESEND_API_KEY already configured)
+- Email template: inline HTML matching existing Navio brand style (Federal Blue gradient header, clean body)
+- Calendar event deletion reuses the same `getAccessToken`/`decrypt` pattern from create-booking
+- ManageBooking page uses minimal header (same as BookMeeting — logo + back link)
+- All edge functions use service role key internally, verify_jwt = false
 
