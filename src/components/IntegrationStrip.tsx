@@ -22,7 +22,7 @@ export default function IntegrationStrip() {
   const onSave = () => setRefreshKey((k) => k + 1);
 
   return (
-    <EditableBackground elementId="integrations-strip-section" defaultBackground="bg-muted/50">
+    <EditableBackground elementId="integrations-strip-section" defaultBackground="bg-card-surface">
       <section
         ref={ref}
         className="py-10 md:py-16 border-y border-border/40"
@@ -83,7 +83,7 @@ export default function IntegrationStrip() {
                 <foreignObject x="330" y="60" width="160" height="160">
                   <div className="w-full h-full rounded-[20px]" 
                     style={{ 
-                      backgroundImage: 'var(--gradient-warmth)', 
+                      backgroundImage: 'var(--gradient-purple-depth)', 
                       border: '2px solid hsl(249 67% 24%)' 
                     }} />
                 </foreignObject>
@@ -142,7 +142,7 @@ export default function IntegrationStrip() {
             <div className="space-y-6 order-3 lg:col-start-1">
               {/* Partner pill */}
               <div className="flex items-center gap-3">
-                <div className="rounded-lg border border-border bg-white px-5 py-2.5 text-sm font-semibold text-foreground">
+                <div className="rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-foreground" style={{ border: '1px solid rgba(91, 74, 207, 0.15)' }}>
                   <EditableTranslation translationKey="integrations_strip.partner_eontyre" onSave={onSave}>
                     <span>{t("integrations_strip.partner_eontyre", "Eontyre")}</span>
                   </EditableTranslation>
@@ -160,7 +160,12 @@ export default function IntegrationStrip() {
                   <EditableTranslation key={key} translationKey={key} onSave={onSave}>
                     <Badge
                       variant="outline"
-                      className="text-sm px-3 py-1.5 border-border bg-white text-foreground shadow-sm gap-1.5"
+                      className="text-sm px-3 py-1.5 shadow-sm gap-1.5"
+                      style={{
+                        backgroundColor: 'hsl(var(--card-surface))',
+                        color: 'hsl(var(--card-surface-foreground))',
+                        border: '1px solid rgba(91, 74, 207, 0.15)',
+                      }}
                     >
                       <Icon className="w-3.5 h-3.5 text-muted-foreground" />
                       {t(key, fallback)}

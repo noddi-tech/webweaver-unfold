@@ -54,12 +54,12 @@ export default function WhyNavio() {
 
         <div className="relative grid lg:grid-cols-2 gap-6 mb-8">
           {/* Floating VS Badge - Desktop */}
-          <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-sm items-center justify-center shadow-lg border-4 border-background">
+          <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-secondary text-secondary-foreground font-bold text-sm items-center justify-center shadow-lg border-4 border-background">
             VS
           </div>
 
           {/* Mobile VS Badge */}
-          <div className="flex lg:hidden w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-xs items-center justify-center shadow-md mx-auto -my-3 relative z-10 border-4 border-background">
+          <div className="flex lg:hidden w-10 h-10 rounded-full bg-secondary text-secondary-foreground font-bold text-xs items-center justify-center shadow-md mx-auto -my-3 relative z-10 border-4 border-background">
             VS
           </div>
 
@@ -99,9 +99,9 @@ export default function WhyNavio() {
           {/* After Card — the clear winner */}
           <EditableCard
             elementIdPrefix="why-noddi-after-card"
-            defaultBackground="bg-card"
-            defaultTextColor="foreground"
-            className={`relative overflow-hidden border-2 border-primary shadow-lg lg:scale-105 transition-all duration-700 delay-200 ${
+            defaultBackground="bg-card-surface"
+            defaultTextColor="card-surface-foreground"
+            className={`relative overflow-hidden border-2 border-secondary shadow-lg lg:scale-105 transition-all duration-700 delay-200 ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
           >
