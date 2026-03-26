@@ -568,7 +568,7 @@ export default function BookMeeting() {
                   <Input
                     {...form.register("name")}
                     placeholder={t('book.form_name_placeholder', 'Your full name')}
-                    className="bg-card"
+                    className="bg-card-background"
                   />
                   {form.formState.errors.name && (
                     <p className="text-sm text-destructive mt-1">{form.formState.errors.name.message}</p>
@@ -579,7 +579,7 @@ export default function BookMeeting() {
                   <Input
                     {...form.register("email")}
                     placeholder={t('book.form_email_placeholder', 'you@company.com')}
-                    className="bg-card"
+                    className="bg-card-background"
                   />
                   {form.formState.errors.email && (
                     <p className="text-sm text-destructive mt-1">{form.formState.errors.email.message}</p>
@@ -590,7 +590,7 @@ export default function BookMeeting() {
                   <Input
                     {...form.register("company")}
                     placeholder={t('book.form_company_placeholder', 'Your company name')}
-                    className="bg-card"
+                    className="bg-card-background"
                   />
                 </div>
                 <div>
