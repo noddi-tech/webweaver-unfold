@@ -387,33 +387,43 @@ function TeamMembersTab() {
                         <span className="text-sm font-medium text-foreground">{entry.eventType.title}</span>
                       </div>
 
-                      {/* Recurring days */}
-                      <div className="space-y-2">
-                        <Label className="text-xs text-muted-foreground">Recurring Days</Label>
-                        {entry.recurring.map((rule, dayIdx) => (
-                          <div key={rule.day} className="flex items-center gap-2">
-                            <Switch checked={rule.enabled} onCheckedChange={checked => updateMemberEventRecurring(etId, dayIdx, { enabled: !!checked })} />
-                            <span className="w-10 text-xs font-medium">{DAY_NAMES_SHORT[rule.day]}</span>
-                            {rule.enabled && (
-                              <>
-                                <Select value={rule.start} onValueChange={v => updateMemberEventRecurring(etId, dayIdx, { start: v })}>
-                                  <SelectTrigger className="w-20 h-8 text-xs"><SelectValue /></SelectTrigger>
-                                  <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                                </Select>
-                                <span className="text-xs text-muted-foreground">–</span>
-                                <Select value={rule.end} onValueChange={v => updateMemberEventRecurring(etId, dayIdx, { end: v })}>
-                                  <SelectTrigger className="w-20 h-8 text-xs"><SelectValue /></SelectTrigger>
-                                  <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                                </Select>
-                              </>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                      {/* Recurring days - only show if any enabled */}
+                      {entry.recurring.some(r => r.enabled) ? (
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Recurring Days</Label>
+                          {entry.recurring.map((rule, dayIdx) => (
+                            <div key={rule.day} className="flex items-center gap-2">
+                              <Switch checked={rule.enabled} onCheckedChange={checked => updateMemberEventRecurring(etId, dayIdx, { enabled: !!checked })} />
+                              <span className="w-10 text-xs font-medium">{DAY_NAMES_SHORT[rule.day]}</span>
+                              {rule.enabled && (
+                                <>
+                                  <Select value={rule.start} onValueChange={v => updateMemberEventRecurring(etId, dayIdx, { start: v })}>
+                                    <SelectTrigger className="w-20 h-8 text-xs"><SelectValue /></SelectTrigger>
+                                    <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                                  </Select>
+                                  <span className="text-xs text-muted-foreground">–</span>
+                                  <Select value={rule.end} onValueChange={v => updateMemberEventRecurring(etId, dayIdx, { end: v })}>
+                                    <SelectTrigger className="w-20 h-8 text-xs"><SelectValue /></SelectTrigger>
+                                    <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                                  </Select>
+                                </>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => {
+                          setMemberEventAvail(prev => prev.map(e => e.eventType.id === etId ? { ...e, recurring: e.recurring.map((r, i) => i === 0 ? { ...r, enabled: true } : r) } : e));
+                        }}>
+                          <Plus className="w-3 h-3 mr-1" /> Add Recurring Days
+                        </Button>
+                      )}
 
-                      {/* Date ranges */}
+                      {/* Date ranges - only show list if any exist */}
                       <div className="space-y-2">
-                        <Label className="text-xs text-muted-foreground">Date Ranges</Label>
+                        {entry.dateRanges.length > 0 && (
+                          <Label className="text-xs text-muted-foreground">Date Ranges</Label>
+                        )}
                         {entry.dateRanges.map((dr, drIdx) => (
                           <div key={drIdx} className="flex flex-wrap items-center gap-2">
                             <Input type="date" value={dr.date_start} onChange={e => updateMemberEventDateRange(etId, drIdx, { date_start: e.target.value })} className="w-[130px] h-8 text-xs" />
