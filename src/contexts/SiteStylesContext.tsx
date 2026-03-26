@@ -42,6 +42,7 @@ interface SiteStylesContextValue {
   colorTokens: ColorToken[];
   isLoaded: boolean;
   refreshBackgroundStyles: () => Promise<void>;
+  refreshTextStyles: () => Promise<void>;
 }
 
 const SiteStylesContext = createContext<SiteStylesContextValue>({
@@ -51,6 +52,7 @@ const SiteStylesContext = createContext<SiteStylesContextValue>({
   colorTokens: [],
   isLoaded: false,
   refreshBackgroundStyles: async () => {},
+  refreshTextStyles: async () => {},
 });
 
 export function useSiteStyles() {
