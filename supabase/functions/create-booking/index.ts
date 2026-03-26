@@ -177,7 +177,7 @@ serve(async (req) => {
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
-        event_type_id,
+        event_type_id: event_type_id || null,
         guest_name,
         guest_email,
         guest_company: guest_company || null,
