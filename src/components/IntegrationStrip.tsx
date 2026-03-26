@@ -87,10 +87,10 @@ export default function IntegrationStrip() {
                       border: '2px solid hsl(249 67% 24%)' 
                     }} />
                 </foreignObject>
-                <text x="410" y="128" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="17" fontWeight="700">
+                <text x="410" y="128" textAnchor="middle" fill="white" fontSize="17" fontWeight="700">
                   {t("integrations_strip.diagram_navio", "Navio")}
                 </text>
-                <text x="410" y="152" textAnchor="middle" fill="hsl(249, 67%, 24%)" fontSize="12" opacity="0.7">
+                <text x="410" y="152" textAnchor="middle" fill="white" fontSize="12" opacity="0.7">
                   {t("integrations_strip.diagram_navio_subtitle", "Booking · Routing · Capacity")}
                 </text>
 
