@@ -66,6 +66,15 @@ type AvailabilityRule = {
   end_time: string;
 };
 
+type EventTypeAvailability = {
+  type: 'recurring' | 'date_range';
+  day_of_week: number | null;
+  start_time: string | null;
+  end_time: string | null;
+  date_start: string | null;
+  date_end: string | null;
+};
+
 type Booking = {
   start_time: string;
   end_time: string;
@@ -144,6 +153,7 @@ export default function BookMeeting() {
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
   const [availabilityRules, setAvailabilityRules] = useState<AvailabilityRule[]>([]);
+  const [eventTypeAvailability, setEventTypeAvailability] = useState<EventTypeAvailability[]>([]);
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
   const [serverSlots, setServerSlots] = useState<Array<{ start: string; end: string; available_members: string[] }> | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
@@ -217,6 +227,15 @@ export default function BookMeeting() {
           .select("team_member_id, day_of_week, start_time, end_time")
           .in("team_member_id", ids);
         setAvailabilityRules((rules as AvailabilityRule[]) || []);
+      });
+
+    // Fetch event-type availability
+    supabase
+      .from("event_type_availability")
+      .select("type, day_of_week, start_time, end_time, date_start, date_end")
+      .eq("event_type_id", selectedEvent.id)
+      .then(({ data }) => {
+        setEventTypeAvailability((data as EventTypeAvailability[]) || []);
       });
   }, [selectedEvent]);
 
@@ -383,12 +402,22 @@ export default function BookMeeting() {
   // Calendar disabled logic: past, future, and days with no availability rules
   const isDateDisabled = (date: Date) => {
     if (isBefore(date, tomorrow) || isAfter(date, maxDate)) return true;
-    // Disable days with no availability rules (e.g. weekends)
+    const jsDay = date.getDay();
+    const dbDay = jsDay === 0 ? 6 : jsDay - 1;
+
+    // Check member availability rules (e.g. weekends)
     if (availabilityRules.length > 0) {
-      const jsDay = date.getDay();
-      const dbDay = jsDay === 0 ? 6 : jsDay - 1;
       if (!availableDayNumbers.has(dbDay)) return true;
     }
+
+    // Check event-type availability constraints
+    if (eventTypeAvailability.length > 0) {
+      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      const recurringMatch = eventTypeAvailability.some(r => r.type === 'recurring' && r.day_of_week === dbDay);
+      const dateRangeMatch = eventTypeAvailability.some(r => r.type === 'date_range' && dateStr >= (r.date_start || '') && dateStr <= (r.date_end || ''));
+      if (!recurringMatch && !dateRangeMatch) return true;
+    }
+
     return false;
   };
 
