@@ -106,7 +106,9 @@ export default function WhyNavio() {
             }`}
           >
             {/* Decorative gradient glow */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent pointer-events-none" />
+            {!hasCustomAfterBackground && (
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent pointer-events-none" />
+            )}
             <CardContent className="p-8 relative z-[1]">
               <div className="mb-6">
                 <EditableTranslation translationKey="why_noddi.after.title" onSave={() => setRefreshKey(prev => prev + 1)}>
@@ -134,12 +136,60 @@ export default function WhyNavio() {
 
         <div className="text-center">
           <LanguageLink to="/functions">
-            <EditableTranslation translationKey="why_noddi.button_cta" onSave={() => setRefreshKey(prev => prev + 1)}>
-              <Button size="lg" className="text-lg px-8 py-6 group">
-                {t('why_noddi.button_cta', 'See How It Works')}
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            <EditableButton
+              buttonText={t('why_noddi.button_cta', 'See How It Works')}
+              buttonUrl="/functions"
+              buttonBgColor={ctaBgColor}
+              buttonTextColor={ctaTextColor}
+              onSave={async (text, url) => {
+                await supabase.from('text_content').upsert({
+                  element_id: 'why-noddi-cta',
+                  page_location: 'homepage',
+                  section: 'why-noddi',
+                  element_type: 'cta_button',
+                  content: text,
+                  active: true,
+                }, { onConflict: 'element_id' });
+                setRefreshKey(prev => prev + 1);
+              }}
+              onBgColorChange={async (color) => {
+                setCtaBgColor(color);
+                await supabase.from('text_content').upsert({
+                  element_id: 'why-noddi-cta',
+                  page_location: 'homepage',
+                  section: 'why-noddi',
+                  element_type: 'cta_button',
+                  content: t('why_noddi.button_cta', 'See How It Works'),
+                  button_bg_color: color,
+                  active: true,
+                }, { onConflict: 'element_id' });
+              }}
+              onTextColorChange={async (color) => {
+                setCtaTextColor(color);
+                await supabase.from('translations').upsert([{
+                  translation_key: 'why_noddi.button_cta',
+                  language_code: 'en',
+                  translated_text: t('why_noddi.button_cta', 'See How It Works'),
+                  color_token: color,
+                }], { onConflict: 'translation_key,language_code' });
+              }}
+            >
+              <Button 
+                size="lg" 
+                className="text-lg px-8 py-6 group"
+                style={{
+                  backgroundColor: ctaBgColor.includes('gradient') ? undefined : `hsl(var(--${ctaBgColor}))`,
+                  backgroundImage: ctaBgColor.includes('gradient') ? `var(--${ctaBgColor})` : undefined,
+                }}
+              >
+                <span style={{ color: resolveTextColor(ctaTextColor) }}>
+                  <EditableTranslation translationKey="why_noddi.button_cta" onSave={() => setRefreshKey(prev => prev + 1)}>
+                    {t('why_noddi.button_cta', 'See How It Works')}
+                  </EditableTranslation>
+                  <ArrowRight className="w-5 h-5 ml-2 inline group-hover:translate-x-1 transition-transform" />
+                </span>
               </Button>
-            </EditableTranslation>
+            </EditableButton>
           </LanguageLink>
         </div>
       </div>
