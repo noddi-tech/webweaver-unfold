@@ -477,14 +477,14 @@ export default function BookMeeting() {
                   selected={selectedDate}
                   onSelect={(date) => { setSelectedDate(date); setSelectedSlot(null); }}
                   disabled={isDateDisabled}
-                  className="rounded-lg border bg-card p-3 pointer-events-auto"
+                  className="rounded-lg border bg-card-background p-3 pointer-events-auto"
                 />
 
                 {/* Timezone */}
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1.5">{t('book.timezone', 'Timezone')}</label>
                   <Select value={timezone} onValueChange={setTimezone}>
-                    <SelectTrigger className="bg-card">
+                    <SelectTrigger className="bg-card-background">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -525,7 +525,7 @@ export default function BookMeeting() {
                               className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-all border shrink-0 ${
                                 isSelected
                                   ? "bg-primary text-primary-foreground border-primary"
-                                  : "bg-card text-foreground border-border hover:border-primary hover:bg-primary/5"
+                                  : "bg-card-background text-foreground border-border hover:border-primary hover:bg-primary/5"
                               }`}
                             >
                               {formatSlotTime(slot, timezone)}
@@ -568,7 +568,7 @@ export default function BookMeeting() {
                   <Input
                     {...form.register("name")}
                     placeholder={t('book.form_name_placeholder', 'Your full name')}
-                    className="bg-card"
+                    className="bg-card-background"
                   />
                   {form.formState.errors.name && (
                     <p className="text-sm text-destructive mt-1">{form.formState.errors.name.message}</p>
@@ -579,7 +579,7 @@ export default function BookMeeting() {
                   <Input
                     {...form.register("email")}
                     placeholder={t('book.form_email_placeholder', 'you@company.com')}
-                    className="bg-card"
+                    className="bg-card-background"
                   />
                   {form.formState.errors.email && (
                     <p className="text-sm text-destructive mt-1">{form.formState.errors.email.message}</p>
@@ -590,7 +590,7 @@ export default function BookMeeting() {
                   <Input
                     {...form.register("company")}
                     placeholder={t('book.form_company_placeholder', 'Your company name')}
-                    className="bg-card"
+                    className="bg-card-background"
                   />
                 </div>
                 <div>
@@ -601,7 +601,7 @@ export default function BookMeeting() {
                     {...form.register("message")}
                     placeholder={t('book.form_message_placeholder', 'Optional message...')}
                     rows={3}
-                    className="bg-card"
+                    className="bg-card-background"
                   />
                 </div>
                 <Button

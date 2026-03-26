@@ -142,7 +142,8 @@ export default {
 				},
 				card: {
 					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
+					foreground: 'hsl(var(--card-foreground))',
+					background: 'hsl(var(--card-background))',
 				},
 				'card-surface': {
 					DEFAULT: 'hsl(var(--card-surface))',
