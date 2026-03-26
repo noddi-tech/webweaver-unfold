@@ -346,7 +346,6 @@ function TeamMembersTab() {
                   )}
                 </div>
               </TableCell>
-              </TableCell>
             </TableRow>
           ))}
         </TableBody>
