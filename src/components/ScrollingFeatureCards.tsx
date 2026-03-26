@@ -1063,15 +1063,6 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                               await refreshTextStyles();
                             }}
                             onTextColorChange={async (color) => {
-                              const elementId = `scrolling-card-${index + 1}-cta`;
-                              await supabase.from('text_content').upsert({
-                                element_id: elementId,
-                                page_location: 'homepage',
-                                section: 'scrolling-features',
-                                element_type: 'cta_button',
-                                content: cardData[index]?.ctaText || card.ctaText,
-                                active: true,
-                              }, { onConflict: 'element_id' });
                               await supabase.from('translations').upsert([{
                                 translation_key: card.ctaKey,
                                 language_code: 'en',
