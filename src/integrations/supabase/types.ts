@@ -382,6 +382,7 @@ export type Database = {
           created_at: string | null
           end_time: string
           event_type_id: string | null
+          google_calendar_event_id: string | null
           google_event_id: string | null
           guest_company: string | null
           guest_email: string
@@ -389,6 +390,7 @@ export type Database = {
           guest_name: string
           guest_timezone: string
           id: string
+          meet_link: string | null
           start_time: string
           status: string | null
         }
@@ -397,6 +399,7 @@ export type Database = {
           created_at?: string | null
           end_time: string
           event_type_id?: string | null
+          google_calendar_event_id?: string | null
           google_event_id?: string | null
           guest_company?: string | null
           guest_email: string
@@ -404,6 +407,7 @@ export type Database = {
           guest_name: string
           guest_timezone: string
           id?: string
+          meet_link?: string | null
           start_time: string
           status?: string | null
         }
@@ -412,6 +416,7 @@ export type Database = {
           created_at?: string | null
           end_time?: string
           event_type_id?: string | null
+          google_calendar_event_id?: string | null
           google_event_id?: string | null
           guest_company?: string | null
           guest_email?: string
@@ -419,6 +424,7 @@ export type Database = {
           guest_name?: string
           guest_timezone?: string
           id?: string
+          meet_link?: string | null
           start_time?: string
           status?: string | null
         }
