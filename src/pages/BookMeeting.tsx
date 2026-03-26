@@ -644,6 +644,16 @@ export default function BookMeeting() {
                     With {members.map(m => m.name).join(" & ")}
                   </p>
                 )}
+                {bookingResult.meet_link && (
+                  <a
+                    href={bookingResult.meet_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-md bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+                  >
+                    🎥 {t('book.join_meet', 'Join Google Meet')}
+                  </a>
+                )}
               </div>
             )}
 
