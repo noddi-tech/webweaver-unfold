@@ -167,7 +167,10 @@ export function ScrollingFeatureCards() {
   const { editMode } = useEditMode();
   const { GRADIENT_COLORS, GLASS_EFFECTS } = useColorSystem();
   const { allowedBackgrounds } = useAllowedBackgrounds();
-  const { backgroundStyles, textStyles, isLoaded: stylesLoaded } = useSiteStyles();
+  const { backgroundStyles, textStyles, isLoaded: stylesLoaded, refreshTextStyles } = useSiteStyles();
+  
+  // Track which cards have been locally edited to prevent stale context overwrites
+  const editedCardsRef = useRef<Set<number>>(new Set());
   
   // Define unique default styles for each card using CMS colors
   const defaultCardStyles = useMemo(() => [
@@ -455,7 +458,10 @@ export function ScrollingFeatureCards() {
   useEffect(() => {
     if (stylesLoaded) {
       cards.forEach((_, index) => {
-        loadCardData(index);
+        // Skip cards that were just edited locally to prevent stale overwrites
+        if (!editedCardsRef.current.has(index)) {
+          loadCardData(index);
+        }
       });
     }
   }, [stylesLoaded, backgroundStyles, textStyles]);
@@ -849,7 +855,9 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                             content: text,
                             active: true,
                           }, { onConflict: 'element_id' });
+                          editedCardsRef.current.add(index);
                           setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaText: text, ctaUrl: url } }));
+                          await refreshTextStyles();
                         }}
                         onBgColorChange={async (color) => {
                           const elementId = `scrolling-card-${index + 1}-cta`;
@@ -862,7 +870,9 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                             button_bg_color: color,
                             active: true,
                           }, { onConflict: 'element_id' });
+                          editedCardsRef.current.add(index);
                           setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaBgColor: color } }));
+                          await refreshTextStyles();
                         }}
                         onTextColorChange={async (color) => {
                           const elementId = `scrolling-card-${index + 1}-cta`;
@@ -881,7 +891,9 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                             translated_text: cardData[index]?.ctaText || card.ctaText,
                             color_token: color,
                           }], { onConflict: 'translation_key,language_code' });
+                          editedCardsRef.current.add(index);
                           setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaTextColor: color } }));
+                          await refreshTextStyles();
                         }}
                       >
                         <Button
@@ -1027,7 +1039,9 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                                 content: text,
                                 active: true,
                               }, { onConflict: 'element_id' });
+                              editedCardsRef.current.add(index);
                               setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaText: text, ctaUrl: url } }));
+                              await refreshTextStyles();
                             }}
                             onBgColorChange={async (color) => {
                               const elementId = `scrolling-card-${index + 1}-cta`;
@@ -1040,7 +1054,9 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                                 button_bg_color: color,
                                 active: true,
                               }, { onConflict: 'element_id' });
+                              editedCardsRef.current.add(index);
                               setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaBgColor: color } }));
+                              await refreshTextStyles();
                             }}
                             onTextColorChange={async (color) => {
                               const elementId = `scrolling-card-${index + 1}-cta`;
@@ -1058,7 +1074,9 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                                 translated_text: cardData[index]?.ctaText || card.ctaText,
                                 color_token: color,
                               }], { onConflict: 'translation_key,language_code' });
+                              editedCardsRef.current.add(index);
                               setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaTextColor: color } }));
+                              await refreshTextStyles();
                             }}
                           >
                             <Button 
