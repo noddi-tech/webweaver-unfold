@@ -834,33 +834,84 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                           {cardData[index]?.description || card.description}
                         </EditableTranslation>
                       </p>
-                      <Button
-                        variant="secondary"
-                        className="rounded-full px-5 py-2.5 group text-sm"
-                        style={{
-                          ...(cardData[index]?.ctaBgColor && cardData[index].ctaBgColor.includes('gradient')
-                            ? { backgroundImage: `var(--${toCssVar(cardData[index].ctaBgColor)})` }
-                            : { backgroundColor: cardData[index]?.ctaBgColor
-                                ? `hsl(var(--${toCssVar(cardData[index].ctaBgColor)}))`
-                                : 'rgba(0, 0, 0, 0.07)' }),
-                          color: cardData[index]?.ctaTextColor
-                            ? `hsl(var(--${toCssVar(cardData[index].ctaTextColor)}))`
-                            : 'rgb(31, 32, 35)',
+                      <EditableButton
+                        buttonText={cardData[index]?.ctaText || card.ctaText}
+                        buttonUrl={cardData[index]?.ctaUrl || card.ctaUrl || '#'}
+                        buttonBgColor={cardData[index]?.ctaBgColor || defaultCardStyles[index]?.ctaBgColor || 'primary'}
+                        buttonTextColor={cardData[index]?.ctaTextColor || defaultCardStyles[index]?.ctaTextColor || 'primary-foreground'}
+                        onSave={async (text, url) => {
+                          const elementId = `scrolling-card-${index + 1}-cta`;
+                          await supabase.from('text_content').upsert({
+                            element_id: elementId,
+                            page_location: 'homepage',
+                            section: 'scrolling-features',
+                            element_type: 'cta_button',
+                            content: text,
+                            active: true,
+                          }, { onConflict: 'element_id' });
+                          setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaText: text, ctaUrl: url } }));
                         }}
-                        asChild
+                        onBgColorChange={async (color) => {
+                          const elementId = `scrolling-card-${index + 1}-cta`;
+                          await supabase.from('text_content').upsert({
+                            element_id: elementId,
+                            page_location: 'homepage',
+                            section: 'scrolling-features',
+                            element_type: 'cta_button',
+                            content: cardData[index]?.ctaText || card.ctaText,
+                            button_bg_color: color,
+                            active: true,
+                          }, { onConflict: 'element_id' });
+                          setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaBgColor: color } }));
+                        }}
+                        onTextColorChange={async (color) => {
+                          const elementId = `scrolling-card-${index + 1}-cta`;
+                          await supabase.from('text_content').upsert({
+                            element_id: elementId,
+                            page_location: 'homepage',
+                            section: 'scrolling-features',
+                            element_type: 'cta_button',
+                            content: cardData[index]?.ctaText || card.ctaText,
+                            active: true,
+                          }, { onConflict: 'element_id' });
+                          // Also save color_token to translations
+                          await supabase.from('translations').upsert({
+                            translation_key: card.ctaKey,
+                            language_code: 'en',
+                            translation_value: cardData[index]?.ctaText || card.ctaText,
+                            color_token: color,
+                          }, { onConflict: 'translation_key,language_code' });
+                          setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaTextColor: color } }));
+                        }}
                       >
-                        <a href={cardData[index]?.ctaUrl || card.ctaUrl || '#'}>
-                          <EditableTranslation translationKey={card.ctaKey}>
-                            {cardData[index]?.ctaText || card.ctaText}
-                          </EditableTranslation>
-                          {(() => {
-                            const IconComponent = (icons as Record<string, any>)['ArrowRight'];
-                            return IconComponent ? (
-                              <IconComponent className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                            ) : null;
-                          })()}
-                        </a>
-                      </Button>
+                        <Button
+                          variant="secondary"
+                          className="rounded-full px-5 py-2.5 group text-sm"
+                          style={{
+                            ...(cardData[index]?.ctaBgColor && cardData[index].ctaBgColor.includes('gradient')
+                              ? { backgroundImage: `var(--${toCssVar(cardData[index].ctaBgColor)})` }
+                              : { backgroundColor: cardData[index]?.ctaBgColor
+                                  ? `hsl(var(--${toCssVar(cardData[index].ctaBgColor)}))`
+                                  : 'rgba(0, 0, 0, 0.07)' }),
+                            color: cardData[index]?.ctaTextColor
+                              ? `hsl(var(--${toCssVar(cardData[index].ctaTextColor)}))`
+                              : 'rgb(31, 32, 35)',
+                          }}
+                          asChild
+                        >
+                          <a href={cardData[index]?.ctaUrl || card.ctaUrl || '#'}>
+                            <EditableTranslation translationKey={card.ctaKey}>
+                              {cardData[index]?.ctaText || card.ctaText}
+                            </EditableTranslation>
+                            {(() => {
+                              const IconComponent = (icons as Record<string, any>)['ArrowRight'];
+                              return IconComponent ? (
+                                <IconComponent className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                              ) : null;
+                            })()}
+                          </a>
+                        </Button>
+                      </EditableButton>
                     </div>
                   </div>
                 );
@@ -961,33 +1012,83 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                             </EditableTranslation>
                           </p>
                         
-                          <Button 
-                            variant="secondary"
-                            className="self-start rounded-full px-6 py-3 group"
-                            style={{
-                              ...(cardData[index]?.ctaBgColor && cardData[index].ctaBgColor.includes('gradient')
-                                ? { backgroundImage: `var(--${toCssVar(cardData[index].ctaBgColor)})` }
-                                : { backgroundColor: cardData[index]?.ctaBgColor 
-                                    ? `hsl(var(--${toCssVar(cardData[index].ctaBgColor)}))` 
-                                    : 'rgba(0, 0, 0, 0.07)' }),
-                              color: cardData[index]?.ctaTextColor 
-                                ? `hsl(var(--${toCssVar(cardData[index].ctaTextColor)}))` 
-                                : 'rgb(31, 32, 35)',
+                          <EditableButton
+                            buttonText={cardData[index]?.ctaText || card.ctaText}
+                            buttonUrl={cardData[index]?.ctaUrl || card.ctaUrl || '#'}
+                            buttonBgColor={cardData[index]?.ctaBgColor || defaultCardStyles[index]?.ctaBgColor || 'primary'}
+                            buttonTextColor={cardData[index]?.ctaTextColor || defaultCardStyles[index]?.ctaTextColor || 'primary-foreground'}
+                            onSave={async (text, url) => {
+                              const elementId = `scrolling-card-${index + 1}-cta`;
+                              await supabase.from('text_content').upsert({
+                                element_id: elementId,
+                                page_location: 'homepage',
+                                section: 'scrolling-features',
+                                element_type: 'cta_button',
+                                content: text,
+                                active: true,
+                              }, { onConflict: 'element_id' });
+                              setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaText: text, ctaUrl: url } }));
                             }}
-                            asChild
+                            onBgColorChange={async (color) => {
+                              const elementId = `scrolling-card-${index + 1}-cta`;
+                              await supabase.from('text_content').upsert({
+                                element_id: elementId,
+                                page_location: 'homepage',
+                                section: 'scrolling-features',
+                                element_type: 'cta_button',
+                                content: cardData[index]?.ctaText || card.ctaText,
+                                button_bg_color: color,
+                                active: true,
+                              }, { onConflict: 'element_id' });
+                              setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaBgColor: color } }));
+                            }}
+                            onTextColorChange={async (color) => {
+                              const elementId = `scrolling-card-${index + 1}-cta`;
+                              await supabase.from('text_content').upsert({
+                                element_id: elementId,
+                                page_location: 'homepage',
+                                section: 'scrolling-features',
+                                element_type: 'cta_button',
+                                content: cardData[index]?.ctaText || card.ctaText,
+                                active: true,
+                              }, { onConflict: 'element_id' });
+                              await supabase.from('translations').upsert({
+                                translation_key: card.ctaKey,
+                                language_code: 'en',
+                                translation_value: cardData[index]?.ctaText || card.ctaText,
+                                color_token: color,
+                              }, { onConflict: 'translation_key,language_code' });
+                              setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaTextColor: color } }));
+                            }}
                           >
-                            <a href={cardData[index]?.ctaUrl || card.ctaUrl || '#'}>
-                              <EditableTranslation translationKey={card.ctaKey}>
-                                {cardData[index]?.ctaText || card.ctaText}
-                              </EditableTranslation>
-                              {(() => {
-                                const IconComponent = (icons as Record<string, any>)['ArrowRight'];
-                                return IconComponent ? (
-                                  <IconComponent className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                ) : null;
-                              })()}
-                            </a>
-                          </Button>
+                            <Button 
+                              variant="secondary"
+                              className="self-start rounded-full px-6 py-3 group"
+                              style={{
+                                ...(cardData[index]?.ctaBgColor && cardData[index].ctaBgColor.includes('gradient')
+                                  ? { backgroundImage: `var(--${toCssVar(cardData[index].ctaBgColor)})` }
+                                  : { backgroundColor: cardData[index]?.ctaBgColor 
+                                      ? `hsl(var(--${toCssVar(cardData[index].ctaBgColor)}))` 
+                                      : 'rgba(0, 0, 0, 0.07)' }),
+                                color: cardData[index]?.ctaTextColor 
+                                  ? `hsl(var(--${toCssVar(cardData[index].ctaTextColor)}))` 
+                                  : 'rgb(31, 32, 35)',
+                              }}
+                              asChild
+                            >
+                              <a href={cardData[index]?.ctaUrl || card.ctaUrl || '#'}>
+                                <EditableTranslation translationKey={card.ctaKey}>
+                                  {cardData[index]?.ctaText || card.ctaText}
+                                </EditableTranslation>
+                                {(() => {
+                                  const IconComponent = (icons as Record<string, any>)['ArrowRight'];
+                                  return IconComponent ? (
+                                    <IconComponent className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                  ) : null;
+                                })()}
+                              </a>
+                            </Button>
+                          </EditableButton>
                         </div>
                         
                         {/* Right: Image with gradient background */}
