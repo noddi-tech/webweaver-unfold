@@ -222,8 +222,9 @@ serve(async (req) => {
       try {
         const accessToken = await getAccessToken(supabase, tokenRow, encKey)
 
+        const meetingTitle = eventType ? eventType.title : `${duration} min meeting`
         const calendarEvent = {
-          summary: `${eventType.title} — ${guest_name}${guest_company ? ` (${guest_company})` : ''}`,
+          summary: `${meetingTitle} — ${guest_name}${guest_company ? ` (${guest_company})` : ''}`,
           description: `Booked via naviosolutions.com\n\nGuest: ${guest_name}\nEmail: ${guest_email}${guest_company ? `\nCompany: ${guest_company}` : ''}${guest_message ? `\nNote: ${guest_message}` : ''}`,
           start: { dateTime: start_time, timeZone: 'UTC' },
           end: { dateTime: endTime, timeZone: 'UTC' },
