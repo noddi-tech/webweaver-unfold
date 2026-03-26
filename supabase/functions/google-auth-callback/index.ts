@@ -76,7 +76,7 @@ serve(async (req) => {
     // Redirect back to admin
     return new Response(null, {
       status: 302,
-      headers: { Location: '/cms?tab=booking&calendar=connected' },
+      headers: { Location: 'https://naviosolutions.com/cms?tab=booking&calendar=connected' },
     })
   } catch (err) {
     console.error('Unexpected error:', err)
