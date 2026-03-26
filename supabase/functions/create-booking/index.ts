@@ -320,7 +320,7 @@ serve(async (req) => {
           <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px">
             <tr><td style="padding:12px 0;border-bottom:1px solid #eee"><strong style="color:#1a1a5e">📅 Date</strong><br/><span style="color:#555">${formattedDate}</span></td></tr>
             <tr><td style="padding:12px 0;border-bottom:1px solid #eee"><strong style="color:#1a1a5e">🕐 Time</strong><br/><span style="color:#555">${formattedTime} (${guest_timezone})</span></td></tr>
-            <tr><td style="padding:12px 0;border-bottom:1px solid #eee"><strong style="color:#1a1a5e">📋 Meeting</strong><br/><span style="color:#555">${eventType.title} (${duration} min)</span></td></tr>
+            <tr><td style="padding:12px 0;border-bottom:1px solid #eee"><strong style="color:#1a1a5e">📋 Meeting</strong><br/><span style="color:#555">${eventType ? eventType.title : `${duration} min meeting`} (${duration} min)</span></td></tr>
             ${teamNames ? `<tr><td style="padding:12px 0;border-bottom:1px solid #eee"><strong style="color:#1a1a5e">👥 With</strong><br/><span style="color:#555">${teamNames}</span></td></tr>` : ''}
             ${meetSection}
           </table>
@@ -353,7 +353,7 @@ serve(async (req) => {
           body: JSON.stringify({
             from: 'Navio Solutions <noreply@naviosolutions.com>',
             to: [guest_email],
-            subject: `Meeting Confirmed: ${eventType.title} — ${formattedDate}`,
+            subject: `Meeting Confirmed: ${eventType ? eventType.title : `${duration} min meeting`} — ${formattedDate}`,
             html: emailHtml,
           }),
         })
