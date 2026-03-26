@@ -529,6 +529,7 @@ export default function BookMeeting() {
                     </div>
                   </div>
                 ) : (
+                  <>
                 <Calendar
                   mode="single"
                   selected={selectedDate}
@@ -603,6 +604,7 @@ export default function BookMeeting() {
                     )}
                   </div>
                 )}
+                  </>
                 )}
               </div>
             </div>
