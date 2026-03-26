@@ -378,6 +378,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          cancel_token: string | null
           cancelled_at: string | null
           created_at: string | null
           end_time: string
@@ -395,6 +396,7 @@ export type Database = {
           status: string | null
         }
         Insert: {
+          cancel_token?: string | null
           cancelled_at?: string | null
           created_at?: string | null
           end_time: string
@@ -412,6 +414,7 @@ export type Database = {
           status?: string | null
         }
         Update: {
+          cancel_token?: string | null
           cancelled_at?: string | null
           created_at?: string | null
           end_time?: string
