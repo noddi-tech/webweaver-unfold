@@ -22,12 +22,12 @@ import { format } from "date-fns";
 interface TeamMember {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   title: string | null;
-  slug: string;
-  is_active: boolean;
+  slug: string | null;
+  active: boolean;
   google_calendar_connected: boolean;
-  created_at: string;
+  timezone: string;
 }
 
 interface AvailabilityRule {
@@ -91,10 +91,6 @@ function TeamMembersTab() {
   const { toast } = useToast();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<TeamMember | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", title: "", slug: "" });
-  const [saving, setSaving] = useState(false);
   const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
   const [disconnectLoading, setDisconnectLoading] = useState(false);
 
@@ -104,7 +100,7 @@ function TeamMembersTab() {
   const [savingAvail, setSavingAvail] = useState(false);
 
   const fetchMembers = async () => {
-    const { data } = await supabase.from("team_members").select("*").order("name");
+    const { data } = await supabase.from("employees").select("id, name, email, title, slug, active, google_calendar_connected, timezone").not("email", "is", null).order("name");
     if (data) setMembers(data as TeamMember[]);
     setLoading(false);
   };
@@ -124,7 +120,7 @@ function TeamMembersTab() {
   const handleDisconnect = async () => {
     if (!disconnectingId) return;
     setDisconnectLoading(true);
-    const { error } = await supabase.from("team_members").update({ google_calendar_connected: false }).eq("id", disconnectingId);
+    const { error } = await supabase.from("employees").update({ google_calendar_connected: false }).eq("id", disconnectingId);
     if (error) {
       toast({ variant: "destructive", title: "Error disconnecting", description: error.message });
     } else {
@@ -135,46 +131,7 @@ function TeamMembersTab() {
     setDisconnectingId(null);
   };
 
-  const hasUnconnectedMembers = members.some(m => m.is_active && !m.google_calendar_connected);
-
-  const openAdd = () => {
-    setEditing(null);
-    setForm({ name: "", email: "", title: "", slug: "" });
-    setDialogOpen(true);
-  };
-
-  const openEdit = (m: TeamMember) => {
-    setEditing(m);
-    setForm({ name: m.name, email: m.email, title: m.title || "", slug: m.slug });
-    setDialogOpen(true);
-  };
-
-  const handleNameChange = (name: string) => {
-    setForm(f => ({ ...f, name, slug: editing ? f.slug : generateSlug(name) }));
-  };
-
-  const handleSave = async () => {
-    if (!form.name || !form.email) return;
-    setSaving(true);
-    const payload = { name: form.name, email: form.email, title: form.title || null, slug: form.slug || generateSlug(form.name) };
-    if (editing) {
-      const { error } = await supabase.from("team_members").update(payload).eq("id", editing.id);
-      if (error) { toast({ variant: "destructive", title: "Error updating member", description: error.message }); }
-      else { toast({ title: "Member updated" }); }
-    } else {
-      const { error } = await supabase.from("team_members").insert(payload);
-      if (error) { toast({ variant: "destructive", title: "Error adding member", description: error.message }); }
-      else { toast({ title: "Member added" }); }
-    }
-    setSaving(false);
-    setDialogOpen(false);
-    fetchMembers();
-  };
-
-  const toggleActive = async (m: TeamMember) => {
-    await supabase.from("team_members").update({ is_active: !m.is_active }).eq("id", m.id);
-    fetchMembers();
-  };
+  const hasUnconnectedMembers = members.some(m => m.active && !m.google_calendar_connected);
 
   // Availability
   const openAvailability = async (m: TeamMember) => {
@@ -190,9 +147,7 @@ function TeamMembersTab() {
   const saveAvailability = async () => {
     if (!availMember) return;
     setSavingAvail(true);
-    // Delete existing rules
     await supabase.from("availability_rules").delete().eq("team_member_id", availMember.id);
-    // Insert enabled ones
     const toInsert = availRules.filter(r => r.enabled).map(r => ({
       team_member_id: availMember.id,
       day_of_week: r.day,
@@ -212,7 +167,6 @@ function TeamMembersTab() {
 
   return (
     <div className="space-y-4">
-      {/* Warning banner for unconnected members */}
       {!loading && hasUnconnectedMembers && (
         <Alert className="border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
           <AlertTriangle className="h-4 w-4 text-yellow-600" />
@@ -225,7 +179,7 @@ function TeamMembersTab() {
 
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Team Members</h3>
-        <Button onClick={openAdd} size="sm"><Plus className="w-4 h-4 mr-1" /> Add Team Member</Button>
+        <p className="text-sm text-muted-foreground">Manage members in the Employees tab</p>
       </div>
 
       <Table>
@@ -235,15 +189,14 @@ function TeamMembersTab() {
             <TableHead>Email</TableHead>
             <TableHead>Title</TableHead>
             <TableHead>Google Calendar</TableHead>
-            <TableHead>Active</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {loading ? (
-            <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Loading…</TableCell></TableRow>
+            <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Loading…</TableCell></TableRow>
           ) : members.length === 0 ? (
-            <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No team members yet</TableCell></TableRow>
+            <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No team members with email addresses</TableCell></TableRow>
           ) : members.map(m => (
             <TableRow key={m.id}>
               <TableCell className="font-medium">{m.name}</TableCell>
@@ -266,36 +219,12 @@ function TeamMembersTab() {
                 }
               </TableCell>
               <TableCell>
-                <Switch checked={m.is_active} onCheckedChange={() => toggleActive(m)} />
-              </TableCell>
-              <TableCell>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(m)}><Pencil className="w-4 h-4" /></Button>
-                  <Button variant="ghost" size="sm" onClick={() => openAvailability(m)}><Clock className="w-4 h-4 mr-1" /> Availability</Button>
-                </div>
+                <Button variant="ghost" size="sm" onClick={() => openAvailability(m)}><Clock className="w-4 h-4 mr-1" /> Availability</Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-
-      {/* Add/Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>{editing ? "Edit" : "Add"} Team Member</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div><Label>Name</Label><Input value={form.name} onChange={e => handleNameChange(e.target.value)} /></div>
-            <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
-            <div><Label>Title</Label><Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Co-founder" /></div>
-            <div><Label>Slug</Label><Input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} /></div>
-          </div>
-          <DialogFooter>
-            <Button onClick={handleSave} disabled={saving || !form.name || !form.email}>
-              {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}{editing ? "Update" : "Add"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Availability Sheet */}
       <Sheet open={!!availMember} onOpenChange={open => { if (!open) setAvailMember(null); }}>
@@ -369,7 +298,7 @@ function EventTypesTab() {
   const fetchData = async () => {
     const [etRes, mRes, aRes] = await Promise.all([
       supabase.from("event_types").select("*").order("title"),
-      supabase.from("team_members").select("*").eq("is_active", true).order("name"),
+      supabase.from("employees").select("id, name, email, title, slug, active, google_calendar_connected, timezone").eq("active", true).not("email", "is", null).order("name"),
       supabase.from("event_type_members").select("*"),
     ]);
     if (etRes.data) setEventTypes(etRes.data as EventType[]);
@@ -590,7 +519,7 @@ function BookingsTab() {
       supabase.from("bookings").select("*").order("start_time", { ascending: false }),
       supabase.from("event_types").select("*"),
       supabase.from("booking_members").select("booking_id, team_member_id"),
-      supabase.from("team_members").select("*"),
+      supabase.from("employees").select("id, name, email, title, slug, active, google_calendar_connected, timezone"),
     ]);
     if (bRes.data) setBookings(bRes.data as Booking[]);
     if (etRes.data) setEventTypes(etRes.data as EventType[]);

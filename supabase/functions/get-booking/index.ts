@@ -44,7 +44,7 @@ serve(async (req) => {
     // Get team members for this booking
     const { data: bookingMembers } = await supabase
       .from('booking_members')
-      .select('team_member_id, team_members(name, email)')
+      .select('team_member_id, employees(name, email)')
       .eq('booking_id', booking_id)
 
     return new Response(JSON.stringify({
@@ -66,8 +66,8 @@ serve(async (req) => {
           description: booking.event_types.description,
         } : null,
         team_members: (bookingMembers || []).map((bm: any) => ({
-          name: bm.team_members?.name,
-          email: bm.team_members?.email,
+          name: bm.employees?.name,
+          email: bm.employees?.email,
         })),
       },
     }), {

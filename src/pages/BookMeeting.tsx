@@ -51,7 +51,7 @@ type EventType = {
 type TeamMember = {
   id: string;
   name: string;
-  avatar_url: string | null;
+  image_url: string | null;
   title: string | null;
   timezone: string;
 };
@@ -187,10 +187,10 @@ export default function BookMeeting() {
         if (!etm?.length) return;
         const ids = etm.map(e => e.team_member_id);
         const { data: tm } = await supabase
-          .from("team_members")
-          .select("id, name, avatar_url, title, timezone")
+      .from("employees")
+          .select("id, name, image_url, title, timezone")
           .in("id", ids)
-          .eq("is_active", true);
+          .eq("active", true);
         setMembers((tm as TeamMember[]) || []);
 
         const { data: rules } = await supabase

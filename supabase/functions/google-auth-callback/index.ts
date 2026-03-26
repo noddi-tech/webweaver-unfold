@@ -68,8 +68,8 @@ serve(async (req) => {
       return new Response(`Database error: ${upsertError.message}`, { status: 500 })
     }
 
-    // Mark team member as connected
-    await supabase.from('team_members')
+    // Mark employee as connected
+    await supabase.from('employees')
       .update({ google_calendar_connected: true })
       .eq('id', state)
 

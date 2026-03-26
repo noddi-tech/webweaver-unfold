@@ -110,10 +110,10 @@ serve(async (req) => {
     const memberIds = etMembers.map((m: any) => m.team_member_id)
 
     const { data: teamMembers } = await supabase
-      .from('team_members')
+      .from('employees')
       .select('id, name, email, timezone')
       .in('id', memberIds)
-      .eq('is_active', true)
+      .eq('active', true)
 
     if (!teamMembers?.length) {
       return new Response(JSON.stringify({ slots: [] }), {
