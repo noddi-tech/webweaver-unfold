@@ -1133,17 +1133,23 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                     </div>
                   </div>
 
-                  {/* Unified Style Modal for this card */}
+                   {/* Unified Style Modal for this card */}
                   <UnifiedStyleModal
                     isOpen={editingCard === index}
                     onClose={() => setEditingCard(null)}
                     elementIdPrefix={`scrolling-card-${index + 1}`}
                     initialData={cardData[index]}
                     onSave={(data) => {
+                      // Merge modal data with existing card data to prevent
+                      // stale CTA values from overwriting inline EditableButton edits
                       setCardData(prev => ({
                         ...prev,
-                        [index]: data
+                        [index]: {
+                          ...prev[index],
+                          ...data,
+                        }
                       }));
+                      editedCardsRef.current.add(index);
                     }}
                   />
                 </div>
