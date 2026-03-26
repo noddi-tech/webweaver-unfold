@@ -878,7 +878,7 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                           await supabase.from('translations').upsert([{
                             translation_key: card.ctaKey,
                             language_code: 'en',
-                            translation_value: cardData[index]?.ctaText || card.ctaText,
+                            translated_text: cardData[index]?.ctaText || card.ctaText,
                             color_token: color,
                           }], { onConflict: 'translation_key,language_code' });
                           setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaTextColor: color } }));
@@ -1052,12 +1052,12 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                                 content: cardData[index]?.ctaText || card.ctaText,
                                 active: true,
                               }, { onConflict: 'element_id' });
-                              await supabase.from('translations').upsert({
+                              await supabase.from('translations').upsert([{
                                 translation_key: card.ctaKey,
                                 language_code: 'en',
-                                translation_value: cardData[index]?.ctaText || card.ctaText,
+                                translated_text: cardData[index]?.ctaText || card.ctaText,
                                 color_token: color,
-                              }, { onConflict: 'translation_key,language_code' });
+                              }], { onConflict: 'translation_key,language_code' });
                               setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaTextColor: color } }));
                             }}
                           >
