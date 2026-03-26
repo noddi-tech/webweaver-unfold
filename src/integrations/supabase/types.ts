@@ -96,6 +96,38 @@ export type Database = {
           },
         ]
       }
+      availability_rules: {
+        Row: {
+          day_of_week: number
+          end_time: string
+          id: string
+          start_time: string
+          team_member_id: string
+        }
+        Insert: {
+          day_of_week: number
+          end_time: string
+          id?: string
+          start_time: string
+          team_member_id: string
+        }
+        Update: {
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          start_time?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_rules_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       background_styles: {
         Row: {
           background_class: string
@@ -310,6 +342,95 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      booking_members: {
+        Row: {
+          booking_id: string
+          id: string
+          team_member_id: string
+        }
+        Insert: {
+          booking_id: string
+          id?: string
+          team_member_id: string
+        }
+        Update: {
+          booking_id?: string
+          id?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_members_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_members_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string | null
+          end_time: string
+          event_type_id: string | null
+          google_event_id: string | null
+          guest_company: string | null
+          guest_email: string
+          guest_message: string | null
+          guest_name: string
+          guest_timezone: string
+          id: string
+          start_time: string
+          status: string | null
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string | null
+          end_time: string
+          event_type_id?: string | null
+          google_event_id?: string | null
+          guest_company?: string | null
+          guest_email: string
+          guest_message?: string | null
+          guest_name: string
+          guest_timezone: string
+          id?: string
+          start_time: string
+          status?: string | null
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string | null
+          end_time?: string
+          event_type_id?: string | null
+          google_event_id?: string | null
+          guest_company?: string | null
+          guest_email?: string
+          guest_message?: string | null
+          guest_name?: string
+          guest_timezone?: string
+          id?: string
+          start_time?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_event_type_id_fkey"
+            columns: ["event_type_id"]
+            isOneToOne: false
+            referencedRelation: "event_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       brand_settings: {
         Row: {
@@ -1179,6 +1300,81 @@ export type Database = {
           },
         ]
       }
+      event_type_members: {
+        Row: {
+          event_type_id: string
+          id: string
+          is_required: boolean | null
+          team_member_id: string
+        }
+        Insert: {
+          event_type_id: string
+          id?: string
+          is_required?: boolean | null
+          team_member_id: string
+        }
+        Update: {
+          event_type_id?: string
+          id?: string
+          is_required?: boolean | null
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_type_members_event_type_id_fkey"
+            columns: ["event_type_id"]
+            isOneToOne: false
+            referencedRelation: "event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_type_members_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_types: {
+        Row: {
+          buffer_minutes: number | null
+          color: string | null
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          is_active: boolean | null
+          requires_all_members: boolean | null
+          slug: string
+          title: string
+        }
+        Insert: {
+          buffer_minutes?: number | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          requires_all_members?: boolean | null
+          slug: string
+          title: string
+        }
+        Update: {
+          buffer_minutes?: number | null
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          requires_all_members?: boolean | null
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
       faqs: {
         Row: {
           active: boolean
@@ -1330,6 +1526,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      google_oauth_tokens: {
+        Row: {
+          access_token_encrypted: string
+          id: string
+          refresh_token_encrypted: string
+          team_member_id: string
+          token_expiry: string
+          updated_at: string | null
+        }
+        Insert: {
+          access_token_encrypted: string
+          id?: string
+          refresh_token_encrypted: string
+          team_member_id: string
+          token_expiry: string
+          updated_at?: string | null
+        }
+        Update: {
+          access_token_encrypted?: string
+          id?: string
+          refresh_token_encrypted?: string
+          team_member_id?: string
+          token_expiry?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_oauth_tokens_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: true
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       header_settings: {
         Row: {
@@ -3108,6 +3339,45 @@ export type Database = {
           id?: string
           mime_type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string
+          google_calendar_connected: boolean | null
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          timezone: string | null
+          title: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email: string
+          google_calendar_connected?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          timezone?: string | null
+          title?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string
+          google_calendar_connected?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          timezone?: string | null
+          title?: string | null
         }
         Relationships: []
       }
