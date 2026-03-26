@@ -331,6 +331,24 @@ function TeamMembersTab() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Disconnect confirmation */}
+      <AlertDialog open={!!disconnectingId} onOpenChange={open => { if (!open) setDisconnectingId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect Google Calendar?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will disconnect Google Calendar for this team member. Their availability will no longer sync with Google Calendar.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={disconnectLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDisconnect} disabled={disconnectLoading} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {disconnectLoading && <Loader2 className="w-4 h-4 mr-1 animate-spin" />} Disconnect
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
