@@ -1,72 +1,46 @@
 
 
-# Ad-Hoc Personal Booking Links
+# Fix: Booking Confirmation Emails Not Sending
 
-## Summary
+## Root Cause
 
-Create shareable booking links like `/en/meet/joachim` or `/en/meet/joachim,mattis,tom` that let external people find a time when all specified team members are free — without requiring a pre-configured event type. A partner gets a link, picks a duration, sees the combined availability, and books.
+The `create-booking` edge function hardcodes `from: 'Navio Solutions <noreply@naviosolutions.com>'` (line 354). But in Resend, only **subdomains** are verified (`info.naviosolutions.com`, `career.naviosolutions.com`). The root domain `naviosolutions.com` is not a verified sender domain.
 
-## How It Works
+The working pricing offer emails use `sales@info.naviosolutions.com` — a verified subdomain — via a `getFromAddress()` helper that checks Resend's domain API.
 
-1. Visitor opens `/en/meet/joachim,mattis`
-2. Page looks up employees by slug, shows their avatars/names
-3. Visitor picks a duration (default options: 15, 30, 45, 60 min) and a date
-4. System queries each member's **general weekly availability** + **Google Calendar** to find overlapping free windows
-5. Visitor picks a slot, fills in details, and confirms — a booking is created with all specified members
+Additionally, the code doesn't check the Resend API response at all (lines 347-360), so the rejection is silently ignored and "Confirmation email sent" is logged even when Resend returns an error.
 
-This is intentionally **decoupled from event types**. No event type selection step. The edge function gets member IDs + date + duration and returns slots where everyone is free.
+## Fix in `supabase/functions/create-booking/index.ts`
 
-## Changes
+1. **Import the shared `getFromAddress` helper** from `_shared/email-domain.ts` (already exists, used by other functions)
+2. **Replace the hardcoded from address** with `await getFromAddress(resendKey, 'hello')` — this checks verified domains in priority order
+3. **Check the Resend API response** and log the actual error if it fails
 
-### 1. New Edge Function: `get-member-availability`
+### Before (line 347-360):
+```typescript
+await fetch('https://api.resend.com/emails', { ... })
+console.log('Confirmation email sent to', guest_email)
+```
 
-A simpler variant of `get-availability` that takes `member_ids[]` instead of `event_type_id`:
+### After:
+```typescript
+import { getFromAddress } from '../_shared/email-domain.ts'
+// ...
+const fromAddress = await getFromAddress(resendKey, 'hello')
+const emailRes = await fetch('https://api.resend.com/emails', {
+  // ... use fromAddress instead of hardcoded string
+})
+if (!emailRes.ok) {
+  const errText = await emailRes.text()
+  console.error('Resend API error:', errText)
+} else {
+  console.log('Confirmation email sent to', guest_email)
+}
+```
 
-- Fetches `availability_rules` for the given members
-- Fetches Google Calendar FreeBusy for all members
-- Fetches existing bookings
-- Computes overlapping free slots for the requested duration
-- Returns `{ slots: [{ start, end }] }`
-
-### 2. New Page: `src/pages/MeetMembers.tsx`
-
-A booking page similar to `BookMeeting.tsx` but streamlined:
-
-- Reads `memberSlugs` param from URL, splits by comma
-- Looks up employees by slug (name, image, title, timezone)
-- Shows member avatars + "Book a meeting with X & Y" header
-- Duration picker (15/30/45/60 min, default 30)
-- Calendar + time slots (calls `get-member-availability`)
-- Booking form (name, email, company, message)
-- Calls existing `create-booking` to finalize (passing member IDs directly)
-
-No event type selection step — the page goes straight to calendar.
-
-### 3. Routes in `src/App.tsx`
-
-- Add `/:lang/meet/:memberSlugs` route → `MeetMembers`
-- Add `/meet/:memberSlugs` redirect via `LanguageRedirect`
-
-### 4. CMS: Copy Link Button in `BookingManager.tsx`
-
-In the team members tab, add a "Copy meeting link" button next to each member that copies `https://naviosolutions.com/en/meet/{slug}` to clipboard. For multi-member links, admins can construct them manually (comma-separated slugs).
-
-### 5. Update `create-booking` Edge Function
-
-Currently requires `event_type_id`. Add support for an alternative flow where `member_ids[]` + `duration` are passed directly (no event type). The function will:
-- Skip event type validation when `member_ids` is provided
-- Create the booking with the given members and duration
-- Still create Google Calendar events for all members
-
-## Files
+One file change, ~10 lines modified. Redeploy the edge function after.
 
 | File | Change |
 |------|--------|
-| `supabase/functions/get-member-availability/index.ts` | New edge function for member-based availability |
-| `src/pages/MeetMembers.tsx` | New booking page for ad-hoc member links |
-| `src/App.tsx` | Add `/meet/:memberSlugs` routes |
-| `supabase/functions/create-booking/index.ts` | Support `member_ids[]` without `event_type_id` |
-| `src/components/design-system/BookingManager.tsx` | Add "Copy meeting link" button per team member |
-
-No database changes needed — the existing `bookings` and `booking_members` tables support this.
+| `supabase/functions/create-booking/index.ts` | Use shared `getFromAddress` helper + check response |
 
