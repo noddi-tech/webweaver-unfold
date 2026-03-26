@@ -395,6 +395,7 @@ export default function BookMeeting() {
     setSelectedSlot(null);
     setSelectedDuration(null);
     setMembers([]);
+    setEventTypeAvailability([]);
     form.reset();
     setBookingResult(null);
   };
