@@ -14,7 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, Clock, Calendar, Users, X, Loader2 } from "lucide-react";
+import { Plus, Pencil, Clock, Calendar, Users, X, Loader2, AlertTriangle, Unplug } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { format } from "date-fns";
 
 // Types
@@ -94,6 +95,8 @@ function TeamMembersTab() {
   const [editing, setEditing] = useState<TeamMember | null>(null);
   const [form, setForm] = useState({ name: "", email: "", title: "", slug: "" });
   const [saving, setSaving] = useState(false);
+  const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
+  const [disconnectLoading, setDisconnectLoading] = useState(false);
 
   // Availability sheet
   const [availMember, setAvailMember] = useState<TeamMember | null>(null);
@@ -107,6 +110,32 @@ function TeamMembersTab() {
   };
 
   useEffect(() => { fetchMembers(); }, []);
+
+  // Detect OAuth redirect success
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("calendar") === "connected") {
+      toast({ title: "Google Calendar connected successfully!" });
+      window.history.replaceState({}, "", window.location.pathname);
+      fetchMembers();
+    }
+  }, []);
+
+  const handleDisconnect = async () => {
+    if (!disconnectingId) return;
+    setDisconnectLoading(true);
+    const { error } = await supabase.from("team_members").update({ google_calendar_connected: false }).eq("id", disconnectingId);
+    if (error) {
+      toast({ variant: "destructive", title: "Error disconnecting", description: error.message });
+    } else {
+      toast({ title: "Google Calendar disconnected" });
+      fetchMembers();
+    }
+    setDisconnectLoading(false);
+    setDisconnectingId(null);
+  };
+
+  const hasUnconnectedMembers = members.some(m => m.is_active && !m.google_calendar_connected);
 
   const openAdd = () => {
     setEditing(null);
@@ -183,6 +212,17 @@ function TeamMembersTab() {
 
   return (
     <div className="space-y-4">
+      {/* Warning banner for unconnected members */}
+      {!loading && hasUnconnectedMembers && (
+        <Alert className="border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
+          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          <AlertTitle className="text-yellow-800 dark:text-yellow-200">Calendar not connected</AlertTitle>
+          <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+            Some team members haven't connected their Google Calendar yet. Availability may be inaccurate.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Team Members</h3>
         <Button onClick={openAdd} size="sm"><Plus className="w-4 h-4 mr-1" /> Add Team Member</Button>
@@ -211,13 +251,18 @@ function TeamMembersTab() {
               <TableCell>{m.title || "—"}</TableCell>
               <TableCell>
                 {m.google_calendar_connected
-                  ? <Badge variant="default" className="bg-green-600">Connected</Badge>
+                  ? <div className="flex items-center gap-2">
+                      <Badge variant="default" className="bg-green-600">Connected</Badge>
+                      <Button variant="ghost" size="sm" className="text-destructive h-7 px-2" onClick={() => setDisconnectingId(m.id)}>
+                        <Unplug className="w-3.5 h-3.5 mr-1" /> Disconnect
+                      </Button>
+                    </div>
                   : <Button variant="outline" size="sm" onClick={() => {
                       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
                       const redirectUri = `https://${projectId}.supabase.co/functions/v1/google-auth-callback`;
-                      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.freebusy')}&access_type=offline&prompt=consent&state=${m.id}`;
+                      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events')}&access_type=offline&prompt=consent&state=${m.id}`;
                       window.open(oauthUrl, '_blank');
-                    }}>Connect</Button>
+                    }}><Calendar className="w-4 h-4 mr-1" /> Connect</Button>
                 }
               </TableCell>
               <TableCell>
@@ -286,6 +331,24 @@ function TeamMembersTab() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Disconnect confirmation */}
+      <AlertDialog open={!!disconnectingId} onOpenChange={open => { if (!open) setDisconnectingId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect Google Calendar?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will disconnect Google Calendar for this team member. Their availability will no longer sync with Google Calendar.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={disconnectLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDisconnect} disabled={disconnectLoading} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {disconnectLoading && <Loader2 className="w-4 h-4 mr-1 animate-spin" />} Disconnect
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
