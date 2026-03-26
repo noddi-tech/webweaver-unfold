@@ -210,11 +210,17 @@ function TeamMembersTab() {
                         <Unplug className="w-3.5 h-3.5 mr-1" /> Disconnect
                       </Button>
                     </div>
-                  : <Button variant="outline" size="sm" onClick={() => {
-                      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-                      const redirectUri = `https://${projectId}.supabase.co/functions/v1/google-auth-callback`;
-                      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events')}&access_type=offline&prompt=consent&state=${m.id}`;
-                      window.open(oauthUrl, '_blank');
+                  : <Button variant="outline" size="sm" onClick={async () => {
+                      try {
+                        const res = await supabase.functions.invoke('google-auth-url', {
+                          body: { team_member_id: m.id },
+                        });
+                        if (res.error) throw res.error;
+                        const { url } = res.data;
+                        if (url) window.open(url, '_blank');
+                      } catch (err) {
+                        console.error('Failed to get Google auth URL:', err);
+                      }
                     }}><Calendar className="w-4 h-4 mr-1" /> Connect</Button>
                 }
               </TableCell>
