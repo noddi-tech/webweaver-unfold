@@ -64,7 +64,7 @@ export function useSiteStyles() {
 }
 
 export function SiteStylesProvider({ children }: { children: React.ReactNode }) {
-  const [styles, setStyles] = useState<Omit<SiteStylesContextValue, 'refreshBackgroundStyles'>>({
+  const [styles, setStyles] = useState<Omit<SiteStylesContextValue, 'refreshBackgroundStyles' | 'refreshTextStyles'>>({
     backgroundStyles: {},
     iconStyles: {},
     textStyles: {},
@@ -95,6 +95,34 @@ export function SiteStylesProvider({ children }: { children: React.ReactNode }) 
       }));
     } catch (error) {
       console.error('Error refreshing background styles:', error);
+    }
+  }, []);
+
+  // Function to refresh just text styles (called after CTA saves)
+  const refreshTextStyles = useCallback(async () => {
+    try {
+      const { data } = await supabase
+        .from('text_content')
+        .select('element_id, color_token, button_bg_color, button_url, content');
+
+      const textMap: Record<string, TextStyle> = {};
+      data?.forEach(item => {
+        if (item.element_id) {
+          textMap[item.element_id] = {
+            color_token: item.color_token,
+            button_bg_color: item.button_bg_color,
+            button_url: item.button_url,
+            content: item.content,
+          };
+        }
+      });
+
+      setStyles(prev => ({
+        ...prev,
+        textStyles: textMap,
+      }));
+    } catch (error) {
+      console.error('Error refreshing text styles:', error);
     }
   }, []);
 
@@ -165,6 +193,7 @@ export function SiteStylesProvider({ children }: { children: React.ReactNode }) 
   const contextValue: SiteStylesContextValue = {
     ...styles,
     refreshBackgroundStyles,
+    refreshTextStyles,
   };
 
   return (
