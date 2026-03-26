@@ -1,33 +1,28 @@
 
 
-# Move /book Page into /:lang/ Routing Structure
+# Fix Contrast Issues on /book Page
 
 ## Problem
 
-The `/book` page is currently a standalone route outside the `/:lang/` structure, so it lacks the Header, Footer, and translation support that every other public page has.
+The CSS variable `--card` is set to Federal Blue (`249 67% 24%` — very dark purple). Components using `bg-card` (Calendar, Select, Input, Textarea, time slot buttons) render with a dark blue background but dark text, making everything unreadable.
 
-## Changes
+## Fix
 
-### 1. `src/pages/BookMeeting.tsx` — Add Header, Footer, translations
+Replace `bg-card` with `bg-card-background` (which is `0 0% 98%` — near white) on all interactive elements in BookMeeting.tsx. The calendar component also inherits `bg-card` from its default styling, so override it explicitly.
 
-- Import `Header`, `Footer`, `HreflangTags`, and `useAppTranslation`
-- Wrap page content with Header at top and Footer at bottom
-- Replace all hardcoded strings ("Book a Meeting", "Select a meeting type...", "No available times...", "Confirm Booking", etc.) with `t()` translation keys
-- Use `useParams` to read `lang` for timezone/locale formatting
+### `src/pages/BookMeeting.tsx`
 
-### 2. `src/App.tsx` — Move routes into /:lang/ structure
+| Element | Current | Fix |
+|---|---|---|
+| Calendar | `bg-card` | `bg-card-background border` |
+| SelectTrigger (timezone) | `bg-card` | `bg-card-background` |
+| Input fields (×3) | `bg-card` | `bg-card-background` |
+| Textarea | `bg-card` | `bg-card-background` |
+| Time slot buttons (unselected) | `bg-card` | `bg-card-background` |
 
-- Add `/:lang/book` route wrapped in `<LanguageSync>` (alongside all other language-prefixed routes)
-- Add `/book` as a `<LanguageRedirect />` route (alongside all other non-prefixed redirects)
-- Keep `/book/:token` as-is (that's the candidate booking token route, different purpose)
-
-### 3. `src/components/Header.tsx` — Fix CTA link
-
-- Update the "Book a Demo" CTA from linking to `/book` to using `LanguageLink` with `to="/book"` so it gets the proper language prefix
+All 8 occurrences of `bg-card` in the page get changed to `bg-card-background`.
 
 | File | Change |
 |---|---|
-| `src/App.tsx` | Add `/:lang/book` route + `/book` redirect |
-| `src/pages/BookMeeting.tsx` | Add Header/Footer, replace hardcoded strings with `t()` keys |
-| `src/components/Header.tsx` | Use `LanguageLink` for the Book a Demo CTA |
+| `src/pages/BookMeeting.tsx` | Replace `bg-card` → `bg-card-background` on all interactive elements |
 
