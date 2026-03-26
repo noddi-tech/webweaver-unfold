@@ -1,37 +1,39 @@
 
 
-# Wire Google Calendar OAuth Flow in Admin UI
+# Use Edge Functions for Real Availability
 
 ## Summary
 
-Enhance the BookingManager's Team Members tab with full Google Calendar connection management: disconnect support for connected members, OAuth redirect detection with success toast, and a warning banner for unconnected members.
+The current code already calls the edge functions and handles most scenarios. Three gaps remain: (1) edge function errors don't fall back to client-side logic, (2) time slot buttons don't show which team member is available, and (3) the confirmation screen doesn't differentiate between successful calendar creation and graceful degradation.
 
-## Changes
+## Changes — `src/pages/BookMeeting.tsx`
 
-### `src/components/design-system/BookingManager.tsx`
+### 1. Fix fallback on edge function error
 
-**1. Warning banner** — Add an alert at the top of `TeamMembersTab` that shows when any active member has `google_calendar_connected === false`. Uses the existing `Alert` component with a yellow/warning style.
+Line 215 currently sets `setServerSlots([])` on error, which shows "no slots" instead of falling back to client-side calculation. Change to `setServerSlots(null)` so the `availableSlots` memo uses the client-side path.
 
-**2. OAuth redirect detection** — In `TeamMembersTab`, read `window.location.search` for `?calendar=connected` on mount. If found, show a success toast and clean the URL param via `window.history.replaceState`.
+### 2. Show member names on time slot buttons
 
-**3. Disconnect button** — For connected members, replace the static green badge with a dropdown or inline button group: green "Connected" badge + a small "Disconnect" button. On click, open a confirmation dialog, then:
-  - Delete the row from `google_oauth_tokens` where `team_member_id = member.id`
-  - Update `team_members` set `google_calendar_connected = false`
-  - Refresh the members list
-  - Show toast "Google Calendar disconnected"
+Store the full server slot data (with `available_members` arrays) alongside the Date-based slots. When `requires_all_members` is false, render a subtle label under each time showing the available member name(s) by looking up the `members` array.
 
-**4. Update OAuth scopes** — Change scope from `calendar.events calendar.freebusy` to `calendar calendar.events` per the prompt.
+### 3. Improve confirmation screen messaging
 
-### File changes
+- If `bookingResult.meet_link` exists: show "A calendar invite has been sent to your email." + the Meet join link
+- If `bookingResult.meet_link` is absent but booking succeeded: show "Meeting confirmed! We'll send you a calendar invite shortly." (graceful degradation)
+
+### 4. Better 409 handling
+
+The current catch block already handles errors, but refine it: detect 409-specific messages ("already been booked" / "slot") and show the specific toast "That time slot was just booked by someone else. Please pick another time." then navigate back to step 2 with the same date preserved.
+
+## Technical details
+
+| Area | Current | Fix |
+|---|---|---|
+| Edge function error (line 215) | `setServerSlots([])` | `setServerSlots(null)` — triggers client fallback |
+| Slot rendering (lines 514-531) | Shows time only | Add member name subtitle from `serverSlots[i].available_members` |
+| Confirmation (lines 629-656) | Generic message | Conditional: meet_link present → "invite sent" / absent → "invite shortly" |
 
 | File | Action |
 |---|---|
-| `src/components/design-system/BookingManager.tsx` | Edit — add warning banner, disconnect flow, OAuth redirect toast, update scopes |
-
-### Technical details
-
-- Import `Alert, AlertTitle, AlertDescription` from `@/components/ui/alert` and `AlertTriangle` from `lucide-react`
-- Add `useEffect` to detect `?calendar=connected` query param on mount, show toast, then `replaceState` to remove it
-- Add `disconnecting` state + `AlertDialog` for disconnect confirmation
-- The `google_oauth_tokens` delete requires service role access — since anon can't delete from that table, use `supabase.from('team_members').update({ google_calendar_connected: false })` and the token cleanup will happen server-side (or add an RLS policy allowing admin delete). Simplest: just update the flag on `team_members` and let the edge function handle stale tokens gracefully.
+| `src/pages/BookMeeting.tsx` | Edit — fix fallback, add member labels, improve confirmation |
 
