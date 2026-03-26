@@ -1,30 +1,41 @@
 
 
-# Only Show Active Sections in Event-Specific Availability
+# Fix: Event Date Ranges Should Override General Availability
 
 ## Problem
-The event-specific availability cards on team members always show both "Recurring Days" and "Date Ranges" sections, even when nothing is configured. This clutters the UI — if the event only uses date ranges (like a trade fair), the recurring days section is unnecessary noise.
+Event-type date ranges currently **intersect with** (constrain by) general weekly availability. They should **replace** it. When you say "Trade fair Mar 30, 10:00–20:00", that means the member is available 10–20 on that date — their normal Mon–Fri 09:00–16:00 schedule is irrelevant.
+
+Two bugs:
+1. Date-range times use `Math.max`/`Math.min` with general rules, so the window shrinks to the overlap (10:00–16:00 instead of 10:00–20:00)
+2. If no general `availability_rules` exist for that weekday (e.g., Saturday trade fair), the function returns empty — even if the event has a date range covering it
 
 ## Solution
-Only display sections that have active data from the event type's configuration. Show a compact summary instead of all 7 day toggles when nothing is enabled.
 
-## Changes to `src/components/design-system/BookingManager.tsx`
+### `supabase/functions/get-availability/index.ts`
 
-### Recurring Days section (lines 390-412)
-- Only render if at least one recurring day is enabled (`entry.recurring.some(r => r.enabled)`)
-- If none enabled, hide the entire "Recurring Days" block
+**When a date-range match exists**, bypass the general availability requirement and use the date-range times as the bookable window directly:
 
-### Date Ranges section (lines 414-439)
-- Only render the date range list if `entry.dateRanges.length > 0`
-- Always show the "Add Date Range" button so the user can add one
-- If no date ranges exist, just show the button without the "Date Ranges" label
+1. **Move date-range detection earlier** (before fetching `availability_rules`)
+2. **If date-range match found**: skip the `availability_rules` query; use `matchingDateRange.start_time`/`end_time` as the window; treat all assigned members as available within that window (skip per-member `rule.start_time`/`end_time` check in the slot loop)
+3. **If no date-range match**: keep existing logic (general rules + optional recurring constraint)
 
-### Add toggle to reveal recurring days
-- Add a small "Add Recurring Days" button (similar to "Add Date Range") that appears only when no recurring days are active, so the user can opt in to adding them
+Specifically:
+- Lines 149-164: Make general `availability_rules` fetch conditional — only required when no date-range override applies
+- Lines 291-295: When date-range active, set `windowStart`/`windowEnd` from the date range directly (not intersected)
+- Lines 331-334: When date-range active, skip the per-member `mStart`/`mEnd` check (members are available per the event override)
 
-This keeps the cards clean — showing only what's configured in the event type — while still allowing the user to add either type of availability.
+### `src/pages/BookMeeting.tsx`
+
+Mirror the same logic in the client-side fallback slot generation.
+
+### Re-deploy edge function
+
+Deploy updated `get-availability`.
+
+## Files to change
 
 | File | Change |
 |------|--------|
-| `src/components/design-system/BookingManager.tsx` | Conditionally render recurring/date-range sections based on active data |
+| `supabase/functions/get-availability/index.ts` | Date-range overrides general availability instead of constraining it |
+| `src/pages/BookMeeting.tsx` | Mirror same override logic in client fallback |
 
