@@ -1,38 +1,63 @@
 
 
-# Calendar Booking System — Database Schema Migration
+# Create /book Meeting Booking Page
 
-## Overview
+## Summary
 
-Create 7 new tables for a meeting booking system with Google Calendar integration, plus seed data for the two co-founders and initial event types.
+Build a new public-facing multi-step booking page at `/book` where external visitors can select an event type, pick a date/time, fill in their details, and confirm a meeting.
 
-## Migration
+## Files to Create
 
-A single SQL migration file will:
+### 1. `src/pages/BookMeeting.tsx` — Main page component
 
-1. **Create tables**: `team_members`, `event_types`, `event_type_members`, `availability_rules`, `bookings`, `booking_members`, `google_oauth_tokens` — all with the exact columns, types, defaults, foreign keys, and unique constraints specified.
+Single-file page with 4 steps managed via state:
 
-2. **Enable RLS** on all 7 tables.
+**Step 1 — Event Type Selection**
+- Fetch `event_types` where `is_active = true`
+- Render as cards with colored left border, title, description, duration badge
+- Click advances to step 2, stores selected event type
 
-3. **RLS policies**:
-   - `team_members`, `event_types`, `event_type_members`, `availability_rules` — public SELECT (anon); full access for admins via `is_admin()`
-   - `bookings` — public INSERT (anon can book); SELECT/UPDATE/DELETE for admins only
-   - `booking_members` — public INSERT (anon, during booking creation); SELECT for admins
-   - `google_oauth_tokens` — zero public/anon access; only admins + service_role
+**Step 2 — Date & Time Selection**
+- Fetch assigned team members via `event_type_members` joined with `team_members`
+- Left panel: event info, member avatars/names, back button
+- Right panel: Shadcn Calendar (tomorrow to +4 weeks), timezone dropdown (auto-detected via `Intl.DateTimeFormat`), time slots
+- Availability logic:
+  - Get `availability_rules` for assigned members for selected day_of_week
+  - Generate slots based on `duration_minutes + buffer_minutes`
+  - Fetch existing confirmed `bookings` for that date range
+  - Filter out overlapping slots
+  - If `requires_all_members`: all members must be free. Otherwise: at least one.
+- Time slots shown in visitor's selected timezone
 
-4. **Seed data** (inside the same migration):
-   - Joachim (joachim@noddi.tech, slug "joachim", title "Co-founder")
-   - Tom Arne (tomarne@noddi.tech, slug "tom-arne", title "Co-founder")
-   - Event type: "Product Demo" (30 min, 15 min buffer)
-   - Event type: "Intro Call" (15 min, 10 min buffer)
-   - Link both members to "Product Demo"
-   - Availability Mon–Fri 09:00–16:00 for both members
+**Step 3 — Booking Form**
+- Name (required), Email (required), Company (optional), Message textarea (optional)
+- Confirm button with primary styling
+- On submit: insert into `bookings` (UTC times) + `booking_members`
 
-## Files
+**Step 4 — Confirmation**
+- Checkmark animation, booking summary in guest timezone
+- "Book another meeting" reset link
 
-| File | Change |
+**UI details:**
+- Step indicator dots at top (1-2-3-4)
+- Smooth transitions between steps (CSS transitions)
+- Max-w-3xl centered, bg-background
+- Navio logo at top
+- `pointer-events-auto` on Calendar
+
+### 2. `src/App.tsx` — Add route
+
+Add `/book` route (no language prefix, no auth required):
+```
+<Route path="/book" element={<BookMeeting />} />
+```
+
+## No database changes needed
+
+Schema and RLS policies already exist from the previous migration.
+
+| File | Action |
 |---|---|
-| `supabase/migrations/<timestamp>.sql` | New migration: all 7 tables, RLS, seed data |
-
-No application code changes in this step — this is schema-only.
+| `src/pages/BookMeeting.tsx` | Create — full booking page with 4 steps |
+| `src/App.tsx` | Add `/book` route |
 
