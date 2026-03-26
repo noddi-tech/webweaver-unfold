@@ -130,7 +130,7 @@ const ManageBooking = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Minimal header */}
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-border bg-white">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="text-xl font-bold text-primary">Navio</a>
           <a href="/" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
@@ -194,7 +194,7 @@ const ManageBooking = () => {
               </p>
             </div>
 
-            <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <div className="bg-white/80 border border-border/50 rounded-xl p-6 space-y-4 backdrop-blur-sm">
               <div className="flex items-start gap-3">
                 <Calendar className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                 <div>
@@ -234,7 +234,7 @@ const ManageBooking = () => {
               )}
             </div>
 
-            <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <div className="bg-white/80 border border-border/50 rounded-xl p-6 space-y-4 backdrop-blur-sm">
               <h2 className="font-semibold text-foreground">Your Details</h2>
 
               <div className="flex items-center gap-3">
