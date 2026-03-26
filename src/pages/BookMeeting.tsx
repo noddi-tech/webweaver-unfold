@@ -433,17 +433,25 @@ export default function BookMeeting() {
     const jsDay = date.getDay();
     const dbDay = jsDay === 0 ? 6 : jsDay - 1;
 
-    // Check member availability rules (e.g. weekends)
-    if (availabilityRules.length > 0) {
-      if (!availableDayNumbers.has(dbDay)) return true;
-    }
-
-    // Check event-type availability constraints
+    // Check event-type date-range overrides FIRST — they replace general availability
     if (eventTypeAvailability.length > 0) {
       const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      const recurringMatch = eventTypeAvailability.some(r => r.type === 'recurring' && r.day_of_week === dbDay);
       const dateRangeMatch = eventTypeAvailability.some(r => r.type === 'date_range' && dateStr >= (r.date_start || '') && dateStr <= (r.date_end || ''));
-      if (!recurringMatch && !dateRangeMatch) return true;
+      if (dateRangeMatch) return false; // Date-range override — allow regardless of weekly rules
+
+      const recurringMatch = eventTypeAvailability.some(r => r.type === 'recurring' && r.day_of_week === dbDay);
+      if (!recurringMatch) {
+        // No recurring match and no date-range match — check general availability
+        if (availabilityRules.length > 0 && !availableDayNumbers.has(dbDay)) return true;
+        // If no recurring constraints match, disable
+        return true;
+      }
+      return false;
+    }
+
+    // No event-type availability — fall back to general weekly rules
+    if (availabilityRules.length > 0) {
+      if (!availableDayNumbers.has(dbDay)) return true;
     }
 
     return false;
