@@ -71,6 +71,7 @@ serve(async (req) => {
       guest_company,
       guest_message,
       guest_timezone,
+      duration_minutes: requested_duration,
     } = await req.json()
 
     if (!event_type_id || !start_time || !guest_name || !guest_email || !guest_timezone) {
@@ -100,7 +101,13 @@ serve(async (req) => {
       })
     }
 
-    const duration = eventType.duration_minutes || 30
+    // Determine duration: use requested if valid within range, otherwise default
+    let duration = eventType.duration_minutes || 30
+    if (requested_duration && eventType.min_duration_minutes && eventType.max_duration_minutes) {
+      if (requested_duration >= eventType.min_duration_minutes && requested_duration <= eventType.max_duration_minutes) {
+        duration = requested_duration
+      }
+    }
     const endTime = new Date(new Date(start_time).getTime() + duration * 60000).toISOString()
 
     // 2. Get assigned members

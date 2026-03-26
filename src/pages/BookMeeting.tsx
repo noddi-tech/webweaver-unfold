@@ -43,6 +43,9 @@ type EventType = {
   slug: string;
   description: string | null;
   duration_minutes: number | null;
+  min_duration_minutes: number | null;
+  max_duration_minutes: number | null;
+  duration_step_minutes: number | null;
   buffer_minutes: number | null;
   color: string | null;
   requires_all_members: boolean | null;
@@ -144,6 +147,7 @@ export default function BookMeeting() {
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
   const [serverSlots, setServerSlots] = useState<Array<{ start: string; end: string; available_members: string[] }> | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [bookingResult, setBookingResult] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -163,6 +167,20 @@ export default function BookMeeting() {
     const days = new Set(availabilityRules.map(r => r.day_of_week));
     return days;
   }, [availabilityRules]);
+
+  // Compute duration options for flexible event types
+  const durationOptions = useMemo(() => {
+    if (!selectedEvent?.min_duration_minutes || !selectedEvent?.max_duration_minutes) return null;
+    const step = selectedEvent.duration_step_minutes || 15;
+    const options: number[] = [];
+    for (let d = selectedEvent.min_duration_minutes; d <= selectedEvent.max_duration_minutes; d += step) {
+      options.push(d);
+    }
+    return options.length > 1 ? options : null;
+  }, [selectedEvent]);
+
+  // Effective duration (chosen or default)
+  const effectiveDuration = selectedDuration || selectedEvent?.duration_minutes || 30;
 
   // Fetch event types
   useEffect(() => {
@@ -211,7 +229,12 @@ export default function BookMeeting() {
     const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
 
     supabase.functions.invoke('get-availability', {
-      body: { event_type_id: selectedEvent.id, date: dateStr, timezone },
+      body: {
+        event_type_id: selectedEvent.id,
+        date: dateStr,
+        timezone,
+        duration_override: durationOptions ? effectiveDuration : undefined,
+      },
     }).then(({ data, error }) => {
       if (error) {
         console.error('get-availability error:', error);
@@ -221,7 +244,7 @@ export default function BookMeeting() {
       }
       setLoadingSlots(false);
     });
-  }, [selectedDate, selectedEvent, timezone]);
+  }, [selectedDate, selectedEvent, timezone, effectiveDuration]);
 
   // Use server slots when available, fall back to client-side
   const availableSlots = useMemo(() => {
@@ -234,7 +257,7 @@ export default function BookMeeting() {
 
     const jsDay = selectedDate.getDay();
     const dbDay = jsDay === 0 ? 6 : jsDay - 1;
-    const duration = selectedEvent.duration_minutes || 30;
+    const duration = effectiveDuration;
     const buffer = selectedEvent.buffer_minutes || 0;
     const requiresAll = selectedEvent.requires_all_members || false;
 
@@ -314,6 +337,7 @@ export default function BookMeeting() {
           guest_company: data.company || null,
           guest_message: data.message || null,
           guest_timezone: timezone,
+          duration_minutes: durationOptions ? effectiveDuration : undefined,
         },
       });
 
@@ -350,6 +374,7 @@ export default function BookMeeting() {
     setSelectedEvent(null);
     setSelectedDate(undefined);
     setSelectedSlot(null);
+    setSelectedDuration(null);
     setMembers([]);
     form.reset();
     setBookingResult(null);
@@ -446,7 +471,7 @@ export default function BookMeeting() {
                   key={et.id}
                   className="p-5 cursor-pointer hover:shadow-md transition-all border-l-4 bg-card-surface/30 hover:bg-card-surface/50"
                   style={{ borderLeftColor: et.color || "hsl(var(--primary))" }}
-                  onClick={() => { setSelectedEvent(et); setStep(2); }}
+                  onClick={() => { setSelectedEvent(et); setSelectedDuration(et.min_duration_minutes || null); setStep(2); }}
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -457,7 +482,9 @@ export default function BookMeeting() {
                     </div>
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium whitespace-nowrap">
                       <Clock className="w-3.5 h-3.5" />
-                      {et.duration_minutes || 30} min
+                      {et.min_duration_minutes && et.max_duration_minutes
+                        ? `${et.min_duration_minutes}–${et.max_duration_minutes}`
+                        : et.duration_minutes || 30} min
                     </span>
                   </div>
                 </Card>
@@ -475,7 +502,7 @@ export default function BookMeeting() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => { setStep(1); setSelectedDate(undefined); setSelectedSlot(null); }}
+                  onClick={() => { setStep(1); setSelectedDate(undefined); setSelectedSlot(null); setSelectedDuration(null); }}
                   className="mb-2"
                 >
                   <ArrowLeft className="w-4 h-4 mr-1" /> {t('book.back', 'Back')}
@@ -484,7 +511,7 @@ export default function BookMeeting() {
                 <div>
                   <h2 className="text-xl font-bold text-foreground">{selectedEvent.title}</h2>
                   <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" /> {selectedEvent.duration_minutes || 30} min
+                    <Clock className="w-3.5 h-3.5" /> {effectiveDuration} min
                   </p>
                 </div>
 
@@ -530,6 +557,29 @@ export default function BookMeeting() {
                   </div>
                 ) : (
                   <>
+                {/* Duration picker for flexible event types */}
+                {durationOptions && (
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-2">
+                      {t('book.choose_duration', 'How long do you need?')}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {durationOptions.map(d => (
+                        <button
+                          key={d}
+                          onClick={() => { setSelectedDuration(d); setSelectedSlot(null); }}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                            effectiveDuration === d
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-card-background text-foreground border-border hover:border-primary"
+                          }`}
+                        >
+                          {d} min
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <Calendar
                   mode="single"
                   selected={selectedDate}
