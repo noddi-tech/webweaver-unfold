@@ -111,6 +111,7 @@ const App = () => {
                     <Route path="/cms" element={<Admin />} />
                     <Route path="/admin" element={<Admin />} />
                     <Route path="/cms/translations" element={<Navigate to="/cms" replace />} />
+                    <Route path="/book" element={<BookMeeting />} />
                     <Route path="/book/:token" element={<CandidateBooking />} />
                     <Route path="/offer/:token" element={<OfferView />} />
                     <Route path="/llms.txt" element={<LlmsTxt />} />
