@@ -540,20 +540,20 @@ function EventTypesTab() {
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label>Min Duration</Label>
-                <Select value={form.min_duration} onValueChange={v => setForm(f => ({ ...f, min_duration: v }))}>
+                <Select value={form.min_duration || "none"} onValueChange={v => setForm(f => ({ ...f, min_duration: v === "none" ? "" : v }))}>
                   <SelectTrigger><SelectValue placeholder="Fixed" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Fixed (no range)</SelectItem>
+                    <SelectItem value="none">Fixed (no range)</SelectItem>
                     {[15, 30, 45, 60].map(d => <SelectItem key={d} value={String(d)}>{d} min</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>Max Duration</Label>
-                <Select value={form.max_duration} onValueChange={v => setForm(f => ({ ...f, max_duration: v }))}>
+                <Select value={form.max_duration || "none"} onValueChange={v => setForm(f => ({ ...f, max_duration: v === "none" ? "" : v }))}>
                   <SelectTrigger><SelectValue placeholder="Fixed" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Fixed (no range)</SelectItem>
+                    <SelectItem value="none">Fixed (no range)</SelectItem>
                     {[30, 45, 60, 90, 120].map(d => <SelectItem key={d} value={String(d)}>{d} min</SelectItem>)}
                   </SelectContent>
                 </Select>
