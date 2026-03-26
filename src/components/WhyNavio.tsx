@@ -8,6 +8,10 @@ import { useAppTranslation } from "@/hooks/useAppTranslation";
 import { EditableTranslation } from "@/components/EditableTranslation";
 import { EditableCard } from "@/components/EditableCard";
 import { EditableListIcon } from "@/components/EditableListIcon";
+import { EditableButton } from "@/components/EditableButton";
+import { useBackgroundStyle } from "@/hooks/useBackgroundStyle";
+import { supabase } from "@/integrations/supabase/client";
+import { resolveTextColor } from "@/lib/textColorUtils";
 
 export default function WhyNavio() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
