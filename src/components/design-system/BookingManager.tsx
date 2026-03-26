@@ -61,6 +61,17 @@ interface EventTypeMember {
   is_required: boolean | null;
 }
 
+interface EventTypeAvailability {
+  id: string;
+  event_type_id: string;
+  type: 'recurring' | 'date_range';
+  day_of_week: number | null;
+  start_time: string | null;
+  end_time: string | null;
+  date_start: string | null;
+  date_end: string | null;
+}
+
 interface Booking {
   id: string;
   guest_name: string;
@@ -86,6 +97,8 @@ for (let h = 7; h <= 20; h++) {
 }
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAY_NAMES_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6]; // Mon=0 .. Sun=6
 
 const generateSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
 
@@ -304,6 +317,13 @@ function EventTypesTab() {
   const [selectedMembers, setSelectedMembers] = useState<{ memberId: string; required: boolean }[]>([]);
   const [saving, setSaving] = useState(false);
 
+  // Event-type availability state
+  const [limitAvailability, setLimitAvailability] = useState(false);
+  const [recurringDays, setRecurringDays] = useState<{ day: number; enabled: boolean; start: string; end: string }[]>(
+    ALL_DAYS.map(d => ({ day: d, enabled: false, start: "09:00", end: "17:00" }))
+  );
+  const [dateRanges, setDateRanges] = useState<{ date_start: string; date_end: string }[]>([]);
+
   const fetchData = async () => {
     const [etRes, mRes, aRes] = await Promise.all([
       supabase.from("event_types").select("*").order("title"),
@@ -322,10 +342,13 @@ function EventTypesTab() {
     setEditing(null);
     setForm({ title: "", slug: "", description: "", duration: "30", buffer: "15", requires_all: false, color: "#3b82f6", min_duration: "", max_duration: "", duration_step: "15" });
     setSelectedMembers([]);
+    setLimitAvailability(false);
+    setRecurringDays(ALL_DAYS.map(d => ({ day: d, enabled: false, start: "09:00", end: "17:00" })));
+    setDateRanges([]);
     setDialogOpen(true);
   };
 
-  const openEdit = (et: EventType) => {
+  const openEdit = async (et: EventType) => {
     setEditing(et);
     setForm({
       title: et.title,
@@ -341,6 +364,24 @@ function EventTypesTab() {
     });
     const assigned = assignments.filter(a => a.event_type_id === et.id);
     setSelectedMembers(assigned.map(a => ({ memberId: a.team_member_id, required: a.is_required || false })));
+
+    // Load event-type availability
+    const { data: avail } = await supabase.from("event_type_availability").select("*").eq("event_type_id", et.id);
+    const rows = (avail || []) as EventTypeAvailability[];
+    if (rows.length > 0) {
+      setLimitAvailability(true);
+      const days = ALL_DAYS.map(d => {
+        const r = rows.find(row => row.type === 'recurring' && row.day_of_week === d);
+        return { day: d, enabled: !!r, start: r?.start_time || "09:00", end: r?.end_time || "17:00" };
+      });
+      setRecurringDays(days);
+      setDateRanges(rows.filter(r => r.type === 'date_range').map(r => ({ date_start: r.date_start || '', date_end: r.date_end || '' })));
+    } else {
+      setLimitAvailability(false);
+      setRecurringDays(ALL_DAYS.map(d => ({ day: d, enabled: false, start: "09:00", end: "17:00" })));
+      setDateRanges([]);
+    }
+
     setDialogOpen(true);
   };
 
@@ -377,6 +418,25 @@ function EventTypesTab() {
       await supabase.from("event_type_members").insert(
         selectedMembers.map(sm => ({ event_type_id: eventId, team_member_id: sm.memberId, is_required: sm.required }))
       );
+    }
+
+    // Sync event-type availability
+    await supabase.from("event_type_availability").delete().eq("event_type_id", eventId);
+    if (limitAvailability) {
+      const availRows: any[] = [];
+      for (const rd of recurringDays) {
+        if (rd.enabled) {
+          availRows.push({ event_type_id: eventId, type: 'recurring', day_of_week: rd.day, start_time: rd.start, end_time: rd.end });
+        }
+      }
+      for (const dr of dateRanges) {
+        if (dr.date_start && dr.date_end) {
+          availRows.push({ event_type_id: eventId, type: 'date_range', date_start: dr.date_start, date_end: dr.date_end });
+        }
+      }
+      if (availRows.length > 0) {
+        await supabase.from("event_type_availability").insert(availRows);
+      }
     }
 
     toast({ title: editing ? "Event type updated" : "Event type created" });
@@ -535,6 +595,69 @@ function EventTypesTab() {
                   );
                 })}
               </div>
+            </div>
+
+            {/* Event-type availability */}
+            <div className="border-t border-border pt-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Switch checked={limitAvailability} onCheckedChange={c => setLimitAvailability(!!c)} />
+                <Label>Limit availability for this event type</Label>
+              </div>
+              {limitAvailability && (
+                <div className="space-y-4">
+                  {/* Recurring days */}
+                  <div>
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wide mb-2 block">Recurring weekly days</Label>
+                    <div className="space-y-2">
+                      {recurringDays.map((rd, idx) => (
+                        <div key={rd.day} className="flex items-center gap-3">
+                          <Checkbox checked={rd.enabled} onCheckedChange={checked => {
+                            const u = [...recurringDays]; u[idx] = { ...rd, enabled: !!checked }; setRecurringDays(u);
+                          }} />
+                          <span className="w-12 text-sm font-medium">{DAY_NAMES_SHORT[rd.day]}</span>
+                          {rd.enabled && (
+                            <>
+                              <Select value={rd.start} onValueChange={v => { const u = [...recurringDays]; u[idx] = { ...rd, start: v }; setRecurringDays(u); }}>
+                                <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                                <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                              </Select>
+                              <span className="text-muted-foreground">–</span>
+                              <Select value={rd.end} onValueChange={v => { const u = [...recurringDays]; u[idx] = { ...rd, end: v }; setRecurringDays(u); }}>
+                                <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                                <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                              </Select>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Date ranges */}
+                  <div>
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wide mb-2 block">Specific date ranges</Label>
+                    <div className="space-y-2">
+                      {dateRanges.map((dr, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <Input type="date" value={dr.date_start} onChange={e => {
+                            const u = [...dateRanges]; u[idx] = { ...dr, date_start: e.target.value }; setDateRanges(u);
+                          }} className="w-40" />
+                          <span className="text-muted-foreground">to</span>
+                          <Input type="date" value={dr.date_end} onChange={e => {
+                            const u = [...dateRanges]; u[idx] = { ...dr, date_end: e.target.value }; setDateRanges(u);
+                          }} className="w-40" />
+                          <Button variant="ghost" size="icon" onClick={() => setDateRanges(dateRanges.filter((_, i) => i !== idx))}>
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button variant="outline" size="sm" onClick={() => setDateRanges([...dateRanges, { date_start: '', date_end: '' }])}>
+                        <Plus className="w-4 h-4 mr-1" /> Add date range
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>

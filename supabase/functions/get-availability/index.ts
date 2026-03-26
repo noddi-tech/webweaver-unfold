@@ -122,6 +122,30 @@ serve(async (req) => {
       })
     }
 
+    // 2b. Get event-type availability rules
+    const { data: etAvailability } = await supabase
+      .from('event_type_availability')
+      .select('*')
+      .eq('event_type_id', event_type_id)
+
+    const etAvailRows = etAvailability || []
+
+    // Check if this date is allowed by event-type availability
+    if (etAvailRows.length > 0) {
+      const dateObj2 = new Date(date + 'T12:00:00Z')
+      const jsDay2 = dateObj2.getUTCDay()
+      const dbDay2 = jsDay2 === 0 ? 6 : jsDay2 - 1
+
+      const recurringMatch = etAvailRows.some((r: any) => r.type === 'recurring' && r.day_of_week === dbDay2)
+      const dateRangeMatch = etAvailRows.some((r: any) => r.type === 'date_range' && date >= r.date_start && date <= r.date_end)
+
+      if (!recurringMatch && !dateRangeMatch) {
+        return new Response(JSON.stringify({ slots: [] }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    }
+
     // 3. Get availability rules for the day
     const dateObj = new Date(date + 'T12:00:00Z')
     const jsDay = dateObj.getUTCDay()
@@ -261,11 +285,22 @@ serve(async (req) => {
     }
 
     // Calculate the slot window
+    // If event-type has recurring availability for this day, use it to further constrain the window
+    const matchingEtRecurring = etAvailRows.find((r: any) => r.type === 'recurring' && r.day_of_week === dbDay)
+
     const allStarts = membersWithRules.map(w => timeToMinutes(w.rule.start_time))
     const allEnds = membersWithRules.map(w => timeToMinutes(w.rule.end_time))
 
-    const windowStart = requiresAll ? Math.max(...allStarts) : Math.min(...allStarts)
-    const windowEnd = requiresAll ? Math.min(...allEnds) : Math.max(...allEnds)
+    let windowStart = requiresAll ? Math.max(...allStarts) : Math.min(...allStarts)
+    let windowEnd = requiresAll ? Math.min(...allEnds) : Math.max(...allEnds)
+
+    // Constrain by event-type recurring times if present
+    if (matchingEtRecurring?.start_time && matchingEtRecurring?.end_time) {
+      const etStart = timeToMinutes(matchingEtRecurring.start_time)
+      const etEnd = timeToMinutes(matchingEtRecurring.end_time)
+      windowStart = Math.max(windowStart, etStart)
+      windowEnd = Math.min(windowEnd, etEnd)
+    }
 
     const slots: Array<{ start: string; end: string; available_members: string[] }> = []
 

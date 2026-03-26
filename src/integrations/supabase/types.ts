@@ -1346,6 +1346,50 @@ export type Database = {
           },
         ]
       }
+      event_type_availability: {
+        Row: {
+          created_at: string | null
+          date_end: string | null
+          date_start: string | null
+          day_of_week: number | null
+          end_time: string | null
+          event_type_id: string
+          id: string
+          start_time: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          date_end?: string | null
+          date_start?: string | null
+          day_of_week?: number | null
+          end_time?: string | null
+          event_type_id: string
+          id?: string
+          start_time?: string | null
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          date_end?: string | null
+          date_start?: string | null
+          day_of_week?: number | null
+          end_time?: string | null
+          event_type_id?: string
+          id?: string
+          start_time?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_type_availability_event_type_id_fkey"
+            columns: ["event_type_id"]
+            isOneToOne: false
+            referencedRelation: "event_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_type_members: {
         Row: {
           event_type_id: string
