@@ -1,41 +1,30 @@
 
 
-# Fix: Event Date Ranges Should Override General Availability
+# Fix: Calendar Disables Dates That Have Date-Range Overrides
 
 ## Problem
-Event-type date ranges currently **intersect with** (constrain by) general weekly availability. They should **replace** it. When you say "Trade fair Mar 30, 10:00–20:00", that means the member is available 10–20 on that date — their normal Mon–Fri 09:00–16:00 schedule is irrelevant.
+March 29 (Saturday) is disabled in the calendar even though a date-range override exists for it. The `isDateDisabled` function checks general weekly availability first (line 437-438) and disables weekends because no team member has Saturday availability configured. The date-range override check on line 442-446 never gets a chance to run.
 
-Two bugs:
-1. Date-range times use `Math.max`/`Math.min` with general rules, so the window shrinks to the overlap (10:00–16:00 instead of 10:00–20:00)
-2. If no general `availability_rules` exist for that weekday (e.g., Saturday trade fair), the function returns empty — even if the event has a date range covering it
+This is the same "intersection vs override" bug, but on the **client-side calendar** rather than in the slot generation.
 
-## Solution
+## Fix in `src/pages/BookMeeting.tsx`
 
-### `supabase/functions/get-availability/index.ts`
+**Reorder the `isDateDisabled` logic** — check for date-range overrides first. If a date-range match exists, the date is allowed regardless of general weekly availability.
 
-**When a date-range match exists**, bypass the general availability requirement and use the date-range times as the bookable window directly:
+### Current logic (lines 431-449):
+1. Check past/future → disable
+2. Check general weekly availability → disable if weekday not in rules
+3. Check event-type availability → disable if no recurring/date-range match
 
-1. **Move date-range detection earlier** (before fetching `availability_rules`)
-2. **If date-range match found**: skip the `availability_rules` query; use `matchingDateRange.start_time`/`end_time` as the window; treat all assigned members as available within that window (skip per-member `rule.start_time`/`end_time` check in the slot loop)
-3. **If no date-range match**: keep existing logic (general rules + optional recurring constraint)
+### Fixed logic:
+1. Check past/future → disable
+2. If event-type availability exists, check for date-range match first → **if match found, allow immediately** (return false)
+3. Check general weekly availability → disable if weekday not in rules
+4. Check event-type recurring constraints → disable if no recurring match
 
-Specifically:
-- Lines 149-164: Make general `availability_rules` fetch conditional — only required when no date-range override applies
-- Lines 291-295: When date-range active, set `windowStart`/`windowEnd` from the date range directly (not intersected)
-- Lines 331-334: When date-range active, skip the per-member `mStart`/`mEnd` check (members are available per the event override)
-
-### `src/pages/BookMeeting.tsx`
-
-Mirror the same logic in the client-side fallback slot generation.
-
-### Re-deploy edge function
-
-Deploy updated `get-availability`.
-
-## Files to change
+One change, ~10 lines modified. No backend changes needed — the edge function already handles this correctly.
 
 | File | Change |
 |------|--------|
-| `supabase/functions/get-availability/index.ts` | Date-range overrides general availability instead of constraining it |
-| `src/pages/BookMeeting.tsx` | Mirror same override logic in client fallback |
+| `src/pages/BookMeeting.tsx` | Reorder `isDateDisabled` to check date-range overrides before general availability |
 
