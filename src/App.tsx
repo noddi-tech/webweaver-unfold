@@ -41,6 +41,7 @@ import MyApplications from "./pages/MyApplications";
 import CandidateBooking from "./pages/CandidateBooking";
 import OfferView from "./pages/OfferView";
 import LegalPage from "./pages/LegalPage";
+import BookMeeting from "./pages/BookMeeting";
 
 const queryClient = new QueryClient();
 const App = () => {
