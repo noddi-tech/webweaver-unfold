@@ -374,6 +374,7 @@ export default function BookMeeting() {
     setSelectedEvent(null);
     setSelectedDate(undefined);
     setSelectedSlot(null);
+    setSelectedDuration(null);
     setMembers([]);
     form.reset();
     setBookingResult(null);
