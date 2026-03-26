@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { getFromAddress } from "../_shared/email-domain.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -344,20 +345,26 @@ serve(async (req) => {
 </body>
 </html>`
 
-        await fetch('https://api.resend.com/emails', {
+        const fromAddress = await getFromAddress(resendKey, 'hello')
+        const emailRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${resendKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'Navio Solutions <noreply@naviosolutions.com>',
+            from: fromAddress,
             to: [guest_email],
             subject: `Meeting Confirmed: ${eventType ? eventType.title : `${duration} min meeting`} — ${formattedDate}`,
             html: emailHtml,
           }),
         })
-        console.log('Confirmation email sent to', guest_email)
+        if (!emailRes.ok) {
+          const errText = await emailRes.text()
+          console.error('Resend API error:', errText)
+        } else {
+          console.log('Confirmation email sent to', guest_email)
+        }
       } catch (emailErr) {
         console.error('Failed to send confirmation email:', emailErr)
         // Don't fail the booking if email fails
