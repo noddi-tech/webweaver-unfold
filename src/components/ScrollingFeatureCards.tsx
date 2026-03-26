@@ -875,12 +875,12 @@ const getMaskClasses = (fitMode: 'contain' | 'cover', borderRadius: string): str
                             active: true,
                           }, { onConflict: 'element_id' });
                           // Also save color_token to translations
-                          await supabase.from('translations').upsert({
+                          await supabase.from('translations').upsert([{
                             translation_key: card.ctaKey,
                             language_code: 'en',
                             translation_value: cardData[index]?.ctaText || card.ctaText,
                             color_token: color,
-                          }, { onConflict: 'translation_key,language_code' });
+                          }], { onConflict: 'translation_key,language_code' });
                           setCardData(prev => ({ ...prev, [index]: { ...prev[index], ctaTextColor: color } }));
                         }}
                       >
