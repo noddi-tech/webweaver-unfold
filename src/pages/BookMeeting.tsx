@@ -257,7 +257,7 @@ export default function BookMeeting() {
 
     const jsDay = selectedDate.getDay();
     const dbDay = jsDay === 0 ? 6 : jsDay - 1;
-    const duration = selectedEvent.duration_minutes || 30;
+    const duration = effectiveDuration;
     const buffer = selectedEvent.buffer_minutes || 0;
     const requiresAll = selectedEvent.requires_all_members || false;
 
