@@ -7,8 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, ArrowLeft, CheckCircle2, Users } from "lucide-react";
-import { format, addDays, startOfDay, isBefore, isAfter, addWeeks, setHours, setMinutes } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Clock, ArrowLeft, CheckCircle2, Users, CalendarX2, Loader2 } from "lucide-react";
+import { format, addDays, startOfDay, isBefore, isAfter, addWeeks } from "date-fns";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useToast } from "@/hooks/use-toast";
 
 const COMMON_TIMEZONES = [
   "Europe/Oslo", "Europe/London", "Europe/Berlin", "Europe/Paris",
@@ -17,6 +22,15 @@ const COMMON_TIMEZONES = [
   "America/Los_Angeles", "Asia/Tokyo", "Asia/Singapore",
   "Australia/Sydney", "Pacific/Auckland",
 ];
+
+const bookingSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters"),
+  email: z.string().trim().email("Please enter a valid email address"),
+  company: z.string().optional(),
+  message: z.string().optional(),
+});
+
+type BookingFormData = z.infer<typeof bookingSchema>;
 
 type EventType = {
   id: string;
@@ -67,9 +81,7 @@ function formatSlotTime(date: Date, timezone: string): string {
   }).format(date);
 }
 
-// Convert a "wall clock" time on a given date in a given timezone to a UTC Date
 function wallClockToUTC(date: Date, hours: number, minutes: number, timezone: string): Date {
-  // Build an ISO-ish string in the target timezone then parse
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -77,7 +89,6 @@ function wallClockToUTC(date: Date, hours: number, minutes: number, timezone: st
   const m = String(minutes).padStart(2, "0");
   const dtStr = `${year}-${month}-${day}T${h}:${m}:00`;
 
-  // Use Intl to find the offset for this timezone at this datetime
   const tempDate = new Date(dtStr + "Z");
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone: timezone,
@@ -85,13 +96,11 @@ function wallClockToUTC(date: Date, hours: number, minutes: number, timezone: st
     hour: "2-digit", minute: "2-digit", second: "2-digit",
     hour12: false,
   });
-  // Iterative approach: find offset
   const utcParts = formatter.formatToParts(tempDate);
   const getP = (type: string) => parseInt(utcParts.find(p => p.type === type)?.value || "0");
   const tzDate = new Date(Date.UTC(getP("year"), getP("month") - 1, getP("day"), getP("hour") === 24 ? 0 : getP("hour"), getP("minute"), getP("second")));
   const offset = tzDate.getTime() - tempDate.getTime();
 
-  // The actual UTC time for the wall clock time in the target TZ
   const target = new Date(dtStr + "Z");
   return new Date(target.getTime() - offset);
 }
@@ -127,13 +136,25 @@ export default function BookMeeting() {
   const [availabilityRules, setAvailabilityRules] = useState<AvailabilityRule[]>([]);
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
-  const [formData, setFormData] = useState({ name: "", email: "", company: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const [bookingResult, setBookingResult] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<BookingFormData>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: { name: "", email: "", company: "", message: "" },
+  });
 
   const tomorrow = useMemo(() => addDays(startOfDay(new Date()), 1), []);
   const maxDate = useMemo(() => addWeeks(tomorrow, 4), [tomorrow]);
+
+  // Compute which day_of_week values have availability rules
+  const availableDayNumbers = useMemo(() => {
+    const days = new Set(availabilityRules.map(r => r.day_of_week));
+    return days;
+  }, [availabilityRules]);
 
   // Fetch event types
   useEffect(() => {
@@ -164,7 +185,6 @@ export default function BookMeeting() {
           .eq("is_active", true);
         setMembers((tm as TeamMember[]) || []);
 
-        // Fetch availability for these members
         const { data: rules } = await supabase
           .from("availability_rules")
           .select("team_member_id, day_of_week, start_time, end_time")
@@ -176,6 +196,7 @@ export default function BookMeeting() {
   // Fetch bookings for selected date
   useEffect(() => {
     if (!selectedDate || !selectedEvent) return;
+    setLoadingSlots(true);
     const dayStart = new Date(selectedDate);
     dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(selectedDate);
@@ -190,6 +211,7 @@ export default function BookMeeting() {
       .lte("start_time", dayEnd.toISOString())
       .then(({ data }) => {
         setExistingBookings((data as Booking[]) || []);
+        setLoadingSlots(false);
       });
   }, [selectedDate, selectedEvent]);
 
@@ -197,14 +219,12 @@ export default function BookMeeting() {
   const availableSlots = useMemo(() => {
     if (!selectedDate || !selectedEvent || !members.length) return [];
 
-    // day_of_week: 0=Monday in our DB. JS getDay: 0=Sunday.
     const jsDay = selectedDate.getDay();
     const dbDay = jsDay === 0 ? 6 : jsDay - 1;
     const duration = selectedEvent.duration_minutes || 30;
     const buffer = selectedEvent.buffer_minutes || 0;
     const requiresAll = selectedEvent.requires_all_members || false;
 
-    // Get availability windows per member
     const memberWindows = members.map(m => {
       const rule = availabilityRules.find(
         r => r.team_member_id === m.id && r.day_of_week === dbDay
@@ -212,14 +232,10 @@ export default function BookMeeting() {
       return { memberId: m.id, timezone: m.timezone, rule };
     });
 
-    // If requires all and any member has no rule, no slots
     if (requiresAll && memberWindows.some(w => !w.rule)) return [];
-    // If not requires all and no member has a rule, no slots
     const membersWithRules = memberWindows.filter(w => w.rule);
     if (!membersWithRules.length) return [];
 
-    // Generate slots from union/intersection of windows
-    // For simplicity, generate from the broadest window then filter per-member
     const allStarts = membersWithRules.map(w => timeToMinutes(w.rule!.start_time));
     const allEnds = membersWithRules.map(w => timeToMinutes(w.rule!.end_time));
 
@@ -235,17 +251,13 @@ export default function BookMeeting() {
       const slotHour = Math.floor(t / 60);
       const slotMin = t % 60;
 
-      // Convert to UTC using team member timezone (use first member's tz for simplicity)
-      // Since availability is in member's local TZ, we convert from Europe/Oslo
       const memberTz = membersWithRules[0].timezone || "Europe/Oslo";
       const slotUTC = wallClockToUTC(selectedDate, slotHour, slotMin, memberTz);
 
-      // Skip past slots
       if (isBefore(slotUTC, now)) continue;
 
       const slotEnd = new Date(slotUTC.getTime() + duration * 60000);
 
-      // Check against existing bookings
       const overlaps = existingBookings.some(b => {
         const bStart = new Date(b.start_time).getTime();
         const bEnd = new Date(b.end_time).getTime();
@@ -253,7 +265,6 @@ export default function BookMeeting() {
       });
 
       if (!overlaps) {
-        // Check member availability for this specific slot
         if (requiresAll) {
           const allFree = memberWindows.every(w => {
             if (!w.rule) return false;
@@ -276,31 +287,32 @@ export default function BookMeeting() {
     return slots;
   }, [selectedDate, selectedEvent, members, availabilityRules, existingBookings]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (data: BookingFormData) => {
     if (!selectedSlot || !selectedEvent) return;
     setSubmitting(true);
 
     const duration = selectedEvent.duration_minutes || 30;
     const endTime = new Date(selectedSlot.getTime() + duration * 60000);
 
-    const { data: booking, error } = await supabase
-      .from("bookings")
-      .insert({
-        event_type_id: selectedEvent.id,
-        guest_name: formData.name,
-        guest_email: formData.email,
-        guest_company: formData.company || null,
-        guest_message: formData.message || null,
-        guest_timezone: timezone,
-        start_time: selectedSlot.toISOString(),
-        end_time: endTime.toISOString(),
-        status: "confirmed",
-      })
-      .select()
-      .single();
+    try {
+      const { data: booking, error } = await supabase
+        .from("bookings")
+        .insert({
+          event_type_id: selectedEvent.id,
+          guest_name: data.name,
+          guest_email: data.email,
+          guest_company: data.company || null,
+          guest_message: data.message || null,
+          guest_timezone: timezone,
+          start_time: selectedSlot.toISOString(),
+          end_time: endTime.toISOString(),
+          status: "confirmed",
+        })
+        .select()
+        .single();
 
-    if (booking && !error) {
+      if (error) throw error;
+
       // Insert booking members
       const memberInserts = members.map(m => ({
         booking_id: booking.id,
@@ -310,8 +322,17 @@ export default function BookMeeting() {
 
       setBookingResult(booking);
       setStep(4);
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "This time slot was just booked.",
+        description: "Please select another time.",
+      });
+      setSelectedSlot(null);
+      setStep(2);
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   const reset = () => {
@@ -320,12 +341,24 @@ export default function BookMeeting() {
     setSelectedDate(undefined);
     setSelectedSlot(null);
     setMembers([]);
-    setFormData({ name: "", email: "", company: "", message: "" });
+    form.reset();
     setBookingResult(null);
   };
 
+  // Calendar disabled logic: past, future, and days with no availability rules
+  const isDateDisabled = (date: Date) => {
+    if (isBefore(date, tomorrow) || isAfter(date, maxDate)) return true;
+    // Disable days with no availability rules (e.g. weekends)
+    if (availabilityRules.length > 0) {
+      const jsDay = date.getDay();
+      const dbDay = jsDay === 0 ? 6 : jsDay - 1;
+      if (!availableDayNumbers.has(dbDay)) return true;
+    }
+    return false;
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background animate-fade-in">
       <div className="max-w-3xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-8">
@@ -345,8 +378,18 @@ export default function BookMeeting() {
         {/* Step 1: Event Type Selection */}
         <div className={`transition-all duration-300 ${step === 1 ? "opacity-100" : "opacity-0 hidden"}`}>
           {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <Card key={i} className="p-5 border-l-4 border-l-muted">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-5 w-48" />
+                      <Skeleton className="h-4 w-72" />
+                    </div>
+                    <Skeleton className="h-8 w-20 rounded-full" />
+                  </div>
+                </Card>
+              ))}
             </div>
           ) : (
             <div className="space-y-4">
@@ -428,15 +471,15 @@ export default function BookMeeting() {
                   mode="single"
                   selected={selectedDate}
                   onSelect={(date) => { setSelectedDate(date); setSelectedSlot(null); }}
-                  disabled={(date) => isBefore(date, tomorrow) || isAfter(date, maxDate)}
-                  className="rounded-lg border bg-white p-3 pointer-events-auto"
+                  disabled={isDateDisabled}
+                  className="rounded-lg border bg-card p-3 pointer-events-auto"
                 />
 
                 {/* Timezone */}
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1.5">Timezone</label>
                   <Select value={timezone} onValueChange={setTimezone}>
-                    <SelectTrigger className="bg-white">
+                    <SelectTrigger className="bg-card">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -453,20 +496,31 @@ export default function BookMeeting() {
                     <p className="text-sm font-medium text-foreground mb-3">
                       Available times for {format(selectedDate, "EEEE, MMMM d")}
                     </p>
-                    {availableSlots.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No available times on this date.</p>
+                    {loadingSlots ? (
+                      <div className="flex gap-2 overflow-x-auto pb-2 md:grid md:grid-cols-3">
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                          <Skeleton key={i} className="h-10 w-20 md:w-full rounded-lg shrink-0" />
+                        ))}
+                      </div>
+                    ) : availableSlots.length === 0 ? (
+                      <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50 border border-border">
+                        <CalendarX2 className="w-5 h-5 text-muted-foreground shrink-0" />
+                        <p className="text-sm text-muted-foreground">
+                          No available times on this date. Please try another day.
+                        </p>
+                      </div>
                     ) : (
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-[280px] overflow-y-auto pr-1">
+                      <div className="flex gap-2 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible">
                         {availableSlots.map((slot, i) => {
                           const isSelected = selectedSlot?.getTime() === slot.getTime();
                           return (
                             <button
                               key={i}
                               onClick={() => { setSelectedSlot(slot); setStep(3); }}
-                              className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-all border ${
+                              className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-all border shrink-0 ${
                                 isSelected
                                   ? "bg-primary text-primary-foreground border-primary"
-                                  : "bg-white text-foreground border-border hover:border-primary hover:bg-primary/5"
+                                  : "bg-card text-foreground border-border hover:border-primary hover:bg-primary/5"
                               }`}
                             >
                               {formatSlotTime(slot, timezone)}
@@ -503,35 +557,35 @@ export default function BookMeeting() {
                 <p className="text-xs text-muted-foreground mt-1">{timezone.replace(/_/g, " ")}</p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-foreground block mb-1.5">Name *</label>
                   <Input
-                    required
-                    value={formData.name}
-                    onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
+                    {...form.register("name")}
                     placeholder="Your full name"
-                    className="bg-white"
+                    className="bg-card"
                   />
+                  {form.formState.errors.name && (
+                    <p className="text-sm text-destructive mt-1">{form.formState.errors.name.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium text-foreground block mb-1.5">Email *</label>
                   <Input
-                    required
-                    type="email"
-                    value={formData.email}
-                    onChange={e => setFormData(f => ({ ...f, email: e.target.value }))}
+                    {...form.register("email")}
                     placeholder="you@company.com"
-                    className="bg-white"
+                    className="bg-card"
                   />
+                  {form.formState.errors.email && (
+                    <p className="text-sm text-destructive mt-1">{form.formState.errors.email.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium text-foreground block mb-1.5">Company</label>
                   <Input
-                    value={formData.company}
-                    onChange={e => setFormData(f => ({ ...f, company: e.target.value }))}
+                    {...form.register("company")}
                     placeholder="Your company name"
-                    className="bg-white"
+                    className="bg-card"
                   />
                 </div>
                 <div>
@@ -539,11 +593,10 @@ export default function BookMeeting() {
                     Anything you'd like us to know?
                   </label>
                   <Textarea
-                    value={formData.message}
-                    onChange={e => setFormData(f => ({ ...f, message: e.target.value }))}
+                    {...form.register("message")}
                     placeholder="Optional message..."
                     rows={3}
-                    className="bg-white"
+                    className="bg-card"
                   />
                 </div>
                 <Button
@@ -552,7 +605,14 @@ export default function BookMeeting() {
                   className="w-full"
                   size="lg"
                 >
-                  {submitting ? "Confirming..." : "Confirm Booking"}
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Confirming...
+                    </>
+                  ) : (
+                    "Confirm Booking"
+                  )}
                 </Button>
               </form>
             </div>
@@ -562,7 +622,7 @@ export default function BookMeeting() {
         {/* Step 4: Confirmation */}
         <div className={`transition-all duration-300 ${step === 4 ? "opacity-100" : "opacity-0 hidden"}`}>
           <div className="text-center max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6 animate-[scale-in_0.3s_ease-out]">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6 animate-scale-in">
               <CheckCircle2 className="w-8 h-8 text-green-600" />
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-2">You're booked!</h2>

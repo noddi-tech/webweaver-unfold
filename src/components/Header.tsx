@@ -343,7 +343,7 @@ const Header = () => {
             {user && <UserMenuDropdown user={user} />}
             {/* Persistent "Book a Demo" CTA — always visible regardless of CMS settings */}
             <Button asChild variant="default" size="sm">
-              <LanguageLink to="/contact">
+              <LanguageLink to="/book">
                 {t('header.book_demo', 'Book a Demo')}
               </LanguageLink>
             </Button>
@@ -423,7 +423,7 @@ const Header = () => {
               <div className="flex flex-col space-y-2 pt-4 border-t border-border">
                 {/* Persistent "Book a Demo" CTA — prominent in mobile menu */}
                 <Button asChild variant="default" className="w-full">
-                  <LanguageLink to="/contact" onClick={() => setIsMenuOpen(false)}>
+                  <LanguageLink to="/book" onClick={() => setIsMenuOpen(false)}>
                     {t('header.book_demo', 'Book a Demo')}
                   </LanguageLink>
                 </Button>
