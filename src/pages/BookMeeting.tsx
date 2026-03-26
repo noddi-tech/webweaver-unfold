@@ -363,20 +363,20 @@ export default function BookMeeting() {
   };
 
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-6">
-            <span className="text-2xl font-bold text-primary font-[var(--font-primary)]">navio</span>
+    <>
+      <HreflangTags pageSlug="/book" />
+      <Header />
+      <div className="min-h-screen bg-background animate-fade-in pt-24 pb-16">
+        <div className="max-w-3xl mx-auto px-4 py-12">
+          {/* Page heading */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 font-[var(--font-primary)]">
+              {t('book.title', 'Book a Meeting')}
+            </h1>
+            <p className="text-muted-foreground">
+              {t('book.subtitle', 'Select a meeting type to schedule time with our team.')}
+            </p>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 font-[var(--font-primary)]">
-            Book a Meeting
-          </h1>
-          <p className="text-muted-foreground">
-            Select a meeting type to schedule time with our team.
-          </p>
-        </div>
 
         <StepIndicator current={step} />
 
