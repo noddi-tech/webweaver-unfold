@@ -115,6 +115,14 @@ function TeamMembersTab() {
   const [availRules, setAvailRules] = useState<{ day: number; enabled: boolean; start: string; end: string }[]>([]);
   const [savingAvail, setSavingAvail] = useState(false);
 
+  // Event-type availability for the member
+  const [memberEventAvail, setMemberEventAvail] = useState<{
+    eventType: EventType;
+    recurring: { day: number; enabled: boolean; start: string; end: string }[];
+    dateRanges: { date_start: string; date_end: string; start_time: string; end_time: string }[];
+  }[]>([]);
+  const [savingEventAvail, setSavingEventAvail] = useState<string | null>(null);
+
   const fetchMembers = async () => {
     const { data } = await supabase.from("employees").select("id, name, email, title, slug, active, google_calendar_connected, timezone").not("email", "is", null).order("name");
     if (data) setMembers(data as TeamMember[]);
