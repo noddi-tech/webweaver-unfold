@@ -1,74 +1,46 @@
 
+You did add the backend secrets, but that is not the whole requirement for this specific flow.
 
-# Unify Booking Team Members with Employees Table
+What’s happening
 
-## Summary
+1. Frontend/client ID mismatch
+- The Connect button in `src/components/design-system/BookingManager.tsx` builds the Google OAuth URL with:
+  `import.meta.env.VITE_GOOGLE_CLIENT_ID`
+- Your screenshot shows these Supabase function secrets:
+  `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URL`
+- Those secrets are available to the edge function, but the browser button is using a different variable name: `VITE_GOOGLE_CLIENT_ID`
+- So the backend can be configured correctly while the browser still opens Google with an empty or missing client ID
 
-Instead of maintaining a separate `team_members` table for the booking system, use the existing `employees` table as the single source of truth. This eliminates duplicate data (Joachim and Tom Arne exist in both tables) and lets you manage team members in one place.
+2. Preview iframe block
+- Google OAuth is commonly blocked inside the Lovable preview iframe
+- So even with correct credentials, the Connect flow can fail in preview with the blocked-response error
+- This needs to be tested from the published site or a standalone browser tab, not the editor preview
 
-## Approach
+3. Redirect URI must match exactly
+- The frontend sends users to:
+  `https://ouhfgazomdmirdazvjys.supabase.co/functions/v1/google-auth-callback`
+- The callback function exchanges the code using `GOOGLE_REDIRECT_URL`
+- Those must be exactly the same value, and that exact URI must also be registered in Google Cloud
 
-Add booking-specific columns to `employees`, migrate FK references, then update all code that queries `team_members` to query `employees` instead.
+What to verify next
 
-## Changes
+1. Make sure the browser-side value exists as `VITE_GOOGLE_CLIENT_ID`
+2. Make sure `GOOGLE_REDIRECT_URL` is exactly:
+   `https://ouhfgazomdmirdazvjys.supabase.co/functions/v1/google-auth-callback`
+3. In Google Cloud OAuth settings, verify:
+   - Authorized redirect URI = that exact Supabase callback URL
+   - Authorized JavaScript origins include the published site:
+     `https://noddi-tech-website.lovable.app`
+     and your custom domain too, if you use one
+4. Re-test from the published site, not from the Lovable preview iframe
 
-### 1. Database Migration
+Technical details
 
-Add booking columns to `employees`:
-```sql
-ALTER TABLE employees ADD COLUMN slug TEXT;
-ALTER TABLE employees ADD COLUMN timezone TEXT DEFAULT 'Europe/Oslo';
-ALTER TABLE employees ADD COLUMN google_calendar_connected BOOLEAN DEFAULT false;
-```
+- Browser code uses: `VITE_GOOGLE_CLIENT_ID`
+- Edge function uses: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URL`
+- Most likely current issue: you added the edge-function secrets, but the frontend still depends on a separate public client ID variable, and preview iframe testing is also blocked by Google
 
-Generate slugs for existing employees. Update all FK references:
-- `availability_rules.team_member_id` → reference `employees(id)`
-- `event_type_members.team_member_id` → reference `employees(id)`
-- `booking_members.team_member_id` → reference `employees(id)`
-- `google_oauth_tokens.team_member_id` → reference `employees(id)`
-
-Migrate existing data: match Joachim and Tom Arne by email between the two tables, re-point their `availability_rules`, `event_type_members`, `booking_members`, and `google_oauth_tokens` rows to the corresponding `employees.id`. Then drop the `team_members` table.
-
-### 2. `src/components/design-system/BookingManager.tsx`
-
-**TeamMembersTab**: Remove "Add Team Member" button and create/edit dialog. Instead, fetch from `employees` table. The tab becomes read-only for member management (members are managed in the Employees tab). Keep: Google Calendar connect/disconnect, availability editor, active toggle (using `employees.active`).
-
-**EventTypesTab**: Change `team_members` query to `employees` (for member assignment).
-
-**BookingsTab**: Change `team_members` query to `employees` (for displaying member names).
-
-### 3. Edge Functions (4 files)
-
-Update all edge functions that query `team_members` to query `employees` instead:
-- `get-availability/index.ts` — `from('employees')`
-- `create-booking/index.ts` — `from('employees')`
-- `get-booking/index.ts` — join on `employees` instead of `team_members`
-- `google-auth-callback/index.ts` — update `employees` instead of `team_members`
-
-### 4. `src/pages/BookMeeting.tsx`
-
-Update the `team_members` query to `employees`.
-
-### 5. `src/integrations/supabase/types.ts`
-
-Will auto-update after migration runs.
-
-## File Summary
-
-| File | Action |
-|---|---|
-| Migration SQL | Add columns to `employees`, migrate FKs, drop `team_members` |
-| `src/components/design-system/BookingManager.tsx` | Replace all `team_members` references with `employees` |
-| `src/pages/BookMeeting.tsx` | Replace `team_members` with `employees` |
-| `supabase/functions/get-availability/index.ts` | `team_members` → `employees` |
-| `supabase/functions/create-booking/index.ts` | `team_members` → `employees` |
-| `supabase/functions/get-booking/index.ts` | `team_members` → `employees` |
-| `supabase/functions/google-auth-callback/index.ts` | `team_members` → `employees` |
-
-## Technical Notes
-
-- The `employees` table uses `active` (not `is_active`) — all code referencing `is_active` must change
-- `employees.email` is nullable — the booking system requires email, so we filter on `email IS NOT NULL` where needed
-- The "Add Team Member" flow is removed from the Booking tab — members are added via the existing Employees manager in the CMS tab
-- Existing availability rules and bookings are preserved by re-pointing FKs to matching employee IDs before dropping `team_members`
-
+Best next implementation
+- Update the Connect flow so the frontend does not depend on `VITE_GOOGLE_CLIENT_ID` directly
+- Instead, generate the Google auth URL from a backend/edge function and open that URL from the UI
+- That removes the frontend env mismatch and makes the setup more reliable
