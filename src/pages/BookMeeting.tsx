@@ -330,8 +330,8 @@ export default function BookMeeting() {
     } catch {
       toast({
         variant: "destructive",
-        title: "This time slot was just booked.",
-        description: "Please select another time.",
+        title: t('book.error_slot_taken_title', 'This time slot was just booked.'),
+        description: t('book.error_slot_taken_desc', 'Please select another time.'),
       });
       setSelectedSlot(null);
       setStep(2);
@@ -482,7 +482,7 @@ export default function BookMeeting() {
 
                 {/* Timezone */}
                 <div>
-                  <label className="text-xs text-muted-foreground block mb-1.5">Timezone</label>
+                  <label className="text-xs text-muted-foreground block mb-1.5">{t('book.timezone', 'Timezone')}</label>
                   <Select value={timezone} onValueChange={setTimezone}>
                     <SelectTrigger className="bg-card">
                       <SelectValue />
@@ -499,7 +499,7 @@ export default function BookMeeting() {
                 {selectedDate && (
                   <div>
                     <p className="text-sm font-medium text-foreground mb-3">
-                      Available times for {format(selectedDate, "EEEE, MMMM d")}
+                      {t('book.available_times', 'Available times for')} {format(selectedDate, "EEEE, MMMM d")}
                     </p>
                     {loadingSlots ? (
                       <div className="flex gap-2 overflow-x-auto pb-2 md:grid md:grid-cols-3">
@@ -511,7 +511,7 @@ export default function BookMeeting() {
                       <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50 border border-border">
                         <CalendarX2 className="w-5 h-5 text-muted-foreground shrink-0" />
                         <p className="text-sm text-muted-foreground">
-                          No available times on this date. Please try another day.
+                          {t('book.no_available_times', 'No available times on this date. Please try another day.')}
                         </p>
                       </div>
                     ) : (
@@ -551,7 +551,7 @@ export default function BookMeeting() {
                 onClick={() => setStep(2)}
                 className="mb-6"
               >
-                <ArrowLeft className="w-4 h-4 mr-1" /> Back
+                <ArrowLeft className="w-4 h-4 mr-1" /> {t('book.back', 'Back')}
               </Button>
 
               <div className="mb-6 p-4 rounded-lg bg-card-surface/30 border border-border">
@@ -564,10 +564,10 @@ export default function BookMeeting() {
 
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-foreground block mb-1.5">Name *</label>
+                  <label className="text-sm font-medium text-foreground block mb-1.5">{t('book.form_name', 'Name')} *</label>
                   <Input
                     {...form.register("name")}
-                    placeholder="Your full name"
+                    placeholder={t('book.form_name_placeholder', 'Your full name')}
                     className="bg-card"
                   />
                   {form.formState.errors.name && (
@@ -575,10 +575,10 @@ export default function BookMeeting() {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground block mb-1.5">Email *</label>
+                  <label className="text-sm font-medium text-foreground block mb-1.5">{t('book.form_email', 'Email')} *</label>
                   <Input
                     {...form.register("email")}
-                    placeholder="you@company.com"
+                    placeholder={t('book.form_email_placeholder', 'you@company.com')}
                     className="bg-card"
                   />
                   {form.formState.errors.email && (
@@ -586,20 +586,20 @@ export default function BookMeeting() {
                   )}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground block mb-1.5">Company</label>
+                  <label className="text-sm font-medium text-foreground block mb-1.5">{t('book.form_company', 'Company')}</label>
                   <Input
                     {...form.register("company")}
-                    placeholder="Your company name"
+                    placeholder={t('book.form_company_placeholder', 'Your company name')}
                     className="bg-card"
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-foreground block mb-1.5">
-                    Anything you'd like us to know?
+                    {t('book.form_message', "Anything you'd like us to know?")}
                   </label>
                   <Textarea
                     {...form.register("message")}
-                    placeholder="Optional message..."
+                    placeholder={t('book.form_message_placeholder', 'Optional message...')}
                     rows={3}
                     className="bg-card"
                   />
@@ -613,10 +613,10 @@ export default function BookMeeting() {
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Confirming...
+                      {t('book.confirming', 'Confirming...')}
                     </>
                   ) : (
-                    "Confirm Booking"
+                    t('book.confirm_booking', 'Confirm Booking')
                   )}
                 </Button>
               </form>
@@ -630,9 +630,9 @@ export default function BookMeeting() {
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6 animate-scale-in">
               <CheckCircle2 className="w-8 h-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">You're booked!</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">{t('book.confirmed_title', "You're booked!")}</h2>
             <p className="text-muted-foreground mb-6">
-              A calendar invite will be sent to your email shortly.
+              {t('book.confirmed_desc', 'A calendar invite will be sent to your email shortly.')}
             </p>
 
             {bookingResult && selectedEvent && (
@@ -652,11 +652,13 @@ export default function BookMeeting() {
             )}
 
             <Button variant="ghost" onClick={reset}>
-              Book another meeting
+              {t('book.book_another', 'Book another meeting')}
             </Button>
           </div>
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 }
