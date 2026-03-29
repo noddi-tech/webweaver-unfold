@@ -133,15 +133,15 @@ const Internal = () => {
                 >
                   <div
                     className="mt-0.5 flex-shrink-0 rounded-md p-2"
-                    style={{ backgroundColor: 'hsl(var(--accent) / 0.1)' }}
+                    style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
                   >
-                    <card.icon className="h-5 w-5" style={{ color: 'hsl(var(--accent))' }} />
+                    <card.icon className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-card-foreground group-hover:text-foreground transition-colors">
+                    <h3 className="font-medium text-white">
                       {card.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground">{card.description}</p>
+                    <p className="text-sm text-white/60">{card.description}</p>
                   </div>
                 </Link>
               ))}
