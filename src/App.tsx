@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
+import Internal from "./pages/Internal";
 import Team from "./pages/Team";
 import LlmsTxt from "./pages/LlmsTxt";
 import Functions from "./pages/Functions";
