@@ -1,89 +1,27 @@
 
 
-# Redesign Auth Page + New Internal Pages Hub
+# Fix Contrast on Internal Hub Cards
 
-## Overview
+## Problem
 
-Two changes: (1) Redesign `/auth` to make Google OAuth the primary login method, with email/password as a secondary collapsible option. (2) Create a new `/internal` page that serves as a hub with categorized cards linking to all internal/admin routes. Both pages use the brand color system (Federal Blue `#201466`, Vivid Purple `#5B4ACF`, Lavender `#EEEAFC`, Bright Snow `#F8F7F4`).
+From the screenshot:
+1. **"Pricing Config" card title missing** — not visible at all (on hover or otherwise)
+2. **Card descriptions** (e.g., "Manage pricing plans") are low contrast on the dark `bg-card` background
+3. **Category headers** ("Content Management", etc.) use `hsl(var(--primary))` which is dark on a light page — these are fine
+4. **Hover state** makes text unreadable (likely `group-hover:text-foreground` resolves to a dark color)
 
-## 1. Redesign `/auth` — Google-first login
+## Root cause
 
-### Current state
-Google button is secondary, below the email/password form.
+Cards use `bg-card` (Federal Blue `#201466`), but text uses `text-card-foreground` and `text-muted-foreground` which are also dark. The hover class `group-hover:text-foreground` is also dark.
 
-### New design
-- Clean centered card on `#F8F7F4` background, no Header component (cleaner admin feel)
-- Navio logo at top
-- Large "Sign in with Google" button as the primary CTA (Federal Blue background, white text, Google icon)
-- Below: a subtle collapsible "Sign in with email" section (collapsed by default) containing the existing email/password form
-- "Forgot password?" and "Need an account?" links remain in the collapsible section
-- Footer link: "Go to Internal Hub →" linking to `/internal`
+## Fix — `src/pages/Internal.tsx`
 
-### File: `src/pages/Auth.tsx`
-- Remove `<Header />`
-- Reorder: Google button first, then collapsible email form
-- Add logo, update styling to brand colors
-- Add link to `/internal`
+| Element | Current class | Fix |
+|---------|--------------|-----|
+| Card title `<h3>` | `text-card-foreground group-hover:text-foreground` | `text-white` (remove hover override) |
+| Card description `<p>` | `text-muted-foreground` | `text-white/60` |
+| Icon circle background | `hsl(var(--accent) / 0.1)` | `rgba(255,255,255,0.15)` |
+| Icon color | `hsl(var(--accent))` | `white` with slight opacity |
 
-## 2. New Internal Pages Hub — `/internal`
-
-### Purpose
-A post-login landing page with categorized cards for all internal and admin routes. Only visible to authenticated users.
-
-### Categories and routes
-
-**Content Management**
-- CMS Dashboard → `/cms`
-- Pricing Config → `/cms?tab=pricing`
-- Blog Manager → `/cms?tab=blog`
-- Translations → `/cms?tab=translations`
-
-**Sales & Business**
-- Pricing (detailed) → `/en/pricing_detailed`
-- Offers → `/cms?tab=offers`
-- Leads → `/cms?tab=leads`
-
-**Pages (Public)**
-- Homepage → `/en`
-- Features → `/en/features`
-- Solutions → `/en/solutions`
-- Partners → `/en/partners`
-- About Us → `/en/about-us`
-- Careers → `/en/careers`
-- Blog → `/en/blog`
-- Contact → `/en/contact`
-- Pricing → `/en/pricing`
-- Book Meeting → `/en/book`
-
-**Admin & Settings**
-- Auth / Login → `/auth`
-- Design System → `/cms?tab=design`
-
-### Design
-- Grid of cards grouped by category headers
-- Each card: icon (from lucide), title, short description, colored left border using brand purple
-- Card background: white with subtle shadow, hover lift effect
-- Category headers in Federal Blue
-- Page background: `#F8F7F4`
-- Auth-gated: redirect to `/auth` if not logged in
-
-### File: `src/pages/Internal.tsx` (new)
-- Auth check using `supabase.auth.getSession()`
-- Categorized card grid
-- Responsive: 1 col mobile, 2 col tablet, 3 col desktop
-
-## 3. Routing update
-
-### File: `src/App.tsx`
-- Import new `Internal` page
-- Add route: `<Route path="/internal" element={<Internal />} />`
-- Place alongside other static admin routes (after `/auth`)
-
-## File summary
-
-| File | Change |
-|------|--------|
-| `src/pages/Auth.tsx` | Redesign: Google-first, collapsible email, brand styling, link to /internal |
-| `src/pages/Internal.tsx` | New: categorized card hub for all internal routes |
-| `src/App.tsx` | Add `/internal` route |
+Single file, ~4 inline style changes on the card `Link` component's children.
 
