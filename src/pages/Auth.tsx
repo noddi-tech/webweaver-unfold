@@ -111,8 +111,8 @@ const Auth = () => {
 
           {/* Collapsible Email/Password */}
           <Collapsible open={emailOpen} onOpenChange={setEmailOpen}>
-            <CollapsibleTrigger asChild className="[&>button]:text-primary-foreground [&>button]:hover:text-primary-foreground">
-              <Button variant="ghost" className="w-full justify-between text-muted-foreground hover:text-foreground">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between" style={{ color: 'hsl(var(--primary-foreground))' }}>
                 <span className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   {mode === "signin" ? "Sign in with email" : mode === "signup" ? "Create account with email" : "Reset password"}
