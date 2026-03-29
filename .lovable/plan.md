@@ -1,27 +1,39 @@
 
 
-# Fix Contrast on Internal Hub Cards
+# Add `?tab=` URL Support to Admin Page (3-Level Deep Linking)
 
 ## Problem
 
-From the screenshot:
-1. **"Pricing Config" card title missing** — not visible at all (on hover or otherwise)
-2. **Card descriptions** (e.g., "Manage pricing plans") are low contrast on the dark `bg-card` background
-3. **Category headers** ("Content Management", etc.) use `hsl(var(--primary))` which is dark on a light page — these are fine
-4. **Hover state** makes text unreadable (likely `group-hover:text-foreground` resolves to a dark color)
+The Internal Hub links use `?tab=pricing`, `?tab=blog`, etc., but Admin.tsx only reads `?section=` for some sub-tabs. The main-level `<Tabs>` uses uncontrolled `defaultValue`, so URL-based navigation doesn't work. None of the 3 tab levels respond to URL params.
 
-## Root cause
+## Solution — `src/pages/Admin.tsx`
 
-Cards use `bg-card` (Federal Blue `#201466`), but text uses `text-card-foreground` and `text-muted-foreground` which are also dark. The hover class `group-hover:text-foreground` is also dark.
+### 1. Extend `getDefaultTabs()` to read `?tab=` param
 
-## Fix — `src/pages/Internal.tsx`
+Add a `tabParam = searchParams.get("tab")` and map values to all three levels:
 
-| Element | Current class | Fix |
-|---------|--------------|-----|
-| Card title `<h3>` | `text-card-foreground group-hover:text-foreground` | `text-white` (remove hover override) |
-| Card description `<p>` | `text-muted-foreground` | `text-white/60` |
-| Icon circle background | `hsl(var(--accent) / 0.1)` | `rgba(255,255,255,0.15)` |
-| Icon color | `hsl(var(--accent))` | `white` with slight opacity |
+| `?tab=` value | Level 1 (main) | Level 2 | Level 3 |
+|---------------|----------------|---------|---------|
+| `pricing` | `sales` | `pricing-config` | — |
+| `blog` | `cms` | `content` | `blog` |
+| `translations` | `translations` | — | — |
+| `design` | `design` | — | — |
+| `offers` | `sales` | `offers` | — |
+| `leads` | `sales` | `leads` | — |
 
-Single file, ~4 inline style changes on the card `Link` component's children.
+### 2. Convert main `<Tabs>` to controlled
+
+Change from `defaultValue={defaults.main}` to `value={mainTab}` + `onValueChange={setMainTab}` using `useState(defaults.main)`. This ensures the tab param is respected on navigation from Internal Hub.
+
+Do the same for any nested tabs that need deep-link support (CMS level 2 and level 3 content tabs).
+
+### 3. Return expanded defaults
+
+Update the defaults object to include a `content` key for the 3rd-level CMS content tabs (pages, blog, etc.), so `?tab=blog` can set `{ main: "cms", cms: "content", content: "blog" }`.
+
+## Files changed
+
+| File | Change |
+|------|--------|
+| `src/pages/Admin.tsx` | Read `?tab=` param, map to 3 levels, convert to controlled tabs |
 
