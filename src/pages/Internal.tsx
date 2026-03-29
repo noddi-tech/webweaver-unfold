@@ -6,7 +6,7 @@ import {
   TrendingUp, FileText, Users,
   Home, Sparkles, Puzzle, Handshake, Building2, Briefcase,
   PenSquare, Phone, CreditCard, Calendar,
-  Lock, Palette, LogOut
+  Lock, Palette, LogOut, MessageSquare
 } from "lucide-react";
 
 interface RouteCard {
@@ -28,6 +28,7 @@ const categories: Category[] = [
       { title: "CMS Dashboard", description: "Main content management", href: "/cms", icon: LayoutDashboard },
       { title: "Pricing Config", description: "Manage pricing plans", href: "/cms?tab=pricing", icon: DollarSign },
       { title: "Blog Manager", description: "Create and edit posts", href: "/cms?tab=blog", icon: BookOpen },
+      { title: "Stories Manager", description: "Manage customer stories", href: "/cms?tab=stories", icon: MessageSquare },
       { title: "Translations", description: "Multi-language content", href: "/cms?tab=translations", icon: Languages },
     ],
   },
@@ -49,6 +50,7 @@ const categories: Category[] = [
       { title: "About Us", description: "Company info", href: "/en/about-us", icon: Building2 },
       { title: "Careers", description: "Job listings", href: "/en/careers", icon: Briefcase },
       { title: "Blog", description: "Articles & news", href: "/en/blog", icon: PenSquare },
+      { title: "Stories", description: "Customer stories", href: "/en/stories", icon: MessageSquare },
       { title: "Contact", description: "Contact page", href: "/en/contact", icon: Phone },
       { title: "Pricing", description: "Pricing overview", href: "/en/pricing", icon: CreditCard },
       { title: "Book Meeting", description: "Booking calendar", href: "/en/book", icon: Calendar },
