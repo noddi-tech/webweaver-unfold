@@ -195,7 +195,7 @@ const Admin = () => {
           <h1 className="text-4xl font-bold gradient-text">Admin</h1>
         </div>
 
-        <Tabs defaultValue={defaults.main} className="w-full">
+        <Tabs value={mainTab} onValueChange={setMainTab} className="w-full">
           <TabsList className="grid w-full grid-cols-7 mb-12">
             <TabsTrigger value="cms">CMS</TabsTrigger>
             <TabsTrigger value="translations">Translations & SEO</TabsTrigger>
@@ -208,7 +208,7 @@ const Admin = () => {
 
           {/* CMS Section with nested tabs */}
           <TabsContent value="cms" className="space-y-8">
-            <Tabs defaultValue={defaults.cms} className="w-full">
+            <Tabs value={cmsTab} onValueChange={setCmsTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-8">
                 <TabsTrigger value="content">Content Management</TabsTrigger>
                 <TabsTrigger value="media">Media Assets</TabsTrigger>
@@ -217,7 +217,7 @@ const Admin = () => {
 
               {/* Content Management Tab */}
               <TabsContent value="content">
-                <Tabs defaultValue="pages">
+                <Tabs value={contentTab} onValueChange={setContentTab}>
                   <TabsList className="flex flex-wrap gap-2 mb-6">
                     <TabsTrigger value="pages">Pages</TabsTrigger>
                     <TabsTrigger value="sections">Sections</TabsTrigger>
@@ -339,7 +339,7 @@ const Admin = () => {
 
           {/* Career Section */}
           <TabsContent value="career" className="space-y-8">
-            <Tabs defaultValue={defaults.career} className="w-full">
+            <Tabs value={careerTab} onValueChange={setCareerTab} className="w-full">
               <TabsList className="flex flex-wrap gap-2 mb-8">
                 <TabsTrigger value="applications">Applications</TabsTrigger>
                 <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
@@ -408,7 +408,7 @@ const Admin = () => {
 
           {/* Sales Section - NEW */}
           <TabsContent value="sales" className="space-y-8">
-            <Tabs defaultValue={defaults.sales} className="w-full">
+            <Tabs value={salesTab} onValueChange={setSalesTab} className="w-full">
               <TabsList className="flex flex-wrap gap-2 mb-8">
                 <TabsTrigger value="offers">Offers</TabsTrigger>
                 <TabsTrigger value="create-offer">Create Offer</TabsTrigger>
@@ -446,7 +446,7 @@ const Admin = () => {
 
           {/* Communications Section */}
           <TabsContent value="communications" className="space-y-8">
-            <Tabs defaultValue={defaults.communications} className="w-full">
+            <Tabs value={commTab} onValueChange={setCommTab} className="w-full">
               <TabsList className="flex flex-wrap gap-2 mb-8">
                 <TabsTrigger value="activity">Activity Feed</TabsTrigger>
                 <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
