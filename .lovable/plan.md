@@ -1,44 +1,37 @@
 
 
-# Fix: Allow Anonymous Users to View Bookable Employees
+# Add Google OAuth to CMS Login
 
-## Problem
+## Summary
 
-The `employees` table has an RLS policy that blocks all anonymous SELECT access:
+Add a "Sign in with Google" button to the Auth page using Supabase's built-in Google OAuth provider. This is a client-side change only — the Google provider must be enabled in the Supabase dashboard.
 
-```sql
-USING (false)
-```
+## Prerequisites (User Action Required)
 
-This means external guests visiting `/book` or `/meet/:slugs` get zero employee rows back, so the calendar shows "not yet available." Only logged-in admins can see the booking pages.
+You need to configure Google OAuth in your Supabase dashboard:
 
-## Solution
+1. Go to **Supabase Dashboard → Authentication → Providers → Google**
+2. Enable Google provider
+3. Add your **Google Client ID** and **Client Secret** (the same ones you already have as edge function secrets: `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`)
+4. Copy the **Callback URL** shown in the Supabase dashboard
+5. In **Google Cloud Console → OAuth Client → Authorized redirect URIs**, add that Supabase callback URL
+6. Under **Authentication → URL Configuration**, set:
+   - **Site URL**: `https://naviosolutions.com`
+   - **Redirect URLs**: add `https://naviosolutions.com/cms`
 
-Add a single RLS policy that lets the `anon` role read only the non-sensitive columns needed for booking (the query only selects `id, name, image_url, title, timezone, slug`), scoped to active, calendar-connected employees.
+## Code Change
 
-### Database Migration
+### `src/pages/Auth.tsx`
 
-```sql
-CREATE POLICY "Anon can view bookable employees"
-ON public.employees
-FOR SELECT
-TO anon
-USING (active = true AND google_calendar_connected = true);
-```
+Add a "Sign in with Google" button below the email/password form (visible only in `signin` mode):
 
-### Security Consideration
-
-The existing `USING (false)` policy targets `public` role. The new policy targets `anon` specifically. Since RLS is permissive (OR logic), if any one policy grants access, the row is visible. The `anon` role will be able to see rows where both conditions are true. The booking page queries only select non-sensitive columns (`id, name, image_url, title, timezone, slug`) — sensitive fields like `email`, `phone`, `linkedin_url` exist on the table but are never requested by the public booking queries.
-
-### What This Fixes
-
-- `/book` page — event type members resolve correctly for anonymous visitors
-- `/meet/:slugs` page — direct member booking works for external guests
-- `/book/reschedule/:id` page — rescheduling works without login
-
-No frontend code changes needed. One migration file.
+- Uses `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/cms' } })`
+- Styled as an outline button with a Google icon (from lucide or inline SVG)
+- Separated from the form by a divider ("or")
 
 | File | Change |
 |------|--------|
-| New migration | Add `anon` SELECT policy on `employees` for bookable members |
+| `src/pages/Auth.tsx` | Add Google OAuth button with divider in signin mode |
+
+One file, ~15 lines added.
 
