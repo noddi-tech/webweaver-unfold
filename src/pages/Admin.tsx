@@ -75,32 +75,52 @@ const Admin = () => {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const { isAdmin, loading: roleLoading } = useUserRole();
 
-  // URL parameter support for direct navigation (e.g., ?section=applications)
+  // URL parameter support for direct navigation (e.g., ?section=applications or ?tab=pricing)
   const sectionParam = searchParams.get("section");
+  const tabParam = searchParams.get("tab");
   const getDefaultTabs = () => {
-    // Career section tabs
+    const base = { main: "cms", cms: "content", content: "pages", config: "header", career: "applications", sales: "offers", communications: "newsletter", booking: "team-members" };
+
+    // ?tab= param support for Internal Hub deep-linking (3 levels)
+    if (tabParam) {
+      switch (tabParam) {
+        case "pricing": return { ...base, main: "sales", sales: "pricing-config" };
+        case "blog": return { ...base, main: "cms", cms: "content", content: "blog" };
+        case "translations": return { ...base, main: "translations" };
+        case "design": return { ...base, main: "design" };
+        case "offers": return { ...base, main: "sales", sales: "offers" };
+        case "leads": return { ...base, main: "sales", sales: "leads" };
+      }
+    }
+
+    // ?section= param support for existing deep-linking
     const careerTabs = ["applications", "pipeline", "inbox", "interviews", "slots", "comparison", "analytics", "jobs", "emails", "settings"];
     if (sectionParam && careerTabs.includes(sectionParam)) {
-      return { main: "career", career: sectionParam };
+      return { ...base, main: "career", career: sectionParam };
     }
-    // Sales section tabs
     const salesTabs = ["offers", "create-offer", "calculator", "pricing-config", "leads", "contacts"];
     if (sectionParam && salesTabs.includes(sectionParam)) {
-      return { main: "sales", sales: sectionParam };
+      return { ...base, main: "sales", sales: sectionParam };
     }
-    // Communications section tabs
     const commTabs = ["newsletter", "slack"];
     if (sectionParam && commTabs.includes(sectionParam)) {
-      return { main: "communications", communications: sectionParam };
+      return { ...base, main: "communications", communications: sectionParam };
     }
-    // Booking section tabs
     const bookingTabs = ["team-members", "event-types", "bookings"];
     if (sectionParam && bookingTabs.includes(sectionParam)) {
-      return { main: "booking", booking: sectionParam };
+      return { ...base, main: "booking", booking: sectionParam };
     }
-    return { main: "cms", cms: "content", config: "header", career: "applications", sales: "offers", communications: "newsletter", booking: "team-members" };
+    return base;
   };
   const defaults = getDefaultTabs();
+
+  // Controlled state for all tab levels
+  const [mainTab, setMainTab] = useState(defaults.main);
+  const [cmsTab, setCmsTab] = useState(defaults.cms);
+  const [contentTab, setContentTab] = useState(defaults.content);
+  const [salesTab, setSalesTab] = useState(defaults.sales);
+  const [careerTab, setCareerTab] = useState(defaults.career);
+  const [commTab, setCommTab] = useState(defaults.communications);
 
   useEffect(() => {
     document.title = "Admin";
@@ -175,7 +195,7 @@ const Admin = () => {
           <h1 className="text-4xl font-bold gradient-text">Admin</h1>
         </div>
 
-        <Tabs defaultValue={defaults.main} className="w-full">
+        <Tabs value={mainTab} onValueChange={setMainTab} className="w-full">
           <TabsList className="grid w-full grid-cols-7 mb-12">
             <TabsTrigger value="cms">CMS</TabsTrigger>
             <TabsTrigger value="translations">Translations & SEO</TabsTrigger>
@@ -188,7 +208,7 @@ const Admin = () => {
 
           {/* CMS Section with nested tabs */}
           <TabsContent value="cms" className="space-y-8">
-            <Tabs defaultValue={defaults.cms} className="w-full">
+            <Tabs value={cmsTab} onValueChange={setCmsTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-8">
                 <TabsTrigger value="content">Content Management</TabsTrigger>
                 <TabsTrigger value="media">Media Assets</TabsTrigger>
@@ -197,7 +217,7 @@ const Admin = () => {
 
               {/* Content Management Tab */}
               <TabsContent value="content">
-                <Tabs defaultValue="pages">
+                <Tabs value={contentTab} onValueChange={setContentTab}>
                   <TabsList className="flex flex-wrap gap-2 mb-6">
                     <TabsTrigger value="pages">Pages</TabsTrigger>
                     <TabsTrigger value="sections">Sections</TabsTrigger>
@@ -319,7 +339,7 @@ const Admin = () => {
 
           {/* Career Section */}
           <TabsContent value="career" className="space-y-8">
-            <Tabs defaultValue={defaults.career} className="w-full">
+            <Tabs value={careerTab} onValueChange={setCareerTab} className="w-full">
               <TabsList className="flex flex-wrap gap-2 mb-8">
                 <TabsTrigger value="applications">Applications</TabsTrigger>
                 <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
@@ -388,7 +408,7 @@ const Admin = () => {
 
           {/* Sales Section - NEW */}
           <TabsContent value="sales" className="space-y-8">
-            <Tabs defaultValue={defaults.sales} className="w-full">
+            <Tabs value={salesTab} onValueChange={setSalesTab} className="w-full">
               <TabsList className="flex flex-wrap gap-2 mb-8">
                 <TabsTrigger value="offers">Offers</TabsTrigger>
                 <TabsTrigger value="create-offer">Create Offer</TabsTrigger>
@@ -426,7 +446,7 @@ const Admin = () => {
 
           {/* Communications Section */}
           <TabsContent value="communications" className="space-y-8">
-            <Tabs defaultValue={defaults.communications} className="w-full">
+            <Tabs value={commTab} onValueChange={setCommTab} className="w-full">
               <TabsList className="flex flex-wrap gap-2 mb-8">
                 <TabsTrigger value="activity">Activity Feed</TabsTrigger>
                 <TabsTrigger value="newsletter">Newsletter</TabsTrigger>
