@@ -113,6 +113,7 @@ const App = () => {
                     {/* CMS and special routes (no language prefix) */}
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/cms-login" element={<Auth />} />
+                    <Route path="/internal" element={<Internal />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/cms" element={<Admin />} />
                     <Route path="/admin" element={<Admin />} />
