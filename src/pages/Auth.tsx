@@ -111,7 +111,7 @@ const Auth = () => {
 
           {/* Collapsible Email/Password */}
           <Collapsible open={emailOpen} onOpenChange={setEmailOpen}>
-            <CollapsibleTrigger asChild>
+            <CollapsibleTrigger asChild className="[&>button]:text-primary-foreground [&>button]:hover:text-primary-foreground">
               <Button variant="ghost" className="w-full justify-between text-muted-foreground hover:text-foreground">
                 <span className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
