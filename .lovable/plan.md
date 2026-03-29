@@ -1,39 +1,23 @@
 
 
-# Add `?tab=` URL Support to Admin Page (3-Level Deep Linking)
+# Add Customer Stories to Internal Hub
 
-## Problem
+## Change — `src/pages/Internal.tsx`
 
-The Internal Hub links use `?tab=pricing`, `?tab=blog`, etc., but Admin.tsx only reads `?section=` for some sub-tabs. The main-level `<Tabs>` uses uncontrolled `defaultValue`, so URL-based navigation doesn't work. None of the 3 tab levels respond to URL params.
+1. Add `BookOpen` is already imported. Import `MessageSquare` (or reuse an existing icon like `Star`) for Stories.
+2. Add two entries:
+   - **Content Management** section: `{ title: "Stories Manager", description: "Manage customer stories", href: "/cms?tab=stories", icon: MessageSquare }`
+   - **Pages (Public)** section: `{ title: "Stories", description: "Customer stories", href: "/en/stories", icon: MessageSquare }`
 
-## Solution — `src/pages/Admin.tsx`
+3. In `src/pages/Admin.tsx` — add `stories` to the `?tab=` mapping in `getDefaultTabs()`:
+   - `?tab=stories` → main: `cms`, cms sub-tab: `stories` (or whichever sub-tab holds the StoriesManager)
 
-### 1. Extend `getDefaultTabs()` to read `?tab=` param
-
-Add a `tabParam = searchParams.get("tab")` and map values to all three levels:
-
-| `?tab=` value | Level 1 (main) | Level 2 | Level 3 |
-|---------------|----------------|---------|---------|
-| `pricing` | `sales` | `pricing-config` | — |
-| `blog` | `cms` | `content` | `blog` |
-| `translations` | `translations` | — | — |
-| `design` | `design` | — | — |
-| `offers` | `sales` | `offers` | — |
-| `leads` | `sales` | `leads` | — |
-
-### 2. Convert main `<Tabs>` to controlled
-
-Change from `defaultValue={defaults.main}` to `value={mainTab}` + `onValueChange={setMainTab}` using `useState(defaults.main)`. This ensures the tab param is respected on navigation from Internal Hub.
-
-Do the same for any nested tabs that need deep-link support (CMS level 2 and level 3 content tabs).
-
-### 3. Return expanded defaults
-
-Update the defaults object to include a `content` key for the 3rd-level CMS content tabs (pages, blog, etc.), so `?tab=blog` can set `{ main: "cms", cms: "content", content: "blog" }`.
+Need to verify the correct CMS sub-tab name for stories.
 
 ## Files changed
 
 | File | Change |
 |------|--------|
-| `src/pages/Admin.tsx` | Read `?tab=` param, map to 3 levels, convert to controlled tabs |
+| `src/pages/Internal.tsx` | Add Stories cards to Content Management and Pages sections |
+| `src/pages/Admin.tsx` | Add `stories` mapping to `getDefaultTabs()` |
 
