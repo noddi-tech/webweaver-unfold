@@ -86,6 +86,7 @@ const Admin = () => {
       switch (tabParam) {
         case "pricing": return { ...base, main: "sales", sales: "pricing-config" };
         case "blog": return { ...base, main: "cms", cms: "content", content: "blog" };
+        case "stories": return { ...base, main: "cms", cms: "content", content: "stories" };
         case "translations": return { ...base, main: "translations" };
         case "design": return { ...base, main: "design" };
         case "offers": return { ...base, main: "sales", sales: "offers" };
