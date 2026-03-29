@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
+import Internal from "./pages/Internal";
 import Team from "./pages/Team";
 import LlmsTxt from "./pages/LlmsTxt";
 import Functions from "./pages/Functions";
@@ -112,6 +113,7 @@ const App = () => {
                     {/* CMS and special routes (no language prefix) */}
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/cms-login" element={<Auth />} />
+                    <Route path="/internal" element={<Internal />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/cms" element={<Admin />} />
                     <Route path="/admin" element={<Admin />} />
