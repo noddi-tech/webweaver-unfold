@@ -75,32 +75,52 @@ const Admin = () => {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const { isAdmin, loading: roleLoading } = useUserRole();
 
-  // URL parameter support for direct navigation (e.g., ?section=applications)
+  // URL parameter support for direct navigation (e.g., ?section=applications or ?tab=pricing)
   const sectionParam = searchParams.get("section");
+  const tabParam = searchParams.get("tab");
   const getDefaultTabs = () => {
-    // Career section tabs
+    const base = { main: "cms", cms: "content", content: "pages", config: "header", career: "applications", sales: "offers", communications: "newsletter", booking: "team-members" };
+
+    // ?tab= param support for Internal Hub deep-linking (3 levels)
+    if (tabParam) {
+      switch (tabParam) {
+        case "pricing": return { ...base, main: "sales", sales: "pricing-config" };
+        case "blog": return { ...base, main: "cms", cms: "content", content: "blog" };
+        case "translations": return { ...base, main: "translations" };
+        case "design": return { ...base, main: "design" };
+        case "offers": return { ...base, main: "sales", sales: "offers" };
+        case "leads": return { ...base, main: "sales", sales: "leads" };
+      }
+    }
+
+    // ?section= param support for existing deep-linking
     const careerTabs = ["applications", "pipeline", "inbox", "interviews", "slots", "comparison", "analytics", "jobs", "emails", "settings"];
     if (sectionParam && careerTabs.includes(sectionParam)) {
-      return { main: "career", career: sectionParam };
+      return { ...base, main: "career", career: sectionParam };
     }
-    // Sales section tabs
     const salesTabs = ["offers", "create-offer", "calculator", "pricing-config", "leads", "contacts"];
     if (sectionParam && salesTabs.includes(sectionParam)) {
-      return { main: "sales", sales: sectionParam };
+      return { ...base, main: "sales", sales: sectionParam };
     }
-    // Communications section tabs
     const commTabs = ["newsletter", "slack"];
     if (sectionParam && commTabs.includes(sectionParam)) {
-      return { main: "communications", communications: sectionParam };
+      return { ...base, main: "communications", communications: sectionParam };
     }
-    // Booking section tabs
     const bookingTabs = ["team-members", "event-types", "bookings"];
     if (sectionParam && bookingTabs.includes(sectionParam)) {
-      return { main: "booking", booking: sectionParam };
+      return { ...base, main: "booking", booking: sectionParam };
     }
-    return { main: "cms", cms: "content", config: "header", career: "applications", sales: "offers", communications: "newsletter", booking: "team-members" };
+    return base;
   };
   const defaults = getDefaultTabs();
+
+  // Controlled state for all tab levels
+  const [mainTab, setMainTab] = useState(defaults.main);
+  const [cmsTab, setCmsTab] = useState(defaults.cms);
+  const [contentTab, setContentTab] = useState(defaults.content);
+  const [salesTab, setSalesTab] = useState(defaults.sales);
+  const [careerTab, setCareerTab] = useState(defaults.career);
+  const [commTab, setCommTab] = useState(defaults.communications);
 
   useEffect(() => {
     document.title = "Admin";
