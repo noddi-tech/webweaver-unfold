@@ -164,7 +164,7 @@ function TeamMembersTab() {
     const { data } = await supabase.from("availability_rules").select("*").eq("team_member_id", m.id);
     const rules = [1, 2, 3, 4, 5].map(day => {
       const existing = (data || []).find((r: AvailabilityRule) => r.day_of_week === day);
-      return { day, enabled: !!existing, start: existing?.start_time || "09:00", end: existing?.end_time || "16:00" };
+      return { day, enabled: !!existing, start: (existing?.start_time || "09:00").slice(0, 5), end: (existing?.end_time || "16:00").slice(0, 5) };
     });
     setAvailRules(rules);
 
@@ -178,13 +178,13 @@ function TeamMembersTab() {
         const avails = ((etAvail || []) as EventTypeAvailability[]).filter(a => a.event_type_id === et.id);
         const recurring = ALL_DAYS.map(day => {
           const existing = avails.find(a => a.type === 'recurring' && a.day_of_week === day);
-          return { day, enabled: !!existing, start: existing?.start_time || "09:00", end: existing?.end_time || "17:00" };
+          return { day, enabled: !!existing, start: (existing?.start_time || "09:00").slice(0, 5), end: (existing?.end_time || "17:00").slice(0, 5) };
         });
         const dateRanges = avails.filter(a => a.type === 'date_range').map(a => ({
           date_start: a.date_start || "",
           date_end: a.date_end || "",
-          start_time: a.start_time || "09:00",
-          end_time: a.end_time || "17:00",
+          start_time: (a.start_time || "09:00").slice(0, 5),
+          end_time: (a.end_time || "17:00").slice(0, 5),
         }));
         return { eventType: et, recurring, dateRanges };
       });
