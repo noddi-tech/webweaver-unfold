@@ -61,6 +61,7 @@ const categories: Category[] = [
     cards: [
       { title: "Auth / Login", description: "Authentication page", href: "/auth", icon: Lock },
       { title: "Design System", description: "Brand & tokens", href: "/cms?tab=design", icon: Palette },
+      { title: "User Roles", description: "Manage user access", href: "/cms?tab=users", icon: Users },
     ],
   },
 ];
