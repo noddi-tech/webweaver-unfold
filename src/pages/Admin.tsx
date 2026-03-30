@@ -553,6 +553,11 @@ const Admin = () => {
           <TabsContent value="booking" className="space-y-8">
             <BookingManager />
           </TabsContent>
+
+          {/* Users Section */}
+          <TabsContent value="users" className="space-y-8">
+            <UserRolesManager />
+          </TabsContent>
         </Tabs>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
