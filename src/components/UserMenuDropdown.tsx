@@ -72,9 +72,9 @@ export function UserMenuDropdown({ user }: UserMenuDropdownProps) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/cms" className="cursor-pointer flex items-center">
+          <Link to="/internal" className="cursor-pointer flex items-center">
             <Settings className="mr-2 h-4 w-4" />
-            <span>CMS Dashboard</span>
+            <span>Internal Hub</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
