@@ -68,6 +68,7 @@ import { SalesContactManager } from "@/components/design-system/SalesContactMana
 import ActivityDashboard from "@/components/design-system/ActivityDashboard";
 import LegalDocumentsManager from "@/components/design-system/LegalDocumentsManager";
 import BookingManager from "@/components/design-system/BookingManager";
+import UserRolesManager from "@/components/design-system/UserRolesManager";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -91,6 +92,7 @@ const Admin = () => {
         case "design": return { ...base, main: "design" };
         case "offers": return { ...base, main: "sales", sales: "offers" };
         case "leads": return { ...base, main: "sales", sales: "leads" };
+        case "users": return { ...base, main: "users" };
       }
     }
 
@@ -197,7 +199,7 @@ const Admin = () => {
         </div>
 
         <Tabs value={mainTab} onValueChange={setMainTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-12">
+          <TabsList className="grid w-full grid-cols-8 mb-12">
             <TabsTrigger value="cms">CMS</TabsTrigger>
             <TabsTrigger value="translations">Translations & SEO</TabsTrigger>
             <TabsTrigger value="design">Design System</TabsTrigger>
@@ -205,6 +207,7 @@ const Admin = () => {
             <TabsTrigger value="sales">Sales</TabsTrigger>
             <TabsTrigger value="communications">Communications</TabsTrigger>
             <TabsTrigger value="booking">Booking</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
 
           {/* CMS Section with nested tabs */}
