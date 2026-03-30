@@ -1,20 +1,21 @@
 
 
-# Add Calendar Booking Link to Internal Hub
+# Fix `?tab=booking` Deep-Link in Admin
 
-## Change — `src/pages/Internal.tsx`
+## Problem
+The `getDefaultTabs` switch statement in `Admin.tsx` (lines 87-96) is missing a `case "booking"` entry. When navigating to `/cms?tab=booking`, it falls through to defaults, landing on CMS > Content > Pages.
 
-Add a new card to the **"Admin & Settings"** category (or optionally a new "Tools" category):
+## Fix — `src/pages/Admin.tsx`
+
+Add one case to the switch block at line 95:
 
 ```typescript
-{ title: "Calendar & Booking", description: "Manage availability & bookings", href: "/cms?tab=booking", icon: Calendar }
+case "booking": return { ...base, main: "booking" };
 ```
 
-`Calendar` icon is already imported. Single line addition to the existing cards array.
-
-## Files changed
+This goes right before `case "users"`. Single-line change.
 
 | File | Change |
 |------|--------|
-| `src/pages/Internal.tsx` | Add "Calendar & Booking" card to Admin & Settings |
+| `src/pages/Admin.tsx` | Add `case "booking"` to `tabParam` switch |
 
