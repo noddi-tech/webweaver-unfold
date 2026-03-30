@@ -92,6 +92,7 @@ const Admin = () => {
         case "design": return { ...base, main: "design" };
         case "offers": return { ...base, main: "sales", sales: "offers" };
         case "leads": return { ...base, main: "sales", sales: "leads" };
+        case "booking": return { ...base, main: "booking" };
         case "users": return { ...base, main: "users" };
       }
     }
