@@ -62,6 +62,7 @@ const categories: Category[] = [
       { title: "Auth / Login", description: "Authentication page", href: "/auth", icon: Lock },
       { title: "Design System", description: "Brand & tokens", href: "/cms?tab=design", icon: Palette },
       { title: "User Roles", description: "Manage user access", href: "/cms?tab=users", icon: Users },
+      { title: "Calendar & Booking", description: "Manage availability & bookings", href: "/cms?tab=booking", icon: Calendar },
     ],
   },
 ];
