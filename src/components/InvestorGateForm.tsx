@@ -1,4 +1,4 @@
-import { FormEvent, KeyboardEvent, useMemo, useRef, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -25,49 +25,44 @@ export function InvestorGateForm() {
 
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
+  const firmRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-
-  const normalizedEmail = email.trim().toLowerCase();
-  const isSubmitDisabled = useMemo(() => {
-    return (
-      loading ||
-      name.trim().length < 2 ||
-      !EMAIL_RE.test(normalizedEmail) ||
-      password.trim().length === 0
-    );
-  }, [loading, name, normalizedEmail, password]);
-
-  const focusFirstInvalidField = () => {
-    if (name.trim().length < 2) {
-      nameRef.current?.focus();
-      return true;
-    }
-    if (!EMAIL_RE.test(normalizedEmail)) {
-      emailRef.current?.focus();
-      return true;
-    }
-    if (password.trim().length === 0) {
-      passwordRef.current?.focus();
-      return true;
-    }
-    return false;
-  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const trimmedName = name.trim();
-    const trimmedFirm = firm.trim();
-    const accessCode = password;
+    if (!name.trim() || name.trim().length < 2) {
+      nameRef.current?.focus();
+      return;
+    }
 
-    if (focusFirstInvalidField()) return;
+    if (!email.trim() || !EMAIL_RE.test(email.trim().toLowerCase())) {
+      emailRef.current?.focus();
+      return;
+    }
+
+    if (!password) {
+      passwordRef.current?.focus();
+      return;
+    }
+
+    const trimmedName = name.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+    const trimmedFirm = firm.trim();
 
     setLoading(true);
     setError(null);
 
     const { data, error: invokeError } = await supabase.functions.invoke(
       "validate-portal-access",
-      { body: { name: trimmedName, email: normalizedEmail, firm: trimmedFirm || null, password: accessCode } }
+      {
+        body: {
+          name: trimmedName,
+          email: normalizedEmail,
+          firm: trimmedFirm.length > 0 ? trimmedFirm : null,
+          password,
+        },
+      }
     );
 
     if (invokeError) {
@@ -89,7 +84,7 @@ export function InvestorGateForm() {
         sessionId: data.data.session_id,
         email: normalizedEmail,
         name: trimmedName,
-        firm: trimmedFirm || null,
+        firm: trimmedFirm.length > 0 ? trimmedFirm : null,
         hasAcceptedNda: !requiresNda,
       });
       navigate(requiresNda ? "/investor/nda" : "/portal");
@@ -98,13 +93,6 @@ export function InvestorGateForm() {
 
     setError(GENERIC_ERROR);
     setLoading(false);
-  };
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLFormElement>) => {
-    if (event.key === "Enter" && isSubmitDisabled && !loading) {
-      event.preventDefault();
-      focusFirstInvalidField();
-    }
   };
 
   return (
@@ -119,7 +107,7 @@ export function InvestorGateForm() {
         A private space for investors evaluating the Series A round. Enter your details to continue.
       </p>
 
-      <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} noValidate>
+      <form onSubmit={handleSubmit} noValidate>
         <div className="mb-5">
           <Label htmlFor="investor-name" className="mb-2 block">Full name</Label>
           <Input
@@ -148,6 +136,7 @@ export function InvestorGateForm() {
         <div className="mb-5">
           <Label htmlFor="investor-firm" className="mb-2 block">Firm (optional)</Label>
           <Input
+            ref={firmRef}
             id="investor-firm"
             value={firm}
             onChange={(event) => setFirm(event.target.value)}
@@ -186,7 +175,7 @@ export function InvestorGateForm() {
           </p>
         ) : null}
 
-        <Button type="submit" variant="default" size="lg" className="w-full" disabled={isSubmitDisabled}>
+        <Button type="submit" variant="default" size="lg" className="w-full" disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
