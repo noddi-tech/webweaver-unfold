@@ -32,6 +32,8 @@ const emptySession = {
   hasAcceptedNda: false,
 };
 
+type InvestorSessionState = Omit<InvestorSession, "isLoaded" | "setSession" | "markNdaAccepted" | "signOut">;
+
 function isPersistedSession(value: unknown): value is PersistedInvestorSession {
   if (!value || typeof value !== "object") return false;
   const session = value as Partial<PersistedInvestorSession>;
@@ -45,26 +47,22 @@ function isPersistedSession(value: unknown): value is PersistedInvestorSession {
 }
 
 export function InvestorSessionProvider({ children }: { children: React.ReactNode }) {
-  const [sessionState, setSessionState] = useState(emptySession);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
+  const [sessionState, setSessionState] = useState<InvestorSessionState>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (isPersistedSession(parsed)) {
-          setSessionState(parsed);
-        } else {
-          localStorage.removeItem(STORAGE_KEY);
+          return parsed;
         }
+        localStorage.removeItem(STORAGE_KEY);
       }
     } catch {
       localStorage.removeItem(STORAGE_KEY);
-    } finally {
-      setIsLoaded(true);
     }
-  }, []);
+    return emptySession;
+  });
+  const [isLoaded] = useState(true);
 
   const setSession = useCallback((session: PersistedInvestorSession) => {
     setSessionState(session);
