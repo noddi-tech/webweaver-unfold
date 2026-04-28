@@ -10,6 +10,7 @@ import { TranslationProvider } from "./components/TranslationProvider";
 import { EditModeProvider } from "@/contexts/EditModeContext";
 import { SiteStylesProvider } from "@/contexts/SiteStylesContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import { InvestorSessionProvider } from "@/contexts/InvestorSessionContext";
 import { TypographyLoader } from "@/components/TypographyLoader";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
@@ -46,6 +47,7 @@ import BookMeeting from "./pages/BookMeeting";
 import ManageBooking from "./pages/ManageBooking";
 import RescheduleBooking from "./pages/RescheduleBooking";
 import MeetMembers from "./pages/MeetMembers";
+import Investor from "./pages/Investor";
 
 const queryClient = new QueryClient();
 const App = () => {
@@ -74,9 +76,10 @@ const App = () => {
       <TypographyLoader />
       <TooltipProvider>
         <TranslationProvider>
-          <CurrencyProvider>
-            <SiteStylesProvider>
-              <EditModeProvider>
+          <InvestorSessionProvider>
+            <CurrencyProvider>
+              <SiteStylesProvider>
+                <EditModeProvider>
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
@@ -114,6 +117,7 @@ const App = () => {
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/cms-login" element={<Auth />} />
                     <Route path="/internal" element={<Internal />} />
+                    <Route path="/investor" element={<Investor />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/cms" element={<Admin />} />
                     <Route path="/admin" element={<Admin />} />
@@ -158,9 +162,10 @@ const App = () => {
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </BrowserRouter>
-              </EditModeProvider>
-            </SiteStylesProvider>
-          </CurrencyProvider>
+                </EditModeProvider>
+              </SiteStylesProvider>
+            </CurrencyProvider>
+          </InvestorSessionProvider>
         </TranslationProvider>
       </TooltipProvider>
     </QueryClientProvider>
