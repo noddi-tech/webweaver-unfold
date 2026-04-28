@@ -2136,6 +2136,134 @@ export type Database = {
           },
         ]
       }
+      investor_events: {
+        Row: {
+          created_at: string
+          dwell_seconds: number | null
+          email: string
+          event_type: string
+          id: string
+          path: string | null
+          payload: Json | null
+          session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          dwell_seconds?: number | null
+          email: string
+          event_type: string
+          id?: string
+          path?: string | null
+          payload?: Json | null
+          session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          dwell_seconds?: number | null
+          email?: string
+          event_type?: string
+          id?: string
+          path?: string | null
+          payload?: Json | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investor_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "investor_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investor_pledges: {
+        Row: {
+          amount_nok: number
+          conditions: string | null
+          created_at: string
+          email: string
+          firm: string | null
+          id: string
+          is_firm: boolean
+          lead_intent: string | null
+          name: string
+          notes: string | null
+          preferred_valuation_nok: number | null
+          updated_at: string
+        }
+        Insert: {
+          amount_nok: number
+          conditions?: string | null
+          created_at?: string
+          email: string
+          firm?: string | null
+          id?: string
+          is_firm?: boolean
+          lead_intent?: string | null
+          name: string
+          notes?: string | null
+          preferred_valuation_nok?: number | null
+          updated_at?: string
+        }
+        Update: {
+          amount_nok?: number
+          conditions?: string | null
+          created_at?: string
+          email?: string
+          firm?: string | null
+          id?: string
+          is_firm?: boolean
+          lead_intent?: string | null
+          name?: string
+          notes?: string | null
+          preferred_valuation_nok?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      investor_sessions: {
+        Row: {
+          email: string
+          ended_at: string | null
+          firm: string | null
+          id: string
+          ip_address: unknown
+          last_seen_at: string
+          name: string
+          referrer: string | null
+          started_at: string
+          total_dwell_seconds: number
+          user_agent: string | null
+        }
+        Insert: {
+          email: string
+          ended_at?: string | null
+          firm?: string | null
+          id?: string
+          ip_address?: unknown
+          last_seen_at?: string
+          name: string
+          referrer?: string | null
+          started_at?: string
+          total_dwell_seconds?: number
+          user_agent?: string | null
+        }
+        Update: {
+          email?: string
+          ended_at?: string | null
+          firm?: string | null
+          id?: string
+          ip_address?: unknown
+          last_seen_at?: string
+          name?: string
+          referrer?: string | null
+          started_at?: string
+          total_dwell_seconds?: number
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       job_applications: {
         Row: {
           applicant_email: string
@@ -2586,6 +2714,75 @@ export type Database = {
         }
         Relationships: []
       }
+      nda_acceptances: {
+        Row: {
+          accepted_at: string
+          email: string
+          id: string
+          ip_address: unknown
+          nda_version_id: string | null
+          session_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          accepted_at?: string
+          email: string
+          id?: string
+          ip_address?: unknown
+          nda_version_id?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          accepted_at?: string
+          email?: string
+          id?: string
+          ip_address?: unknown
+          nda_version_id?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nda_acceptances_nda_version_id_fkey"
+            columns: ["nda_version_id"]
+            isOneToOne: false
+            referencedRelation: "nda_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nda_acceptances_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "investor_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nda_versions: {
+        Row: {
+          body_md: string
+          effective_from: string
+          id: string
+          is_current: boolean
+          version: number
+        }
+        Insert: {
+          body_md: string
+          effective_from?: string
+          id?: string
+          is_current?: boolean
+          version: number
+        }
+        Update: {
+          body_md?: string
+          effective_from?: string
+          id?: string
+          is_current?: boolean
+          version?: number
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           confirmed: boolean | null
@@ -2742,6 +2939,251 @@ export type Database = {
           slug?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      portal_adoption_points: {
+        Row: {
+          cities_live: number
+          customer_id: string
+          date: string
+          id: string
+          note: string | null
+          pct_addressable: number | null
+        }
+        Insert: {
+          cities_live: number
+          customer_id: string
+          date: string
+          id?: string
+          note?: string | null
+          pct_addressable?: number | null
+        }
+        Update: {
+          cities_live?: number
+          customer_id?: string
+          date?: string
+          id?: string
+          note?: string | null
+          pct_addressable?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_adoption_points_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "portal_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_customers: {
+        Row: {
+          case_study_md: string | null
+          cities_live: number | null
+          contract_signed_at: string | null
+          customers_per_day: number | null
+          display_order: number
+          funnel_stage: string | null
+          id: string
+          is_published: boolean
+          logo_url: string | null
+          monthly_revenue_nok: number | null
+          name: string
+          parent_brand: string | null
+          pilot_started_at: string | null
+          slug: string
+          status: string | null
+          testimonial_author: string | null
+          testimonial_quote: string | null
+          testimonial_role: string | null
+          total_addressable_cities: number | null
+        }
+        Insert: {
+          case_study_md?: string | null
+          cities_live?: number | null
+          contract_signed_at?: string | null
+          customers_per_day?: number | null
+          display_order?: number
+          funnel_stage?: string | null
+          id?: string
+          is_published?: boolean
+          logo_url?: string | null
+          monthly_revenue_nok?: number | null
+          name: string
+          parent_brand?: string | null
+          pilot_started_at?: string | null
+          slug: string
+          status?: string | null
+          testimonial_author?: string | null
+          testimonial_quote?: string | null
+          testimonial_role?: string | null
+          total_addressable_cities?: number | null
+        }
+        Update: {
+          case_study_md?: string | null
+          cities_live?: number | null
+          contract_signed_at?: string | null
+          customers_per_day?: number | null
+          display_order?: number
+          funnel_stage?: string | null
+          id?: string
+          is_published?: boolean
+          logo_url?: string | null
+          monthly_revenue_nok?: number | null
+          name?: string
+          parent_brand?: string | null
+          pilot_started_at?: string | null
+          slug?: string
+          status?: string | null
+          testimonial_author?: string | null
+          testimonial_quote?: string | null
+          testimonial_role?: string | null
+          total_addressable_cities?: number | null
+        }
+        Relationships: []
+      }
+      portal_financial_projections: {
+        Row: {
+          arr_nok: number
+          display_order: number
+          id: string
+          is_actual: boolean
+          notes: string | null
+          period_date: string
+          period_label: string
+        }
+        Insert: {
+          arr_nok: number
+          display_order?: number
+          id?: string
+          is_actual?: boolean
+          notes?: string | null
+          period_date: string
+          period_label: string
+        }
+        Update: {
+          arr_nok?: number
+          display_order?: number
+          id?: string
+          is_actual?: boolean
+          notes?: string | null
+          period_date?: string
+          period_label?: string
+        }
+        Relationships: []
+      }
+      portal_round_terms: {
+        Row: {
+          id: string
+          is_active: boolean
+          round_label: string | null
+          round_size_max_nok: number | null
+          round_size_min_nok: number | null
+          target_close_date: string | null
+          total_raised_to_date_nok: number | null
+          updated_at: string
+          use_of_funds: Json | null
+          valuation_max_nok: number | null
+          valuation_min_nok: number | null
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean
+          round_label?: string | null
+          round_size_max_nok?: number | null
+          round_size_min_nok?: number | null
+          target_close_date?: string | null
+          total_raised_to_date_nok?: number | null
+          updated_at?: string
+          use_of_funds?: Json | null
+          valuation_max_nok?: number | null
+          valuation_min_nok?: number | null
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          round_label?: string | null
+          round_size_max_nok?: number | null
+          round_size_min_nok?: number | null
+          target_close_date?: string | null
+          total_raised_to_date_nok?: number | null
+          updated_at?: string
+          use_of_funds?: Json | null
+          valuation_max_nok?: number | null
+          valuation_min_nok?: number | null
+        }
+        Relationships: []
+      }
+      portal_slides: {
+        Row: {
+          body_md: string | null
+          display_order: number
+          id: string
+          is_published: boolean
+          slide_number: number
+          slug: string
+          subtitle: string | null
+          title: string | null
+          visual_config: Json | null
+          visual_type: string | null
+        }
+        Insert: {
+          body_md?: string | null
+          display_order: number
+          id?: string
+          is_published?: boolean
+          slide_number: number
+          slug: string
+          subtitle?: string | null
+          title?: string | null
+          visual_config?: Json | null
+          visual_type?: string | null
+        }
+        Update: {
+          body_md?: string | null
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          slide_number?: number
+          slug?: string
+          subtitle?: string | null
+          title?: string | null
+          visual_config?: Json | null
+          visual_type?: string | null
+        }
+        Relationships: []
+      }
+      portal_team_members: {
+        Row: {
+          bio: string | null
+          display_order: number
+          id: string
+          is_founder: boolean | null
+          is_published: boolean
+          name: string
+          photo_url: string | null
+          role: string
+        }
+        Insert: {
+          bio?: string | null
+          display_order?: number
+          id?: string
+          is_founder?: boolean | null
+          is_published?: boolean
+          name: string
+          photo_url?: string | null
+          role: string
+        }
+        Update: {
+          bio?: string | null
+          display_order?: number
+          id?: string
+          is_founder?: boolean | null
+          is_published?: boolean
+          name?: string
+          photo_url?: string | null
+          role?: string
         }
         Relationships: []
       }

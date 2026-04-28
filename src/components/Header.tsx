@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, icons, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import GlobalUSPBar from "@/components/GlobalUSPBar";
+import { BrandLogo } from "@/components/BrandLogo";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LanguageLink } from "@/components/LanguageLink";
 import { UserMenuDropdown } from "@/components/UserMenuDropdown";
@@ -236,23 +237,7 @@ const Header = () => {
         <div className="flex items-center justify-between transition-colors duration-300">
           <HeadingTag className="m-0">
             <LanguageLink to="/" className="text-2xl font-bold hover:opacity-80 transition-opacity">
-              {brand.logo_variant === 'image' && brand.logo_image_url ? (
-                <img src={brand.logo_image_url} alt={brand.logo_text || "Brand logo"} className="w-auto" style={{ height: brand.logo_image_height || 32 }} />
-              ) : (
-                <span className={`${{ "gradient-primary": "bg-gradient-primary", "gradient-background": "bg-gradient-background", "gradient-hero": "bg-gradient-hero" }[brand.gradient_token] || "bg-gradient-primary"} bg-clip-text text-transparent relative inline-block`} style={{ paddingRight: brand.logo_icon_name ? (({ small: 16, default: 24, medium: 28, large: 32, xl: 40 } as Record<string, number>)[brand.logo_icon_size || "default"] + 4) : undefined }}>
-                  {brand.logo_text}
-                  {(() => {
-                    if (!brand.logo_icon_name) return null;
-                    const Icon = (icons as Record<string, any>)[brand.logo_icon_name];
-                    if (!Icon) return null;
-                    const sizeMap: Record<string, number> = { small: 16, default: 24, medium: 28, large: 32, xl: 40 };
-                    const posMap: Record<string, string> = { 'top-right': 'top-0 -translate-y-1/2', 'middle-right': 'top-1/2 -translate-y-1/2', 'bottom-right': 'bottom-0 translate-y-1/2' };
-                    const px = sizeMap[brand.logo_icon_size as keyof typeof sizeMap] ?? 24;
-                    const posCls = posMap[brand.logo_icon_position as keyof typeof posMap] ?? 'top-0 -translate-y-1/2';
-                    return <Icon className={`absolute right-0 ${posCls} bg-gradient-primary bg-clip-text text-transparent`} style={{ width: px, height: px }} />;
-                  })()}
-                </span>
-              )}
+              <BrandLogo brand={brand} />
             </LanguageLink>
           </HeadingTag>
 
