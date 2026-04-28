@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, useMemo, useRef, useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -100,6 +100,13 @@ export function InvestorGateForm() {
     setLoading(false);
   };
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLFormElement>) => {
+    if (event.key === "Enter" && isSubmitDisabled && !loading) {
+      event.preventDefault();
+      focusFirstInvalidField();
+    }
+  };
+
   return (
     <Card className="glass-card rounded-2xl p-8 w-full">
       <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground mb-2">
@@ -112,7 +119,7 @@ export function InvestorGateForm() {
         A private space for investors evaluating the Series A round. Enter your details to continue.
       </p>
 
-      <form onSubmit={handleSubmit} noValidate>
+      <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} noValidate>
         <div className="mb-5">
           <Label htmlFor="investor-name" className="mb-2 block">Full name</Label>
           <Input
