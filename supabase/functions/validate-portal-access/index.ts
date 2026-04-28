@@ -14,6 +14,8 @@ interface ValidateRequest {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const RATE_LIMIT_FAILURES = 5;
+const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -37,25 +39,6 @@ serve(async (req: Request): Promise<Response> => {
       return json({ success: false, error: "Portal not configured" }, 500);
     }
 
-    const body = (await req.json()) as ValidateRequest;
-    const name = (body.name ?? "").trim();
-    const email = (body.email ?? "").trim().toLowerCase();
-    const firm = body.firm ? body.firm.trim() : null;
-    const password = body.password ?? "";
-
-    if (password !== portalPassword) {
-      return json({ success: false, error: "Invalid access code" }, 401);
-    }
-    if (!name || name.length > 200) {
-      return json({ success: false, error: "Name is required" }, 400);
-    }
-    if (!email || !EMAIL_RE.test(email) || email.length > 320) {
-      return json({ success: false, error: "Valid email is required" }, 400);
-    }
-    if (firm && firm.length > 200) {
-      return json({ success: false, error: "Firm name too long" }, 400);
-    }
-
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -65,6 +48,54 @@ serve(async (req: Request): Promise<Response> => {
     const ipAddress = xff ? xff.split(",")[0].trim() : null;
     const userAgent = req.headers.get("user-agent");
     const referrer = req.headers.get("referer") ?? req.headers.get("referrer");
+
+    if (ipAddress) {
+      const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+      const { count, error: rlError } = await supabase
+        .from("access_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("ip_address", ipAddress)
+        .eq("success", false)
+        .gte("attempted_at", windowStart);
+      if (rlError) {
+        console.error("Rate limit lookup failed:", rlError);
+      } else if ((count ?? 0) >= RATE_LIMIT_FAILURES) {
+        return json(
+          { success: false, error: "Too many attempts. Please try again in a few minutes." },
+          429
+        );
+      }
+    }
+
+    const body = (await req.json()) as ValidateRequest;
+    const name = (body.name ?? "").trim();
+    const email = (body.email ?? "").trim().toLowerCase();
+    const firm = body.firm ? body.firm.trim() : null;
+    const password = body.password ?? "";
+
+    const passwordOk = password === portalPassword;
+
+    if (ipAddress) {
+      await supabase.from("access_attempts").insert({
+        ip_address: ipAddress,
+        email: email || null,
+        success: passwordOk,
+      });
+    }
+
+    if (!passwordOk) {
+      return json({ success: false, error: "Invalid access code" }, 401);
+    }
+
+    if (!name || name.length > 200) {
+      return json({ success: false, error: "Name is required" }, 400);
+    }
+    if (!email || !EMAIL_RE.test(email) || email.length > 320) {
+      return json({ success: false, error: "Valid email is required" }, 400);
+    }
+    if (firm && firm.length > 200) {
+      return json({ success: false, error: "Firm name too long" }, 400);
+    }
 
     const { data: session, error: sessionError } = await supabase
       .from("investor_sessions")
