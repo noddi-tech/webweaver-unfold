@@ -1,1 +1,0 @@
-UPDATE pricing_offers SET accepted_at = NULL, status = 'sent' WHERE id = '4ad220b3-fa8c-45c5-ab8c-bb9547030c09';

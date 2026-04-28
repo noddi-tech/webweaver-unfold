@@ -1,1 +1,0 @@
-ALTER TABLE customer_stories ADD COLUMN quote_author_image_url text;

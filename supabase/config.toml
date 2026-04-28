@@ -65,3 +65,15 @@ verify_jwt = false
 
 [functions.list-users]
 verify_jwt = false
+
+[functions.validate-portal-access]
+verify_jwt = false
+
+[functions.accept-nda]
+verify_jwt = false
+
+[functions.submit-pledge]
+verify_jwt = false
+
+[functions.track-event]
+verify_jwt = false

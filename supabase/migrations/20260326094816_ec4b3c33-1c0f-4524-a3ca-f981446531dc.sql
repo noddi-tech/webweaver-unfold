@@ -1,1 +1,0 @@
-ALTER TABLE bookings ADD COLUMN cancel_token TEXT UNIQUE;
