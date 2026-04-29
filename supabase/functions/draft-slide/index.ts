@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const MODEL = "claude-opus-4-7";
 const MAX_DRAFTS_PER_HOUR = 30;
@@ -13,7 +13,6 @@ const corsHeaders = {
 type DraftRequest = { slug?: unknown; editor_prompt?: unknown; selected_references?: unknown };
 type DraftResponse = { title: string; subtitle?: string; body_md?: string; visual_type: string; visual_config: Record<string, unknown> };
 type Brief = { slug: string; narrative_role: string; drafting_guidance: string; suggested_visual_types: string[]; reference_resources: string[] | null };
-
 type ValidationResult = { ok: true; value: DraftResponse } | { ok: false; errors: string[] };
 
 function json(body: unknown, status = 200) {
@@ -98,7 +97,6 @@ function validateVisualConfig(visualType: string, config: unknown): string | nul
 function validateDraft(raw: unknown, suggested: string[]): ValidationResult {
   const errors: string[] = [];
   if (!isRecord(raw)) return { ok: false, errors: ["response must be a JSON object"] };
-
   const title = raw.title;
   const subtitle = raw.subtitle;
   const body = raw.body_md;
@@ -116,16 +114,7 @@ function validateDraft(raw: unknown, suggested: string[]): ValidationResult {
   }
 
   if (errors.length) return { ok: false, errors };
-  return {
-    ok: true,
-    value: {
-      title: String(title).trim(),
-      subtitle: isString(subtitle) && subtitle.trim() ? subtitle.trim() : undefined,
-      body_md: isString(body) && body.trim() ? body.trim() : undefined,
-      visual_type: String(visualType),
-      visual_config: visualConfig as Record<string, unknown>,
-    },
-  };
+  return { ok: true, value: { title: String(title).trim(), subtitle: isString(subtitle) && subtitle.trim() ? subtitle.trim() : undefined, body_md: isString(body) && body.trim() ? body.trim() : undefined, visual_type: String(visualType), visual_config: visualConfig as Record<string, unknown> } };
 }
 
 function extractJson(text: string): unknown {
@@ -158,7 +147,7 @@ function schemasFor(types: string[]) {
   return Object.fromEntries(types.map((type) => [type, schemaMap[type]]).filter(([, schema]) => Boolean(schema)));
 }
 
-async function fetchReferenceData(supabase: ReturnType<typeof createClient>, references: string[]) {
+async function fetchReferenceData(supabase: SupabaseClient, references: string[]) {
   const output: Record<string, unknown> = {};
   for (const reference of references) {
     if (reference === "portal_customers") {
@@ -220,29 +209,21 @@ serve(async (req: Request): Promise<Response> => {
     if (countError) throw countError;
     if ((count ?? 0) >= MAX_DRAFTS_PER_HOUR) return json({ error: "Draft limit reached. Try again later." }, 429);
 
-    const { data: brief, error: briefError } = await serviceClient.from("portal_slide_briefs").select("slug,narrative_role,drafting_guidance,suggested_visual_types,reference_resources").eq("slug", slug).maybeSingle<Brief>();
+    const { data: brief, error: briefError } = await serviceClient.from("portal_slide_briefs").select("slug,narrative_role,drafting_guidance,suggested_visual_types,reference_resources").eq("slug", slug).maybeSingle();
     if (briefError) throw briefError;
     if (!brief) return json({ error: "Slide brief not found" }, 404);
 
-    const availableReferences = brief.reference_resources ?? [];
+    const typedBrief = brief as Brief;
+    const availableReferences = typedBrief.reference_resources ?? [];
     const referencesToUse = selectedReferences.length ? selectedReferences.filter((ref) => availableReferences.includes(ref)) : availableReferences;
     const referenceData = await fetchReferenceData(serviceClient, referencesToUse);
 
-    const userPrompt = `Slide brief:\n  Slug: ${brief.slug}\n  Narrative role: ${brief.narrative_role}\n  Drafting guidance: ${brief.drafting_guidance}\n  Suggested visual types: ${JSON.stringify(brief.suggested_visual_types)}\n\nEditor's direction (optional):\n  ${editorPrompt || "(none provided)"}\n\nReference data:\n${JSON.stringify(referenceData, null, 2)}\n\nReturn a JSON object with:\n  title (string, required, 1-80 chars)\n  subtitle (string, optional, max 120 chars)\n  body_md (string, optional markdown body, max 4000 chars)\n  visual_type (one of suggested_visual_types)\n  visual_config (object matching the visual_type's schema)\n\nVisual config schemas:\n${JSON.stringify(schemasFor(brief.suggested_visual_types), null, 2)}\n\nReturn only valid JSON. Do not wrap in markdown.`;
+    const userPrompt = `Slide brief:\n  Slug: ${typedBrief.slug}\n  Narrative role: ${typedBrief.narrative_role}\n  Drafting guidance: ${typedBrief.drafting_guidance}\n  Suggested visual types: ${JSON.stringify(typedBrief.suggested_visual_types)}\n\nEditor's direction (optional):\n  ${editorPrompt || "(none provided)"}\n\nReference data:\n${JSON.stringify(referenceData, null, 2)}\n\nReturn a JSON object with:\n  title (string, required, 1-80 chars)\n  subtitle (string, optional, max 120 chars)\n  body_md (string, optional markdown body, max 4000 chars)\n  visual_type (one of suggested_visual_types)\n  visual_config (object matching the visual_type's schema)\n\nVisual config schemas:\n${JSON.stringify(schemasFor(typedBrief.suggested_visual_types), null, 2)}\n\nReturn only valid JSON. Do not wrap in markdown.`;
 
     const anthropicResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: {
-        "x-api-key": anthropicKey,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 2400,
-        system: "You are drafting a single slide for an investor pitch deck for Navio Solutions, a Norwegian B2B SaaS company. Be confident but grounded. Avoid superlatives. Use specific numbers when reference data provides them. Output valid JSON matching the schema.",
-        messages: [{ role: "user", content: userPrompt }],
-      }),
+      headers: { "x-api-key": anthropicKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify({ model: MODEL, max_tokens: 2400, system: "You are drafting a single slide for an investor pitch deck for Navio Solutions, a Norwegian B2B SaaS company. Be confident but grounded. Avoid superlatives. Use specific numbers when reference data provides them. Output valid JSON matching the schema.", messages: [{ role: "user", content: userPrompt }] }),
     });
 
     if (!anthropicResponse.ok) {
@@ -251,7 +232,8 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     const anthropicJson = await anthropicResponse.json();
-    const text = anthropicJson?.content?.map((part: { type?: string; text?: string }) => part.type === "text" ? part.text ?? "" : "").join("\n") ?? "";
+    const content = Array.isArray(anthropicJson.content) ? anthropicJson.content : [];
+    const text = content.map((part: { type?: string; text?: string }) => part.type === "text" ? part.text ?? "" : "").join("\n");
     let parsed: unknown;
     try {
       parsed = extractJson(text);
@@ -259,17 +241,10 @@ serve(async (req: Request): Promise<Response> => {
       return json({ errors: [(error as Error).message] }, 422);
     }
 
-    const validation = validateDraft(parsed, brief.suggested_visual_types);
+    const validation = validateDraft(parsed, typedBrief.suggested_visual_types);
     if (!validation.ok) return json({ errors: validation.errors }, 422);
 
-    const { error: insertError } = await serviceClient.from("portal_slide_drafts").insert({
-      slide_slug: slug,
-      editor_email: userData.user.email ?? null,
-      editor_user_id: userData.user.id,
-      prompt: editorPrompt || null,
-      response: validation.value,
-      model: MODEL,
-    });
+    const { error: insertError } = await serviceClient.from("portal_slide_drafts").insert({ slide_slug: slug, editor_email: userData.user.email ?? null, editor_user_id: userData.user.id, prompt: editorPrompt || null, response: validation.value, model: MODEL });
     if (insertError) throw insertError;
 
     return json(validation.value);
