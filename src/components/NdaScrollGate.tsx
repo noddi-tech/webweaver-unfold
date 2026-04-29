@@ -20,7 +20,10 @@ const ACCEPT_ERROR = "We could not record your acceptance. Please try again.";
 export function NdaScrollGate({ bodyMd = "", isLoading = false }: NdaScrollGateProps) {
   const navigate = useNavigate();
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const hasScrolledToBottom = useScrolledToBottom(sentinelRef);
+  const searchParams = new URLSearchParams(window.location.search);
+  const skipScrollInDev = import.meta.env.DEV && searchParams.get("skip_scroll") === "1";
+  const hasScrolledToBottomNormally = useScrolledToBottom(sentinelRef);
+  const hasScrolledToBottom = skipScrollInDev || hasScrolledToBottomNormally;
   const { sessionId, markNdaAccepted, signOut } = useInvestorSession();
   const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
