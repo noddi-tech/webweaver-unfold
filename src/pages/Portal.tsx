@@ -39,6 +39,12 @@ export default function Portal() {
       hasTrackedInitialViewRef.current = true;
       activeTabRef.current = activeTab;
       tabEnteredAtRef.current = Date.now();
+      if (import.meta.env.DEV) {
+        console.log("[PortalTracking] initial tab timer set", {
+          activeTab,
+          tabEnteredAt: tabEnteredAtRef.current,
+        });
+      }
       trackEvent({ event_type: "tab_view", path: trackedPathForTab(activeTab), payload: { tab: activeTab } });
       return;
     }
@@ -55,16 +61,32 @@ export default function Portal() {
     trackEvent({ event_type: "tab_view", path: trackedPathForTab(activeTab), payload: { tab: activeTab } });
     activeTabRef.current = activeTab;
     tabEnteredAtRef.current = Date.now();
+    if (import.meta.env.DEV) {
+      console.log("[PortalTracking] tab timer reset", {
+        previousTab,
+        activeTab,
+        tabEnteredAt: tabEnteredAtRef.current,
+      });
+    }
   }, [activeTab, trackEvent]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
       const currentTab = activeTabRef.current;
+      const dwellSeconds = dwellSecondsSince(tabEnteredAtRef.current);
+      if (import.meta.env.DEV) {
+        console.log("[PortalTracking] beforeunload", {
+          currentTab,
+          tabEnteredAt: tabEnteredAtRef.current,
+          now: Date.now(),
+          dwellSeconds,
+        });
+      }
       trackEvent({
         event_type: "tab_exit",
         path: trackedPathForTab(currentTab),
         payload: { tab: currentTab },
-        dwell_seconds: dwellSecondsSince(tabEnteredAtRef.current),
+        dwell_seconds: dwellSeconds,
       });
     };
 
