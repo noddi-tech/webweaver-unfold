@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
+import { isSandboxDevAccessEnabled } from "@/lib/sandboxDevAccess";
 import { useEffect, useState } from "react";
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const { isAdmin, loading: roleLoading } = useUserRole();
+  const sandboxDevAccess = isSandboxDevAccessEnabled();
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -19,6 +21,8 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data }) => setAuthenticated(!!data.session?.user));
     return () => listener.subscription.unsubscribe();
   }, []);
+
+  if (sandboxDevAccess) return <>{children}</>;
 
   if (authenticated === null || roleLoading) {
     return (
