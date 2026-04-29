@@ -184,7 +184,7 @@ export function PortalComponentsPreview() {
           <CardContent><pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-md bg-card-background p-4 text-xs">{auditResults.length ? auditResults.map((result) => `${result.key}: ${result.status}${result.issues.length ? ` — ${result.issues.join("; ")}` : ""}`).join("\n") : "Running audit…"}</pre></CardContent>
         </Card>
         {componentRenders.map((component) => <ComponentPair key={component.name} name={component.name} render={component.render} />)}
-        <div className="sr-only" aria-hidden="true">
+        <div className="pointer-events-none absolute left-[-10000px] top-0 w-[1320px] opacity-0" aria-hidden="true">
           {componentRenders.map((component) => auditWidths.flatMap((width) => (["sparse", "dense"] as Density[]).map((density) => <AuditFrame key={`${component.name}-${density}-${width}`} name={component.name} density={density} width={width}>{component.render(density)}</AuditFrame>)))}
         </div>
       </div>
