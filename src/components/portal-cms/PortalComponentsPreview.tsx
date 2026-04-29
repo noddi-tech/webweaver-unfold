@@ -142,6 +142,40 @@ export function PortalComponentsPreview() {
     return { spotlight, metrics, logos, pairs, timeline, steps, chartPoints, funnel, columns, rows, people };
   }, [data]);
 
+  const componentRenders = useMemo(() => [
+    { name: "Hero", render: (density: Density) => <Hero density={density} variant={density === "sparse" ? "gradient" : "minimal"} eyebrow="Navio investor deck" title="En fot innenfor hos verdens største merkevarer" subtitle="Navio hjelper bilglass-, dekk- og flåteoperatører med å gjøre fragmentert mobil etterspørsel om til repeterbar by-for-by drift." metrics={samples.metrics} kicker="NOK 10–20M seed extension" /> },
+    { name: "StatCallout", render: (density: Density) => <StatCallout density={density} label="Round" value="Operativsystemet for mobile bil- og dekktjenester" context="Capital to scale the customer value engine already proven with Hurtigruta Carglass." supporting="Funds go toward commercial expansion, product automation, and operator onboarding capacity." /> },
+    { name: "StatGrid", render: (density: Density) => <StatGrid density={density} title="Proof points investors should retain" subtitle="Dense enough for IC discussion, restrained enough for the deck narrative." metrics={[...samples.metrics, { label: "Live city expansion", value: "8 cities, up from 2", context: "Current footprint for the spotlight customer" }]} /> },
+    { name: "LogoGrid", render: (density: Density) => <LogoGrid density={density} title="Operator ecosystem" caption="Sample uses live portal customers where available, with Navio-relevant fallback operators." logos={samples.logos} /> },
+    { name: "QuoteBlock", render: (density: Density) => <QuoteBlock density={density} quote={samples.spotlight.testimonial_quote ?? "Navio gir oss et skalerbart operativt lag for mobile tjenester, med planlegging, ruteoptimalisering og kundeoppfølging som fungerer gjennom krevende norske sesongtopper."} author={samples.spotlight.testimonial_author ?? "Operations lead"} role={samples.spotlight.testimonial_role ?? "Hurtigruta Carglass"} company={samples.spotlight.name} /> },
+    { name: "ComparisonTable", render: (density: Density) => <ComparisonTable density={density} title="Why Navio is structurally different" columns={samples.columns} rows={samples.rows} /> },
+    { name: "Timeline", render: (density: Density) => <Timeline density={density} title="Narrative arc" items={samples.timeline} /> },
+    { name: "ProcessFlow", render: (density: Density) => <ProcessFlow density={density} title="Customer value engine" steps={samples.steps} /> },
+    { name: "ProblemSolutionGrid", render: (density: Density) => <ProblemSolutionGrid density={density} title="From operator pain to repeatable software" pairs={samples.pairs} /> },
+    { name: "AnnotatedChart", render: (density: Density) => <AnnotatedChart density={density} title="Illustrative ARR glide path" valueLabel="ARR NOK M" points={samples.chartPoints} annotations={[{ label: "Commercial proof with Hurtigruta Carglass", description: "Repeatable operator value validated before broader vertical replication.", pointLabel: "Q3", align: "right" }, { label: "Round accelerates replication", description: "NOK 10–20M funds expansion by 30 June 2026.", pointLabel: "Q5", align: "left" }]} /> },
+    { name: "FunnelLayout", render: (density: Density) => <FunnelLayout density={density} title="Operator pipeline" stages={samples.funnel} /> },
+    { name: "CustomerSpotlight", render: (density: Density) => <CustomerSpotlight density={density} customer={samples.spotlight.name} parentBrand="Hurtigruta Carglass" summary="A lighthouse customer showing that mobile automotive service can be orchestrated as a repeatable software-enabled operating model." quote="Navio gir oss et skalerbart operativt lag for mobile tjenester, med planlegging, ruteoptimalisering, feltflyt og kundeoppfølging som fungerer gjennom krevende norske sesongtopper uten at vi må bygge alt fra bunnen av." author={samples.spotlight.testimonial_author ?? "Operations lead"} logoUrl={samples.spotlight.logo_url} metrics={[{ label: "Cities live", value: "8 cities, up from 2" }, { label: "Customers/day", value: `${samples.spotlight.customers_per_day ?? 42}` }, { label: "Monthly revenue", value: `NOK ${Math.round((samples.spotlight.monthly_revenue_nok ?? 1350000) / 100000) / 10}M` }]} /> },
+    { name: "SectionDivider", render: (density: Density) => <SectionDivider density={density} eyebrow="Section" title="Vertical replicability" subtitle="The same operational primitives apply across mobile car glass, tire service, and fleet maintenance." metric={{ label: "Target round", value: "NOK 10–20M" }} variant={density === "sparse" ? "gradient" : "minimal"} /> },
+    { name: "CitationFooter", render: (density: Density) => <div className="flex h-full flex-col justify-end"><CitationFooter density={density} note="Preview sources" sources={["portal_customers", "portal_round_terms", "Navio investor context"]} /></div> },
+    { name: "PersonCard", render: (density: Density) => <div className="deck-auto-grid-compact gap-4">{samples.people.map((person) => <PersonCard key={person.name} density={density} person={person} />)}</div> },
+    { name: "CategoryCard", render: (density: Density) => <div className="deck-auto-grid gap-4"><CategoryCard density={density} label="Vertical 01" title="Car glass" description="Mobile glass replacement operators need booking, routing, field execution, and customer updates in one operating layer." status="Live proof" metric="Hurtigruta Carglass" /><CategoryCard density={density} label="Vertical 02" title="Tire service" description="Seasonal demand spikes make routing density and capacity planning especially valuable." status="Replication target" metric="NOK 10–20M round" /><CategoryCard density={density} label="Vertical 03" title="Fleet maintenance" description="Recurring B2B demand creates a path to predictable utilization across city clusters." status="Expansion option" metric="Operator audience" /></div> },
+  ], [samples]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      const results = Array.from(document.querySelectorAll<HTMLElement>("[data-audit-case]")).map((root) => {
+        const issues: string[] = [];
+        root.querySelectorAll<HTMLElement>("*").forEach((node) => {
+          if (node.scrollWidth > node.clientWidth + 1) issues.push(`horizontal overflow: ${node.textContent?.trim().slice(0, 80) || node.className}`);
+          if (node.scrollHeight > node.clientHeight + 1 && getComputedStyle(node).overflowY === "hidden") issues.push(`clipped vertical text: ${node.textContent?.trim().slice(0, 80) || node.className}`);
+        });
+        return { key: root.dataset.auditCase ?? "unknown", status: issues.length ? "FAIL" : "PASS", issues: [...new Set(issues)].slice(0, 3) } satisfies AuditResult;
+      });
+      setAuditResults(results);
+    }, 600);
+    return () => window.clearTimeout(timeout);
+  }, [componentRenders]);
+
   return (
     <PortalCmsLayout title="Deck component preview" description="Quality gate for the investor-grade slide component library before renderer refactor.">
       <div className="space-y-10">
