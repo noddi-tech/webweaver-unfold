@@ -37,14 +37,18 @@ export interface LogosConfig {
   customer_slugs?: string[];
 }
 
-export interface BadgeItem extends TextPair {
+export interface BadgeItem {
   icon?: string;
   problem?: string;
   solution?: string;
+  label?: string;
+  title?: string;
+  description?: string;
+  metric?: string;
 }
 
 export interface BadgesConfig {
-  pairs: TextPair[];
+  pairs?: TextPair[];
   badges?: BadgeItem[];
 }
 
