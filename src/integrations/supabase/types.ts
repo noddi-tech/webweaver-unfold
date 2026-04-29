@@ -3139,6 +3139,83 @@ export type Database = {
         }
         Relationships: []
       }
+      portal_slide_briefs: {
+        Row: {
+          created_at: string
+          drafting_guidance: string
+          id: string
+          narrative_position: number
+          narrative_role: string
+          reference_resources: string[]
+          slug: string
+          suggested_visual_types: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          drafting_guidance: string
+          id?: string
+          narrative_position: number
+          narrative_role: string
+          reference_resources?: string[]
+          slug: string
+          suggested_visual_types?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          drafting_guidance?: string
+          id?: string
+          narrative_position?: number
+          narrative_role?: string
+          reference_resources?: string[]
+          slug?: string
+          suggested_visual_types?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      portal_slide_drafts: {
+        Row: {
+          created_at: string
+          editor_email: string | null
+          editor_user_id: string | null
+          id: string
+          model: string
+          prompt: string | null
+          response: Json
+          slide_slug: string
+        }
+        Insert: {
+          created_at?: string
+          editor_email?: string | null
+          editor_user_id?: string | null
+          id?: string
+          model: string
+          prompt?: string | null
+          response: Json
+          slide_slug: string
+        }
+        Update: {
+          created_at?: string
+          editor_email?: string | null
+          editor_user_id?: string | null
+          id?: string
+          model?: string
+          prompt?: string | null
+          response?: Json
+          slide_slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_slide_drafts_slide_slug_fkey"
+            columns: ["slide_slug"]
+            isOneToOne: false
+            referencedRelation: "portal_slides"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       portal_slides: {
         Row: {
           body_md: string | null
