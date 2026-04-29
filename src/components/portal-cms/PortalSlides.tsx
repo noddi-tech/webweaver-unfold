@@ -192,6 +192,54 @@ function ConfigEditor({ type, value, onChange }: { type: VisualType; value: Json
   return null;
 }
 
+function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (draft: SlideDraftResponse) => void }) {
+  const { toast } = useToast();
+  const [direction, setDirection] = useState("");
+  const [selectedReferences, setSelectedReferences] = useState<string[]>([]);
+  const [draft, setDraft] = useState<SlideDraftResponse | null>(null);
+  const { data: status, isLoading: statusLoading } = useQuery({ queryKey: ["draft-slide-status"], queryFn: async () => { const { data, error } = await supabase.functions.invoke<{ configured: boolean }>("draft-slide-status"); if (error) throw error; return data; } });
+  const { data: brief } = useQuery({ queryKey: ["portal-slide-brief", form.slug], queryFn: () => fetchSlideBrief(form.slug), enabled: Boolean(form.slug) });
+  const { data: counts = {} } = useQuery({ queryKey: ["portal-draft-reference-counts"], queryFn: async () => {
+    const [customers, team, financials, round] = await Promise.all([
+      supabase.from("portal_customers").select("id", { count: "exact", head: true }).eq("is_published", true),
+      supabase.from("portal_team_members").select("id", { count: "exact", head: true }).eq("is_published", true),
+      supabase.from("portal_financial_projections").select("id", { count: "exact", head: true }),
+      supabase.from("portal_round_terms").select("id", { count: "exact", head: true }).eq("is_active", true),
+    ]);
+    let partnerLogos: number | null = null;
+    const { data: sessionData } = await supabase.auth.getSession();
+    const mediaResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/media_assets?section=eq.partner-logos&select=id`, { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${sessionData.session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`, Prefer: "count=exact" } });
+    const range = mediaResponse.headers.get("content-range");
+    if (mediaResponse.ok && range) partnerLogos = Number(range.split("/")[1]);
+    return { portal_customers: customers.count ?? 0, portal_team_members: team.count ?? 0, portal_financial_projections: financials.count ?? 0, portal_round_terms: round.count ?? 0, "media_assets:partner_logos": partnerLogos };
+  } });
+
+  useEffect(() => { if (brief?.reference_resources) setSelectedReferences(brief.reference_resources); }, [brief?.slug, brief?.reference_resources]);
+
+  const generate = useMutation({ mutationFn: async () => { const { data, error } = await supabase.functions.invoke<SlideDraftResponse>("draft-slide", { body: { slug: form.slug, editor_prompt: direction, selected_references: selectedReferences } }); if (error) throw error; if (!data) throw new Error("No draft returned."); return data; }, onSuccess: setDraft, onError: (error) => toast({ title: "Draft failed", description: error.message, variant: "destructive" }) });
+  const references = brief?.reference_resources ?? [];
+
+  if (statusLoading) return <Card><CardContent className="pt-6 text-sm text-muted-foreground">Checking AI drafting status…</CardContent></Card>;
+  if (!status?.configured) return <Card><CardHeader><CardTitle>AI Draft</CardTitle><CardDescription>AI drafting requires Anthropic API key — contact admin.</CardDescription></CardHeader></Card>;
+
+  return (
+    <Card className="border-primary/20">
+      <CardHeader><div className="flex items-center gap-2"><Wand2 className="h-5 w-5 text-primary" /><CardTitle>AI Draft</CardTitle></div><CardDescription>Describe what this slide should say. The AI will draft a complete slide based on the narrative role.</CardDescription>{brief?.narrative_role ? <p className="text-sm italic text-muted-foreground">This slide {brief.narrative_role.charAt(0).toLowerCase() + brief.narrative_role.slice(1)}.</p> : null}</CardHeader>
+      <CardContent className="space-y-5">
+        <Field label="Your direction"><Textarea value={direction} onChange={(event) => setDirection(event.target.value)} placeholder="Add specific points or angle you want emphasized. Leave blank for AI to draft from the narrative role alone." /></Field>
+        {references.length ? <div className="space-y-3"><p className="text-sm font-medium">References</p>{references.map((reference) => { const count = counts[reference as keyof typeof counts]; const label = count === null ? `${referenceLabels[reference] ?? reference} (not connected)` : `${referenceLabels[reference] ?? reference} (${count ?? 0} items)`; return <label key={reference} className="flex items-center gap-3 rounded-md border p-3 text-sm"><Checkbox checked={selectedReferences.includes(reference)} onCheckedChange={(checked) => setSelectedReferences((current) => checked ? [...new Set([...current, reference])] : current.filter((item) => item !== reference))} /><span>{label}</span></label>; })}</div> : null}
+        <Button type="button" onClick={() => generate.mutate()} disabled={generate.isPending || !brief}>{generate.isPending ? "Generating…" : "Generate draft"}</Button>
+        {draft ? <div className="space-y-4 rounded-md border bg-muted/30 p-4"><div className="flex flex-wrap gap-2"><Badge variant="secondary">Generated by AI · review before publishing</Badge><Badge variant="outline">{draft.visual_type}</Badge></div><div className="grid gap-3 text-sm"><DiffRow label="Title" before={form.title} after={draft.title} /><DiffRow label="Subtitle" before={form.subtitle} after={draft.subtitle ?? ""} /><DiffRow label="Visual type" before={form.visual_type} after={draft.visual_type} /><DiffRow label="Body" before={form.body_md} after={draft.body_md ?? ""} /><DiffRow label="Visual config" before={JSON.stringify(form.visual_config, null, 2)} after={JSON.stringify(draft.visual_config, null, 2)} /></div><div className="flex gap-3"><Button type="button" onClick={() => onAccept(draft)}>Accept draft</Button><Button type="button" variant="outline" onClick={() => setDraft(null)}>Discard</Button></div></div> : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+function DiffRow({ label, before, after }: { label: string; before: string; after: string }) {
+  const changed = before !== after;
+  return <div className="grid gap-2 rounded-md border bg-background p-3 md:grid-cols-[8rem_minmax(0,1fr)_minmax(0,1fr)]"><div className="font-medium">{label}{changed ? <Badge variant="outline" className="ml-2">Changed</Badge> : null}</div><pre className="whitespace-pre-wrap text-muted-foreground">{before || "—"}</pre><pre className="whitespace-pre-wrap text-foreground">{after || "—"}</pre></div>;
+}
+
 export function PortalSlideEditor() {
   const { id } = useParams();
   const isNew = id === "new";
