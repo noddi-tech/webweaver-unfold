@@ -40,6 +40,22 @@ export const safeTextStyle = {
   hyphens: "manual",
 } as React.CSSProperties;
 
+export const bodyTextStyle = {
+  textWrap: "pretty",
+  overflowWrap: "break-word",
+  wordBreak: "normal",
+  hyphens: "manual",
+  lineHeight: 1.55,
+} as React.CSSProperties;
+
+export const labelTextStyle = {
+  textWrap: "pretty",
+  overflowWrap: "break-word",
+  wordBreak: "normal",
+  hyphens: "manual",
+  lineHeight: 1.25,
+} as React.CSSProperties;
+
 export const unbreakableTextStyle = {
   textWrap: "pretty",
   overflowWrap: "anywhere",
@@ -62,6 +78,47 @@ export function valueTextStyle(density: Density = "sparse", maxRem?: number) {
     hyphens: "manual",
     fontSize: `clamp(${min}rem, 11cqw, ${max}rem)`,
     lineHeight: 0.96,
+  } as React.CSSProperties;
+}
+
+export function metricValueTextStyle(density: Density = "sparse", maxRem?: number) {
+  const max = maxRem ?? (density === "dense" ? 2.45 : 3.1);
+  const min = density === "dense" ? 1.05 : 1.15;
+  return {
+    textWrap: "nowrap",
+    whiteSpace: "nowrap",
+    overflowWrap: "normal",
+    wordBreak: "normal",
+    hyphens: "manual",
+    fontSize: `clamp(${min}rem, 10cqw, ${max}rem)`,
+    lineHeight: 1,
+  } as React.CSSProperties;
+}
+
+export function textMetricStyle(density: Density = "sparse", maxRem?: number) {
+  const max = maxRem ?? (density === "dense" ? 1.65 : 2.05);
+  const min = density === "dense" ? 1.05 : 1.15;
+  return {
+    ...balancedTextStyle,
+    fontSize: `clamp(${min}rem, 7cqw, ${max}rem)`,
+    lineHeight: 1.08,
+  } as React.CSSProperties;
+}
+
+export function metricValueLooksNumeric(value: string) {
+  return /\d/.test(value) && !/[A-Za-zÆØÅæøå]{4,}/.test(value.replace(/NOK|ARR|MRR|Q\d/gi, ""));
+}
+
+export function metricTextStyle(value: string, density: Density = "sparse", maxRem?: number) {
+  return metricValueLooksNumeric(value) ? metricValueTextStyle(density, maxRem) : textMetricStyle(density, maxRem ? Math.min(maxRem, 2) : undefined);
+}
+
+export function headlineClampStyle(density: Density = "sparse", maxRem?: number) {
+  const max = maxRem ?? (density === "dense" ? 2.3 : 2.8);
+  return {
+    ...balancedTextStyle,
+    fontSize: `clamp(1.45rem, 5.5cqw, ${max}rem)`,
+    lineHeight: 1.06,
   } as React.CSSProperties;
 }
 
