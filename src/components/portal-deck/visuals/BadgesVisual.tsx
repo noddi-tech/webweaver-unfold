@@ -1,3 +1,4 @@
+import type React from "react";
 import * as Icons from "lucide-react";
 import { MarkdownBody, PreparedPlaceholder, SlideHeader } from "../SlideRenderer";
 import type { BadgeItem, BadgesConfig, SlideVisualProps } from "../types";
@@ -5,7 +6,7 @@ import type { BadgeItem, BadgesConfig, SlideVisualProps } from "../types";
 type IconComponent = React.ComponentType<{ className?: string }>;
 
 function getIcon(name: string): IconComponent {
-  const icons: Record<string, unknown> = Icons;
+  const icons = Icons as unknown as Record<string, unknown>;
   const candidate = icons[name];
   return typeof candidate === "function" ? (candidate as IconComponent) : Icons.Sparkles;
 }
