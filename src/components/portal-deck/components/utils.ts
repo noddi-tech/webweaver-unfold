@@ -53,10 +53,14 @@ export const containerQueryStyle = {
 
 export function valueTextStyle(density: Density = "sparse", maxRem?: number) {
   const max = maxRem ?? (density === "dense" ? 3 : 3.75);
-  const min = density === "dense" ? 1.7 : 1.9;
+  const min = density === "dense" ? 1.35 : 1.55;
   return {
-    ...balancedTextStyle,
-    fontSize: `clamp(${min}rem, 14cqw, ${max}rem)`,
+    textWrap: "nowrap",
+    whiteSpace: "nowrap",
+    overflowWrap: "normal",
+    wordBreak: "normal",
+    hyphens: "manual",
+    fontSize: `clamp(${min}rem, 11cqw, ${max}rem)`,
     lineHeight: 0.96,
   } as React.CSSProperties;
 }
