@@ -10,19 +10,27 @@ export function useScrolledToBottom(
 
     const sentinel = sentinelRef.current;
     const scrollParent = sentinel.parentElement?.closest("[data-scroll-gate='true']");
+    const markScrolled = () => {
+      if (import.meta.env.DEV) {
+        console.log("[NDA] scrolled to bottom — checkbox now enabled", {
+          via: "observer-or-scroll",
+        });
+      }
+      setHasScrolled(true);
+    };
 
     const checkScrollPosition = () => {
       if (!(scrollParent instanceof HTMLElement)) return;
       const remaining = scrollParent.scrollHeight - scrollParent.scrollTop - scrollParent.clientHeight;
       if (remaining <= 2) {
-        setHasScrolled(true);
+        markScrolled();
       }
     };
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          setHasScrolled(true);
+          markScrolled();
         }
       },
       { threshold: 0.95 }
