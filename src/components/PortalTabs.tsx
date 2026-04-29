@@ -28,10 +28,6 @@ export function PortalTabs({ activeTab }: PortalTabsProps) {
 
   const handleTabChange = (value: string) => {
     const nextTab = resolvePortalTab(value);
-    if (nextTab === "pitch") {
-      setSearchParams({});
-      return;
-    }
     setSearchParams({ tab: nextTab });
   };
 
