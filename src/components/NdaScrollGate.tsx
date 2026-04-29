@@ -65,6 +65,7 @@ export function NdaScrollGate({ bodyMd = "", isLoading = false }: NdaScrollGateP
 
       <div
         tabIndex={0}
+        data-scroll-gate="true"
         className="border border-border rounded-xl bg-background max-h-[50vh] overflow-y-auto p-6 scroll-smooth mb-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         aria-label="Confidentiality agreement text"
       >
