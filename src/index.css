@@ -797,3 +797,29 @@ All colors MUST be HSL.
   0%, 100% { transform-origin: center; transform: scale(1); opacity: 1; }
   50% { transform: scale(1.08); opacity: 0.85; }
 }
+/* Deck components use container queries because they render inside scaled slides,
+   thumbnails, and side-by-side CMS previews where viewport breakpoints are wrong. */
+.deck-responsive-hero-grid {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: end;
+}
+
+.deck-responsive-hero-metrics {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@container (min-width: 620px) {
+  .deck-responsive-hero-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 980px) {
+  .deck-responsive-hero-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  }
+
+  .deck-responsive-hero-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

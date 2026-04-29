@@ -35,6 +35,13 @@ export const balancedTextStyle = {
 
 export const safeTextStyle = {
   textWrap: "pretty",
+  overflowWrap: "break-word",
+  wordBreak: "normal",
+  hyphens: "manual",
+} as React.CSSProperties;
+
+export const unbreakableTextStyle = {
+  textWrap: "pretty",
   overflowWrap: "anywhere",
   wordBreak: "normal",
   hyphens: "manual",

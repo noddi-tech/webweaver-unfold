@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import { enableSandboxDevAccess, isSandboxPreviewHost } from "@/lib/sandboxDevAccess";
 
 const Auth = () => {
   const { toast } = useToast();
@@ -16,6 +17,7 @@ const Auth = () => {
   const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
   const [loading, setLoading] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
+  const showSandboxDevLogin = isSandboxPreviewHost();
 
   useEffect(() => {
     document.title = mode === "signin" ? "Sign In | Navio" : mode === "signup" ? "Create Account | Navio" : "Reset Password | Navio";
@@ -50,11 +52,18 @@ const Auth = () => {
         });
         setMode("signin");
       }
-    } catch (err: any) {
-      toast({ title: "Auth error", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Please try again.";
+      toast({ title: "Auth error", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
+  };
+
+
+  const handleSandboxDevLogin = () => {
+    if (!enableSandboxDevAccess()) return;
+    window.location.href = "/cms/portal/components-preview";
   };
 
   const handleGoogleSignIn = async () => {
@@ -98,6 +107,18 @@ const Auth = () => {
             </svg>
             Sign in with Google
           </Button>
+
+          {showSandboxDevLogin ? (
+            <Button
+              type="button"
+              variant="secondary"
+              className="mt-3 w-full h-12 text-base font-medium"
+              disabled={loading}
+              onClick={handleSandboxDevLogin}
+            >
+              Sandbox dev preview login
+            </Button>
+          ) : null}
 
           {/* Divider */}
           <div className="relative my-5">
