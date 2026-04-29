@@ -53,7 +53,7 @@ export const containerQueryStyle = {
 
 export function valueTextStyle(density: Density = "sparse", maxRem?: number) {
   const max = maxRem ?? (density === "dense" ? 3 : 3.75);
-  const min = density === "dense" ? 1.35 : 1.55;
+  const min = density === "dense" ? 1.05 : 1.15;
   return {
     textWrap: "nowrap",
     whiteSpace: "nowrap",
