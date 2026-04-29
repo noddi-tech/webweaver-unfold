@@ -52,8 +52,9 @@ const Auth = () => {
         });
         setMode("signin");
       }
-    } catch (err: any) {
-      toast({ title: "Auth error", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Please try again.";
+      toast({ title: "Auth error", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
