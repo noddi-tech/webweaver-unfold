@@ -9,7 +9,7 @@ import { useInvestorTracking } from "@/hooks/useInvestorTracking";
 import { cn } from "@/lib/utils";
 import { EmptyDeckState } from "./EmptyDeckState";
 import { deckText } from "./i18n";
-import { {deckText.present}Mode } from "./{deckText.present}Mode";
+import { PresentMode } from "./PresentMode";
 import { SlideRenderer } from "./SlideRenderer";
 import { ThumbnailStrip } from "./ThumbnailStrip";
 import { normalizeSlide, type SlideRow } from "./types";
@@ -40,14 +40,14 @@ function SlideSkeleton() {
 export function SlideViewer() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [presentOpen, set{deckText.present}Open] = useState(false);
+  const [presentOpen, setPresentOpen] = useState(false);
   const { trackEvent } = useInvestorTracking();
   const activeSlideRef = useRef<SlideRow | null>(null);
   const slideEnteredAtRef = useRef(Date.now());
   const hasTrackedInitialSlideRef = useRef(false);
   const presentSlideRef = useRef<SlideRow | null>(null);
   const presentEnteredAtRef = useRef(Date.now());
-  const hasTracked{deckText.present}Ref = useRef(false);
+  const hasTrackedPresentRef = useRef(false);
 
   const previewAll = import.meta.env.DEV && searchParams.get("preview") === "all";
 
@@ -104,18 +104,18 @@ export function SlideViewer() {
     slideEnteredAtRef.current = Date.now();
   }, [slides, trackEvent]);
 
-  const goToSlide = useCallback((index: number, via{deckText.present} = false) => {
+  const goToSlide = useCallback((index: number, viaPresent = false) => {
     const boundedIndex = Math.max(0, Math.min(slides.length - 1, index));
     const nextSlide = slides[boundedIndex];
     if (!nextSlide) return;
 
-    if (via{deckText.present} && presentSlideRef.current?.id !== nextSlide.id) {
-      const previous{deckText.present}Slide = presentSlideRef.current;
-      if (previous{deckText.present}Slide) {
+    if (viaPresent && presentSlideRef.current?.id !== nextSlide.id) {
+      const previousPresentSlide = presentSlideRef.current;
+      if (previousPresentSlide) {
         trackEvent({
           event_type: "slide_exit",
-          path: trackedPathForSlide(previous{deckText.present}Slide),
-          payload: { slug: previous{deckText.present}Slide.slug, slide_number: previous{deckText.present}Slide.slide_number, via: "present" },
+          path: trackedPathForSlide(previousPresentSlide),
+          payload: { slug: previousPresentSlide.slug, slide_number: previousPresentSlide.slide_number, via: "present" },
           dwell_seconds: dwellSecondsSince(presentEnteredAtRef.current),
         });
       }
@@ -126,7 +126,7 @@ export function SlideViewer() {
       });
       presentSlideRef.current = nextSlide;
       presentEnteredAtRef.current = Date.now();
-    } else if (!via{deckText.present}) {
+    } else if (!viaPresent) {
       trackRegularTransition(boundedIndex);
     }
 
@@ -170,7 +170,7 @@ export function SlideViewer() {
         goToSlide(activeIndex - 1);
       } else if (event.key.toLowerCase() === "p") {
         event.preventDefault();
-        set{deckText.present}Open(true);
+        setPresentOpen(true);
       } else if (/^[1-9]$/.test(event.key)) {
         const targetIndex = Number(event.key) - 1;
         if (targetIndex < slides.length) goToSlide(targetIndex);
@@ -195,8 +195,8 @@ export function SlideViewer() {
   }, [trackEvent]);
 
   useEffect(() => {
-    if (!presentOpen || !activeSlide || hasTracked{deckText.present}Ref.current) return;
-    hasTracked{deckText.present}Ref.current = true;
+    if (!presentOpen || !activeSlide || hasTrackedPresentRef.current) return;
+    hasTrackedPresentRef.current = true;
     presentSlideRef.current = activeSlide;
     presentEnteredAtRef.current = Date.now();
     trackEvent({
@@ -206,19 +206,19 @@ export function SlideViewer() {
     });
   }, [activeSlide, presentOpen, trackEvent]);
 
-  const close{deckText.present}Mode = useCallback(() => {
-    const current{deckText.present}Slide = presentSlideRef.current;
-    if (current{deckText.present}Slide) {
+  const closePresentMode = useCallback(() => {
+    const currentPresentSlide = presentSlideRef.current;
+    if (currentPresentSlide) {
       trackEvent({
         event_type: "slide_exit",
-        path: trackedPathForSlide(current{deckText.present}Slide),
-        payload: { slug: current{deckText.present}Slide.slug, slide_number: current{deckText.present}Slide.slide_number, via: "present" },
+        path: trackedPathForSlide(currentPresentSlide),
+        payload: { slug: currentPresentSlide.slug, slide_number: currentPresentSlide.slide_number, via: "present" },
         dwell_seconds: dwellSecondsSince(presentEnteredAtRef.current),
       });
     }
-    hasTracked{deckText.present}Ref.current = false;
+    hasTrackedPresentRef.current = false;
     presentSlideRef.current = null;
-    set{deckText.present}Open(false);
+    setPresentOpen(false);
     if (document.fullscreenElement) {
       void document.exitFullscreen().catch(() => undefined);
     }
@@ -243,7 +243,7 @@ export function SlideViewer() {
     <div className="w-full">
       <div className="no-print mb-4 flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{currentCounter}</p>
-        <p className="hidden text-xs italic text-muted-foreground sm:block">{deckText.pressTo{deckText.present}}</p>
+        <p className="hidden text-xs italic text-muted-foreground sm:block">{deckText.pressToPresent}</p>
       </div>
 
       <div className="mx-auto w-full max-w-5xl">
@@ -273,7 +273,7 @@ export function SlideViewer() {
           <Download className="h-4 w-4" />
           {deckText.exportPdf}
         </Button>
-        <Button variant="outline" size="sm" onClick={() => set{deckText.present}Open(true)}>
+        <Button variant="outline" size="sm" onClick={() => setPresentOpen(true)}>
           <Maximize2 className="h-4 w-4" />
           {deckText.present}
         </Button>
@@ -289,7 +289,7 @@ export function SlideViewer() {
         ))}
       </div>
 
-      {presentOpen ? <{deckText.present}Mode slides={slides} activeIndex={activeIndex} onIndexChange={goToSlide} onExit={close{deckText.present}Mode} /> : null}
+      {presentOpen ? <PresentMode slides={slides} activeIndex={activeIndex} onIndexChange={goToSlide} onExit={closePresentMode} /> : null}
     </div>
   );
 }
