@@ -16,17 +16,7 @@ function getIcon(name: string): IconComponent {
   const iconsByName = Icons.icons as unknown as Record<string, unknown>;
   const iconsNamespace = Icons as unknown as Record<string, unknown>;
   const candidate = iconsByName[name] ?? iconsNamespace[name];
-  const resolved = isIconComponent(candidate) ? candidate : Icons.Sparkles;
-
-  if (import.meta.env.DEV) {
-    console.log("[BadgesVisual] icon resolution", {
-      requested: name,
-      resolvedName: (resolved as { displayName?: string; name?: string }).displayName ?? (resolved as { name?: string }).name ?? "anonymous",
-      fallbackToSparkles: resolved === Icons.Sparkles,
-    });
-  }
-
-  return resolved;
+  return isIconComponent(candidate) ? candidate : Icons.Sparkles;
 }
 
 function BadgeCard({ badge }: { badge: BadgeItem }) {
@@ -43,13 +33,6 @@ function BadgeCard({ badge }: { badge: BadgeItem }) {
 }
 
 export function BadgesVisual({ slide, config }: SlideVisualProps<BadgesConfig>) {
-  if (import.meta.env.DEV) {
-    console.log("[BadgesVisual] badges", {
-      length: config?.badges?.length ?? 0,
-      icons: config?.badges?.map((badge) => badge.icon) ?? [],
-    });
-  }
-
   return (
     <section className="h-full overflow-y-auto p-6 sm:p-10">
       <SlideHeader slide={slide} />
