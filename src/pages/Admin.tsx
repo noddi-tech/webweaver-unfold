@@ -140,8 +140,9 @@ const Admin = () => {
     try {
       await supabase.auth.signOut({ scope: "global" });
       window.location.href = "/cms-login";
-    } catch (err: any) {
-      toast({ title: "Sign out failed", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Please try again.";
+      toast({ title: "Sign out failed", description: message, variant: "destructive" });
     }
   };
 
