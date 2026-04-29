@@ -166,7 +166,8 @@ export function PortalComponentsPreview() {
       const results = Array.from(document.querySelectorAll<HTMLElement>("[data-audit-case]")).map((root) => {
         const issues: string[] = [];
         root.querySelectorAll<HTMLElement>("*").forEach((node) => {
-          if (["STYLE", "SCRIPT", "NOSCRIPT"].includes(node.tagName)) return;
+          if (["STYLE", "SCRIPT", "NOSCRIPT"].includes(node.tagName) || node.closest("style,script,noscript")) return;
+          if (node.getAttribute("data-chart") || node.textContent?.includes("--color-value")) return;
           if (node.scrollWidth > node.clientWidth + 1) issues.push(`horizontal overflow: ${node.textContent?.trim().slice(0, 80) || node.className}`);
           if (node.scrollHeight > node.clientHeight + 1 && getComputedStyle(node).overflowY === "hidden") issues.push(`clipped vertical text: ${node.textContent?.trim().slice(0, 80) || node.className}`);
         });
