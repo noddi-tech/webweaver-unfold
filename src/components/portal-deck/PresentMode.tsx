@@ -65,11 +65,11 @@ export function PresentMode({ slides, activeIndex, onIndexChange, onExit }: Pres
   if (!slide) return null;
 
   return (
-    <div ref={shellRef} className="fixed inset-0 z-[9999] flex items-center justify-center bg-black p-4 text-white">
+    <div ref={shellRef} className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ backgroundColor: "hsl(0 0% 0%)" }}>
       <div className="aspect-video w-full max-w-[min(96vw,calc(96vh*16/9))] overflow-hidden rounded-2xl bg-card-background shadow-2xl">
         <SlideRenderer key={`present-${slide.id}`} slide={slide} mode="present" />
       </div>
-      <div className="absolute bottom-6 right-6 text-sm text-white/60">
+      <div className="absolute bottom-6 right-6 text-sm text-primary-foreground/60">
         {activeIndex + 1} / {slides.length}
       </div>
     </div>
