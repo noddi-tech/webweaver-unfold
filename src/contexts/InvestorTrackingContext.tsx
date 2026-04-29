@@ -31,6 +31,12 @@ const sharedQueue: TrackedEvent[] = [];
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://ouhfgazomdmirdazvjys.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91aGZnYXpvbWRtaXJkYXp2anlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1NzI5OTEsImV4cCI6MjA3MDE0ODk5MX0.w5iC3BX6u5vrnr1fMj5HyYUwEtYRwsoTVx3oAQ2foCQ";
 
+function debugLog(message: string, details?: unknown) {
+  if (import.meta.env.DEV) {
+    console.log(`[InvestorTracking] ${message}`, details ?? "");
+  }
+}
+
 function snapshotQueue(queue: TrackedEvent[]) {
   const queueSnapshot = [...queue];
   queue.length = 0;
@@ -39,6 +45,7 @@ function snapshotQueue(queue: TrackedEvent[]) {
 
 function keepaliveFlush(sessionId: string | null, queue: TrackedEvent[]) {
   const queueSnapshot = snapshotQueue(queue);
+  debugLog("keepalive flush runs", { sessionId, queueSnapshot });
   if (!sessionId || queueSnapshot.length === 0) return;
 
   try {
@@ -69,12 +76,14 @@ export function InvestorTrackingProvider({ children }: { children: React.ReactNo
   }, [sessionId]);
 
   const trackEvent = useCallback((event: TrackedEvent) => {
+    debugLog("trackEvent called; event queued", event);
     queueRef.current.push(event);
   }, []);
 
   const flush = useCallback(async () => {
     const queueSnapshot = snapshotQueue(queueRef.current);
     const currentSessionId = sessionIdRef.current;
+    debugLog("flush runs; queue snapshot before sending", { sessionId: currentSessionId, queueSnapshot });
 
     if (!currentSessionId || queueSnapshot.length === 0) return;
 
@@ -83,8 +92,14 @@ export function InvestorTrackingProvider({ children }: { children: React.ReactNo
     });
 
     if (error || data?.success === false) {
+      if (import.meta.env.DEV) {
+        console.log("[InvestorTracking] supabase.functions.invoke failed", error || data);
+      }
       console.warn("[InvestorTracking] flush failed", error || data);
+      return;
     }
+
+    debugLog("supabase.functions.invoke succeeded", data);
   }, []);
 
   useEffect(() => {
@@ -95,6 +110,7 @@ export function InvestorTrackingProvider({ children }: { children: React.ReactNo
     });
 
     const intervalId = window.setInterval(() => {
+      debugLog("auto-flush interval fires");
       void flush();
     }, 10_000);
 
