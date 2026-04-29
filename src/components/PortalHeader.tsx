@@ -60,7 +60,9 @@ function assembleRoundStatus(round?: {
   const parts = ["Fundraise"];
 
   if (round?.round_size_min_nok != null && round?.round_size_max_nok != null) {
-    parts.push(`NOK ${formatM(round.round_size_min_nok)}–${formatM(round.round_size_max_nok)}`);
+    const minM = Math.round(Number(round.round_size_min_nok) / 1_000_000);
+    const maxM = Math.round(Number(round.round_size_max_nok) / 1_000_000);
+    parts.push(`NOK ${minM}–${maxM}M`);
   }
 
   if (round?.target_close_date) {
