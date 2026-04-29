@@ -33,6 +33,22 @@ const emptySession = {
   hasAcceptedNda: false,
 };
 
+function createDevSession(): PersistedInvestorSession | null {
+  const params = new URLSearchParams(window.location.search);
+  if (!import.meta.env.DEV || params.get("dev_session") !== "test") return null;
+  // DEV ONLY: Allows automation to bypass /investor gate + NDA
+  // by visiting /portal?dev_session=test. import.meta.env.DEV
+  // is false in production builds.
+  return {
+    sessionId: "dev-session-test",
+    email: "dev-automation@navio-test.local",
+    name: "Dev Automation",
+    firm: null,
+    hasAcceptedNda: true,
+    ndaAcceptedAt: new Date().toISOString(),
+  };
+}
+
 type InvestorSessionState = Omit<InvestorSession, "isLoaded" | "setSession" | "markNdaAccepted" | "signOut">;
 
 function isPersistedSession(value: unknown): value is PersistedInvestorSession {
@@ -49,6 +65,11 @@ function isPersistedSession(value: unknown): value is PersistedInvestorSession {
 
 export function InvestorSessionProvider({ children }: { children: React.ReactNode }) {
   const [sessionState, setSessionState] = useState<InvestorSessionState>(() => {
+    const devSession = createDevSession();
+    if (devSession) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(devSession));
+      return devSession;
+    }
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -66,21 +87,10 @@ export function InvestorSessionProvider({ children }: { children: React.ReactNod
   const [isLoaded] = useState(true);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (import.meta.env.DEV && params.get("dev_session") === "test") {
-      // DEV ONLY: Allows automation to bypass /investor gate + NDA
-      // by visiting /portal?dev_session=test. import.meta.env.DEV
-      // is false in production builds.
-      const fakeSession: PersistedInvestorSession = {
-        sessionId: "dev-session-test",
-        email: "dev-automation@navio-test.local",
-        name: "Dev Automation",
-        firm: null,
-        hasAcceptedNda: true,
-        ndaAcceptedAt: new Date().toISOString(),
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(fakeSession));
-      setSessionState(fakeSession);
+    const devSession = createDevSession();
+    if (devSession) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(devSession));
+      setSessionState(devSession);
     }
   }, []);
 
