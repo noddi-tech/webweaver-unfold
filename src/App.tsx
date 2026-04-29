@@ -48,6 +48,8 @@ import ManageBooking from "./pages/ManageBooking";
 import RescheduleBooking from "./pages/RescheduleBooking";
 import MeetMembers from "./pages/MeetMembers";
 import Investor from "./pages/Investor";
+import InvestorNda from "./pages/InvestorNda";
+import { RequireInvestorSession } from "@/components/RequireInvestorSession";
 
 const queryClient = new QueryClient();
 const App = () => {
@@ -118,6 +120,7 @@ const App = () => {
                     <Route path="/cms-login" element={<Auth />} />
                     <Route path="/internal" element={<Internal />} />
                     <Route path="/investor" element={<Investor />} />
+                    <Route path="/investor/nda" element={<RequireInvestorSession><InvestorNda /></RequireInvestorSession>} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/cms" element={<Admin />} />
                     <Route path="/admin" element={<Admin />} />
