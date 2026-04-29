@@ -4554,6 +4554,15 @@ export type Database = {
         }
         Relationships: []
       }
+      portal_round_progress: {
+        Row: {
+          pledge_count: number | null
+          round_size_max_nok: number | null
+          total_pledged_all_nok: number | null
+          total_pledged_firm_nok: number | null
+        }
+        Relationships: []
+      }
       public_employees: {
         Row: {
           active: boolean | null
