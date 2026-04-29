@@ -32,10 +32,10 @@ export function ThumbnailStrip({ slides, activeIndex, onSelect }: ThumbnailStrip
                   ? "border-primary text-foreground ring-2 ring-primary ring-offset-2"
                   : "border-transparent text-muted-foreground hover:bg-muted/80 hover:text-foreground"
               )}
-              aria-label={`Go to slide ${slide.slide_number}`}
+              aria-label={`Go to slide ${index + 1}`}
               aria-current={active ? "true" : undefined}
             >
-              {slide.slide_number}
+              {index + 1}
             </button>
           );
         })}

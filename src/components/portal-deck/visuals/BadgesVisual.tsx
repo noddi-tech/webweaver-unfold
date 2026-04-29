@@ -5,10 +5,15 @@ import type { BadgeItem, BadgesConfig, SlideVisualProps } from "../types";
 
 type IconComponent = React.ComponentType<{ className?: string }>;
 
+function isIconComponent(candidate: unknown): candidate is IconComponent {
+  if (typeof candidate === "function") return true;
+  return typeof candidate === "object" && candidate !== null && "$$typeof" in candidate;
+}
+
 function getIcon(name: string): IconComponent {
-  const icons = Icons as unknown as Record<string, unknown>;
-  const candidate = icons[name];
-  return typeof candidate === "function" ? (candidate as IconComponent) : Icons.Sparkles;
+  const lucide = Icons as unknown as Record<string, unknown> & { icons?: Record<string, unknown> };
+  const candidate = lucide.icons?.[name] ?? lucide[name];
+  return isIconComponent(candidate) ? candidate : Icons.Sparkles;
 }
 
 function BadgeCard({ badge }: { badge: BadgeItem }) {
