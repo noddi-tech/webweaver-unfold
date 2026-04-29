@@ -8,6 +8,7 @@ type PersistedInvestorSession = {
   name: string;
   firm: string | null;
   hasAcceptedNda: boolean;
+  ndaAcceptedAt?: string;
 };
 
 export interface InvestorSession {
@@ -63,6 +64,25 @@ export function InvestorSessionProvider({ children }: { children: React.ReactNod
     return emptySession;
   });
   const [isLoaded] = useState(true);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (import.meta.env.DEV && params.get("dev_session") === "test") {
+      // DEV ONLY: Allows automation to bypass /investor gate + NDA
+      // by visiting /portal?dev_session=test. import.meta.env.DEV
+      // is false in production builds.
+      const fakeSession: PersistedInvestorSession = {
+        sessionId: "dev-session-test",
+        email: "dev-automation@navio-test.local",
+        name: "Dev Automation",
+        firm: null,
+        hasAcceptedNda: true,
+        ndaAcceptedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(fakeSession));
+      setSessionState(fakeSession);
+    }
+  }, []);
 
   const setSession = useCallback((session: PersistedInvestorSession) => {
     setSessionState(session);
