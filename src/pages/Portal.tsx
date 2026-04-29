@@ -50,6 +50,16 @@ export default function Portal() {
   }, []);
 
   useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('[Portal] tab effect runs', {
+        activeTab,
+        activeTabRef_current: activeTabRef.current,
+        tabEnteredAtRef_current: tabEnteredAtRef.current,
+        hasTrackedInitialView: hasTrackedInitialViewRef.current,
+        timestamp: Date.now(),
+      });
+    }
+
     if (!hasTrackedInitialViewRef.current) {
       hasTrackedInitialViewRef.current = true;
       activeTabRef.current = activeTab;
@@ -62,7 +72,23 @@ export default function Portal() {
   }, [activeTab, trackEvent, trackTabTransition]);
 
   useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('[Portal] beforeunload effect setup', {
+        timestamp: Date.now(),
+      });
+    }
+
     const handleBeforeUnload = () => {
+      const now = Date.now();
+      if (import.meta.env.DEV) {
+        console.log('[Portal] beforeunload fires', {
+          activeTabRef_current: activeTabRef.current,
+          tabEnteredAtRef_current: tabEnteredAtRef.current,
+          now,
+          computedDwell: Math.max(0, Math.round((now - tabEnteredAtRef.current) / 1000)),
+        });
+      }
+
       const currentTab = activeTabRef.current;
       trackEvent({
         event_type: "tab_exit",
