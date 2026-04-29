@@ -83,6 +83,13 @@ Deliverable 2 — Component library after confirmation
 6. Preview page will render every component in sparse and dense mode with realistic sample data.
 7. Stop and report Verification Checkpoint 2.
 
+Deliverable 2 status — implemented
+- Added the 16-component library under `src/components/portal-deck/components/`.
+- Added `/cms/portal/components-preview` behind `AdminRoute` and linked it from portal CMS navigation.
+- Preview renders every component in both sparse and dense modes with Navio-specific sample context, using live `portal_customers` and active `portal_round_terms` when available with realistic fallbacks.
+- Automated verification: ESLint passed for the new component library, preview page, route wiring, and portal CMS navigation.
+- Browser verification blocker: the automated browser session is not authenticated as admin and redirects to the sign-in page; Joachim must visually verify `/cms/portal/components-preview` in an authenticated admin session.
+
 Deliverable 3 — Renderer refactor after confirmation
 1. Update `src/components/portal-deck/types.ts` to support the new visual_config schemas while retaining backwards-compatible normalizers for old `badges`, `verticals`, and `gap` shapes where possible.
 2. Refactor all 12 visual renderers so they become composition layers over the library:
