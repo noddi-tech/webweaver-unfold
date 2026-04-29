@@ -11,6 +11,26 @@ export type InvestorSessionRow = Database["public"]["Tables"]["investor_sessions
 export type InvestorPledgeRow = Database["public"]["Tables"]["investor_pledges"]["Row"];
 export type InvestorEventRow = Database["public"]["Tables"]["investor_events"]["Row"];
 
+export type PortalSlideBriefRow = {
+  id: string;
+  slug: string;
+  narrative_position: number;
+  narrative_role: string;
+  drafting_guidance: string;
+  suggested_visual_types: string[];
+  reference_resources: string[] | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SlideDraftResponse = {
+  title: string;
+  subtitle?: string;
+  body_md?: string;
+  visual_type: VisualType;
+  visual_config: Record<string, unknown>;
+};
+
 export interface InvestorSummary {
   email: string | null;
   name: string | null;

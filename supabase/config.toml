@@ -77,3 +77,9 @@ verify_jwt = false
 
 [functions.track-event]
 verify_jwt = false
+
+[functions.draft-slide-status]
+verify_jwt = false
+
+[functions.draft-slide]
+verify_jwt = false
