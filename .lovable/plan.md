@@ -1,22 +1,34 @@
-Plan to address the two NDA scroll-gate verification items:
+Plan for the two requested actions
 
-1. Confirm the scroll fallback target
-   - `src/components/NdaScrollGate.tsx` already renders the actual scroll container with `data-scroll-gate="true"`, `tabIndex={0}`, `aria-label="Confidentiality agreement text"`, and `max-h-[50vh] overflow-y-auto` on the same `<div>`.
-   - No code change is needed in this file unless you want the JSX attribute order adjusted to exactly match the prompt.
+1. Preserve the verified Issue 1 changes
+- Keep the already-completed removal of the client-side `session_start` event from `InvestorTrackingProvider`.
+- Keep the diagnostic tracking `console.log` cleanup.
+- Do not re-run the beforeunload diagnostic.
 
-2. Add development-only hook logging
-   - Update `src/hooks/useScrolledToBottom.ts` so every path that flips the gate logs in development only:
-     ```ts
-     if (import.meta.env.DEV) {
-       console.log('[NDA] scrolled to bottom — checkbox now enabled', {
-         via: 'observer-or-scroll'
-       });
-     }
-     ```
-   - To avoid duplicated logging from both the observer and scroll fallback, I will centralize the state flip in a small helper such as `markScrolled()` and call that helper from both trigger paths.
-   - Production builds will not emit the log because it is guarded by `import.meta.env.DEV`.
+2. Add the dev-only NDA scroll escape hatch
+- Update `src/components/NdaScrollGate.tsx` to read the current URL query string.
+- Enable immediate checkbox availability only when both conditions are true:
+  - `import.meta.env.DEV` is true
+  - `skip_scroll=1` is present in the query string
+- Production builds will ignore the parameter entirely.
 
-3. Report reviewable diffs
-   - After implementation, I will report only the two relevant file diffs:
-     - `src/components/NdaScrollGate.tsx`: confirmation/no-op or exact attribute-order adjustment if requested.
-     - `src/hooks/useScrolledToBottom.ts`: development-only console log addition.
+Technical detail: I will not implement the exact short-circuit hook expression as written, because this would conditionally skip `useScrolledToBottom(...)` when `skipScrollInDev` is true and would violate React’s Rules of Hooks. I will use the safe equivalent:
+
+```tsx
+const searchParams = new URLSearchParams(window.location.search);
+const skipScrollInDev = import.meta.env.DEV && searchParams.get("skip_scroll") === "1";
+const hasScrolledToBottomNormally = useScrolledToBottom(sentinelRef);
+const hasScrolledToBottom = skipScrollInDev || hasScrolledToBottomNormally;
+```
+
+3. Verification
+- Confirm `NdaScrollGate.tsx` still calls hooks unconditionally.
+- Confirm `/investor/nda?skip_scroll=1` in dev mode enables the checkbox without scroll.
+- Confirm the escape hatch is gated by `import.meta.env.DEV`, so production behavior is unchanged.
+- Confirm no beforeunload diagnostic is attempted.
+
+4. Git / GitHub handling
+- I will prepare the two logical changes separately:
+  - Existing Issue 1 cleanup: `fix(investor-portal): remove duplicate session_start, clean diagnostic logs`
+  - New helper: `dev: add skip_scroll dev-mode escape hatch for NDA gate automation`
+- Lovable projects sync changes to GitHub through the platform integration. I cannot manually run stateful git commands in this environment, but the resulting code changes will be ready for the two requested commits/messages in GitHub or via Lovable’s sync workflow.
