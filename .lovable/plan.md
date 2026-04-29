@@ -1,92 +1,124 @@
-# Fix `/investor` gate validation focus and Firm payload
+# Build `/investor/nda` NDA Acceptance Gate
 
-## Findings
+## Overview
+Create the second step of the investor entry flow: a protected NDA acceptance page where investors must read to the bottom, check the confirmation box, and accept before being sent to `/portal`.
 
-`src/components/InvestorGateForm.tsx` already renders the Firm field and stores it in component state. The invoke body also includes `firm`, but the current implementation can be tightened to exactly match the requested contract.
+This will use the existing `InvestorSessionContext`, existing Supabase tables, and the deployed `accept-nda` Edge Function.
 
-The likely focus failure is caused by the submit button being disabled whenever fields are invalid. A disabled submit button does not reliably trigger the form submit path when clicked, so the synchronous focus logic in `handleSubmit` can be bypassed. Pressing Enter is partially handled by `onKeyDown`, but click behavior on a disabled button cannot focus the invalid input.
+## Files to create
 
-## Change 1 — Make invalid submit attempts reach validation focus
+### `src/hooks/useScrolledToBottom.ts`
+Add the reusable IntersectionObserver hook exactly matching the requested sticky behavior:
 
-In `src/components/InvestorGateForm.tsx`:
+- Accepts a `RefObject<HTMLElement>` sentinel ref.
+- Returns `false` initially.
+- Flips to `true` once the sentinel is at least 95% visible.
+- Stays `true` even if the user scrolls back up.
 
-- Keep the button disabled only while `loading`, not while the form is invalid.
-- Replace the current invalid-state-driven disable logic with explicit synchronous validation in `handleSubmit`.
-- Ensure validation focus happens immediately after `event.preventDefault()` and before any state update.
+### `src/components/RequireInvestorSession.tsx`
+Add the route guard for investor-only routes:
 
-Validation order will be exactly:
+- Reads `sessionId` and `isLoaded` from `useInvestorSession()`.
+- Renders nothing while not loaded.
+- Redirects to `/investor` when there is no session.
+- Renders children when a session exists.
 
-```ts
-if (!name.trim() || name.trim().length < 2) {
-  nameRef.current?.focus();
-  return;
-}
+### `src/components/RequireNdaAccepted.tsx`
+Add the future portal guard:
 
-if (!email.trim() || !EMAIL_RE.test(email.trim().toLowerCase())) {
-  emailRef.current?.focus();
-  return;
-}
+- Composes `RequireInvestorSession`.
+- Reads `hasAcceptedNda`.
+- Redirects to `/investor/nda` if the NDA is not accepted.
+- Renders children if accepted.
 
-if (!password) {
-  passwordRef.current?.focus();
-  return;
-}
-```
+### `src/components/NdaScrollGate.tsx`
+Add the reusable NDA reader and acceptance control component:
 
-This ensures both clicking Continue and pressing Enter run the same submit handler and focus the first invalid input without calling the API.
+- shadcn `Card` using `glass-card rounded-2xl p-6 sm:p-8`.
+- Eyebrow, heading, and subheading with the exact text and classes requested.
+- Scrollable, focusable legal reader with `tabIndex={0}` and markdown rendered via `react-markdown`.
+- Sentinel div at the bottom of the rendered NDA connected to `useScrolledToBottom`.
+- Disabled checkbox before scrolling completes.
+- Helper text shown only while disabled.
+- Accept button disabled until checkbox is checked or while saving.
+- Loading state: `Loader2` icon plus `Saving…`.
+- Error region above buttons with `role="alert"` and the exact message.
+- Decline flow: `signOut()` then navigate to `/investor`.
+- Accept flow: call `supabase.functions.invoke('accept-nda', { body: { session_id: sessionId } })`, then `markNdaAccepted()`, then navigate to `/portal` on success.
 
-## Change 2 — Add and wire all requested refs
+### `src/pages/InvestorNda.tsx`
+Add the page shell and data loading:
 
-In `src/components/InvestorGateForm.tsx`:
+- Match `/investor` top bar and footer treatment.
+- Reuse `BrandLogo` and the same brand-settings fetch/realtime update pattern used by `src/pages/Investor.tsx` for exact visual continuity.
+- Top bar: `h-16`, sticky on mobile, static desktop, logo left, “Series A · Closing 30 June 2026” right.
+- Center zone: `bg-background`, no page-level gradient, decorative top-right `--gradient-mesh-velvet` blob at opacity `0.4` behind the card.
+- Content width: card container max-width 720px, full width on mobile with 24px horizontal padding.
+- Footer: same “Confidential investor portal · Access governed by NDA”.
+- Use React Query to fetch the current NDA:
+  - table: `nda_versions`
+  - select: `id, version, body_md`
+  - filter: `is_current = true`
+  - `.single()`
+- While loading, render the NDA card with skeleton lines in the scroll area and no checkbox/buttons.
+- If loading fails, show the requested centered destructive fallback message.
+- If `hasAcceptedNda === true`, redirect to `/portal` defensively.
 
-- Add `firmRef` alongside the existing refs:
+## Files to edit
 
-```ts
-const firmRef = useRef<HTMLInputElement>(null);
-```
+### `package.json`
+Add `react-markdown` to dependencies, because it is not currently installed.
 
-- Wire it to the Firm input:
+### `src/App.tsx`
+Register the language-agnostic route next to `/investor`:
 
 ```tsx
-<Input ref={firmRef} ... />
+<Route
+  path="/investor/nda"
+  element={
+    <RequireInvestorSession>
+      <InvestorNda />
+    </RequireInvestorSession>
+  }
+/>
 ```
 
-Firm remains optional, so `firmRef` is not used for validation focus, but this matches the requested field wiring and preserves tab order.
+Also import `InvestorNda` and `RequireInvestorSession`.
 
-## Change 3 — Normalize Firm payload exactly as specified
+## Technical details
 
-In `src/components/InvestorGateForm.tsx`, submit payload will be explicit:
+- No database migrations are needed.
+- No Edge Function changes are needed.
+- The existing `accept-nda` function already accepts `{ session_id }` and returns `{ success: true }`.
+- NDA markdown will be rendered with typography classes:
 
-```ts
-const trimmedFirm = firm.trim();
-
-supabase.functions.invoke("validate-portal-access", {
-  body: {
-    name: name.trim(),
-    email: email.trim().toLowerCase(),
-    firm: trimmedFirm.length > 0 ? trimmedFirm : null,
-    password,
-  },
-});
+```tsx
+className="prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground"
 ```
 
-The session state will also store the same normalized Firm value:
+- The scroll area will be keyboard focusable to preserve the requested tab order:
 
-```ts
-firm: trimmedFirm.length > 0 ? trimmedFirm : null
+```text
+scroll area -> checkbox -> Decline -> Accept
 ```
 
-## Verification to run after implementation
+- The checkbox will remain disabled until the scroll hook flips true, including keyboard interaction.
 
-1. Submit empty form and confirm Name receives focus.
-2. Type valid name, leave email empty, submit and confirm Email receives focus.
-3. Type valid name and email, leave password empty, submit and confirm Access code receives focus.
-4. Type valid name, email, `Acme Capital` in Firm, correct password, submit successfully.
-5. Inspect the `validate-portal-access` request payload and confirm `firm: "Acme Capital"`.
-6. Repeat with Firm blank and confirm payload has `firm: null`.
+## Verification after implementation
 
-## Files changed
+I will verify and report each checklist item:
 
-| File | Change |
-|---|---|
-| `src/components/InvestorGateForm.tsx` | Fix submit/focus flow, add `firmRef`, and send normalized Firm value exactly as specified |
+- Navigating to `/investor/nda` without a session redirects to `/investor`.
+- A stored session with `hasAcceptedNda: true` redirects to `/portal`.
+- Page renders cleanly at 320px, 768px, and 1280px.
+- NDA loads from DB and renders as formatted markdown.
+- Checkbox is disabled and visibly muted before scrolling completes.
+- Helper text is visible while the checkbox is disabled.
+- Scrolling to the bottom enables the checkbox and hides helper text.
+- Scrolling back up does not disable it again.
+- Checkbox can be checked and unchecked once enabled.
+- Accept is disabled until checked.
+- Accept calls `accept-nda`, updates `navio_investor_session.hasAcceptedNda` to `true`, then navigates to `/portal`.
+- Decline clears localStorage and returns to `/investor`.
+- Tab order is scroll area, checkbox, Decline, Accept.
+- No console errors occur.
