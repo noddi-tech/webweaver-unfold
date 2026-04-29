@@ -755,6 +755,40 @@ All colors MUST be HSL.
   animation: marquee 30s linear infinite;
 }
 
+@media print {
+  body * { visibility: hidden; }
+  .print-deck-container, .print-deck-container * {
+    visibility: visible;
+  }
+  .print-deck-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .print-slide {
+    page-break-after: always;
+    page-break-inside: avoid;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .print-slide:last-child {
+    page-break-after: auto;
+  }
+
+  .no-print { display: none !important; }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
 /* Integration diagram animations */
 @keyframes dash-flow {
   to { stroke-dashoffset: -20; }
