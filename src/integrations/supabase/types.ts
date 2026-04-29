@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_attempts: {
+        Row: {
+          attempted_at: string
+          email: string | null
+          id: string
+          ip_address: unknown
+          success: boolean
+        }
+        Insert: {
+          attempted_at?: string
+          email?: string | null
+          id?: string
+          ip_address: unknown
+          success: boolean
+        }
+        Update: {
+          attempted_at?: string
+          email?: string | null
+          id?: string
+          ip_address?: unknown
+          success?: boolean
+        }
+        Relationships: []
+      }
       application_activity_log: {
         Row: {
           action: string
