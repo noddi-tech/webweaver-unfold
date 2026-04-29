@@ -68,8 +68,8 @@ export default function Portal() {
       });
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload, { capture: true });
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload, { capture: true });
   }, [trackEvent]);
 
   return (

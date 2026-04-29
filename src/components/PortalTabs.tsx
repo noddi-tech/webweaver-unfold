@@ -36,7 +36,7 @@ export function PortalTabs({ activeTab }: PortalTabsProps) {
       <div className="mx-auto max-w-screen-2xl px-6">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <div
-            className="overflow-x-auto"
+            className="overflow-x-auto [&::-webkit-scrollbar]:hidden"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
           >
             <TabsList className="h-12 min-w-max justify-start rounded-none bg-transparent p-0 text-muted-foreground">
