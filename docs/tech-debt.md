@@ -4,6 +4,8 @@ Tracked items to clean up in dedicated future sessions, separate from feature wo
 
 ## Database
 
+- **`portal_team_members` has no `linkedin_url` column.** Investor portal Team CMS v1 intentionally omits LinkedIn URL editing. Add the column in a dedicated schema-change prompt before exposing it in the CMS form.
+
 - **`uuid-ossp` extension installed but unused on remote.** Drop in a separate cleanup task. Verify with:
 
   ```sql
