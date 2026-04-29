@@ -2,7 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type } from "../visuals/_brand";
 import type { DeckComponentProps, MetricItem } from "./types";
-import { accentStyle, containerQueryStyle, deckSurfaceStyle, headlineTextStyle, safeTextStyle, valueTextStyle } from "./utils";
+import { accentStyle, bodyTextStyle, containerQueryStyle, deckSurfaceStyle, headlineTextStyle, labelTextStyle, metricTextStyle, safeTextStyle } from "./utils";
 
 export interface HeroProps extends DeckComponentProps {
   eyebrow?: string;
@@ -30,9 +30,9 @@ export function Hero({ eyebrow, title, subtitle, metrics = [], variant = "minima
         <aside className="deck-responsive-hero-metrics grid min-w-0 self-end gap-3">
           {metrics.slice(0, density === "dense" ? 4 : 3).map((metric) => (
             <div key={`${metric.label}-${metric.value}`} className={cn("min-w-0 rounded-sm border-t p-4", isGradient ? "border-primary-foreground/25 bg-primary-foreground/5" : "border-border bg-card-background")} style={containerQueryStyle}>
-              <div className="min-w-0 font-semibold tabular-nums" style={valueTextStyle(density, density === "dense" ? 1.8 : 2.6)}>{metric.value}</div>
-              <div className={cn("mt-1 min-w-0 text-sm", isGradient ? "text-primary-foreground/70" : "text-muted-foreground")} style={safeTextStyle}>{metric.label}</div>
-              {metric.context ? <div className={cn("mt-2 min-w-0 text-xs leading-relaxed", isGradient ? "text-primary-foreground/62" : "text-muted-foreground")} style={safeTextStyle}>{metric.context}</div> : null}
+              <div className="min-w-0 font-semibold tabular-nums" style={metricTextStyle(metric.value, density, density === "dense" ? 1.7 : 2.1)}>{metric.value}</div>
+              <div className={cn("mt-1 min-w-0 text-sm", isGradient ? "text-primary-foreground/70" : "text-muted-foreground")} style={labelTextStyle}>{metric.label}</div>
+              {metric.context ? <div className={cn("mt-2 min-w-0 text-xs", isGradient ? "text-primary-foreground/62" : "text-muted-foreground")} style={bodyTextStyle}>{metric.context}</div> : null}
             </div>
           ))}
           {kicker ? <div className={cn("flex min-w-0 items-center gap-2 pt-3 text-sm font-semibold", isGradient ? "text-primary-foreground" : "text-foreground")} style={safeTextStyle}><ArrowUpRight className="h-4 w-4 flex-none" />{kicker}</div> : null}
