@@ -91,6 +91,7 @@ export function PortalComponentsPreview() {
       { label: "Round target", value: roundLabel, context: "Seed extension to scale mobile car and tire service operators", accent: "purple" },
       { label: "Raised to date", value: `NOK ${Math.round((round.total_raised_to_date_nok ?? 22000000) / 1_000_000)}M`, context: "Prior capital converted into live operating proof", accent: "green" },
       { label: "Spotlight customer", value: spotlight.name, context: spotlight.parent_brand ?? "Mobile service operator", accent: "orange" },
+      { label: "Expansion deadline", value: "30 June 2026", context: "Target close date for seed extension execution", accent: "teal" },
     ];
     const logos: LogoItem[] = customers.map((customer) => ({ name: customer.name, logoUrl: customer.logo_url, label: customer.parent_brand ?? "Service operator", status: customer.status ?? customer.funnel_stage ?? "Active" }));
     const pairs: TextPair[] = [
@@ -114,10 +115,10 @@ export function PortalComponentsPreview() {
       { label: "Q1", value: 1.2 }, { label: "Q2", value: 2.4 }, { label: "Q3", value: 4.1 }, { label: "Q4", value: 7.5 }, { label: "Q5", value: 12.8 }, { label: "Q6", value: 20.0 },
     ];
     const funnel: FunnelStage[] = [
-      { label: "Qualified mobile service operators", value: "18", context: "Car glass, tire, fleet service", widthPct: 100 },
-      { label: "Pilot / commercial design", value: "7", context: "City-specific launch planning", widthPct: 72 },
-      { label: "Live or expansion", value: "3", context: "Operational proof in market", widthPct: 48 },
-      { label: "Scale candidate", value: "1", context: "Hurtigruta Carglass", widthPct: 28 },
+      { label: "Qualified mobile service operators across glass, tire, and fleet", value: "18", context: "Car glass, tire, fleet service", widthPct: 100 },
+      { label: "Pilot / commercial design with city-specific launch planning", value: "7", context: "Route density and SLA modeling", widthPct: 72 },
+      { label: "Live or expansion-ready operators", value: "3", context: "Operational proof in market", widthPct: 48 },
+      { label: "Scale candidate", value: "Hurtigruta Carglass", context: "Lighthouse customer", widthPct: 28 },
     ];
     const columns: ComparisonColumn[] = [{ key: "generic", label: "Generic booking" }, { key: "agency", label: "Custom agency build" }, { key: "navio", label: "Navio" }];
     const rows: ComparisonRow[] = [
