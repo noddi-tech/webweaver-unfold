@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, Navigate } from "react-router-dom";
+import { useSearchParams, Navigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, AlertCircle } from "lucide-react";
+import { FileText, AlertCircle, ArrowRight } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import CarouselManager from "@/components/design-system/CarouselManager";
 import VideoManager from "@/components/design-system/VideoManager";
@@ -94,6 +94,7 @@ const Admin = () => {
         case "leads": return { ...base, main: "sales", sales: "leads" };
         case "booking": return { ...base, main: "booking" };
         case "users": return { ...base, main: "users" };
+        case "portal": return { ...base, main: "cms", cms: "content", content: "portal" };
       }
     }
 
@@ -238,6 +239,7 @@ const Admin = () => {
                     <TabsTrigger value="contact">Contact</TabsTrigger>
                     <TabsTrigger value="faqs">FAQs</TabsTrigger>
                     <TabsTrigger value="legal">Legal</TabsTrigger>
+                    <TabsTrigger value="portal">Investor Portal</TabsTrigger>
                   </TabsList>
                   <TabsContent value="pages" className="space-y-8">
                     <PagesManager />
@@ -280,6 +282,32 @@ const Admin = () => {
                   </TabsContent>
                   <TabsContent value="legal" className="space-y-8">
                     <LegalDocumentsManager />
+                  </TabsContent>
+                  <TabsContent value="portal" className="space-y-8">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Investor Portal</CardTitle>
+                        <CardDescription>Manage pitch deck content, customer proof, round terms, and read investor analytics.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                          {[
+                            ["Overview", "/cms/portal"],
+                            ["Slides", "/cms/portal/slides"],
+                            ["Customers", "/cms/portal/customers"],
+                            ["Financials", "/cms/portal/financials"],
+                            ["Team", "/cms/portal/team"],
+                            ["Round", "/cms/portal/round"],
+                            ["Investors", "/cms/investors"],
+                            ["Pledges", "/cms/investors/pledges"],
+                          ].map(([label, href]) => (
+                            <Button key={href} asChild variant="outline" className="justify-between">
+                              <Link to={href}>{label}<ArrowRight className="h-4 w-4" /></Link>
+                            </Button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
                   </TabsContent>
                 </Tabs>
               </TabsContent>
