@@ -98,6 +98,10 @@ export function InvestorTrackingProvider({ children }: { children: React.ReactNo
     };
 
     const handleBeforeUnload = () => {
+      queueRef.current.push({
+        event_type: "session_end",
+        path: window.location.pathname,
+      });
       keepaliveFlush(sessionIdRef.current, queueRef.current);
     };
 

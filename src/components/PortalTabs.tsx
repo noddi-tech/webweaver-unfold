@@ -21,13 +21,15 @@ export function resolvePortalTab(value: string | null): PortalTabValue {
 
 interface PortalTabsProps {
   activeTab: PortalTabValue;
+  onTabChange?: (nextTab: PortalTabValue) => void;
 }
 
-export function PortalTabs({ activeTab }: PortalTabsProps) {
+export function PortalTabs({ activeTab, onTabChange }: PortalTabsProps) {
   const [, setSearchParams] = useSearchParams();
 
   const handleTabChange = (value: string) => {
     const nextTab = resolvePortalTab(value);
+    onTabChange?.(nextTab);
     setSearchParams({ tab: nextTab });
   };
 

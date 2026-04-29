@@ -1,34 +1,60 @@
-Plan for the two requested actions
+Plan to handle the two tracking bugs
 
-1. Preserve the verified Issue 1 changes
-- Keep the already-completed removal of the client-side `session_start` event from `InvestorTrackingProvider`.
-- Keep the diagnostic tracking `console.log` cleanup.
-- Do not re-run the beforeunload diagnostic.
+1. Diagnose Bug 1 before rewriting behavior
+   - Add temporary development-only `console.log` instrumentation in `src/pages/Portal.tsx`:
+     - When the tab tracking effect initializes the first tab timer.
+     - When the tab tracking effect records a previous tab exit and resets `tabEnteredAtRef.current` for the new active tab.
+     - When the `beforeunload` handler fires, including:
+       - `activeTabRef.current`
+       - `tabEnteredAtRef.current`
+       - `Date.now()`
+       - computed `dwell_seconds`
+   - Keep logs behind `import.meta.env.DEV` so production behavior is unaffected.
 
-2. Add the dev-only NDA scroll escape hatch
-- Update `src/components/NdaScrollGate.tsx` to read the current URL query string.
-- Enable immediate checkbox availability only when both conditions are true:
-  - `import.meta.env.DEV` is true
-  - `skip_scroll=1` is present in the query string
-- Production builds will ignore the parameter entirely.
+2. Fix Bug 1 only after confirming the breakpoint
+   - Inspect the diagnostic output from the requested flow:
+     1. Gate through to `/portal`.
+     2. Wait 5s on Pitch.
+     3. Click Traction.
+     4. Wait 5s.
+     5. Dispatch `beforeunload`.
+   - If the logs confirm `tabEnteredAtRef.current` is stale at unload, fix the root cause in `src/pages/Portal.tsx`.
+   - The likely systemic fix is to avoid relying on effect timing for URL-driven tab changes and instead update the tab timer synchronously in the tab-change path before `beforeunload` can observe stale state. I will choose the minimal implementation after the diagnostic identifies the exact breakpoint.
 
-Technical detail: I will not implement the exact short-circuit hook expression as written, because this would conditionally skip `useScrolledToBottom(...)` when `skipScrollInDev` is true and would violate React’s Rules of Hooks. I will use the safe equivalent:
+3. Fix Bug 2: queue `session_end` before keepalive flush on tab close
+   - In `src/contexts/InvestorTrackingContext.tsx`, update the provider `beforeunload` handler to append:
+     ```ts
+     {
+       event_type: "session_end",
+       path: window.location.pathname,
+     }
+     ```
+     before calling `keepaliveFlush(sessionIdRef.current, queueRef.current)`.
+   - Keep the existing unmount cleanup session_end for SPA navigation/unmount scenarios.
 
-```tsx
-const searchParams = new URLSearchParams(window.location.search);
-const skipScrollInDev = import.meta.env.DEV && searchParams.get("skip_scroll") === "1";
-const hasScrolledToBottomNormally = useScrolledToBottom(sentinelRef);
-const hasScrolledToBottom = skipScrollInDev || hasScrolledToBottomNormally;
-```
+4. Remove temporary diagnostics after the fix is confirmed
+   - Remove all temporary `console.log` statements from `Portal.tsx` after capturing the diagnostic evidence and applying the fix.
+   - Keep existing `console.warn` error handling in the tracking provider.
 
-3. Verification
-- Confirm `NdaScrollGate.tsx` still calls hooks unconditionally.
-- Confirm `/investor/nda?skip_scroll=1` in dev mode enables the checkbox without scroll.
-- Confirm the escape hatch is gated by `import.meta.env.DEV`, so production behavior is unchanged.
-- Confirm no beforeunload diagnostic is attempted.
+5. Verification
+   - Use the dev-mode `?skip_scroll=1` NDA bypass:
+     1. Navigate `/investor`.
+     2. Submit gate with `NavioFunding2026`.
+     3. Navigate/continue through `/investor/nda?skip_scroll=1`.
+     4. Accept NDA.
+     5. Wait 5s on Pitch.
+     6. Click Traction.
+     7. Wait 5s.
+     8. Dispatch `beforeunload`.
+     9. Wait 3s for keepalive.
+   - Query `investor_events` for the test email, last 2 minutes.
+   - Report literal DB output and pass/fail for:
+     - Bug 1 fixed: Traction `tab_exit` dwell is approximately 5, not approximately 10.
+     - Bug 2 fixed: `session_end` exists at the end of the sequence.
+     - Pitch `tab_exit` dwell is approximately 5, not approximately 10.
 
-4. Git / GitHub handling
-- I will prepare the two logical changes separately:
-  - Existing Issue 1 cleanup: `fix(investor-portal): remove duplicate session_start, clean diagnostic logs`
-  - New helper: `dev: add skip_scroll dev-mode escape hatch for NDA gate automation`
-- Lovable projects sync changes to GitHub through the platform integration. I cannot manually run stateful git commands in this environment, but the resulting code changes will be ready for the two requested commits/messages in GitHub or via Lovable’s sync workflow.
+Technical notes
+
+- `src/main.tsx` does not currently wrap the app in `React.StrictMode`, so React StrictMode double-effect runs are unlikely to be the cause.
+- `Portal.tsx` currently registers the `beforeunload` handler with `[trackEvent]`. The handler reads refs at fire time, so a plain stale closure over the ref object is unlikely; the diagnostic will confirm whether the ref value itself is stale.
+- The provider-level `beforeunload` currently flushes the queue but does not append `session_end`; that is a confirmed implementation gap and will be changed directly after approval.
