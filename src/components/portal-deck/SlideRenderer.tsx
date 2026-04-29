@@ -12,7 +12,7 @@ import { VerticalsVisual } from "./visuals/VerticalsVisual";
 import { CustomerSpotlightVisual } from "./visuals/CustomerSpotlightVisual";
 import { CustomVisual } from "./visuals/CustomVisual";
 import { deckText } from "./i18n";
-import type { SlideMode, SlideRow } from "./types";
+import type { AdoptionConfig, CoverConfig, CustomConfig, FunnelConfig, RoundConfig, SlideMode, SlideRow, TeamConfig } from "./types";
 import { normalizeBadgesConfig, normalizeCustomerSpotlightConfig, normalizeGapConfig, normalizeGlideConfig, normalizeLogosConfig, normalizeVerticalsConfig } from "./types";
 
 interface SlideRendererProps {
@@ -53,21 +53,21 @@ export function SlideRenderer({ slide, mode = "viewer" }: SlideRendererProps) {
   try {
     switch (slide.visual_type) {
       case "cover":
-        return <CoverVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <CoverVisual slide={slide} config={(slide.visual_config as CoverConfig | null) ?? {}} mode={mode} />;
       case "logos":
         return <LogosVisual slide={slide} config={normalizeLogosConfig(slide.visual_config)} mode={mode} />;
       case "badges":
         return <BadgesVisual slide={slide} config={normalizeBadgesConfig(slide.visual_config)} mode={mode} />;
       case "funnel":
-        return <FunnelVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <FunnelVisual slide={slide} config={slide.visual_config as FunnelConfig | null} mode={mode} />;
       case "adoption":
-        return <AdoptionVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <AdoptionVisual slide={slide} config={slide.visual_config as AdoptionConfig | null} mode={mode} />;
       case "glide":
         return <GlideVisual slide={slide} config={normalizeGlideConfig(slide.visual_config)} mode={mode} />;
       case "team":
-        return <TeamVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <TeamVisual slide={slide} config={slide.visual_config as TeamConfig | null} mode={mode} />;
       case "round":
-        return <RoundVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <RoundVisual slide={slide} config={slide.visual_config as RoundConfig | null} mode={mode} />;
       case "gap":
         return <GapVisual slide={slide} config={normalizeGapConfig(slide.visual_config)} mode={mode} />;
       case "verticals":
@@ -75,7 +75,7 @@ export function SlideRenderer({ slide, mode = "viewer" }: SlideRendererProps) {
       case "customer-spotlight":
         return <CustomerSpotlightVisual slide={slide} config={normalizeCustomerSpotlightConfig(slide.visual_config)} mode={mode} />;
       case "custom":
-        return <CustomVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <CustomVisual slide={slide} config={slide.visual_config as CustomConfig | null} mode={mode} />;
       default:
         return <PreparedPlaceholder />;
     }
