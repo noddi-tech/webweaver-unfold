@@ -4503,6 +4503,24 @@ export type Database = {
           },
         ]
       }
+      investor_summary_for_cms: {
+        Row: {
+          email: string | null
+          firm: string | null
+          first_seen_at: string | null
+          has_accepted_nda: boolean | null
+          has_pledge: boolean | null
+          last_seen_at: string | null
+          name: string | null
+          nda_accepted_at: string | null
+          pledge_amount_nok: number | null
+          pledge_is_firm: boolean | null
+          pledge_updated_at: string | null
+          total_dwell_seconds: number | null
+          total_visits: number | null
+        }
+        Relationships: []
+      }
       language_translation_stats: {
         Row: {
           approval_percentage: number | null
