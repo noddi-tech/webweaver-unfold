@@ -58,7 +58,7 @@ function PreviewFrame({ name, density, children }: { name: string; density: Dens
         <CardDescription>Investor deck component preview using Navio-specific sample content.</CardDescription>
       </CardHeader>
       <CardContent className="bg-background p-6">
-        <div className="aspect-video overflow-hidden rounded-md border border-border bg-background p-8">{children}</div>
+        <div className="min-h-[620px] overflow-auto rounded-md border border-border bg-background p-8">{children}</div>
       </CardContent>
     </Card>
   );
