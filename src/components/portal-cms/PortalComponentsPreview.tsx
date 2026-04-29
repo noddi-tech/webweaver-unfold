@@ -1,5 +1,5 @@
 import type React from "react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +38,9 @@ import type { Database } from "@/integrations/supabase/types";
 
 type CustomerRow = Database["public"]["Tables"]["portal_customers"]["Row"];
 type RoundRow = Database["public"]["Tables"]["portal_round_terms"]["Row"];
+type AuditResult = { key: string; status: "PASS" | "FAIL"; issues: string[] };
+
+const auditWidths = [1280, 768, 375] as const;
 
 const fallbackCustomers: CustomerRow[] = [
   { id: "hurtigruta", slug: "hurtigruta-carglass", name: "Hurtigruta Carglass", parent_brand: "Hurtigruta", logo_url: null, status: "Live expansion", funnel_stage: "Scale", cities_live: 8, total_addressable_cities: 28, customers_per_day: 42, monthly_revenue_nok: 1350000, pilot_started_at: null, contract_signed_at: null, case_study_md: null, testimonial_quote: "Navio gives us a scalable mobile service layer without rebuilding dispatch from scratch.", testimonial_author: "Operations lead", testimonial_role: "Hurtigruta Carglass", display_order: 1, is_published: true },
@@ -66,6 +69,10 @@ function PreviewFrame({ name, density, children }: { name: string; density: Dens
 
 function ComponentPair({ name, render }: { name: string; render: (density: Density) => React.ReactNode }) {
   return <section className="grid gap-6 xl:grid-cols-2"><PreviewFrame name={name} density="sparse">{render("sparse")}</PreviewFrame><PreviewFrame name={name} density="dense">{render("dense")}</PreviewFrame></section>;
+}
+
+function AuditFrame({ name, density, width, children }: { name: string; density: Density; width: number; children: React.ReactNode }) {
+  return <div data-audit-case={`${name}|${density}|${width}`} className="min-w-0 overflow-hidden border-b border-border/60 py-4"><div className="mx-auto max-w-full overflow-hidden rounded-md border border-border bg-background p-4" style={{ width }}>{children}</div></div>;
 }
 
 export function PortalComponentsPreview() {
