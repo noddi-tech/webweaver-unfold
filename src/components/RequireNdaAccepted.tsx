@@ -1,3 +1,4 @@
+import type React from "react";
 import { Navigate } from "react-router-dom";
 import { RequireInvestorSession } from "@/components/RequireInvestorSession";
 import { useInvestorSession } from "@/hooks/useInvestorSession";
