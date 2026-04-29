@@ -813,6 +813,26 @@ All colors MUST be HSL.
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.deck-auto-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.deck-auto-grid-compact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.deck-metric-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.deck-two-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
 @container (max-width: 520px) {
   .deck-hero-content {
     min-height: 440px;
@@ -824,6 +844,20 @@ All colors MUST be HSL.
   }
 }
 
+@container (min-width: 560px) {
+  .deck-auto-grid,
+  .deck-auto-grid-compact,
+  .deck-metric-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 760px) {
+  .deck-two-panel {
+    grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.8fr);
+  }
+}
+
 @container (min-width: 980px) {
   .deck-responsive-hero-grid {
     grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.8fr);
@@ -831,5 +865,9 @@ All colors MUST be HSL.
 
   .deck-responsive-hero-metrics {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .deck-auto-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
