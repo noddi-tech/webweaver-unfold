@@ -1,3 +1,4 @@
+import type React from "react";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";

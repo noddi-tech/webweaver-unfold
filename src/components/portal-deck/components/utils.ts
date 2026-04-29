@@ -1,3 +1,4 @@
+import type React from "react";
 import { accentColor, brand, type DeckAccent, type Density } from "../visuals/_brand";
 
 export function densityClasses(density: Density | undefined, sparseClass: string, denseClass: string) {
