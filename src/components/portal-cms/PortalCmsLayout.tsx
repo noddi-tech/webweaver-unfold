@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { label: "Overview", href: "/cms/portal" },
   { label: "Slides", href: "/cms/portal/slides" },
+  { label: "Components", href: "/cms/portal/components-preview" },
   { label: "Customers", href: "/cms/portal/customers" },
   { label: "Financials", href: "/cms/portal/financials" },
   { label: "Team", href: "/cms/portal/team" },

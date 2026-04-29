@@ -55,6 +55,7 @@ import { RequireNdaAccepted } from "@/components/RequireNdaAccepted";
 import { InvestorTrackingProvider } from "@/contexts/InvestorTrackingContext";
 import { AdminRoute } from "@/components/portal-cms/AdminRoute";
 import { PortalOverview } from "@/components/portal-cms/PortalOverview";
+import { PortalComponentsPreview } from "@/components/portal-cms/PortalComponentsPreview";
 import { PortalSlidesList, PortalSlideEditor } from "@/components/portal-cms/PortalSlides";
 import { PortalCustomersList, PortalCustomerEditor, PortalFinancialsList, PortalFinancialEditor, PortalTeamList, PortalTeamEditor, PortalRoundEditor } from "@/components/portal-cms/PortalContentManagers";
 import { InvestorsList, InvestorDetail, PledgesDashboard } from "@/components/portal-cms/InvestorAnalytics";
@@ -133,6 +134,7 @@ const App = () => {
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/cms" element={<Admin />} />
                     <Route path="/cms/portal" element={<AdminRoute><PortalOverview /></AdminRoute>} />
+                    <Route path="/cms/portal/components-preview" element={<AdminRoute><PortalComponentsPreview /></AdminRoute>} />
                     <Route path="/cms/portal/slides" element={<AdminRoute><PortalSlidesList /></AdminRoute>} />
                     <Route path="/cms/portal/slides/new" element={<AdminRoute><PortalSlideEditor /></AdminRoute>} />
                     <Route path="/cms/portal/slides/:id" element={<AdminRoute><PortalSlideEditor /></AdminRoute>} />
