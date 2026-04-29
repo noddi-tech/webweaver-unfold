@@ -3,7 +3,7 @@ import { ChartContainer } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { brand, type } from "../visuals/_brand";
 import type { ChartAnnotation, ChartPoint, DeckComponentProps } from "./types";
-import { accentStyle } from "./utils";
+import { accentStyle, balancedTextStyle, safeTextStyle } from "./utils";
 
 export interface AnnotatedChartProps extends DeckComponentProps {
   title?: string;
@@ -17,8 +17,8 @@ export function AnnotatedChart({ title, points, annotations, valueLabel = "Value
   const pointIndex = new Map(points.map((point, index) => [point.label, index]));
   return (
     <section className={cn("space-y-6", className)} style={accentStyle(accent)}>
-      {title ? <h2 className={type.headline}>{title}</h2> : null}
-      <div className="relative rounded-md border border-border bg-card-background p-6">
+      {title ? <h2 className={type.headline} style={balancedTextStyle}>{title}</h2> : null}
+      <div className="relative min-w-0 overflow-hidden rounded-md border border-border bg-card-background p-6">
         <ChartContainer className={cn("w-full", density === "dense" ? "h-[320px]" : "h-[420px]")} config={{ value: { label: valueLabel, color: brand.chartPrimary } }}>
           <LineChart data={points} margin={{ left: 12, right: 24, top: 24, bottom: 16 }}>
             <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
@@ -33,14 +33,16 @@ export function AnnotatedChart({ title, points, annotations, valueLabel = "Value
         </ChartContainer>
         {annotations.map((annotation, index) => {
           const idx = pointIndex.get(annotation.pointLabel) ?? index;
-          const left = `${Math.min(82, Math.max(10, 12 + idx * (76 / Math.max(points.length - 1, 1))))}%`;
+          const leftPercent = Math.min(76, Math.max(18, 12 + idx * (76 / Math.max(points.length - 1, 1))));
+          const left = `${leftPercent}%`;
           const point = points[idx] ?? points[0];
           const top = `${Math.min(72, Math.max(12, 76 - (point.value / max) * 58))}%`;
+          const alignRight = annotation.align === "right" && leftPercent < 70;
           return (
-            <div key={annotation.label} className={cn("absolute max-w-[220px] rounded-md border border-border bg-background/95 p-3 shadow-sm", annotation.align === "right" ? "translate-x-4" : "-translate-x-full")} style={{ left, top }}>
+            <div key={annotation.label} className={cn("absolute w-[min(220px,42%)] rounded-md border border-border bg-background/95 p-3 shadow-sm", alignRight ? "translate-x-4" : "-translate-x-full")} style={{ left, top }}>
               <div className="mb-2 h-px w-10" style={{ background: "var(--deck-accent)" }} />
-              <p className="text-sm font-semibold text-foreground">{annotation.label}</p>
-              {annotation.description ? <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{annotation.description}</p> : null}
+              <p className="text-sm font-semibold text-foreground" style={balancedTextStyle}>{annotation.label}</p>
+              {annotation.description ? <p className="mt-1 text-xs leading-relaxed text-muted-foreground" style={safeTextStyle}>{annotation.description}</p> : null}
             </div>
           );
         })}
