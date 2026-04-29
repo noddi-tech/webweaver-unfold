@@ -26,7 +26,7 @@ export function RoundProgressBar() {
         .select("total_pledged_firm_nok,total_pledged_all_nok,pledge_count,round_size_max_nok")
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) return null;
       return data as RoundProgressRow | null;
     },
     refetchInterval: 30_000,
