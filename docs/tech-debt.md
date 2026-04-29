@@ -20,6 +20,10 @@ Tracked items to clean up in dedicated future sessions, separate from feature wo
 
 - **Two malformed migration files left in place:** `supabase/migrations/20250813073911-.sql` and `supabase/migrations/20250813080032-.sql`. These don't match the `<timestamp>_<name>.sql` pattern so the Supabase CLI skips them with warnings. Their DDL is captured in the squash baseline `20260428000000_squash_baseline.sql` but the files themselves should be removed in a separate cleanup commit (separate so the migration squash commit stays scoped to its purpose).
 
+## Secrets
+
+- **Two empty Supabase secrets (`SUPABASE_PUBLISHABLE_KEYS`, `SUPABASE_SECRET_KEYS`)** have empty values (SHA-256 digest `44136fa3...`). Likely leftover from an old CLI prompt. Investigate whether any code reads them; if not, delete via `npx supabase secrets unset SUPABASE_PUBLISHABLE_KEYS SUPABASE_SECRET_KEYS`.
+
 ## Edge Functions
 
 - **18 Edge Functions on disk are not declared in `supabase/config.toml`** and inherit `verify_jwt = true` by default. Audit each — confirm whether JWT verification is desired, then declare explicitly either way:
