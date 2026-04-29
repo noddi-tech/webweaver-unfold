@@ -76,6 +76,7 @@ function AuditFrame({ name, density, width, children }: { name: string; density:
 }
 
 export function PortalComponentsPreview() {
+  const [auditResults, setAuditResults] = useState<AuditResult[]>([]);
   const { data } = useQuery({
     queryKey: ["portal-components-preview-data"],
     queryFn: async () => {
@@ -95,12 +96,12 @@ export function PortalComponentsPreview() {
     const spotlight = customers.find((customer) => customer.slug?.includes("hurtigruta")) ?? customers[0] ?? fallbackCustomers[0];
     const roundLabel = round.round_size_min_nok && round.round_size_max_nok ? `NOK ${round.round_size_min_nok / 1_000_000}–${round.round_size_max_nok / 1_000_000}M` : "NOK 10–20M";
     const metrics: MetricItem[] = [
-      { label: "Round target", value: roundLabel, context: "Seed extension to scale mobile car and tire service operators", accent: "purple" },
+      { label: "Inntekt per kunde", value: roundLabel, context: "Seed extension to scale mobile car and tire service operators", accent: "purple" },
       { label: "Raised to date", value: `NOK ${Math.round((round.total_raised_to_date_nok ?? 22000000) / 1_000_000)}M`, context: "Prior capital converted into live operating proof", accent: "green" },
-      { label: "Spotlight customer", value: spotlight.name, context: spotlight.parent_brand ?? "Mobile service operator", accent: "orange" },
-      { label: "Expansion deadline", value: "30 June 2026", context: "Target close date for seed extension execution", accent: "teal" },
+      { label: "Aktive byer", value: "8 byer, opp fra 2", context: spotlight.parent_brand ?? "Mobile service operator", accent: "orange" },
+      { label: "Kunder per dag", value: "42 kunder per dag", context: "Target close date for seed extension execution", accent: "teal" },
     ];
-    const logos: LogoItem[] = customers.map((customer) => ({ name: customer.name, logoUrl: customer.logo_url, label: customer.parent_brand ?? "Service operator", status: customer.status ?? customer.funnel_stage ?? "Active" }));
+    const logos: LogoItem[] = ["Hurtigruta Carglass", "Best-Drive Norge", "Trønderdekk AS", ...customers.map((customer) => customer.name)].slice(0, 8).map((name, index) => ({ name, logoUrl: customers[index]?.logo_url ?? null, label: customers[index]?.parent_brand ?? "Service operator", status: customers[index]?.status ?? customers[index]?.funnel_stage ?? "Active" }));
     const pairs: TextPair[] = [
       { label: "Operator pain", title: "Demand is local, capacity is fragmented", description: "Mobile car and tire services need dense routing, seasonal capacity planning, and customer-grade booking in one workflow.", metric: "Built for city-by-city replication" },
       { label: "Navio response", title: "A vertical operating system for mobile service", description: "Navio combines booking, dispatch, service execution, and partner orchestration into a repeatable operating layer.", metric: "One playbook across operators" },
@@ -129,9 +130,10 @@ export function PortalComponentsPreview() {
     ];
     const columns: ComparisonColumn[] = [{ key: "generic", label: "Generic booking" }, { key: "agency", label: "Custom agency build" }, { key: "navio", label: "Navio" }];
     const rows: ComparisonRow[] = [
-      { label: "Mobile operations", values: { generic: "Appointment capture only", agency: "Expensive bespoke workflows", navio: "Native route, crew, and job orchestration" }, emphasisKey: "navio" },
+      { label: "Driftsdøgnet for én lokasjon", values: { generic: "Appointment capture only", agency: "Expensive bespoke workflows", navio: "Native route, crew, and job orchestration" }, emphasisKey: "navio" },
       { label: "Vertical replication", values: { generic: "Low", agency: "Slow", navio: "Reusable across car glass, tire, and fleet service" }, emphasisKey: "navio" },
       { label: "Operator economics", values: { generic: "No operating leverage", agency: "Services-heavy", navio: "Density improves with every city" }, emphasisKey: "navio" },
+      { label: "Sesongtopper i norske byer", values: { generic: "Manual follow-up", agency: "Rebuild every season", navio: "Capacity planning and dispatch logic reusable across cities" }, emphasisKey: "navio" },
     ];
     const people: Person[] = [
       { name: "Joachim Navio", role: "Founder / CEO", bio: "Builds the commercial and operator playbook for mobile automotive service categories.", metric: "Operator-first execution" },
