@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { deckText } from "./i18n";
 import type { SlideRow } from "./types";
 
 interface ThumbnailStripProps {
@@ -32,7 +33,7 @@ export function ThumbnailStrip({ slides, activeIndex, onSelect }: ThumbnailStrip
                   ? "border-primary text-foreground ring-2 ring-primary ring-offset-2"
                   : "border-transparent text-muted-foreground hover:bg-muted/80 hover:text-foreground"
               )}
-              aria-label={`Go to slide ${index + 1}`}
+              aria-label={deckText.goToSlide(index + 1, slides.length)}
               aria-current={active ? "true" : undefined}
             >
               {index + 1}

@@ -11,8 +11,9 @@ import { GapVisual } from "./visuals/GapVisual";
 import { VerticalsVisual } from "./visuals/VerticalsVisual";
 import { CustomerSpotlightVisual } from "./visuals/CustomerSpotlightVisual";
 import { CustomVisual } from "./visuals/CustomVisual";
-import type { SlideMode, SlideRow } from "./types";
-import { isBadgesConfig, isCustomerSpotlightConfig, isGapConfig, isGlideConfig, isLogosConfig, isVerticalsConfig } from "./types";
+import { deckText } from "./i18n";
+import type { AdoptionConfig, CoverConfig, CustomConfig, FunnelConfig, RoundConfig, SlideMode, SlideRow, TeamConfig } from "./types";
+import { normalizeBadgesConfig, normalizeCustomerSpotlightConfig, normalizeGapConfig, normalizeGlideConfig, normalizeLogosConfig, normalizeVerticalsConfig } from "./types";
 
 interface SlideRendererProps {
   slide: SlideRow;
@@ -22,7 +23,7 @@ interface SlideRendererProps {
 export function PreparedPlaceholder() {
   return (
     <div className="flex min-h-[180px] items-center justify-center text-center text-sm italic text-muted-foreground">
-      [Content being prepared for this slide]
+      {deckText.contentBeingPrepared}
     </div>
   );
 }
@@ -52,29 +53,29 @@ export function SlideRenderer({ slide, mode = "viewer" }: SlideRendererProps) {
   try {
     switch (slide.visual_type) {
       case "cover":
-        return <CoverVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <CoverVisual slide={slide} config={(slide.visual_config as CoverConfig | null) ?? {}} mode={mode} />;
       case "logos":
-        return <LogosVisual slide={slide} config={isLogosConfig(slide.visual_config) ? slide.visual_config : null} mode={mode} />;
+        return <LogosVisual slide={slide} config={normalizeLogosConfig(slide.visual_config)} mode={mode} />;
       case "badges":
-        return <BadgesVisual slide={slide} config={isBadgesConfig(slide.visual_config) ? slide.visual_config : null} mode={mode} />;
+        return <BadgesVisual slide={slide} config={normalizeBadgesConfig(slide.visual_config)} mode={mode} />;
       case "funnel":
-        return <FunnelVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <FunnelVisual slide={slide} config={slide.visual_config as FunnelConfig | null} mode={mode} />;
       case "adoption":
-        return <AdoptionVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <AdoptionVisual slide={slide} config={slide.visual_config as AdoptionConfig | null} mode={mode} />;
       case "glide":
-        return <GlideVisual slide={slide} config={isGlideConfig(slide.visual_config) ? slide.visual_config : null} mode={mode} />;
+        return <GlideVisual slide={slide} config={normalizeGlideConfig(slide.visual_config)} mode={mode} />;
       case "team":
-        return <TeamVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <TeamVisual slide={slide} config={slide.visual_config as TeamConfig | null} mode={mode} />;
       case "round":
-        return <RoundVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <RoundVisual slide={slide} config={slide.visual_config as RoundConfig | null} mode={mode} />;
       case "gap":
-        return <GapVisual slide={slide} config={isGapConfig(slide.visual_config) ? slide.visual_config : null} mode={mode} />;
+        return <GapVisual slide={slide} config={normalizeGapConfig(slide.visual_config)} mode={mode} />;
       case "verticals":
-        return <VerticalsVisual slide={slide} config={isVerticalsConfig(slide.visual_config) ? slide.visual_config : null} mode={mode} />;
+        return <VerticalsVisual slide={slide} config={normalizeVerticalsConfig(slide.visual_config)} mode={mode} />;
       case "customer-spotlight":
-        return <CustomerSpotlightVisual slide={slide} config={isCustomerSpotlightConfig(slide.visual_config) ? slide.visual_config : null} mode={mode} />;
+        return <CustomerSpotlightVisual slide={slide} config={normalizeCustomerSpotlightConfig(slide.visual_config)} mode={mode} />;
       case "custom":
-        return <CustomVisual slide={slide} config={slide.visual_config} mode={mode} />;
+        return <CustomVisual slide={slide} config={slide.visual_config as CustomConfig | null} mode={mode} />;
       default:
         return <PreparedPlaceholder />;
     }

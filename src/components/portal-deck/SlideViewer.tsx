@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useInvestorTracking } from "@/hooks/useInvestorTracking";
 import { cn } from "@/lib/utils";
 import { EmptyDeckState } from "./EmptyDeckState";
+import { deckText } from "./i18n";
 import { PresentMode } from "./PresentMode";
 import { SlideRenderer } from "./SlideRenderer";
 import { ThumbnailStrip } from "./ThumbnailStrip";
@@ -232,7 +233,7 @@ export function SlideViewer() {
     window.print();
   };
 
-  const currentCounter = useMemo(() => `${activeIndex + 1} of ${slides.length}`, [activeIndex, slides.length]);
+  const currentCounter = useMemo(() => deckText.slideCounter(activeIndex + 1, slides.length), [activeIndex, slides.length]);
 
   if (isLoading) return <SlideSkeleton />;
   if (isError || slides.length === 0) return <EmptyDeckState />;
@@ -241,8 +242,8 @@ export function SlideViewer() {
   return (
     <div className="w-full">
       <div className="no-print mb-4 flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">Slide {currentCounter}</p>
-        <p className="hidden text-xs italic text-muted-foreground sm:block">Press P to present</p>
+        <p className="text-sm text-muted-foreground">{currentCounter}</p>
+        <p className="hidden text-xs italic text-muted-foreground sm:block">{deckText.pressToPresent}</p>
       </div>
 
       <div className="mx-auto w-full max-w-5xl">
@@ -256,11 +257,11 @@ export function SlideViewer() {
       <div className="no-print mt-4 mb-4 flex items-center justify-between gap-4">
         <Button variant="ghost" size="sm" onClick={() => goToSlide(activeIndex - 1)} disabled={activeIndex === 0}>
           <ChevronLeft className="h-4 w-4" />
-          Previous
+          {deckText.previous}
         </Button>
-        <p className="text-sm text-muted-foreground md:hidden">Slide {currentCounter}</p>
+        <p className="text-sm text-muted-foreground md:hidden">{currentCounter}</p>
         <Button variant="ghost" size="sm" onClick={() => goToSlide(activeIndex + 1)} disabled={activeIndex === slides.length - 1}>
-          Next
+          {deckText.next}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
@@ -270,11 +271,11 @@ export function SlideViewer() {
       <div className="no-print mt-4 flex items-center justify-between gap-4">
         <Button variant="outline" size="sm" onClick={handleExportPdf}>
           <Download className="h-4 w-4" />
-          Export PDF
+          {deckText.exportPdf}
         </Button>
         <Button variant="outline" size="sm" onClick={() => setPresentOpen(true)}>
           <Maximize2 className="h-4 w-4" />
-          Present
+          {deckText.present}
         </Button>
       </div>
 

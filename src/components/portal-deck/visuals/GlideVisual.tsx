@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { AnnotatedChart, type ChartAnnotation, type ChartPoint } from "../components";
 import { supabase } from "@/integrations/supabase/client";
-import { MarkdownBody, PreparedPlaceholder, SlideHeader } from "../SlideRenderer";
+import { MarkdownBody, PreparedPlaceholder } from "../SlideRenderer";
+import { deckText } from "../i18n";
 import type { GlideConfig, SlideVisualProps } from "../types";
 
 interface ProjectionRow {
@@ -12,8 +14,6 @@ interface ProjectionRow {
   is_actual: boolean;
   display_order: number;
 }
-
-const formatNokM = (value: number) => `NOK ${(Number(value) / 1_000_000).toFixed(1)} M`;
 
 export function GlideVisual({ slide, config }: SlideVisualProps<GlideConfig>) {
   const { data: projections = [] } = useQuery({
@@ -28,29 +28,17 @@ export function GlideVisual({ slide, config }: SlideVisualProps<GlideConfig>) {
     },
   });
 
+  const points = useMemo<ChartPoint[]>(() => projections.map((projection) => ({ label: projection.period_label, value: Number(projection.arr_nok) / 1_000_000 })), [projections]);
+  const annotations = useMemo<ChartAnnotation[]>(() => {
+    if (config?.annotations?.length) return config.annotations;
+    if (!config?.break_even_nok || !projections.length) return [];
+    const closest = projections.reduce((best, projection) => Math.abs(projection.arr_nok - config.break_even_nok!) < Math.abs(best.arr_nok - config.break_even_nok!) ? projection : best, projections[0]);
+    return [{ label: config.breakEvenLabel ?? deckText.breakEven, pointLabel: closest.period_label }];
+  }, [config, projections]);
+
   return (
     <section className="h-full overflow-y-auto p-6 sm:p-10">
-      <SlideHeader slide={slide} />
-      {projections.length ? (
-        <div className="h-[280px] min-h-[240px] w-full sm:h-[340px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={projections} margin={{ top: 10, right: 24, left: 10, bottom: 10 }}>
-              <defs>
-                <linearGradient id="glideFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.05} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" />
-              <XAxis dataKey="period_label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} />
-              <YAxis tickFormatter={(value) => formatNokM(Number(value))} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} width={88} />
-              <Tooltip formatter={(value, _name, entry) => [formatNokM(Number(value)), entry.payload.is_actual ? "Actual ARR" : "Projected ARR"]} contentStyle={{ background: "hsl(var(--card-background))", border: "1px solid hsl(var(--border))" }} />
-              {config?.break_even_nok ? <ReferenceLine y={config.break_even_nok} stroke="hsl(var(--secondary))" strokeDasharray="4 4" label="Break-even" /> : null}
-              <Area type="monotone" dataKey="arr_nok" stroke="hsl(var(--primary))" strokeWidth={3} fill="url(#glideFill)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      ) : <PreparedPlaceholder />}
+      {points.length ? <AnnotatedChart title={config?.headline ?? slide.title ?? undefined} valueLabel={deckText.arrNokM} points={points} annotations={annotations} /> : <PreparedPlaceholder />}
       <MarkdownBody body={slide.body_md} />
     </section>
   );

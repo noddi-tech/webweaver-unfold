@@ -1,195 +1,153 @@
-# Plan: full visual remediation of the 16-component deck library
+Plan for Deliverable 3: refactor the 12 `visual_type` renderers to compose from the passed component library, while converting all investor-facing deck chrome to Norwegian Bokmål.
 
-The current issue is systemic, not isolated. The library is mixing slide-scale typography with small preview-card containers, and several components are forcing dense multi-column layouts before the content has enough width. The fix should be a full pass across all 16 components, using consistent container-aware layout rules and removing horizontal/vertical overflow as an accepted state.
+Scope guard
+- Do not start Deliverable 4.
+- Keep CMS/admin interface text in English.
+- Keep `drafting_guidance`, `narrative_role`, slugs, and Claude/Anthropic prompt instructions in English.
+- Preserve compatibility for the three existing published slides: `cover`, `foot-in-door`, and `badge-taxonomy`.
 
-## Quality bar
+1. Add Norwegian deck text module
+- Create `src/components/portal-deck/i18n.ts` with the requested `deckText` export.
+- Include requested keys exactly, plus renderer chrome keys needed during implementation, likely including:
+  - chart labels: `arrNokM`, `addressablePercent`, `citiesLive`
+  - round labels: `roundSize`, `indicativeValuation`, `useOfFunds`, `closing`, `submitIndication`
+  - customer labels: `spotlightCustomer`, `customersPerDay`, `monthlyRevenue`
+  - empty/default labels: `unknownCustomer`, `value`, `noData`
+- Use natural Norwegian Bokmål for investor-facing output.
 
-Before moving to Deliverable 3, the preview page must show every component in sparse and dense mode with:
+2. Replace deck chrome hardcoded English with `deckText`
+Update these files:
+- `SlideViewer.tsx`
+  - `Slide {x} of {y}` → `deckText.slideCounter(current, total)`
+  - `Press P to present`, `Previous`, `Next`, `Export PDF`, `Present`
+- `PresentMode.tsx`
+  - Any present/exit/chrome labels → `deckText`
+- `ThumbnailStrip.tsx`
+  - Any user-visible slide labels/counters → `deckText` if present
+- `EmptyDeckState.tsx`
+  - Use `deckText.emptyDeckTitle` and `deckText.emptyDeckBody`
+- `SlideRenderer.tsx`
+  - `PreparedPlaceholder` uses `deckText.contentBeingPrepared`
+- `CitationFooter.tsx`
+  - Default note changes from `Source` to `deckText.citationPrefix` (`Kilde`)
+- Existing visual renderer files under `src/components/portal-deck/visuals/`
+  - Replace labels like `Problem`, `Solution`, `Cities live`, `Customers/day`, `Monthly revenue`, `Break-even`, `Adoption data being collected`, `Submit indication of interest`, etc.
 
-- No text overflowing cards, divs, or preview frames.
-- No mid-value wrapping like `NOK 10–20M` becoming broken fragments.
-- No horizontal scrolling inside component frames except where explicitly redesigned and visually acceptable; for these deck components, the target is no internal horizontal scroll.
-- No cards with cramped two-column footers or labels squeezed into unreadable columns.
-- Dense mode can reduce hierarchy, columns, and copy density, but must still look intentional and investor-grade.
-- If a component cannot support the current sample data at a viewport width, redesign that component rather than hiding/clipping/truncating text.
+3. Expand and normalize visual config types
+Update `src/components/portal-deck/types.ts` to support the Deliverable 3 schemas while preserving legacy configs:
+- `cover`: `{ eyebrow?, headline?, supporting?, layout?, background?, footer? }`, with fallback to `slide.title` / `slide.subtitle` when config is `{}` or absent.
+- `logos`: `{ headline?, caption?, greyscale?, columns?, customer_slugs? }`.
+- `badges`: `{ pairs?: [...], badges?: [...] }`, where legacy `badges` normalizes to `pairs`.
+- `funnel`: `{ stages? }`.
+- `adoption`: `{ headline?, chartType?, annotations? }`.
+- `glide`: `{ headline?, annotations?, breakEvenLabel?, break_even_nok? }`, preserving legacy `break_even_nok`.
+- `team`: `{ layout?, caption? }`.
+- `round`: `{ cta_label? }`.
+- `gap`: support new `{ title?, leftLabel, rightLabel, rows }` and legacy `{ categories }` enough to avoid breakage.
+- `verticals`: `{ items?: [...], verticals?: [...] }`, normalizing legacy `verticals` to `items`.
+- `customer-spotlight`: `{ customer_slug, layout?, metrics? }`.
+- `custom`: `{ composition: ComponentRef[] }` with an allowed component-name union.
 
-## Root-cause fix first: shared layout and typography primitives
+Add small normalizer helpers rather than relying on broad `rawConfig` passthrough. The normalizers should be forgiving and safe: invalid configs render placeholders rather than throwing.
 
-1. Update shared utilities in `src/components/portal-deck/components/utils.ts`:
-   - Replace the current one-size-fits-all value sizing with separate helpers:
-     - `metricValueTextStyle`: for large numeric/stat values, nowrap, container-sized, conservative maximum.
-     - `headlineClampStyle`: for titles, balanced wrapping, no aggressive word breaking.
-     - `bodyTextStyle`: readable prose, normal wrapping, no mid-word breaks unless absolutely necessary.
-     - `labelTextStyle`: eyebrow/status labels, supports wrapping without letter-by-letter collapse.
-   - Keep all dynamic sizing container-aware, but only use `cqw` where the element itself or its card is the container.
-   - Add a helper for `containerQueryStyle` usage so every card using `cqw` is actually a container.
+4. Refactor all 12 visual renderers to compose from the component library
+Renderer mapping to implement:
 
-2. Add deck-specific responsive CSS in `src/index.css`:
-   - Component classes for repeatable container-query layouts instead of scattered `md/xl` assumptions.
-   - Use 1-column layouts in narrow preview cards, 2-column only when the component container is wide enough, 3/4-column only for short-content components.
-   - Add explicit safe patterns for metric rows, card footers, and table-like comparisons.
+- `CoverVisual.tsx`
+  - Compose `<Hero>` using config `headline/supporting/eyebrow/background/footer`, falling back to `slide.title/subtitle`.
+  - Optional `<CitationFooter>` when footer/sources are supplied.
+  - Preserve gradient hero for the current cover slide.
 
-## Component-by-component remediation
+- `LogosVisual.tsx`
+  - Query `portal_customers` as today.
+  - Optionally filter by `customer_slugs`.
+  - Map customers to `LogoItem[]` and render `<LogoGrid>`.
+  - Use `slide.title` or `config.headline`, plus Norwegian caption if supplied by DB/config.
 
-### 1. Hero
+- `BadgesVisual.tsx`
+  - Normalize `config.pairs ?? config.badges`.
+  - Render `<ProblemSolutionGrid>` with five pairs for the live `badge-taxonomy` slide.
+  - Use Norwegian chrome only; actual pair content comes from DB/config.
 
-- Keep the improved composition, but finish the metric layout:
-  - Sparse mode: large narrative area plus metrics below or side only when the container is wide enough.
-  - Dense mode: metric cards should form a clean 2x2 or stacked layout, never narrow columns with oversized text.
-- Treat metric values like `Hurtigruta Carglass` as text metrics, not numeric stats; allow balanced wrapping at title scale instead of forcing nowrap stat treatment.
+- `FunnelVisual.tsx`
+  - If `config.stages` exists, render those through `<FunnelLayout>`.
+  - Otherwise derive stages from `portal_customers.funnel_stage`, grouped and counted.
+  - Use Norwegian stage/context labels where generated by the renderer.
 
-### 2. StatCallout
+- `AdoptionVisual.tsx`
+  - Query `portal_adoption_points` as today.
+  - Transform rows into `ChartPoint[]` for `<AnnotatedChart>`.
+  - Use `config.annotations` if present.
+  - Placeholder uses `deckText.adoptionPlaceholder`.
 
-- Redesign sparse and dense variants:
-  - Sparse: full-width hero-stat card with large value, context below, supporting text in a readable block.
-  - Dense: two-row or stacked layout unless container is wide enough for true two-column.
-- `NOK 10–20M` must remain readable as one visual unit. If necessary, use a lower max font size rather than wrapping mid-value.
+- `GlideVisual.tsx`
+  - Query `portal_financial_projections` as today.
+  - Transform to `ChartPoint[]` for `<AnnotatedChart>`.
+  - Preserve break-even support using config `breakEvenLabel` or Norwegian default.
 
-### 3. StatGrid
+- `TeamVisual.tsx`
+  - Query team members as today.
+  - Map to `<PersonCard>` grid.
+  - Use `layout` for simple founder/compact variants if useful, but do not overbuild.
 
-- Change from fixed `xl:grid-cols-3` to container-query cards:
-  - Sparse: default 2 columns only when each card has enough width; otherwise 1 column.
-  - Dense: 2 columns max in CMS preview; 3 columns only at true slide width.
-- Differentiate numeric values and long text values:
-  - Numeric: nowrap, scale down.
-  - Text names/dates: balanced wrap, smaller headline style.
-- Ensure `30 June 2026`, `Hurtigruta Carglass`, and `NOK 10–20M` do not overflow.
+- `RoundVisual.tsx`
+  - Query `portal_round_terms` as today.
+  - Render `<StatGrid>` for round size, valuation, use of funds, closing.
+  - Keep CTA button to `/portal?tab=invest`, label from `config.cta_label` or Norwegian default.
 
-### 4. LogoGrid
+- `GapVisual.tsx`
+  - New schema renders `<ComparisonTable>` with columns based on `leftLabel`, `rightLabel`, and `Navio`.
+  - Legacy `categories` can be converted into comparison rows if encountered.
 
-- Keep simple but tighten long logo-name rendering:
-  - Container-aware card title sizing.
-  - Status labels can wrap normally, not uppercase letter-compressed.
-- Use fewer columns when sample names are long.
+- `VerticalsVisual.tsx`
+  - Normalize `config.items ?? config.verticals`.
+  - Render grid of `<CategoryCard>`.
 
-### 5. QuoteBlock
+- `CustomerSpotlightVisual.tsx`
+  - Query selected customer by `customer_slug`.
+  - Map customer fields to `<CustomerSpotlight>` metrics and quote.
+  - Use Norwegian metric labels: active cities, customers per day, monthly revenue.
 
-- Audit for overlarge quote text in sparse mode.
-- Add max line length and reduce font size for long testimonials.
-- Ensure author/role/company line wraps as a grouped caption instead of overflowing.
+- `CustomVisual.tsx`
+  - Implement vertical stack renderer for allowed component refs:
+    `Hero`, `StatCallout`, `StatGrid`, `LogoGrid`, `QuoteBlock`, `ComparisonTable`, `Timeline`, `ProcessFlow`, `ProblemSolutionGrid`, `AnnotatedChart`, `FunnelLayout`, `CustomerSpotlight`, `SectionDivider`, `CitationFooter`, `PersonCard`, `CategoryCard`.
+  - Ignore unknown component names safely and render a placeholder if nothing valid exists.
 
-### 6. ComparisonTable
+5. Translate component preview sample data to Norwegian Bokmål
+Update `src/components/portal-cms/PortalComponentsPreview.tsx` sample data and descriptions so the visual baseline reflects actual investor-facing language:
+- Translate fallback customer statuses, roles, quotes, parent brands, metrics, problem/solution pairs, timeline, process steps, chart annotations, funnel stages, comparison rows, people bios, and component titles/captions.
+- Keep CMS page shell labels acceptable in English where they are admin-only, but visual sample content itself should be Norwegian.
+- Add a new section that previews all 12 `visual_type` renderers with realistic sample `visual_config`, not only the component primitives.
 
-- Redesign completely: no internal horizontal scrollbar.
-- Replace rigid grid table with responsive comparison cards:
-  - Sparse: one row per dimension, columns rendered as stacked option blocks, with Navio highlighted.
-  - Dense: compact matrix only when wide enough; otherwise same stacked comparison pattern.
-- Keep the semantic table-like relationship visually, but do not force a 760px minimum grid inside a 500px preview card.
+6. Verification checkpoint before stopping
+Run and report these exactly:
 
-### 7. Timeline
+A. Hardcoded English search
+```bash
+rg -i "slide \\d+ of|press p|previous|next|present|export pdf|source:|loading slides|content being prepared" src/components/portal-deck src/components/portal-cms
+```
+- Fix any remaining investor-facing matches.
+- If remaining matches are CMS/admin-only or comments, list them explicitly.
 
-- Redesign timeline cards:
-  - Sparse: vertical timeline or 2-column max with clear date rail.
-  - Dense: compact vertical list or 2-column cards, not 4 cramped columns in preview.
-- Metrics use small caption/value chips instead of large stat typography.
-- Long metrics like `Hurtigruta Carglass spotlight` and `NOK 10–20M` must wrap cleanly.
+B. Renderer composition verification
+- Confirm all 12 `visual_type` renderers import and render components from `src/components/portal-deck/components`.
+- Confirm `/cms/portal/components-preview` includes visual_type renderer previews with realistic configs.
 
-### 8. ProcessFlow
+C. Published slide compatibility verification
+Verify these routes still render:
+- `/portal?tab=pitch&slide=cover` → Norwegian title, gradient hero.
+- `/portal?tab=pitch&slide=foot-in-door` → logos with Norwegian caption.
+- `/portal?tab=pitch&slide=badge-taxonomy` → 5 problem/solution pairs via `badges` → `pairs` normalizer.
 
-- Remove forced 4-column layout in narrow frames.
-- Use container-query flow:
-  - Narrow: vertical steps with subtle connector line.
-  - Wide: horizontal flow with arrows.
-- Metrics should be compact chips/captions, not balanced large text.
+D. Slide counter verification
+- Confirm the deck viewer shows `Lysbilde 1 av 3`.
 
-### 9. ProblemSolutionGrid
+E. Build/typecheck verification
+- Run the project build as the final check in default mode and report TypeScript/build errors if any.
 
-- Redesign both variants:
-  - Sparse: 1 or 2 columns max, stronger hierarchy, more whitespace.
-  - Dense: still 2 columns max in preview, 3 only at true slide width.
-- The `metric` line currently uses stat-value styling and can look wrong; convert it to an insight chip/footer with normal text wrapping.
-- Ensure titles and descriptions have consistent line lengths and do not create cramped cards.
-
-### 10. AnnotatedChart
-
-- Keep static annotations, but audit annotation boxes:
-  - Prevent labels from covering the chart line in narrow frames.
-  - Reduce annotation width and position with container-aware constraints.
-  - Use visible connector/dot relationship without relying on hover.
-- Confirm no clipped annotation text.
-
-### 11. FunnelLayout
-
-- Redesign both variants:
-  - Current horizontal bar/value layout is too fragile with long labels and `Hurtigruta Carglass`.
-  - Use stacked funnel stages with: value badge, label, context, and proportional bar as a background/underlay.
-  - The bar should never steal text width; it should be decorative or behind the content.
-- Dense mode should become compact stacked rows, not narrow grid columns.
-
-### 12. CustomerSpotlight
-
-- Redesign sparse mode substantially:
-  - Make it a clean case-study card with logo/customer header, summary, optional quote, and metrics in a controlled metric strip.
-  - Metrics should use 1-column or 3 compact tiles only when enough width exists.
-- Dense mode should be a compact two-panel only at wide width; otherwise stacked.
-- Customer names and metric values must wrap intentionally, not overflow or become tiny.
-
-### 13. SectionDivider
-
-- Audit metric aside and title at preview widths.
-- Apply the same metric-value helper and container-query behavior as Hero/StatCallout.
-
-### 14. CitationFooter
-
-- Ensure long source strings wrap as multiple lines, not single-line overflow.
-- In dense mode, avoid flex row until container is wide enough.
-
-### 15. PersonCard
-
-- Avoid dense two-column layout until width is sufficient.
-- Long names, roles, and metrics should wrap cleanly with consistent text scale.
-
-### 16. CategoryCard
-
-- Keep the footer fix, then audit full card layout:
-  - No internal horizontal scroll.
-  - No cramped status/metric pairs.
-  - Long metric values should sit under status, not beside it.
-
-## Preview page changes
-
-Update `/cms/portal/components-preview` to act as a real stress-test rather than a nice-case demo:
-
-- Keep every component pair, sparse + dense.
-- Use Navio-relevant long strings for all known failure modes:
-  - `NOK 10–20M`
-  - `Hurtigruta Carglass`
-  - `30 June 2026`
-  - `Qualified mobile service operators across glass, tire, and fleet`
-  - `Commercial proof with Hurtigruta Carglass`
-- Add a small QA note at the top of the preview indicating the viewport widths tested manually.
-- Do not use lorem ipsum or generic filler.
-
-## Verification process
-
-After implementation, use the sandbox dev login and screenshots to verify:
-
-1. Desktop preview around current user viewport (`~1366x768`).
-2. Narrow/tablet preview (`~834x1194` or closest supported width).
-3. Mobile-ish narrow width (`~390x844`) if the CMS route remains usable.
-
-For each viewport:
-
-- Scroll through every component pair.
-- Capture screenshots of each visible section group.
-- Fix any remaining overflow immediately.
-- Final report must explicitly say either:
-  - `ALL 16 COMPONENTS PASS — no overflow at any tested viewport width`, or
-  - list the exact remaining component/density/viewport failures and why they need a design decision.
-
-## Technical constraints
-
-- No hardcoded brand colors; continue using semantic tokens and deck brand helpers.
-- No bullet rendering in slide components.
-- No truncation/clipping as a substitute for layout quality.
-- No moving to Deliverable 3 until this visual QA pass is complete.
-- Keep sandbox dev access sandbox-only; do not introduce a production auth bypass.
-
-## Implementation order
-
-1. Shared primitives and CSS container-query layout rules.
-2. Fix the six known-bad components first: `CustomerSpotlight`, `FunnelLayout`, `ProblemSolutionGrid`, `Timeline`, `StatGrid`, `StatCallout`.
-3. Redesign `ComparisonTable` to remove internal horizontal scroll.
-4. Audit and adjust the remaining components: `Hero`, `LogoGrid`, `QuoteBlock`, `ProcessFlow`, `AnnotatedChart`, `SectionDivider`, `CitationFooter`, `PersonCard`, `CategoryCard`.
-5. Update preview stress data if needed.
-6. Screenshot verification across the tested viewport widths and final pass/fail report.
+Delivery report format
+- Completed renderer refactors: list all 12 with one-line mapping.
+- Norwegian chrome: list changed files and any remaining intentional English.
+- Backward compatibility: cover / foot-in-door / badge-taxonomy status.
+- Verification results: A through E, with exact pass/fail status.
+- If time-limited, stop cleanly and list which renderers are complete and which are not yet verified.
