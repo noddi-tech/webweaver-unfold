@@ -91,6 +91,32 @@ function useDebounced<T>(value: T, delay = 300) {
   return debounced;
 }
 
+const referenceLabels: Record<string, string> = {
+  portal_customers: "Published customers",
+  portal_team_members: "Published team members",
+  portal_financial_projections: "Financial projections",
+  portal_round_terms: "Active round terms",
+  "media_assets:partner_logos": "Partner logos",
+};
+
+function toJson(value: Record<string, unknown>): Json {
+  return JSON.parse(JSON.stringify(value)) as Json;
+}
+
+async function fetchSlideBrief(slug: string): Promise<PortalSlideBriefRow | null> {
+  if (!slug) return null;
+  const { data: sessionData } = await supabase.auth.getSession();
+  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/portal_slide_briefs?slug=eq.${encodeURIComponent(slug)}&select=*`, {
+    headers: {
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${sessionData.session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    },
+  });
+  if (!response.ok) throw new Error("Could not load slide brief.");
+  const rows = (await response.json()) as PortalSlideBriefRow[];
+  return rows[0] ?? null;
+}
+
 export function PortalSlidesList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
