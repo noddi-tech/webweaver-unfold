@@ -25,3 +25,38 @@ export function formatNok(value: number) {
   if (value >= 1_000) return `NOK ${(value / 1_000).toLocaleString("en", { maximumFractionDigits: 0 })}k`;
   return `NOK ${value.toLocaleString("en")}`;
 }
+
+export const balancedTextStyle = {
+  textWrap: "balance",
+  overflowWrap: "normal",
+  wordBreak: "normal",
+  hyphens: "manual",
+} as React.CSSProperties;
+
+export const safeTextStyle = {
+  textWrap: "pretty",
+  overflowWrap: "anywhere",
+  wordBreak: "normal",
+  hyphens: "manual",
+} as React.CSSProperties;
+
+export const containerQueryStyle = {
+  containerType: "inline-size",
+} as React.CSSProperties;
+
+export function valueTextStyle(density: Density = "sparse", maxRem?: number) {
+  const max = maxRem ?? (density === "dense" ? 3 : 3.75);
+  const min = density === "dense" ? 1.7 : 1.9;
+  return {
+    ...balancedTextStyle,
+    fontSize: `clamp(${min}rem, 14cqw, ${max}rem)`,
+    lineHeight: 0.96,
+  } as React.CSSProperties;
+}
+
+export function headlineTextStyle(maxRem = 4.5) {
+  return {
+    ...balancedTextStyle,
+    fontSize: `clamp(2.4rem, 8cqw, ${maxRem}rem)`,
+  } as React.CSSProperties;
+}
