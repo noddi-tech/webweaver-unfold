@@ -1,0 +1,24 @@
+import { ArrowUpRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { type } from "../visuals/_brand";
+import type { DeckComponentProps } from "./types";
+import { accentStyle } from "./utils";
+
+export interface CategoryCardProps extends DeckComponentProps {
+  label: string;
+  title: string;
+  description: string;
+  status?: string;
+  metric?: string;
+}
+
+export function CategoryCard({ label, title, description, status, metric, density = "sparse", accent = "primary", className }: CategoryCardProps) {
+  return (
+    <article className={cn("rounded-md border border-border bg-card-background p-6", className)} style={accentStyle(accent)}>
+      <div className="flex items-start justify-between gap-5"><p className={type.micro}>{label}</p><ArrowUpRight className="h-5 w-5" style={{ color: "var(--deck-accent)" }} /></div>
+      <h3 className={cn("mt-5 font-semibold leading-tight text-foreground", density === "dense" ? "text-2xl" : "text-3xl")}>{title}</h3>
+      <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{description}</p>
+      <div className="mt-6 flex items-center justify-between border-t border-border pt-4 text-sm"><span className="font-semibold text-foreground">{status}</span>{metric ? <span className="text-muted-foreground">{metric}</span> : null}</div>
+    </article>
+  );
+}
