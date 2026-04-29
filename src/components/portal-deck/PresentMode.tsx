@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { deckText } from "./i18n";
 import { SlideRenderer } from "./SlideRenderer";
 import type { SlideRow } from "./types";
 
@@ -70,7 +71,7 @@ export function PresentMode({ slides, activeIndex, onIndexChange, onExit }: Pres
         <SlideRenderer key={`present-${slide.id}`} slide={slide} mode="present" />
       </div>
       <div className="absolute bottom-6 right-6 text-sm text-primary-foreground/60">
-        {activeIndex + 1} / {slides.length}
+        {deckText.slideCounter(activeIndex + 1, slides.length)}
       </div>
     </div>
   );
