@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { type } from "../visuals/_brand";
 import type { DeckComponentProps, FunnelStage } from "./types";
-import { accentStyle, balancedTextStyle, safeTextStyle, valueTextStyle } from "./utils";
+import { accentStyle, balancedTextStyle, containerQueryStyle, safeTextStyle, valueTextStyle } from "./utils";
 
 export interface FunnelLayoutProps extends DeckComponentProps {
   title?: string;
@@ -14,7 +14,7 @@ export function FunnelLayout({ title, stages, density = "sparse", accent = "prim
       {title ? <h2 className={type.headline} style={balancedTextStyle}>{title}</h2> : null}
       <div className="space-y-3">
         {stages.map((stage) => (
-          <article key={stage.label} className="min-w-0 rounded-md border border-border bg-card-background p-4">
+          <article key={stage.label} className="min-w-0 rounded-md border border-border bg-card-background p-4" style={containerQueryStyle}>
             <div className="grid min-w-0 items-center gap-4 md:grid-cols-[minmax(96px,0.34fr)_minmax(0,1fr)]">
               <div className="h-12 rounded-sm" style={{ width: `${stage.widthPct}%`, minWidth: density === "dense" ? "80px" : "112px", maxWidth: "100%", background: "var(--deck-accent)" }} />
               <div className="grid min-w-0 flex-1 gap-2 md:grid-cols-[minmax(0,1fr)_minmax(96px,160px)] md:items-center">
