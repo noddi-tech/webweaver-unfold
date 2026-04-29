@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { brand, type } from "../visuals/_brand";
 import type { DeckComponentProps } from "./types";
-import { accentStyle } from "./utils";
+import { accentStyle, balancedTextStyle, containerQueryStyle, safeTextStyle, valueTextStyle } from "./utils";
 
 export interface StatCalloutProps extends DeckComponentProps {
   label: string;
@@ -12,14 +12,14 @@ export interface StatCalloutProps extends DeckComponentProps {
 
 export function StatCallout({ label, value, context, supporting, density = "sparse", accent = "primary", className }: StatCalloutProps) {
   return (
-    <section className={cn("rounded-md border border-border bg-card-background p-8", density === "dense" ? "grid gap-6 md:grid-cols-[280px_1fr] md:items-end" : "space-y-8", className)} style={accentStyle(accent)}>
-      <div>
-        <p className={type.micro}>{label}</p>
-        <div className={cn("mt-4 font-semibold leading-none tabular-nums", density === "dense" ? "text-6xl" : "text-8xl")} style={{ color: "var(--deck-accent)" }}>{value}</div>
+    <section className={cn("min-w-0 rounded-md border border-border bg-card-background p-8", density === "dense" ? "grid gap-6 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)] md:items-end" : "space-y-8", className)} style={{ ...accentStyle(accent), ...containerQueryStyle }}>
+      <div className="min-w-0">
+        <p className={type.micro} style={safeTextStyle}>{label}</p>
+        <div className="mt-4 min-w-0 font-semibold tabular-nums" style={{ ...valueTextStyle(density, density === "dense" ? 4 : 5.8), color: "var(--deck-accent)" }}>{value}</div>
       </div>
-      <div className="max-w-3xl">
-        <h3 className={cn(type.headline, "text-foreground")}>{context}</h3>
-        {supporting ? <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{supporting}</p> : null}
+      <div className="min-w-0 max-w-3xl">
+        <h3 className={cn(type.headline, "text-foreground")} style={balancedTextStyle}>{context}</h3>
+        {supporting ? <p className="mt-4 text-lg leading-relaxed text-muted-foreground" style={safeTextStyle}>{supporting}</p> : null}
       </div>
       <div className="h-px w-full bg-border" style={{ background: brand.border }} aria-hidden="true" />
     </section>
