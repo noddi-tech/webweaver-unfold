@@ -284,10 +284,10 @@ serve(async (req: Request): Promise<Response> => {
     const validation = validateDraft(parsed, typedBrief.suggested_visual_types);
     if (!validation.ok) return json({ errors: validation.errors }, 422);
 
-    const { error: insertError } = await serviceClient.from("portal_slide_drafts").insert({ slide_slug: slug, editor_email: userData.user.email ?? null, editor_user_id: userData.user.id, prompt: editorPrompt || null, prompt_context: promptContext, response: validation.value, model: MODEL });
+    const { data: insertedRow, error: insertError } = await serviceClient.from("portal_slide_drafts").insert({ slide_slug: slug, editor_email: userData.user.email ?? null, editor_user_id: userData.user.id, prompt: editorPrompt || null, prompt_context: promptContext, response: validation.value, model: MODEL, draft_kind: "initial" }).select("id").single();
     if (insertError) throw insertError;
 
-    return json(validation.value);
+    return json({ id: insertedRow?.id ?? null, ...validation.value });
   } catch (error) {
     console.error("draft-slide error:", error);
     return json({ error: (error as Error).message }, 500);

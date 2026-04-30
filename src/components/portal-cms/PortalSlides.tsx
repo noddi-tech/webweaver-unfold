@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { deepEqualJson, parseAndValidateVisualConfig, type VisualConfigValidation } from "@/lib/portalDraftSchemas";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
@@ -192,11 +193,53 @@ function ConfigEditor({ type, value, onChange }: { type: VisualType; value: Json
   return null;
 }
 
+type EditedDraftState = {
+  title: string;
+  subtitle: string;
+  body_md: string;
+  visual_type: VisualType;
+  configRaw: string;
+};
+
+function draftToEdited(draft: SlideDraftResponse): EditedDraftState {
+  return {
+    title: draft.title,
+    subtitle: draft.subtitle ?? "",
+    body_md: draft.body_md ?? "",
+    visual_type: draft.visual_type,
+    configRaw: JSON.stringify(draft.visual_config ?? {}, null, 2),
+  };
+}
+
+function EditedBadge() {
+  return <Badge variant="outline" className="ml-2 border-primary/40 text-primary">Endret</Badge>;
+}
+
+function FieldRowShell({ label, edited, leftCurrent, rightEditor, errorBlock }: { label: string; edited: boolean; leftCurrent: React.ReactNode; rightEditor: React.ReactNode; errorBlock?: React.ReactNode }) {
+  return (
+    <div className="grid gap-3 rounded-md border bg-background p-3 md:grid-cols-2">
+      <div className="space-y-2">
+        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
+        {leftCurrent}
+      </div>
+      <div className="space-y-2">
+        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {label}{edited ? <EditedBadge /> : null}
+        </div>
+        {rightEditor}
+        {errorBlock}
+      </div>
+    </div>
+  );
+}
+
 function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (draft: SlideDraftResponse) => void }) {
   const { toast } = useToast();
   const [direction, setDirection] = useState("");
   const [selectedReferences, setSelectedReferences] = useState<string[]>([]);
-  const [draft, setDraft] = useState<SlideDraftResponse | null>(null);
+  const [originalDraft, setOriginalDraft] = useState<SlideDraftResponse | null>(null);
+  const [edited, setEdited] = useState<EditedDraftState | null>(null);
+  const [savingAcceptance, setSavingAcceptance] = useState(false);
   const { data: status, isLoading: statusLoading } = useQuery({ queryKey: ["draft-slide-status"], queryFn: async () => { const { data, error } = await supabase.functions.invoke<{ configured: boolean }>("draft-slide-status"); if (error) throw error; return data; } });
   const { data: brief } = useQuery({ queryKey: ["portal-slide-brief", form.slug], queryFn: () => fetchSlideBrief(form.slug), enabled: Boolean(form.slug) });
   const { data: counts = {} } = useQuery({ queryKey: ["portal-draft-reference-counts"], queryFn: async () => {
@@ -216,11 +259,122 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
 
   useEffect(() => { if (brief?.reference_resources) setSelectedReferences(brief.reference_resources); }, [brief?.slug, brief?.reference_resources]);
 
-  const generate = useMutation({ mutationFn: async () => { const { data, error } = await supabase.functions.invoke<SlideDraftResponse>("draft-slide", { body: { slug: form.slug, editor_prompt: direction, selected_references: selectedReferences, include_style_references: true } }); if (error) throw error; if (!data) throw new Error("No draft returned."); return data; }, onSuccess: setDraft, onError: (error) => toast({ title: "Draft failed", description: error.message, variant: "destructive" }) });
+  const generate = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke<SlideDraftResponse>("draft-slide", { body: { slug: form.slug, editor_prompt: direction, selected_references: selectedReferences, include_style_references: true } });
+      if (error) throw error;
+      if (!data) throw new Error("No draft returned.");
+      return data;
+    },
+    onSuccess: (data) => {
+      setOriginalDraft(data);
+      setEdited(draftToEdited(data));
+    },
+    onError: (error) => toast({ title: "Draft failed", description: error.message, variant: "destructive" }),
+  });
+
   const references = brief?.reference_resources ?? [];
+
+  const configValidation: VisualConfigValidation | null = useMemo(() => {
+    if (!edited) return null;
+    return parseAndValidateVisualConfig(edited.visual_type, edited.configRaw);
+  }, [edited]);
+
+  const titleError = useMemo(() => {
+    if (!edited) return null;
+    const trimmed = edited.title.trim();
+    if (trimmed.length < 1) return "Tittel er påkrevd";
+    if (edited.title.length > 80) return "Tittel kan være maks 80 tegn";
+    return null;
+  }, [edited]);
+
+  const subtitleError = useMemo(() => {
+    if (!edited) return null;
+    if (edited.subtitle.length > 120) return "Undertittel kan være maks 120 tegn";
+    return null;
+  }, [edited]);
+
+  const bodyError = useMemo(() => {
+    if (!edited) return null;
+    if (edited.body_md.length > 4000) return "Innhold kan være maks 4000 tegn";
+    return null;
+  }, [edited]);
+
+  const editedFields = useMemo(() => {
+    const set = new Set<string>();
+    if (!edited || !originalDraft) return set;
+    if (edited.title !== originalDraft.title) set.add("title");
+    if (edited.subtitle !== (originalDraft.subtitle ?? "")) set.add("subtitle");
+    if (edited.body_md !== (originalDraft.body_md ?? "")) set.add("body_md");
+    if (configValidation?.kind === "ok" && !deepEqualJson(configValidation.value, originalDraft.visual_config ?? {})) {
+      set.add("visual_config");
+    }
+    return set;
+  }, [edited, originalDraft, configValidation]);
+
+  const isValid = Boolean(edited) && !titleError && !subtitleError && !bodyError && configValidation?.kind === "ok";
+
+  const handleAccept = useCallback(async () => {
+    if (!edited || !originalDraft || !isValid || configValidation?.kind !== "ok") return;
+    setSavingAcceptance(true);
+    try {
+      const finalDraft: SlideDraftResponse = {
+        title: edited.title.trim(),
+        subtitle: edited.subtitle.trim() ? edited.subtitle.trim() : undefined,
+        body_md: edited.body_md.trim() ? edited.body_md.trim() : undefined,
+        visual_type: edited.visual_type,
+        visual_config: configValidation.value,
+      };
+
+      const isManualEdit = editedFields.size > 0;
+      if (isManualEdit && originalDraft.id) {
+        const { data: userData } = await supabase.auth.getUser();
+        const editedFieldsArray = Array.from(editedFields);
+        const { error: insertError } = await supabase.from("portal_slide_drafts").insert({
+          slide_slug: form.slug,
+          editor_email: userData.user?.email ?? undefined,
+          editor_user_id: userData.user?.id ?? undefined,
+          parent_draft_id: originalDraft.id,
+          draft_kind: "manual_edit",
+          prompt_context: {
+            source: "manual_edit",
+            original_response: originalDraft as unknown as Json,
+            edited_fields: editedFieldsArray,
+          } as unknown as Json,
+          response: finalDraft as unknown as Json,
+          model: "manual",
+        });
+        if (insertError) throw insertError;
+      }
+
+      onAccept(finalDraft);
+      setOriginalDraft(null);
+      setEdited(null);
+    } catch (error) {
+      toast({ title: "Could not save edits", description: (error as Error).message, variant: "destructive" });
+    } finally {
+      setSavingAcceptance(false);
+    }
+  }, [edited, originalDraft, isValid, configValidation, editedFields, form.slug, onAccept, toast]);
+
+  const handleDiscard = useCallback(() => {
+    setOriginalDraft(null);
+    setEdited(null);
+  }, []);
 
   if (statusLoading) return <Card><CardContent className="pt-6 text-sm text-muted-foreground">Checking AI drafting status…</CardContent></Card>;
   if (!status?.configured) return <Card><CardHeader><CardTitle>AI Draft</CardTitle><CardDescription>AI drafting requires Anthropic API key — contact admin.</CardDescription></CardHeader></Card>;
+
+  const renderConfigError = () => {
+    if (!configValidation) return null;
+    if (configValidation.kind === "syntax") {
+      return <p className="rounded-sm border border-destructive/40 bg-destructive/5 p-2 text-xs text-destructive">Ugyldig JSON-syntaks: {configValidation.error}</p>;
+    }
+    if (configValidation.kind === "schema") {
+      return <p className="rounded-sm border border-destructive/40 bg-destructive/5 p-2 text-xs text-destructive">Skjemavalidering feilet: {configValidation.error}</p>;
+    }
+    return null;
+  };
 
   return (
     <Card className="border-primary/20">
@@ -229,15 +383,66 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
         <Field label="Your direction"><Textarea value={direction} onChange={(event) => setDirection(event.target.value)} placeholder="Add specific points or angle you want emphasized. Leave blank for AI to draft from the narrative role alone." /></Field>
         {references.length ? <div className="space-y-3"><p className="text-sm font-medium">References</p>{references.map((reference) => { const count = counts[reference as keyof typeof counts]; const label = count === null ? `${referenceLabels[reference] ?? reference} (not connected)` : `${referenceLabels[reference] ?? reference} (${count ?? 0} items)`; return <label key={reference} className="flex items-center gap-3 rounded-md border p-3 text-sm"><Checkbox checked={selectedReferences.includes(reference)} onCheckedChange={(checked) => setSelectedReferences((current) => checked ? [...new Set([...current, reference])] : current.filter((item) => item !== reference))} /><span>{label}</span></label>; })}</div> : null}
         <Button type="button" onClick={() => generate.mutate()} disabled={generate.isPending || !brief}>{generate.isPending ? "Generating…" : "Generate draft"}</Button>
-        {draft ? <div className="space-y-4 rounded-md border bg-muted/30 p-4"><div className="flex flex-wrap gap-2"><Badge variant="secondary">Generated by AI · review before publishing</Badge><Badge variant="outline">{draft.visual_type}</Badge></div><div className="grid gap-3 text-sm"><DiffRow label="Title" before={form.title} after={draft.title} /><DiffRow label="Subtitle" before={form.subtitle} after={draft.subtitle ?? ""} /><DiffRow label="Visual type" before={form.visual_type} after={draft.visual_type} /><DiffRow label="Body" before={form.body_md} after={draft.body_md ?? ""} /><DiffRow label="Visual config" before={JSON.stringify(form.visual_config, null, 2)} after={JSON.stringify(draft.visual_config, null, 2)} /></div><div className="flex gap-3"><Button type="button" onClick={() => onAccept(draft)}>Accept draft</Button><Button type="button" variant="outline" onClick={() => setDraft(null)}>Discard</Button></div></div> : null}
+        {edited && originalDraft ? (
+          <div className="space-y-4 rounded-md border bg-muted/30 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">Generated by AI · review and edit before publishing</Badge>
+              <Badge variant="outline">{edited.visual_type}</Badge>
+              {editedFields.size > 0 ? <Badge variant="outline" className="border-primary/40 text-primary">{editedFields.size} felt endret</Badge> : null}
+            </div>
+
+            <div className="grid grid-cols-1 gap-1 text-sm md:grid-cols-2">
+              <div className="px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Nåværende</div>
+              <div className="px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">AI-forslag — redigerbar</div>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <FieldRowShell
+                label="Title"
+                edited={editedFields.has("title")}
+                leftCurrent={<pre className="whitespace-pre-wrap text-muted-foreground">{form.title || "—"}</pre>}
+                rightEditor={<Input value={edited.title} maxLength={120} onChange={(e) => setEdited((current) => current ? { ...current, title: e.target.value } : current)} />}
+                errorBlock={titleError ? <p className="text-xs text-destructive">{titleError}</p> : <p className="text-xs text-muted-foreground">{edited.title.length}/80</p>}
+              />
+              <FieldRowShell
+                label="Subtitle"
+                edited={editedFields.has("subtitle")}
+                leftCurrent={<pre className="whitespace-pre-wrap text-muted-foreground">{form.subtitle || "—"}</pre>}
+                rightEditor={<Input value={edited.subtitle} maxLength={160} onChange={(e) => setEdited((current) => current ? { ...current, subtitle: e.target.value } : current)} />}
+                errorBlock={subtitleError ? <p className="text-xs text-destructive">{subtitleError}</p> : <p className="text-xs text-muted-foreground">{edited.subtitle.length}/120</p>}
+              />
+              <FieldRowShell
+                label="Visual type"
+                edited={false}
+                leftCurrent={<Badge variant="outline">{form.visual_type}</Badge>}
+                rightEditor={<div className="flex items-center gap-2"><Badge variant="outline">{edited.visual_type}</Badge><span className="text-xs text-muted-foreground">Låst — forkast og generer på nytt for å bytte</span></div>}
+              />
+              <FieldRowShell
+                label="Body"
+                edited={editedFields.has("body_md")}
+                leftCurrent={<pre className="whitespace-pre-wrap text-muted-foreground">{form.body_md || "—"}</pre>}
+                rightEditor={<Textarea value={edited.body_md} rows={4} onChange={(e) => setEdited((current) => current ? { ...current, body_md: e.target.value } : current)} />}
+                errorBlock={bodyError ? <p className="text-xs text-destructive">{bodyError}</p> : <p className="text-xs text-muted-foreground">{edited.body_md.length}/4000</p>}
+              />
+              <FieldRowShell
+                label="Visual config"
+                edited={editedFields.has("visual_config")}
+                leftCurrent={<pre className="max-h-64 overflow-auto whitespace-pre-wrap font-mono text-xs text-muted-foreground">{JSON.stringify(form.visual_config, null, 2) || "—"}</pre>}
+                rightEditor={<Textarea value={edited.configRaw} rows={10} className="font-mono text-xs" onChange={(e) => setEdited((current) => current ? { ...current, configRaw: e.target.value } : current)} />}
+                errorBlock={renderConfigError()}
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button type="button" onClick={handleAccept} disabled={!isValid || savingAcceptance}>{savingAcceptance ? "Saving…" : "Accept draft"}</Button>
+              <Button type="button" variant="outline" onClick={handleDiscard} disabled={savingAcceptance}>Discard</Button>
+              {!isValid ? <span className="text-xs text-muted-foreground">Rett opp valideringsfeil for å akseptere</span> : null}
+            </div>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
-}
-
-function DiffRow({ label, before, after }: { label: string; before: string; after: string }) {
-  const changed = before !== after;
-  return <div className="grid gap-2 rounded-md border bg-background p-3 md:grid-cols-[8rem_minmax(0,1fr)_minmax(0,1fr)]"><div className="font-medium">{label}{changed ? <Badge variant="outline" className="ml-2">Changed</Badge> : null}</div><pre className="whitespace-pre-wrap text-muted-foreground">{before || "—"}</pre><pre className="whitespace-pre-wrap text-foreground">{after || "—"}</pre></div>;
 }
 
 export function PortalSlideEditor() {
