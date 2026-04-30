@@ -3178,38 +3178,54 @@ export type Database = {
       portal_slide_drafts: {
         Row: {
           created_at: string
+          draft_kind: string
           editor_email: string | null
           editor_user_id: string | null
           id: string
           model: string
+          parent_draft_id: string | null
           prompt: string | null
           prompt_context: Json | null
+          refinement_instruction: string | null
           response: Json
           slide_slug: string
         }
         Insert: {
           created_at?: string
+          draft_kind?: string
           editor_email?: string | null
           editor_user_id?: string | null
           id?: string
           model: string
+          parent_draft_id?: string | null
           prompt?: string | null
           prompt_context?: Json | null
+          refinement_instruction?: string | null
           response: Json
           slide_slug: string
         }
         Update: {
           created_at?: string
+          draft_kind?: string
           editor_email?: string | null
           editor_user_id?: string | null
           id?: string
           model?: string
+          parent_draft_id?: string | null
           prompt?: string | null
           prompt_context?: Json | null
+          refinement_instruction?: string | null
           response?: Json
           slide_slug?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "portal_slide_drafts_parent_draft_id_fkey"
+            columns: ["parent_draft_id"]
+            isOneToOne: false
+            referencedRelation: "portal_slide_drafts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "portal_slide_drafts_slide_slug_fkey"
             columns: ["slide_slug"]
