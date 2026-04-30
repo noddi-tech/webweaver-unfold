@@ -24,6 +24,7 @@ export type PortalSlideBriefRow = {
 };
 
 export type SlideDraftResponse = {
+  id?: string | null;
   title: string;
   subtitle?: string;
   body_md?: string;
