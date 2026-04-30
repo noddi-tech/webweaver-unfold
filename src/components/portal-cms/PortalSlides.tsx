@@ -342,8 +342,8 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
             original_response: originalDraft,
             edited_fields: editedFieldsArray,
           },
-          response: finalDraft,
-          model: null,
+          response: finalDraft as unknown as Json,
+          model: "manual",
         });
         if (insertError) throw insertError;
       }
