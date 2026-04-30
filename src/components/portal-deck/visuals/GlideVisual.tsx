@@ -37,7 +37,7 @@ export function GlideVisual({ slide, config }: SlideVisualProps<GlideConfig>) {
   }, [config, projections]);
 
   return (
-    <section className="h-full overflow-y-auto p-6 sm:p-10">
+    <section className="h-full overflow-hidden p-6 sm:p-10">
       {points.length ? <AnnotatedChart title={config?.headline ?? slide.title ?? undefined} valueLabel={deckText.arrNokM} points={points} annotations={annotations} /> : <PreparedPlaceholder />}
       <MarkdownBody body={slide.body_md} />
     </section>

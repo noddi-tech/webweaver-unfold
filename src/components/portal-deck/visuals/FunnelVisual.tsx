@@ -49,7 +49,7 @@ export function FunnelVisual({ slide, config }: SlideVisualProps<FunnelConfig>) 
   }, [config?.stages, customers]);
 
   return (
-    <section className="h-full overflow-y-auto p-6 sm:p-10">
+    <section className="h-full overflow-hidden p-6 sm:p-10">
       {stages.length ? <FunnelLayout title={slide.title ?? deckText.operatorPipeline} stages={stages} /> : <PreparedPlaceholder />}
       <MarkdownBody body={slide.body_md} />
     </section>

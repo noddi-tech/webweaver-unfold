@@ -5,7 +5,7 @@ import type { SlideVisualProps, VerticalsConfig } from "../types";
 
 export function VerticalsVisual({ slide, config }: SlideVisualProps<VerticalsConfig>) {
   return (
-    <section className="h-full overflow-y-auto p-6 sm:p-10">
+    <section className="h-full overflow-hidden p-6 sm:p-10">
       {config?.items?.length ? (
         <div className="space-y-8">
           {slide.title ? <h2 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl">{slide.title}</h2> : null}

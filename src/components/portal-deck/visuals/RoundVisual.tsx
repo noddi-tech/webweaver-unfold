@@ -47,7 +47,7 @@ export function RoundVisual({ slide, config }: SlideVisualProps<RoundConfig>) {
   ] : [];
 
   return (
-    <section className="h-full overflow-y-auto p-6 sm:p-10">
+    <section className="h-full overflow-hidden p-6 sm:p-10">
       {round ? (
         <div className="space-y-6">
           <StatGrid title={slide.title ?? undefined} metrics={metrics} />

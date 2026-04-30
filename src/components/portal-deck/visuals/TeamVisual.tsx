@@ -29,7 +29,7 @@ export function TeamVisual({ slide }: SlideVisualProps<TeamConfig>) {
   });
 
   return (
-    <section className="h-full overflow-y-auto p-6 sm:p-10">
+    <section className="h-full overflow-hidden p-6 sm:p-10">
       <SlideHeader slide={slide} />
       {members.length ? (
         <div className="deck-auto-grid gap-4">

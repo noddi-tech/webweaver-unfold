@@ -23,7 +23,7 @@ export function LogosVisual({ slide, config }: SlideVisualProps<LogosConfig>) {
   const logos = customers.map((customer) => ({ name: customer.name, logoUrl: customer.logo_url, label: customer.parent_brand ?? undefined, status: customer.status ?? customer.funnel_stage ?? undefined }));
 
   return (
-    <section className="h-full overflow-y-auto p-6 sm:p-10">
+    <section className="h-full overflow-hidden p-6 sm:p-10">
       {logos.length ? <LogoGrid title={config?.headline ?? slide.title ?? undefined} caption={config?.caption} logos={logos} /> : <PreparedPlaceholder />}
       <MarkdownBody body={slide.body_md} />
     </section>

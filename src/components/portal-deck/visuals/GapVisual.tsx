@@ -13,7 +13,7 @@ export function GapVisual({ slide, config }: SlideVisualProps<GapConfig>) {
     : (config?.categories ?? []).map((category) => ({ label: category.label, values: { left: category.competitors.map((competitor) => competitor.name).join(" · ") || deckText.noData, right: `${deckText.navio}: ${category.navio_position}%` }, emphasisKey: "right" }));
 
   return (
-    <section className="h-full overflow-y-auto p-6 sm:p-10">
+    <section className="h-full overflow-hidden p-6 sm:p-10">
       {rows.length ? <ComparisonTable title={config?.title ?? slide.title ?? deckText.comparison} columns={columns} rows={rows} /> : <PreparedPlaceholder />}
       <MarkdownBody body={slide.body_md} />
     </section>

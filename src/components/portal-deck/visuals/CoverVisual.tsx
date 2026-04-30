@@ -4,7 +4,7 @@ import type { CoverConfig, SlideVisualProps } from "../types";
 export function CoverVisual({ slide, config }: SlideVisualProps<CoverConfig>) {
   const footer = typeof config?.footer === "object" ? config.footer : null;
   return (
-    <section className="flex h-full flex-col overflow-y-auto p-6 sm:p-10">
+    <section className="flex h-full flex-col overflow-hidden p-6 sm:p-10">
       <Hero
         className="flex-1"
         variant={config?.background === "minimal" ? "minimal" : "gradient"}
