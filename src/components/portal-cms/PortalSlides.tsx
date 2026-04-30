@@ -332,16 +332,15 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
         const editedFieldsArray = Array.from(editedFields);
         const { error: insertError } = await supabase.from("portal_slide_drafts").insert({
           slide_slug: form.slug,
-          editor_email: userData.user?.email ?? null,
-          editor_user_id: userData.user?.id ?? null,
+          editor_email: userData.user?.email ?? undefined,
+          editor_user_id: userData.user?.id ?? undefined,
           parent_draft_id: originalDraft.id,
           draft_kind: "manual_edit",
-          prompt: null,
           prompt_context: {
             source: "manual_edit",
-            original_response: originalDraft,
+            original_response: originalDraft as unknown as Json,
             edited_fields: editedFieldsArray,
-          },
+          } as unknown as Json,
           response: finalDraft as unknown as Json,
           model: "manual",
         });
