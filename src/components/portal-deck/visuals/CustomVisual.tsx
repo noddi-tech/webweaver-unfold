@@ -49,7 +49,7 @@ function renderRef(ref: ComponentRef, index: number) {
 export function CustomVisual({ slide, config }: SlideVisualProps<CustomConfig>) {
   const rendered = config?.composition?.map(renderRef).filter(Boolean) ?? [];
   return (
-    <section className="h-full overflow-y-auto p-6 sm:p-10">
+    <section className="h-full overflow-hidden p-6 sm:p-10">
       {!rendered.length ? <SlideHeader slide={slide} /> : null}
       {rendered.length ? <div className="space-y-8">{rendered}</div> : slide.body_md ? <MarkdownBody body={slide.body_md} /> : <PreparedPlaceholder />}
     </section>

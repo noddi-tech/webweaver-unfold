@@ -34,7 +34,7 @@ export function AdoptionVisual({ slide, config }: SlideVisualProps<AdoptionConfi
   })), [points]);
 
   return (
-    <section className="h-full overflow-y-auto p-6 sm:p-10">
+    <section className="h-full overflow-hidden p-6 sm:p-10">
       {chartPoints.length ? (
         <AnnotatedChart title={config?.headline ?? slide.title ?? undefined} valueLabel={deckText.addressablePercent} points={chartPoints} annotations={config?.annotations ?? []} />
       ) : <p className="text-center text-sm text-muted-foreground">{deckText.adoptionPlaceholder}</p>}
