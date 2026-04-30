@@ -203,6 +203,14 @@ async function fetchReferenceData(supabase: SupabaseClient, references: string[]
   return output;
 }
 
+function summarizeReferenceData(referenceData: Record<string, unknown>) {
+  return Object.fromEntries(Object.entries(referenceData).map(([key, value]) => {
+    if (Array.isArray(value)) return [key, { type: "array", count: value.length }];
+    if (isRecord(value)) return [key, { type: "object", present: true }];
+    return [key, { type: value === null ? "null" : typeof value, present: value !== null && value !== undefined }];
+  }));
+}
+
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -231,6 +239,7 @@ serve(async (req: Request): Promise<Response> => {
     const slug = typeof body.slug === "string" ? body.slug.trim() : "";
     const editorPrompt = typeof body.editor_prompt === "string" ? body.editor_prompt.trim().slice(0, 4000) : "";
     const selectedReferences = Array.isArray(body.selected_references) ? body.selected_references.filter(isString) : [];
+    const includeStyleReferences = typeof body.include_style_references === "boolean" ? body.include_style_references : true;
     if (!slug) return json({ error: "slug is required" }, 400);
 
     const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -246,13 +255,15 @@ serve(async (req: Request): Promise<Response> => {
     const availableReferences = typedBrief.reference_resources ?? [];
     const referencesToUse = selectedReferences.length ? selectedReferences.filter((ref) => availableReferences.includes(ref)) : availableReferences;
     const referenceData = await fetchReferenceData(serviceClient, referencesToUse);
+    const visualSchemas = schemasFor(typedBrief.suggested_visual_types);
 
-    const userPrompt = `Slide brief:\n  Slug: ${typedBrief.slug}\n  Narrative role: ${typedBrief.narrative_role}\n  Drafting guidance: ${typedBrief.drafting_guidance}\n  Suggested visual types: ${JSON.stringify(typedBrief.suggested_visual_types)}\n\nEditor's direction (optional):\n  ${editorPrompt || "(none provided)"}\n\nReference data:\n${JSON.stringify(referenceData, null, 2)}\n\nReturn a JSON object with:\n  title (string, required, 1-80 chars)\n  subtitle (string, optional, max 120 chars)\n  body_md (string, optional markdown body, max 4000 chars)\n  visual_type (one of suggested_visual_types)\n  visual_config (object matching the visual_type's schema)\n\nVisual config schemas:\n${JSON.stringify(schemasFor(typedBrief.suggested_visual_types), null, 2)}\n\nReturn only valid JSON. Do not wrap in markdown.`;
+    const userPrompt = `Slide brief:\n  Slug: ${typedBrief.slug}\n  Narrative role: ${typedBrief.narrative_role}\n  Drafting guidance: ${typedBrief.drafting_guidance}\n  Suggested visual types: ${JSON.stringify(typedBrief.suggested_visual_types)}\n\nEditor's direction (optional):\n  ${editorPrompt || "(none provided)"}\n\nStyle references requested: ${includeStyleReferences ? "yes" : "no"}\nStyle references are not fetched in this version; follow the system design principles instead.\n\nReference data:\n${JSON.stringify(referenceData, null, 2)}\n\nReturn a JSON object with:\n  title (string, required, 1-80 chars)\n  subtitle (string, optional, max 120 chars)\n  body_md (string, optional markdown body, max 4000 chars)\n  visual_type (one of suggested_visual_types)\n  visual_config (object matching the visual_type's schema)\n\nVisual config schemas:\n${JSON.stringify(visualSchemas, null, 2)}\n\nReturn only valid JSON. Do not wrap in markdown.`;
+    const promptContext = { system_prompt: SYSTEM_PROMPT, schema: visualSchemas, references_passed: referencesToUse, editor_prompt: editorPrompt || null, reference_data_summary: summarizeReferenceData(referenceData), include_style_references: includeStyleReferences };
 
     const anthropicResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "x-api-key": anthropicKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model: MODEL, max_tokens: 2400, system: "You are drafting a single slide for an investor pitch deck for Navio Solutions, a Norwegian B2B SaaS company. Be confident but grounded. Avoid superlatives. Use specific numbers when reference data provides them. Output valid JSON matching the schema.", messages: [{ role: "user", content: userPrompt }] }),
+      body: JSON.stringify({ model: MODEL, max_tokens: 2400, system: SYSTEM_PROMPT, messages: [{ role: "user", content: userPrompt }] }),
     });
 
     if (!anthropicResponse.ok) {
@@ -273,7 +284,7 @@ serve(async (req: Request): Promise<Response> => {
     const validation = validateDraft(parsed, typedBrief.suggested_visual_types);
     if (!validation.ok) return json({ errors: validation.errors }, 422);
 
-    const { error: insertError } = await serviceClient.from("portal_slide_drafts").insert({ slide_slug: slug, editor_email: userData.user.email ?? null, editor_user_id: userData.user.id, prompt: editorPrompt || null, response: validation.value, model: MODEL });
+    const { error: insertError } = await serviceClient.from("portal_slide_drafts").insert({ slide_slug: slug, editor_email: userData.user.email ?? null, editor_user_id: userData.user.id, prompt: editorPrompt || null, prompt_context: promptContext, response: validation.value, model: MODEL });
     if (insertError) throw insertError;
 
     return json(validation.value);
