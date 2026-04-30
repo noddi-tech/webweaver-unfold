@@ -216,7 +216,7 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
 
   useEffect(() => { if (brief?.reference_resources) setSelectedReferences(brief.reference_resources); }, [brief?.slug, brief?.reference_resources]);
 
-  const generate = useMutation({ mutationFn: async () => { const { data, error } = await supabase.functions.invoke<SlideDraftResponse>("draft-slide", { body: { slug: form.slug, editor_prompt: direction, selected_references: selectedReferences } }); if (error) throw error; if (!data) throw new Error("No draft returned."); return data; }, onSuccess: setDraft, onError: (error) => toast({ title: "Draft failed", description: error.message, variant: "destructive" }) });
+  const generate = useMutation({ mutationFn: async () => { const { data, error } = await supabase.functions.invoke<SlideDraftResponse>("draft-slide", { body: { slug: form.slug, editor_prompt: direction, selected_references: selectedReferences, include_style_references: true } }); if (error) throw error; if (!data) throw new Error("No draft returned."); return data; }, onSuccess: setDraft, onError: (error) => toast({ title: "Draft failed", description: error.message, variant: "destructive" }) });
   const references = brief?.reference_resources ?? [];
 
   if (statusLoading) return <Card><CardContent className="pt-6 text-sm text-muted-foreground">Checking AI drafting status…</CardContent></Card>;

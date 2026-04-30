@@ -10,10 +10,63 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type DraftRequest = { slug?: unknown; editor_prompt?: unknown; selected_references?: unknown };
+type DraftRequest = { slug?: unknown; editor_prompt?: unknown; selected_references?: unknown; include_style_references?: unknown };
 type DraftResponse = { title: string; subtitle?: string; body_md?: string; visual_type: string; visual_config: Record<string, unknown> };
 type Brief = { slug: string; narrative_role: string; drafting_guidance: string; suggested_visual_types: string[]; reference_resources: string[] | null };
 type ValidationResult = { ok: true; value: DraftResponse } | { ok: false; errors: string[] };
+type JsonSchema = {
+  type: "object" | "array" | "string" | "number" | "integer" | "boolean";
+  additionalProperties?: boolean;
+  required?: string[];
+  properties?: Record<string, JsonSchema>;
+  items?: JsonSchema;
+  enum?: unknown[];
+  minimum?: number;
+  maximum?: number;
+  minItems?: number;
+  maxItems?: number;
+};
+
+const annotationSchema: JsonSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["label", "pointLabel"],
+  properties: { label: { type: "string" }, pointLabel: { type: "string" }, description: { type: "string" } },
+};
+
+const componentRefNames = ["Hero", "StatCallout", "StatGrid", "LogoGrid", "QuoteBlock", "ComparisonTable", "Timeline", "ProcessFlow", "ProblemSolutionGrid", "AnnotatedChart", "FunnelLayout", "CustomerSpotlight", "SectionDivider", "CitationFooter", "PersonCard", "CategoryCard"];
+
+const schemaMap: Record<string, JsonSchema> = {
+  cover: { type: "object", additionalProperties: false, properties: { eyebrow: { type: "string" }, headline: { type: "string" }, supporting: { type: "string" }, layout: { type: "string", enum: ["centered", "left"] }, background: { type: "string", enum: ["gradient", "minimal", "dark"] }, footer: { type: "object", additionalProperties: false, properties: { note: { type: "string" }, sources: { type: "array", items: { type: "string" } } } } } },
+  logos: { type: "object", additionalProperties: false, properties: { headline: { type: "string" }, caption: { type: "string" }, greyscale: { type: "boolean" }, columns: { type: "integer", minimum: 2, maximum: 6 }, customer_slugs: { type: "array", items: { type: "string" } } } },
+  badges: { type: "object", additionalProperties: false, required: ["pairs"], properties: { pairs: { type: "array", minItems: 3, maxItems: 6, items: { type: "object", additionalProperties: false, required: ["title", "description"], properties: { label: { type: "string" }, title: { type: "string" }, description: { type: "string" }, metric: { type: "string" } } } } } },
+  funnel: { type: "object", additionalProperties: false, properties: { stages: { type: "array", items: { type: "object", additionalProperties: false, required: ["label", "value"], properties: { label: { type: "string" }, value: { type: "string" }, context: { type: "string" }, widthPct: { type: "number", minimum: 10, maximum: 100 } } } } } },
+  adoption: { type: "object", additionalProperties: false, properties: { headline: { type: "string" }, chartType: { type: "string", enum: ["line", "area"] }, annotations: { type: "array", items: annotationSchema } } },
+  glide: { type: "object", additionalProperties: false, properties: { headline: { type: "string" }, annotations: { type: "array", items: annotationSchema }, breakEvenLabel: { type: "string" } } },
+  team: { type: "object", additionalProperties: false, properties: { layout: { type: "string", enum: ["founders-prominent", "flat-grid"] }, caption: { type: "string" } } },
+  round: { type: "object", additionalProperties: false, properties: { cta_label: { type: "string" } } },
+  gap: { type: "object", additionalProperties: false, required: ["leftLabel", "rightLabel", "rows"], properties: { title: { type: "string" }, leftLabel: { type: "string" }, rightLabel: { type: "string" }, rows: { type: "array", minItems: 3, maxItems: 6, items: { type: "object", additionalProperties: false, required: ["category", "leftValue", "rightValue"], properties: { category: { type: "string" }, leftValue: { type: "string" }, rightValue: { type: "string" } } } } } },
+  verticals: { type: "object", additionalProperties: false, required: ["items"], properties: { items: { type: "array", minItems: 2, maxItems: 5, items: { type: "object", additionalProperties: false, required: ["name", "status", "description"], properties: { name: { type: "string" }, status: { type: "string" }, description: { type: "string" }, icon: { type: "string" } } } } } },
+  "customer-spotlight": { type: "object", additionalProperties: false, required: ["customer_slug"], properties: { customer_slug: { type: "string" }, layout: { type: "string", enum: ["logo-left", "logo-top", "photo-fullbleed"] }, metrics: { type: "array", items: { type: "object", additionalProperties: false, required: ["label", "value"], properties: { label: { type: "string" }, value: { type: "string" }, context: { type: "string" }, trend: { type: "string" } } } } } },
+  custom: { type: "object", additionalProperties: false, required: ["composition"], properties: { composition: { type: "array", minItems: 1, maxItems: 5, items: { type: "object", additionalProperties: false, required: ["component", "props"], properties: { component: { type: "string", enum: componentRefNames }, props: { type: "object" } } } } } },
+};
+
+const SYSTEM_PROMPT = `You are drafting a slide for Navio Solutions' investor pitch deck. Navio is a Norwegian B2B SaaS for mobile car and tire service operators.
+
+DESIGN PRINCIPLES (apply rigorously):
+
+1. ONE IDEA PER SLIDE. The slide communicates exactly one thing. Everything else is supporting context.
+2. DEATH OF BULLET POINTS. Never produce bullet point lists in body_md or visual_config. If content is sequential, the slide should be split. If content is additive, represent it through visual_config (StatGrid, ProcessFlow, ProblemSolutionGrid, ComparisonTable). Bullets are a signal that the slide structure is wrong.
+3. EVERY NUMBER NEEDS CONTEXT. "250 customers/day" is weak. "250 customers/day, up from 80 a year ago" is strong. Stats include label + value + context (and where applicable, change indicator).
+4. RESTRAINT. Most slides use minimal background, single accent color. The Navio purple gradient is reserved for hero moments (cover, section dividers, the-ask). Don't request gradient backgrounds for content slides.
+5. REFERENCE DATA, NEVER INVENT. Customer names, financial numbers, traction stats, team members must come from reference data. When in doubt, write content that gracefully omits a datapoint rather than fabricating one.
+6. SPARSE BY DEFAULT. Components support density: 'sparse' | 'dense'. Default to sparse. Use dense only when the content genuinely demands it (data tables, multi-metric overviews on traction or financials slides).
+7. COMPOSITION RHYTHM. For visual_type='custom', think about pacing. A slide is usually one big idea (one component), sometimes two (hero + supporting stat grid), rarely three. Avoid 4-5 component compositions unless absolutely necessary.
+
+OUTPUT LANGUAGE: All slide content (title, subtitle, body_md, all visual_config text fields including labels, descriptions, captions, problem/solution pairs, annotations, comparison row text, vertical names, status text, metric labels, etc.) must be in Norwegian Bokmål. Use natural Norwegian business language — confident, restrained, suitable for an investor pitch.
+Do not translate brand terms (e.g., "Navio", "Fundraise", "SaaS", proper company names). Do not include English phrases unless the term is brand-specific or internationally standard.
+
+OUTPUT FORMAT: Return only valid JSON matching the schema. Do not wrap in markdown code blocks. Do not include explanations or preambles.`;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -31,67 +84,57 @@ function isNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
 
-function optionalString(value: unknown): value is string | undefined {
-  return value === undefined || isString(value);
-}
-
-function isLogosLikeConfig(config: unknown): boolean {
-  return isRecord(config) && optionalString(config.caption);
-}
-
-function isBadgesConfig(config: unknown): boolean {
-  return isRecord(config) && Array.isArray(config.badges) && config.badges.every((badge) => isRecord(badge) && isString(badge.icon) && isString(badge.problem) && isString(badge.solution));
-}
-
-function isGlideConfig(config: unknown): boolean {
-  return isRecord(config) && (config.break_even_nok === undefined || isNumber(config.break_even_nok));
-}
-
-function isGapConfig(config: unknown): boolean {
-  return isRecord(config) && Array.isArray(config.categories) && config.categories.every((category) => {
-    if (!isRecord(category) || !isString(category.label) || !isNumber(category.navio_position) || !Array.isArray(category.competitors)) return false;
-    return category.competitors.every((competitor) => isRecord(competitor) && isString(competitor.name) && isNumber(competitor.position));
-  });
-}
-
-function isVerticalsConfig(config: unknown): boolean {
-  return isRecord(config) && Array.isArray(config.verticals) && config.verticals.every((vertical) => isRecord(vertical) && isString(vertical.name) && isString(vertical.description) && isString(vertical.status));
-}
-
-function isCustomerSpotlightConfig(config: unknown): boolean {
-  return isRecord(config) && isString(config.customer_slug) && config.customer_slug.length > 0;
-}
-
-function isRoundConfig(config: unknown): boolean {
-  return isRecord(config) && optionalString(config.cta_label);
+function validateSchema(schema: JsonSchema, value: unknown, path = "visual_config"): string | null {
+  if (schema.type === "object") {
+    if (!isRecord(value)) return `${path} must be an object`;
+    if (schema.additionalProperties === false) {
+      const allowed = new Set(Object.keys(schema.properties ?? {}));
+      const extra = Object.keys(value).find((key) => !allowed.has(key));
+      if (extra) return `${path}.${extra} is not allowed`;
+    }
+    for (const key of schema.required ?? []) {
+      if (value[key] === undefined) return `${path}.${key} is required`;
+    }
+    for (const [key, childSchema] of Object.entries(schema.properties ?? {})) {
+      if (value[key] !== undefined) {
+        const error = validateSchema(childSchema, value[key], `${path}.${key}`);
+        if (error) return error;
+      }
+    }
+    return null;
+  }
+  if (schema.type === "array") {
+    if (!Array.isArray(value)) return `${path} must be an array`;
+    if (schema.minItems !== undefined && value.length < schema.minItems) return `${path} must contain at least ${schema.minItems} items`;
+    if (schema.maxItems !== undefined && value.length > schema.maxItems) return `${path} must contain at most ${schema.maxItems} items`;
+    if (schema.items) {
+      for (let index = 0; index < value.length; index += 1) {
+        const error = validateSchema(schema.items, value[index], `${path}[${index}]`);
+        if (error) return error;
+      }
+    }
+    return null;
+  }
+  if (schema.type === "string") {
+    if (!isString(value)) return `${path} must be a string`;
+    if (schema.enum && !schema.enum.includes(value)) return `${path} must be one of ${schema.enum.join(", ")}`;
+    return null;
+  }
+  if (schema.type === "number" || schema.type === "integer") {
+    if (!isNumber(value)) return `${path} must be a number`;
+    if (schema.type === "integer" && !Number.isInteger(value)) return `${path} must be an integer`;
+    if (schema.minimum !== undefined && value < schema.minimum) return `${path} must be at least ${schema.minimum}`;
+    if (schema.maximum !== undefined && value > schema.maximum) return `${path} must be at most ${schema.maximum}`;
+    return null;
+  }
+  if (schema.type === "boolean") return typeof value === "boolean" ? null : `${path} must be a boolean`;
+  return null;
 }
 
 function validateVisualConfig(visualType: string, config: unknown): string | null {
-  if (!isRecord(config)) return "visual_config must be an object";
-  switch (visualType) {
-    case "cover":
-    case "custom":
-      return null;
-    case "logos":
-    case "funnel":
-    case "adoption":
-    case "team":
-      return isLogosLikeConfig(config) ? null : "visual_config.caption must be a string when provided";
-    case "badges":
-      return isBadgesConfig(config) ? null : "visual_config.badges must be an array of { icon, problem, solution } strings";
-    case "glide":
-      return isGlideConfig(config) ? null : "visual_config.break_even_nok must be a number when provided";
-    case "round":
-      return isRoundConfig(config) ? null : "visual_config.cta_label must be a string when provided";
-    case "gap":
-      return isGapConfig(config) ? null : "visual_config.categories must contain label, navio_position, and competitors";
-    case "verticals":
-      return isVerticalsConfig(config) ? null : "visual_config.verticals must be an array of { name, description, status } strings";
-    case "customer-spotlight":
-      return isCustomerSpotlightConfig(config) ? null : "visual_config.customer_slug must be a non-empty string";
-    default:
-      return "visual_type is not supported";
-  }
+  const schema = schemaMap[visualType];
+  if (!schema) return "visual_type is not supported";
+  return validateSchema(schema, config);
 }
 
 function validateDraft(raw: unknown, suggested: string[]): ValidationResult {
@@ -130,20 +173,6 @@ function extractJson(text: string): unknown {
 }
 
 function schemasFor(types: string[]) {
-  const schemaMap: Record<string, unknown> = {
-    cover: { type: "object", additionalProperties: true },
-    custom: { type: "object", additionalProperties: true },
-    logos: { type: "object", properties: { caption: { type: "string" } } },
-    funnel: { type: "object", properties: { caption: { type: "string" } } },
-    adoption: { type: "object", properties: { caption: { type: "string" } } },
-    team: { type: "object", properties: { caption: { type: "string" } } },
-    round: { type: "object", properties: { cta_label: { type: "string" } } },
-    glide: { type: "object", properties: { break_even_nok: { type: "number" } } },
-    badges: { type: "object", required: ["badges"], properties: { badges: { type: "array", items: { type: "object", required: ["icon", "problem", "solution"], properties: { icon: { type: "string" }, problem: { type: "string" }, solution: { type: "string" } } } } } },
-    gap: { type: "object", required: ["categories"], properties: { categories: { type: "array", items: { type: "object", required: ["label", "navio_position", "competitors"], properties: { label: { type: "string" }, navio_position: { type: "number" }, competitors: { type: "array", items: { type: "object", required: ["name", "position"], properties: { name: { type: "string" }, position: { type: "number" } } } } } } } } },
-    verticals: { type: "object", required: ["verticals"], properties: { verticals: { type: "array", items: { type: "object", required: ["name", "description", "status"], properties: { name: { type: "string" }, description: { type: "string" }, status: { type: "string" } } } } } },
-    "customer-spotlight": { type: "object", required: ["customer_slug"], properties: { customer_slug: { type: "string" } } },
-  };
   return Object.fromEntries(types.map((type) => [type, schemaMap[type]]).filter(([, schema]) => Boolean(schema)));
 }
 
@@ -174,6 +203,14 @@ async function fetchReferenceData(supabase: SupabaseClient, references: string[]
   return output;
 }
 
+function summarizeReferenceData(referenceData: Record<string, unknown>) {
+  return Object.fromEntries(Object.entries(referenceData).map(([key, value]) => {
+    if (Array.isArray(value)) return [key, { type: "array", count: value.length }];
+    if (isRecord(value)) return [key, { type: "object", present: true }];
+    return [key, { type: value === null ? "null" : typeof value, present: value !== null && value !== undefined }];
+  }));
+}
+
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -202,6 +239,7 @@ serve(async (req: Request): Promise<Response> => {
     const slug = typeof body.slug === "string" ? body.slug.trim() : "";
     const editorPrompt = typeof body.editor_prompt === "string" ? body.editor_prompt.trim().slice(0, 4000) : "";
     const selectedReferences = Array.isArray(body.selected_references) ? body.selected_references.filter(isString) : [];
+    const includeStyleReferences = typeof body.include_style_references === "boolean" ? body.include_style_references : true;
     if (!slug) return json({ error: "slug is required" }, 400);
 
     const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -217,13 +255,15 @@ serve(async (req: Request): Promise<Response> => {
     const availableReferences = typedBrief.reference_resources ?? [];
     const referencesToUse = selectedReferences.length ? selectedReferences.filter((ref) => availableReferences.includes(ref)) : availableReferences;
     const referenceData = await fetchReferenceData(serviceClient, referencesToUse);
+    const visualSchemas = schemasFor(typedBrief.suggested_visual_types);
 
-    const userPrompt = `Slide brief:\n  Slug: ${typedBrief.slug}\n  Narrative role: ${typedBrief.narrative_role}\n  Drafting guidance: ${typedBrief.drafting_guidance}\n  Suggested visual types: ${JSON.stringify(typedBrief.suggested_visual_types)}\n\nEditor's direction (optional):\n  ${editorPrompt || "(none provided)"}\n\nReference data:\n${JSON.stringify(referenceData, null, 2)}\n\nReturn a JSON object with:\n  title (string, required, 1-80 chars)\n  subtitle (string, optional, max 120 chars)\n  body_md (string, optional markdown body, max 4000 chars)\n  visual_type (one of suggested_visual_types)\n  visual_config (object matching the visual_type's schema)\n\nVisual config schemas:\n${JSON.stringify(schemasFor(typedBrief.suggested_visual_types), null, 2)}\n\nReturn only valid JSON. Do not wrap in markdown.`;
+    const userPrompt = `Slide brief:\n  Slug: ${typedBrief.slug}\n  Narrative role: ${typedBrief.narrative_role}\n  Drafting guidance: ${typedBrief.drafting_guidance}\n  Suggested visual types: ${JSON.stringify(typedBrief.suggested_visual_types)}\n\nEditor's direction (optional):\n  ${editorPrompt || "(none provided)"}\n\nStyle references requested: ${includeStyleReferences ? "yes" : "no"}\nStyle references are not fetched in this version; follow the system design principles instead.\n\nReference data:\n${JSON.stringify(referenceData, null, 2)}\n\nReturn a JSON object with:\n  title (string, required, 1-80 chars)\n  subtitle (string, optional, max 120 chars)\n  body_md (string, optional markdown body, max 4000 chars)\n  visual_type (one of suggested_visual_types)\n  visual_config (object matching the visual_type's schema)\n\nVisual config schemas:\n${JSON.stringify(visualSchemas, null, 2)}\n\nReturn only valid JSON. Do not wrap in markdown.`;
+    const promptContext = { system_prompt: SYSTEM_PROMPT, schema: visualSchemas, references_passed: referencesToUse, editor_prompt: editorPrompt || null, reference_data_summary: summarizeReferenceData(referenceData), include_style_references: includeStyleReferences };
 
     const anthropicResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "x-api-key": anthropicKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model: MODEL, max_tokens: 2400, system: "You are drafting a single slide for an investor pitch deck for Navio Solutions, a Norwegian B2B SaaS company. Be confident but grounded. Avoid superlatives. Use specific numbers when reference data provides them. Output valid JSON matching the schema.", messages: [{ role: "user", content: userPrompt }] }),
+      body: JSON.stringify({ model: MODEL, max_tokens: 2400, system: SYSTEM_PROMPT, messages: [{ role: "user", content: userPrompt }] }),
     });
 
     if (!anthropicResponse.ok) {
@@ -244,7 +284,7 @@ serve(async (req: Request): Promise<Response> => {
     const validation = validateDraft(parsed, typedBrief.suggested_visual_types);
     if (!validation.ok) return json({ errors: validation.errors }, 422);
 
-    const { error: insertError } = await serviceClient.from("portal_slide_drafts").insert({ slide_slug: slug, editor_email: userData.user.email ?? null, editor_user_id: userData.user.id, prompt: editorPrompt || null, response: validation.value, model: MODEL });
+    const { error: insertError } = await serviceClient.from("portal_slide_drafts").insert({ slide_slug: slug, editor_email: userData.user.email ?? null, editor_user_id: userData.user.id, prompt: editorPrompt || null, prompt_context: promptContext, response: validation.value, model: MODEL });
     if (insertError) throw insertError;
 
     return json(validation.value);
