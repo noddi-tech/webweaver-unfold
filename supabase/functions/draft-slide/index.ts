@@ -10,10 +10,63 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type DraftRequest = { slug?: unknown; editor_prompt?: unknown; selected_references?: unknown };
+type DraftRequest = { slug?: unknown; editor_prompt?: unknown; selected_references?: unknown; include_style_references?: unknown };
 type DraftResponse = { title: string; subtitle?: string; body_md?: string; visual_type: string; visual_config: Record<string, unknown> };
 type Brief = { slug: string; narrative_role: string; drafting_guidance: string; suggested_visual_types: string[]; reference_resources: string[] | null };
 type ValidationResult = { ok: true; value: DraftResponse } | { ok: false; errors: string[] };
+type JsonSchema = {
+  type: "object" | "array" | "string" | "number" | "integer" | "boolean";
+  additionalProperties?: boolean;
+  required?: string[];
+  properties?: Record<string, JsonSchema>;
+  items?: JsonSchema;
+  enum?: unknown[];
+  minimum?: number;
+  maximum?: number;
+  minItems?: number;
+  maxItems?: number;
+};
+
+const annotationSchema: JsonSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["label", "pointLabel"],
+  properties: { label: { type: "string" }, pointLabel: { type: "string" }, description: { type: "string" } },
+};
+
+const componentRefNames = ["Hero", "StatCallout", "StatGrid", "LogoGrid", "QuoteBlock", "ComparisonTable", "Timeline", "ProcessFlow", "ProblemSolutionGrid", "AnnotatedChart", "FunnelLayout", "CustomerSpotlight", "SectionDivider", "CitationFooter", "PersonCard", "CategoryCard"];
+
+const schemaMap: Record<string, JsonSchema> = {
+  cover: { type: "object", additionalProperties: false, properties: { eyebrow: { type: "string" }, headline: { type: "string" }, supporting: { type: "string" }, layout: { type: "string", enum: ["centered", "left"] }, background: { type: "string", enum: ["gradient", "minimal", "dark"] }, footer: { type: "object", additionalProperties: false, properties: { note: { type: "string" }, sources: { type: "array", items: { type: "string" } } } } } },
+  logos: { type: "object", additionalProperties: false, properties: { headline: { type: "string" }, caption: { type: "string" }, greyscale: { type: "boolean" }, columns: { type: "integer", minimum: 2, maximum: 6 }, customer_slugs: { type: "array", items: { type: "string" } } } },
+  badges: { type: "object", additionalProperties: false, required: ["pairs"], properties: { pairs: { type: "array", minItems: 3, maxItems: 6, items: { type: "object", additionalProperties: false, required: ["title", "description"], properties: { label: { type: "string" }, title: { type: "string" }, description: { type: "string" }, metric: { type: "string" } } } } } },
+  funnel: { type: "object", additionalProperties: false, properties: { stages: { type: "array", items: { type: "object", additionalProperties: false, required: ["label", "value"], properties: { label: { type: "string" }, value: { type: "string" }, context: { type: "string" }, widthPct: { type: "number", minimum: 10, maximum: 100 } } } } } },
+  adoption: { type: "object", additionalProperties: false, properties: { headline: { type: "string" }, chartType: { type: "string", enum: ["line", "area"] }, annotations: { type: "array", items: annotationSchema } } },
+  glide: { type: "object", additionalProperties: false, properties: { headline: { type: "string" }, annotations: { type: "array", items: annotationSchema }, breakEvenLabel: { type: "string" } } },
+  team: { type: "object", additionalProperties: false, properties: { layout: { type: "string", enum: ["founders-prominent", "flat-grid"] }, caption: { type: "string" } } },
+  round: { type: "object", additionalProperties: false, properties: { cta_label: { type: "string" } } },
+  gap: { type: "object", additionalProperties: false, required: ["leftLabel", "rightLabel", "rows"], properties: { title: { type: "string" }, leftLabel: { type: "string" }, rightLabel: { type: "string" }, rows: { type: "array", minItems: 3, maxItems: 6, items: { type: "object", additionalProperties: false, required: ["category", "leftValue", "rightValue"], properties: { category: { type: "string" }, leftValue: { type: "string" }, rightValue: { type: "string" } } } } } },
+  verticals: { type: "object", additionalProperties: false, required: ["items"], properties: { items: { type: "array", minItems: 2, maxItems: 5, items: { type: "object", additionalProperties: false, required: ["name", "status", "description"], properties: { name: { type: "string" }, status: { type: "string" }, description: { type: "string" }, icon: { type: "string" } } } } } },
+  "customer-spotlight": { type: "object", additionalProperties: false, required: ["customer_slug"], properties: { customer_slug: { type: "string" }, layout: { type: "string", enum: ["logo-left", "logo-top", "photo-fullbleed"] }, metrics: { type: "array", items: { type: "object", additionalProperties: false, required: ["label", "value"], properties: { label: { type: "string" }, value: { type: "string" }, context: { type: "string" }, trend: { type: "string" } } } } } },
+  custom: { type: "object", additionalProperties: false, required: ["composition"], properties: { composition: { type: "array", minItems: 1, maxItems: 5, items: { type: "object", additionalProperties: false, required: ["component", "props"], properties: { component: { type: "string", enum: componentRefNames }, props: { type: "object" } } } } } },
+};
+
+const SYSTEM_PROMPT = `You are drafting a slide for Navio Solutions' investor pitch deck. Navio is a Norwegian B2B SaaS for mobile car and tire service operators.
+
+DESIGN PRINCIPLES (apply rigorously):
+
+1. ONE IDEA PER SLIDE. The slide communicates exactly one thing. Everything else is supporting context.
+2. DEATH OF BULLET POINTS. Never produce bullet point lists in body_md or visual_config. If content is sequential, the slide should be split. If content is additive, represent it through visual_config (StatGrid, ProcessFlow, ProblemSolutionGrid, ComparisonTable). Bullets are a signal that the slide structure is wrong.
+3. EVERY NUMBER NEEDS CONTEXT. "250 customers/day" is weak. "250 customers/day, up from 80 a year ago" is strong. Stats include label + value + context (and where applicable, change indicator).
+4. RESTRAINT. Most slides use minimal background, single accent color. The Navio purple gradient is reserved for hero moments (cover, section dividers, the-ask). Don't request gradient backgrounds for content slides.
+5. REFERENCE DATA, NEVER INVENT. Customer names, financial numbers, traction stats, team members must come from reference data. When in doubt, write content that gracefully omits a datapoint rather than fabricating one.
+6. SPARSE BY DEFAULT. Components support density: 'sparse' | 'dense'. Default to sparse. Use dense only when the content genuinely demands it (data tables, multi-metric overviews on traction or financials slides).
+7. COMPOSITION RHYTHM. For visual_type='custom', think about pacing. A slide is usually one big idea (one component), sometimes two (hero + supporting stat grid), rarely three. Avoid 4-5 component compositions unless absolutely necessary.
+
+OUTPUT LANGUAGE: All slide content (title, subtitle, body_md, all visual_config text fields including labels, descriptions, captions, problem/solution pairs, annotations, comparison row text, vertical names, status text, metric labels, etc.) must be in Norwegian Bokmål. Use natural Norwegian business language — confident, restrained, suitable for an investor pitch.
+Do not translate brand terms (e.g., "Navio", "Fundraise", "SaaS", proper company names). Do not include English phrases unless the term is brand-specific or internationally standard.
+
+OUTPUT FORMAT: Return only valid JSON matching the schema. Do not wrap in markdown code blocks. Do not include explanations or preambles.`;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
