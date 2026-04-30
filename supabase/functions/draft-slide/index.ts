@@ -84,67 +84,57 @@ function isNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
 
-function optionalString(value: unknown): value is string | undefined {
-  return value === undefined || isString(value);
-}
-
-function isLogosLikeConfig(config: unknown): boolean {
-  return isRecord(config) && optionalString(config.caption);
-}
-
-function isBadgesConfig(config: unknown): boolean {
-  return isRecord(config) && Array.isArray(config.badges) && config.badges.every((badge) => isRecord(badge) && isString(badge.icon) && isString(badge.problem) && isString(badge.solution));
-}
-
-function isGlideConfig(config: unknown): boolean {
-  return isRecord(config) && (config.break_even_nok === undefined || isNumber(config.break_even_nok));
-}
-
-function isGapConfig(config: unknown): boolean {
-  return isRecord(config) && Array.isArray(config.categories) && config.categories.every((category) => {
-    if (!isRecord(category) || !isString(category.label) || !isNumber(category.navio_position) || !Array.isArray(category.competitors)) return false;
-    return category.competitors.every((competitor) => isRecord(competitor) && isString(competitor.name) && isNumber(competitor.position));
-  });
-}
-
-function isVerticalsConfig(config: unknown): boolean {
-  return isRecord(config) && Array.isArray(config.verticals) && config.verticals.every((vertical) => isRecord(vertical) && isString(vertical.name) && isString(vertical.description) && isString(vertical.status));
-}
-
-function isCustomerSpotlightConfig(config: unknown): boolean {
-  return isRecord(config) && isString(config.customer_slug) && config.customer_slug.length > 0;
-}
-
-function isRoundConfig(config: unknown): boolean {
-  return isRecord(config) && optionalString(config.cta_label);
+function validateSchema(schema: JsonSchema, value: unknown, path = "visual_config"): string | null {
+  if (schema.type === "object") {
+    if (!isRecord(value)) return `${path} must be an object`;
+    if (schema.additionalProperties === false) {
+      const allowed = new Set(Object.keys(schema.properties ?? {}));
+      const extra = Object.keys(value).find((key) => !allowed.has(key));
+      if (extra) return `${path}.${extra} is not allowed`;
+    }
+    for (const key of schema.required ?? []) {
+      if (value[key] === undefined) return `${path}.${key} is required`;
+    }
+    for (const [key, childSchema] of Object.entries(schema.properties ?? {})) {
+      if (value[key] !== undefined) {
+        const error = validateSchema(childSchema, value[key], `${path}.${key}`);
+        if (error) return error;
+      }
+    }
+    return null;
+  }
+  if (schema.type === "array") {
+    if (!Array.isArray(value)) return `${path} must be an array`;
+    if (schema.minItems !== undefined && value.length < schema.minItems) return `${path} must contain at least ${schema.minItems} items`;
+    if (schema.maxItems !== undefined && value.length > schema.maxItems) return `${path} must contain at most ${schema.maxItems} items`;
+    if (schema.items) {
+      for (let index = 0; index < value.length; index += 1) {
+        const error = validateSchema(schema.items, value[index], `${path}[${index}]`);
+        if (error) return error;
+      }
+    }
+    return null;
+  }
+  if (schema.type === "string") {
+    if (!isString(value)) return `${path} must be a string`;
+    if (schema.enum && !schema.enum.includes(value)) return `${path} must be one of ${schema.enum.join(", ")}`;
+    return null;
+  }
+  if (schema.type === "number" || schema.type === "integer") {
+    if (!isNumber(value)) return `${path} must be a number`;
+    if (schema.type === "integer" && !Number.isInteger(value)) return `${path} must be an integer`;
+    if (schema.minimum !== undefined && value < schema.minimum) return `${path} must be at least ${schema.minimum}`;
+    if (schema.maximum !== undefined && value > schema.maximum) return `${path} must be at most ${schema.maximum}`;
+    return null;
+  }
+  if (schema.type === "boolean") return typeof value === "boolean" ? null : `${path} must be a boolean`;
+  return null;
 }
 
 function validateVisualConfig(visualType: string, config: unknown): string | null {
-  if (!isRecord(config)) return "visual_config must be an object";
-  switch (visualType) {
-    case "cover":
-    case "custom":
-      return null;
-    case "logos":
-    case "funnel":
-    case "adoption":
-    case "team":
-      return isLogosLikeConfig(config) ? null : "visual_config.caption must be a string when provided";
-    case "badges":
-      return isBadgesConfig(config) ? null : "visual_config.badges must be an array of { icon, problem, solution } strings";
-    case "glide":
-      return isGlideConfig(config) ? null : "visual_config.break_even_nok must be a number when provided";
-    case "round":
-      return isRoundConfig(config) ? null : "visual_config.cta_label must be a string when provided";
-    case "gap":
-      return isGapConfig(config) ? null : "visual_config.categories must contain label, navio_position, and competitors";
-    case "verticals":
-      return isVerticalsConfig(config) ? null : "visual_config.verticals must be an array of { name, description, status } strings";
-    case "customer-spotlight":
-      return isCustomerSpotlightConfig(config) ? null : "visual_config.customer_slug must be a non-empty string";
-    default:
-      return "visual_type is not supported";
-  }
+  const schema = schemaMap[visualType];
+  if (!schema) return "visual_type is not supported";
+  return validateSchema(schema, config);
 }
 
 function validateDraft(raw: unknown, suggested: string[]): ValidationResult {
@@ -183,20 +173,6 @@ function extractJson(text: string): unknown {
 }
 
 function schemasFor(types: string[]) {
-  const schemaMap: Record<string, unknown> = {
-    cover: { type: "object", additionalProperties: true },
-    custom: { type: "object", additionalProperties: true },
-    logos: { type: "object", properties: { caption: { type: "string" } } },
-    funnel: { type: "object", properties: { caption: { type: "string" } } },
-    adoption: { type: "object", properties: { caption: { type: "string" } } },
-    team: { type: "object", properties: { caption: { type: "string" } } },
-    round: { type: "object", properties: { cta_label: { type: "string" } } },
-    glide: { type: "object", properties: { break_even_nok: { type: "number" } } },
-    badges: { type: "object", required: ["badges"], properties: { badges: { type: "array", items: { type: "object", required: ["icon", "problem", "solution"], properties: { icon: { type: "string" }, problem: { type: "string" }, solution: { type: "string" } } } } } },
-    gap: { type: "object", required: ["categories"], properties: { categories: { type: "array", items: { type: "object", required: ["label", "navio_position", "competitors"], properties: { label: { type: "string" }, navio_position: { type: "number" }, competitors: { type: "array", items: { type: "object", required: ["name", "position"], properties: { name: { type: "string" }, position: { type: "number" } } } } } } } } },
-    verticals: { type: "object", required: ["verticals"], properties: { verticals: { type: "array", items: { type: "object", required: ["name", "description", "status"], properties: { name: { type: "string" }, description: { type: "string" }, status: { type: "string" } } } } } },
-    "customer-spotlight": { type: "object", required: ["customer_slug"], properties: { customer_slug: { type: "string" } } },
-  };
   return Object.fromEntries(types.map((type) => [type, schemaMap[type]]).filter(([, schema]) => Boolean(schema)));
 }
 
