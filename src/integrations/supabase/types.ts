@@ -3183,6 +3183,7 @@ export type Database = {
           id: string
           model: string
           prompt: string | null
+          prompt_context: Json | null
           response: Json
           slide_slug: string
         }
@@ -3193,6 +3194,7 @@ export type Database = {
           id?: string
           model: string
           prompt?: string | null
+          prompt_context?: Json | null
           response: Json
           slide_slug: string
         }
@@ -3203,6 +3205,7 @@ export type Database = {
           id?: string
           model?: string
           prompt?: string | null
+          prompt_context?: Json | null
           response?: Json
           slide_slug?: string
         }
