@@ -30,6 +30,7 @@ export type SlideDraftResponse = {
   body_md?: string;
   visual_type: VisualType;
   visual_config: Record<string, unknown>;
+  ai_note?: string;
 };
 
 export interface InvestorSummary {

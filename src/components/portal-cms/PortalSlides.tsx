@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { deepEqualJson, parseAndValidateVisualConfig, type VisualConfigValidation } from "@/lib/portalDraftSchemas";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -201,6 +201,16 @@ type EditedDraftState = {
   configRaw: string;
 };
 
+type ConversationTurn = {
+  id: string;                    // DB row id of the saved draft (or "local-<n>" before save)
+  draftId: string | null;        // DB id (null only for local fallbacks; refinement requires it)
+  parentDraftId: string | null;  // parent in the chain (null for the initial turn)
+  kind: "initial" | "refinement";
+  instruction?: string;          // present for refinement turns
+  aiNote?: string;               // optional Norwegian editor note from AI
+  draft: SlideDraftResponse;     // the AI's response state for this turn
+};
+
 function draftToEdited(draft: SlideDraftResponse): EditedDraftState {
   return {
     title: draft.title,
@@ -215,20 +225,67 @@ function EditedBadge() {
   return <Badge variant="outline" className="ml-2 border-primary/40 text-primary">Endret</Badge>;
 }
 
-function FieldRowShell({ label, edited, leftCurrent, rightEditor, errorBlock }: { label: string; edited: boolean; leftCurrent: React.ReactNode; rightEditor: React.ReactNode; errorBlock?: React.ReactNode }) {
+const SUBTITLE_PLACEHOLDER_NB = "Ingen undertittel i AI-forslaget — la stå tom eller skriv egen";
+const BODY_PLACEHOLDER_NB = "Ingen body i AI-forslaget — la stå tom eller skriv egen";
+
+function PreviewScaleObserver() {
+  // Observes the parent container's width and writes a CSS variable so the inner
+  // 1280×720 board scales to fit. Keeps the slide proportional inside the column.
+  const ref = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = ref.current?.parentElement;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth;
+      el.style.setProperty("--preview-scale", String(Math.max(0.1, w / 1280)));
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return <div ref={ref} className="hidden" />;
+}
+
+function LivePreviewPanel({ edited, configValidation, slug }: { edited: EditedDraftState; configValidation: VisualConfigValidation | null; slug: string }) {
+  // Debounce preview state to keep typing snappy.
+  const debouncedEdited = useDebounced(edited, 200);
+  const debouncedValidation = useDebounced(configValidation, 200);
+
+  if (!debouncedValidation || debouncedValidation.kind === "syntax") {
+    return (
+      <div className="flex aspect-video w-full items-center justify-center rounded-md border border-dashed bg-muted/40 p-4 text-center text-xs text-muted-foreground">
+        Ugyldig JSON-syntaks — forhåndsvisning pauset
+      </div>
+    );
+  }
+  if (debouncedValidation.kind === "schema") {
+    return (
+      <div className="flex aspect-video w-full items-center justify-center rounded-md border border-dashed bg-muted/40 p-4 text-center text-xs text-muted-foreground">
+        Skjemavalidering feilet — forhåndsvisning pauset
+      </div>
+    );
+  }
+
+  const previewSlide = normalizeSlide({
+    id: "ai-preview",
+    slug: slug || "ai-preview",
+    slide_number: 0,
+    title: debouncedEdited.title || null,
+    subtitle: debouncedEdited.subtitle || null,
+    body_md: debouncedEdited.body_md || null,
+    visual_type: debouncedEdited.visual_type,
+    visual_config: debouncedValidation.value as unknown as Json,
+    is_published: false,
+    display_order: 0,
+  });
+
   return (
-    <div className="grid gap-3 rounded-md border bg-background p-3 md:grid-cols-2">
-      <div className="space-y-2">
-        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
-        {leftCurrent}
+    <div className="relative aspect-video w-full overflow-hidden rounded-md border bg-background">
+      <div className="absolute left-0 top-0" style={{ width: 1280, height: 720, transformOrigin: "top left", transform: "scale(var(--preview-scale, 0.28))" }}>
+        <SlideRenderer slide={{ ...previewSlide, visual_config: debouncedValidation.value as unknown as VisualConfig }} mode="viewer" />
       </div>
-      <div className="space-y-2">
-        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {label}{edited ? <EditedBadge /> : null}
-        </div>
-        {rightEditor}
-        {errorBlock}
-      </div>
+      <PreviewScaleObserver />
     </div>
   );
 }
@@ -237,8 +294,10 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
   const { toast } = useToast();
   const [direction, setDirection] = useState("");
   const [selectedReferences, setSelectedReferences] = useState<string[]>([]);
-  const [originalDraft, setOriginalDraft] = useState<SlideDraftResponse | null>(null);
+  const [turns, setTurns] = useState<ConversationTurn[]>([]);
+  const [activeTurnId, setActiveTurnId] = useState<string | null>(null);
   const [edited, setEdited] = useState<EditedDraftState | null>(null);
+  const [refineInstruction, setRefineInstruction] = useState("");
   const [savingAcceptance, setSavingAcceptance] = useState(false);
   const { data: status, isLoading: statusLoading } = useQuery({ queryKey: ["draft-slide-status"], queryFn: async () => { const { data, error } = await supabase.functions.invoke<{ configured: boolean }>("draft-slide-status"); if (error) throw error; return data; } });
   const { data: brief } = useQuery({ queryKey: ["portal-slide-brief", form.slug], queryFn: () => fetchSlideBrief(form.slug), enabled: Boolean(form.slug) });
@@ -259,6 +318,8 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
 
   useEffect(() => { if (brief?.reference_resources) setSelectedReferences(brief.reference_resources); }, [brief?.slug, brief?.reference_resources]);
 
+  const activeTurn = useMemo(() => turns.find((t) => t.id === activeTurnId) ?? null, [turns, activeTurnId]);
+
   const generate = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke<SlideDraftResponse>("draft-slide", { body: { slug: form.slug, editor_prompt: direction, selected_references: selectedReferences, include_style_references: true } });
@@ -267,10 +328,73 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
       return data;
     },
     onSuccess: (data) => {
-      setOriginalDraft(data);
+      const turn: ConversationTurn = {
+        id: data.id ?? `local-${Date.now()}`,
+        draftId: data.id ?? null,
+        parentDraftId: null,
+        kind: "initial",
+        aiNote: data.ai_note,
+        draft: data,
+      };
+      setTurns([turn]);
+      setActiveTurnId(turn.id);
       setEdited(draftToEdited(data));
+      setRefineInstruction("");
     },
     onError: (error) => toast({ title: "Draft failed", description: error.message, variant: "destructive" }),
+  });
+
+  const refine = useMutation({
+    mutationFn: async () => {
+      if (!activeTurn || !edited) throw new Error("No active draft to refine.");
+      if (!activeTurn.draftId) throw new Error("Cannot refine — parent draft has no DB id (regenerate first).");
+      const instruction = refineInstruction.trim();
+      if (instruction.length < 1) throw new Error("Skriv en instruksjon.");
+      // Send the in-memory edited state as current_state so manual tweaks the editor
+      // made before refining are preserved as the AI's starting point.
+      let currentVisualConfig: Record<string, unknown> = activeTurn.draft.visual_config ?? {};
+      try {
+        const parsed = JSON.parse(edited.configRaw);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) currentVisualConfig = parsed as Record<string, unknown>;
+      } catch {
+        // Fall back to active turn's config if user hasn't fixed JSON yet.
+      }
+      const currentState: SlideDraftResponse = {
+        title: edited.title,
+        subtitle: edited.subtitle || undefined,
+        body_md: edited.body_md || undefined,
+        visual_type: edited.visual_type,
+        visual_config: currentVisualConfig,
+      };
+      const { data, error } = await supabase.functions.invoke<SlideDraftResponse>("refine-slide-draft", {
+        body: {
+          slug: form.slug,
+          parent_draft_id: activeTurn.draftId,
+          current_state: currentState,
+          instruction,
+          include_style_references: true,
+        },
+      });
+      if (error) throw error;
+      if (!data) throw new Error("No refinement returned.");
+      return { data, instruction, parentDraftId: activeTurn.draftId };
+    },
+    onSuccess: ({ data, instruction, parentDraftId }) => {
+      const turn: ConversationTurn = {
+        id: data.id ?? `local-${Date.now()}`,
+        draftId: data.id ?? null,
+        parentDraftId,
+        kind: "refinement",
+        instruction,
+        aiNote: data.ai_note,
+        draft: data,
+      };
+      setTurns((current) => [...current, turn]);
+      setActiveTurnId(turn.id);
+      setEdited(draftToEdited(data));
+      setRefineInstruction("");
+    },
+    onError: (error) => toast({ title: "Refinement failed", description: error.message, variant: "destructive" }),
   });
 
   const references = brief?.reference_resources ?? [];
@@ -302,20 +426,29 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
 
   const editedFields = useMemo(() => {
     const set = new Set<string>();
-    if (!edited || !originalDraft) return set;
-    if (edited.title !== originalDraft.title) set.add("title");
-    if (edited.subtitle !== (originalDraft.subtitle ?? "")) set.add("subtitle");
-    if (edited.body_md !== (originalDraft.body_md ?? "")) set.add("body_md");
-    if (configValidation?.kind === "ok" && !deepEqualJson(configValidation.value, originalDraft.visual_config ?? {})) {
+    if (!edited || !activeTurn) return set;
+    const base = activeTurn.draft;
+    if (edited.title !== base.title) set.add("title");
+    if (edited.subtitle !== (base.subtitle ?? "")) set.add("subtitle");
+    if (edited.body_md !== (base.body_md ?? "")) set.add("body_md");
+    if (configValidation?.kind === "ok" && !deepEqualJson(configValidation.value, base.visual_config ?? {})) {
       set.add("visual_config");
     }
     return set;
-  }, [edited, originalDraft, configValidation]);
+  }, [edited, activeTurn, configValidation]);
 
   const isValid = Boolean(edited) && !titleError && !subtitleError && !bodyError && configValidation?.kind === "ok";
 
+  const handleSelectTurn = useCallback((turnId: string) => {
+    const turn = turns.find((t) => t.id === turnId);
+    if (!turn) return;
+    setActiveTurnId(turnId);
+    setEdited(draftToEdited(turn.draft));
+    setRefineInstruction("");
+  }, [turns]);
+
   const handleAccept = useCallback(async () => {
-    if (!edited || !originalDraft || !isValid || configValidation?.kind !== "ok") return;
+    if (!edited || !activeTurn || !isValid || configValidation?.kind !== "ok") return;
     setSavingAcceptance(true);
     try {
       const finalDraft: SlideDraftResponse = {
@@ -327,18 +460,18 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
       };
 
       const isManualEdit = editedFields.size > 0;
-      if (isManualEdit && originalDraft.id) {
+      if (isManualEdit && activeTurn.draftId) {
         const { data: userData } = await supabase.auth.getUser();
         const editedFieldsArray = Array.from(editedFields);
         const { error: insertError } = await supabase.from("portal_slide_drafts").insert({
           slide_slug: form.slug,
           editor_email: userData.user?.email ?? undefined,
           editor_user_id: userData.user?.id ?? undefined,
-          parent_draft_id: originalDraft.id,
+          parent_draft_id: activeTurn.draftId,
           draft_kind: "manual_edit",
           prompt_context: {
             source: "manual_edit",
-            original_response: originalDraft as unknown as Json,
+            original_response: activeTurn.draft as unknown as Json,
             edited_fields: editedFieldsArray,
           } as unknown as Json,
           response: finalDraft as unknown as Json,
@@ -348,18 +481,22 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
       }
 
       onAccept(finalDraft);
-      setOriginalDraft(null);
+      setTurns([]);
+      setActiveTurnId(null);
       setEdited(null);
+      setRefineInstruction("");
     } catch (error) {
       toast({ title: "Could not save edits", description: (error as Error).message, variant: "destructive" });
     } finally {
       setSavingAcceptance(false);
     }
-  }, [edited, originalDraft, isValid, configValidation, editedFields, form.slug, onAccept, toast]);
+  }, [edited, activeTurn, isValid, configValidation, editedFields, form.slug, onAccept, toast]);
 
   const handleDiscard = useCallback(() => {
-    setOriginalDraft(null);
+    setTurns([]);
+    setActiveTurnId(null);
     setEdited(null);
+    setRefineInstruction("");
   }, []);
 
   if (statusLoading) return <Card><CardContent className="pt-6 text-sm text-muted-foreground">Checking AI drafting status…</CardContent></Card>;
@@ -376,61 +513,136 @@ function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (dr
     return null;
   };
 
+  const isOnLatestTurn = activeTurn ? turns[turns.length - 1]?.id === activeTurn.id : true;
+
   return (
     <Card className="border-primary/20">
-      <CardHeader><div className="flex items-center gap-2"><Wand2 className="h-5 w-5 text-primary" /><CardTitle>AI Draft</CardTitle></div><CardDescription>Describe what this slide should say. The AI will draft a complete slide based on the narrative role.</CardDescription>{brief?.narrative_role ? <p className="text-sm italic text-muted-foreground">This slide {brief.narrative_role.charAt(0).toLowerCase() + brief.narrative_role.slice(1)}.</p> : null}</CardHeader>
+      <CardHeader>
+        <div className="flex items-center gap-2"><Wand2 className="h-5 w-5 text-primary" /><CardTitle>AI Draft</CardTitle></div>
+        <CardDescription>Describe what this slide should say. The AI will draft a complete slide based on the narrative role, then iterate with you.</CardDescription>
+        {brief?.narrative_role ? <p className="text-sm italic text-muted-foreground">This slide {brief.narrative_role.charAt(0).toLowerCase() + brief.narrative_role.slice(1)}.</p> : null}
+      </CardHeader>
       <CardContent className="space-y-5">
-        <Field label="Your direction"><Textarea value={direction} onChange={(event) => setDirection(event.target.value)} placeholder="Add specific points or angle you want emphasized. Leave blank for AI to draft from the narrative role alone." /></Field>
-        {references.length ? <div className="space-y-3"><p className="text-sm font-medium">References</p>{references.map((reference) => { const count = counts[reference as keyof typeof counts]; const label = count === null ? `${referenceLabels[reference] ?? reference} (not connected)` : `${referenceLabels[reference] ?? reference} (${count ?? 0} items)`; return <label key={reference} className="flex items-center gap-3 rounded-md border p-3 text-sm"><Checkbox checked={selectedReferences.includes(reference)} onCheckedChange={(checked) => setSelectedReferences((current) => checked ? [...new Set([...current, reference])] : current.filter((item) => item !== reference))} /><span>{label}</span></label>; })}</div> : null}
-        <Button type="button" onClick={() => generate.mutate()} disabled={generate.isPending || !brief}>{generate.isPending ? "Generating…" : "Generate draft"}</Button>
-        {edited && originalDraft ? (
+        {turns.length === 0 ? (
+          <>
+            <Field label="Your direction"><Textarea value={direction} onChange={(event) => setDirection(event.target.value)} placeholder="Add specific points or angle you want emphasized. Leave blank for AI to draft from the narrative role alone." /></Field>
+            {references.length ? <div className="space-y-3"><p className="text-sm font-medium">References</p>{references.map((reference) => { const count = counts[reference as keyof typeof counts]; const label = count === null ? `${referenceLabels[reference] ?? reference} (not connected)` : `${referenceLabels[reference] ?? reference} (${count ?? 0} items)`; return <label key={reference} className="flex items-center gap-3 rounded-md border p-3 text-sm"><Checkbox checked={selectedReferences.includes(reference)} onCheckedChange={(checked) => setSelectedReferences((current) => checked ? [...new Set([...current, reference])] : current.filter((item) => item !== reference))} /><span>{label}</span></label>; })}</div> : null}
+            <Button type="button" onClick={() => generate.mutate()} disabled={generate.isPending || !brief}>{generate.isPending ? "Generating…" : "Generate draft"}</Button>
+          </>
+        ) : null}
+
+        {edited && activeTurn ? (
           <div className="space-y-4 rounded-md border bg-muted/30 p-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary">Generated by AI · review and edit before publishing</Badge>
               <Badge variant="outline">{edited.visual_type}</Badge>
               {editedFields.size > 0 ? <Badge variant="outline" className="border-primary/40 text-primary">{editedFields.size} felt endret</Badge> : null}
+              {!isOnLatestTurn ? <Badge variant="outline" className="border-amber-500/50 text-amber-600">Forgrener fra tidligere svar</Badge> : null}
             </div>
 
-            <div className="grid grid-cols-1 gap-1 text-sm md:grid-cols-2">
-              <div className="px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Nåværende</div>
-              <div className="px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">AI-forslag — redigerbar</div>
+            {activeTurn.aiNote ? (
+              <p className="rounded-sm border border-primary/30 bg-primary/5 p-2 text-xs italic text-primary">AI: {activeTurn.aiNote}</p>
+            ) : null}
+
+            {/* 3-column layout: Current | Editable | Live preview */}
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(280px,1fr)]">
+              <div className="space-y-3">
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Nåværende</div>
+                <div className="space-y-2 rounded-md border bg-background p-3 text-sm">
+                  <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Title</div><pre className="whitespace-pre-wrap text-muted-foreground">{form.title || "—"}</pre></div>
+                  <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Subtitle</div><pre className="whitespace-pre-wrap text-muted-foreground">{form.subtitle || "—"}</pre></div>
+                  <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual</div><Badge variant="outline">{form.visual_type}</Badge></div>
+                  <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Body</div><pre className="whitespace-pre-wrap text-muted-foreground">{form.body_md || "—"}</pre></div>
+                  <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual config</div><pre className="max-h-48 overflow-auto whitespace-pre-wrap font-mono text-[11px] text-muted-foreground">{JSON.stringify(form.visual_config, null, 2) || "—"}</pre></div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">AI-forslag — redigerbar{editedFields.size > 0 ? <EditedBadge /> : null}</div>
+                <div className="space-y-3 rounded-md border bg-background p-3 text-sm">
+                  <div className="space-y-1">
+                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Title{editedFields.has("title") ? <EditedBadge /> : null}</div>
+                    <Input value={edited.title} maxLength={120} onChange={(e) => setEdited((current) => current ? { ...current, title: e.target.value } : current)} />
+                    {titleError ? <p className="text-xs text-destructive">{titleError}</p> : <p className="text-xs text-muted-foreground">{edited.title.length}/80</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Subtitle{editedFields.has("subtitle") ? <EditedBadge /> : null}</div>
+                    <Input value={edited.subtitle} maxLength={160} placeholder={(activeTurn.draft.subtitle ?? "").length === 0 ? SUBTITLE_PLACEHOLDER_NB : undefined} onChange={(e) => setEdited((current) => current ? { ...current, subtitle: e.target.value } : current)} />
+                    {subtitleError ? <p className="text-xs text-destructive">{subtitleError}</p> : <p className="text-xs text-muted-foreground">{edited.subtitle.length}/120</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual type</div>
+                    <div className="flex items-center gap-2"><Badge variant="outline">{edited.visual_type}</Badge><span className="text-xs text-muted-foreground">Be AI om å bytte via instruksjon</span></div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Body{editedFields.has("body_md") ? <EditedBadge /> : null}</div>
+                    <Textarea value={edited.body_md} rows={4} placeholder={(activeTurn.draft.body_md ?? "").length === 0 ? BODY_PLACEHOLDER_NB : undefined} onChange={(e) => setEdited((current) => current ? { ...current, body_md: e.target.value } : current)} />
+                    {bodyError ? <p className="text-xs text-destructive">{bodyError}</p> : <p className="text-xs text-muted-foreground">{edited.body_md.length}/4000</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual config{editedFields.has("visual_config") ? <EditedBadge /> : null}</div>
+                    <Textarea value={edited.configRaw} rows={10} className="font-mono text-xs" onChange={(e) => setEdited((current) => current ? { ...current, configRaw: e.target.value } : current)} />
+                    {renderConfigError()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Live forhåndsvisning</div>
+                <LivePreviewPanel edited={edited} configValidation={configValidation} slug={form.slug} />
+                <p className="text-[11px] text-muted-foreground">Skalert 16:9 — gjenspeiler endringer mens du skriver (200ms forsinkelse).</p>
+              </div>
             </div>
 
-            <div className="space-y-3 text-sm">
-              <FieldRowShell
-                label="Title"
-                edited={editedFields.has("title")}
-                leftCurrent={<pre className="whitespace-pre-wrap text-muted-foreground">{form.title || "—"}</pre>}
-                rightEditor={<Input value={edited.title} maxLength={120} onChange={(e) => setEdited((current) => current ? { ...current, title: e.target.value } : current)} />}
-                errorBlock={titleError ? <p className="text-xs text-destructive">{titleError}</p> : <p className="text-xs text-muted-foreground">{edited.title.length}/80</p>}
-              />
-              <FieldRowShell
-                label="Subtitle"
-                edited={editedFields.has("subtitle")}
-                leftCurrent={<pre className="whitespace-pre-wrap text-muted-foreground">{form.subtitle || "—"}</pre>}
-                rightEditor={<Input value={edited.subtitle} maxLength={160} onChange={(e) => setEdited((current) => current ? { ...current, subtitle: e.target.value } : current)} />}
-                errorBlock={subtitleError ? <p className="text-xs text-destructive">{subtitleError}</p> : <p className="text-xs text-muted-foreground">{edited.subtitle.length}/120</p>}
-              />
-              <FieldRowShell
-                label="Visual type"
-                edited={false}
-                leftCurrent={<Badge variant="outline">{form.visual_type}</Badge>}
-                rightEditor={<div className="flex items-center gap-2"><Badge variant="outline">{edited.visual_type}</Badge><span className="text-xs text-muted-foreground">Låst — forkast og generer på nytt for å bytte</span></div>}
-              />
-              <FieldRowShell
-                label="Body"
-                edited={editedFields.has("body_md")}
-                leftCurrent={<pre className="whitespace-pre-wrap text-muted-foreground">{form.body_md || "—"}</pre>}
-                rightEditor={<Textarea value={edited.body_md} rows={4} onChange={(e) => setEdited((current) => current ? { ...current, body_md: e.target.value } : current)} />}
-                errorBlock={bodyError ? <p className="text-xs text-destructive">{bodyError}</p> : <p className="text-xs text-muted-foreground">{edited.body_md.length}/4000</p>}
-              />
-              <FieldRowShell
-                label="Visual config"
-                edited={editedFields.has("visual_config")}
-                leftCurrent={<pre className="max-h-64 overflow-auto whitespace-pre-wrap font-mono text-xs text-muted-foreground">{JSON.stringify(form.visual_config, null, 2) || "—"}</pre>}
-                rightEditor={<Textarea value={edited.configRaw} rows={10} className="font-mono text-xs" onChange={(e) => setEdited((current) => current ? { ...current, configRaw: e.target.value } : current)} />}
-                errorBlock={renderConfigError()}
-              />
+            {/* Conversation log */}
+            {turns.length > 0 ? (
+              <div className="space-y-2 rounded-md border bg-background p-3">
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Samtale</div>
+                <ol className="space-y-1.5">
+                  {turns.map((turn, index) => {
+                    const isActive = turn.id === activeTurnId;
+                    return (
+                      <li key={turn.id}>
+                        <button
+                          type="button"
+                          onClick={() => handleSelectTurn(turn.id)}
+                          className={`w-full rounded-md border px-3 py-2 text-left text-xs transition ${isActive ? "border-primary/60 bg-primary/5" : "border-border hover:bg-muted/50"}`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium">
+                              {index + 1}. {turn.kind === "initial" ? "Første utkast" : "Endring"}
+                            </span>
+                            <Badge variant="outline" className="text-[10px]">{turn.draft.visual_type}</Badge>
+                          </div>
+                          {turn.instruction ? <p className="mt-1 italic text-muted-foreground">"{turn.instruction}"</p> : null}
+                          {turn.aiNote ? <p className="mt-1 text-primary/80">↳ {turn.aiNote}</p> : null}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ol>
+                {!isOnLatestTurn ? (
+                  <p className="text-[11px] text-amber-600">Du har valgt en tidligere versjon — neste endring forgrener fra dette steget.</p>
+                ) : null}
+              </div>
+            ) : null}
+
+            {/* Refinement input */}
+            <div className="space-y-2 rounded-md border border-primary/20 bg-background p-3">
+              <Field label="Be AI om å endre noe">
+                <Textarea
+                  value={refineInstruction}
+                  onChange={(e) => setRefineInstruction(e.target.value)}
+                  placeholder="F.eks. 'Bytt verksteder til tjenester', 'Gjør det mer som Apple — sparsere, drop body', 'Prøv en custom-komposisjon med Hero og StatGrid'."
+                  rows={2}
+                />
+              </Field>
+              <div className="flex items-center gap-3">
+                <Button type="button" onClick={() => refine.mutate()} disabled={refine.isPending || !refineInstruction.trim() || !activeTurn?.draftId}>
+                  {refine.isPending ? "AI tenker…" : "Send til AI"}
+                </Button>
+                {!activeTurn?.draftId ? <span className="text-xs text-muted-foreground">Lagring av forelder feilet — generer på nytt for å aktivere endringer</span> : null}
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
