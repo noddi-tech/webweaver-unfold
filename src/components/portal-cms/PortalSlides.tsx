@@ -295,6 +295,7 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
   const { toast } = useToast();
   const [direction, setDirection] = useState("");
   const [selectedReferences, setSelectedReferences] = useState<string[]>([]);
+  const [includeStyleReferences, setIncludeStyleReferences] = useState(true);
   const [turns, setTurns] = useState<ConversationTurn[]>([]);
   const [activeTurnId, setActiveTurnId] = useState<string | null>(null);
   const [edited, setEdited] = useState<EditedDraftState | null>(null);
@@ -302,6 +303,21 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
   const [savingAcceptance, setSavingAcceptance] = useState(false);
   const { data: status, isLoading: statusLoading } = useQuery({ queryKey: ["draft-slide-status"], queryFn: async () => { const { data, error } = await supabase.functions.invoke<{ configured: boolean }>("draft-slide-status"); if (error) throw error; return data; } });
   const { data: brief } = useQuery({ queryKey: ["portal-slide-brief", form.slug], queryFn: () => fetchSlideBrief(form.slug), enabled: Boolean(form.slug) });
+  const { data: styleRefStats } = useQuery({
+    queryKey: ["portal-style-references-stats"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("portal_style_references")
+        .select("avoid,image_url,is_published");
+      if (error) throw error;
+      const rows = data ?? [];
+      const active = rows.filter((r) => r.is_published && r.image_url && r.image_url !== "");
+      const matches = active.filter((r) => !r.avoid).length;
+      const avoids = active.filter((r) => r.avoid).length;
+      const unphotographed = rows.filter((r) => !r.image_url || r.image_url === "").length;
+      return { matches, avoids, total: active.length, unphotographed };
+    },
+  });
   const { data: counts = {} } = useQuery({ queryKey: ["portal-draft-reference-counts"], queryFn: async () => {
     const [customers, team, financials, round] = await Promise.all([
       supabase.from("portal_customers").select("id", { count: "exact", head: true }).eq("is_published", true),
@@ -323,9 +339,11 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
   const panelActive = Boolean(edited && activeTurn);
   useEffect(() => { onActiveChange?.(panelActive); }, [panelActive, onActiveChange]);
 
+  const styleRefSnapshot = useMemo(() => (includeStyleReferences && styleRefStats ? { matches: styleRefStats.matches, avoids: styleRefStats.avoids } : null), [includeStyleReferences, styleRefStats]);
+
   const generate = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke<SlideDraftResponse>("draft-slide", { body: { slug: form.slug, editor_prompt: direction, selected_references: selectedReferences, include_style_references: true } });
+      const { data, error } = await supabase.functions.invoke<SlideDraftResponse>("draft-slide", { body: { slug: form.slug, editor_prompt: direction, selected_references: selectedReferences, include_style_references: includeStyleReferences } });
       if (error) throw error;
       if (!data) throw new Error("No draft returned.");
       return data;
@@ -338,6 +356,7 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
         kind: "initial",
         aiNote: data.ai_note,
         draft: data,
+        styleRefsUsed: styleRefSnapshot,
       };
       setTurns([turn]);
       setActiveTurnId(turn.id);
