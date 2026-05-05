@@ -337,6 +337,34 @@ function detectLikelyEnglish(text: string): boolean {
 
 const isUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 
+type StyleReference = { id: string; title: string; source_company: string | null; asset_type: string | null; use_for: string[] | null; notes: string | null; avoid: boolean };
+
+async function fetchStyleReferences(supabase: SupabaseClient): Promise<StyleReference[]> {
+  const { data, error } = await supabase
+    .from("portal_style_references")
+    .select("id,title,source_company,asset_type,use_for,notes,avoid")
+    .eq("is_published", true)
+    .neq("image_url", "")
+    .order("display_order");
+  if (error) {
+    console.warn("fetchStyleReferences failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as StyleReference[];
+}
+
+function buildStyleReferencesBlock(refs: StyleReference[], requested: boolean): string {
+  if (!requested) return "STYLE_REFERENCES: not requested for this refinement.";
+  if (!refs.length) return "STYLE_REFERENCES: none available — follow the system design principles instead.";
+  const lines = refs.map((r, i) => {
+    const tags = (r.use_for ?? []).join(", ") || "—";
+    const flag = r.avoid ? " [AVOID — anti-pattern]" : "";
+    const meta = [r.source_company, r.asset_type].filter(Boolean).join(" · ") || "—";
+    return `${i + 1}. "${r.title}" (${meta}) — use_for: ${tags}${flag}\n   notes: ${r.notes ?? "(no notes)"}`;
+  });
+  return `STYLE_REFERENCES (apply notes as design instructions; you do not see the images):\n${lines.join("\n\n")}`;
+}
+
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
