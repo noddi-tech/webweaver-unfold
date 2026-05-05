@@ -37,7 +37,7 @@ export function PortalCmsLayout({ title, description, children, action }: { titl
               key={item.href}
               to={item.href}
               end={item.href === "/cms/portal" || item.href === "/cms/investors"}
-              className={({ isActive }) => cn("rounded-md border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted", isActive ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground")}
+              className={({ isActive }) => cn("rounded-md border px-3 py-2 text-sm font-medium transition-colors", isActive ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-card-foreground hover:bg-muted hover:text-foreground")}
             >
               {item.label}
             </NavLink>
