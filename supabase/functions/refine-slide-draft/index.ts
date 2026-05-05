@@ -504,6 +504,7 @@ Return only valid JSON in the OUTPUT FORMAT specified in the system prompt. Do n
       instruction,
       reference_data_summary: summarizeReferenceData(referenceData),
       include_style_references: includeStyleReferences,
+      references_used: styleReferenceIds,
       visual_type_changed: visualTypeChanged,
       ai_note: validated.ai_note ?? null,
       warnings,
