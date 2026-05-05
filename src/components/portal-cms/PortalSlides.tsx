@@ -550,6 +550,41 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
           <>
             <Field label="Your direction"><Textarea value={direction} onChange={(event) => setDirection(event.target.value)} placeholder="Add specific points or angle you want emphasized. Leave blank for AI to draft from the narrative role alone." /></Field>
             {references.length ? <div className="space-y-3"><p className="text-sm font-medium">References</p>{references.map((reference) => { const count = counts[reference as keyof typeof counts]; const label = count === null ? `${referenceLabels[reference] ?? reference} (not connected)` : `${referenceLabels[reference] ?? reference} (${count ?? 0} items)`; return <label key={reference} className="flex items-center gap-3 rounded-md border p-3 text-sm"><Checkbox checked={selectedReferences.includes(reference)} onCheckedChange={(checked) => setSelectedReferences((current) => checked ? [...new Set([...current, reference])] : current.filter((item) => item !== reference))} /><span>{label}</span></label>; })}</div> : null}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium">Style References</p>
+                <a
+                  href="/cms/portal/style-references"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline"
+                >
+                  Administrer referanser →
+                </a>
+              </div>
+              <label className="flex items-start gap-3 rounded-md border p-3 text-sm">
+                <Checkbox
+                  checked={includeStyleReferences}
+                  onCheckedChange={(checked) => setIncludeStyleReferences(checked === true)}
+                />
+                <span className="space-y-1">
+                  <span className="block">Inkluder stilreferanser i AI-prompten</span>
+                  {styleRefStats ? (
+                    styleRefStats.total > 0 ? (
+                      <span className="block text-xs text-muted-foreground">
+                        {styleRefStats.matches} mønstre + {styleRefStats.avoids} anti-mønster blir inkludert
+                      </span>
+                    ) : (
+                      <span className="block text-xs text-muted-foreground">
+                        Ingen aktive stilreferanser ennå{styleRefStats.unphotographed > 0 ? ` (${styleRefStats.unphotographed} mangler bilde)` : ""} — last opp bilder i "Administrer referanser"
+                      </span>
+                    )
+                  ) : (
+                    <span className="block text-xs text-muted-foreground">Laster …</span>
+                  )}
+                </span>
+              </label>
+            </div>
             <Button type="button" onClick={() => generate.mutate()} disabled={generate.isPending || !brief}>{generate.isPending ? "Generating…" : "Generate draft"}</Button>
           </>
         ) : null}
