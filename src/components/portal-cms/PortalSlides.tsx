@@ -546,53 +546,55 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
               <p className="rounded-sm border border-primary/30 bg-primary/5 p-2 text-xs italic text-primary">AI: {activeTurn.aiNote}</p>
             ) : null}
 
-            {/* 3-column layout: Current | Editable | Live preview */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(280px,1fr)]">
-              <div className="space-y-3">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Nåværende</div>
-                <div className="space-y-2 rounded-md border bg-background p-3 text-sm">
-                  <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Title</div><pre className="whitespace-pre-wrap text-muted-foreground">{form.title || "—"}</pre></div>
-                  <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Subtitle</div><pre className="whitespace-pre-wrap text-muted-foreground">{form.subtitle || "—"}</pre></div>
-                  <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual</div><Badge variant="outline">{form.visual_type}</Badge></div>
-                  <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Body</div><pre className="whitespace-pre-wrap text-muted-foreground">{form.body_md || "—"}</pre></div>
-                  <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual config</div><pre className="max-h-48 overflow-auto whitespace-pre-wrap font-mono text-[11px] text-muted-foreground">{JSON.stringify(form.visual_config, null, 2) || "—"}</pre></div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">AI-forslag — redigerbar{editedFields.size > 0 ? <EditedBadge /> : null}</div>
-                <div className="space-y-3 rounded-md border bg-background p-3 text-sm">
-                  <div className="space-y-1">
-                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Title{editedFields.has("title") ? <EditedBadge /> : null}</div>
-                    <Input value={edited.title} maxLength={120} onChange={(e) => setEdited((current) => current ? { ...current, title: e.target.value } : current)} />
-                    {titleError ? <p className="text-xs text-destructive">{titleError}</p> : <p className="text-xs text-muted-foreground">{edited.title.length}/80</p>}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Subtitle{editedFields.has("subtitle") ? <EditedBadge /> : null}</div>
-                    <Input value={edited.subtitle} maxLength={160} placeholder={(activeTurn.draft.subtitle ?? "").length === 0 ? SUBTITLE_PLACEHOLDER_NB : undefined} onChange={(e) => setEdited((current) => current ? { ...current, subtitle: e.target.value } : current)} />
-                    {subtitleError ? <p className="text-xs text-destructive">{subtitleError}</p> : <p className="text-xs text-muted-foreground">{edited.subtitle.length}/120</p>}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual type</div>
-                    <div className="flex items-center gap-2"><Badge variant="outline">{edited.visual_type}</Badge><span className="text-xs text-muted-foreground">Be AI om å bytte via instruksjon</span></div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Body{editedFields.has("body_md") ? <EditedBadge /> : null}</div>
-                    <Textarea value={edited.body_md} rows={4} placeholder={(activeTurn.draft.body_md ?? "").length === 0 ? BODY_PLACEHOLDER_NB : undefined} onChange={(e) => setEdited((current) => current ? { ...current, body_md: e.target.value } : current)} />
-                    {bodyError ? <p className="text-xs text-destructive">{bodyError}</p> : <p className="text-xs text-muted-foreground">{edited.body_md.length}/4000</p>}
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual config{editedFields.has("visual_config") ? <EditedBadge /> : null}</div>
-                    <Textarea value={edited.configRaw} rows={10} className="font-mono text-xs" onChange={(e) => setEdited((current) => current ? { ...current, configRaw: e.target.value } : current)} />
-                    {renderConfigError()}
-                  </div>
-                </div>
-              </div>
-
+            {/* Row 1: Live preview full width. Row 2: Current | Editable */}
+            <div className="space-y-4">
               <div className="space-y-3">
                 <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Live forhåndsvisning</div>
                 <LivePreviewPanel edited={edited} configValidation={configValidation} slug={form.slug} />
                 <p className="text-[11px] text-muted-foreground">Skalert 16:9 — gjenspeiler endringer mens du skriver (200ms forsinkelse).</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div className="space-y-3">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Nåværende</div>
+                  <div className="space-y-2 rounded-md border bg-background p-3 text-sm">
+                    <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Title</div><pre className="whitespace-pre-wrap text-muted-foreground">{form.title || "—"}</pre></div>
+                    <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Subtitle</div><pre className="whitespace-pre-wrap text-muted-foreground">{form.subtitle || "—"}</pre></div>
+                    <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual</div><Badge variant="outline">{form.visual_type}</Badge></div>
+                    <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Body</div><pre className="whitespace-pre-wrap text-muted-foreground">{form.body_md || "—"}</pre></div>
+                    <div><div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual config</div><pre className="max-h-48 overflow-auto whitespace-pre-wrap font-mono text-[11px] text-muted-foreground">{JSON.stringify(form.visual_config, null, 2) || "—"}</pre></div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">AI-forslag — redigerbar{editedFields.size > 0 ? <EditedBadge /> : null}</div>
+                  <div className="space-y-3 rounded-md border bg-background p-3 text-sm">
+                    <div className="space-y-1">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Title{editedFields.has("title") ? <EditedBadge /> : null}</div>
+                      <Input value={edited.title} maxLength={120} onChange={(e) => setEdited((current) => current ? { ...current, title: e.target.value } : current)} />
+                      {titleError ? <p className="text-xs text-destructive">{titleError}</p> : <p className="text-xs text-muted-foreground">{edited.title.length}/80</p>}
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Subtitle{editedFields.has("subtitle") ? <EditedBadge /> : null}</div>
+                      <Input value={edited.subtitle} maxLength={160} placeholder={(activeTurn.draft.subtitle ?? "").length === 0 ? SUBTITLE_PLACEHOLDER_NB : undefined} onChange={(e) => setEdited((current) => current ? { ...current, subtitle: e.target.value } : current)} />
+                      {subtitleError ? <p className="text-xs text-destructive">{subtitleError}</p> : <p className="text-xs text-muted-foreground">{edited.subtitle.length}/120</p>}
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual type</div>
+                      <div className="flex items-center gap-2"><Badge variant="outline">{edited.visual_type}</Badge><span className="text-xs text-muted-foreground">Be AI om å bytte via instruksjon</span></div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Body{editedFields.has("body_md") ? <EditedBadge /> : null}</div>
+                      <Textarea value={edited.body_md} rows={4} placeholder={(activeTurn.draft.body_md ?? "").length === 0 ? BODY_PLACEHOLDER_NB : undefined} onChange={(e) => setEdited((current) => current ? { ...current, body_md: e.target.value } : current)} />
+                      {bodyError ? <p className="text-xs text-destructive">{bodyError}</p> : <p className="text-xs text-muted-foreground">{edited.body_md.length}/4000</p>}
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Visual config{editedFields.has("visual_config") ? <EditedBadge /> : null}</div>
+                      <Textarea value={edited.configRaw} rows={10} className="font-mono text-xs" onChange={(e) => setEdited((current) => current ? { ...current, configRaw: e.target.value } : current)} />
+                      {renderConfigError()}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
