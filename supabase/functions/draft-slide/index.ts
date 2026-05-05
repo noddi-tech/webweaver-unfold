@@ -259,8 +259,12 @@ serve(async (req: Request): Promise<Response> => {
     const referenceData = await fetchReferenceData(serviceClient, referencesToUse);
     const visualSchemas = schemasFor(typedBrief.suggested_visual_types);
 
-    const userPrompt = `Slide brief:\n  Slug: ${typedBrief.slug}\n  Narrative role: ${typedBrief.narrative_role}\n  Drafting guidance: ${typedBrief.drafting_guidance}\n  Suggested visual types: ${JSON.stringify(typedBrief.suggested_visual_types)}\n\nEditor's direction (optional):\n  ${editorPrompt || "(none provided)"}\n\nStyle references requested: ${includeStyleReferences ? "yes" : "no"}\nStyle references are not fetched in this version; follow the system design principles instead.\n\nReference data:\n${JSON.stringify(referenceData, null, 2)}\n\nReturn a JSON object with:\n  title (string, required, 1-80 chars)\n  subtitle (string, optional, max 120 chars)\n  body_md (string, optional markdown body, max 4000 chars)\n  visual_type (one of suggested_visual_types)\n  visual_config (object matching the visual_type's schema)\n\nVisual config schemas:\n${JSON.stringify(visualSchemas, null, 2)}\n\nReturn only valid JSON. Do not wrap in markdown.`;
-    const promptContext = { system_prompt: SYSTEM_PROMPT, schema: visualSchemas, references_passed: referencesToUse, editor_prompt: editorPrompt || null, reference_data_summary: summarizeReferenceData(referenceData), include_style_references: includeStyleReferences };
+    const styleReferences = includeStyleReferences ? await fetchStyleReferences(serviceClient) : [];
+    const styleReferencesBlock = buildStyleReferencesBlock(styleReferences, includeStyleReferences);
+    const styleReferenceIds = styleReferences.map((r) => r.id);
+
+    const userPrompt = `Slide brief:\n  Slug: ${typedBrief.slug}\n  Narrative role: ${typedBrief.narrative_role}\n  Drafting guidance: ${typedBrief.drafting_guidance}\n  Suggested visual types: ${JSON.stringify(typedBrief.suggested_visual_types)}\n\nEditor's direction (optional):\n  ${editorPrompt || "(none provided)"}\n\n${styleReferencesBlock}\n\nReference data:\n${JSON.stringify(referenceData, null, 2)}\n\nReturn a JSON object with:\n  title (string, required, 1-80 chars)\n  subtitle (string, optional, max 120 chars)\n  body_md (string, optional markdown body, max 4000 chars)\n  visual_type (one of suggested_visual_types)\n  visual_config (object matching the visual_type's schema)\n\nVisual config schemas:\n${JSON.stringify(visualSchemas, null, 2)}\n\nReturn only valid JSON. Do not wrap in markdown.`;
+    const promptContext = { system_prompt: SYSTEM_PROMPT, schema: visualSchemas, references_passed: referencesToUse, editor_prompt: editorPrompt || null, reference_data_summary: summarizeReferenceData(referenceData), include_style_references: includeStyleReferences, references_used: styleReferenceIds };
 
     const anthropicResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
