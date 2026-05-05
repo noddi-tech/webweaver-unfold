@@ -63,6 +63,8 @@ DESIGN PRINCIPLES (apply rigorously):
 6. SPARSE BY DEFAULT. Components support density: 'sparse' | 'dense'. Default to sparse. Use dense only when the content genuinely demands it (data tables, multi-metric overviews on traction or financials slides).
 7. COMPOSITION RHYTHM. For visual_type='custom', think about pacing. A slide is usually one big idea (one component), sometimes two (hero + supporting stat grid), rarely three. Avoid 4-5 component compositions unless absolutely necessary.
 
+STYLE REFERENCES: When a STYLE_REFERENCES block is provided in the user prompt, treat each reference's "notes" as a design instruction to learn from. Patterns labeled avoid=true describe anti-patterns to NOT replicate. References are tagged with use_for hints (typography, layout, data-viz, whitespace, narrative-structure, tone, color, photography) — apply each reference only where its tags are relevant to the slide you're drafting. You never see the images themselves; rely entirely on the notes.
+
 OUTPUT LANGUAGE: All slide content (title, subtitle, body_md, all visual_config text fields including labels, descriptions, captions, problem/solution pairs, annotations, comparison row text, vertical names, status text, metric labels, etc.) must be in Norwegian Bokmål. Use natural Norwegian business language — confident, restrained, suitable for an investor pitch.
 Do not translate brand terms (e.g., "Navio", "Fundraise", "SaaS", proper company names). Do not include English phrases unless the term is brand-specific or internationally standard.
 
@@ -211,6 +213,34 @@ function summarizeReferenceData(referenceData: Record<string, unknown>) {
   }));
 }
 
+type StyleReference = { id: string; title: string; source_company: string | null; asset_type: string | null; use_for: string[] | null; notes: string | null; avoid: boolean };
+
+async function fetchStyleReferences(supabase: SupabaseClient): Promise<StyleReference[]> {
+  const { data, error } = await supabase
+    .from("portal_style_references")
+    .select("id,title,source_company,asset_type,use_for,notes,avoid")
+    .eq("is_published", true)
+    .neq("image_url", "")
+    .order("display_order");
+  if (error) {
+    console.warn("fetchStyleReferences failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as StyleReference[];
+}
+
+function buildStyleReferencesBlock(refs: StyleReference[], requested: boolean): string {
+  if (!requested) return "STYLE_REFERENCES: not requested for this draft.";
+  if (!refs.length) return "STYLE_REFERENCES: none available — follow the system design principles instead.";
+  const lines = refs.map((r, i) => {
+    const tags = (r.use_for ?? []).join(", ") || "—";
+    const flag = r.avoid ? " [AVOID — anti-pattern]" : "";
+    const meta = [r.source_company, r.asset_type].filter(Boolean).join(" · ") || "—";
+    return `${i + 1}. "${r.title}" (${meta}) — use_for: ${tags}${flag}\n   notes: ${r.notes ?? "(no notes)"}`;
+  });
+  return `STYLE_REFERENCES (apply notes as design instructions; you do not see the images):\n${lines.join("\n\n")}`;
+}
+
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -257,8 +287,12 @@ serve(async (req: Request): Promise<Response> => {
     const referenceData = await fetchReferenceData(serviceClient, referencesToUse);
     const visualSchemas = schemasFor(typedBrief.suggested_visual_types);
 
-    const userPrompt = `Slide brief:\n  Slug: ${typedBrief.slug}\n  Narrative role: ${typedBrief.narrative_role}\n  Drafting guidance: ${typedBrief.drafting_guidance}\n  Suggested visual types: ${JSON.stringify(typedBrief.suggested_visual_types)}\n\nEditor's direction (optional):\n  ${editorPrompt || "(none provided)"}\n\nStyle references requested: ${includeStyleReferences ? "yes" : "no"}\nStyle references are not fetched in this version; follow the system design principles instead.\n\nReference data:\n${JSON.stringify(referenceData, null, 2)}\n\nReturn a JSON object with:\n  title (string, required, 1-80 chars)\n  subtitle (string, optional, max 120 chars)\n  body_md (string, optional markdown body, max 4000 chars)\n  visual_type (one of suggested_visual_types)\n  visual_config (object matching the visual_type's schema)\n\nVisual config schemas:\n${JSON.stringify(visualSchemas, null, 2)}\n\nReturn only valid JSON. Do not wrap in markdown.`;
-    const promptContext = { system_prompt: SYSTEM_PROMPT, schema: visualSchemas, references_passed: referencesToUse, editor_prompt: editorPrompt || null, reference_data_summary: summarizeReferenceData(referenceData), include_style_references: includeStyleReferences };
+    const styleReferences = includeStyleReferences ? await fetchStyleReferences(serviceClient) : [];
+    const styleReferencesBlock = buildStyleReferencesBlock(styleReferences, includeStyleReferences);
+    const styleReferenceIds = styleReferences.map((r) => r.id);
+
+    const userPrompt = `Slide brief:\n  Slug: ${typedBrief.slug}\n  Narrative role: ${typedBrief.narrative_role}\n  Drafting guidance: ${typedBrief.drafting_guidance}\n  Suggested visual types: ${JSON.stringify(typedBrief.suggested_visual_types)}\n\nEditor's direction (optional):\n  ${editorPrompt || "(none provided)"}\n\n${styleReferencesBlock}\n\nReference data:\n${JSON.stringify(referenceData, null, 2)}\n\nReturn a JSON object with:\n  title (string, required, 1-80 chars)\n  subtitle (string, optional, max 120 chars)\n  body_md (string, optional markdown body, max 4000 chars)\n  visual_type (one of suggested_visual_types)\n  visual_config (object matching the visual_type's schema)\n\nVisual config schemas:\n${JSON.stringify(visualSchemas, null, 2)}\n\nReturn only valid JSON. Do not wrap in markdown.`;
+    const promptContext = { system_prompt: SYSTEM_PROMPT, schema: visualSchemas, references_passed: referencesToUse, editor_prompt: editorPrompt || null, reference_data_summary: summarizeReferenceData(referenceData), include_style_references: includeStyleReferences, references_used: styleReferenceIds };
 
     const anthropicResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
