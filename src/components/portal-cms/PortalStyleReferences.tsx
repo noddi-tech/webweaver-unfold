@@ -212,7 +212,7 @@ export function PortalStyleReferences() {
 
 function ReferenceCard({ row, onEdit, onDelete }: { row: StyleRef; onEdit: () => void; onDelete: () => void }) {
   return (
-    <Card className="overflow-hidden border bg-card">
+    <Card className="overflow-hidden border bg-card text-card-foreground">
       <div className="relative aspect-video bg-muted">
         {row.image_url ? (
           <img src={row.image_url} alt={row.title} className="h-full w-full object-cover" />
@@ -235,7 +235,7 @@ function ReferenceCard({ row, onEdit, onDelete }: { row: StyleRef; onEdit: () =>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h3 className="font-semibold leading-tight truncate">{row.title}</h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-card-foreground/80">
               {row.source_company || "—"} · {row.asset_type}
             </p>
           </div>
@@ -245,10 +245,12 @@ function ReferenceCard({ row, onEdit, onDelete }: { row: StyleRef; onEdit: () =>
             {row.use_for.map((u) => <Badge key={u} variant="secondary" className="text-[10px]">{u}</Badge>)}
           </div>
         ) : null}
-        <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-line">{row.notes}</p>
+        <p className="text-sm text-card-foreground/85 line-clamp-3 whitespace-pre-line">{row.notes}</p>
         <div className="flex gap-2 pt-2">
-          <Button size="sm" variant="outline" onClick={onEdit}><Edit className="h-3 w-3 mr-1" />Rediger</Button>
-          <Button size="sm" variant="ghost" onClick={onDelete} className="text-destructive hover:text-destructive">
+          <Button size="sm" variant="secondary" onClick={onEdit} className="bg-background text-foreground hover:bg-muted">
+            <Edit className="h-3 w-3 mr-1" />Rediger
+          </Button>
+          <Button size="sm" variant="destructive" onClick={onDelete}>
             <Trash2 className="h-3 w-3 mr-1" />Slett
           </Button>
         </div>
