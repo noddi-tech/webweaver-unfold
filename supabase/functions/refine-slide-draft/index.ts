@@ -438,6 +438,7 @@ serve(async (req: Request): Promise<Response> => {
     const styleReferences = includeStyleReferences ? await fetchStyleReferences(serviceClient) : [];
     const styleReferencesBlock = buildStyleReferencesBlock(styleReferences, includeStyleReferences);
     const styleReferenceIds = styleReferences.map((r) => r.id);
+    const styleReferencesCount = { matches: styleReferences.filter((r) => !r.avoid).length, avoids: styleReferences.filter((r) => r.avoid).length };
 
     const userPrompt = `Slide brief:
   Slug: ${typedBrief.slug}
@@ -505,6 +506,8 @@ Return only valid JSON in the OUTPUT FORMAT specified in the system prompt. Do n
       reference_data_summary: summarizeReferenceData(referenceData),
       include_style_references: includeStyleReferences,
       references_used: styleReferenceIds,
+      references_count: styleReferencesCount,
+      style_references_block: styleReferencesBlock,
       visual_type_changed: visualTypeChanged,
       ai_note: validated.ai_note ?? null,
       warnings,
