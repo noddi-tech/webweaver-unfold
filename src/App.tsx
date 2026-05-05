@@ -58,6 +58,7 @@ import { PortalOverview } from "@/components/portal-cms/PortalOverview";
 import { PortalComponentsPreview } from "@/components/portal-cms/PortalComponentsPreview";
 import { PortalSlidesList, PortalSlideEditor } from "@/components/portal-cms/PortalSlides";
 import { PortalCustomersList, PortalCustomerEditor, PortalFinancialsList, PortalFinancialEditor, PortalTeamList, PortalTeamEditor, PortalRoundEditor } from "@/components/portal-cms/PortalContentManagers";
+import { PortalStyleReferences } from "@/components/portal-cms/PortalStyleReferences";
 import { InvestorsList, InvestorDetail, PledgesDashboard } from "@/components/portal-cms/InvestorAnalytics";
 
 const queryClient = new QueryClient();
@@ -148,6 +149,7 @@ const App = () => {
                     <Route path="/cms/portal/team/new" element={<AdminRoute><PortalTeamEditor /></AdminRoute>} />
                     <Route path="/cms/portal/team/:id" element={<AdminRoute><PortalTeamEditor /></AdminRoute>} />
                     <Route path="/cms/portal/round" element={<AdminRoute><PortalRoundEditor /></AdminRoute>} />
+                    <Route path="/cms/portal/style-references" element={<AdminRoute><PortalStyleReferences /></AdminRoute>} />
                     <Route path="/cms/investors" element={<AdminRoute><InvestorsList /></AdminRoute>} />
                     <Route path="/cms/investors/pledges" element={<AdminRoute><PledgesDashboard /></AdminRoute>} />
                     <Route path="/cms/investors/:email" element={<AdminRoute><InvestorDetail /></AdminRoute>} />

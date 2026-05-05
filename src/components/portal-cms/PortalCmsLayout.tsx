@@ -12,6 +12,7 @@ const navItems = [
   { label: "Financials", href: "/cms/portal/financials" },
   { label: "Team", href: "/cms/portal/team" },
   { label: "Round", href: "/cms/portal/round" },
+  { label: "Style refs", href: "/cms/portal/style-references" },
   { label: "Investors", href: "/cms/investors" },
   { label: "Pledges", href: "/cms/investors/pledges" },
 ];
