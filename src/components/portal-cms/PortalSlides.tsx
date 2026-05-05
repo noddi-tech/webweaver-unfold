@@ -667,6 +667,7 @@ export function PortalSlideEditor() {
   const queryClient = useQueryClient();
   const [dirty, setDirty] = useState(false);
   const [acceptedAiDraft, setAcceptedAiDraft] = useState(false);
+  const [aiPanelActive, setAiPanelActive] = useState(false);
   const { data: slides = [] } = useQuery({ queryKey: ["portal-slides"], queryFn: async () => { const { data, error } = await supabase.from("portal_slides").select("*").order("display_order", { ascending: true }); if (error) throw error; return data; } });
   const existing = slides.find((slide) => slide.id === id);
   const nextNumber = slides.length ? Math.max(...slides.map((slide) => slide.slide_number)) + 1 : 1;
