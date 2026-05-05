@@ -438,6 +438,7 @@ serve(async (req: Request): Promise<Response> => {
     const styleReferences = includeStyleReferences ? await fetchStyleReferences(serviceClient) : [];
     const styleReferencesBlock = buildStyleReferencesBlock(styleReferences, includeStyleReferences);
     const styleReferenceIds = styleReferences.map((r) => r.id);
+    const styleReferencesCount = { matches: styleReferences.filter((r) => !r.avoid).length, avoids: styleReferences.filter((r) => r.avoid).length };
 
     const userPrompt = `Slide brief:
   Slug: ${typedBrief.slug}
