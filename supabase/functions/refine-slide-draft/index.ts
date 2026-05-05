@@ -435,6 +435,10 @@ serve(async (req: Request): Promise<Response> => {
     const referenceData = await fetchReferenceData(serviceClient, referencesToUse);
     const visualSchemas = schemasFor(typedBrief.suggested_visual_types);
 
+    const styleReferences = includeStyleReferences ? await fetchStyleReferences(serviceClient) : [];
+    const styleReferencesBlock = buildStyleReferencesBlock(styleReferences, includeStyleReferences);
+    const styleReferenceIds = styleReferences.map((r) => r.id);
+
     const userPrompt = `Slide brief:
   Slug: ${typedBrief.slug}
   Narrative role: ${typedBrief.narrative_role}
@@ -447,8 +451,7 @@ ${JSON.stringify(currentState, null, 2)}
 Editor's instruction:
 ${instruction}
 
-Style references requested: ${includeStyleReferences ? "yes" : "no"}
-Style references are not fetched in this version; follow the system design principles instead.
+${styleReferencesBlock}
 
 Reference data (use these when reshaping; never invent customer names, numbers, or team members):
 ${JSON.stringify(referenceData, null, 2)}
