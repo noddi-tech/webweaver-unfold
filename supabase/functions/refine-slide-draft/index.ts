@@ -96,6 +96,8 @@ const DESIGN_PRINCIPLES = `DESIGN PRINCIPLES (apply rigorously):
 6. SPARSE BY DEFAULT. Components support density: 'sparse' | 'dense'. Default to sparse. Use dense only when the content genuinely demands it (data tables, multi-metric overviews on traction or financials slides).
 7. COMPOSITION RHYTHM. For visual_type='custom', think about pacing. A slide is usually one big idea (one component), sometimes two (hero + supporting stat grid), rarely three. Avoid 4-5 component compositions unless absolutely necessary.
 
+STYLE REFERENCES: When a STYLE_REFERENCES block is provided in the user prompt, treat each reference's "notes" as a design instruction to learn from. Patterns labeled avoid=true describe anti-patterns to NOT replicate. References are tagged with use_for hints (typography, layout, data-viz, whitespace, narrative-structure, tone, color, photography) — apply each reference only where its tags are relevant to the slide. You never see the images themselves; rely entirely on the notes.
+
 OUTPUT LANGUAGE: All slide content (title, subtitle, body_md, all visual_config text fields including labels, descriptions, captions, problem/solution pairs, annotations, comparison row text, vertical names, status text, metric labels, etc.) must be in Norwegian Bokmål. Use natural Norwegian business language — confident, restrained, suitable for an investor pitch.
 Do not translate brand terms (e.g., "Navio", "Fundraise", "SaaS", proper company names). Do not include English phrases unless the term is brand-specific or internationally standard.`;
 
