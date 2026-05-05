@@ -58,6 +58,7 @@ import { PortalOverview } from "@/components/portal-cms/PortalOverview";
 import { PortalComponentsPreview } from "@/components/portal-cms/PortalComponentsPreview";
 import { PortalSlidesList, PortalSlideEditor } from "@/components/portal-cms/PortalSlides";
 import { PortalCustomersList, PortalCustomerEditor, PortalFinancialsList, PortalFinancialEditor, PortalTeamList, PortalTeamEditor, PortalRoundEditor } from "@/components/portal-cms/PortalContentManagers";
+import { PortalStyleReferences } from "@/components/portal-cms/PortalStyleReferences";
 import { InvestorsList, InvestorDetail, PledgesDashboard } from "@/components/portal-cms/InvestorAnalytics";
 
 const queryClient = new QueryClient();
