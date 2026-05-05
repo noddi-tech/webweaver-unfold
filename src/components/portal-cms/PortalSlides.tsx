@@ -290,7 +290,7 @@ function LivePreviewPanel({ edited, configValidation, slug }: { edited: EditedDr
   );
 }
 
-function AiDraftPanel({ form, onAccept }: { form: SlideFormValues; onAccept: (draft: SlideDraftResponse) => void }) {
+function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValues; onAccept: (draft: SlideDraftResponse) => void; onActiveChange?: (active: boolean) => void }) {
   const { toast } = useToast();
   const [direction, setDirection] = useState("");
   const [selectedReferences, setSelectedReferences] = useState<string[]>([]);
