@@ -3274,6 +3274,60 @@ export type Database = {
         }
         Relationships: []
       }
+      portal_style_references: {
+        Row: {
+          asset_type: string
+          avoid: boolean
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string
+          is_published: boolean
+          needs_image: boolean
+          notes: string
+          source_company: string | null
+          title: string
+          updated_at: string
+          use_for: string[]
+        }
+        Insert: {
+          asset_type: string
+          avoid?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string
+          is_published?: boolean
+          needs_image?: boolean
+          notes: string
+          source_company?: string | null
+          title: string
+          updated_at?: string
+          use_for?: string[]
+        }
+        Update: {
+          asset_type?: string
+          avoid?: boolean
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string
+          is_published?: boolean
+          needs_image?: boolean
+          notes?: string
+          source_company?: string | null
+          title?: string
+          updated_at?: string
+          use_for?: string[]
+        }
+        Relationships: []
+      }
       portal_team_members: {
         Row: {
           bio: string | null
