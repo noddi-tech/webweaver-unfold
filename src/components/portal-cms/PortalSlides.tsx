@@ -394,7 +394,7 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
           parent_draft_id: activeTurn.draftId,
           current_state: currentState,
           instruction,
-          include_style_references: true,
+          include_style_references: includeStyleReferences,
         },
       });
       if (error) throw error;
@@ -410,6 +410,7 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
         instruction,
         aiNote: data.ai_note,
         draft: data,
+        styleRefsUsed: styleRefSnapshot,
       };
       setTurns((current) => [...current, turn]);
       setActiveTurnId(turn.id);
