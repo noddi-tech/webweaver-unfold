@@ -209,6 +209,7 @@ type ConversationTurn = {
   instruction?: string;          // present for refinement turns
   aiNote?: string;               // optional Norwegian editor note from AI
   draft: SlideDraftResponse;     // the AI's response state for this turn
+  styleRefsUsed?: { matches: number; avoids: number } | null;
 };
 
 function draftToEdited(draft: SlideDraftResponse): EditedDraftState {
@@ -294,6 +295,7 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
   const { toast } = useToast();
   const [direction, setDirection] = useState("");
   const [selectedReferences, setSelectedReferences] = useState<string[]>([]);
+  const [includeStyleReferences, setIncludeStyleReferences] = useState(true);
   const [turns, setTurns] = useState<ConversationTurn[]>([]);
   const [activeTurnId, setActiveTurnId] = useState<string | null>(null);
   const [edited, setEdited] = useState<EditedDraftState | null>(null);
@@ -301,6 +303,21 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
   const [savingAcceptance, setSavingAcceptance] = useState(false);
   const { data: status, isLoading: statusLoading } = useQuery({ queryKey: ["draft-slide-status"], queryFn: async () => { const { data, error } = await supabase.functions.invoke<{ configured: boolean }>("draft-slide-status"); if (error) throw error; return data; } });
   const { data: brief } = useQuery({ queryKey: ["portal-slide-brief", form.slug], queryFn: () => fetchSlideBrief(form.slug), enabled: Boolean(form.slug) });
+  const { data: styleRefStats } = useQuery({
+    queryKey: ["portal-style-references-stats"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("portal_style_references")
+        .select("avoid,image_url,is_published");
+      if (error) throw error;
+      const rows = data ?? [];
+      const active = rows.filter((r) => r.is_published && r.image_url && r.image_url !== "");
+      const matches = active.filter((r) => !r.avoid).length;
+      const avoids = active.filter((r) => r.avoid).length;
+      const unphotographed = rows.filter((r) => !r.image_url || r.image_url === "").length;
+      return { matches, avoids, total: active.length, unphotographed };
+    },
+  });
   const { data: counts = {} } = useQuery({ queryKey: ["portal-draft-reference-counts"], queryFn: async () => {
     const [customers, team, financials, round] = await Promise.all([
       supabase.from("portal_customers").select("id", { count: "exact", head: true }).eq("is_published", true),
@@ -322,9 +339,11 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
   const panelActive = Boolean(edited && activeTurn);
   useEffect(() => { onActiveChange?.(panelActive); }, [panelActive, onActiveChange]);
 
+  const styleRefSnapshot = useMemo(() => (includeStyleReferences && styleRefStats ? { matches: styleRefStats.matches, avoids: styleRefStats.avoids } : null), [includeStyleReferences, styleRefStats]);
+
   const generate = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke<SlideDraftResponse>("draft-slide", { body: { slug: form.slug, editor_prompt: direction, selected_references: selectedReferences, include_style_references: true } });
+      const { data, error } = await supabase.functions.invoke<SlideDraftResponse>("draft-slide", { body: { slug: form.slug, editor_prompt: direction, selected_references: selectedReferences, include_style_references: includeStyleReferences } });
       if (error) throw error;
       if (!data) throw new Error("No draft returned.");
       return data;
@@ -337,6 +356,7 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
         kind: "initial",
         aiNote: data.ai_note,
         draft: data,
+        styleRefsUsed: styleRefSnapshot,
       };
       setTurns([turn]);
       setActiveTurnId(turn.id);
@@ -374,7 +394,7 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
           parent_draft_id: activeTurn.draftId,
           current_state: currentState,
           instruction,
-          include_style_references: true,
+          include_style_references: includeStyleReferences,
         },
       });
       if (error) throw error;
@@ -390,6 +410,7 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
         instruction,
         aiNote: data.ai_note,
         draft: data,
+        styleRefsUsed: styleRefSnapshot,
       };
       setTurns((current) => [...current, turn]);
       setActiveTurnId(turn.id);
@@ -529,6 +550,41 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
           <>
             <Field label="Your direction"><Textarea value={direction} onChange={(event) => setDirection(event.target.value)} placeholder="Add specific points or angle you want emphasized. Leave blank for AI to draft from the narrative role alone." /></Field>
             {references.length ? <div className="space-y-3"><p className="text-sm font-medium">References</p>{references.map((reference) => { const count = counts[reference as keyof typeof counts]; const label = count === null ? `${referenceLabels[reference] ?? reference} (not connected)` : `${referenceLabels[reference] ?? reference} (${count ?? 0} items)`; return <label key={reference} className="flex items-center gap-3 rounded-md border p-3 text-sm"><Checkbox checked={selectedReferences.includes(reference)} onCheckedChange={(checked) => setSelectedReferences((current) => checked ? [...new Set([...current, reference])] : current.filter((item) => item !== reference))} /><span>{label}</span></label>; })}</div> : null}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium">Style References</p>
+                <a
+                  href="/cms/portal/style-references"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline"
+                >
+                  Administrer referanser →
+                </a>
+              </div>
+              <label className="flex items-start gap-3 rounded-md border p-3 text-sm">
+                <Checkbox
+                  checked={includeStyleReferences}
+                  onCheckedChange={(checked) => setIncludeStyleReferences(checked === true)}
+                />
+                <span className="space-y-1">
+                  <span className="block">Inkluder stilreferanser i AI-prompten</span>
+                  {styleRefStats ? (
+                    styleRefStats.total > 0 ? (
+                      <span className="block text-xs text-muted-foreground">
+                        {styleRefStats.matches} mønstre + {styleRefStats.avoids} anti-mønster blir inkludert
+                      </span>
+                    ) : (
+                      <span className="block text-xs text-muted-foreground">
+                        Ingen aktive stilreferanser ennå{styleRefStats.unphotographed > 0 ? ` (${styleRefStats.unphotographed} mangler bilde)` : ""} — last opp bilder i "Administrer referanser"
+                      </span>
+                    )
+                  ) : (
+                    <span className="block text-xs text-muted-foreground">Laster …</span>
+                  )}
+                </span>
+              </label>
+            </div>
             <Button type="button" onClick={() => generate.mutate()} disabled={generate.isPending || !brief}>{generate.isPending ? "Generating…" : "Generate draft"}</Button>
           </>
         ) : null}
@@ -567,7 +623,15 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
                 </div>
 
                 <div className="space-y-3">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">AI-forslag — redigerbar{editedFields.size > 0 ? <EditedBadge /> : null}</div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <span>AI-forslag — redigerbar</span>
+                    {editedFields.size > 0 ? <EditedBadge /> : null}
+                    {activeTurn?.styleRefsUsed && (activeTurn.styleRefsUsed.matches + activeTurn.styleRefsUsed.avoids) > 0 ? (
+                      <Badge variant="outline" className="border-primary/40 text-primary normal-case">
+                        Style: {activeTurn.styleRefsUsed.matches + activeTurn.styleRefsUsed.avoids} refs
+                      </Badge>
+                    ) : null}
+                  </div>
                   <div className="space-y-3 rounded-md border bg-background p-3 text-sm">
                     <div className="space-y-1">
                       <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Title{editedFields.has("title") ? <EditedBadge /> : null}</div>
