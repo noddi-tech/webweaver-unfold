@@ -149,6 +149,7 @@ const App = () => {
                     <Route path="/cms/portal/team/new" element={<AdminRoute><PortalTeamEditor /></AdminRoute>} />
                     <Route path="/cms/portal/team/:id" element={<AdminRoute><PortalTeamEditor /></AdminRoute>} />
                     <Route path="/cms/portal/round" element={<AdminRoute><PortalRoundEditor /></AdminRoute>} />
+                    <Route path="/cms/portal/style-references" element={<AdminRoute><PortalStyleReferences /></AdminRoute>} />
                     <Route path="/cms/investors" element={<AdminRoute><InvestorsList /></AdminRoute>} />
                     <Route path="/cms/investors/pledges" element={<AdminRoute><PledgesDashboard /></AdminRoute>} />
                     <Route path="/cms/investors/:email" element={<AdminRoute><InvestorDetail /></AdminRoute>} />
