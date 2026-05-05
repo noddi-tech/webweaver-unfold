@@ -623,7 +623,15 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
                 </div>
 
                 <div className="space-y-3">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">AI-forslag — redigerbar{editedFields.size > 0 ? <EditedBadge /> : null}</div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <span>AI-forslag — redigerbar</span>
+                    {editedFields.size > 0 ? <EditedBadge /> : null}
+                    {activeTurn?.styleRefsUsed && (activeTurn.styleRefsUsed.matches + activeTurn.styleRefsUsed.avoids) > 0 ? (
+                      <Badge variant="outline" className="border-primary/40 text-primary normal-case">
+                        Style: {activeTurn.styleRefsUsed.matches + activeTurn.styleRefsUsed.avoids} refs
+                      </Badge>
+                    ) : null}
+                  </div>
                   <div className="space-y-3 rounded-md border bg-background p-3 text-sm">
                     <div className="space-y-1">
                       <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Title{editedFields.has("title") ? <EditedBadge /> : null}</div>
