@@ -209,6 +209,7 @@ type ConversationTurn = {
   instruction?: string;          // present for refinement turns
   aiNote?: string;               // optional Norwegian editor note from AI
   draft: SlideDraftResponse;     // the AI's response state for this turn
+  styleRefsUsed?: { matches: number; avoids: number } | null;
 };
 
 function draftToEdited(draft: SlideDraftResponse): EditedDraftState {
