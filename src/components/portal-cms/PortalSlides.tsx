@@ -319,6 +319,8 @@ function AiDraftPanel({ form, onAccept, onActiveChange }: { form: SlideFormValue
   useEffect(() => { if (brief?.reference_resources) setSelectedReferences(brief.reference_resources); }, [brief?.slug, brief?.reference_resources]);
 
   const activeTurn = useMemo(() => turns.find((t) => t.id === activeTurnId) ?? null, [turns, activeTurnId]);
+  const panelActive = Boolean(edited && activeTurn);
+  useEffect(() => { onActiveChange?.(panelActive); }, [panelActive, onActiveChange]);
 
   const generate = useMutation({
     mutationFn: async () => {
