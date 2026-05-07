@@ -1,31 +1,19 @@
 ## Goal
+Make AI proactively apply style references on every draft, not only when explicitly invoked.
 
-Reorganize the AI Draft panel's 3-column layout so the live preview gets full width on top, with "Nåværende" and "AI-forslag — redigerbar" sitting side-by-side beneath it. This gives the preview much more room and makes the slide easier to evaluate.
+## Changes
 
-## Change
+### 1. `supabase/functions/draft-slide/index.ts` (line 66)
+Replace the single-line `STYLE REFERENCES:` paragraph in `SYSTEM_PROMPT` with the new multi-step directive (mandatory application, 4-step process, anti-pattern enforcement, "respect editor's curated taste by default"). All other prompt sections (DESIGN PRINCIPLES, OUTPUT LANGUAGE, OUTPUT FORMAT) untouched.
 
-**File:** `src/components/portal-cms/PortalSlides.tsx` (lines ~549–597)
+### 2. `supabase/functions/refine-slide-draft/index.ts` (line 99)
+Identical replacement of the `STYLE REFERENCES:` paragraph with the same new wording.
 
-Replace the current 3-column grid:
-```
-[ Nåværende | AI-forslag (editable) | Live preview ]
-```
+### 3. Deploy
+Redeploy both `draft-slide` and `refine-slide-draft` edge functions via `supabase--deploy_edge_functions`.
 
-With a stacked layout:
-```
-Row 1:  [ Live forhåndsvisning — full width ]
-Row 2:  [ Nåværende | AI-forslag — redigerbar ]
-```
+## Verification
+User will generate a fresh `product-one-liner` draft with no editor direction and confirm output reflects Linear/YC/Apple-style opinionated choices.
 
-### Implementation details
-
-- Outer wrapper becomes a vertical stack (`space-y-4`).
-- Row 1: a single block containing the section label ("Live forhåndsvisning"), `<LivePreviewPanel>`, and the existing 200ms note. Because it's full width, `LivePreviewPanel`'s internal scaling will automatically render the slide much larger (the `PreviewScaleObserver` uses container width to set `--preview-scale`).
-- Row 2: `grid grid-cols-1 gap-4 lg:grid-cols-2` containing the existing "Nåværende" read-only column and the existing "AI-forslag — redigerbar" editable column. No internal markup changes — same fields, badges, validation, character counters.
-- Conversation log ("Samtale") and the action buttons below remain unchanged.
-
-### Out of scope
-
-- No changes to `LivePreviewPanel` itself — it already scales to its container width.
-- No changes to the external Preview card hide/show behavior added in the previous fix.
-- No changes to edge functions or data flow.
+## Out of scope
+No schema changes, no audit-log changes, no UI changes.
