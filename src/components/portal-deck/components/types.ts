@@ -40,8 +40,9 @@ export interface ComparisonColumn {
 
 export interface ComparisonRow {
   label: string;
-  values: Record<string, string>;
+  values?: Record<string, string>;
   emphasisKey?: string;
+  [key: string]: unknown;
 }
 
 export interface TimelineItem {
