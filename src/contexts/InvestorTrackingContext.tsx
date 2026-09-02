@@ -61,7 +61,7 @@ function keepaliveFlush(sessionId: string | null, queue: TrackedEvent[]) {
 }
 
 export function InvestorTrackingProvider({ children }: { children: React.ReactNode }) {
-  const { sessionId } = useInvestorSession();
+  const { sessionId, email, name, firm } = useInvestorSession();
   const sessionIdRef = useRef(sessionId);
   const queueRef = useRef<TrackedEvent[]>(sharedQueue);
 
@@ -69,9 +69,28 @@ export function InvestorTrackingProvider({ children }: { children: React.ReactNo
     sessionIdRef.current = sessionId;
   }, [sessionId]);
 
+  // Identify the investor in OpenPanel while their portal session is active.
+  useEffect(() => {
+    if (!sessionId || !email) return;
+    const [firstName, ...rest] = (name ?? "").trim().split(" ");
+    analytics.identify(email, {
+      email,
+      firstName: firstName || undefined,
+      lastName: rest.length ? rest.join(" ") : undefined,
+      properties: { auth_source: "investor_portal", investor_session_id: sessionId, firm: firm ?? undefined },
+    });
+  }, [sessionId, email, name, firm]);
+
   const trackEvent = useCallback((event: TrackedEvent) => {
     queueRef.current.push(event);
+    // Mirror investor portal telemetry to OpenPanel (Supabase tracking unchanged).
+    analytics.track(`investor_${event.event_type}`, {
+      path: event.path,
+      dwell_seconds: event.dwell_seconds,
+      ...(event.payload ?? {}),
+    });
   }, []);
+
 
   const flush = useCallback(async () => {
     const queueSnapshot = snapshotQueue(queueRef.current);
