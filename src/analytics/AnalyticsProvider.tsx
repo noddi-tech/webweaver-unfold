@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { analytics, getDeviceId } from "./client";
+import { analytics, analyticsConfig, getDeviceId, maskText } from "./client";
 
 type AnalyticsValue = {
   track: (name: string, properties?: Record<string, unknown>) => void;
@@ -20,7 +20,8 @@ function languageFromPath(pathname: string) {
 
 function labelOf(element: Element): string {
   const text = (element.textContent ?? "").trim().replace(/\s+/g, " ");
-  return (element.getAttribute("aria-label") || text || element.getAttribute("title") || "").slice(0, 80);
+  const raw = (element.getAttribute("aria-label") || text || element.getAttribute("title") || "").slice(0, 80);
+  return maskText(raw);
 }
 
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
@@ -32,6 +33,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       device_id: getDeviceId(),
       app: "navio-web",
       environment: import.meta.env.DEV ? "development" : "production",
+      mask_all_text: analyticsConfig.maskAllText,
     });
     return () => analytics.stop();
   }, []);
