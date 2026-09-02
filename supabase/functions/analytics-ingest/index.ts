@@ -87,25 +87,36 @@ serve(async (req: Request): Promise<Response> => {
     if (payloads.length === 0) return json({ success: false, error: "no valid events" }, 400);
 
     const forwardedFor = req.headers.get("x-forwarded-for") ?? "";
-    const response = await fetch(`${OPENPANEL_URL}/track`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "openpanel-client-id": CLIENT_ID,
-        "openpanel-client-secret": CLIENT_SECRET,
-        "user-agent": req.headers.get("user-agent") ?? "navio-analytics-proxy",
-        ...(forwardedFor ? { "x-client-ip": forwardedFor.split(",")[0].trim() } : {}),
-      },
-      body: JSON.stringify(payloads),
-    });
+    const upstreamHeaders = {
+      "Content-Type": "application/json",
+      "openpanel-client-id": CLIENT_ID,
+      "openpanel-client-secret": CLIENT_SECRET,
+      "user-agent": req.headers.get("user-agent") ?? "navio-analytics-proxy",
+      ...(forwardedFor ? { "x-client-ip": forwardedFor.split(",")[0].trim() } : {}),
+    };
 
-    const text = await response.text();
-    if (!response.ok) {
-      console.error("OpenPanel rejected batch", response.status, text.slice(0, 500));
-      return json({ success: false, status: response.status, error: text.slice(0, 500) }, 502);
-    }
+    // OpenPanel /track accepts one event object per request.
+    const results = await Promise.all(
+      payloads.map(async (entry) => {
+        try {
+          const response = await fetch(`${OPENPANEL_URL}/track`, {
+            method: "POST",
+            headers: upstreamHeaders,
+            body: JSON.stringify(entry),
+          });
+          const text = await response.text();
+          if (!response.ok) console.error("OpenPanel rejected event", response.status, text.slice(0, 300));
+          return { ok: response.ok, status: response.status, body: text.slice(0, 300) };
+        } catch (error) {
+          console.error("OpenPanel request failed", error);
+          return { ok: false, status: 0, body: (error as Error).message };
+        }
+      })
+    );
 
-    return json({ success: true, sent: payloads.length, upstream_status: response.status, upstream_body: text.slice(0, 500) });
+    const accepted = results.filter((result) => result.ok).length;
+    return json({ success: accepted > 0, sent: payloads.length, accepted, results }, accepted > 0 ? 200 : 502);
+
   } catch (error) {
     console.error("analytics-ingest error:", error);
     return json({ success: false, error: (error as Error).message }, 500);

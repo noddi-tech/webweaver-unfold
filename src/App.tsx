@@ -53,6 +53,7 @@ import Portal from "./pages/Portal";
 import { RequireInvestorSession } from "@/components/RequireInvestorSession";
 import { RequireNdaAccepted } from "@/components/RequireNdaAccepted";
 import { InvestorTrackingProvider } from "@/contexts/InvestorTrackingContext";
+import { AnalyticsProvider } from "@/analytics/AnalyticsProvider";
 import { AdminRoute } from "@/components/portal-cms/AdminRoute";
 import { PortalOverview } from "@/components/portal-cms/PortalOverview";
 import { PortalComponentsPreview } from "@/components/portal-cms/PortalComponentsPreview";
@@ -95,6 +96,7 @@ const App = () => {
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
+                  <AnalyticsProvider>
                   <Routes>
                     {/* Language-prefixed routes */}
                     <Route path="/:lang" element={<LanguageSync><Index /></LanguageSync>} />
@@ -194,6 +196,7 @@ const App = () => {
                     {/* Catch-all for 404 */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                  </AnalyticsProvider>
                 </BrowserRouter>
                 </EditModeProvider>
               </SiteStylesProvider>
