@@ -83,3 +83,6 @@ verify_jwt = false
 
 [functions.draft-slide]
 verify_jwt = false
+
+[functions.analytics-ingest]
+verify_jwt = false
