@@ -95,6 +95,7 @@ const App = () => {
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
+                  <AnalyticsProvider>
                   <Routes>
                     {/* Language-prefixed routes */}
                     <Route path="/:lang" element={<LanguageSync><Index /></LanguageSync>} />
