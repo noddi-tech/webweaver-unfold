@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useInvestorSession } from "@/hooks/useInvestorSession";
+import { analytics } from "@/analytics/client";
 
 export type TrackedEvent = {
   event_type:
