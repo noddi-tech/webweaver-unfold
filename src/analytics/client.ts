@@ -14,6 +14,20 @@ const DEVICE_ID_KEY = "navio_analytics_device_id";
 const FLUSH_INTERVAL_MS = 5000;
 const MAX_BATCH = 100;
 
+/**
+ * Runtime analytics configuration.
+ * maskAllText: false -> element labels / button text are shipped verbatim
+ * (no redaction) so OpenPanel reports readable CTA names.
+ */
+export const analyticsConfig = {
+  maskAllText: false,
+} as const;
+
+export function maskText(value: string): string {
+  return analyticsConfig.maskAllText ? value.replace(/\S/g, "*") : value;
+}
+
+
 export type AnalyticsEvent = {
   type: "track" | "identify";
   name?: string;
